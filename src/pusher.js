@@ -1,10 +1,3 @@
-/*!
- * Pusher JavaScript Library v1.1
- * http://pusherapp.com/
- *
- * Copyright 2010, New Bamboo
- * Released under the MIT licence.
- */
 var Pusher = function(application_key, channel) {
   this.url = 'ws://' + Pusher.host + '/app/' + application_key + "?channel=" + channel;
   this.socket_id;
@@ -13,7 +6,7 @@ var Pusher = function(application_key, channel) {
   this.connect();
 
   var self = this;
-  
+
   this.bind('connection_established', function(data) {
     self.socket_id = data.socket_id;
   });
@@ -39,18 +32,18 @@ Pusher.prototype = {
       this.connection = {};
     }
   },
-  
+
   bind: function(event_name, callback) {
     this.callbacks[event_name] = this.callbacks[event_name] || [];
     this.callbacks[event_name].push(callback);
     return this;
   },
-  
+
   bind_all: function(callback) {
     this.global_callbacks.push(callback);
     return this;
   },
-  
+
   // Not currently supported by pusherapp.com
   trigger: function(event_name, data) {
     var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
@@ -58,7 +51,7 @@ Pusher.prototype = {
     this.connection.send(payload);
     return this;
   },
-  
+
   onmessage: function(evt) {
     var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
@@ -83,7 +76,7 @@ Pusher.prototype = {
       }, 5000);
     }
   },
-  
+
   onopen: function() {
     this.dispatch('open', null);
   },
@@ -99,7 +92,7 @@ Pusher.prototype = {
       Pusher.log('Pusher : No callbacks for ' + event_name);
     }
   },
-  
+
   dispatch_global_callbacks: function(event_name, event_data) {
     for (var i = 0; i < this.global_callbacks.length; i++) {
       this.global_callbacks[i](event_name, event_data);
