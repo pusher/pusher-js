@@ -102,6 +102,7 @@ Pusher.prototype = {
 
 // Pusher defaults
 
+Pusher.VERSION = "<%= VERSION %>";
 Pusher.host = "ws.pusherapp.com:80";
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.allow_reconnect = true;
