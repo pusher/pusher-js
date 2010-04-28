@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'tempfile'
 require 'yaml'
 
 require 'rubygems'
@@ -25,7 +24,7 @@ module Builder
       FileUtils.mkdir_p(version_dir)
 
       path = "#{version_dir}/#{dest}"
-      tempfile = Tempfile.new('bundle')
+      min_path = path.sub('.js', '.min.js')
 
       puts "generating #{path}"
 
@@ -34,11 +33,13 @@ module Builder
         :source_files => "#{SRC_DIR}/#{src}"
       )
       concatenation = secretary.concatenation
-      concatenation.save_to(tempfile.path)
+      concatenation.save_to(path)
 
-      minified = Closure::Compiler.new.compile(tempfile)
+      puts "generating #{min_path}"
 
-      File.open(path, 'w') do |f|
+      minified = Closure::Compiler.new.compile(File.new(path))
+
+      File.open(min_path, 'w') do |f|
         yield f
         f.write(minified)
       end
