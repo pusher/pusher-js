@@ -3,3 +3,4 @@
 //= require "FABridge"
 //= require "web_socket"
 //= require "pusher"
+//= require "pusher_channels"

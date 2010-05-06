@@ -1,14 +1,18 @@
 var Pusher = function(application_key, channel) {
-  this.url = 'ws://' + Pusher.host + '/app/' + application_key + "?channel=" + channel;
+  this.url = 'ws://' + Pusher.host + '/app/' + application_key;
   this.socket_id;
   this.callbacks = {};
   this.global_callbacks = [];
+  this.channels = new Pusher.Channels(channel);
+  this.connected = false;
   this.connect();
-
+  
   var self = this;
 
   this.bind('connection_established', function(data) {
+    self.connected = true;
     self.socket_id = data.socket_id;
+    self.subscribeAll(self.channels.channels);
   });
 };
 
@@ -51,19 +55,46 @@ Pusher.prototype = {
     this.connection.send(payload);
     return this;
   },
+  
+  subscribeAll: function(channel_names) {
+    for (var i = 0; i < channel_names.length; i++) {
+      this.subscribe(channel_names[i]);
+    }
+  },
+  
+  subscribe: function(channel_name) {
+    this.channels.add(channel_name);
+    
+    if (this.connected) {
+      this.trigger('pusher:subscribe', {
+        channel: channel_name
+      });
+    }
+  },
+  
+  unsubscribe: function(channel_name) {
+    this.channels.remove(channel_name);
+
+    if (this.connected) {
+      this.trigger('pusher:unsubscribe', {
+        channel: channel_name
+      });
+    }
+  },
 
   onmessage: function(evt) {
     var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
     var event_name = params.event;
     var event_data = Pusher.parser(params.data);
-    Pusher.log("Pusher : event received : " + event_name +" : "+ event_data);
+    Pusher.log("Pusher : event received : " + event_name +" : ", event_data);
     this.dispatch_global_callbacks(event_name, event_data);
     this.dispatch(event_name, event_data);
   },
 
   onclose: function() {
     this.dispatch('close', null);
+    this.connected = false;
 
     var self = this;
 
