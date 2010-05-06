@@ -28,12 +28,7 @@ module Builder
 
       puts "generating #{path}"
 
-      secretary = Sprockets::Secretary.new(
-        :load_path => SRC_DIR,
-        :source_files => "#{SRC_DIR}/#{src}"
-      )
-      concatenation = secretary.concatenation
-      concatenation.save_to(path)
+      unminified(src).save_to(path)
 
       puts "generating #{min_path}"
 
@@ -43,6 +38,14 @@ module Builder
         yield f
         f.write(minified)
       end
+    end
+
+    def unminified(src)
+      secretary = Sprockets::Secretary.new(
+        :load_path => SRC_DIR,
+        :source_files => "#{SRC_DIR}/#{src}"
+      )
+      concatenation = secretary.concatenation
     end
 
     def config
