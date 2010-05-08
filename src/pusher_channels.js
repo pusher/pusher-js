@@ -1,27 +1,83 @@
-Pusher.Channels = function(channel_name) {
-  this.channels = [channel_name];
+Pusher.Channels = function() {
+  this.channels = {};
 };
 
 Pusher.Channels.prototype = {
   add: function(channel_name) {
-    if (!this.includes(channel_name)) {
-      this.channels.push(channel_name);
+    var existing_channel = this.find(channel_name);
+    if (!existing_channel) {
+      var channel = new Pusher.Channel(channel_name);
+      this.channels[channel_name] = channel;
+      return channel;
+    } else {
+      return existing_channel;
     }
   },
   
-  includes: function(channel_name) {
-    for (var i = 0; i < this.channels.length; i++) {
-      if (this.channels[i] === channel_name) return true;
-    }
-    return false;
+  find: function(channel_name) {
+    return this.channels[channel_name];
   },
   
   remove: function(channel_name) {
-    for (var i = 0; i < this.channels.length; i++) {
-      if (this.channels[i] === channel_name) {
-        this.channels.splice(i, 1);
-        break;
-      };
-    }
+    this.channels[channel_name] = null;
   }
 };
+
+Pusher.Channel = function(name) {
+  this.name = name;
+  this.callbacks = {};
+  this.global_callbacks = [];
+}
+
+Pusher.GlobalChannel = function() {
+  this.callbacks = {};
+  this.global_callbacks = [];
+}
+
+var eventStuff = {
+  bind: function(event_name, callback) {
+    this.callbacks[event_name] = this.callbacks[event_name] || [];
+    this.callbacks[event_name].push(callback);
+    return this;
+  },
+
+  bind_all: function(callback) {
+    this.global_callbacks.push(callback);
+    return this;
+  },
+
+  // Not currently supported by pusherapp.com
+  trigger: function(event_name, data) {
+    var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
+    Pusher.log("Pusher : sending event : " + payload);
+    this.connection.send(payload);
+    return this;
+  },
+  
+  dispatch_with_all: function(event_name, data) {
+    this.dispatch(event_name, data);
+    this.dispatch_global_callbacks(event_name, data);
+  },
+  
+  dispatch: function(event_name, event_data) {
+    var callbacks = this.callbacks[event_name];
+
+    if (callbacks) {
+      for (var i = 0; i < callbacks.length; i++) {
+        callbacks[i](event_data);
+      }
+    } else {
+      Pusher.log('Pusher : No callbacks for ' + event_name);
+    }
+  },
+
+  dispatch_global_callbacks: function(event_name, event_data) {
+    console.log('global dispatch'+ this.global_callbacks.length)
+    for (var i = 0; i < this.global_callbacks.length; i++) {
+      this.global_callbacks[i](event_name, event_data);
+    }
+  }
+}
+
+Pusher.GlobalChannel.prototype = eventStuff;
+Pusher.Channel.prototype = eventStuff;
