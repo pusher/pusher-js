@@ -76,7 +76,7 @@ Pusher.prototype = {
         var xhr = window.XMLHttpRequest ?
           new XMLHttpRequest() :
           new ActiveXObject("Microsoft.XMLHTTP");
-        xhr.open("POST", '/pusher/auth', true);
+        xhr.open("POST", Pusher.channel_auth_endpoint, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
@@ -163,6 +163,7 @@ Pusher.prototype = {
 
 Pusher.VERSION = "<%= VERSION %>";
 Pusher.host = "ws.pusherapp.com:80";
+Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.allow_reconnect = true;
 Pusher.parser = function(data) {
