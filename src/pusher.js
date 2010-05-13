@@ -1,5 +1,6 @@
 var Pusher = function(application_key, channel) {
   this.url = 'ws://' + Pusher.host + '/app/' + application_key;
+  this.key = application_key;
   this.socket_id;
   this.callbacks = {};
   this.global_callbacks = [];
@@ -13,6 +14,10 @@ var Pusher = function(application_key, channel) {
     self.connected = true;
     self.socket_id = data.socket_id;
     self.subscribeAll(self.channels.channels);
+  });
+
+  this.bind('pusher:error', function(data) {
+    Pusher.log("Pusher : error : " + data.message);
   });
 };
 
@@ -66,9 +71,24 @@ Pusher.prototype = {
     this.channels.add(channel_name);
     
     if (this.connected) {
-      this.trigger('pusher:subscribe', {
-        channel: channel_name
-      });
+      if (channel_name.indexOf("private:") === 0) {
+        var self = this;
+        $.post('/pusher/auth', {socket_id: this.socket_id, channel_name: channel_name}, function(json, status) {
+          data = JSON.parse(json);
+          if (status == "success") {
+            self.trigger('pusher:subscribe', {
+              channel: channel_name,
+              auth: self.key + ':' + data.auth
+            });
+          } else {
+            Pusher.log("Couldn't get auth info from your webapp" + status);
+          }
+        });
+      } else {
+        this.trigger('pusher:subscribe', {
+          channel: channel_name
+        });
+      }
     }
   },
   
