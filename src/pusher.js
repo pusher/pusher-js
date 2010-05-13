@@ -71,19 +71,27 @@ Pusher.prototype = {
     this.channels.add(channel_name);
     
     if (this.connected) {
-      if (channel_name.indexOf("private:") === 0) {
+      if (channel_name.indexOf("private-") === 0) {
         var self = this;
-        $.post('/pusher/auth', {socket_id: this.socket_id, channel_name: channel_name}, function(json, status) {
-          data = JSON.parse(json);
-          if (status == "success") {
-            self.trigger('pusher:subscribe', {
-              channel: channel_name,
-              auth: self.key + ':' + data.auth
-            });
-          } else {
-            Pusher.log("Couldn't get auth info from your webapp" + status);
+        var xhr = window.XMLHttpRequest ?
+          new XMLHttpRequest() :
+          new ActiveXObject("Microsoft.XMLHTTP");
+        xhr.open("POST", '/pusher/auth', true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+              var data = JSON.parse(xhr.responseText);
+              self.trigger('pusher:subscribe', {
+                channel: channel_name,
+                auth: self.key + ':' + data.auth
+              });
+            } else {
+              Pusher.log("Couldn't get auth info from your webapp" + status);
+            }
           }
-        });
+        };
+        xhr.send('socket_id=' + encodeURIComponent(this.socket_id) + '&channel_name=' + encodeURIComponent(channel_name));
       } else {
         this.trigger('pusher:subscribe', {
           channel: channel_name
