@@ -19,7 +19,7 @@ Pusher.Channels.prototype = {
   },
 
   remove: function(channel_name) {
-    this.channels[channel_name] = null;
+    delete this.channels[channel_name];
   }
 };
 
