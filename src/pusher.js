@@ -2,7 +2,7 @@ var Pusher = function(application_key, channel_name) {
   this.url = 'ws://' + Pusher.host + '/app/' + application_key;
   this.socket_id;
   this.channels = new Pusher.Channels();
-  this.global_channel = new Pusher.GlobalChannel()
+  this.global_channel = new Pusher.Channel()
   this.connected = false;
   this.connect();
   
@@ -19,6 +19,10 @@ var Pusher = function(application_key, channel_name) {
 };
 
 Pusher.prototype = {
+  channel: function(name) {
+    return this.channels.find(name);
+  },
+
   connect: function() {
     var self = this;
 
@@ -79,7 +83,7 @@ Pusher.prototype = {
   // Not currently supported by pusherapp.com
   trigger: function(event_name, data) {
     var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
-    Pusher.log("Pusher : sending event : " + payload);
+    Pusher.log("Pusher : sending event : ", payload);
     this.connection.send(payload);
     return this;
   },
@@ -87,17 +91,21 @@ Pusher.prototype = {
   onmessage: function(evt) {
     var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
-    var event_name = params.event;
-    var event_data = Pusher.parser(params.data);
-    // temporary fix to braodcast to single channel
-    if (event_data.channel_name) {
-      var channel = this.channels.find(event_data.channel_name)
-      if (channel){
-        channel.dispatch_with_all(event_name, event_data); 
+
+    var event_name = params.event,
+        event_data = Pusher.parser(params.data),
+        channel_name = params.channel;
+
+    if (channel_name) {
+      var channel = this.channel(channel_name);
+      if (channel) {
+        channel.dispatch_with_all(event_name, event_data);
       }
     }
+
     this.global_channel.dispatch_with_all(event_name, event_data);
-    Pusher.log("Pusher : event received : " + event_name +" : ", event_data);
+    Pusher.log("Pusher : event received : channel: " + channel_name +
+      "; event: " + event_name, event_data);
   },
 
   onclose: function() {

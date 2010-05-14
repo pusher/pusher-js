@@ -6,35 +6,29 @@ Pusher.Channels.prototype = {
   add: function(channel_name) {
     var existing_channel = this.find(channel_name);
     if (!existing_channel) {
-      var channel = new Pusher.Channel(channel_name);
+      var channel = new Pusher.Channel();
       this.channels[channel_name] = channel;
       return channel;
     } else {
       return existing_channel;
     }
   },
-  
+
   find: function(channel_name) {
     return this.channels[channel_name];
   },
-  
+
   remove: function(channel_name) {
     this.channels[channel_name] = null;
   }
 };
 
-Pusher.Channel = function(name) {
-  this.name = name;
+Pusher.Channel = function() {
   this.callbacks = {};
   this.global_callbacks = [];
-}
+};
 
-Pusher.GlobalChannel = function() {
-  this.callbacks = {};
-  this.global_callbacks = [];
-}
-
-var eventStuff = {
+Pusher.Channel.prototype = {
   bind: function(event_name, callback) {
     this.callbacks[event_name] = this.callbacks[event_name] || [];
     this.callbacks[event_name].push(callback);
@@ -53,12 +47,12 @@ var eventStuff = {
     this.connection.send(payload);
     return this;
   },
-  
+
   dispatch_with_all: function(event_name, data) {
     this.dispatch(event_name, data);
     this.dispatch_global_callbacks(event_name, data);
   },
-  
+
   dispatch: function(event_name, event_data) {
     var callbacks = this.callbacks[event_name];
 
@@ -72,12 +66,8 @@ var eventStuff = {
   },
 
   dispatch_global_callbacks: function(event_name, event_data) {
-    console.log('global dispatch'+ this.global_callbacks.length)
     for (var i = 0; i < this.global_callbacks.length; i++) {
       this.global_callbacks[i](event_name, event_data);
     }
   }
-}
-
-Pusher.GlobalChannel.prototype = eventStuff;
-Pusher.Channel.prototype = eventStuff;
+};
