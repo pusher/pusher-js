@@ -1,5 +1,6 @@
 var Pusher = function(application_key, channel) {
   this.url = 'ws://' + Pusher.host + '/app/' + application_key;
+  this.key = application_key;
   this.socket_id;
   this.callbacks = {};
   this.global_callbacks = [];
@@ -13,6 +14,10 @@ var Pusher = function(application_key, channel) {
     self.connected = true;
     self.socket_id = data.socket_id;
     self.subscribeAll(self.channels.channels);
+  });
+
+  this.bind('pusher:error', function(data) {
+    Pusher.log("Pusher : error : " + data.message);
   });
 };
 
@@ -66,9 +71,32 @@ Pusher.prototype = {
     this.channels.add(channel_name);
     
     if (this.connected) {
-      this.trigger('pusher:subscribe', {
-        channel: channel_name
-      });
+      if (channel_name.indexOf("private-") === 0) {
+        var self = this;
+        var xhr = window.XMLHttpRequest ?
+          new XMLHttpRequest() :
+          new ActiveXObject("Microsoft.XMLHTTP");
+        xhr.open("POST", Pusher.channel_auth_endpoint, true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+              var data = JSON.parse(xhr.responseText);
+              self.trigger('pusher:subscribe', {
+                channel: channel_name,
+                auth: data.auth
+              });
+            } else {
+              Pusher.log("Couldn't get auth info from your webapp" + status);
+            }
+          }
+        };
+        xhr.send('socket_id=' + encodeURIComponent(this.socket_id) + '&channel_name=' + encodeURIComponent(channel_name));
+      } else {
+        this.trigger('pusher:subscribe', {
+          channel: channel_name
+        });
+      }
     }
   },
   
@@ -135,6 +163,7 @@ Pusher.prototype = {
 
 Pusher.VERSION = "<%= VERSION %>";
 Pusher.host = "ws.pusherapp.com:80";
+Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.allow_reconnect = true;
 Pusher.parser = function(data) {
