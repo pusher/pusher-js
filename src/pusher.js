@@ -84,7 +84,7 @@ Pusher.prototype = {
               var data = JSON.parse(xhr.responseText);
               self.trigger('pusher:subscribe', {
                 channel: channel_name,
-                auth: self.key + ':' + data.auth
+                auth: data.auth
               });
             } else {
               Pusher.log("Couldn't get auth info from your webapp" + status);
