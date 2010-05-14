@@ -40,14 +40,6 @@ Pusher.Channel.prototype = {
     return this;
   },
 
-  // Not currently supported by pusherapp.com
-  trigger: function(event_name, data) {
-    var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
-    Pusher.log("Pusher : sending event : " + payload);
-    this.connection.send(payload);
-    return this;
-  },
-
   dispatch_with_all: function(event_name, data) {
     this.dispatch(event_name, data);
     this.dispatch_global_callbacks(event_name, data);

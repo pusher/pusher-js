@@ -5,16 +5,15 @@ var Pusher = function(application_key, channel_name) {
   this.global_channel = new Pusher.Channel()
   this.connected = false;
   this.connect();
-  
+
+  if (channel_name) this.subscribe(channel_name);
+
   var self = this;
 
   this.bind('connection_established', function(data) {
     self.connected = true;
-    if (channel_name){
-      self.subscribe(channel_name);
-    }
     self.socket_id = data.socket_id;
-    // self.subscribeAll(self.channels.channels);
+    self.subscribeAll();
   });
 };
 
@@ -52,13 +51,13 @@ Pusher.prototype = {
     this.global_channel.bind_all(callback)
     return this;
   },
-  
-  subscribeAll: function(channel_names) {
-    for (var i = 0; i < channel_names.length; i++) {
-      this.subscribe(channel_names[i]);
+
+  subscribeAll: function() {
+    for (var channel in this.channels.channels) {
+      if (this.channels.channels.hasOwnProperty(channel)) this.subscribe(channel);
     }
   },
-  
+
   subscribe: function(channel_name) {
     var channel = this.channels.add(channel_name);
     
