@@ -4,6 +4,7 @@ var Pusher = function(application_key, channel_name) {
   this.socket_id;
   this.channels = new Pusher.Channels();
   this.global_channel = new Pusher.Channel()
+  this.global_channel.global = true;
   this.connected = false;
   this.connect();
 

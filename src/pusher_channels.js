@@ -52,7 +52,7 @@ Pusher.Channel.prototype = {
       for (var i = 0; i < callbacks.length; i++) {
         callbacks[i](event_data);
       }
-    } else {
+    } else if (!this.global) {
       Pusher.log('Pusher : No callbacks for ' + event_name);
     }
   },
