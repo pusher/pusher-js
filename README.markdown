@@ -109,9 +109,12 @@ There are a number of events which are used internally, but can also be of use e
 In order to build a combined `pusher.js` and `pusher.min.js` just install the gem dependencies and run rake:
 
     gem install closure-compiler sprockets
-
     rake
 
-For development purposes you can start a Sinatra application which will serve up the combined Javascript on <http://localhost:4567/pusher.js>. It allows you to link against this url in your app and freely modify files in `src`.
+## Testing
 
-    ruby dev_server.rb
+To run the tests first start the testing server by running `rake test` then visit <http://localhost:4567/>. The server posts to the production Pusher API using the environment variable `PUSHER_URL` in the form of:
+
+    http://<PUSHER_KEY>:<PUSHER_SECRET>@api.pusherapp.com/apps/<PUSHER_APP_ID>
+
+The tests link to a development version of the combined Pusher Javascript file <http://localhost:4567/pusher.js> allowing you to modify files in `src`.
