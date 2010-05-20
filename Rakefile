@@ -1,4 +1,4 @@
-require 'lib/builder'
+autoload :Builder, 'lib/builder'
 
 task :default => :build
 
