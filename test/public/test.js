@@ -1,3 +1,4 @@
+Pusher.allow_reconnect = false
 Pusher.log = function() {
   if (window.console) console.log.apply(console, arguments)
 }
@@ -28,11 +29,18 @@ function trigger(channel, event, data, socket_id) {
   })
 }
 
+function disconnect(pusher) {
+  setTimeout(function() {
+    pusher.disconnect()
+  }, testTimeout)
+}
+
 function pusherTest(description, expected, callback) {
   test(description, function() {
     stop(testTimeout)
     var pusher = new Pusher(pusherKey)
     onPusherReady(pusher, callback)
+    disconnect(pusher)
   })
 }
 
@@ -48,6 +56,8 @@ asyncTest("should subscribe to the given channel on initialization", 1, function
 
     trigger(channel, "test_event", "data")
   })
+
+  disconnect(pusher)
 })
 
 pusherTest("should receive events from a subscribed channel", 1, function(pusher, channel) {
