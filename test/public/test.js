@@ -7,7 +7,6 @@ WebSocket.__swfLocation = "/WebSocketMain.swf"
 var testTimeout = 10000
 var clientID = parseInt(Math.random() * 1000000)
 var pusherAsyncTimeout = 2000;
-var pusherKey = ""
 var channelCount = 0
 
 function nextChannel() {
