@@ -29,6 +29,8 @@ Pusher.prototype = {
   },
 
   connect: function() {
+    Pusher.log('Pusher : connecting');
+
     var self = this;
 
     if (window["WebSocket"]) {
@@ -46,6 +48,12 @@ Pusher.prototype = {
       // Mock connection object if WebSockets are not available.
       this.connection = {};
     }
+  },
+
+  disconnect: function() {
+    Pusher.log('Pusher : disconnecting')
+    Pusher.allow_reconnect = false
+    this.connection.close()
   },
 
   bind: function(event_name, callback) {
@@ -146,7 +154,6 @@ Pusher.prototype = {
       Pusher.log('Pusher : socket closed : Reconnecting in 5 seconds...');
 
       setTimeout(function() {
-        Pusher.log('Pusher : reconnecting');
         self.connect();
       }, 5000);
     }
