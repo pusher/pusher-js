@@ -50,11 +50,11 @@ asyncTest("should subscribe to the given channel on initialization", 1, function
 
   onPusherReady(pusher, function() {
     pusher.channel(channel).bind("test_event", function(data) {
-      same(data, "data")
+      same(data, { some: "data" })
       start()
     });
 
-    trigger(channel, "test_event", "data")
+    trigger(channel, "test_event", { some: "data" })
   })
 
   disconnect(pusher)
@@ -62,11 +62,11 @@ asyncTest("should subscribe to the given channel on initialization", 1, function
 
 pusherTest("should receive events from a subscribed channel", 1, function(pusher, channel) {
   pusher.subscribe(channel).bind("test_event", function(data) {
-    same(data, "data")
+    same(data, { some: "data" })
     start()
   });
 
-  trigger(channel, "test_event", "data")
+  trigger(channel, "test_event", { some: "data" })
 })
 
 pusherTest("should not trigger events for channels which we aren't subscribed to", 1, function(pusher, channel) {
@@ -78,7 +78,7 @@ pusherTest("should not trigger events for channels which we aren't subscribed to
 
   pusher.unsubscribe(channel)
 
-  trigger(channel, "test_event", "data")
+  trigger(channel, "test_event", { some: "data" })
 
   setTimeout(function() {
     ok(!eventCalled)
@@ -99,8 +99,8 @@ pusherTest("should only trigger events for channels which we are subscribed to",
 
   pusher.unsubscribe(channel)
 
-  trigger(channel, "test_event", "data")
-  trigger(anotherChannel, "test_event", "data")
+  trigger(channel, "test_event", { some: "data" })
+  trigger(anotherChannel, "test_event", { some: "data" })
 
   setTimeout(function() {
     same(eventChannels, [anotherChannel])
@@ -120,8 +120,8 @@ pusherTest("should trigger events for all channels which we are subscribed to", 
     anotherChannelEventCalled = true
   });
 
-  trigger(channel, "test_event", "data")
-  trigger(anotherChannel, "test_event", "data")
+  trigger(channel, "test_event", { some: "data" })
+  trigger(anotherChannel, "test_event", { some: "data" })
 
   setTimeout(function() {
     ok(channelEventCalled)
