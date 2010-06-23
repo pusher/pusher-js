@@ -70,10 +70,14 @@ Pusher.prototype = {
 
   reconnect: function(){
     if (this.connected == true){
-      //the automatically trigger reconnect is too slow
-      Pusher.allow_reconnect = false;
+      var self = this;
+      this.connection.onclose = function() {
+        // we don't want to wait till we try a reconnect
+        Pusher.allow_reconnect = false;
+        self.onclose.apply(self, arguments);
+        Pusher.allow_reconnect = true;
+      };
       this.connection.close();
-      Pusher.allow_reconnect = true;
     }
     this.connect();
   },
@@ -177,7 +181,7 @@ Pusher.prototype = {
     this.connected = false;
 
     var self = this;
-
+    Pusher.log ("Pusher: Socket closed")
     if (Pusher.allow_reconnect){
       Pusher.log('Pusher : socket closed : Reconnecting in 5 seconds...');
 
