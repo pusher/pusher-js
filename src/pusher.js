@@ -1,10 +1,11 @@
 var Pusher = function(application_key, channel_name) {
-  this.url = 'ws://' + Pusher.host + '/app/' + application_key;
+  this.path = '/app/' + application_key;
   this.key = application_key;
   this.socket_id;
   this.channels = new Pusher.Channels();
   this.global_channel = new Pusher.Channel()
   this.global_channel.global = true;
+  this.secure = false;
   this.connected = false;
   this.connect();
 
@@ -29,12 +30,17 @@ Pusher.prototype = {
   },
 
   connect: function() {
-    Pusher.log('Pusher : connecting');
+    var url = "ws://" + Pusher.host + ":" + Pusher.ws_port + this.path;
+    if (this.secure == true){
+      url = "wss://" + Pusher.host + ":" + Pusher.wss_port + this.path;
+    }
+
+    Pusher.log('Pusher : connecting : ' + url );
 
     var self = this;
 
     if (window["WebSocket"]) {
-      this.connection = new WebSocket(this.url);
+      this.connection = new WebSocket(url);
       this.connection.onmessage = function() {
         self.onmessage.apply(self, arguments);
       };
@@ -48,6 +54,28 @@ Pusher.prototype = {
       // Mock connection object if WebSockets are not available.
       this.connection = {};
     }
+  },
+
+  switch_to_secure: function(){
+    Pusher.log("Pusher: switching to wss:// connection");
+    this.secure=true;
+    this.reconnect();
+  },
+
+  switch_to_unsecure: function(){
+    Pusher.log("Pusher: switching to ws:// connection");
+    this.secure=false;
+    this.reconnect();
+  },
+
+  reconnect: function(){
+    if (this.connected == true){
+      //the automatically trigger reconnect is too slow
+      Pusher.allow_reconnect = false;
+      this.connection.close();
+      Pusher.allow_reconnect = true;
+    }
+    this.connect();
   },
 
   disconnect: function() {
@@ -167,7 +195,9 @@ Pusher.prototype = {
 // Pusher defaults
 
 Pusher.VERSION = "<%= VERSION %>";
-Pusher.host = "ws.pusherapp.com:80";
+Pusher.host = "ws.pusherapp.com";
+Pusher.ws_port = 80;
+Pusher.wss_port = 443;
 Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.allow_reconnect = true;
