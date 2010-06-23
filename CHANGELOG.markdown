@@ -2,6 +2,10 @@
 
 Add some full-stack integration tests that interact with the production Pusher environment.
 
+## 1.4.1
+
+Added switch_to_secure() and switch_to_unsecure() to enable ssl testing
+
 ## 1.4
 
 Add ability to bind events to a specific channel:
