@@ -5,25 +5,44 @@ require 'rubygems'
 require 'closure-compiler'
 require 'sprockets'
 
+class Version
+  
+  def initialize(string)
+    @major, @minor, @patch = string.split('.')
+    raise "require (major.minor.patch) eg: 1.3.1" unless @major && @minor && @patch
+  end
+  
+  def full
+    [@major, @minor, @patch].join('.')
+  end
+  
+  def major_minor 
+    [@major, @minor].join('.')
+  end
+  
+end
+
 module Builder
   DIST_DIR = 'dist'
   SRC_DIR = 'src'
 
   class << self
     def build(*args)
-      bundle('bundle.js', 'pusher.js') do |f|
-        licence = File.read('src/pusher-licence.js')
-        licence.sub!('<%= VERSION %>', version.to_s)
-        f.write(licence)
-      end
+      [version.full, version.major_minor].each do |v|
+        bundle('bundle.js', 'pusher.js', v) do |f|
+          licence = File.read('src/pusher-licence.js')
+          licence.sub!('<%= VERSION %>', v.to_s)
+          f.write(licence)
+        end
 
-      copy_swf
+        copy_swf(v)
+      end
     end
 
-    def bundle(src, dest)
-      FileUtils.mkdir_p(version_dir)
+    def bundle(src, dest, v)
+      FileUtils.mkdir_p(version_dir(v))
 
-      path = "#{version_dir}/#{dest}"
+      path = "#{version_dir(v)}/#{dest}"
       min_path = path.sub('.js', '.min.js')
 
       puts "generating #{path}"
@@ -52,9 +71,9 @@ module Builder
       @config ||= YAML.load_file("#{SRC_DIR}/constants.yml")
     end
 
-    def copy_swf
+    def copy_swf(v)
       from = "#{SRC_DIR}/WebSocketMain.swf"
-      to = "#{version_dir}/#{config['SWF_NAME']}"
+      to = "#{version_dir(v)}/#{config['SWF_NAME']}"
 
       puts "copying #{to}"
 
@@ -62,11 +81,11 @@ module Builder
     end
 
     def version
-      config['VERSION']
+      @version ||= Version.new(config['VERSION'])
     end
 
-    def version_dir
-      "#{DIST_DIR}/#{version}"
+    def version_dir(v)
+      "#{DIST_DIR}/#{v}"
     end
   end
 end
