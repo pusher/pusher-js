@@ -7,6 +7,7 @@ var Pusher = function(application_key, channel_name) {
   this.global_channel.global = true;
   this.secure = false;
   this.connected = false;
+  this.retry_counter = 0;
   this.connect();
 
   if (channel_name) this.subscribe(channel_name);
@@ -15,6 +16,7 @@ var Pusher = function(application_key, channel_name) {
 
   this.bind('connection_established', function(data) {
     self.connected = true;
+    self.retry_counter = 0;
     self.socket_id = data.socket_id;
     self.subscribeAll();
   });
@@ -56,36 +58,22 @@ Pusher.prototype = {
     }
   },
 
-  switch_to_secure: function(){
-    Pusher.log("Pusher: switching to wss:// connection");
-    this.secure=true;
-    this.reconnect();
+  toggle_secure: function() {
+    if (this.secure == false) {
+      this.secure = true;
+      Pusher.log("Pusher: switching to wss:// connection");
+    }else{
+      this.secure = false;
+      Pusher.log("Pusher: switching to ws:// connection");
+    };
   },
 
-  switch_to_unsecure: function(){
-    Pusher.log("Pusher: switching to ws:// connection");
-    this.secure=false;
-    this.reconnect();
-  },
-
-  reconnect: function(){
-    if (this.connected == true){
-      var self = this;
-      this.connection.onclose = function() {
-        // we don't want to wait till we try a reconnect
-        Pusher.allow_reconnect = false;
-        self.onclose.apply(self, arguments);
-        Pusher.allow_reconnect = true;
-      };
-      this.connection.close();
-    }
-    this.connect();
-  },
 
   disconnect: function() {
-    Pusher.log('Pusher : disconnecting')
-    Pusher.allow_reconnect = false
-    this.connection.close()
+    Pusher.log('Pusher : disconnecting');
+    Pusher.allow_reconnect = false;
+    Pusher.retry_count = 0;
+    this.connection.close();
   },
 
   bind: function(event_name, callback) {
@@ -179,17 +167,28 @@ Pusher.prototype = {
   onclose: function() {
     this.global_channel.dispatch('close', null);
     this.connected = false;
-
-    var self = this;
     Pusher.log ("Pusher: Socket closed")
-    if (Pusher.allow_reconnect){
-      Pusher.log('Pusher : socket closed : Reconnecting in 5 seconds...');
 
-      setTimeout(function() {
-        self.connect();
-      }, 5000);
-    }
-  },
+    if (Pusher.allow_reconnect){
+
+      if (this.retry_counter == 0) {
+        Pusher.log ("Pusher: First reconnect")
+        this.toggle_secure();
+        this.connect();
+      }else{
+        var self = this;
+        Pusher.log('Pusher : socket closed : Reconnecting in 5 seconds...');
+        Pusher.log ("Pusher: Socket closed *****")
+        Pusher.log ("Pusher: counter:" + this.counter)
+
+        setTimeout(function() {
+          self.toggle_secure();
+          self.connect();
+          }, 5000);
+        }
+      };
+      this.retry_counter = this.retry_counter + 1
+    },
 
   onopen: function() {
     this.global_channel.dispatch('open', null);
