@@ -71,6 +71,7 @@ Pusher.prototype = {
 
   disconnect: function() {
     Pusher.log('Pusher : disconnecting');
+    this.send_local_event("connection_disconnected", {});
     Pusher.allow_reconnect = false;
     Pusher.retry_count = 0;
     this.connection.close();
