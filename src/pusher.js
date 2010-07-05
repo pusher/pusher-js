@@ -143,7 +143,20 @@ Pusher.prototype = {
     this.connection.send(payload);
     return this;
   },
+  
+  send_local_event: function(event_name, event_data, channel_name){
+     if (channel_name) {
+        var channel = this.channel(channel_name);
+        if (channel) {
+          channel.dispatch_with_all(event_name, event_data);
+        }
+      }
 
+      this.global_channel.dispatch_with_all(event_name, event_data);
+      Pusher.log("Pusher : event received : channel: " + channel_name +
+        "; event: " + event_name, event_data);
+  },
+  
   onmessage: function(evt) {
     var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
@@ -152,16 +165,7 @@ Pusher.prototype = {
         event_data = Pusher.parser(params.data),
         channel_name = params.channel;
 
-    if (channel_name) {
-      var channel = this.channel(channel_name);
-      if (channel) {
-        channel.dispatch_with_all(event_name, event_data);
-      }
-    }
-
-    this.global_channel.dispatch_with_all(event_name, event_data);
-    Pusher.log("Pusher : event received : channel: " + channel_name +
-      "; event: " + event_name, event_data);
+    this.send_local_event(event_name, event_data, channel_name);
   },
 
   onclose: function() {
