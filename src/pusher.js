@@ -70,9 +70,10 @@ Pusher.prototype = {
 
 
   disconnect: function() {
-    Pusher.log('Pusher : disconnecting')
-    Pusher.allow_reconnect = false
-    this.connection.close()
+    Pusher.log('Pusher : disconnecting');
+    Pusher.allow_reconnect = false;
+    Pusher.retry_count = 0;
+    this.connection.close();
   },
 
   bind: function(event_name, callback) {
@@ -167,14 +168,15 @@ Pusher.prototype = {
     this.global_channel.dispatch('close', null);
     this.connected = false;
     Pusher.log ("Pusher: Socket closed")
-    
-    if (this.retry_counter == 0) {
-      Pusher.log ("Pusher: First reconnect")
-      this.toggle_secure();
-      this.connect();
-    }else{
-      var self = this;
-      if (Pusher.allow_reconnect){
+
+    if (Pusher.allow_reconnect){
+
+      if (this.retry_counter == 0) {
+        Pusher.log ("Pusher: First reconnect")
+        this.toggle_secure();
+        this.connect();
+      }else{
+        var self = this;
         Pusher.log('Pusher : socket closed : Reconnecting in 5 seconds...');
         Pusher.log ("Pusher: Socket closed *****")
         Pusher.log ("Pusher: counter:" + this.counter)
@@ -182,11 +184,11 @@ Pusher.prototype = {
         setTimeout(function() {
           self.toggle_secure();
           self.connect();
-        }, 5000);
-      }
-    };
-    this.retry_counter = this.retry_counter + 1
-  },
+          }, 5000);
+        }
+      };
+      this.retry_counter = this.retry_counter + 1
+    },
 
   onopen: function() {
     this.global_channel.dispatch('open', null);
