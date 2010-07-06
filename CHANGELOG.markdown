@@ -2,9 +2,15 @@
 
 Add some full-stack integration tests that interact with the production Pusher environment.
 
+## 1.4.2
+
+ * Removed switch\_to\_secure and switch\_to\_unsecure in favour of automatic failover to ssl
+ * Generate internal events pusher:connection\_disconnected and pusher:connection\_failed
+ * Responds to pusher:connection\_established preparing for deprecation of connection\_established
+
 ## 1.4.1
 
-Added switch_to_secure() and switch_to_unsecure() to enable ssl testing
+Added switch\_to\_secure() and switch\_to\_unsecure() to enable ssl testing
 
 ## 1.4
 

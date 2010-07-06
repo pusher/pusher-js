@@ -14,7 +14,8 @@ var Pusher = function(application_key, channel_name) {
 
   var self = this;
 
-  this.bind('connection_established', function(data) {
+  //This is the new namespaced version
+  this.bind('pusher:connection_established', function(data) {
     self.connected = true;
     self.retry_counter = 0;
     self.socket_id = data.socket_id;
@@ -37,6 +38,7 @@ Pusher.prototype = {
       url = "wss://" + Pusher.host + ":" + Pusher.wss_port + this.path;
     }
 
+    Pusher.allow_reconnect = true;
     Pusher.log('Pusher : connecting : ' + url );
 
     var self = this;
@@ -143,7 +145,20 @@ Pusher.prototype = {
     this.connection.send(payload);
     return this;
   },
+  
+  send_local_event: function(event_name, event_data, channel_name){
+     if (channel_name) {
+         var channel = this.channel(channel_name);
+         if (channel) {
+           channel.dispatch_with_all(event_name, event_data);
+         }
+       }
 
+       this.global_channel.dispatch_with_all(event_name, event_data);
+       Pusher.log("Pusher : event received : channel: " + channel_name +
+         "; event: " + event_name, event_data);
+  },
+  
   onmessage: function(evt) {
     var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
@@ -152,43 +167,38 @@ Pusher.prototype = {
         event_data = Pusher.parser(params.data),
         channel_name = params.channel;
 
-    if (channel_name) {
-      var channel = this.channel(channel_name);
-      if (channel) {
-        channel.dispatch_with_all(event_name, event_data);
-      }
-    }
+    this.send_local_event(event_name, event_data, channel_name);
+  },
 
-    this.global_channel.dispatch_with_all(event_name, event_data);
-    Pusher.log("Pusher : event received : channel: " + channel_name +
-      "; event: " + event_name, event_data);
+  wait_and_reconnect: function(perform_toggle, ms_to_wait){
+    var self = this;
+    setTimeout(function(){
+      perform_toggle();
+      self.connect();
+    }, ms_to_wait)
   },
 
   onclose: function() {
+    var self = this;
     this.global_channel.dispatch('close', null);
-    this.connected = false;
     Pusher.log ("Pusher: Socket closed")
-
-    if (Pusher.allow_reconnect){
-
-      if (this.retry_counter == 0) {
-        Pusher.log ("Pusher: First reconnect")
-        this.toggle_secure();
-        this.connect();
-      }else{
-        var self = this;
-        Pusher.log('Pusher : socket closed : Reconnecting in 5 seconds...');
-        Pusher.log ("Pusher: Socket closed *****")
-        Pusher.log ("Pusher: counter:" + this.counter)
-
-        setTimeout(function() {
-          self.toggle_secure();
-          self.connect();
-          }, 5000);
-        }
-      };
+    var time = 5000;
+    if ( this.connected == true ) {
+      this.send_local_event("pusher:connection_disconnected", {});
+      if (Pusher.allow_reconnect){
+        Pusher.log('Pusher : Reconnecting in 5 seconds...');
+        this.wait_and_reconnect(function(){}, time)
+      }
+    } else {
+      self.send_local_event("pusher:connection_failed", {});
+      if (this.retry_counter == 0){
+        time = 100;
+      }
       this.retry_counter = this.retry_counter + 1
-    },
+      this.wait_and_reconnect(function(){self.toggle_secure()}, time);
+    }
+    this.connected = false;
+  },
 
   onopen: function() {
     this.global_channel.dispatch('open', null);
