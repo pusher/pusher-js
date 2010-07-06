@@ -57,6 +57,9 @@ Pusher.prototype = {
     } else {
       // Mock connection object if WebSockets are not available.
       this.connection = {};
+      setTimeout(function(){
+        self.send_local_event("pusher:connection_failed", {})
+        }, 3000)
     }
   },
 
