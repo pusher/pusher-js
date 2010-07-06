@@ -2,6 +2,10 @@
 
 Add some full-stack integration tests that interact with the production Pusher environment.
 
+## 1.4.3
+
+Trigger pusher:connection\_failed if no websocket is defined, allowing the event to work on iphones etc. 
+
 ## 1.4.2
 
  * Removed switch\_to\_secure and switch\_to\_unsecure in favour of automatic failover to ssl
