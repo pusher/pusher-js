@@ -7,6 +7,8 @@ require 'sinatra'
 require 'erb'
 require 'pusher'
 
+set :public, File.dirname(__FILE__) + '/../dist'
+
 get '/' do
   erb :index
 end
