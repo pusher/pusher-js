@@ -1,4 +1,28 @@
-:s3:
-  :bucket:
-  :access_key_id:
-  :secret_access_key:
+:defalt: &default
+  :api:
+    :host: localhost
+    :port: 8081
+  :socket:
+    :host: localhost
+    :port: 8090
+    :secure_port: 9090
+  :site:
+    :key: 
+    :secret: 
+    :app_id: 
+  
+:staging:
+  :s3:
+    :bucket:
+    :access_key_id: 
+    :secret_access_key: 
+    
+  <<: *default
+    
+:production:
+  :s3:
+    :bucket:
+    :access_key_id:
+    :secret_access_key:
+
+  <<: *default

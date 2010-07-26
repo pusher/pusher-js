@@ -6,13 +6,16 @@ require 'pp'
 require 'builder'
 
 module S3Uploader
- CONFIG = YAML.load_file('./config/config.yml')
+ ENVIRONMENT = ENV["ENVIORNMENT"] || 'staging'
+ p ENVIRONMENT
+ 
+ CONFIG = YAML.load_file('./config/config.yml')[ENVIRONMENT.to_sym]
  raise "Specify config.yml" unless  CONFIG
 
  class << self
    def upload()
      versions = [Builder.version.full, Builder.version.major_minor]
-     
+
      versions.each do |v|
 
        bucket = CONFIG[:s3][:bucket]
