@@ -25,7 +25,7 @@ end
 module Builder
   DIST_DIR = 'dist'
   SRC_DIR = 'src'
-  ENVIRONMENT = ENV["ENVIRONMENT"] || 'development'
+  ENVIRONMENT = ENV["ENVIRONMENT"] || 'staging'
   JS_HOST = YAML.load_file('./config/config.yml')[ENVIRONMENT.to_sym][:js][:host]
   class << self
 
