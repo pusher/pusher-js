@@ -6,7 +6,7 @@ require 'pp'
 require 'builder'
 
 module S3Uploader
- ENVIRONMENT = ENV["ENVIORNMENT"] || 'staging'
+ ENVIRONMENT = ENV["ENVIRONMENT"] || 'staging'
  p ENVIRONMENT
  
  CONFIG = YAML.load_file('./config/config.yml')[ENVIRONMENT.to_sym]

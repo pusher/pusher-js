@@ -10,6 +10,10 @@
     :key: 
     :secret: 
     :app_id: 
+
+:development:
+  :js:
+    :host: localhost:4567
   
 :staging:
   :s3:
