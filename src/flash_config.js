@@ -1,1 +1,1 @@
-WebSocket.__swfLocation = "<%= ASSET_HOST %>/<%= VERSION %>/<%= SWF_NAME %>"
+WEB_SOCKET_SWF_LOCATION = "<WEB_SOCKET_SWF_LOCATION>/WebSocketMain.swf";

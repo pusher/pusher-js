@@ -33,14 +33,11 @@ module Builder
     p JS_HOST
     
     def build(*args)
-      string = "WEB_SOCKET_SWF_LOCATION = \"http://#{JS_HOST}/#{version.major_minor}/WebSocketMain.swf\";\n"
-      puts string
       [version.full, version.major_minor].each do |v|
         bundle('bundle.js', 'pusher.js', v) do |f|
           licence = File.read('src/pusher-licence.js')
           licence.sub!('<%= VERSION %>', v.to_s)
           f.write(licence)
-          f.write(string)
         end
 
         copy_swf(v)
@@ -57,8 +54,9 @@ module Builder
 
       # unminified(src).save_to(path)
       File.open(path, 'w') do |f|
-        yield f
-        f.write(unminified(src))
+        concatenated = unminified(src).to_s
+        replaced = concatenated.sub(/<WEB_SOCKET_SWF_LOCATION>/, sft_location)
+        f.write(replaced)
       end
 
       puts "generating #{min_path}"
@@ -94,6 +92,10 @@ module Builder
 
     def version
       @version ||= Version.new(config['VERSION'])
+    end
+    
+    def sft_location
+      "http://#{JS_HOST}/#{version.major_minor}/WebSocketMain.swf"
     end
 
     def version_dir(v)
