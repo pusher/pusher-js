@@ -1,7 +1,7 @@
 //= require "json2"
 //= require "swfobject"
 //= require "FABridge"
-//= require "web_socket"
 //= require "flash_config"
+//= require "web_socket"
 //= require "pusher"
 //= require "pusher_channels"

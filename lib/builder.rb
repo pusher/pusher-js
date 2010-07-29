@@ -34,6 +34,7 @@ module Builder
     
     def build(*args)
       [version.full, version.major_minor].each do |v|
+        clear(v)
         bundle('bundle.js', 'pusher.js', v) do |f|
           licence = File.read('src/pusher-licence.js')
           licence.sub!('<%= VERSION %>', v.to_s)
@@ -42,6 +43,15 @@ module Builder
 
         copy_swf(v)
       end
+    end
+
+    def clear(v)
+      path = "#{version_dir(v)}/"
+      files =  Dir.glob(path + "*")
+      files.each  do |f|
+        p "Removing #{f}"
+      end
+      FileUtils.rm(files)
     end
 
     def bundle(src, dest, v)
@@ -60,9 +70,7 @@ module Builder
       end
 
       puts "generating #{min_path}"
-
       minified = Closure::Compiler.new.compile(File.new(path))
-
       File.open(min_path, 'w') do |f|
         yield f
         f.write(minified)
