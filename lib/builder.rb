@@ -55,7 +55,7 @@ module Builder
       # unminified(src).save_to(path)
       File.open(path, 'w') do |f|
         concatenated = unminified(src).to_s
-        replaced = concatenated.sub(/<WEB_SOCKET_SWF_LOCATION>/, swf_location)
+        replaced = concatenated.sub(/<WEB_SOCKET_SWF_LOCATION>/, swf_location(v))
         f.write(replaced)
       end
 
@@ -94,8 +94,8 @@ module Builder
       @version ||= Version.new(config['VERSION'])
     end
     
-    def swf_location
-      "http://#{JS_HOST}/#{version.major_minor}/WebSocketMain.swf"
+    def swf_location(v)
+      "http://#{JS_HOST}/#{v}/WebSocketMain.swf"
     end
 
     def version_dir(v)
