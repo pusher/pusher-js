@@ -111,7 +111,7 @@ Pusher.prototype = {
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
             if (xhr.status == 200) {
-              var data = JSON.parse(xhr.responseText);
+              var data = Pusher.parser(xhr.responseText);
               self.trigger('pusher:subscribe', {
                 channel: channel_name,
                 auth: data.auth
@@ -163,7 +163,7 @@ Pusher.prototype = {
   },
   
   onmessage: function(evt) {
-    var params = JSON.parse(evt.data);
+    var params = Pusher.parser(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
 
     var event_name = params.event,
