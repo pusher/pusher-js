@@ -150,6 +150,7 @@ Pusher.prototype = {
   },
   
   send_local_event: function(event_name, event_data, channel_name){
+    event_data = Pusher.data_decorator(event_name, event_data);
      if (channel_name) {
          var channel = this.channel(channel_name);
          if (channel) {
@@ -216,6 +217,7 @@ Pusher.ws_port = 80;
 Pusher.wss_port = 443;
 Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
+Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.allow_reconnect = true;
 Pusher.parser = function(data) {
   try {

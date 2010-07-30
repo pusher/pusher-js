@@ -129,3 +129,22 @@ pusherTest("should trigger events for all channels which we are subscribed to", 
     start()
   }, pusherAsyncTimeout);
 })
+
+pusherTest("should wrap event data if Pusher.data_wrapper is defined", 1, function(pusher, channel) {
+  var Wrap = function(data){
+    this.event_data = data;
+  };
+  
+  Pusher.data_decorator = function(event_name, event_data){
+    if(event_name == 'wrapped_event') return new Wrap(event_data)
+    else return event_data;
+  };
+  
+  pusher.subscribe(channel).bind("wrapped_event", function(wrapped_data_object) {
+    same(wrapped_data_object.event_data, { some: "data" })
+    start()
+  });
+
+  trigger(channel, "wrapped_event", { some: "data" })
+})
+
