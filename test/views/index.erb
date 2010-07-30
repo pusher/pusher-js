@@ -1,14 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<script src="qunit.js"></script>
-<link rel="stylesheet" href="qunit.css">
-<script src="jquery-1.4.2.min.js"></script>
-<script src="pusher.js"></script>
+<script src="/qunit.js"></script>
+<link rel="stylesheet" href="/qunit.css">
+<script src="/jquery-1.4.2.min.js"></script>
+<script src="/pusher.js"></script>
 <script>
-var pusherKey = "<%= Pusher.key %>"
+var pusherKey = "<%= Pusher.key %>";
+
+Pusher.log = function(m){console.log(m)};
+
+Pusher.host = "<%= CONFIG[:socket][:host] %>";
+Pusher.ws_port = <%= CONFIG[:socket][:port] %>;
+
 </script>
-<script src="test.js"></script>
+<script src="/test.js"></script>
 </head>
 <body>
   <h1 id="qunit-header">Pusher Tests</h1>
