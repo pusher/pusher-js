@@ -5,9 +5,9 @@ Pusher.log = function() {
 
 WebSocket.__swfLocation = "/WebSocketMain.swf"
 
-var testTimeout = 10000
+var testTimeout = 40000
 var clientID = parseInt(Math.random() * 1000000)
-var pusherAsyncTimeout = 2000;
+var pusherAsyncTimeout = 40000;
 var channelCount = 0
 
 function nextChannel() {
@@ -146,5 +146,24 @@ pusherTest("should wrap event data if Pusher.data_wrapper is defined", 1, functi
   });
 
   trigger(channel, "wrapped_event", { some: "data" })
+})
+
+/* Private channels :::::::::::::::::::::::::::::::: */
+pusherTest("should subscribe to private channels", 1, function(pusher, channel) {
+  pusher.subscribe('private-succesful_auth').bind("test_event", function(data) {
+    same(data, { some: "private data" })
+    start()
+  });
+
+  trigger('private-succesful_auth', "test_event", { some: "private data" })
+})
+
+pusherTest("should trigger failed authentication for private channels", 1, function(pusher, channel) {
+  failed_channel = pusher.subscribe('private-failed_auth');
+  failed_channel.bind('pusher:auth_errors', function(){
+    ok(true, 'Got error event')
+  });
+
+  trigger('private-failed_auth', "test_event", { some: "private data" })
 })
 
