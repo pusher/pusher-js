@@ -101,19 +101,13 @@ Pusher.prototype = {
     var channel = this.channels.add(channel_name);
     
     if (this.connected) {
-      if (channel.is_private() || channel.is_presence()) {
-        this.ajax_auth(channel_name, function(self, auth){
-          self.trigger('pusher:subscribe', {
-            channel: channel_name,
-            auth: auth
-          });
+      var self = this;
+      channel.authorize(this, function(auth){
+        self.trigger('pusher:subscribe', {
+          channel: channel_name,
+          auth: auth
         });
-        
-      } else {
-        this.trigger('pusher:subscribe', {
-          channel: channel_name
-        });
-      }
+      });
     }
     return channel;
   },
@@ -149,26 +143,6 @@ Pusher.prototype = {
        this.global_channel.dispatch_with_all(event_name, event_data);
        Pusher.log("Pusher : event received : channel: " + channel_name +
          "; event: " + event_name, event_data);
-  },
-  
-  ajax_auth: function(channel_name, callback){
-    var self = this;
-    var xhr = window.XMLHttpRequest ?
-      new XMLHttpRequest() :
-      new ActiveXObject("Microsoft.XMLHTTP");
-    xhr.open("POST", Pusher.channel_auth_endpoint, true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
-          var data = Pusher.parser(xhr.responseText);
-          callback(self, data.auth);
-        } else {
-          Pusher.log("Couldn't get auth info from your webapp" + status);
-        }
-      }
-    };
-    xhr.send('socket_id=' + encodeURIComponent(this.socket_id) + '&channel_name=' + encodeURIComponent(channel_name));
   },
   
   onmessage: function(evt) {
@@ -214,6 +188,15 @@ Pusher.prototype = {
 
   onopen: function() {
     this.global_channel.dispatch('open', null);
+  }
+};
+
+Pusher.Util = {
+  extend: function(target, extensions){
+    for(var i in extensions){
+      target[i] = extensions[i]
+    };
+    return target;
   }
 };
 
