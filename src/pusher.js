@@ -101,7 +101,7 @@ Pusher.prototype = {
     var channel = this.channels.add(channel_name);
     
     if (this.connected) {
-      if (channel_name.indexOf("private-") === 0) {
+      if (channel.is_private() || channel.is_presence()) {
         var self = this;
         var xhr = window.XMLHttpRequest ?
           new XMLHttpRequest() :
