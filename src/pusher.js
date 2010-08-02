@@ -96,32 +96,19 @@ Pusher.prototype = {
       if (this.channels.channels.hasOwnProperty(channel)) this.subscribe(channel);
     }
   },
-
+  
   subscribe: function(channel_name) {
     var channel = this.channels.add(channel_name);
     
     if (this.connected) {
       if (channel.is_private() || channel.is_presence()) {
-        var self = this;
-        var xhr = window.XMLHttpRequest ?
-          new XMLHttpRequest() :
-          new ActiveXObject("Microsoft.XMLHTTP");
-        xhr.open("POST", Pusher.channel_auth_endpoint, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState == 4) {
-            if (xhr.status == 200) {
-              var data = Pusher.parser(xhr.responseText);
-              self.trigger('pusher:subscribe', {
-                channel: channel_name,
-                auth: data.auth
-              });
-            } else {
-              Pusher.log("Couldn't get auth info from your webapp" + status);
-            }
-          }
-        };
-        xhr.send('socket_id=' + encodeURIComponent(this.socket_id) + '&channel_name=' + encodeURIComponent(channel_name));
+        this.ajax_auth(channel_name, function(self, auth){
+          self.trigger('pusher:subscribe', {
+            channel: channel_name,
+            auth: auth
+          });
+        });
+        
       } else {
         this.trigger('pusher:subscribe', {
           channel: channel_name
@@ -140,6 +127,7 @@ Pusher.prototype = {
       });
     }
   },
+  
   
   // Not currently supported by pusherapp.com
   trigger: function(event_name, data) {
@@ -161,6 +149,26 @@ Pusher.prototype = {
        this.global_channel.dispatch_with_all(event_name, event_data);
        Pusher.log("Pusher : event received : channel: " + channel_name +
          "; event: " + event_name, event_data);
+  },
+  
+  ajax_auth: function(channel_name, callback){
+    var self = this;
+    var xhr = window.XMLHttpRequest ?
+      new XMLHttpRequest() :
+      new ActiveXObject("Microsoft.XMLHTTP");
+    xhr.open("POST", Pusher.channel_auth_endpoint, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200) {
+          var data = Pusher.parser(xhr.responseText);
+          callback(self, data.auth);
+        } else {
+          Pusher.log("Couldn't get auth info from your webapp" + status);
+        }
+      }
+    };
+    xhr.send('socket_id=' + encodeURIComponent(this.socket_id) + '&channel_name=' + encodeURIComponent(channel_name));
   },
   
   onmessage: function(evt) {
