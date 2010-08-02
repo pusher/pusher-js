@@ -1,0 +1,101 @@
+<!DOCTYPE HTML>
+<html lang="ru-RU">
+<head>
+	<meta charset="UTF-8">
+	<title>Manual test</title>
+	<style type="text/css" media="screen">
+	 .response {
+	   margin:1em;
+	   border:solid green 4px;
+	   padding:0 1em 1em 1em;
+	 }
+	</style>
+	<script src="/jquery-1.4.2.min.js"></script>
+  <script src="/pusher.js"></script>
+  <script>
+
+  Pusher.log = function(m){console.log(m)};
+
+  Pusher.host = "<%= CONFIG[:socket][:host] %>";
+  Pusher.ws_port = <%= CONFIG[:socket][:port] %>;
+  
+  var server;
+  
+  
+  $(function(){
+    
+    server = new Pusher("<%= Pusher.key %>");
+    
+    server.bind('pusher:heartbeat', function(data){
+      console.log('Heartbeat received')
+    });
+    
+    var private_channel = server.subscribe('private-test_channel');
+    var public_channel = server.subscribe('public-test_channel');
+    var presence_channel = server.subscribe('presence-test_channel');
+
+    $.each(['private-test_channel', 'public-test_channel', 'presence-test_channel'], function(i, channel){
+      server.channels.find(channel).bind_all(function(e,d){console.log(channel + 'received '+e+' with: ', d)})
+      server.channels.find(channel).bind('test', function(data){
+        console.log(channel + ' received test event with:', data)
+        $('#response_'+channel).html(data)
+      })
+    });
+    
+    
+    $('form.ajax').submit(function(){
+      $.post($(this).attr('action'), {
+        channel: $(this).find('select[name=channel]').val(),
+        event: $(this).find('input[name=event]').val(),
+        data: $(this).find('input[name=data]').val(),
+        socket_id: server.socket_id
+      },
+      function(){
+        $('#ajax_status').append('<li>Success</li>')
+      })
+      return false;
+    });
+  });
+  </script>
+</head>
+<body>
+	
+	<fieldset id="private_channel" class="">
+	 <legend>Private channel</legend>
+	 <form action="/trigger" method="post" accept-charset="utf-8" class="ajax">
+	   <p>
+  	     <select name="channel" id="channel">
+  	       <option value="private-test_channel">private-test_channel</option>
+  	       <option value="public-test_channel">public-test_channel</option>
+  	       <option value="presence-test_channel">presence-test_channel</option>
+  	     </select>
+  	   </p>
+  	   <p>
+  	     <input type="text" name="event" value="test" id="event" placeholder="event">
+  	   </p>
+  	   <p>
+   	     <input type="text" name="data" value="<%= params[:data] %>" id="data" placeholder="data">
+   	   </p>
+  	   <p><input type="submit" value="Continue &rarr;"></p>
+	 </form>
+	 
+	</fieldset>
+	
+	<div class="responses">
+	  <div class="response">
+	   <h3>private-test_channel</h3>
+	   <div id="response_private-test_channel"></div>
+	  </div>
+	  <div class="response">
+	   <h3>public-test_channel</h3>
+	   <div id="response_public-test_channel"></div>
+	  </div>
+	  <div class="response">
+	   <h3>presence-test_channel</h3>
+	   <div id="response_presence-test_channel"></div>
+	  </div>
+	</div>
+	
+	<ul id="ajax_status"></ul>
+</body>
+</html>

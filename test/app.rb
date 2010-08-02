@@ -21,6 +21,10 @@ get '/' do
   erb :index
 end
 
+get '/manual' do
+  erb :manual
+end
+
 get '/pusher.js' do
   content_type('application/javascript')
   Builder.unminified('bundle.js').to_s
