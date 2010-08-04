@@ -120,7 +120,7 @@ Pusher.prototype = {
           channel: channel_name,
           auth: data.auth,
           user_id: data.user_id,
-          user_info: data.user_info // only for presense channels atm
+          user_info: data.user_info // only for presence channels atm
         });
       }.scopedTo(this));
     }
