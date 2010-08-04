@@ -1,9 +1,19 @@
+if(typeof Function.prototype.scopedTo == 'undefined'){
+  Function.prototype.scopedTo = function(context, args){
+    var f = this;
+    return function(){
+      return f.apply(context, Array.prototype.slice.call(args || [])
+        .concat(Array.prototype.slice.call(arguments)));
+    };
+  };
+};
+
 var Pusher = function(application_key, channel_name) {
   this.path = '/app/' + application_key;
   this.key = application_key;
   this.socket_id;
   this.channels = new Pusher.Channels();
-  this.global_channel = new Pusher.Channel()
+  this.global_channel = new Pusher.Channel('pusher_global_channel')
   this.global_channel.global = true;
   this.secure = false;
   this.connected = false;
@@ -12,19 +22,24 @@ var Pusher = function(application_key, channel_name) {
 
   if (channel_name) this.subscribe(channel_name);
 
-  var self = this;
-
   //This is the new namespaced version
   this.bind('pusher:connection_established', function(data) {
-    self.connected = true;
-    self.retry_counter = 0;
-    self.socket_id = data.socket_id;
-    self.subscribeAll();
-  });
+    this.connected = true;
+    this.retry_counter = 0;
+    this.socket_id = data.socket_id;
+    this.subscribeAll();
+  }.scopedTo(this));
+  
+  this.bind('pusher:connection_disconnected', function(){
+    for(var channel_name in this.channels.channels){
+      this.channels.channels[channel_name].disconnect()
+    }
+  }.scopedTo(this));
 
   this.bind('pusher:error', function(data) {
     Pusher.log("Pusher : error : " + data.message);
   });
+  
 };
 
 Pusher.prototype = {
@@ -99,15 +114,15 @@ Pusher.prototype = {
   
   subscribe: function(channel_name) {
     var channel = this.channels.add(channel_name);
-    
     if (this.connected) {
-      var self = this;
-      channel.authorize(this, function(auth){
-        self.trigger('pusher:subscribe', {
+      channel.authorize(this, function(data){
+        this.send_event('pusher:subscribe', {
           channel: channel_name,
-          auth: auth
+          auth: data.auth,
+          user_id: data.user_id,
+          user_info: data.user_info // only for presense channels atm
         });
-      });
+      }.scopedTo(this));
     }
     return channel;
   },
@@ -116,7 +131,7 @@ Pusher.prototype = {
     this.channels.remove(channel_name);
 
     if (this.connected) {
-      this.trigger('pusher:unsubscribe', {
+      this.send_event('pusher:unsubscribe', {
         channel: channel_name
       });
     }
@@ -124,7 +139,7 @@ Pusher.prototype = {
   
   
   // Not currently supported by pusherapp.com
-  trigger: function(event_name, data) {
+  send_event: function(event_name, data) {
     var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
     Pusher.log("Pusher : sending event : ", payload);
     this.connection.send(payload);
@@ -148,20 +163,18 @@ Pusher.prototype = {
   onmessage: function(evt) {
     var params = Pusher.parser(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
-
     var event_name = params.event,
         event_data = Pusher.parser(params.data),
         channel_name = params.channel;
-
+        
     this.send_local_event(event_name, event_data, channel_name);
   },
 
   wait_and_reconnect: function(perform_toggle, ms_to_wait){
-    var self = this;
     setTimeout(function(){
       perform_toggle();
-      self.connect();
-    }, ms_to_wait)
+      this.connect();
+    }.scopedTo(this), ms_to_wait)
   },
 
   onclose: function() {

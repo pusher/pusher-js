@@ -27,9 +27,24 @@ Pusher.Channel = function(channel_name) {
   this.name = channel_name;
   this.callbacks = {};
   this.global_callbacks = [];
+  this.subscribed = false;
 };
 
 Pusher.Channel.prototype = {
+  // inheritable constructor
+  init: function(){
+    
+  },
+  
+  disconnect: function(){
+    
+  },
+  
+  // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
+  acknowledge_subscription: function(data){
+    this.subscribed = true;
+  },
+  
   bind: function(event_name, callback) {
     this.callbacks[event_name] = this.callbacks[event_name] || [];
     this.callbacks[event_name].push(callback);
@@ -73,7 +88,7 @@ Pusher.Channel.prototype = {
   },
   
   authorize: function(pusher, callback){
-    callback(null); // normal channels don't require auth
+    callback({}); // normal channels don't require auth
   }
 };
 
@@ -93,7 +108,7 @@ Pusher.Channel.PrivateChannel = {
       if (xhr.readyState == 4) {
         if (xhr.status == 200) {
           var data = Pusher.parser(xhr.responseText);
-          callback(data.auth);
+          callback(data);
         } else {
           Pusher.log("Couldn't get auth info from your webapp" + status);
         }
@@ -104,8 +119,52 @@ Pusher.Channel.PrivateChannel = {
 };
 
 Pusher.Channel.PresenceChannel = {
+  
+  init: function(){
+    
+    this.bind('pusher:subscription_succeeded', function(member_list){
+      this.acknowledge_subscription(member_list);
+    }.scopedTo(this));
+    
+    this.bind('pusher:member_added', function(member){
+      this.add_member(member)
+    }.scopedTo(this))
+    
+    this.bind('pusher:member_removed', function(member){
+      this.remove_member(member)
+    }.scopedTo(this))
+  },
+  
+  disconnect: function(){
+    this._members_map = {};
+  },
+  
+  acknowledge_subscription: function(member_list){
+    this._members_map = {};
+    for(var i=0;i<member_list.length;i++){
+      this._members_map[member_list[i].user_id] = member_list[i];
+    }
+    this.subscribed = true;
+  },
+  
   is_presence: function(){
     return true;
+  },
+  
+  members: function(){
+    var m = [];
+    for(var i in this._members_map){
+      m.push(this._members_map[i])
+    }
+    return m;
+  },
+  
+  add_member: function(member){
+    this._members_map[member.user_id] = member;
+  },
+  
+  remove_member: function(member){
+    delete this._members_map[member.user_id]
   }
 };
 
@@ -117,6 +176,7 @@ Pusher.Channel.factory = function(channel_name){
     Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
     Pusher.Util.extend(channel, Pusher.Channel.PresenceChannel);
   };
+  channel.init();// inheritable constructor
   return channel;
 };
 
