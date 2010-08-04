@@ -21,8 +21,9 @@ get '/' do
   erb :index
 end
 
-get '/manual' do
-  erb :manual
+get '/presence/:name' do |name|
+  @member_name = name
+  erb :presence
 end
 
 get '/pusher.js' do
@@ -37,17 +38,25 @@ end
 
 post '/trigger' do
   puts "Triggering #{params.inspect}"
-  Pusher[params['channel']].trigger(params['event'], params['data'], params['socket_id'])
+  data = {
+    :message => params['data'],
+    :custom => 'test'
+  }
+  Pusher[params['channel']].trigger(params['event'], data, params['socket_id'])
 end
 
 # Always authenticate
-post '/pusher/auth' do
+post '/pusher/auth/:member_name' do |member_name|
   channel_name = params[:channel_name]
   p channel_name
   if channel_name =~ /[private-test_channel|presence-test_channel]/
     auth = Pusher[channel_name].socket_auth(params[:socket_id])
     p auth
-    JSON.generate(:auth => auth)
+    JSON.generate({
+      :auth => auth, 
+      :user_id => member_name, 
+      :user_info => {:name => member_name}
+    })
   else
     p "Unsuccessful private channel auth"
     halt 401, "Unsuccessful private channel auth"
