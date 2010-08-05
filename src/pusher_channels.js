@@ -124,14 +124,18 @@ Pusher.Channel.PresenceChannel = {
     
     this.bind('pusher:subscription_succeeded', function(member_list){
       this.acknowledge_subscription(member_list);
+      this.dispatch_with_all('subscription_succeeded', this.members());
     }.scopedTo(this));
     
     this.bind('pusher:member_added', function(member){
-      this.add_member(member)
+      if(this.member_exists(member)) return false;
+      this.add_member(member);
+      this.dispatch_with_all('member_added', member);
     }.scopedTo(this))
     
     this.bind('pusher:member_removed', function(member){
-      this.remove_member(member)
+      this.remove_member(member);
+      this.dispatch_with_all('member_removed', member);
     }.scopedTo(this))
   },
   
@@ -145,6 +149,10 @@ Pusher.Channel.PresenceChannel = {
       this._members_map[member_list[i].user_id] = member_list[i];
     }
     this.subscribed = true;
+  },
+  
+  member_exists: function(member){
+    return (typeof this._members_map[member.user_id] != 'undefined')
   },
   
   is_presence: function(){
