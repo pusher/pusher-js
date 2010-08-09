@@ -119,8 +119,7 @@ Pusher.prototype = {
         this.send_event('pusher:subscribe', {
           channel: channel_name,
           auth: data.auth,
-          user_id: data.user_id,
-          user_info: data.user_info // only for presence channels atm
+          channel_data: data.channel_data
         });
       }.scopedTo(this));
     }
