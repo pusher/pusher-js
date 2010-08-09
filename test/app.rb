@@ -50,17 +50,25 @@ end
 post '/pusher/auth/:member_name' do |member_name|
   channel_name = params[:channel_name]
   p channel_name
-  if channel_name =~ /[private-test_channel|presence-test_channel]/
-    auth = Pusher[channel_name].socket_auth(params[:socket_id])
-    p auth
-    JSON.generate({
-      :auth => auth, 
-      :user_id => member_name, 
+  
+  response = if channel_name =~ /private/
+    # Pusher[channel_name].authenticate(params[:socket_id])
+    {:auth => Pusher[channel_name].socket_auth(params[:socket_id])}
+  elsif channel_name =~ /presence/
+    Pusher[channel_name].authenticate(params[:socket_id], {
+      :user_id => member_name,
       :user_info => {:name => member_name}
     })
   else
-    p "Unsuccessful private channel auth"
-    halt 401, "Unsuccessful private channel auth"
+    halt 401, 'Channel is not presence nor private'
   end
+  
+  # response = Pusher[channel_name].authenticate(params[:socket_id], {
+  #     :user_id => member_name,
+  #     :user_info => {:name => member_name}
+  #   })
+  p response
+  JSON.generate(response)
+  
 end
 
