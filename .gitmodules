@@ -1,0 +1,3 @@
+[submodule "lib/pusher-gem"]
+	path = lib/pusher-gem
+	url = git@github.com:newbamboo/pusher-gem-private.git

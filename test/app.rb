@@ -1,4 +1,5 @@
 $:.unshift(File.expand_path('../../lib', __FILE__))
+$:.unshift(File.expand_path('../../lib/pusher-gem/lib', __FILE__))
 
 require 'builder'
 
