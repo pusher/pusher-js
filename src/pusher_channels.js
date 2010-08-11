@@ -122,20 +122,20 @@ Pusher.Channel.PresenceChannel = {
   
   init: function(){
     
-    this.bind('pusher:subscription_succeeded', function(member_list){
+    this.bind('pusher_internal:subscription_succeeded', function(member_list){
       this.acknowledge_subscription(member_list);
-      this.dispatch_with_all('subscription_succeeded', this.members());
+      this.dispatch_with_all('pusher:subscription_succeeded', this.members());
     }.scopedTo(this));
     
-    this.bind('pusher:member_added', function(member){
+    this.bind('pusher_internal:member_added', function(member){
       if(this.member_exists(member)) return false;
       this.add_member(member);
-      this.dispatch_with_all('member_added', member);
+      this.dispatch_with_all('pusher:member_added', member);
     }.scopedTo(this))
     
-    this.bind('pusher:member_removed', function(member){
+    this.bind('pusher_internal:member_removed', function(member){
       this.remove_member(member);
-      this.dispatch_with_all('member_removed', member);
+      this.dispatch_with_all('pusher:member_removed', member);
     }.scopedTo(this))
   },
   

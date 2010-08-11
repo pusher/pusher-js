@@ -51,17 +51,17 @@
         slideDown('fast');
     };
     
-    presence_channel.bind('subscription_succeeded', function(member_list){
+    presence_channel.bind('pusher:subscription_succeeded', function(member_list){
       $.each(member_list, function(i, member){
         addMember(member)
       })
     });
     
-    presence_channel.bind('member_added', function(member){
+    presence_channel.bind('pusher:member_added', function(member){
       addMember(member)
     });
     
-    presence_channel.bind('member_removed', function(member){
+    presence_channel.bind('pusher:member_removed', function(member){
       $('li#member_'+member.user_id).slideUp('fast', function(){$(this).remove()});
     });
     
