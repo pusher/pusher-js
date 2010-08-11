@@ -92,17 +92,16 @@ Pusher.Channel.prototype = {
   }
 };
 
-Pusher.Channel.PrivateChannel = {
-  is_private: function(){
-    return true;
-  },
-  
-  authorize: function(pusher, callback){
+
+var foo;
+
+Pusher.authorizers = {
+  ajax: function(pusher, callback){
     var self = this;
     var xhr = window.XMLHttpRequest ?
       new XMLHttpRequest() :
       new ActiveXObject("Microsoft.XMLHTTP");
-    xhr.open("POST", Pusher.channel_auth_endpoint, true);
+    xhr.open("GET", Pusher.channel_auth_endpoint, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
@@ -115,6 +114,24 @@ Pusher.Channel.PrivateChannel = {
       }
     };
     xhr.send('socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(self.name));
+  },
+  jsonp: function(pusher, callback){
+    foo = callback;
+    var qstring = 'socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
+    var script = document.createElement("script");
+    script.src = Pusher.channel_auth_endpoint+'?callback=foo&'+qstring;
+    var head = document.getElementsByTagName("head")[0] || document.documentElement;
+    head.insertBefore( script, head.firstChild );
+  }
+};
+
+Pusher.Channel.PrivateChannel = {
+  is_private: function(){
+    return true;
+  },
+  
+  authorize: function(pusher, callback){
+    Pusher.authorizers[Pusher.authorizer].scopedTo(this)(pusher, callback);
   }
 };
 

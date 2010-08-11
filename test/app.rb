@@ -33,7 +33,8 @@ post '/trigger' do
 end
 
 # Always authenticate
-post '/pusher/auth/:member_name' do |member_name|
+get '/pusher/auth/:member_name' do |member_name|
+  p params
   channel_name = params[:channel_name]
   p channel_name
   
