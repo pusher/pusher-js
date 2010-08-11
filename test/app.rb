@@ -36,7 +36,6 @@ end
 get '/pusher/auth/:member_name' do |member_name|
   p params
   channel_name = params[:channel_name]
-  p channel_name
   
   response = if channel_name =~ /private/
     # Pusher[channel_name].authenticate(params[:socket_id])
@@ -49,12 +48,13 @@ get '/pusher/auth/:member_name' do |member_name|
   else
     halt 401, 'Channel is not presence nor private'
   end
-  
-  # response = Pusher[channel_name].authenticate(params[:socket_id], {
-  #     :user_id => member_name,
-  #     :user_info => {:name => member_name}
-  #   })
+
   p response
-  JSON.generate(response)
+  
+  if params[:callback] #Handle JSONP if needed
+    params[:callback] + "(" + JSON.generate(response) + ");"
+  else 
+    JSON.generate(response)
+  end
   
 end
