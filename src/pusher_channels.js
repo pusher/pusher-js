@@ -101,7 +101,7 @@ Pusher.authorizers = {
     var xhr = window.XMLHttpRequest ?
       new XMLHttpRequest() :
       new ActiveXObject("Microsoft.XMLHTTP");
-    xhr.open("GET", Pusher.channel_auth_endpoint, true);
+    xhr.open("GET", (Pusher.channel_auth_endpoint+'?socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(self.name)), true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
