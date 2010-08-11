@@ -93,7 +93,7 @@ Pusher.Channel.prototype = {
 };
 
 
-var foo;
+Pusher.auth_callbacks = {};
 
 Pusher.authorizers = {
   ajax: function(pusher, callback){
@@ -113,13 +113,14 @@ Pusher.authorizers = {
         }
       }
     };
-    xhr.send('socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(self.name));
+    xhr.send();
   },
   jsonp: function(pusher, callback){
-    foo = callback;
     var qstring = 'socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
-    var script = document.createElement("script");
-    script.src = Pusher.channel_auth_endpoint+'?callback=foo&'+qstring;
+    var script = document.createElement("script");  
+    Pusher.auth_callbacks[this.name] = callback;
+    var callback_name = "Pusher.auth_callbacks['" + this.name + "']";
+    script.src = Pusher.channel_auth_endpoint+'?callback='+encodeURIComponent(callback_name)+'&'+qstring;
     var head = document.getElementsByTagName("head")[0] || document.documentElement;
     head.insertBefore( script, head.firstChild );
   }
