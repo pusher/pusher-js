@@ -132,7 +132,7 @@ Pusher.Channel.PrivateChannel = {
   },
   
   authorize: function(pusher, callback){
-    Pusher.authorizers[Pusher.authorizer].scopedTo(this)(pusher, callback);
+    Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);
   }
 };
 

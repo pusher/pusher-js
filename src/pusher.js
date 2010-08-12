@@ -223,7 +223,7 @@ Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.allow_reconnect = true;
-Pusher.authorizer = 'ajax';
+Pusher.channel_auth_transport = 'ajax';
 Pusher.parser = function(data) {
   try {
     return JSON.parse(data);
