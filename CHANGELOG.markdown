@@ -1,5 +1,14 @@
 # Changelog
 
+
+## 1.6 
+
+Initial Presence support. Subscribing to presence channels allows you to respond to people entering and leaving the channel in your UI, to show who is has a connection open. More documentation here: http://pusherapp.com/docs/presence.
+
+## 1.5 
+
+Updated the library to use a version of the swf file hosted by Pusher. This makes it more convenient to integrate and avoids version conflicts in future.
+
 Add some full-stack integration tests that interact with the production Pusher environment.
 
 ## 1.4.3
