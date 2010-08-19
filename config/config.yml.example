@@ -1,32 +1,19 @@
-:defalt: &default
-  :api:
-    :host: localhost
-    :port: 8081
-  :socket:
-    :host: localhost
-    :port: 8090
-    :secure_port: 9090
-  :site:
-    :key: 
-    :secret: 
-    :app_id: 
-
 :development:
   :js:
     :host: localhost:4567
-  
+
 :staging:
+  :js:
+    :host: js.staging.pusherapp.com
   :s3:
-    :bucket:
+    :bucket: pusher-js-staging
     :access_key_id: 
     :secret_access_key: 
-    
-  <<: *default
-    
+
 :production:
+  :js:
+    :host: js.pusherapp.com
   :s3:
-    :bucket:
+    :bucket: pusher-js
     :access_key_id:
     :secret_access_key:
-
-  <<: *default
