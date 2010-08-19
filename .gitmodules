@@ -1,3 +1,6 @@
 [submodule "lib/pusher-gem"]
 	path = lib/pusher-gem
 	url = git@github.com:newbamboo/pusher-gem-private.git
+[submodule "src/web-socket-js"]
+	path = src/web-socket-js
+	url = git://github.com/newbamboo/web-socket-js.git

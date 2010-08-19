@@ -90,7 +90,7 @@ module Builder
     end
 
     def copy_swf(v)
-      from = "#{SRC_DIR}/WebSocketMain.swf"
+      from = "#{SRC_DIR}/web-socket-js/WebSocketMain.swf"
       to = "#{version_dir(v)}/#{config['SWF_NAME']}"
 
       puts "copying #{to}"
