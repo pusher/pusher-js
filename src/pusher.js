@@ -177,9 +177,14 @@ Pusher.prototype = {
     var params = Pusher.parser(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
     var event_name = params.event,
-        event_data = Pusher.parser(params.data),
+        event_data = params.data,
         channel_name = params.channel;
-        
+
+    // Try to parse the event data unless it has already been decoded
+    if (typeof(event_data) == 'string') {
+      event_data = Pusher.parser(params.data)
+    }
+
     this.send_local_event(event_name, event_data, channel_name);
   },
 
