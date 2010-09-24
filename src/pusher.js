@@ -127,7 +127,7 @@ Pusher.prototype = {
   },
   
   subscribe: function(channel_name) {
-    var channel = this.channels.add(channel_name);
+    var channel = this.channels.add(channel_name, this);
     if (this.connected) {
       channel.authorize(this, function(data){
         this.send_event('pusher:subscribe', {

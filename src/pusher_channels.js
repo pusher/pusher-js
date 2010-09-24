@@ -3,10 +3,10 @@ Pusher.Channels = function() {
 };
 
 Pusher.Channels.prototype = {
-  add: function(channel_name) {
+  add: function(channel_name, pusher) {
     var existing_channel = this.find(channel_name);
     if (!existing_channel) {
-      var channel = Pusher.Channel.factory(channel_name);
+      var channel = Pusher.Channel.factory(channel_name, pusher);
       this.channels[channel_name] = channel;
       return channel;
     } else {
@@ -23,7 +23,8 @@ Pusher.Channels.prototype = {
   }
 };
 
-Pusher.Channel = function(channel_name) {
+Pusher.Channel = function(channel_name, pusher) {
+  this.pusher = pusher;
   this.name = channel_name;
   this.callbacks = {};
   this.global_callbacks = [];
@@ -53,6 +54,17 @@ Pusher.Channel.prototype = {
 
   bind_all: function(callback) {
     this.global_callbacks.push(callback);
+    return this;
+  },
+
+  trigger: function(event_name, data) {
+    var payload = JSON.stringify({
+      channel: this.name,
+      event: event_name,
+      data: data
+    });
+    Pusher.log("Pusher : sending event : ", payload);
+    this.pusher.connection.send(payload);
     return this;
   },
 
@@ -205,8 +217,8 @@ Pusher.Channel.PresenceChannel = {
   }
 };
 
-Pusher.Channel.factory = function(channel_name){
-  var channel = new Pusher.Channel(channel_name);
+Pusher.Channel.factory = function(channel_name, pusher){
+  var channel = new Pusher.Channel(channel_name, pusher);
   if(channel_name.indexOf(Pusher.Channel.private_prefix) === 0) {
     Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
   } else if(channel_name.indexOf(Pusher.Channel.presence_prefix) === 0) {
