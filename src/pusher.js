@@ -9,7 +9,7 @@ if(typeof Function.prototype.scopedTo == 'undefined'){
 };
 
 var Pusher = function(application_key, channel_name) {
-  this.path = '/app/' + application_key;
+  this.path = '/app/' + application_key + "?client=js&version=" + Pusher.VERSION;
   this.key = application_key;
   this.socket_id;
   this.channels = new Pusher.Channels();
@@ -139,7 +139,7 @@ Pusher.prototype = {
   
   // Not currently supported by pusherapp.com
   send_event: function(event_name, data) {
-    var payload = JSON.stringify({ 'event' : event_name, 'data' : data, 'js_version': Pusher.VERSION });
+    var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
     Pusher.log("Pusher : sending event : ", payload);
     this.connection.send(payload);
     return this;
