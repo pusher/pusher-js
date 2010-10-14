@@ -64,9 +64,8 @@ module Builder
 
       # unminified(src).save_to(path)
       File.open(path, 'w') do |f|
-        concatenated = unminified(src).to_s
-        replaced = concatenated.sub(/<WEB_SOCKET_SWF_LOCATION>/, swf_location(v))
-        f.write(replaced)
+        concatenated = unminified(src, v).to_s
+        f.write(concatenated)
       end
 
       puts "generating #{min_path}"
@@ -77,12 +76,12 @@ module Builder
       end
     end
 
-    def unminified(src)
+    def unminified(src, v = config['VERSION'])
       secretary = Sprockets::Secretary.new(
         :load_path => SRC_DIR,
         :source_files => "#{SRC_DIR}/#{src}"
       )
-      concatenation = secretary.concatenation
+      concatenation = secretary.concatenation.to_s.sub(/<WEB_SOCKET_SWF_LOCATION>/, swf_location(v))
     end
 
     def config
