@@ -37,7 +37,7 @@ module Builder
         clear(v)
         bundle('bundle.js', 'pusher.js', v) do |f|
           licence = File.read('src/pusher-licence.js')
-          licence.sub!('<%= VERSION %>', v.to_s)
+          licence.sub!('<%= VERSION %>', version.full)
           f.write(licence)
         end
 
