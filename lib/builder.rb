@@ -62,14 +62,15 @@ module Builder
 
       puts "generating #{path}"
 
-      # unminified(src).save_to(path)
+      unminified_code = unminified(src, v).to_s
+
       File.open(path, 'w') do |f|
-        concatenated = unminified(src, v).to_s
-        f.write(concatenated)
+        yield f
+        f.write(unminified_code)
       end
 
       puts "generating #{min_path}"
-      minified = Closure::Compiler.new.compile(File.new(path))
+      minified = Closure::Compiler.new.compile(unminified_code)
       File.open(min_path, 'w') do |f|
         yield f
         f.write(minified)
