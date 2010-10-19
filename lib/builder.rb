@@ -35,11 +35,17 @@ module Builder
     def build(*args)
       [version.full, version.major_minor].each do |v|
         clear(v)
-        bundle('bundle.js', 'pusher.js', v) do |f|
+        bundle('pusher-bundle.js', 'pusher.js', v) do |f|
           licence = File.read('src/pusher-licence.js')
           licence.sub!('<%= VERSION %>', version.full)
           f.write(licence)
         end
+        bundle('web-socket-js-bundle.js', 'flashfallback.js', v) do |f|
+          licence = File.read('src/web-socket-js-licence.js')
+          licence.sub!('<%= VERSION %>', version.full)
+          f.write(licence)
+        end
+        bundle('json-bundle.js', 'json2.js', v)
 
         copy_swf(v)
       end
@@ -54,7 +60,7 @@ module Builder
       FileUtils.rm(files)
     end
 
-    def bundle(src, dest, v)
+    def bundle(bundle, dest, v)
       FileUtils.mkdir_p(version_dir(v))
 
       path = "#{version_dir(v)}/#{dest}"
@@ -62,27 +68,27 @@ module Builder
 
       puts "generating #{path}"
 
-      unminified_code = unminified(src, v).to_s
+      unminified_code = unminified(bundle, "http://#{JS_HOST}/#{v}").to_s
 
       File.open(path, 'w') do |f|
-        yield f
+        yield f if block_given?
         f.write(unminified_code)
       end
 
       puts "generating #{min_path}"
       minified = Closure::Compiler.new.compile(unminified_code)
       File.open(min_path, 'w') do |f|
-        yield f
+        yield f if block_given?
         f.write(minified)
       end
     end
 
-    def unminified(src, v = config['VERSION'])
+    def unminified(bundle, require_root = '')
       secretary = Sprockets::Secretary.new(
         :load_path => SRC_DIR,
-        :source_files => "#{SRC_DIR}/#{src}"
+        :source_files => "#{SRC_DIR}/#{bundle}"
       )
-      concatenation = secretary.concatenation.to_s.sub(/<WEB_SOCKET_SWF_LOCATION>/, swf_location(v))
+      concatenation = secretary.concatenation.to_s.gsub(/<PUSHER_REQUIRE_ROOT>/, require_root)
     end
 
     def config
@@ -100,10 +106,6 @@ module Builder
 
     def version
       @version ||= Version.new(config['VERSION'])
-    end
-    
-    def swf_location(v)
-      "http://#{JS_HOST}/#{v}/WebSocketMain.swf"
     end
 
     def version_dir(v)

@@ -1,7 +1,3 @@
-//= require "json2"
 //= require "web-socket-js/swfobject"
 //= require "web-socket-js/FABridge"
-//= require "flash_config"
 //= require "web-socket-js/web_socket"
-//= require "pusher"
-//= require "pusher_channels"

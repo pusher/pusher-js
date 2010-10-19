@@ -16,7 +16,7 @@ Pusher.app_id   = CONFIG[:site][:app_id]
 Pusher.host     = CONFIG[:api][:host]
 Pusher.port     = CONFIG[:api][:port]
 
-#set :public, File.dirname(__FILE__) + '/../dist'
+use Rack::Static, :urls => ["/src", "/dist"], :root => File.expand_path("../..", __FILE__)
 
 get '/' do
   erb :index
@@ -27,14 +27,24 @@ get '/presence/:name' do |name|
   erb :presence
 end
 
-get '/pusher.js' do
+get '/dev/pusher.js' do
   content_type('application/javascript')
-  Builder.unminified('bundle.js').to_s
+  Builder.unminified('pusher-bundle.js', '/dev').to_s
 end
 
-get '/:version/pusher.js' do
+get '/dev/flashfallback.js' do
   content_type('application/javascript')
-  Builder.unminified('bundle.js').to_s
+  Builder.unminified('web-socket-js-bundle.js', '/dev').to_s
+end
+
+get '/dev/json2.js' do
+  content_type('application/javascript')
+  Builder.unminified('json-bundle.js', '/dev').to_s
+end
+
+get '/dev/WebSocketMain.swf' do
+  content_type("application/x-shockwave-flash")
+  File.read(File.expand_path("../../src/web-socket-js/WebSocketMain.swf", __FILE__))
 end
 
 post '/trigger' do
