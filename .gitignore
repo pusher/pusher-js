@@ -1,3 +1,4 @@
 /dist
 /config/config.yml
 .rvmrc
+*.DS_Store
