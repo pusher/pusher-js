@@ -106,11 +106,17 @@ There are a number of events which are used internally, but can also be of use e
 
 ## Developing
 
-In order to build a combined `pusher.js` and `pusher.min.js` just install the gem dependencies and run rake:
+Run a development server which serves bundled javascript from <http://localhost:4500/dev/pusher.js> so that you can edit files in /src freely
+
+    ruby devserver.rb
+
+In order to build the minified versions:
 
     gem install closure-compiler sprockets
-    mv config/config.yml.example config/config.yml
+    mv config/config.yml.example config/config.yml # and edit
     ENVIRONMENT=development rake
+
+If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml`.
 
 ## Testing
 

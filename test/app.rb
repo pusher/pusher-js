@@ -1,12 +1,10 @@
-$:.unshift(File.expand_path('../../lib', __FILE__))
+require 'rubygems'
+
 $:.unshift(File.expand_path('../../lib/pusher-gem/lib', __FILE__))
 
-require 'builder'
-
-require 'rubygems'
 require 'sinatra'
-require 'erb'
 require 'pusher'
+require 'yaml'
 
 CONFIG = YAML.load_file(File.dirname(__FILE__)+'/../config/config.yml')[(ENV['ENVIRONMENT'] || 'development').to_sym]
 
@@ -16,8 +14,6 @@ Pusher.app_id   = CONFIG[:site][:app_id]
 Pusher.host     = CONFIG[:api][:host]
 Pusher.port     = CONFIG[:api][:port]
 
-use Rack::Static, :urls => ["/src", "/dist"], :root => File.expand_path("../..", __FILE__)
-
 get '/' do
   erb :index
 end
@@ -25,26 +21,6 @@ end
 get '/presence/:name' do |name|
   @member_name = name
   erb :presence
-end
-
-get '/dev/pusher.js' do
-  content_type('application/javascript')
-  Builder.unminified('pusher-bundle.js', '/dev').to_s
-end
-
-get '/dev/flashfallback.js' do
-  content_type('application/javascript')
-  Builder.unminified('web-socket-js-bundle.js', '/dev').to_s
-end
-
-get '/dev/json2.js' do
-  content_type('application/javascript')
-  Builder.unminified('json-bundle.js', '/dev').to_s
-end
-
-get '/dev/WebSocketMain.swf' do
-  content_type("application/x-shockwave-flash")
-  File.read(File.expand_path("../../src/web-socket-js/WebSocketMain.swf", __FILE__))
 end
 
 post '/trigger' do
@@ -81,4 +57,3 @@ post '/pusher/auth/:member_name' do |member_name|
   JSON.generate(response)
   
 end
-
