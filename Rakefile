@@ -1,11 +1,16 @@
+require 'yaml'
+
 autoload :Builder, 'lib/builder'
 autoload :S3Uploader, 'lib/s3_uploader'
+
+environment = (ENV["ENVIRONMENT"] || 'staging').to_sym
+config = YAML.load_file('./config/config.yml')[environment]
 
 task :default => :build
 
 desc 'Bundle and minify source files.'
 task :build do
-  Builder.build
+  Builder.new(config[:version], "http://#{config[:js][:host]}/#{config[:version]}").build
 end
 
 desc 'upload files to s3'

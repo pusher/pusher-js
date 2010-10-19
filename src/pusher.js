@@ -214,7 +214,7 @@ Pusher.Util = {
 
 // Pusher defaults
 
-Pusher.VERSION = "<%= VERSION %>";
+Pusher.VERSION = "<VERSION>";
 Pusher.host = "ws.pusherapp.com";
 Pusher.ws_port = 80;
 Pusher.wss_port = 443;

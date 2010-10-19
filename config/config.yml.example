@@ -1,8 +1,13 @@
+:default: &default
+  :version: 1.6.0
+
 :development:
+  <<: *default
   :js:
     :host: localhost:4567
 
 :staging:
+  <<: *default
   :js:
     :host: js.staging.pusherapp.com
   :s3:
@@ -11,6 +16,7 @@
     :secret_access_key: 
 
 :production:
+  <<: *default
   :js:
     :host: js.pusherapp.com
   :s3:

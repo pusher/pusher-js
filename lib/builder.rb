@@ -22,94 +22,88 @@ class Version
   
 end
 
-module Builder
+class Builder
   DIST_DIR = 'dist'
   SRC_DIR = 'src'
-  ENVIRONMENT = ENV["ENVIRONMENT"] || 'staging'
-  JS_HOST = YAML.load_file('./config/config.yml')[ENVIRONMENT.to_sym][:js][:host]
-  class << self
+  
+  attr_reader :version, :require_root
+  
+  def initialize(version, require_root)
+    @version = Version.new(version)
+    @require_root = require_root
+  end
 
-    p ENVIRONMENT
-    p JS_HOST
-    
-    def build(*args)
-      [version.full, version.major_minor].each do |v|
-        clear(v)
-        bundle('pusher-bundle.js', 'pusher.js', v) do |f|
-          licence = File.read('src/pusher-licence.js')
-          licence.sub!('<%= VERSION %>', version.full)
-          f.write(licence)
-        end
-        bundle('web-socket-js-bundle.js', 'flashfallback.js', v) do |f|
-          licence = File.read('src/web-socket-js-licence.js')
-          licence.sub!('<%= VERSION %>', version.full)
-          f.write(licence)
-        end
-        bundle('json-bundle.js', 'json2.js', v)
-
-        copy_swf(v)
+  def build
+    [version.full, version.major_minor].each do |v|
+      clear(v)
+      bundle('pusher-bundle.js', 'pusher.js', v) do |f|
+        licence = File.read('src/pusher-licence.js')
+        licence.gsub!(/<VERSION>/, version.full)
+        f.write(licence)
       end
-    end
-
-    def clear(v)
-      path = "#{version_dir(v)}/"
-      files =  Dir.glob(path + "*")
-      files.each  do |f|
-        p "Removing #{f}"
+      bundle('web-socket-js-bundle.js', 'flashfallback.js', v) do |f|
+        licence = File.read('src/web-socket-js-licence.js')
+        licence.gsub!(/<VERSION>/, version.full)
+        f.write(licence)
       end
-      FileUtils.rm(files)
+      bundle('json-bundle.js', 'json2.js', v)
+
+      copy_swf(v)
+    end
+  end
+
+  def clear(v)
+    path = "#{version_dir(v)}/"
+    files =  Dir.glob(path + "*")
+    files.each  do |f|
+      p "Removing #{f}"
+    end
+    FileUtils.rm(files)
+  end
+
+  def bundle(bundle, dest, v)
+    FileUtils.mkdir_p(version_dir(v))
+
+    path = "#{version_dir(v)}/#{dest}"
+    min_path = path.sub('.js', '.min.js')
+
+    puts "generating #{path}"
+
+    unminified_code = unminified(bundle).to_s
+
+    File.open(path, 'w') do |f|
+      yield f if block_given?
+      f.write(unminified_code)
     end
 
-    def bundle(bundle, dest, v)
-      FileUtils.mkdir_p(version_dir(v))
-
-      path = "#{version_dir(v)}/#{dest}"
-      min_path = path.sub('.js', '.min.js')
-
-      puts "generating #{path}"
-
-      unminified_code = unminified(bundle, "http://#{JS_HOST}/#{v}").to_s
-
-      File.open(path, 'w') do |f|
-        yield f if block_given?
-        f.write(unminified_code)
-      end
-
-      puts "generating #{min_path}"
-      minified = Closure::Compiler.new.compile(unminified_code)
-      File.open(min_path, 'w') do |f|
-        yield f if block_given?
-        f.write(minified)
-      end
+    puts "generating #{min_path}"
+    minified = Closure::Compiler.new.compile(unminified_code)
+    File.open(min_path, 'w') do |f|
+      yield f if block_given?
+      f.write(minified)
     end
+  end
 
-    def unminified(bundle, require_root = '')
-      secretary = Sprockets::Secretary.new(
-        :load_path => SRC_DIR,
-        :source_files => "#{SRC_DIR}/#{bundle}"
-      )
-      concatenation = secretary.concatenation.to_s.gsub(/<PUSHER_REQUIRE_ROOT>/, require_root)
-    end
+  def unminified(bundle)
+    secretary = Sprockets::Secretary.new(
+      :load_path => SRC_DIR,
+      :source_files => "#{SRC_DIR}/#{bundle}"
+    )
+    concatenation = secretary.concatenation.to_s.
+      gsub(/<PUSHER_REQUIRE_ROOT>/, require_root).
+      gsub(/<VERSION>/, version.full)
+  end
 
-    def config
-      @config ||= YAML.load_file("#{SRC_DIR}/constants.yml")
-    end
+  def copy_swf(v)
+    from = "#{SRC_DIR}/web-socket-js/WebSocketMain.swf"
+    to = "#{version_dir(v)}/WebSocketMain.swf"
 
-    def copy_swf(v)
-      from = "#{SRC_DIR}/web-socket-js/WebSocketMain.swf"
-      to = "#{version_dir(v)}/#{config['SWF_NAME']}"
+    puts "copying #{to}"
 
-      puts "copying #{to}"
+    FileUtils.cp(from, to)
+  end
 
-      FileUtils.cp(from, to)
-    end
-
-    def version
-      @version ||= Version.new(config['VERSION'])
-    end
-
-    def version_dir(v)
-      "#{DIST_DIR}/#{v}"
-    end
+  def version_dir(v)
+    "#{DIST_DIR}/#{v}"
   end
 end
