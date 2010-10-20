@@ -21,18 +21,18 @@ var _require = (function () {
 
     function checkReady (callback) {
       dep_count++;
-      callback = callback || function(){}
       if ( dep_length == dep_count ) {
         callback();
       }
     }
 
     function addScript (src, callback) {
+      callback = callback || function(){}
       var head = document.getElementsByTagName('head')[0];
       var script = document.createElement('script');
       script.setAttribute('src', src + '.js');
       script.setAttribute("type","text/javascript");
-      script.async = true;
+      script.setAttribute('async', true);
 
       handleScriptLoaded(script, function () {
         checkReady(callback);
@@ -64,7 +64,9 @@ var _require = (function () {
       FABridge.addInitializationCallback('webSocket', function () {
         Pusher.ready();
       })
-      WebSocket.__initialize();
+      // WebSockets.js inits on window load, which fires after script loading on chrome and firefox and makes FF insert SWF twice.
+      // We want to let WS.js auto init on FF but we need this for IE
+      if(!window.addEventListener) WebSocket.__initialize();
     }
   }
   
