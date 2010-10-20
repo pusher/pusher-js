@@ -59,14 +59,15 @@ var _require = (function () {
   }
   // Check for Flash fallback dep. Wrap initialization.
   if (window['WebSocket'] == undefined) {
+    // Don't let WebSockets.js initialize on load. Inconsistent accross browsers.
+    window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback');
     callback = function(){
       FABridge.addInitializationCallback('webSocket', function () {
         Pusher.ready();
       })
-      // WebSockets.js inits on window load, which fires after script loading on chrome and firefox and makes FF insert SWF twice.
-      // We want to let WS.js auto init on FF but we need this for IE
-      if(!window.addEventListener) WebSocket.__initialize();
+      // Run this AFTER adding the callback above
+      WebSocket.__initialize();
     }
   }
   
