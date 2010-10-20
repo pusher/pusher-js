@@ -70,6 +70,11 @@ var _require = (function () {
     }
   }
   
-  _require(deps, callback)
+  if( deps.length > 0){
+    _require(deps, callback);
+  } else {
+    callback();
+  }
+    
   
 })();
