@@ -18,7 +18,7 @@ var Pusher = function(application_key, channel_name) {
   this.secure = false;
   this.connected = false;
   this.retry_counter = 0;
-  // this.connect();
+  if(Pusher.ready) this.connect();
   Pusher.instances.push(this);
   if (channel_name) this.subscribe(channel_name);
 
@@ -232,9 +232,11 @@ Pusher.parser = function(data) {
   }
 };
 
+Pusher.ready = false;
 Pusher.ready = function () {
+  Pusher.ready = true;
   for(var i = 0; i < Pusher.instances.length; i++) {
-    Pusher.instances[i].connect();
+    if(!Pusher.instances[i].connected) Pusher.instances[i].connect();
   }
 }
 
