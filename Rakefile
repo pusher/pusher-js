@@ -15,7 +15,7 @@ end
 
 desc 'upload files to s3'
 task :upload => :build do
-  S3Uploader.upload
+  S3Uploader.new(config[:version], config[:s3]).upload
 end
 
 desc 'Start test server.'
