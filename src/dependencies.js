@@ -1,57 +1,73 @@
 WEB_SOCKET_SWF_LOCATION = "<PUSHER_REQUIRE_ROOT>/WebSocketMain.swf";
 
-(function () {
+var _require = (function () {
   
-  var root = '<PUSHER_REQUIRE_ROOT>',
-      deps = [
-        ['JSON', '/json2'],
-        ['WebSocket', '/flashfallback']
-      ],
-      dep_count = 0,
-      missing_deps = [];
-  
-  var index = 0;
-  function checkReady () {
-    if ( missing_deps.length == dep_count ) {
-      // alert(Pusher.instances.length)
-      // Pusher.ready()
-      
-      FABridge.addInitializationCallback('webSocket', function () {
-        Pusher.ready()
+  var handleScriptLoaded;
+  if (document.addEventListener) {
+    handleScriptLoaded = function (elem, callback) {
+      elem.addEventListener('load', callback, false)
+    }
+  } else {
+    handleScriptLoaded = function(elem, callback) {
+      elem.attachEvent('onreadystatechange', function () {
+        if(elem.readyState == 'loaded') callback()
       })
-      WebSocket.__initialize()
     }
   }
   
-  function require (src) {
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-    script.setAttribute('src', root + src + '.js');
-    script.setAttribute("type","text/javascript");
+  return function (deps, callback) {
+    var dep_count = 0,
+    dep_length = deps.length;
 
-    script.onload = function(){
+    function checkReady (callback) {
       dep_count++;
-      checkReady();
-    }
-    script.onreadystatechange = function () {
-      if (this.readyState == 'loaded') {
-        dep_count++;
-        checkReady();
+      callback = callback || function(){}
+      if ( dep_length == dep_count ) {
+        callback();
       }
     }
-    head.appendChild(script);
+
+    function addScript (src, callback) {
+      var head = document.getElementsByTagName('head')[0];
+      var script = document.createElement('script');
+      script.setAttribute('src', src + '.js');
+      script.setAttribute("type","text/javascript");
+      script.async = true;
+
+      handleScriptLoaded(script, function () {
+        checkReady(callback);
+      });
+
+      head.appendChild(script);
+    }   
+
+    for(var i = 0; i < dep_length; i++) {
+      addScript(deps[i], callback);
+    }
+  }
+})();
+
+;(function() {
+  var root = '<PUSHER_REQUIRE_ROOT>';
+  var deps = [],
+      callback = function () {
+        Pusher.ready()
+      }
+  // Check for JSON dependency
+  if (window['JSON'] == undefined) {
+    deps.push(root + '/json2');
+  }
+  // Check for Flash fallback dep. Wrap initialization.
+  if (window['WebSocket'] == undefined) {
+    deps.push(root + '/flashfallback');
+    callback = function(){
+      FABridge.addInitializationCallback('webSocket', function () {
+        Pusher.ready();
+      })
+      WebSocket.__initialize();
+    }
   }
   
-  for(var i = 0; i < deps.length; i++) {
-    if ( window[deps[i][0]] == undefined){
-      missing_deps.push(deps[i]);
-    }
-  }
-  for(var i = 0; i < missing_deps.length; i++) {
-    if ( window[missing_deps[i][0]] == undefined){
-      require(missing_deps[i][1]);
-    }
-  }
-  checkReady();
-
+  _require(deps, callback)
+  
 })();
