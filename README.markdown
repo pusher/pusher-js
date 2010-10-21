@@ -118,6 +118,25 @@ In order to build the minified versions:
 
 If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml`.
 
+## Building
+
+Define the version number in config/version.rb (should be in the format 1.2.3).
+
+    rake build
+
+## Uploading
+
+Define S3 bucket config in config/config.yml
+
+Set version in config/version.rb, build and upload
+
+    rake build
+    ENVIRONMENT=production rake upload
+    
+For "pre-release" versions append "-pre" to version number, as in 1.2.3-pre
+
+This will upload that specific "pre" version without overwriting the point release (1.2)
+
 ## Testing
 
 To run the tests first start the testing server by running `rake test` then visit <http://localhost:4567/>. The server posts to the production Pusher API using the environment variable `PUSHER_URL` in the form of:
