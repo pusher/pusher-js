@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.6.3
+
+Fixed presence bug for removed duplicate members.
+
+If I connect as the same user in different browser windows or tabs, clients should trigger remove that member from a channel's member list only when the last window/tab is closed.
+
+See http://pusher.tenderapp.com/discussions/questions/11-presence-of-friends for discussion.
 
 ## 1.6.2
 
