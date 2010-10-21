@@ -19,7 +19,7 @@ class S3Uploader
  end
  
  def upload()
-    versions = [version.full, version.major_minor]
+    versions = version.prerelease? ? [version.full] : [version.full, version.major_minor]
     p versions
     versions.each do |v|
 
