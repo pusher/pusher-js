@@ -1,6 +1,16 @@
 # Changelog
 
 
+## 1.6.2
+
+Dynamically load Javascript and Flash dependencies only for browsers that need them. Including pusher.js will:
+
+IE: require JSON2, require and activate Flash fallback.
+Firefox 3.6x: require and activate Flash fallback
+Chrome, Safari: don't require anything. These browsers already have WebSocket and JSON support.
+
+This saves a lot of bandwidth and makes page loads faster.
+
 ## 1.6 
 
 Initial Presence support. Subscribing to presence channels allows you to respond to people entering and leaving the channel in your UI, to show who is has a connection open. More documentation here: http://pusherapp.com/docs/presence.
