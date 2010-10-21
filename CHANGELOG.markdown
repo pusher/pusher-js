@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.6.4
+
+JSONp support for presence and private channels
+
+Configurable transport for channel auths. JSONp allows for cross-domain channel authorization (ie. embedable widgets)
+
+    Pusher.channel_auth_transport = 'jsonp';
+
+The default is Ajax for backwards compatibility. Ajax mode POSTS to Pusher.channel_auth_endpoint, whereas JSONp GETs.
+
+For JSONp to work, your server must wrap the response in the callback name provided as a query parameter. Ruby example (using Pusher Gem) and Rails:
+
+    auth = Pusher[channel_name].authenticate(params[:socket_id], {
+      :user_id => current_user.id,
+      :user_info => {:name => current_user.name}
+    })
+    
+    render :text => params[:callback] + "(" + JSON.generate(auth) + ");"
+
 ## 1.6.3
 
 Fixed presence bug for removed duplicate members.
