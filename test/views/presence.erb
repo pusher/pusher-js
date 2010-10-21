@@ -11,17 +11,19 @@
 	 }
 	</style>
 	<script src="/jquery-1.4.2.min.js"></script>
-  <script src="http://localhost:4500/dev/pusher.js"></script>
+  <script src="http://192.168.1.124:4500/dev/pusher.js"></script>
   <script>
-
-  Pusher.log = function(m){console.log(m)};
-
+  
+  Pusher.log = function() {
+    var args = Array.prototype.slice.call(arguments);
+    if (window['console']) console.log(args)
+  }
   Pusher.host = "<%= CONFIG[:socket][:host] %>";
   Pusher.ws_port = <%= CONFIG[:socket][:port] %>;
   
   // Different members
   Pusher.channel_auth_endpoint = '/pusher/auth/<%= @member_name %>';
-  
+  // Pusher.channel_auth_transport = 'jsonp';
   var server;
   
   
@@ -30,7 +32,7 @@
     server = new Pusher("<%= Pusher.key %>");
     
     server.bind('pusher:heartbeat', function(data){
-      console.log('Heartbeat received')
+      Pusher.log('Heartbeat received')
     });
     
     var private_channel = server.subscribe('private-test_channel');
@@ -39,7 +41,7 @@
 
     $.each(['private-test_channel', 'public-test_channel', 'presence-test_channel'], function(i, channel){
       server.channels.find(channel).bind('test', function(data){
-        console.log(channel + ' received test event with:', data)
+        Pusher.log(channel + ' received test event with:', data)
         $('#response_'+channel).html(data.message)
       })
     });

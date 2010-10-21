@@ -121,19 +121,21 @@ Pusher.Channel.PrivateChannel = {
 Pusher.Channel.PresenceChannel = {
   
   init: function(){
-    
     this.bind('pusher_internal:subscription_succeeded', function(member_list){
       this.acknowledge_subscription(member_list);
       this.dispatch_with_all('pusher:subscription_succeeded', this.members());
     }.scopedTo(this));
     
     this.bind('pusher_internal:member_added', function(member){
+      this.track_member(member, 1);
       if(this.member_exists(member)) return false;
       this.add_member(member);
       this.dispatch_with_all('pusher:member_added', member);
     }.scopedTo(this))
     
     this.bind('pusher_internal:member_removed', function(member){
+      this.track_member(member, -1);
+      if(this._members_count[member.user_id] > 0) return false;
       this.remove_member(member);
       this.dispatch_with_all('pusher:member_removed', member);
     }.scopedTo(this))
@@ -141,14 +143,23 @@ Pusher.Channel.PresenceChannel = {
   
   disconnect: function(){
     this._members_map = {};
+    this._members_count = {};
   },
   
   acknowledge_subscription: function(member_list){
     this._members_map = {};
+    this._members_count = {};
     for(var i=0;i<member_list.length;i++){
       this._members_map[member_list[i].user_id] = member_list[i];
+      this.track_member(member_list[i], 1);
     }
     this.subscribed = true;
+  },
+  
+  track_member: function (member, inc) {
+    this._members_count[member.user_id] = this._members_count[member.user_id] || 0;
+    this._members_count[member.user_id] += inc;
+    return this;
   },
   
   member_exists: function(member){
