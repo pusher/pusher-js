@@ -33,28 +33,37 @@ post '/trigger' do
 end
 
 # Always authenticate
-get '/pusher/auth/:member_name' do |member_name|
+# AJAX auth
+post '/pusher/auth/:member_name' do
   p params
-  channel_name = params[:channel_name]
+  puts "AJAX AUTH"
+  JSON.generate auth_response
   
-  response = if channel_name =~ /private/
-    # Pusher[channel_name].authenticate(params[:socket_id])
-    {:auth => Pusher[channel_name].socket_auth(params[:socket_id])}
-  elsif channel_name =~ /presence/
-    Pusher[channel_name].authenticate(params[:socket_id], {
-      :user_id => member_name,
-      :user_info => {:name => member_name}
-    })
-  else
-    halt 401, 'Channel is not presence nor private'
-  end
+end
 
-  p response
+# JSONP auth
+get '/pusher/auth/:member_name' do
+  puts "JSONP AUTH"
+  params[:callback] + "(" + JSON.generate(auth_response) + ");"
+end
+
+helpers do
   
-  if params[:callback] #Handle JSONP if needed
-    params[:callback] + "(" + JSON.generate(response) + ");"
-  else 
-    JSON.generate(response)
+  def auth_response
+    channel_name = params[:channel_name]
+    member_name = params[:member_name]
+    response = if channel_name =~ /private/
+      # Pusher[channel_name].authenticate(params[:socket_id])
+      {:auth => Pusher[channel_name].socket_auth(params[:socket_id])}
+    elsif channel_name =~ /presence/
+      Pusher[channel_name].authenticate(params[:socket_id], {
+        :user_id => member_name,
+        :user_info => {:name => member_name}
+      })
+    else
+      halt 401, 'Channel is not presence nor private'
+    end
+    response
   end
   
 end
