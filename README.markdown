@@ -130,7 +130,6 @@ Define S3 bucket config in config/config.yml
 
 Set version in config/version.rb, build and upload
 
-    rake build
     ENVIRONMENT=production rake upload
     
 For "pre-release" versions append "-pre" to version number, as in 1.2.3-pre
