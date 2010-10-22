@@ -11,7 +11,7 @@ task :default => :build
 
 desc 'Bundle and minify source files.'
 task :build do
-  Builder.new(PUSHER_JS_VERSION, "http://#{config[:js][:host]}/#{config[:version]}").build
+  Builder.new(PUSHER_JS_VERSION, "http://#{config[:js][:host]}/#{PUSHER_JS_VERSION}").build
 end
 
 desc 'upload files to s3'

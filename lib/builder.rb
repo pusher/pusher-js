@@ -20,6 +20,12 @@ class Version
     [@major, @minor].join('.')
   end
   
+  def releaseable
+    prerelease? ? [full] : [full, major_minor]
+  end
+  
+  protected
+  
   def prerelease?
     @patch =~ /-pre/
   end
@@ -38,7 +44,7 @@ class Builder
   end
 
   def build
-    versions.each do |v|
+    version.releaseable.each do |v|
       clear(v)
       bundle('pusher-bundle.js', 'pusher.js', v) do |f|
         licence = File.read('src/pusher-licence.js')
@@ -54,10 +60,6 @@ class Builder
 
       copy_swf(v)
     end
-  end
-  
-  def versions
-    version.prerelease? ? [version.full, version.major_minor] : [version.full]
   end
 
   def clear(v)
