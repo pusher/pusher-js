@@ -19,6 +19,7 @@
   :js:
     :host: js.pusherapp.com
   :s3:
+    :cf_distribution_id: <YOUR AWS CLOUD FRONT DISTRIBUTION ID>
     :bucket: pusher-js
     :access_key_id:
     :secret_access_key:

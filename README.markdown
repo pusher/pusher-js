@@ -136,6 +136,22 @@ For "pre-release" versions append "-pre" to version number, as in 1.2.3-pre
 
 This will upload that specific "pre" version without overwriting the point release (1.2)
 
+## Invalidating files from Amazon Cloud Front
+
+Add [:s3][:cf_distribution_id] to config/config.yml (in the right environment)
+
+    ENVIRONMENT=production rake acf_invalidate path=/1.6/pusher.js,/1.6/pusher.min.js
+
+This puts files in a queue for invalidation. To check status:
+
+    ENVIRONMENT=production rake acf_invalidation_list
+    
+Use with caution. There's a limit on how many FREE invalidation requests you can issue as well as how many 'in-progress' ones you can have. Try grouping files together (comma-separated list in the 'path' parameter) instead of issuing separate requests.
+
+Note: requires httparty
+
+More: http://docs.amazonwebservices.com/AmazonCloudFront/latest/DeveloperGuide/index.html?Invalidation.html
+
 ## Testing
 
 To run the tests first start the testing server by running `rake test` then visit <http://localhost:4567/>. The server posts to the production Pusher API using the environment variable `PUSHER_URL` in the form of:
