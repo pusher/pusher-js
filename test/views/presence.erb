@@ -49,8 +49,7 @@
     function addMember(member){
       $('<li id="member_'+member.user_id+'">'+member.user_info.name+'</li>').
         hide().
-        appendTo('#member_list').
-        slideDown('fast');
+        appendTo('#member_list').show();
     };
     
     presence_channel.bind('pusher:subscription_succeeded', function(member_list){
