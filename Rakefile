@@ -33,8 +33,12 @@ desc 'check status of Cloudfront invalidation requests'
 task :acf_invalidation_list do
   acf = Acf.new(config[:s3][:cf_distribution_id], config[:s3][:access_key_id], config[:s3][:secret_access_key])
   list = acf.invalidation_list['InvalidationList']['InvalidationSummary']
-  list.each do |inv|
-    puts "#{inv['Status']} - #{inv['Id']}"
+  if list.is_a?(Array)
+    list.each do |inv|
+     puts "#{inv['Status']} - #{inv['Id']}"
+    end
+  else
+    p list
   end
 end
 
