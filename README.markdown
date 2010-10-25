@@ -140,11 +140,15 @@ This will upload that specific "pre" version without overwriting the point relea
 
 Add [:s3][:cf_distribution_id] to config/config.yml (in the right environment)
 
-    ENVIRONMENT=production rake acf_invalidate path=/1.6/pusher.js,/1.6/pusher.min.js
+    ENVIRONMENT=production rake acf:invalidate path=/1.6/pusher.js,/1.6/pusher.min.js
+    
+To invalidate all files in a version:
+
+    ENVIRONMENT=production rake acf:invalidate_version version=1.6.0
 
 This puts files in a queue for invalidation. To check status:
 
-    ENVIRONMENT=production rake acf_invalidation_list
+    ENVIRONMENT=production rake acf:invalidation_list
     
 Use with caution. There's a limit on how many FREE invalidation requests you can issue as well as how many 'in-progress' ones you can have. Try grouping files together (comma-separated list in the 'path' parameter) instead of issuing separate requests.
 
