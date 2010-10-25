@@ -22,7 +22,8 @@ var _require = (function () {
     function checkReady (callback) {
       dep_count++;
       if ( dep_length == dep_count ) {
-        callback();
+        // Opera needs the timeout for page initialization weirdness
+        setTimeout(callback, 0);
       }
     }
 
