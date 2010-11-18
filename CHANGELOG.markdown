@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.7.0
+
+Encrypted apps: apps can now be configured to connect via SSL only. There is a corresponding setting in your dashboard which will reject non encrypted connections.
+
+    var pusher = new Pusher('your-key', {
+      encrypted: true
+    })
+
+Note that the second argument to the Pusher constructor for setting channel names has been removed. You should use `pusher.subscribe instead`. THIS NO LONGER WORKS:
+
+    var pusher = new Pusher('your-key', 'channel-name') # DOES NOT WORK
+
 ## 1.6.4
 
 JSONp support for presence and private channels

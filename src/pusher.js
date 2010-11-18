@@ -8,7 +8,8 @@ if(typeof Function.prototype.scopedTo == 'undefined'){
   };
 };
 
-var Pusher = function(application_key, channel_name) {
+var Pusher = function(application_key, options) {
+  this.options = options || {};
   this.path = '/app/' + application_key + "?client=js&version=" + Pusher.VERSION;
   this.key = application_key;
   this.socket_id;
@@ -18,9 +19,9 @@ var Pusher = function(application_key, channel_name) {
   this.secure = false;
   this.connected = false;
   this.retry_counter = 0;
+  this.encrypted = this.options.encrypted ? true : false;
   if(Pusher.isReady) this.connect();
   Pusher.instances.push(this);
-  if (channel_name) this.subscribe(channel_name);
 
   //This is the new namespaced version
   this.bind('pusher:connection_established', function(data) {
@@ -49,9 +50,10 @@ Pusher.prototype = {
   },
 
   connect: function() {
-    var url = "ws://" + Pusher.host + ":" + Pusher.ws_port + this.path;
-    if (this.secure == true){
-      url = "wss://" + Pusher.host + ":" + Pusher.wss_port + this.path;
+    if (this.encrypted || this.secure) {
+      var url = "wss://" + Pusher.host + ":" + Pusher.wss_port + this.path;
+    } else {
+      var url = "ws://" + Pusher.host + ":" + Pusher.ws_port + this.path;
     }
 
     Pusher.allow_reconnect = true;
