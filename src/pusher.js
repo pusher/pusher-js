@@ -62,16 +62,26 @@ Pusher.prototype = {
     var self = this;
 
     if (window["WebSocket"]) {
-      this.connection = new WebSocket(url);
-      this.connection.onmessage = function() {
+      var ws = new WebSocket(url);
+
+      // Force close connection after 2s to handle hanging connections
+      var connectionTimeout = window.setTimeout(function(){
+        ws.close();
+      }, 2000);
+
+      ws.onmessage = function() {
         self.onmessage.apply(self, arguments);
       };
-      this.connection.onclose = function() {
+      ws.onclose = function() {
+        window.clearTimeout(connectionTimeout);
         self.onclose.apply(self, arguments);
       };
-      this.connection.onopen = function() {
+      ws.onopen = function() {
+        window.clearTimeout(connectionTimeout);
         self.onopen.apply(self, arguments);
       };
+
+      this.connection = ws;
     } else {
       // Mock connection object if WebSockets are not available.
       this.connection = {};
