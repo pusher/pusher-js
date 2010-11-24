@@ -88,7 +88,7 @@ Pusher.prototype = {
       this.connection = {};
       setTimeout(function(){
         self.send_local_event("pusher:connection_failed", {})
-        }, 3000)
+      }, 0);
     }
   },
 
@@ -204,7 +204,8 @@ Pusher.prototype = {
     } else {
       self.send_local_event("pusher:connection_failed", {});
       if (this.retry_counter == 0){
-        time = 100;
+        // If this is the first connection attempt, immediately try ssl
+        time = 0;
       }
       this.retry_counter = this.retry_counter + 1
       this.wait_and_reconnect(function(){self.toggle_secure()}, time);
