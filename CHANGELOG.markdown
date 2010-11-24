@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.1
+
+Wrap timeout around connections so that silently hanging connections are retried.
+
+More robust reconnection logic, with initially shorter reconnect delay, but with increasing backoff.
+
 ## 1.7.0
 
 Encrypted apps: apps can now be configured to connect via SSL only. There is a corresponding setting in your dashboard which will reject non encrypted connections.
