@@ -95,7 +95,7 @@ Pusher.prototype = {
   disconnect: function() {
     Pusher.log('Pusher : disconnecting');
     Pusher.allow_reconnect = false;
-    Pusher.retry_count = 0;
+    this.retry_counter = 0;
     this.connection.close();
   },
 
