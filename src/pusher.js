@@ -183,32 +183,42 @@ Pusher.prototype = {
     this.send_local_event(event_name, event_data, channel_name);
   },
 
-  wait_and_reconnect: function(perform_toggle, ms_to_wait){
-    setTimeout(function(){
-      perform_toggle();
-      this.connect();
-    }.scopedTo(this), ms_to_wait)
+  reconnect: function() {
+    var self = this;
+    setTimeout(function() {
+      self.connect();
+    }, 0);
+  },
+
+  retry_connect: function() {
+    // Unless we're ssl only, try toggling between ws & wss
+    if (!this.encrypted) {
+      this.toggle_secure();
+    }
+
+    // Retry with increasing delay, with a maximum interval of 10s
+    var retry_delay = Math.min(this.retry_counter * 1000, 10000);
+    Pusher.log ("Pusher: Retrying connection in " + retry_delay + "ms");
+    var self = this;
+    setTimeout(function() {
+      self.connect();
+    }, retry_delay);
+
+    this.retry_counter = this.retry_counter + 1;
   },
 
   onclose: function() {
-    var self = this;
     this.global_channel.dispatch('close', null);
     Pusher.log ("Pusher: Socket closed")
-    var time = 5000;
-    if ( this.connected == true ) {
+    if (this.connected) {
       this.send_local_event("pusher:connection_disconnected", {});
-      if (Pusher.allow_reconnect){
-        Pusher.log('Pusher : Reconnecting in 5 seconds...');
-        this.wait_and_reconnect(function(){}, time)
+      if (Pusher.allow_reconnect) {
+        Pusher.log('Pusher : Connection broken, trying to reconnect');
+        this.reconnect();
       }
     } else {
-      self.send_local_event("pusher:connection_failed", {});
-      if (this.retry_counter == 0){
-        // If this is the first connection attempt, immediately try ssl
-        time = 0;
-      }
-      this.retry_counter = this.retry_counter + 1
-      this.wait_and_reconnect(function(){self.toggle_secure()}, time);
+      this.send_local_event("pusher:connection_failed", {});
+      this.retry_connect();
     }
     this.connected = false;
   },
