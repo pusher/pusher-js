@@ -64,10 +64,11 @@ Pusher.prototype = {
     if (window["WebSocket"]) {
       var ws = new WebSocket(url);
 
-      // Force close connection after 2s to handle hanging connections
+      // Timeout for the connection to handle silently hanging connections
+      // Increase the timeout after each retry in case of extreme latencies
       var connectionTimeout = window.setTimeout(function(){
         ws.close();
-      }, 2000);
+      }, (2000 + (self.retry_counter * 1000)));
 
       ws.onmessage = function() {
         self.onmessage.apply(self, arguments);
