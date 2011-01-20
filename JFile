@@ -1,0 +1,45 @@
+require 'yaml'
+# JBundle configuration file
+# https://github.com/ismasan/jbundle
+
+target_dir './dist'
+
+src_dir './src'
+
+version '1.7.1'
+
+bundle 'pusher.js' do
+  license 'pusher-licence.js'
+  file 'pusher.js'
+  file 'pusher_channels.js'
+  file 'dependencies.js'
+end
+
+bundle 'flashfallback.js' do
+  license 'web-socket-js-licence.js'
+  file 'web-socket-js/swfobject.js'
+  file 'web-socket-js/FABridge.js'
+  file 'web-socket-js/web_socket.js'
+end
+
+file 'json2.js'
+
+CONFIG = YAML.load_file('config/config.yml')[(ENV['ENVIRONMENT'] || 'development').to_sym]
+
+# Runs for every bundle and license source.
+filter do |src, config|
+  src.gsub! /<VERSION>/, config.version.to_s
+  src.gsub! /<PUSHER_REQUIRE_ROOT>/, 'http://'+CONFIG[:js][:host] + '/' + config.version.to_s
+end
+
+# Runs after all versions have been written
+after_write do |config|
+  
+  config.version.releaseable.each do |v|
+    from = "#{config.src_dir}/web-socket-js/WebSocketMain.swf"
+    to = "#{config.target_dir}/#{v}/WebSocketMain.swf"
+    puts "copying SWF file to #{to}"
+    FileUtils.cp(from, to)
+  end
+  
+end

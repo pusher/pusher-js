@@ -120,7 +120,7 @@ If you wish to host the javascript on your own server you need to change [:js][:
 
 ## Building
 
-Define the version number in config/version.rb (should be in the format 1.2.3).
+Define the version number in JFile (should be in the format 1.2.3).
 
     rake build
 

@@ -1,10 +1,8 @@
 require 'yaml'
+require 'jbundle'
 
-autoload :Builder, 'lib/builder'
 autoload :S3Uploader, 'lib/s3_uploader'
 autoload :Acf, 'lib/acf_invalidate'
-
-require 'config/version'
 
 environment = (ENV["ENVIRONMENT"] || 'staging').to_sym
 config = YAML.load_file('./config/config.yml')[environment]
@@ -13,12 +11,13 @@ task :default => :build
 
 desc 'Bundle and minify source files.'
 task :build do
-  Builder.new(PUSHER_JS_VERSION, "http://#{config[:js][:host]}/#{PUSHER_JS_VERSION}").build
+  JBundle.config_from_file 'JFile'
+  JBundle.write!
 end
 
 desc 'upload files to s3'
 task :upload => :build do
-  S3Uploader.new(PUSHER_JS_VERSION, config[:s3]).upload
+  S3Uploader.new(JBundle.config.version.to_s, config[:s3]).upload
 end
 
 namespace :acf do
