@@ -106,13 +106,15 @@ There are a number of events which are used internally, but can also be of use e
 
 ## Developing
 
-Run a development server which serves bundled javascript from <http://localhost:4500/dev/pusher.js> so that you can edit files in /src freely
+At the moment we don't use Bundler, so you might have to install one of more of the following gems: sinatra, jbundle
+
+Run a development server which serves bundled javascript from <http://localhost:4500/dev/version/pusher.js> so that you can edit files in /src freely
 
     ruby devserver.rb
 
 In order to build the minified versions:
 
-    gem install closure-compiler sprockets
+    gem install jbundle
     mv config/config.yml.example config/config.yml # and edit
     ENVIRONMENT=development rake
 
@@ -120,9 +122,24 @@ If you wish to host the javascript on your own server you need to change [:js][:
 
 ## Building
 
+./JFile declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
 Define the version number in JFile (should be in the format 1.2.3).
 
     rake build
+    
+That writes source and minified versions of each bundle declared in the JFile into versioned directories. For example if the JFile says
+
+    version '1.7.1'
+    
+Then rake build will put copies of the files in ./dist/1.7.1/ and ./dist/1.7/
+
+However for a prerelease
+
+    version '1.7.2-pre'
+
+It will only write to the full, suffixed directory ./dist/1.7.2-pre
+
+This is so prereleases don't overwrite the previous stable release.
 
 ## Uploading
 
