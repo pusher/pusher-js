@@ -17,7 +17,7 @@ end
 
 desc 'upload files to s3'
 task :upload => :build do
-  S3Uploader.new(JBundle.config.version.to_s, config[:s3]).upload
+  S3Uploader.new(JBundle.config.target_dir, JBundle.config.version, config[:s3]).upload
 end
 
 namespace :acf do

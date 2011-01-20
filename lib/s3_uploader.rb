@@ -7,15 +7,16 @@ require 'builder'
 
 class S3Uploader
  
- attr_reader :config, :version
+ attr_reader :config, :version, :dist_dir
  
- def initialize(version_number, config)
+ def initialize(dist_dir, version, config)
    raise 'Define :access_key_id' unless config[:access_key_id]
    raise 'Define :secret_access_key' unless config[:secret_access_key]
    raise 'Define :bucket' unless config[:bucket]
    
    @config = config
-   @version = Version.new(version_number)
+   @version = version
+   @dist_dir = dist_dir
  end
  
  def upload()
@@ -25,7 +26,7 @@ class S3Uploader
 
       bucket = config[:bucket]
 
-      files = Dir.glob("#{Builder::DIST_DIR}/#{v}/*")
+      files = Dir.glob("#{dist_dir}/#{v}/*")
       target_dir = "#{v}/"
 
       AWS::S3::Base.establish_connection!(
