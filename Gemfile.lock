@@ -10,7 +10,7 @@ GEM
     crack (0.1.8)
     httparty (0.6.1)
       crack (= 0.1.8)
-    jbundle (0.0.7)
+    jbundle (0.0.8)
       closure-compiler
     json (1.4.6)
     mime-types (1.16)
@@ -33,6 +33,6 @@ PLATFORMS
 DEPENDENCIES
   aws-s3
   httparty
-  jbundle
+  jbundle (~> 0.0.8)
   pusher
   sinatra

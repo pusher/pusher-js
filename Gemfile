@@ -2,7 +2,7 @@
 source "http://rubygems.org"
 
 group :development do
-  gem 'jbundle'
+  gem 'jbundle', "~> 0.0.8"
   gem 'sinatra'
   gem 'pusher'
   gem 'aws-s3'

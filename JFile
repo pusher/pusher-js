@@ -31,6 +31,16 @@ CONFIG = YAML.load_file('config/config.yml')[(ENV['ENVIRONMENT'] || 'development
 
 # Runs for every bundle and license source.
 filter do |src, config|
-  src.gsub! /<VERSION>/, config.version.to_s
-  src.gsub! /<PUSHER_REQUIRE_ROOT>/, 'http://'+CONFIG[:js][:host] + '/' + config.version.to_s
+  src.gsub /<VERSION>/, config.version.to_s
+  src.gsub /<PUSHER_REQUIRE_ROOT>/, 'http://'+CONFIG[:js][:host] + '/' + config.version.to_s
+end
+
+# some_dependency.js
+filter :src do |src, config|
+  src.gsub /<DEPENDENCY_SUFFIX>/, ''
+end
+
+# some_dependency.min.js
+filter :min do |src, config|
+  src.gsub /<DEPENDENCY_SUFFIX>/, '.min'
 end

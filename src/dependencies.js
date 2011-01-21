@@ -31,7 +31,7 @@ var _require = (function () {
       callback = callback || function(){}
       var head = document.getElementsByTagName('head')[0];
       var script = document.createElement('script');
-      script.setAttribute('src', src + '.js');
+      script.setAttribute('src', src);
       script.setAttribute("type","text/javascript");
       script.setAttribute('async', true);
 
@@ -56,13 +56,13 @@ var _require = (function () {
       }
   // Check for JSON dependency
   if (window['JSON'] == undefined) {
-    deps.push(root + '/json2');
+    deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
   // Check for Flash fallback dep. Wrap initialization.
   if (window['WebSocket'] == undefined) {
     // Don't let WebSockets.js initialize on load. Inconsistent accross browsers.
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
-    deps.push(root + '/flashfallback');
+    deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
     callback = function(){
       FABridge.addInitializationCallback('webSocket', function () {
         Pusher.ready();
