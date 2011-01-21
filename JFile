@@ -1,4 +1,5 @@
 require 'yaml'
+CONFIG = YAML.load_file('config/config.yml')[(ENV['ENVIRONMENT'] || 'development').to_sym]
 # JBundle configuration file
 # https://github.com/ismasan/jbundle
 
@@ -26,8 +27,6 @@ file 'json2.js'
 
 # Just copy this file across
 file 'web-socket-js/WebSocketMain.swf' => 'WebSocketMain.swf'
-
-CONFIG = YAML.load_file('config/config.yml')[(ENV['ENVIRONMENT'] || 'development').to_sym]
 
 # Runs for every bundle and license source.
 filter do |src, config|
