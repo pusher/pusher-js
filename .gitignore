@@ -1,3 +1,4 @@
 /config/config.yml
 .rvmrc
+.bundle
 *.DS_Store
