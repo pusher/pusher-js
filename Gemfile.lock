@@ -1,0 +1,38 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    aws-s3 (0.6.2)
+      builder
+      mime-types
+      xml-simple
+    builder (2.1.2)
+    closure-compiler (0.3.3)
+    crack (0.1.8)
+    httparty (0.6.1)
+      crack (= 0.1.8)
+    jbundle (0.0.7)
+      closure-compiler
+    json (1.4.6)
+    mime-types (1.16)
+    pusher (0.6.0)
+      crack
+      json
+      ruby-hmac
+      signature
+    rack (1.2.1)
+    ruby-hmac (0.4.0)
+    signature (0.1.1)
+      ruby-hmac
+    sinatra (1.0)
+      rack (>= 1.0)
+    xml-simple (1.0.12)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  aws-s3
+  httparty
+  jbundle
+  pusher
+  sinatra

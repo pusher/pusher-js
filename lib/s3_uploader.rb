@@ -3,7 +3,6 @@ $:.unshift(File.expand_path('..', __FILE__))
 require 'rubygems'
 require 'aws/s3'
 require 'pp'
-require 'builder'
 
 class S3Uploader
  

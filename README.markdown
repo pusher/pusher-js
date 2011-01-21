@@ -106,7 +106,9 @@ There are a number of events which are used internally, but can also be of use e
 
 ## Developing
 
-At the moment we don't use Bundler, so you might have to install one of more of the following gems: sinatra, jbundle
+Use Bundler to install all development dependencies
+
+    bundle install
 
 Run a development server which serves bundled javascript from <http://localhost:4500/dev/version/pusher.js> so that you can edit files in /src freely
 
@@ -114,7 +116,6 @@ Run a development server which serves bundled javascript from <http://localhost:
 
 In order to build the minified versions:
 
-    gem install jbundle
     mv config/config.yml.example config/config.yml # and edit
     ENVIRONMENT=development rake
 
