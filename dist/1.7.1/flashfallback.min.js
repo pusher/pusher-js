@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v<%= VERSION %>
+ * Pusher JavaScript Library v1.7.1
  * http://pusherapp.com/
  *
  * Copyright 2010, New Bamboo
