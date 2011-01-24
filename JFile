@@ -30,8 +30,8 @@ file 'web-socket-js/WebSocketMain.swf' => 'WebSocketMain.swf'
 
 # Runs for every bundle and license source.
 filter do |src, config|
-  src.gsub /<VERSION>/, config.version.to_s
-  src.gsub /<PUSHER_REQUIRE_ROOT>/, 'http://'+CONFIG[:js][:host] + '/' + config.version.to_s
+  src.gsub(/<VERSION>/, config.version.to_s)\
+      .gsub /<PUSHER_REQUIRE_ROOT>/, 'http://'+CONFIG[:js][:host] + '/' + config.version.to_s
 end
 
 # some_dependency.js
