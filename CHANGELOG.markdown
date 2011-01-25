@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.2 (2011-01-25)
+
+[FIXED] pusher.min.js now loads minified rather than unminified dependencies.
+
+[CHANGED] Using JBundle for bundling the distribution. This should not in any way affect the minified files, it just simplifies building them.
+
 ## 1.7.1
 
 Wrap timeout around connections so that silently hanging connections are retried.
