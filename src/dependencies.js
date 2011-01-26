@@ -10,7 +10,7 @@ var _require = (function () {
   } else {
     handleScriptLoaded = function(elem, callback) {
       elem.attachEvent('onreadystatechange', function () {
-        if(elem.readyState == 'loaded') callback()
+        if(elem.readyState == 'loaded' || elem.readyState == 'complete') callback()
       })
     }
   }
