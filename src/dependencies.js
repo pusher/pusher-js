@@ -67,8 +67,15 @@ var _require = (function () {
       FABridge.addInitializationCallback('webSocket', function () {
         Pusher.ready();
       })
-      // Run this AFTER adding the callback above
-      WebSocket.__initialize();
+
+      if (window['WebSocket']) {
+        // This will call the FABridge callback, which initializes pusher!
+        WebSocket.__initialize();
+      } else {
+        // Flash is not installed
+        Pusher.log("Pusher : Could not connect : WebSocket is not availabe natively or via Flash")
+        // TODO: Update Pusher state in such a way that users can bind to it
+      }
     }
   }
   
@@ -77,6 +84,4 @@ var _require = (function () {
   } else {
     callback();
   }
-    
-  
 })();
