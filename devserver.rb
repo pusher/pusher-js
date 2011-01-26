@@ -8,7 +8,7 @@ require 'sinatra'
 
 set :port, 4500
 
-use Rack::Static, :urls => ["/src", "/dist"], :root => File.expand_path("../..", __FILE__)
+use Rack::Static, :urls => ["/src", "/dist"], :root => File.expand_path("..", __FILE__)
 
 before do
   JBundle.config_from_file 'JFile'
