@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.3 (2011-02-01)
+
+[FIXED] Pusher could fail to initialize in IE 7 & 8 when dependencies cached
+
 ## 1.7.2 (2011-01-25)
 
 [FIXED] pusher.min.js now loads minified rather than unminified dependencies.
