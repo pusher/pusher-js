@@ -178,7 +178,7 @@ Pusher.Channel.PresenceChannel = {
   },
   
   acknowledge_subscription: function(sub_data){
-    this.members._members_map = sub_data.u_hash;
+    this.members._members_map = sub_data.presence.hash;
     this.subscribed = true;
   },
   
