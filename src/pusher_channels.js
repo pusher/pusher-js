@@ -179,6 +179,7 @@ Pusher.Channel.PresenceChannel = {
   
   acknowledge_subscription: function(sub_data){
     this.members._members_map = sub_data.presence.hash;
+    this.members.count = sub_data.presence.count;
     this.subscribed = true;
   },
   
@@ -188,6 +189,7 @@ Pusher.Channel.PresenceChannel = {
   
   members: {
     _members_map: {},
+    count: 0,
 
     each: function(callback) {
       for(var i in this._members_map) {
@@ -200,14 +202,17 @@ Pusher.Channel.PresenceChannel = {
 
     add: function(member){
       this._members_map[member.user_id] = member;
+      this.count++;
     },
 
     remove: function(member){
       delete this._members_map[member.user_id];
+      this.count--;
     },
 
     clear: function() {
       this._members_map = {};
+      this.count = 0;
     }
   }
 };
