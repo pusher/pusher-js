@@ -157,19 +157,13 @@ Pusher.Channel.PresenceChannel = {
     }.scopedTo(this));
     
     this.bind('pusher_internal:member_added', function(member){
-      this.members.add(member);
-      this.dispatch_with_all('pusher:member_added', {
-        id: member.user_id,
-        info: member.user_info
-      });
+      var member = this.members.add(member.user_id, member.user_info);
+      this.dispatch_with_all('pusher:member_added', member);
     }.scopedTo(this))
     
     this.bind('pusher_internal:member_removed', function(member){
-      this.members.remove(member);
-      this.dispatch_with_all('pusher:member_removed', {
-        id: member.user_id,
-        info: member.user_info
-      });
+      var member = this.members.remove(member.user_id);
+      this.dispatch_with_all('pusher:member_removed', member);
     }.scopedTo(this))
   },
   
@@ -200,14 +194,29 @@ Pusher.Channel.PresenceChannel = {
       }
     },
 
-    add: function(member){
-      this._members_map[member.user_id] = member;
+    add: function(id, info) {
+      this._members_map[id] = info;
       this.count++;
+      return this.get(id);
     },
 
-    remove: function(member){
-      delete this._members_map[member.user_id];
+    remove: function(user_id) {
+      member = this.get(user_id);
+      delete this._members_map[user_id];
       this.count--;
+      return member;
+    },
+
+    get: function(user_id) {
+      var user_info = this._members_map[user_id];
+      if (user_info) {
+        return {
+          id: user_id,
+          info: user_info
+        }
+      } else {
+        return null;
+      }
     },
 
     clear: function() {
