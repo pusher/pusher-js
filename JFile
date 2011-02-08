@@ -26,7 +26,7 @@ end
 file 'json2.js'
 
 # Just copy this file across
-file 'web-socket-js/WebSocketMain.swf' => 'WebSocketMain.swf'
+file 'web-socket-js/WebSocketMainInsecure.swf' => 'WebSocketMain.swf'
 
 # Runs for every bundle and license source.
 filter do |src, config|
