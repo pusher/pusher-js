@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.7.4 (2011-02-09)
+
+[FIXED] Javascript error was raised in the case that neither native WebSockets nor Flash were available.
+
+[FIXED] Updated linked version of web-socket-js, which fixes issue connecting from Android, allows connection attempts to timeout and retry correctly. For full details see <https://github.com/gimite/web-socket-js/compare/2776dcfbf7847a5e19505432d8d63f8814e37b52...6640d9d806972ea1720a273d09e8919464bcd131>
+
 ## 1.7.3 (2011-02-01)
 
 [FIXED] Pusher could fail to initialize in IE 7 & 8 when dependencies cached
