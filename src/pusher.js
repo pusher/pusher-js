@@ -181,16 +181,13 @@ Pusher.prototype = {
   onmessage: function(evt) {
     var params = Pusher.parser(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
-    var event_name = params.event,
-        event_data = params.data,
-        channel_name = params.channel;
-
     // Try to parse the event data unless it has already been decoded
-    if (typeof(event_data) == 'string') {
-      event_data = Pusher.parser(params.data)
+    if (typeof(params.data) == 'string') {
+      params.data = Pusher.parser(params.data);
     }
+    // Pusher.log("Pusher : received message : ", params)
 
-    this.send_local_event(event_name, event_data, channel_name);
+    this.send_local_event(params.event, params.data, params.channel);
   },
 
   reconnect: function() {
