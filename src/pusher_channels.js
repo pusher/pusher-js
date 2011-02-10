@@ -58,13 +58,7 @@ Pusher.Channel.prototype = {
   },
 
   trigger: function(event_name, data) {
-    var payload = JSON.stringify({
-      channel: this.name,
-      event: event_name,
-      data: data
-    });
-    Pusher.log("Pusher : sending event : ", payload);
-    this.pusher.connection.send(payload);
+    this.pusher.send_event(event_name, data, this.name);
     return this;
   },
 

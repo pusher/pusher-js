@@ -149,13 +149,17 @@ Pusher.prototype = {
       });
     }
   },
-  
-  
-  // Not currently supported by pusherapp.com
-  send_event: function(event_name, data) {
-    var payload = JSON.stringify({ 'event' : event_name, 'data' : data });
-    Pusher.log("Pusher : sending event : ", payload);
-    this.connection.send(payload);
+
+  send_event: function(event_name, data, channel) {
+    Pusher.log("Pusher : event sent (channel,event,data) : ", channel, event_name, data);
+
+    var payload = {
+      event: event_name,
+      data: data
+    };
+    if (channel) { payload['channel'] = channel };
+
+    this.connection.send(JSON.stringify(payload));
     return this;
   },
   
