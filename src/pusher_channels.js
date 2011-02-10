@@ -63,6 +63,9 @@ Pusher.Channel.prototype = {
   },
 
   dispatch_with_all: function(event_name, data) {
+    if (this.name != 'pusher_global_channel') {
+      Pusher.log("Pusher : event recd (channel,event,data)", this.name, event_name, data);
+    }
     this.dispatch(event_name, data);
     this.dispatch_global_callbacks(event_name, data);
   },

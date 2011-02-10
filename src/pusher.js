@@ -165,16 +165,17 @@ Pusher.prototype = {
   
   send_local_event: function(event_name, event_data, channel_name){
     event_data = Pusher.data_decorator(event_name, event_data);
-     if (channel_name) {
-         var channel = this.channel(channel_name);
-         if (channel) {
-           channel.dispatch_with_all(event_name, event_data);
-         }
-       }
+    if (channel_name) {
+      var channel = this.channel(channel_name);
+      if (channel) {
+        channel.dispatch_with_all(event_name, event_data);
+      }
+    } else {
+      // Bit hacky but these events won't get logged otherwise
+      Pusher.log("Pusher : event recd (event,data) :", event_name, event_data);
+    }
 
-       this.global_channel.dispatch_with_all(event_name, event_data);
-       Pusher.log("Pusher : event received : channel: " + channel_name +
-         "; event: " + event_name, event_data);
+    this.global_channel.dispatch_with_all(event_name, event_data);
   },
   
   onmessage: function(evt) {
