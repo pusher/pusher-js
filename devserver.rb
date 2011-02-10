@@ -23,7 +23,7 @@ end
 
 get '/dev/:version/WebSocketMain.swf' do
   content_type("application/x-shockwave-flash")
-  File.read(File.expand_path("../src/web-socket-js/WebSocketMain.swf", __FILE__))
+  File.read(File.expand_path("../src/web-socket-js/WebSocketMainInsecure.swf", __FILE__))
 end
 
 # == Catch all for:
