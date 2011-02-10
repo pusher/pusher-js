@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.8.0 (2011-02-10)
+
+[NEW] Support triggering client events with new API
+
+    channel.trigger('client-myeventname', {
+      some: 'data'
+    })
+
+[NEW] Support for new socket presence interface, and changed javascript API. The `subscription_succeeded` event now returns an iterator object:
+
+    presence_channel.bind('pusher:subscription_succeeded', function(members) {
+     members.each(function(member) {
+       console.log(member.id, member.info)
+     })
+    })
+
+Also, the member object passed to `member_added` and `member_removed` now has attributes `id` and `info` rather than `user_id` and `user_info`.
+
+[CHANGED] Improved javascript debug console logging.
+
 ## 1.7.4 (2011-02-09)
 
 [FIXED] Javascript error was raised in the case that neither native WebSockets nor Flash were available.
