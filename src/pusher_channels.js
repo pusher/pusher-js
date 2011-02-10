@@ -153,13 +153,13 @@ Pusher.Channel.PresenceChannel = {
       this.dispatch_with_all('pusher:subscription_succeeded', this.members);
     }.scopedTo(this));
     
-    this.bind('pusher_internal:member_added', function(member){
-      var member = this.members.add(member.user_id, member.user_info);
+    this.bind('pusher_internal:member_added', function(data){
+      var member = this.members.add(data.user_id, data.user_info);
       this.dispatch_with_all('pusher:member_added', member);
     }.scopedTo(this))
     
-    this.bind('pusher_internal:member_removed', function(member){
-      var member = this.members.remove(member.user_id);
+    this.bind('pusher_internal:member_removed', function(data){
+      var member = this.members.remove(data.user_id);
       this.dispatch_with_all('pusher:member_removed', member);
     }.scopedTo(this))
   },
