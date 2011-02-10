@@ -179,7 +179,7 @@ Pusher.prototype = {
   },
   
   onmessage: function(evt) {
-    var params = Pusher.parser(evt.data);
+    var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
     // Try to parse the event data unless it has already been decoded
     if (typeof(params.data) == 'string') {
