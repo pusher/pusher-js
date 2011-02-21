@@ -4,8 +4,9 @@ require 'bundler/setup'
 require 'yaml'
 require 'jbundle'
 
-autoload :S3Uploader, 'lib/s3_uploader'
-autoload :Acf, 'lib/acf_invalidate'
+$:.push(File.expand_path('../lib', __FILE__))
+autoload :S3Uploader, 's3_uploader'
+autoload :Acf, 'acf_invalidate'
 
 environment = (ENV["ENVIRONMENT"] || 'staging').to_sym
 config = YAML.load_file('./config/config.yml')[environment]
