@@ -110,20 +110,23 @@ Use Bundler to install all development dependencies
 
     bundle install
 
-Run a development server which serves bundled javascript from <http://localhost:4500/dev/version/pusher.js> so that you can edit files in /src freely
+and create a local config file
+
+    mv config/config.yml.example config/config.yml # and edit
+
+Run a development server which serves bundled javascript from <http://localhost:4500/dev/version/pusher.js> so that you can edit files in /src freely.
 
     ruby devserver.rb
 
 In order to build the minified versions:
 
-    mv config/config.yml.example config/config.yml # and edit
-    ENVIRONMENT=development rake
+    ENVIRONMENT=development rake build
 
-If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml`.
+If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
 
 ## Building
 
-./JFile declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
+`./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
 Define the version number in JFile (should be in the format 1.2.3).
 
     rake build

@@ -3,7 +3,7 @@
 :development:
   <<: *default
   :js:
-    :host: localhost:4567
+    :host: localhost:4500
 
 :staging:
   <<: *default
