@@ -160,7 +160,9 @@ Pusher.Channel.PresenceChannel = {
     
     this.bind('pusher_internal:member_removed', function(data){
       var member = this.members.remove(data.user_id);
-      this.dispatch_with_all('pusher:member_removed', member);
+      if (member) {
+        this.dispatch_with_all('pusher:member_removed', member);
+      }
     }.scopedTo(this))
   },
   
@@ -199,8 +201,10 @@ Pusher.Channel.PresenceChannel = {
 
     remove: function(user_id) {
       member = this.get(user_id);
-      delete this._members_map[user_id];
-      this.count--;
+      if (member) {
+        delete this._members_map[user_id];
+        this.count--;
+      }
       return member;
     },
 
