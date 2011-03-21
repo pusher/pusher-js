@@ -66,9 +66,11 @@ Pusher.prototype = {
 
       // Timeout for the connection to handle silently hanging connections
       // Increase the timeout after each retry in case of extreme latencies
+      var timeout = Pusher.connection_timeout + (self.retry_counter * 1000);
       var connectionTimeout = window.setTimeout(function(){
+        Pusher.log('Pusher : connection timeout after ' + timeout + 'ms');
         ws.close();
-      }, (2000 + (self.retry_counter * 1000)));
+      }, timeout);
 
       ws.onmessage = function() {
         self.onmessage.apply(self, arguments);
@@ -249,6 +251,7 @@ Pusher.host = "ws.pusherapp.com";
 Pusher.ws_port = 80;
 Pusher.wss_port = 443;
 Pusher.channel_auth_endpoint = '/pusher/auth';
+Pusher.connection_timeout = 5000;
 Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.allow_reconnect = true;
