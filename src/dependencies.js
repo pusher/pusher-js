@@ -66,7 +66,7 @@ var _require = (function () {
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
     callback = function(){
-      FABridge.addInitializationCallback('webSocket', function () {
+      WebSocket.__addTask(function() {
         Pusher.ready();
       })
 

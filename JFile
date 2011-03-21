@@ -19,7 +19,6 @@ end
 bundle 'flashfallback.js' do
   license 'web-socket-js-licence.js'
   file 'web-socket-js/swfobject.js'
-  file 'web-socket-js/FABridge.js'
   file 'web-socket-js/web_socket.js'
 end
 
