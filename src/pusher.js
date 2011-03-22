@@ -97,10 +97,10 @@ Pusher.prototype = {
   toggle_secure: function() {
     if (this.secure == false) {
       this.secure = true;
-      Pusher.log("Pusher: switching to wss:// connection");
+      Pusher.log("Pusher : switching to wss:// connection");
     }else{
       this.secure = false;
-      Pusher.log("Pusher: switching to ws:// connection");
+      Pusher.log("Pusher : switching to ws:// connection");
     };
   },
 
@@ -207,7 +207,7 @@ Pusher.prototype = {
 
     // Retry with increasing delay, with a maximum interval of 10s
     var retry_delay = Math.min(this.retry_counter * 1000, 10000);
-    Pusher.log ("Pusher: Retrying connection in " + retry_delay + "ms");
+    Pusher.log("Pusher : Retrying connection in " + retry_delay + "ms");
     var self = this;
     setTimeout(function() {
       self.connect();
@@ -218,7 +218,7 @@ Pusher.prototype = {
 
   onclose: function() {
     this.global_channel.dispatch('close', null);
-    Pusher.log ("Pusher: Socket closed")
+    Pusher.log("Pusher : Socket closed")
     if (this.connected) {
       this.send_local_event("pusher:connection_disconnected", {});
       if (Pusher.allow_reconnect) {
