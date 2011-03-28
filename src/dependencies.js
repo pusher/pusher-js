@@ -1,5 +1,3 @@
-WEB_SOCKET_SWF_LOCATION = "<PUSHER_REQUIRE_ROOT>/WebSocketMain.swf";
-
 var _require = (function () {
   
   var handleScriptLoaded;
@@ -49,7 +47,11 @@ var _require = (function () {
 })();
 
 ;(function() {
-  var root = '<PUSHER_REQUIRE_ROOT>';
+  var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
+  var root = cdn + Pusher.VERSION;
+
+  window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
+
   var deps = [],
       callback = function () {
         Pusher.ready()

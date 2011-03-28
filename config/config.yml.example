@@ -3,21 +3,16 @@
 :development:
   <<: *default
   :js:
-    :host: localhost:4500
-
-:staging:
-  <<: *default
-  :js:
-    :host: js.staging.pusherapp.com
-  :s3:
-    :bucket: pusher-js-staging
-    :access_key_id: 
-    :secret_access_key: 
+    :cdn: 
+      :http: localhost:4500/dev/
+      :https: localhost:4500/dev/
 
 :production:
   <<: *default
   :js:
-    :host: js.pusherapp.com
+    :cdn:
+      :http: http://js.pusherapp.com/
+      :https: https://d3ds63zw57jt09.cloudfront.net/
   :s3:
     :cf_distribution_id: <YOUR AWS CLOUD FRONT DISTRIBUTION ID>
     :bucket: pusher-js
