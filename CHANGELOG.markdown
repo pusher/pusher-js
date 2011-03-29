@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.2 (2011-03-29)
+
+[BUGFIX] When loaded onto a HTTPS page, load pusher dependencies from HTTPS.
+
+## 1.8.1 (2011-03-21)
+
+[BUGFIX] Minor fix which could have allowed `member_removed` to be triggered with nil.
+
+[CHANGE] Increased default connection timeout to reduce likelyhood of timeouts on first connection attempt. This is now configurable as `Pusher.connection_timeout`.
+
 ## 1.8.0 (2011-02-10)
 
 [NEW] Support triggering client events with new API
@@ -19,6 +29,14 @@
 Also, the member object passed to `member_added` and `member_removed` now has attributes `id` and `info` rather than `user_id` and `user_info`.
 
 [CHANGED] Improved javascript debug console logging.
+
+## 1.7.6 (2011-03-29)
+
+[BUGFIX] When loaded onto a HTTPS page, load pusher dependencies from HTTPS [backported from 1.8.2].
+
+## 1.7.5 (2011-03-21)
+
+[CHANGE] Increased default connection timeout to reduce likelyhood of timeouts on first connection attempt. This is now configurable as `Pusher.connection_timeout` [backported from 1.8.1].
 
 ## 1.7.4 (2011-02-09)
 
