@@ -50,40 +50,42 @@ var _require = (function () {
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
 
-  window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
-
-  var deps = [],
-      callback = function () {
-        Pusher.ready()
-      }
-  // Check for JSON dependency
+  var deps = [];
   if (window['JSON'] == undefined) {
     deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
-  // Check for Flash fallback dep. Wrap initialization.
   if (window['WebSocket'] == undefined) {
-    // Don't let WebSockets.js initialize on load. Inconsistent accross browsers.
+    // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
-    callback = function(){
-      WebSocket.__addTask(function() {
-        Pusher.ready();
-      })
+  }
 
-      if (window['WebSocket']) {
-        // This will call the FABridge callback, which initializes pusher!
-        WebSocket.__initialize();
-      } else {
-        // Flash is not installed
-        Pusher.log("Pusher : Could not connect : WebSocket is not availabe natively or via Flash")
-        // TODO: Update Pusher state in such a way that users can bind to it
+  var initialize = function() {
+    if (window['WebSocket'] == undefined) {
+      return function() {
+        // This runs after flashfallback.js has loaded
+        if (window['WebSocket']) {
+          window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
+          WebSocket.__addTask(function() {
+            Pusher.ready();
+          })
+          WebSocket.__initialize();
+        } else {
+          // Flash must not be installed
+          Pusher.log("Pusher : Could not connect : WebSocket is not available natively or via Flash");
+          // TODO: Update Pusher state in such a way that users can bind to it
+        }
+      }
+    } else {
+      return function() {
+        Pusher.ready();
       }
     }
-  }
+  }();
   
-  if( deps.length > 0){
-    _require(deps, callback);
+  if (deps.length > 0) {
+    _require(deps, initialize);
   } else {
-    callback();
+    initialize();
   }
 })();
