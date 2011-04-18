@@ -83,9 +83,20 @@ var _require = (function () {
     }
   }();
   
+  var ondocumentbody = function(callback) {
+    var load_body = function() {
+      document.body ? callback() : setTimeout(load_body, 0);
+    }
+    load_body();
+  };
+
+  var initializeOnDocumentBody = function() {
+    ondocumentbody(initialize);
+  }
+
   if (deps.length > 0) {
-    _require(deps, initialize);
+    _require(deps, initializeOnDocumentBody);
   } else {
-    initialize();
+    initializeOnDocumentBody();
   }
 })();
