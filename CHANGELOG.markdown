@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.8.3 (2011-04-19)
+
+[FIX] Delay Pusher initialization until document.body is defined. This fixes an issue in Firefox < 4 & IE which occasionally caused a "document.body is null"  error when loading the flash fallback.
+
+[UPGRADE] Upgraded linked version of web-socket-js. Amongst other things this removes the dependency on FABridge and reduces the minified size of fallback dependencies by 13KB.
+For the full list of changes in web-socket-js see <https://github.com/gimite/web-socket-js/compare/6640d9d806972ea1720a273d09e8919464bcd131...bb5797cad5244dc86410e35726ef886bbc49afe9>
+
 ## 1.8.2 (2011-03-29)
 
 [BUGFIX] When loaded onto a HTTPS page, load pusher dependencies from HTTPS.
