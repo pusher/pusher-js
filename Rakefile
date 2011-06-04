@@ -54,10 +54,14 @@ namespace :acf do
       p list
     end
   end
-  
+
 end
 
 desc 'Start test server.'
 task :test do
   exec 'ruby test/app.rb'
+end
+
+task :test_mock do
+  exec 'ruby test/mock.rb'
 end
