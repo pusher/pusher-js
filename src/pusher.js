@@ -238,12 +238,11 @@ Pusher.prototype = {
 };
 
 Pusher.Util = {
-  extend: function(target, extensions){
+  extend: function extend(target, extensions){
     for (var property in extensions) {
       if (extensions[property] && extensions[property].constructor &&
         extensions[property].constructor === Object) {
-        target[property] = target[property] || {};
-        arguments.callee(target[property], extensions[property]);
+        target[property] = extend(target[property] || {}, extensions[property]);
       } else {
         target[property] = extensions[property];
       }
