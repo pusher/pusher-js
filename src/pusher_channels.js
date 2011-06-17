@@ -200,7 +200,7 @@ Pusher.Channel.PresenceChannel = {
     },
 
     remove: function(user_id) {
-      member = this.get(user_id);
+      var member = this.get(user_id);
       if (member) {
         delete this._members_map[user_id];
         this.count--;
