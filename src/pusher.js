@@ -250,7 +250,10 @@ Pusher.Util = {
   }
 };
 
+// To receive log output provide a Pusher.log function, for example
+// Pusher.log = function(m){console.log(m)}
 Pusher.debug = function() {
+  if (!Pusher.log) { return }
   var m = ["Pusher"]
   for (var i = 0; i < arguments.length; i++){
     if (typeof arguments[i] === "string") {
@@ -272,7 +275,6 @@ Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.connection_timeout = 5000;
 Pusher.cdn_http = '<CDN_HTTP>'
 Pusher.cdn_https = '<CDN_HTTPS>'
-Pusher.log = function(msg){}; // e.g. function(m){console.log(m)}
 Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.allow_reconnect = true;
 Pusher.channel_auth_transport = 'ajax';
