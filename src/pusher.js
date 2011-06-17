@@ -30,7 +30,7 @@ var Pusher = function(application_key, options) {
     this.socket_id = data.socket_id;
     this.subscribeAll();
   }.scopedTo(this));
-  
+
   this.bind('pusher:connection_disconnected', function(){
     for(var channel_name in this.channels.channels){
       this.channels.channels[channel_name].disconnect()
@@ -40,7 +40,7 @@ var Pusher = function(application_key, options) {
   this.bind('pusher:error', function(data) {
     Pusher.log("Pusher : error : " + data.message);
   });
-  
+
 };
 
 Pusher.instances = [];
@@ -127,7 +127,7 @@ Pusher.prototype = {
       if (this.channels.channels.hasOwnProperty(channel)) this.subscribe(channel);
     }
   },
-  
+
   subscribe: function(channel_name) {
     var channel = this.channels.add(channel_name, this);
     if (this.connected) {
@@ -141,7 +141,7 @@ Pusher.prototype = {
     }
     return channel;
   },
-  
+
   unsubscribe: function(channel_name) {
     this.channels.remove(channel_name);
 
@@ -164,7 +164,7 @@ Pusher.prototype = {
     this.connection.send(JSON.stringify(payload));
     return this;
   },
-  
+
   send_local_event: function(event_name, event_data, channel_name){
     event_data = Pusher.data_decorator(event_name, event_data);
     if (channel_name) {
@@ -179,7 +179,7 @@ Pusher.prototype = {
 
     this.global_channel.dispatch_with_all(event_name, event_data);
   },
-  
+
   onmessage: function(evt) {
     var params = JSON.parse(evt.data);
     if (params.socket_id && params.socket_id == this.socket_id) return;
@@ -238,10 +238,15 @@ Pusher.prototype = {
 };
 
 Pusher.Util = {
-  extend: function(target, extensions){
-    for(var i in extensions){
-      target[i] = extensions[i]
-    };
+  extend: function extend(target, extensions){
+    for (var property in extensions) {
+      if (extensions[property] && extensions[property].constructor &&
+        extensions[property].constructor === Object) {
+        target[property] = extend(target[property] || {}, extensions[property]);
+      } else {
+        target[property] = extensions[property];
+      }
+    }
     return target;
   }
 };
