@@ -38,7 +38,7 @@ var Pusher = function(application_key, options) {
   }.scopedTo(this));
 
   this.bind('pusher:error', function(data) {
-    Pusher.log("Pusher : error : " + data.message);
+    Pusher.debug("ERROR", data.message);
   });
 
 };
@@ -57,7 +57,7 @@ Pusher.prototype = {
     }
 
     Pusher.allow_reconnect = true;
-    Pusher.log('Pusher : connecting : ' + url );
+    Pusher.debug('Connecting', url);
 
     var self = this;
 
@@ -68,7 +68,7 @@ Pusher.prototype = {
       // Increase the timeout after each retry in case of extreme latencies
       var timeout = Pusher.connection_timeout + (self.retry_counter * 1000);
       var connectionTimeout = window.setTimeout(function(){
-        Pusher.log('Pusher : connection timeout after ' + timeout + 'ms');
+        Pusher.debug('Connection timeout after', timeout + 'ms');
         ws.close();
       }, timeout);
 
@@ -97,16 +97,16 @@ Pusher.prototype = {
   toggle_secure: function() {
     if (this.secure == false) {
       this.secure = true;
-      Pusher.log("Pusher : switching to wss:// connection");
+      Pusher.debug("Switching to wss:// connection");
     }else{
       this.secure = false;
-      Pusher.log("Pusher : switching to ws:// connection");
+      Pusher.debug("Switching to ws:// connection");
     };
   },
 
 
   disconnect: function() {
-    Pusher.log('Pusher : disconnecting');
+    Pusher.debug('Disconnecting');
     Pusher.allow_reconnect = false;
     this.retry_counter = 0;
     this.connection.close();
@@ -153,7 +153,7 @@ Pusher.prototype = {
   },
 
   send_event: function(event_name, data, channel) {
-    Pusher.log("Pusher : event sent (channel,event,data) : ", channel, event_name, data);
+    Pusher.debug("Event sent (channel,event,data)", channel, event_name, data);
 
     var payload = {
       event: event_name,
@@ -174,7 +174,7 @@ Pusher.prototype = {
       }
     } else {
       // Bit hacky but these events won't get logged otherwise
-      Pusher.log("Pusher : event recd (event,data) :", event_name, event_data);
+      Pusher.debug("Event recd (event,data)", event_name, event_data);
     }
 
     this.global_channel.dispatch_with_all(event_name, event_data);
@@ -187,7 +187,6 @@ Pusher.prototype = {
     if (typeof(params.data) == 'string') {
       params.data = Pusher.parser(params.data);
     }
-    // Pusher.log("Pusher : received message : ", params)
 
     this.send_local_event(params.event, params.data, params.channel);
   },
@@ -207,7 +206,7 @@ Pusher.prototype = {
 
     // Retry with increasing delay, with a maximum interval of 10s
     var retry_delay = Math.min(this.retry_counter * 1000, 10000);
-    Pusher.log("Pusher : Retrying connection in " + retry_delay + "ms");
+    Pusher.debug("Retrying connection in " + retry_delay + "ms");
     var self = this;
     setTimeout(function() {
       self.connect();
@@ -218,11 +217,11 @@ Pusher.prototype = {
 
   onclose: function() {
     this.global_channel.dispatch('close', null);
-    Pusher.log("Pusher : Socket closed")
+    Pusher.debug("Socket closed")
     if (this.connected) {
       this.send_local_event("pusher:connection_disconnected", {});
       if (Pusher.allow_reconnect) {
-        Pusher.log('Pusher : Connection broken, trying to reconnect');
+        Pusher.debug('Connection broken, trying to reconnect');
         this.reconnect();
       }
     } else {
@@ -251,6 +250,18 @@ Pusher.Util = {
   }
 };
 
+Pusher.debug = function() {
+  var m = ["Pusher"]
+  for (var i = 0; i < arguments.length; i++){
+    if (typeof arguments[i] === "string") {
+      m.push(arguments[i])
+    } else {
+      m.push(JSON.stringify(arguments[i]))
+    }
+  };
+  Pusher.log(m.join(" : "))
+}
+
 // Pusher defaults
 Pusher.VERSION = "<VERSION>";
 
@@ -269,7 +280,7 @@ Pusher.parser = function(data) {
   try {
     return JSON.parse(data);
   } catch(e) {
-    Pusher.log("Pusher : data attribute not valid JSON - you may wish to implement your own Pusher.parser");
+    Pusher.debug("Data attribute not valid JSON - you may wish to implement your own Pusher.parser");
     return data;
   }
 };

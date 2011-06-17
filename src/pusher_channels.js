@@ -64,7 +64,7 @@ Pusher.Channel.prototype = {
 
   dispatch_with_all: function(event_name, data) {
     if (this.name != 'pusher_global_channel') {
-      Pusher.log("Pusher : event recd (channel,event,data)", this.name, event_name, data);
+      Pusher.debug("Event recd (channel,event,data)", this.name, event_name, data);
     }
     this.dispatch(event_name, data);
     this.dispatch_global_callbacks(event_name, data);
@@ -78,7 +78,7 @@ Pusher.Channel.prototype = {
         callbacks[i](event_data);
       }
     } else if (!this.global) {
-      Pusher.log('Pusher : No callbacks for ' + event_name);
+      Pusher.debug('No callbacks for ' + event_name);
     }
   },
 
@@ -118,7 +118,7 @@ Pusher.authorizers = {
           var data = Pusher.parser(xhr.responseText);
           callback(data);
         } else {
-          Pusher.log("Couldn't get auth info from your webapp" + status);
+          Pusher.debug("Couldn't get auth info from your webapp", status);
         }
       }
     };
