@@ -6,12 +6,14 @@ GEM
       mime-types
       xml-simple
     builder (2.1.2)
-    closure-compiler (0.3.3)
+    closure-compiler (1.1.1)
     crack (0.1.8)
     httparty (0.6.1)
       crack (= 0.1.8)
-    jbundle (0.0.8)
+    jbundle (0.1.2)
       closure-compiler
+      rack
+      thor
     json (1.4.6)
     mime-types (1.16)
     pusher (0.6.0)
@@ -19,12 +21,13 @@ GEM
       json
       ruby-hmac
       signature
-    rack (1.2.1)
+    rack (1.3.0)
     ruby-hmac (0.4.0)
     signature (0.1.1)
       ruby-hmac
     sinatra (1.0)
       rack (>= 1.0)
+    thor (0.14.6)
     xml-simple (1.0.12)
 
 PLATFORMS
@@ -33,6 +36,6 @@ PLATFORMS
 DEPENDENCIES
   aws-s3
   httparty
-  jbundle (~> 0.0.8)
+  jbundle
   pusher
   sinatra

@@ -114,9 +114,9 @@ and create a local config file
 
     mv config/config.yml.example config/config.yml # and edit
 
-Run a development server which serves bundled javascript from <http://localhost:4500/dev/version/pusher.js> so that you can edit files in /src freely.
+Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
 
-    ruby devserver.rb
+    bundle exec jbundle server
 
 In order to build the minified versions:
 
