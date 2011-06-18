@@ -34,6 +34,7 @@ class S3Uploader
         puts "Uploading #{file} to #{bucket}/#{destination}"
         AWS::S3::S3Object.store(destination, open(file), bucket, {
           :access => :public_read,
+          "Cache-Control" => "max-age=86400"
         })
       end
     end
