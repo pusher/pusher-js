@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.8.5 (2011-06-18)
+
+[FIX] Fix the fact that member was being added to the global scope
+
+[CHANGE] `Pusher.log` function now always receives a single string argument rather than multiple arguments, making it easier to use. If you want more control, you can over-ride `Pusher.debug`
+
+## 1.8.4 (2011-06-18)
+
+[FIX] When using multiple presence channels concurrently, the members object for each channel now operates as expected
+
 ## 1.8.3 (2011-04-19)
 
 [FIX] Delay Pusher initialization until document.body is defined. This fixes an issue in Firefox < 4 & IE which occasionally caused a "document.body is null"  error when loading the flash fallback.
