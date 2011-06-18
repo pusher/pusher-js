@@ -25,7 +25,8 @@ class S3Uploader
 
       AWS::S3::Base.establish_connection!(
         :access_key_id     => config[:access_key_id],
-        :secret_access_key => config[:secret_access_key]
+        :secret_access_key => config[:secret_access_key],
+        :use_ssl          => true,
       )
 
       files.each do |file|
