@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'httparty'
 require 'hmac-sha1'
 require 'base64'

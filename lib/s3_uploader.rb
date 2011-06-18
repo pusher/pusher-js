@@ -1,8 +1,4 @@
-$:.unshift(File.expand_path('..', __FILE__))
-
-require 'rubygems'
 require 'aws/s3'
-require 'pp'
 
 class S3Uploader
  
@@ -20,13 +16,12 @@ class S3Uploader
  
  def upload()
     versions = version.releaseable
-    p versions
-    versions.each do |v|
+    puts "Uploading versions: #{versions.inspect}"
 
+    versions.each do |v|
       bucket = config[:bucket]
 
       files = Dir.glob("#{dist_dir}/#{v}/*")
-      target_dir = "#{v}/"
 
       AWS::S3::Base.establish_connection!(
         :access_key_id     => config[:access_key_id],
@@ -35,11 +30,13 @@ class S3Uploader
 
       files.each do |file|
         file_name = File.basename(file)
-        p "Uploading ... AWS::S3::S3Object.store(#{target_dir + file_name}, open(#{file}), #{bucket}, :access => :public_read)"
-        AWS::S3::S3Object.store(target_dir + file_name, open(file), bucket, :access => :public_read)
+        destination = "#{v}/#{file_name}"
+        puts "Uploading #{file} to #{bucket}/#{destination}"
+        AWS::S3::S3Object.store(destination, open(file), bucket, {
+          :access => :public_read,
+        })
       end
     end
-    
   end
-  
+
 end
