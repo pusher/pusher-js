@@ -10,7 +10,7 @@ GEM
     crack (0.1.8)
     httparty (0.6.1)
       crack (= 0.1.8)
-    jbundle (0.1.2)
+    jbundle (0.1.3)
       closure-compiler
       rack
       thor
