@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="/qunit.js"></script>
+<link rel="stylesheet" href="/qunit.css">
+<script src="/jquery-1.4.2.min.js"></script>
+<script src="http://localhost:4500/dev/1.8.0/pusher.js"></script>
+<script src="/pusher_mock.js"></script>
+<script>
+var pusherKey = "key";
+Pusher.log = function(m){console.log(m)};
+</script>
+<script src="/mock_test.js"></script>
+</head>
+<body>
+  <h1 id="qunit-header">Pusher Tests</h1>
+  <h2 id="qunit-banner"></h2>
+  <h2 id="qunit-userAgent"></h2>
+  <ol id="qunit-tests"></ol>
+</body>
+</html>
