@@ -1,12 +1,20 @@
-if(typeof Function.prototype.scopedTo == 'undefined'){
-  Function.prototype.scopedTo = function(context, args){
-    var f = this;
-    return function(){
-      return f.apply(context, Array.prototype.slice.call(args || [])
-        .concat(Array.prototype.slice.call(arguments)));
-    };
+if (!Function.prototype.bind) {
+  Function.prototype.bind = function( obj ) {
+    var slice = [].slice,
+        args = slice.call(arguments, 1),
+        self = this,
+        nop = function () {},
+        bound = function () {
+          return self.apply(this instanceof nop ? this : (obj || {}),
+                              args.concat(slice.call(arguments)));
+        };
+
+    nop.prototype = self.prototype;
+    bound.prototype = new nop();
+
+    return bound;
   };
-};
+}
 
 var Pusher = function(application_key, options) {
   this.options = options || {};
@@ -29,13 +37,13 @@ var Pusher = function(application_key, options) {
     this.retry_counter = 0;
     this.socket_id = data.socket_id;
     this.subscribeAll();
-  }.scopedTo(this));
+  }.bind(this));
 
   this.bind('pusher:connection_disconnected', function(){
     for(var channel_name in this.channels.channels){
       this.channels.channels[channel_name].disconnect()
     }
-  }.scopedTo(this));
+  }.bind(this));
 
   this.bind('pusher:error', function(data) {
     Pusher.debug("ERROR", data.message);
@@ -137,7 +145,7 @@ Pusher.prototype = {
           auth: data.auth,
           channel_data: data.channel_data
         });
-      }.scopedTo(this));
+      }.bind(this));
     }
     return channel;
   },
