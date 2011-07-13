@@ -80,7 +80,7 @@ Pusher.authorizers = {
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
         if (xhr.status == 200) {
-          var data = Pusher.parser(xhr.responseText);
+          var data = JSON.parse(xhr.responseText);
           callback(data);
         } else {
           Pusher.debug("Couldn't get auth info from your webapp", status);

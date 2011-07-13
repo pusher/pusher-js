@@ -1080,11 +1080,7 @@
           // connected
           function() {
             // note: the data property is an invalid JSON string.
-            var payload = JSON.stringify({
-              event: 'chat-message',
-              channel: 'my-awesome-chat-channel',
-              data: '{"message":oh awesome"}'
-            });
+            var payload = 'invalid';
 
             connection.socket.trigger('message', payload);
 
