@@ -56,8 +56,3 @@ namespace :acf do
   end
   
 end
-
-desc 'Start test server.'
-task :test do
-  exec 'ruby test/app.rb'
-end

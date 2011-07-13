@@ -20,14 +20,20 @@ Pusher.Channels.prototype = {
 
   remove: function(channel_name) {
     delete this.channels[channel_name];
+  },
+
+  disconnect: function () {
+    for(var channel_name in this.channels){
+      this.channels[channel_name].disconnect()
+    }
   }
 };
 
 Pusher.Channel = function(channel_name, pusher) {
+  Pusher.EventsDispatcher.call(this);
+
   this.pusher = pusher;
   this.name = channel_name;
-  this.callbacks = {};
-  this.global_callbacks = [];
   this.subscribed = false;
 };
 
@@ -45,49 +51,7 @@ Pusher.Channel.prototype = {
   acknowledge_subscription: function(data){
     this.subscribed = true;
   },
-  
-  bind: function(event_name, callback) {
-    this.callbacks[event_name] = this.callbacks[event_name] || [];
-    this.callbacks[event_name].push(callback);
-    return this;
-  },
 
-  bind_all: function(callback) {
-    this.global_callbacks.push(callback);
-    return this;
-  },
-
-  trigger: function(event_name, data) {
-    this.pusher.send_event(event_name, data, this.name);
-    return this;
-  },
-
-  dispatch_with_all: function(event_name, data) {
-    if (this.name != 'pusher_global_channel') {
-      Pusher.debug("Event recd (channel,event,data)", this.name, event_name, data);
-    }
-    this.dispatch(event_name, data);
-    this.dispatch_global_callbacks(event_name, data);
-  },
-
-  dispatch: function(event_name, event_data) {
-    var callbacks = this.callbacks[event_name];
-
-    if (callbacks) {
-      for (var i = 0; i < callbacks.length; i++) {
-        callbacks[i](event_data);
-      }
-    } else if (!this.global) {
-      Pusher.debug('No callbacks for ' + event_name);
-    }
-  },
-
-  dispatch_global_callbacks: function(event_name, event_data) {
-    for (var i = 0; i < this.global_callbacks.length; i++) {
-      this.global_callbacks[i](event_name, event_data);
-    }
-  },
-  
   is_private: function(){
     return false;
   },
@@ -101,6 +65,7 @@ Pusher.Channel.prototype = {
   }
 };
 
+Pusher.Util.extend(Pusher.Channel.prototype, Pusher.EventsDispatcher.prototype);
 
 Pusher.auth_callbacks = {};
 
@@ -122,10 +87,10 @@ Pusher.authorizers = {
         }
       }
     };
-    xhr.send('socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(self.name));
+    xhr.send('socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(self.name));
   },
   jsonp: function(pusher, callback){
-    var qstring = 'socket_id=' + encodeURIComponent(pusher.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
+    var qstring = 'socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
     var script = document.createElement("script");  
     Pusher.auth_callbacks[this.name] = callback;
     var callback_name = "Pusher.auth_callbacks['" + this.name + "']";

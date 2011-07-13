@@ -1,5 +1,5 @@
 var _require = (function () {
-  
+
   var handleScriptLoaded;
   if (document.addEventListener) {
     handleScriptLoaded = function (elem, callback) {
@@ -12,7 +12,7 @@ var _require = (function () {
       })
     }
   }
-  
+
   return function (deps, callback) {
     var dep_count = 0,
     dep_length = deps.length;
@@ -38,7 +38,7 @@ var _require = (function () {
       });
 
       head.appendChild(script);
-    }   
+    }
 
     for(var i = 0; i < dep_length; i++) {
       addScript(deps[i], callback);
@@ -65,6 +65,9 @@ var _require = (function () {
       return function() {
         // This runs after flashfallback.js has loaded
         if (window['WebSocket']) {
+          // Explicitly set the transport to websockets here, as we are using flashsocket.
+          Pusher.Transport = window['WebSocket'];
+
           window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
           WebSocket.__addTask(function() {
             Pusher.ready();
@@ -82,7 +85,7 @@ var _require = (function () {
       }
     }
   }();
-  
+
   var ondocumentbody = function(callback) {
     var load_body = function() {
       document.body ? callback() : setTimeout(load_body, 0);

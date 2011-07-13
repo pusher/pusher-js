@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pusher.js Test Suite</title>
+
+  <!-- Includes -->
+  <script type="text/javascript" src="../src/pusher.js"></script>
+  <script type="text/javascript" src="../src/pusher_event_dispatcher.js"></script>
+  <script type="text/javascript" src="../src/pusher_machine.js"></script>
+  <script type="text/javascript" src="../src/pusher_connection.js"></script>
+  <script type="text/javascript" src="../src/pusher_channels.js"></script>
+  <script type="text/javascript" src="../src/dependencies.js"></script>
+
+  <style type='text/css'>
+  ol ol { display: block!important; }
+  </style>
+</head>
+<body id="body">
+  <script type="text/javascript">
+    Pusher.log = function(data) {console.log(data)}
+
+    var pusher = new Pusher('b599fe0f1e4b6f6eb8a6');
+
+    var channel = pusher.subscribe('test_channel');
+    channel.trigger('client-someeventname', { your: "data" });
+    channel.bind('my_event', function(data) {
+      alert(data);
+    });
+
+    pusher.bind('connected', function(){
+      var ms = Date.now() - started;
+      alert('Took ' + ms + 'ms to connect');
+    });
+  </script>
+</body>
+</html>
