@@ -4,6 +4,16 @@
   /*-----------------------------------------------
     Helpers:
   -----------------------------------------------*/
+  
+  // MSIE doesn't have array.indexOf
+  var nativeIndexOf = Array.prototype.indexOf;
+  function indexOf(array, item) {
+    if (array == null) return -1;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+    for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+    return -1;
+  }
+
 
   function capitalize(str) {
     return str.substr(0, 1).toUpperCase() + str.substr(1);
@@ -33,12 +43,11 @@
     this.transition(initialState);
   };
 
-  // try and avoid transitioning with data - it's a fucking state machine
   Machine.prototype.transition = function(nextState, data) {
     var prevState = this.state;
     var stateCallbacks = this.stateActions;
 
-    if (prevState && (this.transitions[prevState].indexOf(nextState) == -1)) {
+    if (prevState && (indexOf(this.transitions[prevState], nextState) == -1)) {
       throw new Error(this.actor.key + ': Invalid transition [' + prevState + ' to ' + nextState + ']');
     }
 

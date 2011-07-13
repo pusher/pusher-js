@@ -74,15 +74,16 @@ Pusher.prototype = {
   },
 
   subscribe: function(channel_name) {
+    var self = this;
     var channel = this.channels.add(channel_name, this);
     if (this.connection._machine.is("connected")) {
       channel.authorize(this, function(data) {
-        this.send_event('pusher:subscribe', {
+        self.send_event('pusher:subscribe', {
           channel: channel_name,
           auth: data.auth,
           channel_data: data.channel_data
         });
-      }.scopedTo(this));
+      });
     }
     return channel;
   },
@@ -132,8 +133,6 @@ if (window["WebSocket"]) {
   Pusher.Transport = window["WebSocket"];
 }
 
-
-
 Pusher.Util = {
   extend: function extend(target, extensions) {
     for (var property in extensions) {
@@ -157,7 +156,11 @@ Pusher.debug = function() {
     if (typeof arguments[i] === "string") {
       m.push(arguments[i])
     } else {
-      m.push(JSON.stringify(arguments[i]))
+      if (window['JSON'] == undefined) {
+        m.push(arguments[i].toString());
+      } else {
+        m.push(JSON.stringify(arguments[i]))
+      }
     }
   };
   Pusher.log(m.join(" : "))
@@ -176,14 +179,6 @@ Pusher.cdn_https = '<CDN_HTTPS>'
 Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.allow_reconnect = true;
 Pusher.channel_auth_transport = 'ajax';
-Pusher.parser = function(data) {
-  try {
-    return JSON.parse(data);
-  } catch(e) {
-    Pusher.debug("Data attribute not valid JSON - you may wish to implement your own Pusher.parser");
-    return data;
-  }
-};
 
 Pusher.isReady = false;
 Pusher.ready = function() {
