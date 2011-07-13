@@ -3,3 +3,4 @@
 .bundle
 *.DS_Store
 *.swp
+/dist
