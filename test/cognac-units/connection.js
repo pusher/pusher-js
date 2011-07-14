@@ -358,7 +358,6 @@
           },
           // waiting
           function(e) {
-            console.log(e.newState)
             test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
 
             test.equal(connection.connectionSecure, true, 'connection should switch to using wss');
@@ -980,7 +979,6 @@
             connection.socket.trigger('close');
           },
           function(e) {
-            console.log(e.newState)
             test.equal(e.newState, 'waiting', 'state should be "waiting"');
             test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
             nextConnectionAttempt = new Date().getTime() + connection.connectionWait;

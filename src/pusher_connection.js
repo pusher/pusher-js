@@ -298,8 +298,6 @@
 
       self.state = newState;
 
-      console.warn('Public State Change:', prevState, '->', newState);
-
       self.trigger('state_change', {previous: prevState, current: newState});
       self.trigger(newState, data);
     }
