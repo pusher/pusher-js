@@ -280,7 +280,7 @@
   };
 
   Connection.prototype.connect = function() {
-    if (!Pusher.Transport) {
+    if (Pusher.Transport === null) {
       this._machine.transition('failed');
     } else if (!this._machine.is('connected')) {
       this.connectionWait = 0; // note that openTimeout and connectedTimeout are not reset

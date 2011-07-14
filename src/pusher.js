@@ -126,13 +126,6 @@ Pusher.prototype = {
   }
 };
 
-// False, fail fast:
-Pusher.Transport = false;
-
-if (window["WebSocket"]) {
-  Pusher.Transport = window["WebSocket"];
-}
-
 Pusher.Util = {
   extend: function extend(target, extensions) {
     for (var property in extensions) {

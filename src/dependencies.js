@@ -65,8 +65,9 @@ var _require = (function () {
       return function() {
         // This runs after flashfallback.js has loaded
         if (window['WebSocket']) {
-          // Explicitly set the transport to websockets here, as we are using flashsocket.
+          // window['WebSocket'] is a flash emulation of WebSocket
           Pusher.Transport = window['WebSocket'];
+          Pusher.TransportType = 'flash';
 
           window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
           WebSocket.__addTask(function() {
@@ -75,12 +76,17 @@ var _require = (function () {
           WebSocket.__initialize();
         } else {
           // Flash must not be installed
+          Pusher.Transport = null;
+
           Pusher.debug("Could not connect: WebSocket is not available natively or via Flash");
           // TODO: Update Pusher state in such a way that users can bind to it
         }
       }
     } else {
       return function() {
+        // WebSocket available natively
+        Pusher.Transport = window['WebSocket'];
+        Pusher.TransportType = 'native';
         Pusher.ready();
       }
     }
