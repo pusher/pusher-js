@@ -22,6 +22,19 @@
   var MAX_OPEN_ATTEMPT_TIMEOUT = 5 * UNSUCCESSFUL_OPEN_ATTEMPT_ADDITIONAL_TIMEOUT;
   var MAX_CONNECTED_ATTEMPT_TIMEOUT = 5 * UNSUCCESSFUL_CONNECTED_ATTEMPT_ADDITIONAL_TIMEOUT;
 
+  function resetConnectionParameters(connection) {
+    connection.connectionWait = 0;
+
+    if (Pusher.TransportType === 'flash') {
+      // Flash needs a bit more time
+      connection.openTimeout = 5000;
+    } else {
+      connection.openTimeout = 2000;
+    }
+    connection.connectedTimeout = 2000;
+    connection.connectionSecure = connection.compulsorySecure;
+  }
+
   function Connection(key, options) {
     var self = this;
 
@@ -37,8 +50,6 @@
         self.key = key;
         self.socket = null;
         self.socket_id = null;
-
-        resetConnectionParameters();
       },
 
       waitingPre: function() {
@@ -117,7 +128,7 @@
           self._machine.transition('waiting');
         };
 
-        resetConnectionParameters();
+        resetConnectionParameters(self);
       },
 
       connectedPost: function() {
@@ -135,7 +146,7 @@
 
       permanentlyClosingPost: function() {
         self.socket.onclose = function() {
-          resetConnectionParameters();
+          resetConnectionParameters(self);
           self._machine.transition('permanentlyClosed');
         };
 
@@ -154,13 +165,6 @@
 
     /*-----------------------------------------------
       -----------------------------------------------*/
-
-    function resetConnectionParameters() {
-      self.connectionWait = 0;
-      self.openTimeout = UNSUCCESSFUL_OPEN_ATTEMPT_ADDITIONAL_TIMEOUT;
-      self.connectedTimeout = UNSUCCESSFUL_CONNECTED_ATTEMPT_ADDITIONAL_TIMEOUT;
-      self.connectionSecure = self.compulsorySecure;
-    }
 
     function updateConnectionParameters() {
       if (self.connectionWait < MAX_CONNECTION_ATTEMPT_WAIT) {
@@ -283,7 +287,7 @@
     if (Pusher.Transport === null) {
       this._machine.transition('failed');
     } else if (!this._machine.is('connected')) {
-      this.connectionWait = 0; // note that openTimeout and connectedTimeout are not reset
+      resetConnectionParameters(this);
       this._machine.transition('waiting');
     }
   };
