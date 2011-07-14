@@ -77,9 +77,7 @@ var _require = (function () {
         } else {
           // Flash must not be installed
           Pusher.Transport = null;
-
-          Pusher.debug("Could not connect: WebSocket is not available natively or via Flash");
-          // TODO: Update Pusher state in such a way that users can bind to it
+          Pusher.ready();
         }
       }
     } else {
