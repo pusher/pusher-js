@@ -928,7 +928,7 @@
 
 
       'test failure state': function(test) {
-        Pusher.Transport = false;
+        Pusher.Transport = null;
         var connection = new Pusher.Connection('p');
         var watcher = new EventsWatcher(connection, [
           'failed'
@@ -951,7 +951,7 @@
       //-----------------------------------------------
       'Should result in a state of "failed" if WebSockets are not available': function(test) {
         // hack, as we only check that this is something
-        Pusher.Transport = false;
+        Pusher.Transport = null;
 
         var connection = new Pusher.Connection('n');
 

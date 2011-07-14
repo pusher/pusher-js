@@ -51,20 +51,20 @@ var _require = (function () {
   var root = cdn + Pusher.VERSION;
 
   var deps = [];
-  if (window['JSON'] == undefined) {
+  if (typeof window['JSON'] === undefined) {
     deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
-  if (window['WebSocket'] == undefined) {
+  if (typeof window['WebSocket'] === 'undefined') {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
   }
 
   var initialize = function() {
-    if (window['WebSocket'] == undefined) {
+    if (typeof window['WebSocket'] === 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
       return function() {
         // This runs after flashfallback.js has loaded
-        if (window['WebSocket']) {
+        if (typeof window['WebSocket'] !== 'undefined') {
           // window['WebSocket'] is a flash emulation of WebSocket
           Pusher.Transport = window['WebSocket'];
           Pusher.TransportType = 'flash';
@@ -77,14 +77,24 @@ var _require = (function () {
         } else {
           // Flash must not be installed
           Pusher.Transport = null;
+          Pusher.TransportType = 'none';
           Pusher.ready();
         }
       }
     } else {
       return function() {
-        // WebSocket available natively
-        Pusher.Transport = window['WebSocket'];
+        // This is because Mozilla have decided to
+        // prefix the WebSocket constructor with "Moz".
+        if (typeof window['MozWebSocket'] !== 'undefined') {
+          Pusher.Transport = window['MozWebSocket'];
+        } else {
+          Pusher.Transport = window['WebSocket'];
+        }
+        // We have some form of a native websocket,
+        // even if the constructor is prefixed:
         Pusher.TransportType = 'native';
+
+        // Initialise Pusher.
         Pusher.ready();
       }
     }
