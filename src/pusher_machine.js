@@ -4,7 +4,7 @@
   /*-----------------------------------------------
     Helpers:
   -----------------------------------------------*/
-  
+
   // MSIE doesn't have array.indexOf
   var nativeIndexOf = Array.prototype.indexOf;
   function indexOf(array, item) {
@@ -30,6 +30,8 @@
     The State Machine
   -----------------------------------------------*/
   function Machine(actor, initialState, transitions, stateActions) {
+    Pusher.EventsDispatcher.call(this);
+
     this.actor = actor;
     this.state = undefined;
     this.errors = [];
@@ -64,7 +66,7 @@
     this.state = nextState;
 
     // handy to bind to
-    this.actor.trigger('state_change', {
+    this.trigger('state_change', {
       oldState: prevState,
       newState: nextState
     });
@@ -82,6 +84,8 @@
   Machine.prototype.isNot = function(state) {
     return this.state !== state;
   };
+
+  Pusher.Util.extend(Machine.prototype, Pusher.EventsDispatcher.prototype);
 
   this.Pusher.Machine = Machine;
 }).call(this);

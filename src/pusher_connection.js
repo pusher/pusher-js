@@ -44,12 +44,16 @@
 
     // define the state machine that runs the connection
     this._machine = new Pusher.Machine(self, 'initialized', machineTransitions, {
+
+      // TODO: Use the constructor for this.
       initializedPre: function() {
         self.compulsorySecure = self.options.encrypted;
 
         self.key = key;
         self.socket = null;
         self.socket_id = null;
+
+        self.state = 'initialized';
       },
 
       waitingPre: function() {
@@ -58,6 +62,11 @@
         }, self.connectionWait);
 
         informUser('connecting_in', self.connectionWait);
+
+        // QUERY: Should this be in connectingPre?
+        if (self.state !== 'connecting') {
+          triggerStateChange('connecting');
+        }
       },
 
       waitingExit: function() {
@@ -132,7 +141,7 @@
       },
 
       connectedPost: function() {
-        informUser('connected');
+        triggerStateChange('connected');
       },
 
       impermanentlyClosingPost: function() {
@@ -141,7 +150,9 @@
       },
 
       permanentlyClosingPre: function() {
-        informUser('closing');
+        // TODO: Do we still want a closing / disconnecting state?
+        // QUERY: Is this a state or an event?
+        triggerStateChange('disconnecting');
       },
 
       permanentlyClosingPost: function() {
@@ -154,11 +165,11 @@
       },
 
       permanentlyClosedPre: function() {
-        informUser('closed');
+        triggerStateChange('disconnected');
       },
 
       failedPre: function() {
-        informUser('failed');
+        triggerStateChange('failed');
         Pusher.debug('WebSockets are not available in this browser.');
       }
     });
@@ -280,6 +291,17 @@
 
     function informUser(eventName, data) {
       self.trigger(eventName, data);
+    }
+
+    function triggerStateChange(newState, data) {
+      var prevState = self.state;
+
+      self.state = newState;
+
+      console.warn('Public State Change:', prevState, '->', newState);
+
+      self.trigger('state_change', {previous: prevState, current: newState});
+      self.trigger(newState, data);
     }
   };
 

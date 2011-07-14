@@ -201,7 +201,7 @@
           'connected'
         ])
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -239,7 +239,7 @@
             defer(connection.disconnect, connection);
           },
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'connected'}, 'the "connected" event should be emitted');
+            test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
             test.finish();
           }
         ]);
@@ -257,11 +257,11 @@
         var watcher = new EventsWatcher(connection, [
           'connecting_in',
           'connected',
-          'closing',
-          'closed'
+          'disconnecting',
+          'disconnected'
         ])
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -292,7 +292,7 @@
           },
           // permanentlyClosing
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'connected'}, 'the "connected" event should be emitted');
+            test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
 
             test.equal(e.newState, 'permanentlyClosing', 'state should progress to "permanentlyClosing"');
             // Safari does not implement this state change
@@ -300,7 +300,7 @@
           },
           // permanentlyClosed
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'closing'}, 'the "closing" event should be emitted');
+            test.equal(watcher.next().name, 'disconnecting', 'the "disconnecting" event should be emitted');
 
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
             test.equal(connection.socket.readyState, connection.socket.CLOSED, 'the socket readyState should change to closed');
@@ -308,7 +308,7 @@
             connection.connect();
           },
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'closed'}, 'the "closed" event should be emitted');
+            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
 
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
 
@@ -343,7 +343,7 @@
           'connecting_in'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -389,7 +389,7 @@
           'connecting_in'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -434,7 +434,7 @@
           'connected'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -461,7 +461,7 @@
           },
           function(e) {
             // have to test connected event in next state because, in prev one, connectedPost has not been run
-            test.deepEqual(watcher.next(), {name: 'connected'}, 'the "connected" event should be emitted');
+            test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
 
             connection.disconnect();
@@ -483,7 +483,7 @@
           'error'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -539,7 +539,7 @@
           'connecting_in'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -574,7 +574,7 @@
           'connecting_in'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -610,7 +610,7 @@
           'error'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -645,7 +645,7 @@
           'error'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -686,10 +686,10 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('k');
         var watcher = new EventsWatcher(connection, [
-          'closed'
+          'disconnected'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -697,7 +697,7 @@
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
-            test.equal(watcher.next().name, 'closed', 'the "closed" event should be emitted');
+            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
             test.finish();
           }
         ]);
@@ -712,11 +712,11 @@
         var connection = new Pusher.Connection('l');
         var watcher = new EventsWatcher(connection, [
           'connecting_in',
-          'closing',
-          'closed'
+          'disconnecting',
+          'disconnected'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -728,11 +728,11 @@
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosing', 'state should progress to "permanentlyClosing"');
-            test.equal(watcher.next().name, 'closing', 'the "closing" event should be emitted');
+            test.equal(watcher.next().name, 'disconnecting', 'the "disconnecting" event should be emitted');
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
-            test.equal(watcher.next().name, 'closed', 'the "closed" event should be emitted');
+            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
             test.finish();
           }
         ]);
@@ -744,11 +744,11 @@
         var connection = new Pusher.Connection('m');
         var watcher = new EventsWatcher(connection, [
           'connecting_in',
-          'closing',
-          'closed'
+          'disconnecting',
+          'disconnected'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -764,11 +764,11 @@
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosing', 'state should progress to "permanentlyClosing"');
-            test.equal(watcher.next().name, 'closing', 'the "closing" event should be emitted');
+            test.equal(watcher.next().name, 'disconnecting', 'the "disconnecting" event should be emitted');
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
-            test.equal(watcher.next().name, 'closed', 'the "closed" event should be emitted');
+            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
             test.finish();
           }
         ]);
@@ -794,7 +794,7 @@
           'connected'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
@@ -841,7 +841,7 @@
           },
           function(e) {
             // have to test connected event in next state because, in prev one, connectedPost has not been run
-            test.deepEqual(watcher.next(), {name: 'connected'}, 'the "connected" event should be emitted');
+            test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
           },
           // connecting
@@ -865,7 +865,7 @@
 
         test.deepEqual(connection.options, {encrypted: true}, 'this.options should be {encrypted: true}');
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
           },
@@ -934,7 +934,7 @@
           'failed'
         ]);
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           function(e) {
             test.equal(e.newState, 'failed', 'state should be "failed"');
             test.deepEqual(watcher.next().name, 'failed', 'the "failed" event should be emitted');
@@ -955,7 +955,7 @@
 
         var connection = new Pusher.Connection('n');
 
-        new SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           function(e) {
             test.equal(e.newState, 'failed', 'state should intially be "failed"');
             test.finish();
@@ -971,7 +971,7 @@
         var connection = new Pusher.Connection('r');
         var nextConnectionAttempt = null;
 
-        SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           function(e) {
             test.equal(e.newState, 'waiting', 'state should be "waiting"');
           },
@@ -1020,7 +1020,7 @@
 
         var connection = new Pusher.Connection('b599fe0f1e4b6f6eb8a6');
 
-        SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {},
           // connecting
@@ -1063,7 +1063,7 @@
 
         var connection = new Pusher.Connection('b599fe0f1e4b6f6eb8a6');
 
-        SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {},
           // connecting
@@ -1106,7 +1106,7 @@
           data: '{"message":"oh awesome"}'
         });
 
-        SteppedObserver(connection, 'state_change', [
+        SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {},
           // connecting
@@ -1146,7 +1146,7 @@
         'connecting_in'
       ]);
 
-      new SteppedObserver(connection, 'state_change', [
+      SteppedObserver(connection._machine, 'state_change', [
         // waiting
         function(e) {
           test.equal(e.newState, 'waiting', 'state should progress to "waiting"');

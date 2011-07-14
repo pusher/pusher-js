@@ -28,7 +28,7 @@ var Pusher = function(app_key, options) {
     .bind('message', function(params) {
       self.send_local_event(params.event, params.data, params.channel);
     })
-    .bind('closed', function() {
+    .bind('disconnected', function() {
       self.channels.disconnect();
     })
     .bind('error', function(err) {
@@ -76,7 +76,7 @@ Pusher.prototype = {
   subscribe: function(channel_name) {
     var self = this;
     var channel = this.channels.add(channel_name, this);
-    if (this.connection._machine.is("connected")) {
+    if (this.connection.state === 'connected') {
       channel.authorize(this, function(data) {
         self.send_event('pusher:subscribe', {
           channel: channel_name,
@@ -90,7 +90,7 @@ Pusher.prototype = {
 
   unsubscribe: function(channel_name) {
     this.channels.remove(channel_name);
-    if (this.connection._machine.is("connected")) {
+    if (this.connection.state === 'connected') {
       this.send_event('pusher:unsubscribe', {
         channel: channel_name
       });
