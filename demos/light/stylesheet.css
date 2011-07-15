@@ -1,0 +1,122 @@
+body {
+  background: #EEE;
+  color: #333;
+  font-family: "Helvetica", Helvetica, Arial, sans-serif;
+  font-size: 100%; }
+
+a { color:black; }
+a:visited { color:black; }
+
+.connect_disconnect {
+    text-align: center;
+}
+
+.light_container {
+    margin-left: auto;
+    margin-right: auto;
+    width: 40px;
+    margin-bottom:50px;
+    background-color:black;
+    padding:5px 15px 5px 15px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+}
+
+.redon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: #FF0000;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+}
+
+.redoff {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: #440000;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+}
+
+.amberon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: #FFC800;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    text-align:center;
+    vertical-align: bottom;
+    font-size:34px;
+    color:#FFFF00;
+}
+
+.amberoff {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: #443800;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+}
+
+.greenon {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: #00FF00;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+}
+
+.greenoff {
+    display: block;
+    width: 40px;
+    height: 40px;
+    background: #004400;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+}
+
+#container {
+  position: relative;
+  width: 500px;
+  margin: 0 auto 40px;
+  background: white;
+  border: 1px solid #d0d0d0;
+  -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
+  -o-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
+  margin-top: 50px;
+
+  padding: 0 0 6px 0;
+}
+  #container header h2 {
+    font-size: 2.4em;
+    font-weight: normal;
+    text-align: center;
+    padding: 0.4em 0 0.7em;
+    margin: 0;
+    line-height: 1em; }
+
+footer {
+    border-top: 1px solid #d0d0d0;
+    padding-top: 6px;
+    width: 500px;
+    margin: 0 auto 2em;
+    color: #777;
+    text-shadow: rgba(255, 255, 255, 0.8) 0 1px 1px;
+    text-align: center;
+    font-size: 80%;
+}
+
+footer a {
+    color: #777;
+    text-decoration: underline; }
+footer a:visited { color: #777; }
+footer a:hover, footer a:focus {
+    color: #777;
+    text-decoration: none; }

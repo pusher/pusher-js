@@ -1,5 +1,5 @@
 var _require = (function () {
-  
+
   var handleScriptLoaded;
   if (document.addEventListener) {
     handleScriptLoaded = function (elem, callback) {
@@ -12,7 +12,7 @@ var _require = (function () {
       })
     }
   }
-  
+
   return function (deps, callback) {
     var dep_count = 0,
     dep_length = deps.length;
@@ -38,7 +38,7 @@ var _require = (function () {
       });
 
       head.appendChild(script);
-    }   
+    }
 
     for(var i = 0; i < dep_length; i++) {
       addScript(deps[i], callback);
@@ -51,20 +51,24 @@ var _require = (function () {
   var root = cdn + Pusher.VERSION;
 
   var deps = [];
-  if (window['JSON'] == undefined) {
+  if (typeof window['JSON'] === undefined) {
     deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
-  if (window['WebSocket'] == undefined) {
+  if (typeof window['WebSocket'] === 'undefined') {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
   }
 
   var initialize = function() {
-    if (window['WebSocket'] == undefined) {
+    if (typeof window['WebSocket'] === 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
       return function() {
         // This runs after flashfallback.js has loaded
-        if (window['WebSocket']) {
+        if (typeof window['WebSocket'] !== 'undefined') {
+          // window['WebSocket'] is a flash emulation of WebSocket
+          Pusher.Transport = window['WebSocket'];
+          Pusher.TransportType = 'flash';
+
           window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
           WebSocket.__addTask(function() {
             Pusher.ready();
@@ -72,17 +76,30 @@ var _require = (function () {
           WebSocket.__initialize();
         } else {
           // Flash must not be installed
-          Pusher.debug("Could not connect: WebSocket is not available natively or via Flash");
-          // TODO: Update Pusher state in such a way that users can bind to it
+          Pusher.Transport = null;
+          Pusher.TransportType = 'none';
+          Pusher.ready();
         }
       }
     } else {
       return function() {
+        // This is because Mozilla have decided to
+        // prefix the WebSocket constructor with "Moz".
+        if (typeof window['MozWebSocket'] !== 'undefined') {
+          Pusher.Transport = window['MozWebSocket'];
+        } else {
+          Pusher.Transport = window['WebSocket'];
+        }
+        // We have some form of a native websocket,
+        // even if the constructor is prefixed:
+        Pusher.TransportType = 'native';
+
+        // Initialise Pusher.
         Pusher.ready();
       }
     }
   }();
-  
+
   var ondocumentbody = function(callback) {
     var load_body = function() {
       document.body ? callback() : setTimeout(load_body, 0);

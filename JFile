@@ -7,11 +7,14 @@ target_dir './dist'
 
 src_dir './src'
 
-version '1.8.5'
+version '1.9.0-pre'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
+  file 'pusher_event_dispatcher.js'
+  file 'pusher_machine.js'
+  file 'pusher_connection.js'
   file 'pusher_channels.js'
   file 'dependencies.js'
 end
