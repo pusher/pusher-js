@@ -18,7 +18,7 @@ $().ready(function(){
     updateControls('disconnect');
   });
 
-  socket.connection.bind('closed', function(data) {
+  socket.connection.bind('disconnected', function(data) {
     updateLight('red');
     updateControls('connect');
   });
