@@ -71,8 +71,6 @@
       newState: nextState
     });
 
-    Pusher.debug('State changed', prevState + ' -> ' + nextState);
-
     // Post:
     safeCall(nextState + 'Post', stateCallbacks, data);
   };

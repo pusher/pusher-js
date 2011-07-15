@@ -304,6 +304,7 @@
 
       self.trigger('state_change', {previous: prevState, current: newState});
       self.trigger(newState, data);
+      Pusher.debug('State changed', prevState + ' -> ' + newState);
     }
   };
 
