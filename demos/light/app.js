@@ -12,6 +12,11 @@ $().ready(function(){
     }
   });
 
+  socket.connection.bind('connecting', function() {
+    updateLight('amber');
+    updateControls('connect');
+  });
+
   socket.connection.bind('connected', function(data) {
     resetAmber();
     updateLight('green');
