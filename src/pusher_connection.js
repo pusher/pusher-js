@@ -53,6 +53,8 @@
         self.socket = null;
         self.socket_id = null;
 
+        resetConnectionParameters(self);
+
         self.state = 'initialized';
       },
 
@@ -304,10 +306,21 @@
   };
 
   Connection.prototype.connect = function() {
+    // no WebSockets
     if (Pusher.Transport === null) {
       this._machine.transition('failed');
-    } else if (!this._machine.is('connected')) {
+    }
+    // initial open of connection
+    else if(this._machine.is('initialized')) {
+      this._machine.transition('waiting');
+    }
+    // user skipping connection wait
+    else if (this._machine.is('waiting')) {
       resetConnectionParameters(this);
+      this._machine.transition('connecting');
+    }
+    // user re-opening connection after closing it
+    else if(this._machine.is("permanentlyClosed")) {
       this._machine.transition('waiting');
     }
   };

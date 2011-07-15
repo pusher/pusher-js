@@ -201,6 +201,7 @@
           'connected'
         ])
 
+
         SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
@@ -984,15 +985,10 @@
             nextConnectionAttempt = new Date().getTime() + connection.connectionWait;
             connection.connect();
           },
-          function(e) { // back into waiting state again
-            test.equal(e.newState, 'waiting', 'state should be "waiting"');
-            test.equal(connection.connectionWait, 0, 'connectionWait should be 0 again');
-          },
-          function(e) {
+          function(e) { // straight to connecting
             test.equal(e.newState, 'connecting', 'state should be "connecting"');
             connection.socket.trigger('open');
           },
-          // open
           function(e) {
             test.equal(e.newState, 'open', 'state should intially be "open"');
             connection.socket.trigger('message', JSON.stringify({
