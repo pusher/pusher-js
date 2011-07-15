@@ -3,7 +3,7 @@
 
   var machineTransitions = {
     'initialized': ['waiting', 'failed'],
-    'waiting': ['connecting', 'permanentlyClosed', 'waiting'],
+    'waiting': ['connecting', 'permanentlyClosed'],
     'connecting': ['open', 'permanentlyClosing', 'impermanentlyClosing', 'waiting'],
     'open': ['connected', 'permanentlyClosing', 'impermanentlyClosing', 'waiting'],
     'connected': ['permanentlyClosing', 'impermanentlyClosing', 'waiting'],
@@ -53,8 +53,6 @@
         self.key = key;
         self.socket = null;
         self.socket_id = null;
-
-        resetConnectionParameters(self);
 
         self.state = 'initialized';
       },
@@ -316,11 +314,11 @@
     }
     // initial open of connection
     else if(this._machine.is('initialized')) {
+      resetConnectionParameters(this);
       this._machine.transition('waiting');
     }
     // user skipping connection wait
     else if (this._machine.is('waiting')) {
-      resetConnectionParameters(this);
       this._machine.transition('connecting');
     }
     // user re-opening connection after closing it
