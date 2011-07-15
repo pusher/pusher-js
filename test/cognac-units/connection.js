@@ -198,6 +198,7 @@
 
         var watcher = new EventsWatcher(connection, [
           'connecting_in',
+          'connecting',
           'connected'
         ])
 
@@ -209,7 +210,7 @@
           },
           // connecting
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, 'the "connecting_in" event should be emitted with event_data of [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
 
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
             test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
@@ -257,8 +258,8 @@
 
         var watcher = new EventsWatcher(connection, [
           'connecting_in',
+          'connecting',
           'connected',
-          'disconnecting',
           'disconnected'
         ])
 
@@ -269,7 +270,7 @@
           },
           // connecting
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, 'the "connecting_in" event should be emitted with event_data of [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
 
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
             test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
@@ -301,8 +302,6 @@
           },
           // permanentlyClosed
           function(e) {
-            test.equal(watcher.next().name, 'disconnecting', 'the "disconnecting" event should be emitted');
-
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
             test.equal(connection.socket.readyState, connection.socket.CLOSED, 'the socket readyState should change to closed');
 
@@ -318,7 +317,7 @@
           },
           // connecting
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, 'the "connecting_in" event should be emitted with event_data of [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             test.equal(e.newState, 'connecting', 'state should intially be "connecting"');
 
             defer(connection.disconnect, connection);
@@ -341,6 +340,7 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('c');
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in'
         ]);
 
@@ -351,7 +351,7 @@
           },
           // connecting
           function(e) {
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, 'the "connecting_in" event should be emitted with event_data of [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
             test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
 
@@ -386,6 +386,7 @@
         var connection = new Pusher.Connection('d');
 
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in'
         ]);
 
@@ -397,7 +398,7 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
 
             connection.socket.trigger('open');
@@ -430,6 +431,7 @@
         var connection = new Pusher.Connection('e');
 
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in',
           'connected'
         ]);
@@ -442,7 +444,7 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.socket.trigger('open');
           },
           // open
@@ -462,7 +464,7 @@
           function(e) {
             // have to test connected event in next state because, in prev one, connectedPost has not been run
             test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
-            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
 
             connection.disconnect();
           },
@@ -479,6 +481,7 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('f');
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in',
           'error'
         ]);
@@ -491,7 +494,7 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.socket.trigger('open');
           },
           // open
@@ -536,6 +539,7 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('g');
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in'
         ]);
 
@@ -547,7 +551,7 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             // open is not fired
           },
           // impermanentlyClosing
@@ -571,6 +575,7 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('h');
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in'
         ]);
 
@@ -582,7 +587,7 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.socket.trigger('open');
           },
           function(e) {
@@ -606,6 +611,7 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('i');
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in',
           'error'
         ]);
@@ -618,11 +624,12 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.socket.trigger('error');
           },
           // impermanentlyClosing
           function(e) {
+            // TODO: do deepEqual on the error object as err.type should equal "WebSocketError"
             test.equal(watcher.next().name, 'error', 'the "error" event should be emitted');
             test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermantentlyClosing"');
           },
@@ -641,6 +648,7 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('j');
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in',
           'error'
         ]);
@@ -653,7 +661,7 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.socket.trigger('open');
           },
           function(e) {
@@ -685,9 +693,8 @@
       'user closes during waiting': function(test) {
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('k');
-        var watcher = new EventsWatcher(connection, [
-          'disconnected'
-        ]);
+
+        // TODO: test that disconnected event was not emitted.
 
         SteppedObserver(connection._machine, 'state_change', [
           // waiting
@@ -697,7 +704,6 @@
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
-            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
             test.finish();
           }
         ]);
@@ -711,9 +717,8 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('l');
         var watcher = new EventsWatcher(connection, [
-          'connecting_in',
-          'disconnecting',
-          'disconnected'
+          'connecting',
+          'connecting_in'
         ]);
 
         SteppedObserver(connection._machine, 'state_change', [
@@ -723,16 +728,14 @@
           },
           function(e) {
             test.equal(e.newState, 'connecting', 'state should intially be "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.disconnect();
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosing', 'state should progress to "permanentlyClosing"');
-            test.equal(watcher.next().name, 'disconnecting', 'the "disconnecting" event should be emitted');
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
-            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
             test.finish();
           }
         ]);
@@ -743,9 +746,8 @@
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('m');
         var watcher = new EventsWatcher(connection, [
-          'connecting_in',
-          'disconnecting',
-          'disconnected'
+          'connecting',
+          'connecting_in'
         ]);
 
         SteppedObserver(connection._machine, 'state_change', [
@@ -755,7 +757,7 @@
           },
           function(e) {
             test.equal(e.newState, 'connecting', 'state should intially be "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             connection.socket.trigger('open');
           },
           function(e) {
@@ -764,11 +766,9 @@
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosing', 'state should progress to "permanentlyClosing"');
-            test.equal(watcher.next().name, 'disconnecting', 'the "disconnecting" event should be emitted');
           },
           function(e) {
             test.equal(e.newState, 'permanentlyClosed', 'state should progress to "permanentlyClosed"');
-            test.equal(watcher.next().name, 'disconnected', 'the "disconnected" event should be emitted');
             test.finish();
           }
         ]);
@@ -782,16 +782,20 @@
 
 
       //  Test:
-      //    waiting -> connecting -> (onopen)
-      //    -> opened -> (onclose) -> waiting
+      //    waiting -> connecting -> (onclose) -> waiting
+      //    -> connecting -> open -> connected -> (onclose)
       //
+      // For this test we must first fail a connection by (onclose) so that
+      // we increment the connectionWait time and toggle ssl
       'Successful connection resets conn wait to 0 and ssl to its default initial value': function(test) {
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('n');
 
         var watcher = new EventsWatcher(connection, [
+          'connecting',
           'connecting_in',
           'connected'
+          // trigger disconnected?
         ]);
 
         SteppedObserver(connection._machine, 'state_change', [
@@ -802,14 +806,9 @@
           // connecting
           function(e) {
             test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
             test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
 
-            connection.socket.trigger('open');
-          },
-          // open
-          function(e) {
-            test.equal(e.newState, 'open', 'state should progress to "open"');
             connection.socket.trigger('close');
           },
           // waiting
@@ -843,13 +842,8 @@
             // have to test connected event in next state because, in prev one, connectedPost has not been run
             test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
-          },
-          // connecting
-          function(e) {
-            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
-            test.equal(connection.socket.URL.substr(0, 3), 'ws:'); // should be using default non-ssl
-
+            test.equal(connection.connectionSecure, false, 'connection should switch to using ws');
+            test.equal(connection.connectionWait, 0, 'connectionWait should reset to 0');
             connection.disconnect();
             test.finish();
           }
@@ -920,33 +914,6 @@
 
 
 
-
-
-
-
-
-
-
-      'test failure state': function(test) {
-        Pusher.Transport = null;
-        var connection = new Pusher.Connection('p');
-        var watcher = new EventsWatcher(connection, [
-          'failed'
-        ]);
-
-        SteppedObserver(connection._machine, 'state_change', [
-          function(e) {
-            test.equal(e.newState, 'failed', 'state should be "failed"');
-            test.deepEqual(watcher.next().name, 'failed', 'the "failed" event should be emitted');
-
-            test.finish();
-          }
-        ]);
-
-        connection.connect();
-      },
-
-
       //-----------------------------------------------
       //-----------------------------------------------
       'Should result in a state of "failed" if WebSockets are not available': function(test) {
@@ -954,9 +921,13 @@
         Pusher.Transport = null;
 
         var connection = new Pusher.Connection('n');
+        var watcher = new EventsWatcher(connection, [
+          'failed'
+        ]);
 
         SteppedObserver(connection._machine, 'state_change', [
           function(e) {
+            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
             test.equal(e.newState, 'failed', 'state should intially be "failed"');
             test.finish();
           }
@@ -1137,7 +1108,8 @@
       var connection = new Pusher.Connection('z');
 
       var watcher = new EventsWatcher(connection, [
-        'connecting_in'
+        'connecting_in',
+        'connecting'
       ]);
 
       SteppedObserver(connection._machine, 'state_change', [
@@ -1148,7 +1120,7 @@
         },
         // connecting
         function(e) {
-          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 0}, '"connecting_in" event should be emitted with [Number:0]');
+          test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
           connection.socket.trigger('open');
         },
         // open

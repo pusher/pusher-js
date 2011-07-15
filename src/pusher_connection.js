@@ -63,7 +63,9 @@
           self._machine.transition('connecting');
         }, self.connectionWait);
 
-        informUser('connecting_in', self.connectionWait);
+        if (self.connectionWait > 0) {
+          informUser('connecting_in', self.connectionWait);
+        }
 
         // QUERY: Should this be in connectingPre?
         if (self.state !== 'connecting') {
@@ -146,15 +148,13 @@
         triggerStateChange('connected');
       },
 
+      connectedExit: function() {
+        triggerStateChange('disconnected');
+      },
+
       impermanentlyClosingPost: function() {
         self.socket.onclose = transitionToWaiting;
         self.socket.close();
-      },
-
-      permanentlyClosingPre: function() {
-        // TODO: Do we still want a closing / disconnecting state?
-        // QUERY: Is this a state or an event?
-        triggerStateChange('disconnecting');
       },
 
       permanentlyClosingPost: function() {
@@ -164,10 +164,6 @@
         };
 
         self.socket.close();
-      },
-
-      permanentlyClosedPre: function() {
-        triggerStateChange('disconnected');
       },
 
       failedPre: function() {
