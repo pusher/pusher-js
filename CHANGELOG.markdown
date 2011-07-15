@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.9.0 (2011-07-15)
+
+[NEW] New API to allow binding to changes in connection state. See blog post for details.
+
+[REMOVED] Old connection state events: `pusher:connection_established`, `pusher:connection_failed`, `pusher:connection_disconnected`.
+
+[CHANGED] Socket id now accessed via `pusher.connection.socket_id` rather than `pusher.socket_id`.
+
 ## 1.8.5 (2011-06-18)
 
 [FIX] Fix the fact that member was being added to the global scope
