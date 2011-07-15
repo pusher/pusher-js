@@ -1109,7 +1109,9 @@
 
       var watcher = new EventsWatcher(connection, [
         'connecting_in',
-        'connecting'
+        'connecting',
+        'unavailable',
+        'connected'
       ]);
 
       SteppedObserver(connection._machine, 'state_change', [
@@ -1186,6 +1188,7 @@
         },
         function(e) {
           test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '"connecting_in" event should be emitted with [Number:10000]');
+          test.equal(watcher.next().name, 'unavailable', 'the "unavailable" event should be emitted');
           connection.socket.trigger('open');
         },
         // open
@@ -1199,9 +1202,31 @@
         },
         function(e) {
           test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '"connecting_in" event should be emitted with [Number:10000]');
-          connection.disconnect();
-          test.finish();
+
+          // The next event on the watcher should be undefined
+          // as we should not have emitted another event.
+          test.equal(watcher.next(), undefined, 'the "unavailable" event should not be emitted');
+          // now lets actually connect.
+          connection.socket.trigger('open');
         },
+        // open
+        function(e) {
+          test.equal(e.newState, 'open', 'state should progress to "open"');
+
+          connection.socket.trigger('message', JSON.stringify({
+            event: 'pusher:connection_established',
+            data: '{\"socket_id\":\"804.1456320\"}'
+          }));
+        },
+        // connected
+        function(e) {
+          test.equal(e.newState, 'connected', 'state should progress to "connected"');
+          defer(connection.disconnect, connection);
+        },
+        function(e) {
+          test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
+          test.finish();
+        }
       ]);
 
       connection.connect();

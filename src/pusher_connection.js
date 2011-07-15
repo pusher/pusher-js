@@ -33,6 +33,7 @@
     }
     connection.connectedTimeout = 2000;
     connection.connectionSecure = connection.compulsorySecure;
+    connection.connectionAttempts = 0;
   }
 
   function Connection(key, options) {
@@ -67,8 +68,9 @@
           informUser('connecting_in', self.connectionWait);
         }
 
-        // QUERY: Should this be in connectingPre?
-        if (self.state !== 'connecting') {
+        if (self.connectionAttempts > 4) {
+          triggerStateChange('unavailable');
+        } else {
           triggerStateChange('connecting');
         }
       },
@@ -191,6 +193,8 @@
       if (self.compulsorySecure !== true) {
         self.connectionSecure = !self.connectionSecure;
       }
+
+      self.connectionAttempts++;
     }
 
     function formatURL(key, isSecure) {
@@ -292,6 +296,10 @@
     }
 
     function triggerStateChange(newState, data) {
+      // avoid emitting and changing the state
+      // multiple times when it's the same.
+      if (self.state === newState) return;
+
       var prevState = self.state;
 
       self.state = newState;
