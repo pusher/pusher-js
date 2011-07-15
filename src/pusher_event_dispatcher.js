@@ -45,7 +45,7 @@ Example:
       }
     } else {
       // Log is un-necessary in case of global channel or connection object
-      if (!(this.global || this instanceof Pusher.Connection)) {
+      if (!(this.global || this instanceof Pusher.Connection || this instanceof Pusher.Machine)) {
         Pusher.debug('No callbacks for ' + event_name, event_data);
       }
     }
