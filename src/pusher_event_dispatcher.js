@@ -25,7 +25,7 @@ Example:
     return this;// chainable
   };
 
-  EventsDispatcher.prototype.trigger = function(event_name, data) {
+  EventsDispatcher.prototype.emit = function(event_name, data) {
     this.dispatch_global_callbacks(event_name, data);
     this.dispatch(event_name, data);
     return this;

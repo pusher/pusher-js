@@ -290,7 +290,7 @@
     }
 
     function informUser(eventName, data) {
-      self.trigger(eventName, data);
+      self.emit(eventName, data);
     }
 
     function triggerStateChange(newState, data) {
@@ -302,9 +302,10 @@
 
       self.state = newState;
 
-      self.trigger('state_change', {previous: prevState, current: newState});
-      self.trigger(newState, data);
       Pusher.debug('State changed', prevState + ' -> ' + newState);
+
+      self.emit('state_change', {previous: prevState, current: newState});
+      self.emit(newState, data);
     }
   };
 

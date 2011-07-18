@@ -62,10 +62,17 @@ Pusher.Channel.prototype = {
   
   authorize: function(pusher, callback){
     callback({}); // normal channels don't require auth
+  },
+
+  trigger: function(event, data) {
+    this.pusher.send_event(event, data, this.name);
+    return this;
   }
 };
 
 Pusher.Util.extend(Pusher.Channel.prototype, Pusher.EventsDispatcher.prototype);
+
+
 
 Pusher.auth_callbacks = {};
 

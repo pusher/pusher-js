@@ -66,7 +66,7 @@
     this.state = nextState;
 
     // handy to bind to
-    this.trigger('state_change', {
+    this.emit('state_change', {
       oldState: prevState,
       newState: nextState
     });
