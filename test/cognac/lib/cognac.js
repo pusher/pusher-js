@@ -18,55 +18,66 @@
 
   function TestRunner() {
     // templates:
-    //var suiteTemplate = document.getElementById('suiteTemplate').innerText;
-    //var testTemplate = document.getElementById('testTemplate').innerText;
+    var self = this;
 
     // storage:
-    var suites = [];
-    var suite_names = [];
+    self.suites = [];
+    self.suite_names = [];
 
+
+    var totals = {
+      failures: 0,
+      successes: 0,
+      count: 0,
+      suitesRun: 0
+    };
 
     // callbacks
 
     function onSuiteFinished(suite, status, results) {
+      totals.suitesRun++;
+      totals.count += results.tests.length;
+      totals.successes += results.numSuccesses;
+      totals.failures += results.numFailures;
+      
       console.log('----');
       console.log('Finished: ' + suite.name);
       console.log('\tFailures: ' + results.numFailures);
       console.log('\tSuccesses: ' + results.numSuccesses);
       console.log('\tTotal: ' + results.tests.length);
       console.log('----');
+      
+      console.log(totals.suitesRun, self.suites.length)
+      
+      if (totals.suitesRun === self.suites.length) {
+        onAllSuitesDone(totals);
+      }
+    }
+    
+    function onAllSuitesDone(totals) {
+      console.log('---- TOTALS ----');
+      console.log('\tFailures: ' + totals.failures);
+      console.log('\tSuccesses: ' + totals.successes);
+      console.log('\tTotal: ' + totals.count);
+      console.log('----');
     }
 
     function onAddSuite(suite) {
-      // $('#suites-list').append(Mustache.to_html(suiteTemplate, {
-      //         'name': suite.name,
-      //         'id': suite.id
-      //       }));
-      //
-      //       for(var name in suite.tests) {
-      //         var test = suite.tests[name];
-      //
-      //         $('#'+suite.id).find('ul.tests-list').append(Mustache.to_html(testTemplate, {
-      //           name: name,
-      //           source: test.toString(),
-      //           id: test.id
-      //         }));
-      //       }
     }
 
     return {
       addSuite: function(name, tests) {
-        if (suite_names.indexOf(name) === -1) {
+        if (self.suite_names.indexOf(name) === -1) {
           var suite = {'name': name, 'id': guid(), 'tests': tests};
 
-          suite_names.push(name);
-          suites.push(suite);
+          self.suite_names.push(name);
+          self.suites.push(suite);
         }
         return this;
       },
 
       run: function() {
-        forEach(suites, function(suite, i, suites) {
+        forEach(self.suites, function(suite, i, suites) {
           // kinda inefficient, but no better way to do it.
           var options = {
             onTestDone: function(status, result) {

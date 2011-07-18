@@ -1,12 +1,4 @@
 ;(function() {
-  var runner;
-
-  if (window.runner) {
-    runner = window.runner;
-  } else {
-    runner = window.runner = new TestRunner();
-  }
-
   // Clear version, as we want to use a constant version for tests.
   Pusher.VERSION = '';
 
