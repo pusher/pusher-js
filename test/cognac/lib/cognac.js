@@ -17,104 +17,73 @@
   }
 
   function TestRunner() {
-    // templates:
-    var self = this;
-
     // storage:
-    self.suites = [];
-    self.suite_names = [];
+    this.suites = [];
+    this.suite_names = [];
 
-
-    var totals = {
+    this.totals = {
       failures: 0,
       successes: 0,
       count: 0,
       suitesRun: 0
     };
+  }
 
-    // callbacks
+  TestRunner.prototype.addSuite = function(name, tests) {
+    if (this.suite_names.indexOf(name) === -1) {
+      var suite = {'name': name, 'tests': tests};
 
-    function onSuiteFinished(suite, status, results) {
-      totals.suitesRun++;
-      totals.count += results.tests.length;
-      totals.successes += results.numSuccesses;
-      totals.failures += results.numFailures;
-      
-      console.log('----');
-      console.log('Finished: ' + suite.name);
-      console.log('\tFailures: ' + results.numFailures);
-      console.log('\tSuccesses: ' + results.numSuccesses);
-      console.log('\tTotal: ' + results.tests.length);
-      console.log('----');
-      
-      console.log(totals.suitesRun, self.suites.length)
-      
-      if (totals.suitesRun === self.suites.length) {
-        onAllSuitesDone(totals);
-      }
+      this.suite_names.push(name);
+      this.suites.push(suite);
     }
-    
-    function onAllSuitesDone(totals) {
-      console.log('---- TOTALS ----');
-      console.log('\tFailures: ' + totals.failures);
-      console.log('\tSuccesses: ' + totals.successes);
-      console.log('\tTotal: ' + totals.count);
-      console.log('----');
-    }
+    return this;
+  };
 
-    function onAddSuite(suite) {
-    }
+  TestRunner.prototype.run = function() {
+    var runner = this;
 
-    return {
-      addSuite: function(name, tests) {
-        if (self.suite_names.indexOf(name) === -1) {
-          var suite = {'name': name, 'id': guid(), 'tests': tests};
+    forEach(this.suites, function(suite, i, suites) {
+      // kinda inefficient, but no better way to do it.
+      var options = {
+        onTestDone: function(status, result) {
+          if (status === 'success') {
+            console.log(status.toUpperCase() + ': ' + suite.name + ': ' + result.name);
+          } else {
+            console.log(status.toUpperCase() + ': ' + suite.name + ': ' + result.name);
+            console.error('>> ' + result.failure);
+          }
+        },
 
-          self.suite_names.push(name);
-          self.suites.push(suite);
+        onTestStart: function(name) {
+          console.log('STARTED: ' + suite.name + ': ' + name);
+        },
+
+        onSuiteDone: function(status, results) {
+          runner.totals.suitesRun++;
+          runner.totals.count += results.tests.length;
+          runner.totals.successes += results.numSuccesses;
+          runner.totals.failures += results.numFailures;
+
+          console.log('----');
+          console.log('Finished: ' + suite.name);
+          console.log('\tFailures: ' + results.numFailures);
+          console.log('\tSuccesses: ' + results.numSuccesses);
+          console.log('\tTotal: ' + results.tests.length);
+          console.log('----');
+
+          if (runner.totals.suitesRun === runner.suites.length) {
+            console.log('---- TOTALS ----');
+            console.log('\tFailures: ' + runner.totals.failures);
+            console.log('\tSuccesses: ' + runner.totals.successes);
+            console.log('\tTotal: ' + runner.totals.count);
+            console.log('----');
+
+          }
+        },
+        beforeStartSuite: function(suites) {
         }
-        return this;
-      },
+      };
 
-      run: function() {
-        forEach(self.suites, function(suite, i, suites) {
-          // kinda inefficient, but no better way to do it.
-          var options = {
-            onTestDone: function(status, result) {
-              if (status === 'success') {
-                console.log(status.toUpperCase() + ': ' + result.name);
-              } else {
-                console.error(status.toUpperCase() + ': ' + result.name);
-                console.error('>> ' + result.failure);
-              }
-            },
-
-            onTestStart: function(name) {
-              console.log('STARTED: ' + name);
-            },
-
-            onSuiteDone: function(status, results) {
-              onSuiteFinished(suite, status, results);
-            },
-            beforeStartSuite: function(suites) {
-            }
-          };
-
-          testing.runSuite(suite.tests, options);
-        });
-      }
-    }
-  }
-
-  function S4() {
-    return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-  }
-
-  function guid() {
-    return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-  }
-
-
-  /*-----------------------------------------------
-    Cognac
-  -----------------------------------------------*/
+      testing.runSuite(suite.tests, options);
+    });
+  };

@@ -227,14 +227,12 @@ exports.runSuite = function(obj, options) {
 
     if (options.onTestDone) { options.onTestDone(test.failure ? 'failure' : 'success', test); }
 
-    process.nextTick(function() {
-      // if we have no more tests to start and none still running, we're done
-      if (suite.todo.length == 0 && suite.started.length == 0) {
-        suiteFinished();
-      }
+    // if we have no more tests to start and none still running, we're done
+    if (suite.todo.length == 0 && suite.started.length == 0) {
+      suiteFinished();
+    }
 
-     startNextTest();
-    });
+   startNextTest();
   }
 
   function errorHandler(err, test) {
@@ -292,7 +290,6 @@ exports.runSuite = function(obj, options) {
           tests = suite.results;
         }
         options.onSuiteDone('error', { error: err, tests: tests.map(function(t) { return t.name; })});
-        process.exit(1);
       }
       else {
         // TODO test this
@@ -376,41 +373,6 @@ exports.getTestsFromObject = function(o, filter, namespace) {
   }
 
   return tests;
-}
-
-var messageFrame = "~m~";
-// these encode/decode functions inspired by socket.io's
-exports.messageDecode = function(lines) {
-  return lines.map(function(str) {
-    if (str.substr(0,3) !== messageFrame) {
-      return str;
-    }
-
-    var msg = [];
-    for (var i = 3, number = '', l = str.length; i < l; i++){
-      var n = Number(str.substr(i, 1));
-      if (str.substr(i, 1) == n){
-        number += n;
-      } else {
-        number = Number(number);
-        var m = str.substr(i+messageFrame.length, number);
-        msg.push(JSON.parse(m));
-        i += messageFrame.length*2 + number - 1;
-        number = '';
-      }
-    }
-    return msg;
-  });
-}
-exports.messageEncode = function() {
-  var r = '';
-
-  for (var i = 0; i < arguments.length; i++) {
-    var json = JSON.stringify(arguments[i]);
-    r += messageFrame + json.length + messageFrame + json;
-  }
-
-  return r;
 }
 
 var TestAlreadyFinishedError = function(message) {

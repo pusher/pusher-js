@@ -5,7 +5,7 @@
       
       var PusherMock = {
         send_event: function(name, data, channel) {
-          test.equal('foo', name, 'Event names should be equal');
+          test.equal('client-foo', name, 'Event names should be equal');
           test.deepEqual({'bar': 'baz'}, data, 'Event data should be sent');
           test.equal('clientEvents', channel, 'The channel name should be auto-populated');
         }
@@ -18,7 +18,7 @@
 
       var channel = Pusher.Channel.factory('clientEvents', PusherMock);
       
-      channel.trigger('foo', {'bar': 'baz'});
+      channel.trigger('client-foo', {'bar': 'baz'});
       test.finish();
     }
 
