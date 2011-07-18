@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.1 (2011-07-18)
+
+[FIX] Client events triggering fixed (broken by 1.9.0)
+
+[FIX] Removed verbose logging of internal state machine transitions
+
 ## 1.9.0 (2011-07-15)
 
 [NEW] New API to allow binding to changes in connection state. See blog post for details.
