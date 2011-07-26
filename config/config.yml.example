@@ -3,9 +3,10 @@
 :development:
   <<: *default
   :js:
+    :host: foo
     :cdn: 
-      :http: localhost:4500/dev/
-      :https: localhost:4500/dev/
+      :http: http://localhost:5555/
+      :https: http://localhost:5555/
 
 :production:
   <<: *default
