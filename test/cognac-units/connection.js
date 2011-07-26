@@ -968,7 +968,96 @@
 
         // Connect the socket to continue the tests.
         connection.connect();
-      }
+      },
+
+      'User: unavailable, machine: waiting if connected and then internet dies': function(test) {
+        Pusher.Transport = TestSocket;
+        Pusher.NetInfo = TestNetInfo;
+        var connection = new Pusher.Connection('n');
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            connection.socket.trigger('open');
+          },
+          function(e) {
+            test.equal(e.newState, 'open', 'state should progress to "open"');
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'pusher:connection_established',
+              data: '{\"socket_id\":\"804.1456320\"}'
+            }));
+          },
+          function(e) {
+            test.equal(e.newState, 'connected', 'state should progress to "connected"');
+            connection.netInfo.unplug();
+          },
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+            test.equal(connection.state, 'unavailable', 'user state should be "unavailable"');
+            defer(connection.disconnect, connection);
+          },
+          function(e) {
+            test.finish();
+          }
+        ]);
+
+        connection.connect();
+      },
+
+      'User state should go from waiting to unavailable if internet down': function(test) {
+        Pusher.Transport = TestSocket;
+        Pusher.NetInfo = TestNetInfo;
+        var connection = new Pusher.Connection('n');
+
+        connection.netInfo.unplug();
+        test.equal(connection.netInfo.isOnLine(), false, 'mock onLine should be false');
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+            test.equal(connection.state, 'unavailable', 'user state should be "unavailable"');
+          },
+          function(e) {
+            defer(connection.disconnect, connection);
+          },
+          function(e) {
+            test.finish();
+          },
+        ]);
+
+        connection.connect();
+      },
+
+      'Should start connecting if net connection comes back': function(test) {
+        Pusher.Transport = TestSocket;
+        Pusher.NetInfo = TestNetInfo;
+        var connection = new Pusher.Connection('n');
+
+        connection.netInfo.unplug();
+        test.equal(connection.netInfo.isOnLine(), false, 'mock onLine should be false');
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+            test.equal(connection.state, 'unavailable', 'user state should be "unavailable"');
+            connection.netInfo.plugIn();
+          },
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should be "connecting"');
+            defer(connection.disconnect, connection);
+          },
+          function(e) {
+            test.finish();
+          },
+        ]);
+
+        connection.connect();
+      },
+
+
     },
 
     'Message Sending and Receiving': {

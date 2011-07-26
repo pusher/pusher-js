@@ -61,6 +61,8 @@ var _require = (function () {
   }
 
   var initialize = function() {
+    Pusher.NetInfo = Pusher.Connection.NetInfo;
+
     if (typeof window['WebSocket'] === 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
       return function() {
         // This runs after flashfallback.js has loaded
