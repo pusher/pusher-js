@@ -61,7 +61,7 @@ Pusher.Channel.prototype = {
   },
   
   authorize: function(pusher, callback){
-    callback({}); // normal channels don't require auth
+    callback(false, {}); // normal channels don't require auth
   },
 
   trigger: function(event, data) {
@@ -88,9 +88,10 @@ Pusher.authorizers = {
       if (xhr.readyState == 4) {
         if (xhr.status == 200) {
           var data = JSON.parse(xhr.responseText);
-          callback(data);
+          callback(false, data);
         } else {
           Pusher.debug("Couldn't get auth info from your webapp", status);
+          callback(true, xhr.status);
         }
       }
     };
@@ -98,8 +99,11 @@ Pusher.authorizers = {
   },
   jsonp: function(pusher, callback){
     var qstring = 'socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
-    var script = document.createElement("script");  
-    Pusher.auth_callbacks[this.name] = callback;
+    var script = document.createElement("script");
+    // Hacked wrapper.
+    Pusher.auth_callbacks[this.name] = function(data) {
+      callback(false, data);
+    };
     var callback_name = "Pusher.auth_callbacks['" + this.name + "']";
     script.src = Pusher.channel_auth_endpoint+'?callback='+encodeURIComponent(callback_name)+'&'+qstring;
     var head = document.getElementsByTagName("head")[0] || document.documentElement;

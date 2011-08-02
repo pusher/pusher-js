@@ -77,12 +77,16 @@ Pusher.prototype = {
     var self = this;
     var channel = this.channels.add(channel_name, this);
     if (this.connection.state === 'connected') {
-      channel.authorize(this, function(data) {
-        self.send_event('pusher:subscribe', {
-          channel: channel_name,
-          auth: data.auth,
-          channel_data: data.channel_data
-        });
+      channel.authorize(this, function(err, data) {
+        if (err) {
+          channel.emit('subscription_error', data);
+        } else {
+          self.send_event('pusher:subscribe', {
+            channel: channel_name,
+            auth: data.auth,
+            channel_data: data.channel_data
+          });
+        }
       });
     }
     return channel;
