@@ -12,7 +12,9 @@
 
   <script type="text/javascript">
     Pusher.log = function(data) {
-      console.log('\t\t', data);
+      if(window.console !== undefined) {
+        console.log('\t\t', data);
+      }
     };
   </script>
 </head>
