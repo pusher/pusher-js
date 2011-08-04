@@ -7,7 +7,7 @@ target_dir './dist'
 
 src_dir './src'
 
-version '1.9.1'
+version '1.9.2'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
