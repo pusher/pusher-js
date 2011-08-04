@@ -149,7 +149,7 @@ This is so prereleases don't overwrite the previous stable release.
 
 Define S3 bucket config in config/config.yml
 
-Set version in config/version.rb, build and upload
+First, follow the instructions under "Building", then do:
 
     ENVIRONMENT=production rake upload
     
