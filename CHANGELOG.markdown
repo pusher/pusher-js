@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.9.2 (2011-08-4)
+
+[NEW] Cleverer reconnection behaviour.
+
+If Connection is connected and the window.ononffline event is fired, this indicates that the computer has lost its connection to the local router.  In response, the Connection immediately closes the socket.
+
+If Connection is disconnected and waiting to reattempt a connection, and the window.ononline event is fired, the Connection tries to connect immediately, rather than waiting for the current waiting period to elapse.
+
+If the window is about to attempt a connection and the window.navigator.onLine variable is false, the Connection immediately goes to the unavailable state.
+
+Note: window.ononline, window.onoffline and window.navigator.onLine are only supported by some browsers.
+
+[CHANGE] If channel authentication request returns a status code that is not 200, a subscription_error event is triggered.  The subscription_error can be bound to so that the library user can respond to the failure.
+
+[FIX] Works with IE7 again, after being broken in 1.9.0.
+
+[FIX] Traffic Light connection status demo works in installations of Firefox 3.6 without Firebug.
+
 ## 1.9.1 (2011-07-18)
 
 [FIX] Client events triggering fixed (broken by 1.9.0)
@@ -119,7 +137,7 @@ For JSONp to work, your server must wrap the response in the callback name provi
       :user_id => current_user.id,
       :user_info => {:name => current_user.name}
     })
-    
+
     render :text => params[:callback] + "(" + JSON.generate(auth) + ");"
 
 ## 1.6.3
@@ -140,11 +158,11 @@ Chrome, Safari: don't require anything. These browsers already have WebSocket an
 
 This saves a lot of bandwidth and makes page loads faster.
 
-## 1.6 
+## 1.6
 
 Initial Presence support. Subscribing to presence channels allows you to respond to people entering and leaving the channel in your UI, to show who is has a connection open. More documentation here: http://pusherapp.com/docs/presence.
 
-## 1.5 
+## 1.5
 
 Updated the library to use a version of the swf file hosted by Pusher. This makes it more convenient to integrate and avoids version conflicts in future.
 
@@ -152,7 +170,7 @@ Add some full-stack integration tests that interact with the production Pusher e
 
 ## 1.4.3
 
-Trigger pusher:connection\_failed if no websocket is defined, allowing the event to work on iphones etc. 
+Trigger pusher:connection\_failed if no websocket is defined, allowing the event to work on iphones etc.
 
 ## 1.4.2
 
