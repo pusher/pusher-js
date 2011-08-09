@@ -127,6 +127,98 @@ Pusher.prototype = {
     }
 
     this.global_channel.dispatch_with_all(event_name, event_data);
+  },
+  
+  /**
+   * Subscribe to multiple channels in one call. The underlying authentication request, if required.
+   * is also performed using a single call.
+   *
+   * @return a map of channel names to channel objects.
+   *
+   * @example
+   * var pusher = new Pusher("APP_KEY");
+   * var channels = pusher.multiSubscribe(['private-channel1', 'private-channel2']);
+   * var channel1 = channels['private-channel1'];
+   */
+  multiSubscribe: function(channels) {
+    var channelName;
+    var channel;
+    var newChannels = {};
+    for(var i = 0, l = channels.length; i < l; ++i) {
+      channelName = channels[i];
+      channel = this.channels.add(channelName, this);
+      newChannels[channelName] = channel;
+    }
+    
+    if (this.connection.state === 'connected') {
+      this._multiAuth(channels, function(err, authData) {
+        if (err) {
+          channel.emit('subscription_error', authData);
+        } else {
+          self._sendSubscriptionEvents(channels, authData);
+        }
+      });
+    }
+    
+    return newChannels;
+  },
+  
+  /** @private */
+  _multiAuth: function(channels, callback) {
+    var self = this;
+    
+    var xhr = window.XMLHttpRequest ?
+      new XMLHttpRequest() :
+      new ActiveXObject("Microsoft.XMLHTTP");
+    xhr.open("POST", Pusher.channel_multiauth_endpoint, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200) {
+          var data = JSON.parse(xhr.responseText);
+          callback(false, data);
+        } else {
+          Pusher.debug("Couldn't get multiauth info from your webapp", status);
+          callback(true, xhr.status);
+        }
+      }
+    };
+    
+    var channelsToAuthorize = this._filterAuthChannels(channels);
+    var authRequest = {
+      socket_id: self.connection.socket_id,
+      channels: channelsToAuthorize
+    };
+    var postData = JSON.stringify(authRequest);
+    xhr.send(postData);
+  },
+  
+  /** @private */
+  _filterAuthChannels: function(channels) {
+    var channelsToAuth = [];
+    var channelName;
+    for(var i = 0, l = channels.length; i < l; ++i) {
+      channelName = channels[i];
+      if(Pusher.Util.startsWith(channelName)) {
+        channelsToAuth.push(channelName);
+      }
+    }
+    return channelsToAuth;
+  },
+  
+  /** @private */
+  _sendSubscriptionEvents: function(channels, authData) {
+    var channelName;
+    var channelAuth;
+    for(var i = 0, l = channels.length; i < l; ++i) {
+      channelName = channels[i];
+      channelAuth = authData[channelName] || {};
+      this.send_event('pusher:subscribe', {
+        channel: channelName,
+        auth: channelAuth.auth,
+        channel_data: channelAuth.channel_data
+      });
+    }
   }
 };
 
@@ -141,6 +233,9 @@ Pusher.Util = {
       }
     }
     return target;
+  },
+  startsWith: function(check, startsWith){
+    return check.substring(0, startsWith.length-1) === startsWith;
   }
 };
 
@@ -170,6 +265,7 @@ Pusher.host = 'ws.pusherapp.com';
 Pusher.ws_port = 80;
 Pusher.wss_port = 443;
 Pusher.channel_auth_endpoint = '/pusher/auth';
+Pusher.channel_multiauth_endpoint = '/pusher/multiauth'
 Pusher.connection_timeout = 5000;
 Pusher.cdn_http = '<CDN_HTTP>'
 Pusher.cdn_https = '<CDN_HTTPS>'
