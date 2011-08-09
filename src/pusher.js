@@ -66,11 +66,13 @@ Pusher.prototype = {
 
   subscribeAll: function() {
     var channel;
+    var channelNames = [];
     for (channel in this.channels.channels) {
       if (this.channels.channels.hasOwnProperty(channel)) {
-        this.subscribe(channel);
+        channelNames.push(channel);
       }
     }
+    this.multiSubscribe(channelNames);
   },
 
   subscribe: function(channel_name) {
@@ -128,7 +130,7 @@ Pusher.prototype = {
 
     this.global_channel.dispatch_with_all(event_name, event_data);
   },
-  
+
   /**
    * Subscribe to multiple channels in one call. The underlying authentication request, if required.
    * is also performed using a single call.
@@ -140,7 +142,8 @@ Pusher.prototype = {
    * var channels = pusher.multiSubscribe(['private-channel1', 'private-channel2']);
    * var channel1 = channels['private-channel1'];
    */
-  multiSubscribe: function(channels) {
+multiSubscribe: function(channels) {
+    var self = this;
     var channelName;
     var channel;
     var newChannels = {};
@@ -149,7 +152,7 @@ Pusher.prototype = {
       channel = this.channels.add(channelName, this);
       newChannels[channelName] = channel;
     }
-    
+
     if (this.connection.state === 'connected') {
       this._multiAuth(channels, function(err, authData) {
         if (err) {
@@ -159,14 +162,14 @@ Pusher.prototype = {
         }
       });
     }
-    
+
     return newChannels;
   },
-  
+
   /** @private */
   _multiAuth: function(channels, callback) {
     var self = this;
-    
+
     var xhr = window.XMLHttpRequest ?
       new XMLHttpRequest() :
       new ActiveXObject("Microsoft.XMLHTTP");
@@ -183,7 +186,7 @@ Pusher.prototype = {
         }
       }
     };
-    
+
     var channelsToAuthorize = this._filterAuthChannels(channels);
     var authRequest = {
       socket_id: self.connection.socket_id,
@@ -192,20 +195,21 @@ Pusher.prototype = {
     var postData = JSON.stringify(authRequest);
     xhr.send(postData);
   },
-  
+
   /** @private */
-  _filterAuthChannels: function(channels) {
+   _filterAuthChannels: function(channels) {
     var channelsToAuth = [];
     var channelName;
     for(var i = 0, l = channels.length; i < l; ++i) {
       channelName = channels[i];
-      if(Pusher.Util.startsWith(channelName)) {
+      if(Pusher.Util.startsWith(channelName, 'private-') ||
+        Pusher.Util.startsWith(channelName, 'presence-') ) {
         channelsToAuth.push(channelName);
       }
     }
     return channelsToAuth;
   },
-  
+
   /** @private */
   _sendSubscriptionEvents: function(channels, authData) {
     var channelName;
@@ -235,7 +239,7 @@ Pusher.Util = {
     return target;
   },
   startsWith: function(check, startsWith){
-    return check.substring(0, startsWith.length-1) === startsWith;
+    return (check.indexOf(startsWith) === 0);
   }
 };
 
