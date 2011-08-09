@@ -48,16 +48,16 @@ var _require = (function () {
 
 ;(function() {
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
-  var root= '/public/plugins/pusherapp';
+  var root = cdn + Pusher.VERSION;
 
   var deps = [];
   if (typeof window['JSON'] === undefined) {
-    deps.push(root + '/json2.js');
+    deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
   if (typeof window['WebSocket'] === 'undefined') {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
-    deps.push(root + '/flashfallback.js');
+    deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
   }
 
   var initialize = function() {
