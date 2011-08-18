@@ -1,7 +1,4 @@
-:default: &default
-
 :development:
-  <<: *default
   :js:
     :host: foo
     :cdn: 
@@ -9,7 +6,6 @@
       :https: http://localhost:5555/
 
 :production:
-  <<: *default
   :js:
     :cdn:
       :http: http://js.pusherapp.com/
