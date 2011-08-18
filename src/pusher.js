@@ -61,8 +61,9 @@ Pusher.prototype = {
 
     var self = this;
 
-    if (window["WebSocket"]) {
-      var ws = new WebSocket(url);
+    var socket = window["WebSocket"] ? window["WebSocket"] : window["MozWebSocket"];
+    if (socket) {
+      var ws = new socket(url);
 
       // Timeout for the connection to handle silently hanging connections
       // Increase the timeout after each retry in case of extreme latencies

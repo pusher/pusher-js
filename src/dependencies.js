@@ -54,14 +54,14 @@ var _require = (function () {
   if (window['JSON'] == undefined) {
     deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
-  if (window['WebSocket'] == undefined) {
+  if (window['WebSocket'] == undefined && window['MozWebSocket'] == undefined) {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
   }
 
   var initialize = function() {
-    if (window['WebSocket'] == undefined) {
+    if (window['WebSocket'] == undefined && window['MozWebSocket'] == undefined) {
       return function() {
         // This runs after flashfallback.js has loaded
         if (window['WebSocket']) {
