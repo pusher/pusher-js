@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.9.2 (2011-08-4)
+## 1.9.2 (2011-08-04)
 
 [NEW] Cleverer reconnection behaviour.
 
@@ -12,7 +12,7 @@ If the window is about to attempt a connection and the window.navigator.onLine v
 
 Note: window.ononline, window.onoffline and window.navigator.onLine are only supported by some browsers.
 
-[CHANGE] If channel authentication request returns a status code that is not 200, a subscription_error event is triggered.  The subscription_error can be bound to so that the library user can respond to the failure.
+[NEW] If channel authentication AJAX request returns a status code that is not 200, a `subscription_error` event is triggered.  The `subscription_error` can be bound to so that the library user can respond to the failure.
 
 [FIX] Works with IE7 again, after being broken in 1.9.0.
 
@@ -28,9 +28,15 @@ Note: window.ononline, window.onoffline and window.navigator.onLine are only sup
 
 [NEW] New API to allow binding to changes in connection state. See blog post for details.
 
+[NEW] Support for Firefox 6 native WebSocket using MozWebSocket prefix
+
 [REMOVED] Old connection state events: `pusher:connection_established`, `pusher:connection_failed`, `pusher:connection_disconnected`.
 
 [CHANGED] Socket id now accessed via `pusher.connection.socket_id` rather than `pusher.socket_id`.
+
+## 1.8.6 (2011-08-19)
+
+[NEW] Support for Firefox 6 native WebSocket using MozWebSocket prefix
 
 ## 1.8.5 (2011-06-18)
 
