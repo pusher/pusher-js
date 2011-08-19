@@ -51,7 +51,7 @@ var _require = (function () {
   var root = cdn + Pusher.VERSION;
 
   var deps = [];
-  if (typeof window['JSON'] === undefined) {
+  if (typeof window['JSON'] === 'undefined') {
     deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
   }
   if (typeof window['WebSocket'] === 'undefined') {
