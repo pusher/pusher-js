@@ -11,7 +11,6 @@ version '1.9.2'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
-  file 'json2.js'
   file 'pusher.js'
   file 'pusher_event_dispatcher.js'
   file 'pusher_machine.js'
@@ -25,6 +24,8 @@ bundle 'flashfallback.js' do
   file 'web-socket-js/swfobject.js'
   file 'web-socket-js/web_socket.js'
 end
+
+file 'json2.js'
 
 # Just copy this file across
 file 'web-socket-js/WebSocketMainInsecure.swf' => 'WebSocketMain.swf'
