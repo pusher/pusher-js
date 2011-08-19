@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.3 (2011-08-19)
+
+[FIX] Fixed JSON dependency loading properly, rather than bundling it always.
+
 ## 1.9.2 (2011-08-04)
 
 [NEW] Cleverer reconnection behaviour.
