@@ -40,13 +40,13 @@ Pusher.Channel = function(channel_name, pusher) {
 Pusher.Channel.prototype = {
   // inheritable constructor
   init: function(){
-    
+
   },
-  
+
   disconnect: function(){
-    
+
   },
-  
+
   // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
   acknowledge_subscription: function(data){
     this.subscribed = true;
@@ -55,11 +55,11 @@ Pusher.Channel.prototype = {
   is_private: function(){
     return false;
   },
-  
+
   is_presence: function(){
     return false;
   },
-  
+
   authorize: function(pusher, callback){
     callback(false, {}); // normal channels don't require auth
   },
@@ -115,25 +115,25 @@ Pusher.Channel.PrivateChannel = {
   is_private: function(){
     return true;
   },
-  
+
   authorize: function(pusher, callback){
     Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);
   }
 };
 
 Pusher.Channel.PresenceChannel = {
-  
+
   init: function(){
     this.bind('pusher_internal:subscription_succeeded', function(sub_data){
       this.acknowledge_subscription(sub_data);
       this.dispatch_with_all('pusher:subscription_succeeded', this.members);
     }.scopedTo(this));
-    
+
     this.bind('pusher_internal:member_added', function(data){
       var member = this.members.add(data.user_id, data.user_info);
       this.dispatch_with_all('pusher:member_added', member);
     }.scopedTo(this))
-    
+
     this.bind('pusher_internal:member_removed', function(data){
       var member = this.members.remove(data.user_id);
       if (member) {
@@ -141,21 +141,21 @@ Pusher.Channel.PresenceChannel = {
       }
     }.scopedTo(this))
   },
-  
+
   disconnect: function(){
     this.members.clear();
   },
-  
+
   acknowledge_subscription: function(sub_data){
     this.members._members_map = sub_data.presence.hash;
     this.members.count = sub_data.presence.count;
     this.subscribed = true;
   },
-  
+
   is_presence: function(){
     return true;
   },
-  
+
   members: {
     _members_map: {},
     count: 0,
@@ -185,13 +185,12 @@ Pusher.Channel.PresenceChannel = {
     },
 
     get: function(user_id) {
-      var user_info = this._members_map[user_id];
-      if (user_info) {
+      if (this._members_map.hasOwnProperty(user_id)) { // have heard of this user user_id
         return {
           id: user_id,
-          info: user_info
+          info: this._members_map[user_id]
         }
-      } else {
+      } else { // have never heard of this user
         return null;
       }
     },
