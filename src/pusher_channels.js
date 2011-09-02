@@ -65,8 +65,7 @@ Pusher.Channel.prototype = {
   },
 
   trigger: function(event, data) {
-    this.pusher.send_event(event, data, this.name);
-    return this;
+    return this.pusher.send_event(event, data, this.name);
   }
 };
 

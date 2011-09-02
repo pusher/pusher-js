@@ -110,8 +110,7 @@ Pusher.prototype = {
     };
     if (channel) payload['channel'] = channel;
 
-    this.connection.send(JSON.stringify(payload));
-    return this;
+    return this.connection.send(JSON.stringify(payload));
   },
 
   send_local_event: function(event_name, event_data, channel_name) {
