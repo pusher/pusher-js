@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.4 (2011-09-12)
+
+[FIX] Fixed bug which meant that presence channels only worked correctly when `user_info` was supplied. It's now possible to use presence channels without specifying `user_info` (`user_id` is required).
+
 ## 1.9.3 (2011-08-19)
 
 [FIX] Fixed JSON dependency loading properly, rather than bundling it always.
