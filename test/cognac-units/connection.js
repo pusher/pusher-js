@@ -15,6 +15,7 @@
     var events = [];
 
     this.next = function() {
+      // console.log('next', events);
       return events.shift();
     };
 
@@ -26,6 +27,7 @@
           events.push({name: event_name});
         }
       }
+      // console.log('addEvent', events);
     });
   }
 
@@ -43,7 +45,7 @@
         numberOfCallbacks = callbacks.length;
 
     subject.bind(event_name, function(event_data) {
-      //console.log(event_data);
+      // console.log('observed', event_data);
       if (numberOfChanges < numberOfCallbacks) {
         callbacks[numberOfChanges++](event_data);
       }

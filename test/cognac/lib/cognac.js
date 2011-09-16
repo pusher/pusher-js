@@ -76,11 +76,14 @@
             console.log('\tFailures: ' + runner.totals.failures);
             console.log('\tSuccesses: ' + runner.totals.successes);
             console.log('\tTotal: ' + runner.totals.count);
+            console.log('');
+            console.log('Time taken: ' + (Date.now() - runner.startTime) + 'ms')
             console.log('----');
 
           }
         },
         beforeStartSuite: function(suites) {
+          runner.startTime = Date.now();
         }
       };
 
