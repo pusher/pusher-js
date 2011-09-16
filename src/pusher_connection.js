@@ -1,6 +1,38 @@
 ;(function() {
   var Pusher = this.Pusher;
 
+  /*
+    A little bauble to interface with window.navigator.onLine,
+    window.ononline and window.onoffline.  Easier to mock.
+  */
+  var NetInfo = function() {
+    var self = this;
+    Pusher.EventsDispatcher.call(this);
+    // This is okay, as IE doesn't support this stuff anyway.
+    if (window.addEventListener !== undefined) {
+      window.addEventListener("online", function() {
+        self.emit('online', null);
+      }, false);
+      window.addEventListener("offline", function() {
+        self.emit('offline', null);
+      }, false);
+    }
+  };
+
+  // Offline means definitely offline (no connection to router).
+  // Inverse does NOT mean definitely online (only currently supported in Safari
+  // and even there only means the device has a connection to the router).
+  NetInfo.prototype.isOnLine = function() {
+    if (window.navigator.onLine === undefined) {
+      return true;
+    } else {
+      return window.navigator.onLine;
+    }
+  };
+
+  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
+  this.Pusher.NetInfo = Pusher.NetInfo = NetInfo;
+
   var machineTransitions = {
     'initialized': ['waiting', 'failed'],
     'waiting': ['connecting', 'permanentlyClosed'],
@@ -44,7 +76,20 @@
     this.options = Pusher.Util.extend({encrypted: false}, options || {});
 
     this.netInfo = new Pusher.NetInfo();
-    Pusher.EventsDispatcher.call(this.netInfo);
+
+    this.netInfo.bind('online', function(){
+      if (self._machine.is('waiting')) {
+        self._machine.transition('connecting');
+        triggerStateChange('connecting');
+      }
+    });
+
+    this.netInfo.bind('offline', function() {
+      if (self._machine.is('connected')) {
+        self.socket = undefined;
+        self._machine.transition('waiting');
+      }
+    })
 
     // define the state machine that runs the connection
     this._machine = new Pusher.Machine(self, 'initialized', machineTransitions, {
@@ -61,27 +106,24 @@
       },
 
       waitingPre: function() {
-        self._waitingTimer = setTimeout(function() {
-          self._machine.transition('connecting');
-        }, self.connectionWait);
-
         if (self.connectionWait > 0) {
           informUser('connecting_in', self.connectionWait);
+
+          if (self.netInfo.isOnLine() === true && self.connectionAttempts > 4) {
+            triggerStateChange('unavailable');
+          }
         }
 
-        if (netInfoSaysOffline() || self.connectionAttempts > 4) {
-          if(netInfoSaysOffline())
-          {
-            // called by some browsers upon reconnection to router
-            self.netInfo.bind('online', function() {
-              if(self._machine.is('waiting'))
-                self._machine.transition('connecting');
-            });
-          }
+        if (self.netInfo.isOnLine() === true) {
+          self._waitingTimer = setTimeout(function() {
+            self._machine.transition('connecting');
+          }, self.connectionWait);
 
-          triggerStateChange('unavailable');
+          if (self.connectionAttempts <= 4) {
+            triggerStateChange('connecting');
+          }
         } else {
-          triggerStateChange('connecting');
+          triggerStateChange('unavailable');
         }
       },
 
@@ -150,11 +192,6 @@
         self.socket.onclose = function() {
           self._machine.transition('waiting');
         };
-        // onoffline called by some browsers on loss of connection to router
-        self.netInfo.bind('offline', function() {
-          if(self._machine.is('connected'))
-            self.socket.close();
-        });
 
         resetConnectionParameters(self);
       },
@@ -322,13 +359,6 @@
       self.emit('state_change', {previous: prevState, current: newState});
       self.emit(newState, data);
     }
-
-    // Offline means definitely offline (no connection to router).
-    // Inverse does NOT mean definitely online (only currently supported in Safari
-    // and even there only means the device has a connection to the router).
-    function netInfoSaysOffline() {
-      return self.netInfo.isOnLine() === false;
-    }
   };
 
   Connection.prototype.connect = function() {
@@ -370,26 +400,4 @@
 
   Pusher.Util.extend(Connection.prototype, Pusher.EventsDispatcher.prototype);
   this.Pusher.Connection = Connection;
-
-  /*
-    A little bauble to interface with window.navigator.onLine,
-    window.ononline and window.onoffline.  Easier to mock.
-  */
-  var NetInfo = function() {
-    var self = this;
-    window.ononline = function() {
-      self.emit('online', null);
-    };
-    window.onoffline = function() {
-      self.emit('offline', null);
-    };
-  };
-
-  NetInfo.prototype.isOnLine = function() {
-    return window.navigator.onLine;
-  };
-
-  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
-  this.Pusher.Connection.NetInfo = NetInfo;
-
 }).call(this);

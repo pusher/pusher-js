@@ -20,6 +20,7 @@
 ;(function() {
   var TestNetInfo = function() {
     this.onLine = true;
+    Pusher.EventsDispatcher.call(this)
   };
 
   TestNetInfo.prototype.isOnLine = function() {
