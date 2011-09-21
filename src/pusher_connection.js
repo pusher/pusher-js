@@ -108,22 +108,18 @@
       waitingPre: function() {
         if (self.connectionWait > 0) {
           informUser('connecting_in', self.connectionWait);
+        }
 
-          if (self.netInfo.isOnLine() === true && self.connectionAttempts > 4) {
-            triggerStateChange('unavailable');
-          }
+        if (self.netInfo.isOnLine() === false || self.connectionAttempts > 4){
+          triggerStateChange('unavailable');
+        } else {
+          triggerStateChange('connecting');
         }
 
         if (self.netInfo.isOnLine() === true) {
           self._waitingTimer = setTimeout(function() {
             self._machine.transition('connecting');
           }, self.connectionWait);
-
-          if (self.connectionAttempts <= 4) {
-            triggerStateChange('connecting');
-          }
-        } else {
-          triggerStateChange('unavailable');
         }
       },
 
