@@ -387,6 +387,12 @@
   };
 
   Connection.prototype.disconnect = function() {
+    if (this._machine.is('permanentlyClosed')) {
+      return;
+    }
+
+    Pusher.debug('Disconnecting');
+
     if (this._machine.is('waiting')) {
       this._machine.transition('permanentlyClosed');
     } else {

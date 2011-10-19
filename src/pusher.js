@@ -50,7 +50,6 @@ Pusher.prototype = {
   },
 
   disconnect: function() {
-    Pusher.debug('Disconnecting');
     this.connection.disconnect();
   },
 
