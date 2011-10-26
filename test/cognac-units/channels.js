@@ -1,4 +1,4 @@
-;(function() {
+;(function(context) {
   runner.addSuite('Pusher.Channel', {
     'Trigger client-event': function(test) {
       test.numAssertions = 3;
@@ -51,6 +51,88 @@
       presenceChannel.dispatch('pusher_internal:member_added', {
         'user_id': user_id
       });
+    },
+
+    'Authorizers': {
+      'invalid JSON in xhr.responseText results in Error': function(test) {
+        test.numAssertions = 2;
+
+        var invalidJSON = 'ERROR INVALID JSON {"msg":"Goodnight from me. And goodnight from him."}';
+
+        var PusherMock = {
+          connection: {
+            socket_id: 1234.1234
+          }
+        };
+
+        Pusher.channel_auth_transport = 'ajax';
+        context.XMLHttpRequest = context.TestXHR;
+
+        var channel = Pusher.Channel.factory('private-channel', PusherMock);
+        channel.authorize(PusherMock, function(err, data) {
+
+          test.equal(
+            err, true,
+           'callback argument `err` should be true.'
+          );
+
+          test.equal(
+            data,
+            'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + invalidJSON,
+            'callback argument `data` should be a message indicating the error.'
+          );
+
+          context.XMLHttpRequest = context.TestXHR.original;
+          test.finish();
+        });
+
+        var XHR = TestXHR.lastInstance();
+
+        XHR.trigger('DONE', {
+          responseText: invalidJSON,
+          status: 200
+        });
+      },
+
+      'valid JSON in xhr.responseText results in Success': function(test) {
+        test.numAssertions = 2;
+
+        var authResult = {"auth":"278d425bdf160c739803:a99e78e7cd40dcd0d4ae06be0a5395b6cd3c085764229fd40b39ce92c39af33e"};
+        var validJSON = JSON.stringify(authResult);
+
+        var PusherMock = {
+          connection: {
+            socket_id: 1234.1234
+          }
+        };
+
+        Pusher.channel_auth_transport = 'ajax';
+        context.XMLHttpRequest = context.TestXHR;
+
+        var channel = Pusher.Channel.factory('private-channel', PusherMock);
+        channel.authorize(PusherMock, function(err, data) {
+
+          test.equal(
+            err, false,
+           'callback argument `err` should be false.'
+          );
+
+          test.deepEqual(
+            data, authResult,
+            'callback argument `data` should be an object of the authResult.'
+          );
+
+          context.XMLHttpRequest = context.TestXHR.original;
+          test.finish();
+        });
+
+        var XHR = TestXHR.lastInstance();
+
+        XHR.trigger('DONE', {
+          responseText: validJSON,
+          status: 200
+        });
+      }
     }
   });
-})();
+})(this);

@@ -87,8 +87,18 @@ Pusher.authorizers = {
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4) {
         if (xhr.status == 200) {
-          var data = JSON.parse(xhr.responseText);
-          callback(false, data);
+          var data, parsed = false;
+
+          try {
+            data = JSON.parse(xhr.responseText);
+            parsed = true;
+          } catch (e) {
+            callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
+          }
+
+          if (parsed) { // prevents double execution.
+            callback(false, data);
+          }
         } else {
           Pusher.debug("Couldn't get auth info from your webapp", status);
           callback(true, xhr.status);
