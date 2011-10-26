@@ -185,9 +185,7 @@
 
         self.socket.onmessage = ws_onMessage;
         self.socket.onerror = ws_onError;
-        self.socket.onclose = function() {
-          self._machine.transition('waiting');
-        };
+        self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
       },
