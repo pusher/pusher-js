@@ -86,6 +86,14 @@
 
     this.netInfo.bind('offline', function() {
       if (self._machine.is('connected')) {
+        // These are for Chrome 15, which ends up
+        // having two sockets hanging around.
+        self.socket.onclose = undefined;
+        self.socket.onmessage = undefined;
+        self.socket.onerror = undefined;
+        self.socket.onopen = undefined;
+
+        self.socket.close();
         self.socket = undefined;
         self._machine.transition('waiting');
       }
@@ -128,6 +136,15 @@
       },
 
       connectingPre: function() {
+        // Case that a user manages to get to the connecting
+        // state even when offline.
+        if (self.netInfo.isOnLine() === false) {
+          self._machine.transition('waiting');
+          triggerStateChange('unavailable');
+
+          return;
+        }
+
         // removed: if not closed, something is wrong that we should fix
         // if(self.socket !== undefined) self.socket.close();
         var url = formatURL(self.key, self.connectionSecure);
@@ -366,7 +383,7 @@
       this._machine.transition('waiting');
     }
     // user skipping connection wait
-    else if (this._machine.is('waiting')) {
+    else if (this._machine.is('waiting') && this.netInfo.isOnLine() === true) {
       this._machine.transition('connecting');
     }
     // user re-opening connection after closing it
