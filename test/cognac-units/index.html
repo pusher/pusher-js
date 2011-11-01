@@ -5,16 +5,21 @@
 
   <link rel="shortcut icon" href="favicon.ico" />
 
+  <script src="../cognac/lib/jquery.js" type="text/javascript"></script>
   <script src="../cognac/lib/assert.js" type="text/javascript"></script>
   <script src="../cognac/lib/testing.js" type="text/javascript"></script>
-  <script src="../cognac/lib/mustache.js" type="text/javascript"></script>
-  <script src="../cognac/lib/ender.min.js" type="text/javascript"></script>
   <script src="../cognac/lib/cognac.js" type="text/javascript"></script>
 
   <link rel="stylesheet" href="../cognac/public/stylesheet.css" type="text/css" />
 
   <!-- Includes -->
   <script type="text/javascript" src="../../src/pusher.js"></script>
+  <script type="text/javascript">
+    Pusher.VERSION = '';
+    Pusher.cdn_http = 'http://192.168.1.122:5555';
+    Pusher.cdn_https = 'http://192.168.1.122:5555';
+    Pusher.dependency_suffix = '';
+  </script>
   <script type="text/javascript" src="../../src/pusher_event_dispatcher.js"></script>
   <script type="text/javascript" src="../../src/pusher_machine.js"></script>
   <script type="text/javascript" src="../../src/pusher_connection.js"></script>
@@ -37,39 +42,14 @@
   <script type="text/javascript" src="connection.js"></script>
 </head>
 <body>
-  <div id="container">
-    <header>
-      <h2>Tests</h2>
-      <button id="run-all">Run All</button>
-    </header>
-    <ul id="suites-list">
-      <li class="suite">
-        <div class="overview">
-          <p>At present, the fancy output is not yet built, check the console instead</p>
-          <p>To run use:</p>
-          <code>runner.run();</code>
-        </div>
-      </li>
-    </ul>
+  <div id="header">
+    <h2>Tests <span id="status"></span></h2>
+    <div id="buttons">
+      <button id="clear">Clear</button>
+      <button id="run-all">Run</button>
+    </div>
   </div>
-  <footer>
-    <p>A project by <a href="http://pusher.com" title="Pusher: A simple way to add realtime push to your web applications">the <em>Pusherinos</em></a></p>
-  </footer>
-  <script type="html/mustache" id="suiteTemplate">
-    <li class="suite" id="{{id}}">
-      <div class="overview">
-        <h3>{{name}}</h3>
-        <button class="run">Run</button>
-      </div>
-      <ul class="tests-list"></ul>
-    </li>
-  </script>
-  <script type="html/mustache" id="testTemplate">
-    <li id="{{id}}">
-      <p class="name">{{name}}</p>
-      <code class="result"></code>
-      <code class="test-func">{{source}}</code>
-    </li>
-  </script>
+  <div id="log">
+  </div>
 </body>
 </html>

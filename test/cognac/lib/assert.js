@@ -32,6 +32,14 @@
   exports['assert'] = {}
   var assert = exports['assert'];
 
+  assert.log = function(obj) {
+    assert.log(obj);
+  };
+  
+  assert.error = function(e) {
+    assert.error(e);
+  };
+
   // 2. The AssertionError is defined in assert.
   // new assert.AssertionError({ message: message,
   //                             actual: actual,
@@ -43,7 +51,7 @@
     this.actual = options.actual;
     this.expected = options.expected;
     this.operator = options.operator;
-    var stackStartFunction = options.stackStartFunction || fail;
+    var stackStartFunction = options.stackStartFunction;
 
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, stackStartFunction);
@@ -53,16 +61,17 @@
       if (this.message) {
         return [this.name + ':', this.message].join(' ');
       } else {
-        return [this.name + ':',
-                JSON.stringify(this.expected),
-                this.operator,
-                JSON.stringify(this.actual)].join(' ');
+        // return this.name;
+        //                 JSON.stringify(this.expected),
+        //                 this.operator,
+        //                 JSON.stringify(this.actual)].join(' ');
       }
     };
   };
 
   // assert.AssertionError instanceof Error
   assert.AssertionError.prototype = new Error();
+  assert.AssertionError.constructor = assert.AssertionError;
 
   // At present only the three keys mentioned above are used and
   // understood by the spec. Implementations or sub modules can pass
@@ -84,9 +93,8 @@
       operator: operator,
       stackStartFunction: stackStartFunction
     });
-    console.error('\tERROR: ' + message);
-    console.error(e);
-    console.error('STOP.');
+
+    assert.error('\tERROR: expected: ' + expected + ', actual: ' + actual);
 
     throw e;
   }
@@ -109,10 +117,11 @@
   // assert.equal(actual, expected, message_opt);
 
   assert.equal = function equal(actual, expected, message) {
-    if (actual != expected) {
+    assert.log('\tTEST: ' + message);
+    if (!isEqual(actual, expected)) {
       fail(actual, expected, message, '==', assert.equal);
     } else {
-      console.log('\tOK: ' + message);
+      assert.log('\tOK: ' + message);
     }
   };
 
@@ -120,10 +129,10 @@
   // with != assert.notEqual(actual, expected, message_opt);
 
   assert.notEqual = function notEqual(actual, expected, message) {
-    if (actual == expected) {
-      fail(actual, expected, message, '!=', assert.notEqual);
+    if (!isEqual(actual, expected)) {
+      fail(actual, expected, message, '!==', assert.notEqual);
     } else {
-      console.log('\tOK: ' + message);
+      assert.log('\tOK: ' + message);
     }
   };
 
@@ -131,46 +140,15 @@
   // assert.deepEqual(actual, expected, message_opt);
 
   assert.deepEqual = function deepEqual(actual, expected, message) {
-    if (!_deepEqual(actual, expected)) {
+    if (!isEqual(actual, expected)) {
       fail(actual, expected, message, 'deepEqual', assert.deepEqual);
     } else {
-      console.log('\tOK: ' + message);
+      assert.log('\tOK: ' + message);
     }
   };
 
-  function _deepEqual(actual, expected) {
-    // 7.1. All identical values are equivalent, as determined by ===.
-    if (actual === expected) {
-      return true;
-
-    // } else if (Buffer.isBuffer(actual) && Buffer.isBuffer(expected)) {
-    //   if (actual.length != expected.length) return false;
-    //
-    //   for (var i = 0; i < actual.length; i++) {
-    //     if (actual[i] !== expected[i]) return false;
-    //   }
-    //
-    //   return true;
-    //
-    // 7.2. If the expected value is a Date object, the actual value is
-    // equivalent if it is also a Date object that refers to the same time.
-    } else if (actual instanceof Date && expected instanceof Date) {
-      return actual.getTime() === expected.getTime();
-
-    // 7.3. Other pairs that do not both pass typeof value == 'object',
-    // equivalence is determined by ==.
-    } else if (typeof actual != 'object' && typeof expected != 'object') {
-      return actual == expected;
-
-    // 7.4. For all other Object pairs, including Array objects, equivalence is
-    // determined by having the same number of owned properties (as verified
-    // with Object.prototype.hasOwnProperty.call), the same set of keys
-    // (although not necessarily the same order), equivalent values for every
-    // corresponding key, and an identical 'prototype' property. Note: this
-    // accounts for both named and indexed properties on Arrays.
-    } else {
-      return objEquiv(actual, expected);
-    }
+  function isEqual(actual, expected) {
+    return eq(actual, expected, []);
   }
 
   function isUndefinedOrNull(value) {
@@ -181,143 +159,110 @@
     return Object.prototype.toString.call(object) == '[object Arguments]';
   }
 
-  function objEquiv(a, b) {
-    if (isUndefinedOrNull(a) || isUndefinedOrNull(b))
-      return false;
-    // an identical 'prototype' property.
-    if (a.prototype !== b.prototype) return false;
-    //~~~I've managed to break Object.keys through screwy arguments passing.
-    //   Converting to array solves the problem.
-    if (isArguments(a)) {
-      if (!isArguments(b)) {
-        return false;
-      }
-      a = pSlice.call(a);
-      b = pSlice.call(b);
-      return _deepEqual(a, b);
-    }
-    try {
-      var ka = Object.keys(a),
-          kb = Object.keys(b),
-          key, i;
-    } catch (e) {//happens when one is a string literal and the other isn't
-      return false;
-    }
-    // having the same number of owned properties (keys incorporates
-    // hasOwnProperty)
-    if (ka.length != kb.length)
-      return false;
-    //the same set of keys (although not necessarily the same order),
-    ka.sort();
-    kb.sort();
-    //~~~cheap key test
-    for (i = ka.length - 1; i >= 0; i--) {
-      if (ka[i] != kb[i])
-        return false;
-    }
-    //equivalent values for every corresponding key, and
-    //~~~possibly expensive deep test
-    for (i = ka.length - 1; i >= 0; i--) {
-      key = ka[i];
-      if (!_deepEqual(a[key], b[key])) return false;
-    }
-    return true;
+  var ObjProto = Object.prototype;
+  var toString = ObjProto.toString;
+  var hasOwnProperty   = ObjProto.hasOwnProperty
+  function isFunction(object) {
+    return toString.call(object) == '[object Function]'
   }
+
+  function eq(a, b, stack) {
+      // Identical objects are equal. `0 === -0`, but they aren't identical.
+      // See the Harmony `egal` proposal: http://wiki.ecmascript.org/doku.php?id=harmony:egal.
+      if (a === b) return a !== 0 || 1 / a == 1 / b;
+      // A strict comparison is necessary because `null == undefined`.
+      if (a == null || b == null) return a === b;
+      // Unwrap any wrapped objects.
+      if (a._chain) a = a._wrapped;
+      if (b._chain) b = b._wrapped;
+      // Invoke a custom `isEqual` method if one is provided.
+      if (isFunction(a.isEqual)) return a.isEqual(b);
+      if (isFunction(b.isEqual)) return b.isEqual(a);
+      // Compare `[[Class]]` names.
+      var className = toString.call(a);
+      if (className != toString.call(b)) return false;
+      switch (className) {
+        // Strings, numbers, dates, and booleans are compared by value.
+        case '[object String]':
+          // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+          // equivalent to `new String("5")`.
+          return String(a) == String(b);
+        case '[object Number]':
+          a = +a;
+          b = +b;
+          // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+          // other numeric values.
+          return a != a ? b != b : (a == 0 ? 1 / a == 1 / b : a == b);
+        case '[object Date]':
+        case '[object Boolean]':
+          // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+          // millisecond representations. Note that invalid dates with millisecond representations
+          // of `NaN` are not equivalent.
+          return +a == +b;
+        // RegExps are compared by their source patterns and flags.
+        case '[object RegExp]':
+          return a.source == b.source &&
+                 a.global == b.global &&
+                 a.multiline == b.multiline &&
+                 a.ignoreCase == b.ignoreCase;
+      }
+      if (typeof a != 'object' || typeof b != 'object') return false;
+      // Assume equality for cyclic structures. The algorithm for detecting cyclic
+      // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+      var length = stack.length;
+      while (length--) {
+        // Linear search. Performance is inversely proportional to the number of
+        // unique nested structures.
+        if (stack[length] == a) return true;
+      }
+      // Add the first object to the stack of traversed objects.
+      stack.push(a);
+      var size = 0, result = true;
+      // Recursively compare objects and arrays.
+      if (className == '[object Array]') {
+        // Compare array lengths to determine if a deep comparison is necessary.
+        size = a.length;
+        result = size == b.length;
+        if (result) {
+          // Deep compare the contents, ignoring non-numeric properties.
+          while (size--) {
+            // Ensure commutative equality for sparse arrays.
+            if (!(result = size in a == size in b && eq(a[size], b[size], stack))) break;
+          }
+        }
+      } else {
+        // Objects with different constructors are not equivalent.
+        if ("constructor" in a != "constructor" in b || a.constructor != b.constructor) return false;
+        // Deep compare objects.
+        for (var key in a) {
+          if (hasOwnProperty.call(a, key)) {
+            // Count the expected number of properties.
+            size++;
+            // Deep compare each member.
+            if (!(result = hasOwnProperty.call(b, key) && eq(a[key], b[key], stack))) break;
+          }
+        }
+        // Ensure that both objects contain the same number of properties.
+        if (result) {
+          for (key in b) {
+            if (hasOwnProperty.call(b, key) && !(size--)) break;
+          }
+          result = !size;
+        }
+      }
+      // Remove the first object from the stack of traversed objects.
+      stack.pop();
+      return result;
+    }
 
   // 8. The non-equivalence assertion tests for any deep inequality.
   // assert.notDeepEqual(actual, expected, message_opt);
 
   assert.notDeepEqual = function notDeepEqual(actual, expected, message) {
-    if (_deepEqual(actual, expected)) {
+    if (!isEqual(actual, expected)) {
       fail(actual, expected, message, 'notDeepEqual', assert.notDeepEqual);
     } else {
-      console.log('\tOK: ' + message);
+      assert.log('\tOK: ' + message);
     }
   };
-
-  // 9. The strict equality assertion tests strict equality, as determined by ===.
-  // assert.strictEqual(actual, expected, message_opt);
-
-  assert.strictEqual = function strictEqual(actual, expected, message) {
-    if (actual !== expected) {
-      fail(actual, expected, message, '===', assert.strictEqual);
-    } else {
-      console.log('\tOK: ' + message);
-    }
-  };
-
-  // 10. The strict non-equality assertion tests for strict inequality, as
-  // determined by !==.  assert.notStrictEqual(actual, expected, message_opt);
-
-  assert.notStrictEqual = function notStrictEqual(actual, expected, message) {
-    if (actual === expected) {
-      fail(actual, expected, message, '!==', assert.notStrictEqual);
-    } else {
-      console.log('\tOK: ' + message);
-    }
-  };
-
-  function expectedException(actual, expected) {
-    if (!actual || !expected) {
-      return false;
-    }
-
-    if (expected instanceof RegExp) {
-      return expected.test(actual);
-    } else if (actual instanceof expected) {
-      return true;
-    } else if (expected.call({}, actual) === true) {
-      return true;
-    }
-
-    return false;
-  }
-
-  function _throws(shouldThrow, block, expected, message) {
-    var actual;
-
-    if (typeof expected === 'string') {
-      message = expected;
-      expected = null;
-    }
-
-    try {
-      block();
-    } catch (e) {
-      actual = e;
-    }
-
-    message = (expected && expected.name ? ' (' + expected.name + ').' : '.') +
-              (message ? ' ' + message : '.');
-
-    if (shouldThrow && !actual) {
-      fail('Missing expected exception' + message);
-    }
-
-    if (!shouldThrow && expectedException(actual, expected)) {
-      fail('Got unwanted exception' + message);
-    }
-
-    if ((shouldThrow && actual && expected &&
-        !expectedException(actual, expected)) || (!shouldThrow && actual)) {
-      throw actual;
-    }
-
-    console.log('\tOK: ' + message);
-  }
-
-  // 11. Expected to throw an error:
-  // assert.throws(block, Error_opt, message_opt);
-
-  assert.throws = function(block, /*optional*/error, /*optional*/message) {
-    _throws.apply(this, [true].concat(pSlice.call(arguments)));
-  };
-
-  // EXTENSION! This is annoying to write outside this module.
-  assert.doesNotThrow = function(block, /*optional*/error, /*optional*/message) {
-    _throws.apply(this, [false].concat(pSlice.call(arguments)));
-  };
-
-  assert.ifError = function(err) { if (err) {throw err;}};
-
 })(this);
