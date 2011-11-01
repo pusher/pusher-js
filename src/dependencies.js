@@ -49,15 +49,15 @@ var _require = (function () {
 ;(function() {
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
-
   var deps = [];
+
   if (typeof window['JSON'] === 'undefined') {
-    deps.push(root + '/json2<DEPENDENCY_SUFFIX>.js');
+    deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
   if (typeof window['WebSocket'] === 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
-    deps.push(root + '/flashfallback<DEPENDENCY_SUFFIX>.js');
+    deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
   }
 
   var initialize = function() {
