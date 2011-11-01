@@ -1,4 +1,12 @@
 ;(function() {
+  // Create a new object, that prototypally inherits from the Error constructor.
+  function InvalidStateError() {
+      this.name = "InvalidStateError";
+  }
+  InvalidStateError.prototype = new Error();
+  InvalidStateError.prototype.constructor = InvalidStateError;
+
+
   /**
    * TestSocket is a object for faking a WebSocket.
    *
@@ -78,6 +86,7 @@
   TestSocket.prototype.send = function(data) {
     var socket = this;
 
+    //if (socket.readyState === socket.CONNECTING) throw new InvalidStateError();
     if (socket.readyState !== socket.OPEN) return false;
 
     socket._sendQueue.push(data);
@@ -102,7 +111,9 @@
 
       defer(function() {
         socket.readyState = socket.CLOSED;
-        socket.onclose.call(socket);
+        if (typeof socket.onclose === 'function') {
+          socket.onclose.call(socket);
+        }
       });
     }
   };
@@ -119,30 +130,37 @@
       case 'open':
         defer(function() {
           socket.readyState = socket.OPEN;
-          socket.onopen.call(socket);
+          if (typeof socket.onopen === 'function') {
+            socket.onopen.call(socket);
+          }
         });
         break;
       case 'message':
         defer(function() {
-          socket.onmessage.call(this, {data: message});
+          if (typeof socket.onmessage === 'function') {
+            socket.onmessage.call(this, {data: message});
+          }
         });
         break;
       case 'close':
         if (socket.readyState !== socket.CLOSING && socket.readyState !== socket.CLOSED) {
           defer(function() {
             socket.readyState = socket.CLOSING;
-            socket._onclosing.call(socket);
 
             defer(function() {
               socket.readyState = socket.CLOSED;
-              socket.onclose.call(socket);
+              if (typeof socket.onclose === 'function') {
+                socket.onclose.call(socket);
+              }
             });
           });
         }
         break;
       case 'error':
         defer(function() {
-          socket.onerror.call(socket);
+          if (typeof socket.onerror === 'function') {
+            socket.onerror.call(socket);
+          }
         });
         break;
     }
