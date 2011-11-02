@@ -78,10 +78,14 @@ Pusher.auth_callbacks = {};
 
 Pusher.authorizers = {
   ajax: function(pusher, callback){
-    var self = this;
-    var xhr = window.XMLHttpRequest ?
-      new XMLHttpRequest() :
-      new ActiveXObject("Microsoft.XMLHTTP");
+    var self = this, xhr;
+
+    if (Pusher.XHR) {
+      xhr = new Pusher.XHR();
+    } else {
+      xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
+    }
+
     xhr.open("POST", Pusher.channel_auth_endpoint, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
     xhr.onreadystatechange = function() {

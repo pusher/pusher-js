@@ -66,7 +66,7 @@
         };
 
         Pusher.channel_auth_transport = 'ajax';
-        context.XMLHttpRequest = context.TestXHR;
+        Pusher.XHR = context.TestXHR;
 
         var channel = Pusher.Channel.factory('private-channel', PusherMock);
         channel.authorize(PusherMock, function(err, data) {
@@ -82,7 +82,6 @@
             'callback argument `data` should be a message indicating the error.'
           );
 
-          context.XMLHttpRequest = context.TestXHR.original;
           test.finish();
         });
 
@@ -107,7 +106,7 @@
         };
 
         Pusher.channel_auth_transport = 'ajax';
-        context.XMLHttpRequest = context.TestXHR;
+        Pusher.XHR = context.TestXHR;
 
         var channel = Pusher.Channel.factory('private-channel', PusherMock);
         channel.authorize(PusherMock, function(err, data) {
@@ -122,7 +121,6 @@
             'callback argument `data` should be an object of the authResult.'
           );
 
-          context.XMLHttpRequest = context.TestXHR.original;
           test.finish();
         });
 

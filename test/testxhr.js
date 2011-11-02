@@ -28,7 +28,6 @@
     TestXHR.instances.push(this);
   }
 
-  TestXHR.original = XMLHttpRequest;
   TestXHR.instances = [];
   TestXHR.lastInstance = function() {
     return TestXHR.instances[TestXHR.instances.length - 1];
