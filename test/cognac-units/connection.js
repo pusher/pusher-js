@@ -2,6 +2,19 @@
   // Clear version, as we want to use a constant version for tests.
   Pusher.VERSION = '';
 
+  // Set this globally, as otherwise we can get some strange
+  // errors in tests.
+  Pusher.NetInfo = TestNetInfo;
+
+  // MSIE doesn't have array.indexOf
+  var nativeIndexOf = Array.prototype.indexOf;
+  function indexOf(array, item) {
+    if (array == null) return -1;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+    for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+    return -1;
+  }
+
   /**
    * EventsWatcher is a constructor that'll listen for all
    * given possible events and allow you to be able to
@@ -15,19 +28,18 @@
     var events = [];
 
     this.next = function() {
-      // console.log('next', events);
       return events.shift();
     };
 
     subject.bind_all(function(event_name, data) {
-      if (possibleEvents.indexOf(event_name) > -1) {
-        if (typeof data !== 'undefined') {
+      if (indexOf(possibleEvents, event_name) > -1) {
+        if (arguments.length > 1) {
           events.push({name: event_name, data: data});
         } else {
           events.push({name: event_name});
         }
       }
-      // console.log('addEvent', events);
+      // console.log('addEvent', events, event_name, data, indexOf(possibleEvents, event_name));
     });
   }
 
@@ -45,9 +57,12 @@
         numberOfCallbacks = callbacks.length;
 
     subject.bind(event_name, function(event_data) {
-      // console.log('observed', event_data);
       if (numberOfChanges < numberOfCallbacks) {
-        callbacks[numberOfChanges++](event_data);
+        var callback = callbacks[numberOfChanges++];
+
+        if (typeof callback === 'function') {
+          callback(event_data);
+        }
       }
     });
   }
@@ -970,7 +985,7 @@
 
         // Connect the socket to continue the tests.
         connection.connect();
-      },
+      }
     },
 
     'NetInfo': {
@@ -1059,7 +1074,7 @@
         ]);
 
         connection.connect();
-      },
+      }
     },
 
     'Message Sending and Receiving': {
@@ -1090,22 +1105,23 @@
               data: { message: 'oh awesome' }
             };
 
-            connection.socket.trigger('message', JSON.stringify({
-              event: 'chat-message',
-              channel: 'my-awesome-chat-channel',
-              data: '{"message":"oh awesome"}'
-            }));
-
             // best to bind directly as connection.socket.trigger is async.
             connection.bind('message', function(event) {
               test.deepEqual(event, testMessage, 'Should receive an exact copy of the sent message.');
               test.finish();
             });
+
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'chat-message',
+              channel: 'my-awesome-chat-channel',
+              data: '{"message":"oh awesome"}'
+            }));
           }
         ]);
 
         connection.connect();
       },
+
       'should emit the "error" event on the receive of a invalid websocket message': function(test) {
         Pusher.Transport = TestSocket;
 
@@ -1130,14 +1146,14 @@
             // note: the data property is an invalid JSON string.
             var payload = 'invalid';
 
-            connection.socket.trigger('message', payload);
-
             // best to bind directly as connection.socket.trigger is async.
             connection.bind('error', function(event) {
               test.equal(event.type, 'MessageParseError', 'The error type should be set to "MessageParseError"');
               test.equal(event.data, payload, 'The payload should remain unchanged');
               test.finish();
             });
+
+            connection.socket.trigger('message', payload);
           }
         ]);
 
@@ -1182,7 +1198,7 @@
 
         // Connect the socket to continue the tests.
         connection.connect();
-      },
+      }
     },
 
 
