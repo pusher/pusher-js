@@ -920,7 +920,25 @@
       },
 
 
+      'Should result in a state of "failed" if Pusher.Transport === null': function(test) {
+        Pusher.Transport = null;
 
+        var connection = new Pusher.Connection('n1');
+        var watcher = new EventsWatcher(connection, ['failed']);
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'failed', 'state should intially be "failed"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
+            test.finish();
+          }
+        ]);
+
+        connection.connect();
+      },
 
 
       //-----------------------------------------------
@@ -934,10 +952,19 @@
           'failed'
         ]);
 
+
+      'Should be able to disconnect after "failed" state.': function(test) {
+        Pusher.Transport = undefined;
+
+        var connection = new Pusher.Connection('n3');
+
         SteppedObserver(connection._machine, 'state_change', [
           function(e) {
-            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
             test.equal(e.newState, 'failed', 'state should intially be "failed"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.equal(e.newState, 'permanentlyClosing', 'the state should transition to "permanentlyClosing".');
             test.finish();
           }
         ]);

@@ -41,7 +41,8 @@
     'connected': ['permanentlyClosing', 'impermanentlyClosing', 'waiting'],
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
-    'permanentlyClosed': ['waiting']
+    'permanentlyClosed': ['waiting'],
+    'failed': ['permanentlyClosing']
   };
 
 
@@ -216,17 +217,24 @@
       },
 
       impermanentlyClosingPost: function() {
-        self.socket.onclose = transitionToWaiting;
-        self.socket.close();
+        if (self.socket) {
+          self.socket.onclose = transitionToWaiting;
+          self.socket.close();
+        }
       },
 
       permanentlyClosingPost: function() {
-        self.socket.onclose = function() {
+        if (self.socket) {
+          self.socket.onclose = function() {
+            resetConnectionParameters(self);
+            self._machine.transition('permanentlyClosed');
+          };
+
+          self.socket.close();
+        } else {
           resetConnectionParameters(self);
           self._machine.transition('permanentlyClosed');
-        };
-
-        self.socket.close();
+        }
       },
 
       failedPre: function() {
