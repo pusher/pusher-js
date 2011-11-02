@@ -43,7 +43,7 @@
       var presenceChannel = Pusher.Channel.factory('presence-woo', {});
 
       presenceChannel.bind('pusher:member_added', function(member) {
-        test.equal(member.info, null, "member info should be null");
+        test.equal(member.info, undefined, "member info should be undefined");
         test.equal(member.id, user_id, "member id should be what was sent");
         test.finish();
       });
