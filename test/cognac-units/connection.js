@@ -82,7 +82,6 @@
   }
 
   runner.addSuite('Pusher.Connection', {
-
     'Initialisation': {
       'new Pusher.Connection("b599fe0f1e4b6f6eb8a6")': function(test) {
         Pusher.Transport = TestSocket;
@@ -544,6 +543,9 @@
         connection.connect();
       },
 
+      //-----------------------------------------------
+      //-----------------------------------------------
+
       'timeout occurs when in connecting and awaiting open': function(test) {
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('g');
@@ -615,6 +617,9 @@
 
         connection.connect();
       },
+
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       'error occurs when in connecting and awaiting open': function(test) {
         Pusher.Transport = TestSocket;
@@ -692,12 +697,8 @@
         connection.connect();
       },
 
-
-
-
-
-
-
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       'user closes during waiting': function(test) {
         Pusher.Transport = TestSocket;
@@ -719,8 +720,6 @@
 
         connection.connect();
       },
-
-
 
       'user closes during connecting': function(test) {
         Pusher.Transport = TestSocket;
@@ -785,10 +784,8 @@
         connection.connect();
       },
 
-
-
-
-
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       //  Test:
       //    waiting -> connecting -> (onclose) -> waiting
@@ -861,6 +858,8 @@
         connection.connect();
       },
 
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       'check that forced ssl actually uses ssl first time, on second try and after successful connect': function(test) {
         Pusher.Transport = TestSocket;
@@ -919,6 +918,8 @@
         connection.connect();
       },
 
+//-----------------------------------------------
+//-----------------------------------------------
 
       'Should result in a state of "failed" if Pusher.Transport === null': function(test) {
         Pusher.Transport = null;
@@ -980,6 +981,9 @@
       },
 
 
+//-----------------------------------------------
+//-----------------------------------------------
+
       'User should be able to bypass connection wait with explicit socket.connection.connect() call': function(test) {
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('r');
@@ -1022,6 +1026,11 @@
         connection.connect();
       }
     },
+
+
+//-----------------------------------------------
+//-----------------------------------------------
+
 
     'NetInfo': {
       'User: unavailable, machine: waiting if connected and then internet dies': function(test) {
@@ -1235,7 +1244,6 @@
         connection.connect();
       }
     },
-
 
     'Test connection back-off limit': function(test) {
       Pusher.Transport = TestSocket;
