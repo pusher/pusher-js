@@ -1,6 +1,6 @@
 ;(function() {
   // Clear version, as we want to use a constant version for tests.
-  Pusher.VERSION = '';
+  Pusher.VERSION = '1.10.0';
 
   // Set this globally, as otherwise we can get some strange
   // errors in tests.
@@ -996,6 +996,7 @@
           function(e) {
             test.equal(e.newState, 'waiting', 'state should be "waiting"');
             test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
+            test.equal(connection.netInfo.isOnLine(), true, 'connection.netInfo should return true for isOnLine');
             nextConnectionAttempt = new Date().getTime() + connection.connectionWait;
             connection.connect();
           },
