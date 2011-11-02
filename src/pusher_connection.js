@@ -313,6 +313,14 @@
         if (params.data.code === 4001) {
           self._machine.transition('permanentlyClosing');
         }
+
+        if (params.data.code === 4000) {
+          Pusher.debug(params.data.message);
+
+          self.compulsorySecure = true;
+          self.connectionSecure = true;
+          self.options.encrypted = true;
+        }
       } else if (params.event === 'pusher:heartbeat') {
       } else if (self._machine.is('connected')) {
         informUser('message', params);
