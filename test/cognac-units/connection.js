@@ -940,18 +940,25 @@
         connection.connect();
       },
 
+      'Should result in a state of "failed" if Pusher.Transport === undefined': function(test) {
+        Pusher.Transport = undefined;
 
-      //-----------------------------------------------
-      //-----------------------------------------------
-      'Should result in a state of "failed" if WebSockets are not available': function(test) {
-        // hack, as we only check that this is something
-        Pusher.Transport = null;
+        var connection = new Pusher.Connection('n2');
+        var watcher = new EventsWatcher(connection, ['failed']);
 
-        var connection = new Pusher.Connection('n');
-        var watcher = new EventsWatcher(connection, [
-          'failed'
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'failed', 'state should intially be "failed"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
+            test.finish();
+          }
         ]);
 
+        connection.connect();
+      },
 
       'Should be able to disconnect after "failed" state.': function(test) {
         Pusher.Transport = undefined;

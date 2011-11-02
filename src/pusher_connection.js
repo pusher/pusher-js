@@ -382,7 +382,7 @@
 
   Connection.prototype.connect = function() {
     // no WebSockets
-    if (Pusher.Transport === null) {
+    if (Pusher.Transport === null || typeof Pusher.Transport === 'undefined') {
       this._machine.transition('failed');
     }
     // initial open of connection
