@@ -98,7 +98,7 @@
         self.socket = undefined;
         self._machine.transition('waiting');
       }
-    })
+    });
 
     // define the state machine that runs the connection
     this._machine = new Pusher.Machine(self, 'initialized', machineTransitions, {
@@ -270,7 +270,12 @@
       var port = Pusher.ws_port;
       var protocol = 'ws://';
 
-      if (isSecure) {
+      // Always connect with SSL if the current page has
+      // been loaded via HTTPS.
+      //
+      // FUTURE: Always connect using SSL.
+      //
+      if (isSecure || document.location.protocol === 'https:') {
         port = Pusher.wss_port;
         protocol = 'wss://';
       }
