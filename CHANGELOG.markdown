@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.9.6 (2011-11-16)
+
+[FIXED] Issue in Mozilla Firefox 8, where making a connection to non-ssl websocket endpoint from a secure page results in a security exception.
+
 ## 1.9.5 (2011-11-15)
 
 [FIXED] NetInfo listening as to not clobber the window.ononline and window.onoffline variables. Fixes issue #9.
