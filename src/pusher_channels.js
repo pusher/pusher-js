@@ -30,16 +30,21 @@ Pusher.Channels.prototype = {
 };
 
 Pusher.Channel = function(channel_name, pusher) {
+  var channel = this;
   Pusher.EventsDispatcher.call(this);
 
   this.pusher = pusher;
   this.name = channel_name;
   this.subscribed = false;
+
+  this.bind('pusher_internal:subscription_succeeded', function(sub_data){
+    channel.acknowledge_subscription(sub_data);
+  });
 };
 
 Pusher.Channel.prototype = {
   // inheritable constructor
-  init: function(){
+  init: function() {
 
   },
 
@@ -50,6 +55,7 @@ Pusher.Channel.prototype = {
   // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
   acknowledge_subscription: function(data){
     this.subscribed = true;
+    this.dispatch_with_all('pusher:subscription_succeeded');
   },
 
   is_private: function(){
@@ -138,11 +144,6 @@ Pusher.Channel.PrivateChannel = {
 Pusher.Channel.PresenceChannel = {
 
   init: function(){
-    this.bind('pusher_internal:subscription_succeeded', function(sub_data){
-      this.acknowledge_subscription(sub_data);
-      this.dispatch_with_all('pusher:subscription_succeeded', this.members);
-    }.scopedTo(this));
-
     this.bind('pusher_internal:member_added', function(data){
       var member = this.members.add(data.user_id, data.user_info);
       this.dispatch_with_all('pusher:member_added', member);
@@ -164,6 +165,8 @@ Pusher.Channel.PresenceChannel = {
     this.members._members_map = sub_data.presence.hash;
     this.members.count = sub_data.presence.count;
     this.subscribed = true;
+
+    this.dispatch_with_all('pusher:subscription_succeeded', this.members);
   },
 
   is_presence: function(){

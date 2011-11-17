@@ -1,25 +1,74 @@
 ;(function(context) {
   runner.addSuite('Pusher.Channel', {
-    'Trigger client-event': function(test) {
-      test.numAssertions = 3;
+    'Events': {
+      'Public Channel': {
+        'subscription callback': function(test) {
+          Pusher.channel_auth_transport = 'test';
+          Pusher.authorizers['test'] = function() {
+            callback({});
+          };
 
-      var PusherMock = {
-        send_event: function(name, data, channel) {
-          test.equal('client-foo', name, 'Event names should be equal');
-          test.deepEqual({'bar': 'baz'}, data, 'Event data should be sent');
-          test.equal('clientEvents', channel, 'The channel name should be auto-populated');
+          var channel = Pusher.Channel.factory('public-channel', {});
+
+          channel.bind('pusher:subscription_succeeded', function() {
+            test.equal(channel.subscribed, true, 'Channel should be marked as subscribed after ack');
+            test.finish();
+          });
+
+          test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
+          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
         }
-      };
+      },
 
-      Pusher.channel_auth_transport = 'test';
-      Pusher.authorizers['test'] = function() {
-        callback({});
-      };
+      'Presence Channel': {
+        'subscription callback': function(test) {
+          Pusher.channel_auth_transport = 'test';
+          Pusher.authorizers['test'] = function() {
+            callback({});
+          };
 
-      var channel = Pusher.Channel.factory('clientEvents', PusherMock);
+          var channel = Pusher.Channel.factory('presence-channel', {});
 
-      channel.trigger('client-foo', {'bar': 'baz'});
-      test.finish();
+          channel.bind('pusher:subscription_succeeded', function(members) {
+            test.equal(members.count, 1, 'There should be one member');
+            test.equal(channel.subscribed, true, 'Channel should be marked as subscribed after ack');
+            test.finish();
+          });
+
+          test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
+          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {
+            "presence": {
+              "count":1,
+              "ids":["0a7ffd3af0e34b6acbe42e50b6fc31f1"],
+              "hash":{
+                "0a7ffd3af0e34b6acbe42e50b6fc31f1":{}
+              }
+            }
+          });
+        }
+      },
+
+      'Client Trigger': function(test) {
+        test.numAssertions = 3;
+
+        var PusherMock = {
+          send_event: function(name, data, channel) {
+            test.equal('client-foo', name, 'Event names should be equal');
+            test.deepEqual({'bar': 'baz'}, data, 'Event data should be sent');
+            test.equal('clientEvents', channel, 'The channel name should be auto-populated');
+          }
+        };
+
+        Pusher.channel_auth_transport = 'test';
+        Pusher.authorizers['test'] = function() {
+          callback({});
+        };
+
+        var channel = Pusher.Channel.factory('clientEvents', PusherMock);
+
+        channel.trigger('client-foo', {'bar': 'baz'});
+        test.finish();
+      }
     },
 
     'user_info is sent if specified': function(test) {
