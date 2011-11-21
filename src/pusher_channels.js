@@ -37,20 +37,21 @@ Pusher.Channel = function(channel_name, pusher) {
   this.name = channel_name;
   this.subscribed = false;
 
-  this.bind('pusher_internal:subscription_succeeded', function(sub_data){
-    channel.acknowledge_subscription(sub_data);
-  });
+  // TODO: Change these two methods to just be static booleans, as they won't
+  // return anything different over the lifetime of a channel
+  if (this.is_private() || this.is_presence()) {
+    this.bind('pusher_internal:subscription_succeeded', function(sub_data){
+      channel.acknowledge_subscription(sub_data);
+    });
+  } else {
+    channel.acknowledge_subscription();
+  }
 };
 
 Pusher.Channel.prototype = {
   // inheritable constructor
-  init: function() {
-
-  },
-
-  disconnect: function(){
-
-  },
+  init: function() {},
+  disconnect: function() {},
 
   // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
   acknowledge_subscription: function(data){

@@ -10,6 +10,23 @@
 
           var channel = Pusher.Channel.factory('public-channel', {});
 
+          test.equal(channel.subscribed, true, 'Channel should be marked as subscribed immediately');
+
+          channel.bind('pusher:subscription_succeeded', function() {
+            test.finish();
+          });
+        }
+      },
+
+      'Private Channel': {
+        'subscription callback': function(test) {
+          Pusher.channel_auth_transport = 'test';
+          Pusher.authorizers['test'] = function() {
+            callback({});
+          };
+
+          var channel = Pusher.Channel.factory('private-channel', {});
+
           channel.bind('pusher:subscription_succeeded', function() {
             test.equal(channel.subscribed, true, 'Channel should be marked as subscribed after ack');
             test.finish();
@@ -19,6 +36,7 @@
           channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
         }
       },
+
 
       'Presence Channel': {
         'subscription callback': function(test) {
