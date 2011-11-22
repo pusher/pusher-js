@@ -10,11 +10,13 @@
 
           var channel = Pusher.Channel.factory('public-channel', {});
 
-          test.equal(channel.subscribed, true, 'Channel should be marked as subscribed immediately');
-
           channel.bind('pusher:subscription_succeeded', function() {
+            test.equal(channel.subscribed, true, 'Channel should be marked as subscribed after ack');
             test.finish();
           });
+
+          test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
+          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
         }
       },
 
