@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.9.6 (2011-11-16)
+
+[FIXED] Issue in Mozilla Firefox 8, where making a connection to non-ssl websocket endpoint from a secure page results in a security exception.
+
+## 1.9.5 (2011-11-15)
+
+[FIXED] NetInfo listening as to not clobber the window.ononline and window.onoffline variables. Fixes issue #9.
+
+[FIXED] Loading of web-socket-js on Mozilla browsers with MozWebSocket, issue #10.
+
+[UPGRADE] Test framework to run in most browsers (IE6+, FF3+, Opera 11.52+, Safari, Chrome). Includes various other improvements to tests and testing infrastructure.
+
+[NEW] Smarter SSL only error detection. If a connection is closed by pusher with an error saying that the app is in SSL only mode, then we will now force all future connection attempts to use SSL.
+
+[NEW] Added guards around the JSON.parse calls in the Ajax Authoriser for private and presence channels.
+
+## 1.9.4 (2011-09-12)
+
+[FIX] Fixed bug which meant that presence channels only worked correctly when `user_info` was supplied. It's now possible to use presence channels without specifying `user_info` (`user_id` is required).
+
 ## 1.9.3 (2011-08-19)
 
 [FIX] Fixed JSON dependency loading properly, rather than bundling it always.

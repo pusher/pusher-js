@@ -1,15 +1,40 @@
 ;(function(module) {
+
+
+
+
   exports = module['testing'] = {};
 
-var process = {
-  on: function() {},
-  removeListener: function() {},
-  exit: function() {},
-  nextTick: function(cb) {
-    setTimeout(cb, 0);
-  }
+var isArray = Array.isArray || function(obj) {
+  return Object.prototype.toString.call(obj) == '[object Array]';
 };
-var inspect = function(){}; // require('util').inspect
+
+// MSIE doesn't have array.indexOf
+var nativeIndexOf = Array.prototype.indexOf;
+function indexOf(array, item) {
+  if (array == null) return -1;
+  if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+  for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+  return -1;
+}
+
+function forEach(array, callbackfn, thisArg) {
+  for (var k=0, len=array.length; k<len;) {
+    callbackfn.call(thisArg, array[k], k, array);
+    k++;
+  }
+}
+
+var nativeMap          = Array.prototype.map;
+function map(obj, iterator, context) {
+  var results = [];
+  if (obj == null) return results;
+  if (nativeMap && obj.map === nativeMap) return obj.map(iterator, context);
+  forEach(obj, function(value, index, list) {
+    results[results.length] = iterator.call(context, value, index, list);
+  });
+  return results;
+};
 
 /* Runs an object with tests.  Each property in the object should be a
  * test.  A test is just a method.
@@ -30,8 +55,10 @@ var inspect = function(){}; // require('util').inspect
  * + onSuiteDone
  */
 exports.runSuite = function(obj, options) {
+  exports.isTesting = true;
+  exports.isStopping = false;
   // make sure options exists
-  options = options || {};
+  exports.options = options = options || {};
 
   // keep track of internal state
   var suite =
@@ -47,8 +74,7 @@ exports.runSuite = function(obj, options) {
 
   if (suite.todo.length < 1) { return suiteFinished(); }
 
-  process.on('uncaughtException', errorHandler);
-  process.on('exit', exitHandler);
+  //window.onerror = errorHandler;
 
   // start the test chain
   startNextTest();
@@ -60,10 +86,12 @@ exports.runSuite = function(obj, options) {
 
     if (!test) { return; }
 
+    if (stopTesting(test)) return;
+
     suite.started.push(test);
 
     // make sure all tests are an array of test functions
-    test.func = Array.isArray(test.func) ? test.func : [test.func];
+    test.func = isArray(test.func) ? test.func : [test.func];
     // TODO make sure test length is odd?
 
     // keep track of which parts of the flow have been run
@@ -71,32 +99,17 @@ exports.runSuite = function(obj, options) {
     // keep track of assertions made:
     test.numAssertions = 0;
     // object that is passed to the tests:
-    test.obj =
-      { get uncaughtExceptionHandler() { return test.UEHandler; }
-      , set uncaughtExceptionHandler(h) {
-          if (options.parallel) {
-            test.obj.equal('serial', 'parallel',
-               "Cannot set an 'uncaughtExceptionHandler' when running tests in parallel");
-          }
-          test.UEHandler = h;
-        }
-      , finish: function() {
-          testProgressed(test);
-        }
-      };
+    test.obj = {
+      finish: function() {
+        testProgressed(test);
+      }
+    };
 
     addAssertionFunctions(test);
 
     if (options.onTestStart) { options.onTestStart(test.name); }
 
     runTestFunc(test);
-
-    // if we are supposed to run the tests in parallel, start the next test
-    // if (options.parallel) {
-    //   process.nextTick(function() {
-    //     startNextTest();
-    //   });
-    // }
   }
 
   function runTestFunc(test) {
@@ -106,9 +119,27 @@ exports.runSuite = function(obj, options) {
       test.history.push(true);
       // run the first function
       test.func[index](test.obj, test.obj.finish);
-    }
-    catch(err) {
+    } catch(err) {
       errorHandler(err, test);
+    }
+  }
+
+  function stopTesting(test) {
+    if (exports.isTesting === false) {
+      if (!exports.isStopping) {
+        exports.isStopping = true;
+
+        if (options.onTestStopped) {
+          options.onTestStopped();
+        }
+
+        errorHandler(new Error('Testing interrupted.'), test);
+
+        if(test.obj) { test.obj.log = function(){}; }
+      }
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -120,6 +151,7 @@ exports.runSuite = function(obj, options) {
       (function() {
         var fn = funcName;
         test.obj[fn] = function() {
+          if (stopTesting(test)) return;
           // if the test doesn't have a func, it was already finished
           if (!test.func) {
             testAlreadyFinished(test, 'Encountered ' + fn + ' assertion');
@@ -132,7 +164,7 @@ exports.runSuite = function(obj, options) {
             if (err instanceof assert.AssertionError) {
               err.TEST = test;
             }
-            throw err;
+            errorHandler(err, test);
           }
         }
       })();
@@ -140,6 +172,7 @@ exports.runSuite = function(obj, options) {
   }
 
   function testAlreadyFinished(test, msg) {
+    if (exports.isTesting === false) return;
     errorHandler(new TestAlreadyFinishedError(test.name + ' already finished!' + (msg ? ' ' + msg : '')), test);
   }
 
@@ -159,10 +192,14 @@ exports.runSuite = function(obj, options) {
       test.failure = problem;
     }
 
-    if (test.func.length == test.history.length) {
+    if (typeof test.func === 'undefined') {
+      testAlreadyFinished(test, 'Caught at testProgressed()')
+    }
+
+    if (test.history && test.func.length == test.history.length) {
       testFinished(test);
     }
-    else {
+    else if(isArray(test.history)) {
       var index = test.history.length;
       var match = test.func.length - index - 1;
 
@@ -213,11 +250,8 @@ exports.runSuite = function(obj, options) {
     }
 
     // remove it from the list of tests that have been started
-    suite.started.splice(suite.started.indexOf(test), 1);
+    suite.started.splice(indexOf(suite.started, test), 1);
 
-    test.obj.finish = function() {
-      testAlreadyFinished(test);
-    }
     // clean up properties that are no longer needed
     delete test.obj;
     delete test.history;
@@ -232,47 +266,31 @@ exports.runSuite = function(obj, options) {
       suiteFinished();
     }
 
-   startNextTest();
+    startNextTest();
   }
 
   function errorHandler(err, test) {
     // assertions throw an error, but we can't just catch those errors, because
     // then the rest of the test will run.  So, we don't catch it and it ends up
     // here. When that happens just finish the test.
+    // alert([
+    //   arguments.caller,
+    //   typeof err,
+    //   (err instanceof TestAlreadyFinishedError),
+    //   (err instanceof assert.AssertionError),
+    //   err.constructor.name,
+    //   err.message
+    // ].join('\n'))
 
-    if (err instanceof assert.AssertionError && err.TEST) {
+    if (typeof err === 'object' && err.name === 'AssertionError' && err.TEST) {
       var t = err.TEST;
       delete err.TEST;
       return testProgressed(t, err);
     }
 
     // if the error is not an instance of Error (& has no stack trace) wrap in proper error
-
     if('object' !== typeof err)
-      err = new Error (typeof err + " thrown:" + inspect(err) + " (intercepted by async_testing)")
-
-    // We want to allow tests to supply a function for handling uncaught errors,
-    // and since all uncaught errors come here, this is where we have to handle
-    // them.
-    // (you can only handle uncaught errors when not in parallel mode)
-    if (!options.parallel && suite.started.length && suite.started[0].UEHandler) {
-      // an error could possibly be thrown in the UncaughtExceptionHandler, in
-      // this case we do not want to call the handler again, so we move it
-      suite.started[0].UEHandlerUsed = suite.started[0].UEHandler;
-      delete suite.started[0].UEHandler;
-
-      try {
-        // run the UncaughtExceptionHandler
-        suite.started[0].UEHandlerUsed(err);
-        return;
-      }
-      catch(e) {
-        // we had an error, just run our error handler function on this error
-        // again.  We don't have to worry about it triggering the uncaught
-        // exception handler again because we moved it just a second ago
-        return errorHandler(e);
-      }
-    }
+      err = new Error (typeof err + " thrown:" + err.toString() + " (intercepted by async_testing)")
 
     if (!(err instanceof TestAlreadyFinishedError) && (test || suite.started.length == 1)) {
       // if we can narrow down what caused the error then report it
@@ -281,18 +299,18 @@ exports.runSuite = function(obj, options) {
     }
     else {
       // otherwise report that we can't narrow it down and exit
-      process.removeListener('uncaughtException', errorHandler);
-      process.removeListener('exit', exitHandler);
+      // window.onerror = null;
 
       if (options.onSuiteDone) {
         var tests = test ? [test] : suite.started;
         if (tests.length < 1) {
           tests = suite.results;
         }
-        options.onSuiteDone('error', { error: err, tests: tests.map(function(t) { return t.name; })});
+        options.onSuiteDone('error', { error: err, tests: map(tests, function(t) { return t.name; })});
       }
       else {
         // TODO test this
+        alert('got it.')
         throw err;
       }
     }
@@ -301,7 +319,7 @@ exports.runSuite = function(obj, options) {
   function exitHandler() {
     if (suite.started.length > 0) {
       if (options.onSuiteDone) {
-        options.onSuiteDone('exit', {tests: suite.started.map(function(t) { return t.name; })});
+        options.onSuiteDone('exit', {tests: map(suite.started, function(t) { return t.name; })});
       }
     }
   }
@@ -310,10 +328,10 @@ exports.runSuite = function(obj, options) {
   function suiteFinished() {
     if (suite.finished) { return; }
 
+    exports.isStopping = false;
     suite.finished = true;
 
-    process.removeListener('uncaughtException', errorHandler);
-    process.removeListener('exit', exitHandler);
+    // window.onerror = null;
 
     if (options.onSuiteDone) {
       var result =
@@ -323,7 +341,7 @@ exports.runSuite = function(obj, options) {
         };
 
 
-      suite.results.forEach(function(r) {
+      forEach(suite.results, function(r) {
         result[r.failure ? 'numFailures' : 'numSuccesses']++;
       });
 
@@ -346,9 +364,16 @@ exports.registerAssertion = function(name, func) {
 
 // register the default functions
 var assertionModuleAssertions = [ 'ok', 'equal', 'notEqual', 'deepEqual', 'notDeepEqual', 'strictEqual', 'notStrictEqual', 'throws', 'doesNotThrow', 'ifError'];
-assertionModuleAssertions.forEach(function(funcName) {
+
+
+
+forEach(assertionModuleAssertions, function(funcName) {
     exports.registerAssertion(funcName, assert[funcName]);
   });
+
+exports.registerAssertion('log', function(msg) {
+  runner.log(msg);
+});
 
 // this is a recursive function because suites can hold sub suites
 exports.getTestsFromObject = function(o, filter, namespace) {
@@ -356,15 +381,13 @@ exports.getTestsFromObject = function(o, filter, namespace) {
   for(var key in o) {
     (function(key, value) {
       var displayName = (namespace ? namespace+' \u2192 ' : '') + key;
-      if (typeof value == 'function' || Array.isArray(value)) {
+      if (typeof value == 'function' || isArray(value)) {
         // if the testName option is set, then only add the test to the todo
         // list if the name matches
-        if (!filter || filter.indexOf(key) >= 0) {
-          tests.push({
-            name: displayName,
-            func: value
-          });
-        }
+        tests.push({
+          name: displayName,
+          func: value
+        });
       }
       else {
         tests = tests.concat(exports.getTestsFromObject(value, filter, displayName));
@@ -378,8 +401,9 @@ exports.getTestsFromObject = function(o, filter, namespace) {
 var TestAlreadyFinishedError = function(message) {
   this.name = "TestAlreadyFinishedError";
   this.message = message;
-  Error.captureStackTrace(this);
+  //Error.captureStackTrace(this);
 };
-TestAlreadyFinishedError.__proto__ = Error.prototype;
+TestAlreadyFinishedError.prototype = new Error();
+TestAlreadyFinishedError.constructor = TestAlreadyFinishedError;
 
-})(this)
+})(this);

@@ -1,6 +1,38 @@
 ;(function() {
   var Pusher = this.Pusher;
 
+  /*
+    A little bauble to interface with window.navigator.onLine,
+    window.ononline and window.onoffline.  Easier to mock.
+  */
+  var NetInfo = function() {
+    var self = this;
+    Pusher.EventsDispatcher.call(this);
+    // This is okay, as IE doesn't support this stuff anyway.
+    if (window.addEventListener !== undefined) {
+      window.addEventListener("online", function() {
+        self.emit('online', null);
+      }, false);
+      window.addEventListener("offline", function() {
+        self.emit('offline', null);
+      }, false);
+    }
+  };
+
+  // Offline means definitely offline (no connection to router).
+  // Inverse does NOT mean definitely online (only currently supported in Safari
+  // and even there only means the device has a connection to the router).
+  NetInfo.prototype.isOnLine = function() {
+    if (window.navigator.onLine === undefined) {
+      return true;
+    } else {
+      return window.navigator.onLine;
+    }
+  };
+
+  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
+  this.Pusher.NetInfo = Pusher.NetInfo = NetInfo;
+
   var machineTransitions = {
     'initialized': ['waiting', 'failed'],
     'waiting': ['connecting', 'permanentlyClosed'],
@@ -9,7 +41,8 @@
     'connected': ['permanentlyClosing', 'impermanentlyClosing', 'waiting'],
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
-    'permanentlyClosed': ['waiting']
+    'permanentlyClosed': ['waiting'],
+    'failed': ['permanentlyClosing']
   };
 
 
@@ -44,7 +77,28 @@
     this.options = Pusher.Util.extend({encrypted: false}, options || {});
 
     this.netInfo = new Pusher.NetInfo();
-    Pusher.EventsDispatcher.call(this.netInfo);
+
+    this.netInfo.bind('online', function(){
+      if (self._machine.is('waiting')) {
+        self._machine.transition('connecting');
+        triggerStateChange('connecting');
+      }
+    });
+
+    this.netInfo.bind('offline', function() {
+      if (self._machine.is('connected')) {
+        // These are for Chrome 15, which ends up
+        // having two sockets hanging around.
+        self.socket.onclose = undefined;
+        self.socket.onmessage = undefined;
+        self.socket.onerror = undefined;
+        self.socket.onopen = undefined;
+
+        self.socket.close();
+        self.socket = undefined;
+        self._machine.transition('waiting');
+      }
+    });
 
     // define the state machine that runs the connection
     this._machine = new Pusher.Machine(self, 'initialized', machineTransitions, {
@@ -61,27 +115,20 @@
       },
 
       waitingPre: function() {
-        self._waitingTimer = setTimeout(function() {
-          self._machine.transition('connecting');
-        }, self.connectionWait);
-
         if (self.connectionWait > 0) {
           informUser('connecting_in', self.connectionWait);
         }
 
-        if (netInfoSaysOffline() || self.connectionAttempts > 4) {
-          if(netInfoSaysOffline())
-          {
-            // called by some browsers upon reconnection to router
-            self.netInfo.bind('online', function() {
-              if(self._machine.is('waiting'))
-                self._machine.transition('connecting');
-            });
-          }
-
+        if (self.netInfo.isOnLine() === false || self.connectionAttempts > 4){
           triggerStateChange('unavailable');
         } else {
           triggerStateChange('connecting');
+        }
+
+        if (self.netInfo.isOnLine() === true) {
+          self._waitingTimer = setTimeout(function() {
+            self._machine.transition('connecting');
+          }, self.connectionWait);
         }
       },
 
@@ -90,6 +137,15 @@
       },
 
       connectingPre: function() {
+        // Case that a user manages to get to the connecting
+        // state even when offline.
+        if (self.netInfo.isOnLine() === false) {
+          self._machine.transition('waiting');
+          triggerStateChange('unavailable');
+
+          return;
+        }
+
         // removed: if not closed, something is wrong that we should fix
         // if(self.socket !== undefined) self.socket.close();
         var url = formatURL(self.key, self.connectionSecure);
@@ -147,14 +203,7 @@
 
         self.socket.onmessage = ws_onMessage;
         self.socket.onerror = ws_onError;
-        self.socket.onclose = function() {
-          self._machine.transition('waiting');
-        };
-        // onoffline called by some browsers on loss of connection to router
-        self.netInfo.bind('offline', function() {
-          if(self._machine.is('connected'))
-            self.socket.close();
-        });
+        self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
       },
@@ -168,17 +217,24 @@
       },
 
       impermanentlyClosingPost: function() {
-        self.socket.onclose = transitionToWaiting;
-        self.socket.close();
+        if (self.socket) {
+          self.socket.onclose = transitionToWaiting;
+          self.socket.close();
+        }
       },
 
       permanentlyClosingPost: function() {
-        self.socket.onclose = function() {
+        if (self.socket) {
+          self.socket.onclose = function() {
+            resetConnectionParameters(self);
+            self._machine.transition('permanentlyClosed');
+          };
+
+          self.socket.close();
+        } else {
           resetConnectionParameters(self);
           self._machine.transition('permanentlyClosed');
-        };
-
-        self.socket.close();
+        }
       },
 
       failedPre: function() {
@@ -214,7 +270,12 @@
       var port = Pusher.ws_port;
       var protocol = 'ws://';
 
-      if (isSecure) {
+      // Always connect with SSL if the current page has
+      // been loaded via HTTPS.
+      //
+      // FUTURE: Always connect using SSL.
+      //
+      if (isSecure || document.location.protocol === 'https:') {
         port = Pusher.wss_port;
         protocol = 'wss://';
       }
@@ -256,6 +317,14 @@
         // App not found by key - close connection
         if (params.data.code === 4001) {
           self._machine.transition('permanentlyClosing');
+        }
+
+        if (params.data.code === 4000) {
+          Pusher.debug(params.data.message);
+
+          self.compulsorySecure = true;
+          self.connectionSecure = true;
+          self.options.encrypted = true;
         }
       } else if (params.event === 'pusher:heartbeat') {
       } else if (self._machine.is('connected')) {
@@ -322,18 +391,11 @@
       self.emit('state_change', {previous: prevState, current: newState});
       self.emit(newState, data);
     }
-
-    // Offline means definitely offline (no connection to router).
-    // Inverse does NOT mean definitely online (only currently supported in Safari
-    // and even there only means the device has a connection to the router).
-    function netInfoSaysOffline() {
-      return self.netInfo.isOnLine() === false;
-    }
   };
 
   Connection.prototype.connect = function() {
     // no WebSockets
-    if (Pusher.Transport === null) {
+    if (Pusher.Transport === null || typeof Pusher.Transport === 'undefined') {
       this._machine.transition('failed');
     }
     // initial open of connection
@@ -342,7 +404,7 @@
       this._machine.transition('waiting');
     }
     // user skipping connection wait
-    else if (this._machine.is('waiting')) {
+    else if (this._machine.is('waiting') && this.netInfo.isOnLine() === true) {
       this._machine.transition('connecting');
     }
     // user re-opening connection after closing it
@@ -361,6 +423,12 @@
   };
 
   Connection.prototype.disconnect = function() {
+    if (this._machine.is('permanentlyClosed')) {
+      return;
+    }
+
+    Pusher.debug('Disconnecting');
+
     if (this._machine.is('waiting')) {
       this._machine.transition('permanentlyClosed');
     } else {
@@ -370,26 +438,4 @@
 
   Pusher.Util.extend(Connection.prototype, Pusher.EventsDispatcher.prototype);
   this.Pusher.Connection = Connection;
-
-  /*
-    A little bauble to interface with window.navigator.onLine,
-    window.ononline and window.onoffline.  Easier to mock.
-  */
-  var NetInfo = function() {
-    var self = this;
-    window.ononline = function() {
-      self.emit('online', null);
-    };
-    window.onoffline = function() {
-      self.emit('offline', null);
-    };
-  };
-
-  NetInfo.prototype.isOnLine = function() {
-    return window.navigator.onLine;
-  };
-
-  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
-  this.Pusher.Connection.NetInfo = NetInfo;
-
 }).call(this);

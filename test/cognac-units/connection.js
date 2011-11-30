@@ -1,71 +1,12 @@
 ;(function() {
   // Clear version, as we want to use a constant version for tests.
-  Pusher.VERSION = '';
+  Pusher.VERSION = '1.10.0';
 
-  /**
-   * EventsWatcher is a constructor that'll listen for all
-   * given possible events and allow you to be able to
-   * write asserts that check if an event was emitted
-   *
-   * @constructor
-   * @param {Pusher.EventsDispatcher} subject The object that will emit the events.
-   * @param {Array} possibleEvents The events we care about for our testcase.
-  **/
-  function EventsWatcher(subject, possibleEvents) {
-    var events = [];
-
-    this.next = function() {
-      return events.shift();
-    };
-
-    subject.bind_all(function(event_name, data) {
-      if (possibleEvents.indexOf(event_name) > -1) {
-        if (typeof data !== 'undefined') {
-          events.push({name: event_name, data: data});
-        } else {
-          events.push({name: event_name});
-        }
-      }
-    });
-  }
-
-  /**
-   * SteppedObserver is a constructor that will bind to a given event and
-   * step through a list of callback functions. (One step per emit of event).
-   *
-   * @constructor
-   * @param {Object} subject     The object that will emit the events.
-   * @param {String} event_name  The event we wish to observe in a stepped manner.
-   * @param {Array}  callbacks   The callbacks to step through.
-  **/
-  function SteppedObserver(subject, event_name, callbacks) {
-    var numberOfChanges = 0,
-        numberOfCallbacks = callbacks.length;
-
-    subject.bind(event_name, function(event_data) {
-      //console.log(event_data);
-      if (numberOfChanges < numberOfCallbacks) {
-        callbacks[numberOfChanges++](event_data);
-      }
-    });
-  }
-
-  /**
-   * defer is a utility method to create a very short timeout as to be able
-   * to run code in the "nextTick"
-   *
-   * @param {Function}  callback    The callback to run on "nextTick".
-   * @param {Object}    thisArg     The scope to call the callback in.
-   * @param {Array}     args        Optional arguments to call the callback with.
-  **/
-  function defer(callback, thisArg, args) {
-    return setTimeout(function() {
-      callback.apply(thisArg, (args || []));
-    }, 10);
-  }
+  // Set this globally, as otherwise we can get some strange
+  // errors in tests.
+  Pusher.NetInfo = TestNetInfo;
 
   runner.addSuite('Pusher.Connection', {
-
     'Initialisation': {
       'new Pusher.Connection("b599fe0f1e4b6f6eb8a6")': function(test) {
         Pusher.Transport = TestSocket;
@@ -527,6 +468,9 @@
         connection.connect();
       },
 
+      //-----------------------------------------------
+      //-----------------------------------------------
+
       'timeout occurs when in connecting and awaiting open': function(test) {
         Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('g');
@@ -598,6 +542,9 @@
 
         connection.connect();
       },
+
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       'error occurs when in connecting and awaiting open': function(test) {
         Pusher.Transport = TestSocket;
@@ -675,12 +622,8 @@
         connection.connect();
       },
 
-
-
-
-
-
-
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       'user closes during waiting': function(test) {
         Pusher.Transport = TestSocket;
@@ -702,8 +645,6 @@
 
         connection.connect();
       },
-
-
 
       'user closes during connecting': function(test) {
         Pusher.Transport = TestSocket;
@@ -768,10 +709,8 @@
         connection.connect();
       },
 
-
-
-
-
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       //  Test:
       //    waiting -> connecting -> (onclose) -> waiting
@@ -844,6 +783,8 @@
         connection.connect();
       },
 
+      //-----------------------------------------------
+      //-----------------------------------------------
 
       'check that forced ssl actually uses ssl first time, on second try and after successful connect': function(test) {
         Pusher.Transport = TestSocket;
@@ -902,25 +843,22 @@
         connection.connect();
       },
 
+//-----------------------------------------------
+//-----------------------------------------------
 
-
-
-
-      //-----------------------------------------------
-      //-----------------------------------------------
-      'Should result in a state of "failed" if WebSockets are not available': function(test) {
-        // hack, as we only check that this is something
+      'Should result in a state of "failed" if Pusher.Transport === null': function(test) {
         Pusher.Transport = null;
 
-        var connection = new Pusher.Connection('n');
-        var watcher = new EventsWatcher(connection, [
-          'failed'
-        ]);
+        var connection = new Pusher.Connection('n1');
+        var watcher = new EventsWatcher(connection, ['failed']);
 
         SteppedObserver(connection._machine, 'state_change', [
           function(e) {
-            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
             test.equal(e.newState, 'failed', 'state should intially be "failed"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
             test.finish();
           }
         ]);
@@ -928,6 +866,48 @@
         connection.connect();
       },
 
+      'Should result in a state of "failed" if Pusher.Transport === undefined': function(test) {
+        Pusher.Transport = undefined;
+
+        var connection = new Pusher.Connection('n2');
+        var watcher = new EventsWatcher(connection, ['failed']);
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'failed', 'state should intially be "failed"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.equal(watcher.next().name, 'failed', 'the "failed" event should be emitted');
+            test.finish();
+          }
+        ]);
+
+        connection.connect();
+      },
+
+      'Should be able to disconnect after "failed" state.': function(test) {
+        Pusher.Transport = undefined;
+
+        var connection = new Pusher.Connection('n3');
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'failed', 'state should intially be "failed"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.equal(e.newState, 'permanentlyClosing', 'the state should transition to "permanentlyClosing".');
+            test.finish();
+          }
+        ]);
+
+        connection.connect();
+      },
+
+
+//-----------------------------------------------
+//-----------------------------------------------
 
       'User should be able to bypass connection wait with explicit socket.connection.connect() call': function(test) {
         Pusher.Transport = TestSocket;
@@ -945,6 +925,7 @@
           function(e) {
             test.equal(e.newState, 'waiting', 'state should be "waiting"');
             test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
+            test.equal(connection.netInfo.isOnLine(), true, 'connection.netInfo should return true for isOnLine');
             nextConnectionAttempt = new Date().getTime() + connection.connectionWait;
             connection.connect();
           },
@@ -968,8 +949,15 @@
 
         // Connect the socket to continue the tests.
         connection.connect();
-      },
+      }
+    },
 
+
+//-----------------------------------------------
+//-----------------------------------------------
+
+
+    'NetInfo': {
       'User: unavailable, machine: waiting if connected and then internet dies': function(test) {
         Pusher.Transport = TestSocket;
         Pusher.NetInfo = TestNetInfo;
@@ -1019,8 +1007,8 @@
           function(e) {
             test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
             test.equal(connection.state, 'unavailable', 'user state should be "unavailable"');
-          },
-          function(e) {
+            // This needs to be in the same block as you don't actually get any state_change
+            // event after unavailable.
             defer(connection.disconnect, connection);
           },
           function(e) {
@@ -1055,9 +1043,7 @@
         ]);
 
         connection.connect();
-      },
-
-
+      }
     },
 
     'Message Sending and Receiving': {
@@ -1088,22 +1074,23 @@
               data: { message: 'oh awesome' }
             };
 
-            connection.socket.trigger('message', JSON.stringify({
-              event: 'chat-message',
-              channel: 'my-awesome-chat-channel',
-              data: '{"message":"oh awesome"}'
-            }));
-
             // best to bind directly as connection.socket.trigger is async.
             connection.bind('message', function(event) {
               test.deepEqual(event, testMessage, 'Should receive an exact copy of the sent message.');
               test.finish();
             });
+
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'chat-message',
+              channel: 'my-awesome-chat-channel',
+              data: '{"message":"oh awesome"}'
+            }));
           }
         ]);
 
         connection.connect();
       },
+
       'should emit the "error" event on the receive of a invalid websocket message': function(test) {
         Pusher.Transport = TestSocket;
 
@@ -1128,14 +1115,14 @@
             // note: the data property is an invalid JSON string.
             var payload = 'invalid';
 
-            connection.socket.trigger('message', payload);
-
             // best to bind directly as connection.socket.trigger is async.
             connection.bind('error', function(event) {
               test.equal(event.type, 'MessageParseError', 'The error type should be set to "MessageParseError"');
               test.equal(event.data, payload, 'The payload should remain unchanged');
               test.finish();
             });
+
+            connection.socket.trigger('message', payload);
           }
         ]);
 
@@ -1180,9 +1167,8 @@
 
         // Connect the socket to continue the tests.
         connection.connect();
-      },
+      }
     },
-
 
     'Test connection back-off limit': function(test) {
       Pusher.Transport = TestSocket;
