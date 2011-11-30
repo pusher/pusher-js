@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.10.0 (2011-12-1)
+
+[NEW] Private and public channels now emit `pusher:subscription_succeeded` events.  This is consistent with presence channels.
+
+[CHANGED] Renamed the `subscription_error` event to `pusher:subscription_error`.
+
 ## 1.9.6 (2011-11-16)
 
 [FIXED] Issue in Mozilla Firefox 8, where making a connection to non-ssl websocket endpoint from a secure page results in a security exception.
