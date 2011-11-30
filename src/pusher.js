@@ -78,7 +78,7 @@ Pusher.prototype = {
     if (this.connection.state === 'connected') {
       channel.authorize(this, function(err, data) {
         if (err) {
-          channel.emit('subscription_error', data);
+          channel.emit('pusher:subscription_error', data);
         } else {
           self.send_event('pusher:subscribe', {
             channel: channel_name,
