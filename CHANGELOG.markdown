@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.10.0 (2011-12-1)
+## 1.10.1 (2011-12-1)
 
 [NEW] Private and public channels now emit `pusher:subscription_succeeded` events.  This is consistent with presence channels.
 
