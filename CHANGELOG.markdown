@@ -2,7 +2,7 @@
 
 ## 1.10.1 (2011-12-1)
 
-[NEW] Changed channel.trigger() and back_channel.trigger() to return a boolean indicating whether the message was actually sent.
+[NEW] Changed channel.trigger() returns a boolean indicating whether the message was actually sent.
 
 [NEW] Private and public channels now emit `pusher:subscription_succeeded` events.  This is consistent with presence channels.
 
