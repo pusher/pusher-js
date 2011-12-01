@@ -122,6 +122,38 @@
       });
     },
 
+    'trigger() should return false if not connected': function(test) {
+      test.numAssertions = 1;
+
+      var pusher = new Pusher('testing');
+      var channel = pusher.subscribe('foo');
+      // stop the initial connection attempt.
+      pusher.disconnect();
+      // Override the state machine, as trigger only checks
+      // the value of the machine state.
+      pusher.connection._machine.state = 'permanentlyClosed';
+      pusher.connection.socket = new TestSocket()
+
+      test.equal(false, channel.trigger('foo', 'bar'), 'channel.trigger should return false.');
+      test.finish();
+    },
+
+    'trigger() should return true if connected': function(test) {
+      test.numAssertions = 1;
+
+      var pusher = new Pusher('testing');
+      var channel = pusher.subscribe('foo');
+      // stop the initial connection attempt.
+      pusher.disconnect();
+      // Override the state machine, as trigger only checks
+      // the value of the machine state.
+      pusher.connection._machine.state = 'connected';
+      pusher.connection.socket = new TestSocket()
+
+      test.equal(true, channel.trigger('foo', 'bar'), 'channel.trigger should return true.');
+      test.finish();
+    },
+
     'Authorizers': {
       'invalid JSON in xhr.responseText results in Error': function(test) {
         test.numAssertions = 2;
