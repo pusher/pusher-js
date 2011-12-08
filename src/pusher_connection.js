@@ -75,18 +75,21 @@
     Pusher.EventsDispatcher.call(this);
 
     this.options = Pusher.Util.extend({encrypted: false}, options || {});
-
     this.netInfo = new Pusher.NetInfo();
 
     this.netInfo.bind('online', function(){
-      if (self._machine.is('waiting')) {
-        self._machine.transition('connecting');
+      var machine = self._machine;
+
+      if (machine.is('waiting')) {
+        machine.transition('connecting');
         triggerStateChange('connecting');
       }
     });
 
     this.netInfo.bind('offline', function() {
-      if (self._machine.is('connected')) {
+      var machine = self._machine;
+
+      if (machine.is('connected')) {
         // These are for Chrome 15, which ends up
         // having two sockets hanging around.
         self.socket.onclose = undefined;
@@ -96,7 +99,8 @@
 
         self.socket.close();
         self.socket = undefined;
-        self._machine.transition('waiting');
+
+        machine.transition('waiting');
       }
     });
 
@@ -224,16 +228,19 @@
       },
 
       permanentlyClosingPost: function() {
-        if (self.socket) {
-          self.socket.onclose = function() {
+        var socket = self.socket;
+        var machine = self._machine;
+
+        if (socket) {
+          socket.onclose = function() {
             resetConnectionParameters(self);
-            self._machine.transition('permanentlyClosed');
+            machine.transition('permanentlyClosed');
           };
 
-          self.socket.close();
+          socket.close();
         } else {
           resetConnectionParameters(self);
-          self._machine.transition('permanentlyClosed');
+          machine.transition('permanentlyClosed');
         }
       },
 
@@ -299,6 +306,7 @@
 
     function ws_onMessage(event) {
       var params = parseWebSocketEvent(event);
+      var machine = this._machine;
 
       // case of invalid JSON payload sent
       // we have to handle the error in the parseWebSocketEvent
@@ -309,14 +317,14 @@
 
       // Continue to work with valid payloads:
       if (params.event === 'pusher:connection_established') {
-        self._machine.transition('connected', params.data.socket_id);
+        machine.transition('connected', params.data.socket_id);
       } else if (params.event === 'pusher:error') {
         // first inform the end-developer of this error
         informUser('error', {type: 'PusherError', data: params.data});
 
         // App not found by key - close connection
         if (params.data.code === 4001) {
-          self._machine.transition('permanentlyClosing');
+          machine.transition('permanentlyClosing');
         }
 
         if (params.data.code === 4000) {
@@ -327,7 +335,7 @@
           self.options.encrypted = true;
         }
       } else if (params.event === 'pusher:heartbeat') {
-      } else if (self._machine.is('connected')) {
+      } else if (machine.is('connected')) {
         informUser('message', params);
       }
     }
@@ -394,22 +402,24 @@
   };
 
   Connection.prototype.connect = function() {
+    var machine = this._machine;
+
     // no WebSockets
     if (Pusher.Transport === null || typeof Pusher.Transport === 'undefined') {
-      this._machine.transition('failed');
+      machine.transition('failed');
     }
     // initial open of connection
-    else if(this._machine.is('initialized')) {
+    else if (machine.is('initialized')) {
       resetConnectionParameters(this);
-      this._machine.transition('waiting');
+      machine.transition('waiting');
     }
     // user skipping connection wait
-    else if (this._machine.is('waiting') && this.netInfo.isOnLine() === true) {
-      this._machine.transition('connecting');
+    else if (machine.is('waiting') && this.netInfo.isOnLine() === true) {
+      machine.transition('connecting');
     }
     // user re-opening connection after closing it
-    else if(this._machine.is("permanentlyClosed")) {
-      this._machine.transition('waiting');
+    else if(machine.is("permanentlyClosed")) {
+      machine.transition('waiting');
     }
   };
 
@@ -423,16 +433,18 @@
   };
 
   Connection.prototype.disconnect = function() {
-    if (this._machine.is('permanentlyClosed')) {
+    var machine = this._machine;
+
+    if (machine.is('permanentlyClosed')) {
       return;
     }
 
     Pusher.debug('Disconnecting');
 
-    if (this._machine.is('waiting')) {
-      this._machine.transition('permanentlyClosed');
+    if (machine.is('waiting')) {
+      machine.transition('permanentlyClosed');
     } else {
-      this._machine.transition('permanentlyClosing');
+      machine.transition('permanentlyClosing');
     }
   };
 

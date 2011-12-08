@@ -20,9 +20,12 @@ Example:
   }
 
   EventsDispatcher.prototype.bind = function(event_name, callback) {
-    this.callbacks[event_name] = this.callbacks[event_name] || [];
-    this.callbacks[event_name].push(callback);
-    return this;// chainable
+    var callbacks = this.callbacks;
+
+    callbacks[event_name] = callbacks[event_name] || [];
+    callbacks[event_name].push(callback);
+
+    return this;
   };
 
   EventsDispatcher.prototype.emit = function(event_name, data) {
@@ -52,8 +55,10 @@ Example:
   };
 
   EventsDispatcher.prototype.dispatch_global_callbacks = function(event_name, data) {
-    for (var i = 0; i < this.global_callbacks.length; i++) {
-      this.global_callbacks[i](event_name, data);
+    var global_callbacks = this.global_callbacks;
+
+    for (var i = 0; i < global_callbacks.length; i++) {
+      global_callbacks[i](event_name, data);
     }
   };
 
