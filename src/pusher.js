@@ -10,7 +10,6 @@ if (typeof Function.prototype.scopedTo === 'undefined') {
 
 var Pusher = function(app_key, options) {
   this.options = options || {};
-  this.path = '/app/' + app_key + '?client=js&version=' + Pusher.VERSION;
   this.key = app_key;
   this.channels = new Pusher.Channels();
   this.global_channel = new Pusher.Channel('pusher_global_channel');
@@ -168,12 +167,10 @@ Pusher.host = 'ws.pusherapp.com';
 Pusher.ws_port = 80;
 Pusher.wss_port = 443;
 Pusher.channel_auth_endpoint = '/pusher/auth';
-Pusher.connection_timeout = 5000;
 Pusher.cdn_http = '<CDN_HTTP>'
 Pusher.cdn_https = '<CDN_HTTPS>'
 Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
 Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
-Pusher.allow_reconnect = true;
 Pusher.channel_auth_transport = 'ajax';
 
 Pusher.isReady = false;
