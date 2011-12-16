@@ -108,7 +108,12 @@ var _require = (function () {
   };
 
   var initializeOnDocumentBody = function() {
-    ondocumentbody(initialize);
+    // Don't wait for document.body if the context is XULDocument
+    if (document.toString().match('XULDocument')) {
+      initialize();
+    } else {
+      ondocumentbody(initialize);
+    }
   }
 
   if (deps.length > 0) {
