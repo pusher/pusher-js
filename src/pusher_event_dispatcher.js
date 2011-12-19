@@ -24,6 +24,14 @@ Example:
     this.callbacks[event_name].push(callback);
     return this;// chainable
   };
+  
+  EventsDispatcher.prototype.unbind = function(eventName, callback) {
+    if(this.callbacks[eventName]) {
+      var index = Pusher.Util.arrayIndexOf(this.callbacks[eventName], callback);
+      this.callbacks[eventName].splice(index, 1);
+    }
+    return this;
+  };
 
   EventsDispatcher.prototype.emit = function(event_name, data) {
     this.dispatch_global_callbacks(event_name, data);
