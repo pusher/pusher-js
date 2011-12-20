@@ -426,6 +426,18 @@
     }
   };
 
+  Connection.prototype.send_event = function(event_name, data, channel) {
+    Pusher.debug("Event sent (channel,event,data)", channel, event_name, data);
+
+    var payload = {
+      event: event_name,
+      data: data
+    };
+    if (channel) { payload['channel'] = channel };
+
+    this.send(JSON.stringify(payload));
+  }
+
   Connection.prototype.disconnect = function() {
     if (this._machine.is('permanentlyClosed')) {
       return;

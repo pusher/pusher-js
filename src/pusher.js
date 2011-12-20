@@ -100,15 +100,8 @@ Pusher.prototype = {
   },
 
   send_event: function(event_name, data, channel) {
-    Pusher.debug("Event sent (channel,event,data)", channel, event_name, data);
-
-    var payload = {
-      event: event_name,
-      data: data
-    };
-    if (channel) payload['channel'] = channel;
-
-    return this.connection.send(JSON.stringify(payload));
+    this.connection.send_event(event_name, data, channel);
+    return this;
   },
 
   send_local_event: function(event_name, event_data, channel_name) {
