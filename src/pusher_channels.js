@@ -31,7 +31,9 @@ Pusher.Channels.prototype = {
 
 Pusher.Channel = function(channel_name, pusher) {
   var channel = this;
-  Pusher.EventsDispatcher.call(this);
+  Pusher.EventsDispatcher.call(this, function(event_name, event_data) {
+    Pusher.debug('No callbacks for ' + event_name, event_data);
+  });
 
   this.pusher = pusher;
   this.name = channel_name;

@@ -12,8 +12,7 @@ var Pusher = function(app_key, options) {
   this.options = options || {};
   this.key = app_key;
   this.channels = new Pusher.Channels();
-  this.global_channel = new Pusher.Channel('pusher_global_channel');
-  this.global_channel.global = true;
+  this.global_emitter = new Pusher.EventsDispatcher()
 
   var self = this;
 
@@ -53,12 +52,12 @@ Pusher.prototype = {
   },
 
   bind: function(event_name, callback) {
-    this.global_channel.bind(event_name, callback);
+    this.global_emitter.bind(event_name, callback);
     return this;
   },
 
   bind_all: function(callback) {
-    this.global_channel.bind_all(callback);
+    this.global_emitter.bind_all(callback);
     return this;
   },
 
@@ -116,7 +115,7 @@ Pusher.prototype = {
       Pusher.debug("Event recd (event,data)", event_name, event_data);
     }
 
-    this.global_channel.dispatch_with_all(event_name, event_data);
+    this.global_emitter.dispatch_with_all(event_name, event_data);
   }
 };
 
