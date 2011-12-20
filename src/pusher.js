@@ -24,7 +24,15 @@ var Pusher = function(app_key, options) {
       self.subscribeAll();
     })
     .bind('message', function(params) {
-      self.send_local_event(params.event, params.data, params.channel);
+      var internal = (params.event.indexOf('pusher_internal:') === 0);
+      if (params.channel) {
+        var channel;
+        if (channel = self.channel(params.channel)) {
+          channel.emit(params.event, params.data);
+        }
+      }
+      // Emit globaly [deprecated]
+      if (!internal) self.global_emitter.emit(params.event, params.data);
     })
     .bind('disconnected', function() {
       self.channels.disconnect();
@@ -102,17 +110,6 @@ Pusher.prototype = {
     this.connection.send_event(event_name, data, channel);
     return this;
   },
-
-  send_local_event: function(event_name, event_data, channel_name) {
-    if (channel_name) {
-      var channel = this.channel(channel_name);
-      if (channel) {
-        channel.emit(event_name, event_data);
-      }
-    }
-
-    this.global_emitter.emit(event_name, event_data);
-  }
 };
 
 Pusher.Util = {
