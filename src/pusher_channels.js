@@ -54,14 +54,6 @@ Pusher.Channel.prototype = {
     this.emit('pusher:subscription_succeeded');
   },
 
-  is_private: function(){
-    return false;
-  },
-
-  is_presence: function(){
-    return false;
-  },
-
   authorize: function(pusher, callback){
     callback(false, {}); // normal channels don't require auth
   },
@@ -127,10 +119,6 @@ Pusher.authorizers = {
 };
 
 Pusher.Channel.PrivateChannel = {
-  is_private: function(){
-    return true;
-  },
-
   authorize: function(pusher, callback){
     Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);
   }
@@ -162,10 +150,6 @@ Pusher.Channel.PresenceChannel = {
     this.subscribed = true;
 
     this.emit('pusher:subscription_succeeded', this.members);
-  },
-
-  is_presence: function(){
-    return true;
   },
 
   members: {
