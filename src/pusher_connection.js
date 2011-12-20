@@ -326,6 +326,10 @@
           self.connectionSecure = true;
           self.options.encrypted = true;
         }
+      } else if (params.event === 'pusher:ping') {
+        self.send_event('pusher:pong', {})
+      } else if (params.event === 'pusher:pong') {
+        
       } else if (params.event === 'pusher:heartbeat') {
       } else if (self._machine.is('connected')) {
         informUser('message', params);
