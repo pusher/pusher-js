@@ -30,7 +30,7 @@ Pusher.Channels.prototype = {
 };
 
 Pusher.Channel = function(channel_name, pusher) {
-  var channel = this;
+  var self = this;
   Pusher.EventsDispatcher.call(this, function(event_name, event_data) {
     Pusher.debug('No callbacks for ' + event_name, event_data);
   });
@@ -39,8 +39,8 @@ Pusher.Channel = function(channel_name, pusher) {
   this.name = channel_name;
   this.subscribed = false;
 
-  this.bind('pusher_internal:subscription_succeeded', function(sub_data){
-    channel.acknowledge_subscription(sub_data);
+  this.bind('pusher_internal:subscription_succeeded', function(data) {
+    self.onSubscriptionSucceeded(data);
   });
 };
 
@@ -49,8 +49,7 @@ Pusher.Channel.prototype = {
   init: function() {},
   disconnect: function() {},
 
-  // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
-  acknowledge_subscription: function(data){
+  onSubscriptionSucceeded: function(data) {
     this.subscribed = true;
     this.emit('pusher:subscription_succeeded');
   },
@@ -157,9 +156,9 @@ Pusher.Channel.PresenceChannel = {
     this.members.clear();
   },
 
-  acknowledge_subscription: function(sub_data){
-    this.members._members_map = sub_data.presence.hash;
-    this.members.count = sub_data.presence.count;
+  onSubscriptionSucceeded: function(data) {
+    this.members._members_map = data.presence.hash;
+    this.members.count = data.presence.count;
     this.subscribed = true;
 
     this.emit('pusher:subscription_succeeded', this.members);
