@@ -101,7 +101,7 @@
         test.finish();
       });
 
-      presenceChannel.dispatch('pusher_internal:member_added', {
+      presenceChannel.emit('pusher_internal:member_added', {
         'user_id': user_id,
         'user_info': user_info
       });
@@ -117,7 +117,7 @@
         test.finish();
       });
 
-      presenceChannel.dispatch('pusher_internal:member_added', {
+      presenceChannel.emit('pusher_internal:member_added', {
         'user_id': user_id
       });
     },

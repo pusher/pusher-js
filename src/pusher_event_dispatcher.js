@@ -28,32 +28,27 @@ Example:
   };
 
   EventsDispatcher.prototype.emit = function(event_name, data) {
-    this.dispatch_global_callbacks(event_name, data);
-    this.dispatch(event_name, data);
+    // Global callbacks
+    for (var i = 0; i < this.global_callbacks.length; i++) {
+      this.global_callbacks[i](event_name, data);
+    }
+
+    // Event callbacks
+    var callbacks = this.callbacks[event_name];
+    if (callbacks) {
+      for (var i = 0; i < callbacks.length; i++) {
+        callbacks[i](data);
+      }
+    } else if (this.failThrough) {
+      this.failThrough(event_name, data)
+    }
+
     return this;
   };
 
   EventsDispatcher.prototype.bind_all = function(callback) {
     this.global_callbacks.push(callback);
     return this;
-  };
-
-  EventsDispatcher.prototype.dispatch = function(event_name, event_data) {
-    var callbacks = this.callbacks[event_name];
-
-    if (callbacks) {
-      for (var i = 0; i < callbacks.length; i++) {
-        callbacks[i](event_data);
-      }
-    } else if (this.failThrough) {
-      this.failThrough(event_name, event_data)
-    }
-  };
-
-  EventsDispatcher.prototype.dispatch_global_callbacks = function(event_name, data) {
-    for (var i = 0; i < this.global_callbacks.length; i++) {
-      this.global_callbacks[i](event_name, data);
-    }
   };
 
   this.Pusher.EventsDispatcher = EventsDispatcher;
