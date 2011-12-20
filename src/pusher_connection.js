@@ -206,6 +206,8 @@
         self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
+
+        resetActivityCheck();
       },
 
       connectedPost: function() {
@@ -213,6 +215,7 @@
       },
 
       connectedExit: function() {
+        stopActivityCheck();
         triggerStateChange('disconnected');
       },
 
@@ -288,6 +291,22 @@
       self._machine.transition('impermanentlyClosing');
     }
 
+    function resetActivityCheck() {
+      if (self.timer) { clearTimeout(self.timer); }
+      // Send ping after inactivity
+      self.timer = setTimeout(function() {
+        self.send_event('pusher:ping', {})
+        // Wait for pong response
+        self.timer = setTimeout(function() {
+          self.socket.close();
+        }, Pusher.pong_timeout)
+      }, Pusher.activity_timeout)
+    }
+
+    function stopActivityCheck() {
+      if (self.timer) { clearTimeout(self.timer); }
+    }
+
     /*-----------------------------------------------
       WebSocket Callbacks
       -----------------------------------------------*/
@@ -324,6 +343,8 @@
     }
 
     function ws_onMessageConnected(event) {
+      resetActivityCheck();
+
       var params;
       if (params = parseWebSocketEvent(event)) {
         switch (params.event) {

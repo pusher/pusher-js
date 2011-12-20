@@ -165,6 +165,8 @@ Pusher.cdn_https = '<CDN_HTTPS>'
 Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
 Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.channel_auth_transport = 'ajax';
+Pusher.activity_timeout = 120000;
+Pusher.pong_timeout = 30000;
 
 Pusher.isReady = false;
 Pusher.ready = function() {
