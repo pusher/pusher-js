@@ -111,7 +111,7 @@
     this._machine = new Pusher.Machine('initialized', machineTransitions, {
       waitingPre: function() {
         if (self.connectionWait > 0) {
-          informUser('connecting_in', self.connectionWait);
+          self.emit('connecting_in', self.connectionWait);
         }
 
         if (self.netInfo.isOnLine() === false || self.connectionAttempts > 4){
@@ -318,7 +318,7 @@
           self._machine.transition('connected', params.data.socket_id);
         } else if (params.event === 'pusher:error') {
           // first inform the end-developer of this error
-          informUser('error', {type: 'PusherError', data: params.data});
+          self.emit('error', {type: 'PusherError', data: params.data});
 
           switch (params.data.code) {
             case 4000:
@@ -344,7 +344,7 @@
       if (params = parseWebSocketEvent(event)) {
         switch (params.event) {
           case 'pusher:error':
-            informUser('error', {type: 'PusherError', data: params.data});
+            self.emit('error', {type: 'PusherError', data: params.data});
             break;
           case 'pusher:ping':
             self.send_event('pusher:pong', {})
@@ -353,7 +353,7 @@
           case 'pusher:heartbeat':
             break;
           default:
-            informUser('message', params);
+            self.emit('message', params);
         }
       }
     }
@@ -381,7 +381,7 @@
 
         return params;
       } catch (e) {
-        informUser('error', {type: 'MessageParseError', error: e, data: event.data});
+        self.emit('error', {type: 'MessageParseError', error: e, data: event.data});
       }
     }
 
@@ -390,17 +390,13 @@
     }
 
     function ws_onError() {
-      informUser('error', {
+      self.emit('error', {
         type: 'WebSocketError'
       });
 
       // note: required? is the socket auto closed in the case of error?
       self.socket.close();
       self._machine.transition('impermanentlyClosing');
-    }
-
-    function informUser(eventName, data) {
-      self.emit(eventName, data);
     }
 
     function triggerStateChange(newState, data) {
