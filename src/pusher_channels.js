@@ -52,7 +52,7 @@ Pusher.Channel.prototype = {
   // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
   acknowledge_subscription: function(data){
     this.subscribed = true;
-    this.dispatch_with_all('pusher:subscription_succeeded');
+    this.emit('pusher:subscription_succeeded');
   },
 
   is_private: function(){
@@ -142,13 +142,13 @@ Pusher.Channel.PresenceChannel = {
   init: function(){
     this.bind('pusher_internal:member_added', function(data){
       var member = this.members.add(data.user_id, data.user_info);
-      this.dispatch_with_all('pusher:member_added', member);
+      this.emit('pusher:member_added', member);
     }.scopedTo(this))
 
     this.bind('pusher_internal:member_removed', function(data){
       var member = this.members.remove(data.user_id);
       if (member) {
-        this.dispatch_with_all('pusher:member_removed', member);
+        this.emit('pusher:member_removed', member);
       }
     }.scopedTo(this))
   },
@@ -162,7 +162,7 @@ Pusher.Channel.PresenceChannel = {
     this.members.count = sub_data.presence.count;
     this.subscribed = true;
 
-    this.dispatch_with_all('pusher:subscription_succeeded', this.members);
+    this.emit('pusher:subscription_succeeded', this.members);
   },
 
   is_presence: function(){

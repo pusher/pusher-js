@@ -56,10 +56,5 @@ Example:
     }
   };
 
-  EventsDispatcher.prototype.dispatch_with_all = function(event_name, data) {
-    this.dispatch(event_name, data);
-    this.dispatch_global_callbacks(event_name, data);
-  };
-
   this.Pusher.EventsDispatcher = EventsDispatcher;
 }).call(this);

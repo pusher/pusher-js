@@ -108,14 +108,14 @@ Pusher.prototype = {
     if (channel_name) {
       var channel = this.channel(channel_name);
       if (channel) {
-        channel.dispatch_with_all(event_name, event_data);
+        channel.emit(event_name, event_data);
       }
     } else {
       // Bit hacky but these events won't get logged otherwise
       Pusher.debug("Event recd (event,data)", event_name, event_data);
     }
 
-    this.global_emitter.dispatch_with_all(event_name, event_data);
+    this.global_emitter.emit(event_name, event_data);
   }
 };
 

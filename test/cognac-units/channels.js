@@ -16,7 +16,7 @@
           });
 
           test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
-          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
+          channel.emit('pusher_internal:subscription_succeeded', {});
         }
       },
 
@@ -35,7 +35,7 @@
           });
 
           test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
-          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
+          channel.emit('pusher_internal:subscription_succeeded', {});
         }
       },
 
@@ -56,7 +56,7 @@
           });
 
           test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
-          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {
+          channel.emit('pusher_internal:subscription_succeeded', {
             "presence": {
               "count":1,
               "ids":["0a7ffd3af0e34b6acbe42e50b6fc31f1"],
