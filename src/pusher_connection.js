@@ -310,6 +310,8 @@
 
       var params;
       if (params = parseWebSocketEvent(event)) {
+        Pusher.debug('Event recd', params);
+
         switch (params.event) {
           case 'pusher:error':
             self.emit('error', {type: 'PusherError', data: params.data});
@@ -413,14 +415,13 @@
   };
 
   Connection.prototype.send_event = function(event_name, data, channel) {
-    Pusher.debug("Event sent (channel,event,data)", channel, event_name, data);
-
     var payload = {
       event: event_name,
       data: data
     };
-    if (channel) { payload['channel'] = channel };
+    if (channel) payload['channel'] = channel;
 
+    Pusher.debug('Event sent', payload);
     this.send(JSON.stringify(payload));
   }
 

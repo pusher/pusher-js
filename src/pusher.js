@@ -109,9 +109,6 @@ Pusher.prototype = {
       if (channel) {
         channel.emit(event_name, event_data);
       }
-    } else {
-      // Bit hacky but these events won't get logged otherwise
-      Pusher.debug("Event recd (event,data)", event_name, event_data);
     }
 
     this.global_emitter.emit(event_name, event_data);
