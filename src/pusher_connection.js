@@ -74,7 +74,7 @@
 
     Pusher.EventsDispatcher.call(this);
 
-    this.options = Pusher.Util.extend({encrypted: false}, options || {});
+    this.options = Pusher.Util.extend({encrypted: false}, options);
 
     self.compulsorySecure = self.options.encrypted;
     self.key = key;
