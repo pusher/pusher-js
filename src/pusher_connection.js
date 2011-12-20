@@ -178,7 +178,7 @@
       },
 
       openPre: function() {
-        self.socket.onmessage = ws_onMessage;
+        self.socket.onmessage = ws_onMessageOpen;
         self.socket.onerror = ws_onError;
         self.socket.onclose = transitionToWaiting;
 
@@ -201,7 +201,7 @@
       connectedPre: function(socket_id) {
         self.socket_id = socket_id;
 
-        self.socket.onmessage = ws_onMessage;
+        self.socket.onmessage = ws_onMessageConnected;
         self.socket.onerror = ws_onError;
         self.socket.onclose = transitionToWaiting;
 
@@ -297,42 +297,48 @@
       self._machine.transition('open');
     };
 
-    function ws_onMessage(event) {
-      var params = parseWebSocketEvent(event);
+    function ws_onMessageOpen(event) {
+      var params;
+      if (params = parseWebSocketEvent(event)) {
+        if (params.event === 'pusher:connection_established') {
+          self._machine.transition('connected', params.data.socket_id);
+        } else if (params.event === 'pusher:error') {
+          // first inform the end-developer of this error
+          informUser('error', {type: 'PusherError', data: params.data});
 
-      // case of invalid JSON payload sent
-      // we have to handle the error in the parseWebSocketEvent
-      // method as JavaScript error objects are kinda icky.
-      if (typeof params === 'undefined') return;
+          switch (params.data.code) {
+            case 4000:
+              Pusher.debug(params.data.message);
 
-      Pusher.debug('Event recd (event,data)', params.event, params.data);
-
-      // Continue to work with valid payloads:
-      if (params.event === 'pusher:connection_established') {
-        self._machine.transition('connected', params.data.socket_id);
-      } else if (params.event === 'pusher:error') {
-        // first inform the end-developer of this error
-        informUser('error', {type: 'PusherError', data: params.data});
-
-        // App not found by key - close connection
-        if (params.data.code === 4001) {
-          self._machine.transition('permanentlyClosing');
+              self.compulsorySecure = true;
+              self.connectionSecure = true;
+              self.options.encrypted = true;
+              break;
+            case 4001:
+              // App not found by key - close connection
+              self._machine.transition('permanentlyClosing');
+              break;
+          }
         }
+      }
+    }
 
-        if (params.data.code === 4000) {
-          Pusher.debug(params.data.message);
-
-          self.compulsorySecure = true;
-          self.connectionSecure = true;
-          self.options.encrypted = true;
+    function ws_onMessageConnected(event) {
+      var params;
+      if (params = parseWebSocketEvent(event)) {
+        switch (params.event) {
+          case 'pusher:error':
+            informUser('error', {type: 'PusherError', data: params.data});
+            break;
+          case 'pusher:ping':
+            self.send_event('pusher:pong', {})
+            break;
+          case 'pusher:pong':
+          case 'pusher:heartbeat':
+            break;
+          default:
+            informUser('message', params);
         }
-      } else if (params.event === 'pusher:ping') {
-        self.send_event('pusher:pong', {})
-      } else if (params.event === 'pusher:pong') {
-        
-      } else if (params.event === 'pusher:heartbeat') {
-      } else if (self._machine.is('connected')) {
-        informUser('message', params);
       }
     }
 
