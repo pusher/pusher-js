@@ -319,12 +319,9 @@
           case 'pusher:ping':
             self.send_event('pusher:pong', {})
             break;
-          case 'pusher:pong':
-          case 'pusher:heartbeat':
-            break;
-          default:
-            self.emit('message', params);
         }
+
+        self.emit('message', params);
       }
     }
 
