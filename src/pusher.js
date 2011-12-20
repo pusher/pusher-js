@@ -30,7 +30,7 @@ var Pusher = function(app_key, options) {
       self.channels.disconnect();
     })
     .bind('error', function(err) {
-      Pusher.debug('Error', err);
+      Pusher.warn('Error', err);
     });
 
   Pusher.instances.push(this);
@@ -129,27 +129,39 @@ Pusher.Util = {
       }
     }
     return target;
+  },
+
+  stringify: function stringify(arguments) {
+    var m = ["Pusher"]
+    for (var i = 0; i < arguments.length; i++){
+      if (typeof arguments[i] === "string") {
+        m.push(arguments[i])
+      } else {
+        if (window['JSON'] == undefined) {
+          m.push(arguments[i].toString());
+        } else {
+          m.push(JSON.stringify(arguments[i]))
+        }
+      }
+    };
+    return m.join(" : ")
   }
 };
 
 // To receive log output provide a Pusher.log function, for example
 // Pusher.log = function(m){console.log(m)}
 Pusher.debug = function() {
-  if (!Pusher.log) { return }
-  var m = ["Pusher"]
-  for (var i = 0; i < arguments.length; i++){
-    if (typeof arguments[i] === "string") {
-      m.push(arguments[i])
-    } else {
-      if (window['JSON'] == undefined) {
-        m.push(arguments[i].toString());
-      } else {
-        m.push(JSON.stringify(arguments[i]))
-      }
-    }
-  };
-  Pusher.log(m.join(" : "))
+  if (!Pusher.log) return
+  Pusher.log(Pusher.Util.stringify(arguments))
 }
+Pusher.warn = function() {
+  if (window.console && window.console.warn) {
+    window.console.warn(Pusher.Util.stringify(arguments));
+  } else {
+    if (!Pusher.log) return
+    Pusher.log(Pusher.Util.stringify(arguments))
+  }
+};
 
 // Pusher defaults
 Pusher.VERSION = '<VERSION>';
