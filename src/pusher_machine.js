@@ -29,10 +29,9 @@
   /*-----------------------------------------------
     The State Machine
   -----------------------------------------------*/
-  function Machine(actor, initialState, transitions, stateActions) {
+  function Machine(initialState, transitions, stateActions) {
     Pusher.EventsDispatcher.call(this);
 
-    this.actor = actor;
     this.state = undefined;
     this.errors = [];
 
@@ -50,7 +49,7 @@
     var stateCallbacks = this.stateActions;
 
     if (prevState && (indexOf(this.transitions[prevState], nextState) == -1)) {
-      throw new Error(this.actor.key + ': Invalid transition [' + prevState + ' to ' + nextState + ']');
+      throw new Error('Invalid transition [' + prevState + ' to ' + nextState + ']');
     }
 
     // exit
