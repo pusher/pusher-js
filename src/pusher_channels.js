@@ -125,7 +125,6 @@ Pusher.Channel.PrivateChannel = {
 };
 
 Pusher.Channel.PresenceChannel = {
-
   init: function(){
     this.bind('pusher_internal:member_added', function(data){
       var member = this.members.add(data.user_id, data.user_info);
@@ -200,15 +199,12 @@ Pusher.Channel.PresenceChannel = {
 
 Pusher.Channel.factory = function(channel_name, pusher){
   var channel = new Pusher.Channel(channel_name, pusher);
-  if(channel_name.indexOf(Pusher.Channel.private_prefix) === 0) {
+  if (channel_name.indexOf('private-') === 0) {
     Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
-  } else if(channel_name.indexOf(Pusher.Channel.presence_prefix) === 0) {
+  } else if (channel_name.indexOf('presence-') === 0) {
     Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
     Pusher.Util.extend(channel, Pusher.Channel.PresenceChannel);
   };
-  channel.init();// inheritable constructor
+  channel.init();
   return channel;
 };
-
-Pusher.Channel.private_prefix = "private-";
-Pusher.Channel.presence_prefix = "presence-";
