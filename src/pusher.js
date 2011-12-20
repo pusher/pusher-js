@@ -104,7 +104,6 @@ Pusher.prototype = {
   },
 
   send_local_event: function(event_name, event_data, channel_name) {
-    event_data = Pusher.data_decorator(event_name, event_data);
     if (channel_name) {
       var channel = this.channel(channel_name);
       if (channel) {
@@ -162,7 +161,6 @@ Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.cdn_http = '<CDN_HTTP>'
 Pusher.cdn_https = '<CDN_HTTPS>'
 Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
-Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.channel_auth_transport = 'ajax';
 Pusher.activity_timeout = 120000;
 Pusher.pong_timeout = 30000;
