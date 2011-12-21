@@ -419,7 +419,7 @@
     if (channel) payload['channel'] = channel;
 
     Pusher.debug('Event sent', payload);
-    this.send(JSON.stringify(payload));
+    return this.send(JSON.stringify(payload));
   }
 
   Connection.prototype.disconnect = function() {

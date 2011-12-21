@@ -107,8 +107,7 @@ Pusher.prototype = {
   },
 
   send_event: function(event_name, data, channel) {
-    this.connection.send_event(event_name, data, channel);
-    return this;
+    return this.connection.send_event(event_name, data, channel);
   },
 };
 
