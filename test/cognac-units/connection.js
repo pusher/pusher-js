@@ -119,7 +119,7 @@
         // Pusher.Transport = TestSocket;
         var connection = new Pusher.Connection('a');
 
-        checkMachine(connection._machine, 'initialized')
+        checkMachine(connection._machine, 'initialized');
       },
 
       //
