@@ -134,7 +134,7 @@
       pusher.connection._machine.state = 'permanentlyClosed';
       pusher.connection.socket = new TestSocket()
 
-      test.equal(false, channel.trigger('foo', 'bar'), 'channel.trigger should return false.');
+      test.equal(channel.trigger('foo', 'bar'), false, 'channel.trigger should return false.');
       test.finish();
     },
 
@@ -150,7 +150,7 @@
       pusher.connection._machine.state = 'connected';
       pusher.connection.socket = new TestSocket()
 
-      test.equal(true, channel.trigger('foo', 'bar'), 'channel.trigger should return true.');
+      test.equal(channel.trigger('foo', 'bar'), true, 'channel.trigger should return true.');
       test.finish();
     },
 
