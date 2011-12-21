@@ -133,7 +133,7 @@
           'connecting_in',
           'connecting',
           'connected'
-        ])
+        ]);
 
 
         SteppedObserver(connection._machine, 'state_change', [
@@ -194,7 +194,7 @@
           'connecting',
           'connected',
           'disconnected'
-        ])
+        ]);
 
         SteppedObserver(connection._machine, 'state_change', [
           // waiting
