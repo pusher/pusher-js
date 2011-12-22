@@ -32,7 +32,7 @@
   function Machine(initialState, transitions, stateActions) {
     Pusher.EventsDispatcher.call(this);
 
-    this.state = initialState;
+    this.state = undefined;
     this.errors = [];
 
     // functions for each state
@@ -40,6 +40,8 @@
 
     // set up the transitions
     this.transitions = transitions;
+
+    this.transition(initialState);
   };
 
   Machine.prototype.transition = function(nextState, data) {

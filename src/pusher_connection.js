@@ -44,13 +44,6 @@
 
     this.options = Pusher.Util.extend({encrypted: false}, options);
 
-    self.compulsorySecure = self.options.encrypted;
-    self.key = key;
-    self.socket = null;
-    self.socket_id = null;
-
-    self.state = 'initialized';
-
     this.netInfo = new Pusher.NetInfo();
 
     this.netInfo.bind('online', function(){
@@ -77,6 +70,18 @@
 
     // define the state machine that runs the connection
     this._machine = new Pusher.Machine('initialized', machineTransitions, {
+
+      // TODO: Use the constructor for this.
+      initializedPre: function() {
+        self.compulsorySecure = self.options.encrypted;
+
+        self.key = key;
+        self.socket = null;
+        self.socket_id = null;
+
+        self.state = 'initialized';
+      },
+
       waitingPre: function() {
         if (self.connectionWait > 0) {
           self.emit('connecting_in', self.connectionWait);
