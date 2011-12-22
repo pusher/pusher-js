@@ -299,8 +299,8 @@
         // Wait for pong response
         self.timer = setTimeout(function() {
           self.socket.close();
-        }, Pusher.pong_timeout)
-      }, Pusher.activity_timeout)
+        }, (self.options.pong_timeout || Pusher.pong_timeout))
+      }, (self.options.activity_timeout || Pusher.activity_timeout))
     }
 
     function stopActivityCheck() {
