@@ -365,11 +365,9 @@ exports.registerAssertion = function(name, func) {
 // register the default functions
 var assertionModuleAssertions = [ 'ok', 'equal', 'notEqual', 'deepEqual', 'notDeepEqual', 'strictEqual', 'notStrictEqual', 'throws', 'doesNotThrow', 'ifError'];
 
-
-
 forEach(assertionModuleAssertions, function(funcName) {
-    exports.registerAssertion(funcName, assert[funcName]);
-  });
+  exports.registerAssertion(funcName, assert[funcName]);
+});
 
 exports.registerAssertion('log', function(msg) {
   runner.log(msg);
