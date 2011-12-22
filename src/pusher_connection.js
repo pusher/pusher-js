@@ -384,7 +384,7 @@
 
   Connection.prototype.connect = function() {
     // no WebSockets
-    if (Pusher.Transport === null || typeof Pusher.Transport === 'undefined') {
+    if (Pusher.Transport === null || Pusher.Transport === undefined) {
       this._machine.transition('failed');
     }
     // initial open of connection

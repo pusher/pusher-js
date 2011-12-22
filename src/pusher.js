@@ -1,4 +1,4 @@
-if (typeof Function.prototype.scopedTo === 'undefined') {
+if (Function.prototype.scopedTo === undefined) {
   Function.prototype.scopedTo = function(context, args) {
     var f = this;
     return function() {
