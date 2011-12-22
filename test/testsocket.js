@@ -73,7 +73,7 @@
   function defer(callback, thisArg, args) {
     return setTimeout(function() {
       callback.apply(thisArg, (args || []));
-    }, 500);
+    }, 0);
   }
 
   function noop() {};
