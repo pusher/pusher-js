@@ -255,19 +255,19 @@
     }
 
     function resetActivityCheck() {
-      if (self.timer) { clearTimeout(self.timer); }
+      if (self._activityTimer) { clearTimeout(self._activityTimer); }
       // Send ping after inactivity
-      self.timer = setTimeout(function() {
+      self._activityTimer = setTimeout(function() {
         self.send_event('pusher:ping', {})
         // Wait for pong response
-        self.timer = setTimeout(function() {
+        self._activityTimer = setTimeout(function() {
           self.socket.close();
         }, Pusher.pong_timeout)
       }, Pusher.activity_timeout)
     }
 
     function stopActivityCheck() {
-      if (self.timer) { clearTimeout(self.timer); }
+      if (self._activityTimer) { clearTimeout(self._activityTimer); }
     }
 
     /*-----------------------------------------------
@@ -280,8 +280,8 @@
     };
 
     function ws_onMessageOpen(event) {
-      var params;
-      if (params = parseWebSocketEvent(event)) {
+      var params = parseWebSocketEvent(event);
+      if (params !== undefined) {
         if (params.event === 'pusher:connection_established') {
           self._machine.transition('connected', params.data.socket_id);
         } else if (params.event === 'pusher:error') {
@@ -308,8 +308,8 @@
     function ws_onMessageConnected(event) {
       resetActivityCheck();
 
-      var params;
-      if (params = parseWebSocketEvent(event)) {
+      var params = parseWebSocketEvent(event);
+      if (params !== undefined) {
         Pusher.debug('Event recd', params);
 
         switch (params.event) {
