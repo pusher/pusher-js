@@ -51,12 +51,12 @@
       'should send pings': function(test) {
         Pusher.Transport = TestSocket;
 
-        withConnectedConnection(test, {'activity_timeout': 20}, function(connection) {
+        withConnectedConnection(test, {'activity_timeout': 100}, function(connection) {
           connectedTime = (+new Date())
           connection.socket._onsend = function(msg) {
             pingTime = (+new Date())
             test.deepEqual(JSON.parse(msg), {'event': 'pusher:ping', 'data': {}}, 'should be a ping');
-            near(test, 20, pingTime - connectedTime, 15)
+            near(test, 100, pingTime - connectedTime, 90)
 
             test.finish();
           }
