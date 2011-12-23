@@ -1,38 +1,6 @@
 ;(function() {
   var Pusher = this.Pusher;
 
-  /*
-    A little bauble to interface with window.navigator.onLine,
-    window.ononline and window.onoffline.  Easier to mock.
-  */
-  var NetInfo = function() {
-    var self = this;
-    Pusher.EventsDispatcher.call(this);
-    // This is okay, as IE doesn't support this stuff anyway.
-    if (window.addEventListener !== undefined) {
-      window.addEventListener("online", function() {
-        self.emit('online', null);
-      }, false);
-      window.addEventListener("offline", function() {
-        self.emit('offline', null);
-      }, false);
-    }
-  };
-
-  // Offline means definitely offline (no connection to router).
-  // Inverse does NOT mean definitely online (only currently supported in Safari
-  // and even there only means the device has a connection to the router).
-  NetInfo.prototype.isOnLine = function() {
-    if (window.navigator.onLine === undefined) {
-      return true;
-    } else {
-      return window.navigator.onLine;
-    }
-  };
-
-  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
-  this.Pusher.NetInfo = Pusher.NetInfo = NetInfo;
-
   var machineTransitions = {
     'initialized': ['waiting', 'failed'],
     'waiting': ['connecting', 'permanentlyClosed'],
@@ -74,7 +42,7 @@
 
     Pusher.EventsDispatcher.call(this);
 
-    this.options = Pusher.Util.extend({encrypted: false}, options || {});
+    this.options = Pusher.Util.extend({encrypted: false}, options);
 
     this.netInfo = new Pusher.NetInfo();
 
@@ -101,7 +69,7 @@
     });
 
     // define the state machine that runs the connection
-    this._machine = new Pusher.Machine(self, 'initialized', machineTransitions, {
+    this._machine = new Pusher.Machine('initialized', machineTransitions, {
 
       // TODO: Use the constructor for this.
       initializedPre: function() {
@@ -116,7 +84,7 @@
 
       waitingPre: function() {
         if (self.connectionWait > 0) {
-          informUser('connecting_in', self.connectionWait);
+          self.emit('connecting_in', self.connectionWait);
         }
 
         if (self.netInfo.isOnLine() === false || self.connectionAttempts > 4){
@@ -178,7 +146,7 @@
       },
 
       openPre: function() {
-        self.socket.onmessage = ws_onMessage;
+        self.socket.onmessage = ws_onMessageOpen;
         self.socket.onerror = ws_onError;
         self.socket.onclose = transitionToWaiting;
 
@@ -201,11 +169,13 @@
       connectedPre: function(socket_id) {
         self.socket_id = socket_id;
 
-        self.socket.onmessage = ws_onMessage;
+        self.socket.onmessage = ws_onMessageConnected;
         self.socket.onerror = ws_onError;
         self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
+
+        resetActivityCheck();
       },
 
       connectedPost: function() {
@@ -213,6 +183,7 @@
       },
 
       connectedExit: function() {
+        stopActivityCheck();
         triggerStateChange('disconnected');
       },
 
@@ -288,6 +259,22 @@
       self._machine.transition('impermanentlyClosing');
     }
 
+    function resetActivityCheck() {
+      if (self._activityTimer) { clearTimeout(self._activityTimer); }
+      // Send ping after inactivity
+      self._activityTimer = setTimeout(function() {
+        self.send_event('pusher:ping', {})
+        // Wait for pong response
+        self._activityTimer = setTimeout(function() {
+          self.socket.close();
+        }, (self.options.pong_timeout || Pusher.pong_timeout))
+      }, (self.options.activity_timeout || Pusher.activity_timeout))
+    }
+
+    function stopActivityCheck() {
+      if (self._activityTimer) { clearTimeout(self._activityTimer); }
+    }
+
     /*-----------------------------------------------
       WebSocket Callbacks
       -----------------------------------------------*/
@@ -297,38 +284,49 @@
       self._machine.transition('open');
     };
 
-    function ws_onMessage(event) {
+    function ws_onMessageOpen(event) {
       var params = parseWebSocketEvent(event);
+      if (params !== undefined) {
+        if (params.event === 'pusher:connection_established') {
+          self._machine.transition('connected', params.data.socket_id);
+        } else if (params.event === 'pusher:error') {
+          // first inform the end-developer of this error
+          self.emit('error', {type: 'PusherError', data: params.data});
 
-      // case of invalid JSON payload sent
-      // we have to handle the error in the parseWebSocketEvent
-      // method as JavaScript error objects are kinda icky.
-      if (typeof params === 'undefined') return;
+          switch (params.data.code) {
+            case 4000:
+              Pusher.debug(params.data.message);
 
-      Pusher.debug('Event recd (event,data)', params.event, params.data);
+              self.compulsorySecure = true;
+              self.connectionSecure = true;
+              self.options.encrypted = true;
+              break;
+            case 4001:
+              // App not found by key - close connection
+              self._machine.transition('permanentlyClosing');
+              break;
+          }
+        }
+      }
+    }
 
-      // Continue to work with valid payloads:
-      if (params.event === 'pusher:connection_established') {
-        self._machine.transition('connected', params.data.socket_id);
-      } else if (params.event === 'pusher:error') {
-        // first inform the end-developer of this error
-        informUser('error', {type: 'PusherError', data: params.data});
+    function ws_onMessageConnected(event) {
+      resetActivityCheck();
 
-        // App not found by key - close connection
-        if (params.data.code === 4001) {
-          self._machine.transition('permanentlyClosing');
+      var params = parseWebSocketEvent(event);
+      if (params !== undefined) {
+        Pusher.debug('Event recd', params);
+
+        switch (params.event) {
+          case 'pusher:error':
+            self.emit('error', {type: 'PusherError', data: params.data});
+            break;
+          case 'pusher:ping':
+            self.send_event('pusher:pong', {})
+            break;
         }
 
-        if (params.data.code === 4000) {
-          Pusher.debug(params.data.message);
-
-          self.compulsorySecure = true;
-          self.connectionSecure = true;
-          self.options.encrypted = true;
-        }
-      } else if (params.event === 'pusher:heartbeat') {
-      } else if (self._machine.is('connected')) {
-        informUser('message', params);
+        self.emit('message', params);
       }
     }
 
@@ -355,7 +353,7 @@
 
         return params;
       } catch (e) {
-        informUser('error', {type: 'MessageParseError', error: e, data: event.data});
+        self.emit('error', {type: 'MessageParseError', error: e, data: event.data});
       }
     }
 
@@ -364,17 +362,13 @@
     }
 
     function ws_onError() {
-      informUser('error', {
+      self.emit('error', {
         type: 'WebSocketError'
       });
 
       // note: required? is the socket auto closed in the case of error?
       self.socket.close();
       self._machine.transition('impermanentlyClosing');
-    }
-
-    function informUser(eventName, data) {
-      self.emit(eventName, data);
     }
 
     function triggerStateChange(newState, data) {
@@ -395,7 +389,7 @@
 
   Connection.prototype.connect = function() {
     // no WebSockets
-    if (Pusher.Transport === null || typeof Pusher.Transport === 'undefined') {
+    if (Pusher.Transport === null || Pusher.Transport === undefined) {
       this._machine.transition('failed');
     }
     // initial open of connection
@@ -422,12 +416,19 @@
     }
   };
 
-  Connection.prototype.disconnect = function() {
-    if (this._machine.is('permanentlyClosed')) {
-      return;
-    }
+  Connection.prototype.send_event = function(event_name, data, channel) {
+    var payload = {
+      event: event_name,
+      data: data
+    };
+    if (channel) payload['channel'] = channel;
 
-    Pusher.debug('Disconnecting');
+    Pusher.debug('Event sent', payload);
+    return this.send(JSON.stringify(payload));
+  }
+
+  Connection.prototype.disconnect = function() {
+    if (this._machine.is('permanentlyClosed')) return;
 
     if (this._machine.is('waiting')) {
       this._machine.transition('permanentlyClosed');

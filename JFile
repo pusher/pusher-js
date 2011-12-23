@@ -14,6 +14,7 @@ bundle 'pusher.js' do
   file 'pusher.js'
   file 'pusher_event_dispatcher.js'
   file 'pusher_machine.js'
+  file 'net_info.js'
   file 'pusher_connection.js'
   file 'pusher_channels.js'
   file 'dependencies.js'

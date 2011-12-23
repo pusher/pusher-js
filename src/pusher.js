@@ -1,4 +1,4 @@
-if (typeof Function.prototype.scopedTo === 'undefined') {
+if (Function.prototype.scopedTo === undefined) {
   Function.prototype.scopedTo = function(context, args) {
     var f = this;
     return function() {
@@ -12,8 +12,7 @@ var Pusher = function(app_key, options) {
   this.options = options || {};
   this.key = app_key;
   this.channels = new Pusher.Channels();
-  this.global_channel = new Pusher.Channel('pusher_global_channel');
-  this.global_channel.global = true;
+  this.global_emitter = new Pusher.EventsDispatcher()
 
   var self = this;
 
@@ -25,13 +24,21 @@ var Pusher = function(app_key, options) {
       self.subscribeAll();
     })
     .bind('message', function(params) {
-      self.send_local_event(params.event, params.data, params.channel);
+      var internal = (params.event.indexOf('pusher_internal:') === 0);
+      if (params.channel) {
+        var channel;
+        if (channel = self.channel(params.channel)) {
+          channel.emit(params.event, params.data);
+        }
+      }
+      // Emit globaly [deprecated]
+      if (!internal) self.global_emitter.emit(params.event, params.data);
     })
     .bind('disconnected', function() {
       self.channels.disconnect();
     })
     .bind('error', function(err) {
-      Pusher.debug('Error', err);
+      Pusher.warn('Error', err);
     });
 
   Pusher.instances.push(this);
@@ -53,12 +60,12 @@ Pusher.prototype = {
   },
 
   bind: function(event_name, callback) {
-    this.global_channel.bind(event_name, callback);
+    this.global_emitter.bind(event_name, callback);
     return this;
   },
 
   bind_all: function(callback) {
-    this.global_channel.bind_all(callback);
+    this.global_emitter.bind_all(callback);
     return this;
   },
 
@@ -100,31 +107,8 @@ Pusher.prototype = {
   },
 
   send_event: function(event_name, data, channel) {
-    Pusher.debug("Event sent (channel,event,data)", channel, event_name, data);
-
-    var payload = {
-      event: event_name,
-      data: data
-    };
-    if (channel) payload['channel'] = channel;
-
-    return this.connection.send(JSON.stringify(payload));
+    return this.connection.send_event(event_name, data, channel);
   },
-
-  send_local_event: function(event_name, event_data, channel_name) {
-    event_data = Pusher.data_decorator(event_name, event_data);
-    if (channel_name) {
-      var channel = this.channel(channel_name);
-      if (channel) {
-        channel.dispatch_with_all(event_name, event_data);
-      }
-    } else {
-      // Bit hacky but these events won't get logged otherwise
-      Pusher.debug("Event recd (event,data)", event_name, event_data);
-    }
-
-    this.global_channel.dispatch_with_all(event_name, event_data);
-  }
 };
 
 Pusher.Util = {
@@ -138,27 +122,39 @@ Pusher.Util = {
       }
     }
     return target;
+  },
+
+  stringify: function stringify(arguments) {
+    var m = ["Pusher"]
+    for (var i = 0; i < arguments.length; i++){
+      if (typeof arguments[i] === "string") {
+        m.push(arguments[i])
+      } else {
+        if (window['JSON'] == undefined) {
+          m.push(arguments[i].toString());
+        } else {
+          m.push(JSON.stringify(arguments[i]))
+        }
+      }
+    };
+    return m.join(" : ")
   }
 };
 
 // To receive log output provide a Pusher.log function, for example
 // Pusher.log = function(m){console.log(m)}
 Pusher.debug = function() {
-  if (!Pusher.log) { return }
-  var m = ["Pusher"]
-  for (var i = 0; i < arguments.length; i++){
-    if (typeof arguments[i] === "string") {
-      m.push(arguments[i])
-    } else {
-      if (window['JSON'] == undefined) {
-        m.push(arguments[i].toString());
-      } else {
-        m.push(JSON.stringify(arguments[i]))
-      }
-    }
-  };
-  Pusher.log(m.join(" : "))
+  if (!Pusher.log) return
+  Pusher.log(Pusher.Util.stringify(arguments))
 }
+Pusher.warn = function() {
+  if (window.console && window.console.warn) {
+    window.console.warn(Pusher.Util.stringify(arguments));
+  } else {
+    if (!Pusher.log) return
+    Pusher.log(Pusher.Util.stringify(arguments))
+  }
+};
 
 // Pusher defaults
 Pusher.VERSION = '<VERSION>';
@@ -170,8 +166,9 @@ Pusher.channel_auth_endpoint = '/pusher/auth';
 Pusher.cdn_http = '<CDN_HTTP>'
 Pusher.cdn_https = '<CDN_HTTPS>'
 Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
-Pusher.data_decorator = function(event_name, event_data){ return event_data }; // wrap event_data before dispatching
 Pusher.channel_auth_transport = 'ajax';
+Pusher.activity_timeout = 120000;
+Pusher.pong_timeout = 30000;
 
 Pusher.isReady = false;
 Pusher.ready = function() {

@@ -65,7 +65,7 @@
     this.onclose = noop;
 
     // hooks:
-    this._onclosing = noop;
+    this._onclose = noop;
     this._onsend = noop;
   };
 
@@ -114,6 +114,7 @@
         if (typeof socket.onclose === 'function') {
           socket.onclose.call(socket);
         }
+        if (socket._onclose) { socket._onclose(); }
       });
     }
   };

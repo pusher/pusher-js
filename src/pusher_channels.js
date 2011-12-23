@@ -30,15 +30,17 @@ Pusher.Channels.prototype = {
 };
 
 Pusher.Channel = function(channel_name, pusher) {
-  var channel = this;
-  Pusher.EventsDispatcher.call(this);
+  var self = this;
+  Pusher.EventsDispatcher.call(this, function(event_name, event_data) {
+    Pusher.debug('No callbacks on ' + channel_name + ' for ' + event_name);
+  });
 
   this.pusher = pusher;
   this.name = channel_name;
   this.subscribed = false;
 
-  this.bind('pusher_internal:subscription_succeeded', function(sub_data){
-    channel.acknowledge_subscription(sub_data);
+  this.bind('pusher_internal:subscription_succeeded', function(data) {
+    self.onSubscriptionSucceeded(data);
   });
 };
 
@@ -47,18 +49,9 @@ Pusher.Channel.prototype = {
   init: function() {},
   disconnect: function() {},
 
-  // Activate after successful subscription. Called on top-level pusher:subscription_succeeded
-  acknowledge_subscription: function(data){
+  onSubscriptionSucceeded: function(data) {
     this.subscribed = true;
-    this.dispatch_with_all('pusher:subscription_succeeded');
-  },
-
-  is_private: function(){
-    return false;
-  },
-
-  is_presence: function(){
-    return false;
+    this.emit('pusher:subscription_succeeded');
   },
 
   authorize: function(pusher, callback){
@@ -126,27 +119,22 @@ Pusher.authorizers = {
 };
 
 Pusher.Channel.PrivateChannel = {
-  is_private: function(){
-    return true;
-  },
-
   authorize: function(pusher, callback){
     Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);
   }
 };
 
 Pusher.Channel.PresenceChannel = {
-
   init: function(){
     this.bind('pusher_internal:member_added', function(data){
       var member = this.members.add(data.user_id, data.user_info);
-      this.dispatch_with_all('pusher:member_added', member);
+      this.emit('pusher:member_added', member);
     }.scopedTo(this))
 
     this.bind('pusher_internal:member_removed', function(data){
       var member = this.members.remove(data.user_id);
       if (member) {
-        this.dispatch_with_all('pusher:member_removed', member);
+        this.emit('pusher:member_removed', member);
       }
     }.scopedTo(this))
   },
@@ -155,16 +143,12 @@ Pusher.Channel.PresenceChannel = {
     this.members.clear();
   },
 
-  acknowledge_subscription: function(sub_data){
-    this.members._members_map = sub_data.presence.hash;
-    this.members.count = sub_data.presence.count;
+  onSubscriptionSucceeded: function(data) {
+    this.members._members_map = data.presence.hash;
+    this.members.count = data.presence.count;
     this.subscribed = true;
 
-    this.dispatch_with_all('pusher:subscription_succeeded', this.members);
-  },
-
-  is_presence: function(){
-    return true;
+    this.emit('pusher:subscription_succeeded', this.members);
   },
 
   members: {
@@ -215,15 +199,12 @@ Pusher.Channel.PresenceChannel = {
 
 Pusher.Channel.factory = function(channel_name, pusher){
   var channel = new Pusher.Channel(channel_name, pusher);
-  if(channel_name.indexOf(Pusher.Channel.private_prefix) === 0) {
+  if (channel_name.indexOf('private-') === 0) {
     Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
-  } else if(channel_name.indexOf(Pusher.Channel.presence_prefix) === 0) {
+  } else if (channel_name.indexOf('presence-') === 0) {
     Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
     Pusher.Util.extend(channel, Pusher.Channel.PresenceChannel);
   };
-  channel.init();// inheritable constructor
+  channel.init();
   return channel;
 };
-
-Pusher.Channel.private_prefix = "private-";
-Pusher.Channel.presence_prefix = "presence-";
