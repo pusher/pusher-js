@@ -5,16 +5,6 @@
     Helpers:
   -----------------------------------------------*/
 
-  // MSIE doesn't have array.indexOf
-  var nativeIndexOf = Array.prototype.indexOf;
-  function indexOf(array, item) {
-    if (array == null) return -1;
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-    for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
-    return -1;
-  }
-
-
   function capitalize(str) {
     return str.substr(0, 1).toUpperCase() + str.substr(1);
   }
@@ -48,7 +38,7 @@
     var prevState = this.state;
     var stateCallbacks = this.stateActions;
 
-    if (prevState && (indexOf(this.transitions[prevState], nextState) == -1)) {
+    if (prevState && (Pusher.Util.arrayIndexOf(this.transitions[prevState], nextState) == -1)) {
       throw new Error('Invalid transition [' + prevState + ' to ' + nextState + ']');
     }
 

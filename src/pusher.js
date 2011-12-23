@@ -138,6 +138,14 @@ Pusher.Util = {
       }
     };
     return m.join(" : ")
+  },
+
+  arrayIndexOf: function(array, item) { // MSIE doesn't have array.indexOf
+    var nativeIndexOf = Array.prototype.indexOf;
+    if (array == null) return -1;
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
+    for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+    return -1;
   }
 };
 
