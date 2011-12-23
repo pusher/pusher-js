@@ -51,20 +51,26 @@
       test.equal(expectedData, actualData);
 
       test.finish();
-  },
+    },
     'Can unbind from an event': function(test) {
-        test.numAssertions = 2;
-
-        var eventDispatcher = new Pusher.EventsDispatcher();
-        var callback = function() {};
-        eventDispatcher.bind('test_event', callback);
-
-        test.equal(1, eventDispatcher.callbacks['test_event'].length);
-        
-        eventDispatcher.unbind('test_event', callback);
-        test.equal(0, eventDispatcher.callbacks['test_event'].length);
-
-        test.finish();
+      test.numAssertions = 2;
+      
+      var eventDispatcher = new Pusher.EventsDispatcher();
+      
+      var callbackCalled = false;
+      var callback = function() {
+        callbackCalled = true;
+      };
+      eventDispatcher.bind('test_event', callback);
+      
+      test.equal(1, eventDispatcher.callbacks['test_event'].length);
+      
+      eventDispatcher.unbind('test_event', callback);
+      
+      eventDispatcher.emit('test_event', {});      
+      test.equal(callbackCalled, false, "Unbound callback should not have been called.");
+      
+      test.finish();
     }
   });
 })();
