@@ -16,7 +16,7 @@
           });
 
           test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
-          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
+          channel.emit('pusher_internal:subscription_succeeded', {});
         }
       },
 
@@ -35,7 +35,7 @@
           });
 
           test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
-          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {});
+          channel.emit('pusher_internal:subscription_succeeded', {});
         }
       },
 
@@ -56,7 +56,7 @@
           });
 
           test.equal(channel.subscribed, false, 'Channel should not be marked as subscribed before ack');
-          channel.dispatch_with_all('pusher_internal:subscription_succeeded', {
+          channel.emit('pusher_internal:subscription_succeeded', {
             "presence": {
               "count":1,
               "ids":["0a7ffd3af0e34b6acbe42e50b6fc31f1"],
@@ -101,7 +101,7 @@
         test.finish();
       });
 
-      presenceChannel.dispatch('pusher_internal:member_added', {
+      presenceChannel.emit('pusher_internal:member_added', {
         'user_id': user_id,
         'user_info': user_info
       });
@@ -117,7 +117,7 @@
         test.finish();
       });
 
-      presenceChannel.dispatch('pusher_internal:member_added', {
+      presenceChannel.emit('pusher_internal:member_added', {
         'user_id': user_id
       });
     },
@@ -134,7 +134,7 @@
       pusher.connection._machine.state = 'permanentlyClosed';
       pusher.connection.socket = new TestSocket()
 
-      test.equal(false, channel.trigger('foo', 'bar'), 'channel.trigger should return false.');
+      test.equal(channel.trigger('foo', 'bar'), false, 'channel.trigger should return false.');
       test.finish();
     },
 
@@ -150,7 +150,7 @@
       pusher.connection._machine.state = 'connected';
       pusher.connection.socket = new TestSocket()
 
-      test.equal(true, channel.trigger('foo', 'bar'), 'channel.trigger should return true.');
+      test.equal(channel.trigger('foo', 'bar'), true, 'channel.trigger should return true.');
       test.finish();
     },
 

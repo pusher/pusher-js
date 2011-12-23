@@ -51,20 +51,20 @@ var _require = (function () {
   var root = cdn + Pusher.VERSION;
   var deps = [];
 
-  if (typeof window['JSON'] === 'undefined') {
+  if (window['JSON'] === undefined) {
     deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
-  if (typeof window['WebSocket'] === 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
+  if (window['WebSocket'] === undefined && window['MozWebSocket'] === undefined) {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
   }
 
   var initialize = function() {
-    if (typeof window['WebSocket'] === 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
+    if (window['WebSocket'] === undefined && window['MozWebSocket'] === undefined) {
       return function() {
         // This runs after flashfallback.js has loaded
-        if (typeof window['WebSocket'] !== 'undefined' && typeof window['MozWebSocket'] === 'undefined') {
+        if (window['WebSocket'] !== undefined && window['MozWebSocket'] === undefined) {
           // window['WebSocket'] is a flash emulation of WebSocket
           Pusher.Transport = window['WebSocket'];
           Pusher.TransportType = 'flash';
@@ -85,7 +85,7 @@ var _require = (function () {
       return function() {
         // This is because Mozilla have decided to
         // prefix the WebSocket constructor with "Moz".
-        if (typeof window['MozWebSocket'] !== 'undefined') {
+        if (window['MozWebSocket'] !== undefined) {
           Pusher.Transport = window['MozWebSocket'];
         } else {
           Pusher.Transport = window['WebSocket'];
