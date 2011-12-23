@@ -482,7 +482,7 @@
         SteppedObserver(connection._machine, 'state_change', [
           // waiting
           function(e) {
-            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+            test.equal(e.newState, 'waiting', 'state should initially be "waiting"');
           },
           // connecting
           function(e) {
