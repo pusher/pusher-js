@@ -1,5 +1,21 @@
 # Changelog
 
+## 1.11.0 (2012-01-02)
+
+[NEW] You can now unbind from an event.
+
+[NEW] Call Pusher.warn to log a warning.
+
+[NEW] You get a warning if you forget to pass your app key when you instantiate the Pusher object.
+
+[CHANGED] Some refactors, partly done by Tristan Dunn.
+
+[REMOVED] Pusher.Channel.is_private
+
+[REMOVED] Pusher.Channel.is_presence
+
+[CHANGED] You may no longer bind to pusher_internal events.
+
 ## 1.10.1 (2011-12-1)
 
 [NEW] Changed channel.trigger() returns a boolean indicating whether the message was actually sent.
