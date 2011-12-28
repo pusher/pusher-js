@@ -17,7 +17,7 @@ var Pusher = function(app_key, options) {
   var self = this;
 
   this.checkAppKey();
-  
+
   this.connection = new Pusher.Connection(this.key, this.options);
 
   // Setup / teardown connection
@@ -111,7 +111,7 @@ Pusher.prototype = {
   send_event: function(event_name, data, channel) {
     return this.connection.send_event(event_name, data, channel);
   },
-  
+
   checkAppKey: function() {
     if(this.key === null || this.key === undefined) {
       Pusher.warn('Warning', 'You must pass your app key when you instantiate Pusher.');
@@ -132,7 +132,7 @@ Pusher.Util = {
     return target;
   },
 
-  stringify: function stringify(arguments) {
+  stringify: function stringify() {
     var m = ["Pusher"]
     for (var i = 0; i < arguments.length; i++){
       if (typeof arguments[i] === "string") {
