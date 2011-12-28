@@ -71,14 +71,14 @@
   exports.mock.log.LogMock = function LogMock() {
     this.messages = {};
     var self = this;
-    
+
     var persistLogFn = function() {
       var log = arguments[0];
       if(self.messages[log] === undefined) {
         self.messages[log] = [];
       }
 
-      self.messages[log].push(Pusher.Util.stringify(arguments));            
+      self.messages[log].push(Pusher.Util.stringify(arguments));
     };
     
     Pusher.warn = persistLogFn;
