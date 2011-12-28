@@ -8,7 +8,6 @@
           function(test) {
             var logs = new mock.log.LogMock();
             var pusher = new Pusher();
-
             test.equal(logs.messages["Warning"][0],
                        "Pusher : Warning : You must pass your app key when you instantiate Pusher.",
                        "User should be warned if they do not supply an app key");
@@ -39,7 +38,3 @@
     }
   });
 })();
-
-
-
-
