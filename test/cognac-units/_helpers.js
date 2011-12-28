@@ -80,11 +80,25 @@
 
       self.messages[log].push(Pusher.Util.stringify(arguments));
     };
-    
+
+    // stored outside obj so LogMock can be reinstantiated and the restore still works
+    if(exports.mock.log.oldWarn === undefined && exports.mock.log.oldDebug === undefined) {
+      exports.mock.log.oldWarn = Pusher.warn;
+      exports.mock.log.oldDebug = Pusher.debug;
+    }
+
     Pusher.warn = persistLogFn;
-    Pusher.debug = persistLogFn;    
+    Pusher.debug = persistLogFn;
   };
-    
+
+  exports.mock.log.LogMock.prototype = {
+    // restore normal logging behaviour
+    restore: function() {
+      Pusher.warn = exports.mock.log.oldWarn;
+      Pusher.debug = exports.mock.log.oldDebug;
+    }
+  };
+
   /**
    * defer is a utility method to create a very short timeout as to be able
    * to run code in the "nextTick"
