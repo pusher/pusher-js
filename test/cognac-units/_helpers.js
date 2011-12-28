@@ -78,7 +78,7 @@
         self.messages[log] = [];
       }
 
-      self.messages[log].push(Pusher.Util.stringify(arguments));
+      self.messages[log].push(Pusher.Util.stringify.apply(this, arguments));
     };
 
     // stored outside obj so LogMock can be reinstantiated and the restore still works

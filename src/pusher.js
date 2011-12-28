@@ -161,14 +161,14 @@ Pusher.Util = {
 // Pusher.log = function(m){console.log(m)}
 Pusher.debug = function() {
   if (!Pusher.log) return
-  Pusher.log(Pusher.Util.stringify(arguments))
+  Pusher.log(Pusher.Util.stringify.apply(this, arguments))
 }
 Pusher.warn = function() {
   if (window.console && window.console.warn) {
-    window.console.warn(Pusher.Util.stringify(arguments));
+    window.console.warn(Pusher.Util.stringify.apply(this, arguments));
   } else {
     if (!Pusher.log) return
-    Pusher.log(Pusher.Util.stringify(arguments))
+    Pusher.log(Pusher.Util.stringify.apply(this, arguments));
   }
 };
 
