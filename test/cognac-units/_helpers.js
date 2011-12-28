@@ -1,5 +1,5 @@
 ;(function(exports) {
-  
+
   // MSIE doesn't have array.indexOf
   var nativeIndexOf = Array.prototype.indexOf;
   exports.indexOf = function indexOf(array, item) {
@@ -65,7 +65,10 @@
     });
   }
 
-  exports.LogMock = function LogMock() {
+  exports.mock = {};
+
+  exports.mock.log = {};
+  exports.mock.log.LogMock = function LogMock() {
     this.messages = {};
     var self = this;
     
