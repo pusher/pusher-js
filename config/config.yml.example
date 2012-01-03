@@ -8,10 +8,10 @@
 :production:
   :js:
     :cdn:
-      :http: http://js.pusherapp.com/
-      :https: https://d3ds63zw57jt09.cloudfront.net/
+      :http: http://js.pusher.com/
+      :https: https://d3dy5gmtp8yhk7.cloudfront.net/
   :s3:
     :cf_distribution_id: <YOUR AWS CLOUD FRONT DISTRIBUTION ID>
-    :bucket: pusher-js
+    :bucket: com.pusher.js
     :access_key_id:
     :secret_access_key:
