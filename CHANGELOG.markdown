@@ -1,22 +1,20 @@
 # Changelog
 
-## 1.11.0 (2012-01-02)
+## 1.11.0 (2012-01-03)
 
 [NEW] You can now unbind from an event.
 
-[NEW] Call Pusher.warn to log a warning.
+[NEW] Internal errors are now logged with `console.error` if available. You can override this behaviour by modifying the `Pusher.warn` function.
 
 [NEW] You get a warning if you forget to pass your app key when you instantiate the Pusher object.
 
 [NEW] Stale connections between the Pusher client and server are now detected and re-established.
 
-[CHANGED] Some refactors of the code, partly done by Tristan Dunn.
+[CHANGED] You may no longer bind to pusher_internal events.
 
 [REMOVED] Pusher.Channel.is_private
 
 [REMOVED] Pusher.Channel.is_presence
-
-[CHANGED] You may no longer bind to pusher_internal events.
 
 ## 1.10.1 (2011-12-1)
 
