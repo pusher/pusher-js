@@ -8,7 +8,9 @@
 
 [NEW] You get a warning if you forget to pass your app key when you instantiate the Pusher object.
 
-[CHANGED] Some refactors, partly done by Tristan Dunn.
+[NEW] Stale connections between the Pusher client and server are now detected and re-established.
+
+[CHANGED] Some refactors of the code, partly done by Tristan Dunn.
 
 [REMOVED] Pusher.Channel.is_private
 
