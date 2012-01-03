@@ -97,7 +97,7 @@ Pusher.authorizers = {
             callback(false, data);
           }
         } else {
-          Pusher.debug("Couldn't get auth info from your webapp", status);
+          Pusher.warn("Couldn't get auth info from your webapp", status);
           callback(true, xhr.status);
         }
       }

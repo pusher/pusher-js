@@ -295,7 +295,7 @@
 
           switch (params.data.code) {
             case 4000:
-              Pusher.debug(params.data.message);
+              Pusher.warn(params.data.message);
 
               self.compulsorySecure = true;
               self.connectionSecure = true;

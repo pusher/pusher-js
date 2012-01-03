@@ -6,7 +6,7 @@
 
 [NEW] Internal errors are now logged with `console.error` if available. You can override this behaviour by modifying the `Pusher.warn` function.
 
-[NEW] You get a warning if you forget to pass your app key when you instantiate the Pusher object.
+[NEW] Warning logged to `console.error` in the following cases: no api key supplied to initialiser, authentication failure connecting to private/presence channel, attempt to connect using `ws://` for application which have designated themselves as secure only, or unexpected errors returned by Pusher.
 
 [NEW] Stale connections between the Pusher client and server are now detected and re-established.
 
