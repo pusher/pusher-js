@@ -3,6 +3,7 @@
     A little bauble to interface with window.navigator.onLine,
     window.ononline and window.onoffline.  Easier to mock.
   */
+
   var NetInfo = function() {
     var self = this;
     Pusher.EventsDispatcher.call(this);
@@ -29,6 +30,6 @@
   };
 
   Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
-  
+
   this.Pusher.NetInfo = NetInfo;
 }).call(this);
