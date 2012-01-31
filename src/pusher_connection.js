@@ -49,7 +49,7 @@
     this.netInfo.bind('online', function(){
       if (self._machine.is('waiting')) {
         self._machine.transition('connecting');
-        triggerStateChange('connecting');
+        updateState('connecting');
       }
     });
 
@@ -86,9 +86,9 @@
         }
 
         if (self.netInfo.isOnLine() && self.connectionAttempts <= 4) {
-          triggerStateChange('connecting');
+          updateState('connecting');
         } else {
-          triggerStateChange('unavailable');
+          updateState('unavailable');
         }
 
         if (self.netInfo.isOnLine() === true) {
@@ -107,7 +107,7 @@
         // state even when offline.
         if (self.netInfo.isOnLine() === false) {
           self._machine.transition('waiting');
-          triggerStateChange('unavailable');
+          updateState('unavailable');
 
           return;
         }
@@ -177,12 +177,12 @@
       },
 
       connectedPost: function() {
-        triggerStateChange('connected');
+        updateState('connected');
       },
 
       connectedExit: function() {
         stopActivityCheck();
-        triggerStateChange('disconnected');
+        updateState('disconnected');
       },
 
       impermanentlyClosingPost: function() {
@@ -207,12 +207,12 @@
       },
 
       failedPre: function() {
-        triggerStateChange('failed');
+        updateState('failed');
         Pusher.debug('WebSockets are not available in this browser.');
       },
 
       permanentlyClosedPost: function() {
-        triggerStateChange('disconnected');
+        updateState('disconnected');
       }
     });
 
@@ -373,7 +373,12 @@
       self._machine.transition('impermanentlyClosing');
     }
 
-    function triggerStateChange(newState, data) {
+    // Updates the public state information exposed by connection
+    //
+    // This is distinct from the internal state information used by _machine
+    // to manage the connection
+    //
+    function updateState(newState, data) {
       // avoid emitting and changing the state
       // multiple times when it's the same.
       if (self.state === newState) return;
