@@ -251,7 +251,7 @@
         protocol = 'wss://';
       }
 
-      return protocol + Pusher.host + ':' + port + '/app/' + key + '?client=js&version=' + Pusher.VERSION;
+      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js&version=' + Pusher.VERSION;
     }
 
     // callback for close and retry.  Used on timeouts.

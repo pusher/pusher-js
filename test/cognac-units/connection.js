@@ -164,7 +164,7 @@
             test.equal(e.newState, 'connected', 'state should progress to "connected"');
             test.equal(connection.socket.readyState, connection.socket.OPEN, 'the socket readyState should change to open');
 
-            test.equal(connection.socket.URL, 'ws://ws.pusherapp.com:80/app/a?client=js&version=' + Pusher.VERSION);
+            test.equal(connection.socket.URL, 'ws://ws.pusherapp.com:80/app/a?protocol=5&client=js&version=' + Pusher.VERSION);
             test.equal(connection.socket_id, '804.1456320', 'the socket_id should be set on connected.');
 
             // This needs to be in a timer to break the callstack,
