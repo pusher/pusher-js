@@ -211,6 +211,10 @@
       failedPre: function() {
         triggerStateChange('failed');
         Pusher.debug('WebSockets are not available in this browser.');
+      },
+
+      permanentlyClosedPost: function() {
+        triggerStateChange('disconnected');
       }
     });
 
