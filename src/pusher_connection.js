@@ -403,6 +403,7 @@
     }
     // user re-opening connection after closing it
     else if(this._machine.is("permanentlyClosed")) {
+      resetConnectionParameters(this);
       this._machine.transition('waiting');
     }
   };
