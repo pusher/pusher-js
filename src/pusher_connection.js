@@ -87,10 +87,10 @@
           self.emit('connecting_in', self.connectionWait);
         }
 
-        if (self.netInfo.isOnLine() === false || self.connectionAttempts > 4){
-          triggerStateChange('unavailable');
-        } else {
+        if (self.netInfo.isOnLine() && self.connectionAttempts <= 4) {
           triggerStateChange('connecting');
+        } else {
+          triggerStateChange('unavailable');
         }
 
         if (self.netInfo.isOnLine() === true) {
