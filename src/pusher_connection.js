@@ -70,8 +70,6 @@
 
     // define the state machine that runs the connection
     this._machine = new Pusher.Machine('initialized', machineTransitions, {
-
-      // TODO: Use the constructor for this.
       initializedPre: function() {
         self.compulsorySecure = self.options.encrypted;
 
