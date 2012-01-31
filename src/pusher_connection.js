@@ -379,18 +379,15 @@
     // to manage the connection
     //
     function updateState(newState, data) {
-      // avoid emitting and changing the state
-      // multiple times when it's the same.
-      if (self.state === newState) return;
-
       var prevState = self.state;
-
       self.state = newState;
 
-      Pusher.debug('State changed', prevState + ' -> ' + newState);
-
-      self.emit('state_change', {previous: prevState, current: newState});
-      self.emit(newState, data);
+      // Only emit when the state changes
+      if (prevState !== newState) {
+        Pusher.debug('State changed', prevState + ' -> ' + newState);
+        self.emit('state_change', {previous: prevState, current: newState});
+        self.emit(newState, data);
+      }
     }
   };
 
