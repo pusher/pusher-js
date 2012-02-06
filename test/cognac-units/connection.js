@@ -6,6 +6,38 @@
   // errors in tests.
   Pusher.NetInfo = TestNetInfo;
 
+  var withConnectedConnection = function(name, test, callback) {
+    Pusher.Transport = TestSocket;
+    var connection = new Pusher.Connection(name);
+
+    SteppedObserver(connection._machine, 'state_change', [
+      // waiting
+      function(e) {},
+      // connecting
+      function(e) {
+        connection.socket.trigger('open');
+      },
+      // open
+      function(e) {
+        connection.socket.trigger('message', JSON.stringify({
+          event: 'pusher:connection_established',
+          data: '{\"socket_id\":\"804.1456320\"}'
+        }));
+      },
+      // connected
+      function(e) {
+        test.equal(e.newState, 'connected', 'should be connected');
+
+        // run callback after SO terminated
+        setTimeout(function() {
+          callback(connection);
+        }, 0);
+      },
+    ]);
+
+    connection.connect();
+  };
+
   runner.addSuite('Pusher.Connection', {
     'Initialisation': {
       'new Pusher.Connection("b599fe0f1e4b6f6eb8a6")': function(test) {
@@ -841,6 +873,48 @@
         ]);
 
         connection.connect();
+      },
+
+
+      'should reconnect immediately when connection attempt was a) successful and b) a while ago': function(test) {
+        withConnectedConnection("asdhj", test, function(connection) {
+          var loopDefenceDelay = 1000;
+
+          setTimeout(function() {
+            var began = new Date().getTime();
+
+            SteppedObserver(connection._machine, 'state_change', [
+              function(e) {
+                test.equal(e.newState, 'waiting', 'state should be "waiting"');
+              },
+              function(e) {
+                test.equal(e.newState, 'connecting', 'state should be "connecting"');
+                test.ok(new Date().getTime() - began < 50, "should have reconnected immediately");
+                test.finish();
+              }
+            ]);
+
+            connection.socket.close();
+          }, loopDefenceDelay + 500);
+        });
+      },
+
+      'should delay reconnect if last connection attempt was a) successful and b) happened within last second': function(test) {
+        withConnectedConnection("sdfjh", test, function(connection) {
+          var began = new Date().getTime();
+          SteppedObserver(connection._machine, 'state_change', [
+            function(e) {
+              test.equal(e.newState, 'waiting', 'state should be "waiting"');
+            },
+            function(e) {
+              test.equal(e.newState, 'connecting', 'state should be "connecting"');
+              test.ok(new Date().getTime() - began > 1000, "should have waited to reconnect");
+              test.finish();
+            }
+          ]);
+
+          connection.socket.close();
+        });
       },
 
 //-----------------------------------------------
