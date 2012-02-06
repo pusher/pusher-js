@@ -908,7 +908,8 @@
             },
             function(e) {
               test.equal(e.newState, 'connecting', 'state should be "connecting"');
-              test.ok(new Date().getTime() - began > 1000, "should have waited to reconnect");
+              var delta = new Date().getTime() - began;
+              test.ok(delta > 50 && delta < 1000, "should have waited to reconnect");
               test.finish();
             }
           ]);
