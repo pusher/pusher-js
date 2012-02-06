@@ -288,8 +288,12 @@
     function connectionDelay() {
       var delay = self.connectionWait;
       if (delay === 0) {
-        if (self.connectedAt && (new Date().getTime() - self.connectedAt) < 1000) {
-          delay = 1000;
+        if (self.connectedAt) {
+          var t = 1000;
+          var connectedFor = new Date().getTime() - self.connectedAt;
+          if (connectedFor < t) {
+            delay = t - connectedFor;
+          }
         }
       }
       return delay;
