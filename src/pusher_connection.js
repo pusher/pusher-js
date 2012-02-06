@@ -174,7 +174,7 @@
         self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
-        self.connectedAt = Date.now();
+        self.connectedAt = new Date().getTime();
 
         resetActivityCheck();
       },
@@ -288,7 +288,7 @@
     function connectionDelay() {
       var delay = self.connectionWait;
       if (delay === 0) {
-        if (self.connectedAt && (Date.now() - self.connectedAt) < 1000) {
+        if (self.connectedAt && (new Date().getTime() - self.connectedAt) < 1000) {
           delay = 1000;
         }
       }
