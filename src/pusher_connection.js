@@ -295,18 +295,25 @@
           // first inform the end-developer of this error
           self.emit('error', {type: 'PusherError', data: params.data});
 
-          switch (params.data.code) {
-            case 4000:
-              Pusher.warn(params.data.message);
+          if (params.data.code === 4000) {
+            // SSL only app
+            self.compulsorySecure = true;
+            self.connectionSecure = true;
+            self.options.encrypted = true;
 
-              self.compulsorySecure = true;
-              self.connectionSecure = true;
-              self.options.encrypted = true;
-              break;
-            case 4001:
-              // App not found by key - close connection
-              self._machine.transition('permanentlyClosing');
-              break;
+            self.connect()
+          } else if (params.data.code < 4100) {
+            // Permentently close connection
+            self._machine.transition('permanentlyClosing')
+          } else if (params.data.code < 4200) {
+            // Backoff before reconnecting
+            self._machine.transition('permanentlyClosing')
+            setTimeout(function() {
+              self.connect()
+            }, 1000)
+          } else if (params.data.code < 4300) {
+            // Reconnect immediately
+            self.socket.close()
           }
         }
       }
