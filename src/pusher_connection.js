@@ -286,35 +286,40 @@
       self._machine.transition('open');
     };
 
+    function handleCloseCode(code, message) {
+      // first inform the end-developer of this error
+      self.emit('error', {type: 'PusherError', data: {code: code, message: message}});
+
+      if (code === 4000) {
+        // SSL only app
+        self.compulsorySecure = true;
+        self.connectionSecure = true;
+        self.options.encrypted = true;
+
+        self._machine.transition('impermanentlyClosing')
+      } else if (code < 4100) {
+        // Permentently close connection
+        self._machine.transition('permanentlyClosing')
+      } else if (code < 4200) {
+        // Backoff before reconnecting
+        self.connectionWait = 1000;
+        self._machine.transition('waiting')
+      } else if (code < 4300) {
+        // Reconnect immediately
+        self._machine.transition('impermanentlyClosing')
+      } else {
+        // Unknown error
+        self._machine.transition('permanentlyClosing')
+      }
+    }
+
     function ws_onMessageOpen(event) {
       var params = parseWebSocketEvent(event);
       if (params !== undefined) {
         if (params.event === 'pusher:connection_established') {
           self._machine.transition('connected', params.data.socket_id);
         } else if (params.event === 'pusher:error') {
-          // first inform the end-developer of this error
-          self.emit('error', {type: 'PusherError', data: params.data});
-
-          if (params.data.code === 4000) {
-            // SSL only app
-            self.compulsorySecure = true;
-            self.connectionSecure = true;
-            self.options.encrypted = true;
-
-            self.connect()
-          } else if (params.data.code < 4100) {
-            // Permentently close connection
-            self._machine.transition('permanentlyClosing')
-          } else if (params.data.code < 4200) {
-            // Backoff before reconnecting
-            self._machine.transition('permanentlyClosing')
-            setTimeout(function() {
-              self.connect()
-            }, 1000)
-          } else if (params.data.code < 4300) {
-            // Reconnect immediately
-            self.socket.close()
-          }
+          handleCloseCode(params.data.code, params.data.message)
         }
       }
     }
