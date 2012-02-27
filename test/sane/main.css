@@ -1,0 +1,209 @@
+html {
+  overflow: scroll;
+}
+
+body {
+  background:#fff;
+  color:#333;
+  font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size:100%;
+}
+
+#header {
+  position: fixed;
+  top: 0px; left: 0px;
+  z-index: 2;
+  width: 100%;
+  height: 80px;
+  background: white;
+  color: #333;
+  border-bottom:1px solid #ddd;
+}
+
+#header h2 {
+  font-size:2.4em;
+  font-weight:700;
+  line-height:1em;
+  margin:0;
+  padding: 20px 40px;
+  text-align:left;
+}
+
+#header h2 #status {
+  font-size: 18px;
+  color: #888;
+  line-height: 38px;
+}
+
+#header #buttons {
+  position: fixed;
+  top: 20px;
+  right: 40px;
+}
+
+#header #buttons button {
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  -ms-border-radius: 5px;
+  border-radius: 5px;
+  
+  background:#489F25;
+  border:medium none;
+  color:#FFF;
+  cursor:pointer;
+  display:block;
+  float: left;
+  font-size:18px;
+  font-weight:700;
+  line-height: 18px;
+  padding: 10px;
+  margin: 0 5px;
+  width: 80px;
+}
+
+#header #buttons button#clear {
+  background: #888;
+}
+
+#header #run-all.running {
+  background:#DB4F32;
+}
+
+
+#log{
+  cursor:default;
+  font-size:1em;
+  font-weight:400;
+  margin:90px 40px 20px;
+  padding: 0;
+}
+
+#log pre.log_error {
+  color:#DB4F32;
+}
+
+#container #suites-list {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+}
+
+#container #suites-list li.suite {
+  border-bottom:4px solid #fff;
+  border-top:1px solid #CCC;
+  display:block;
+  font-size:14px;
+  margin:0;
+  position:relative;
+}
+
+#container #suites-list li.suite.success {
+  background:#489F25;
+}
+
+#container #suites-list li.suite.failure,#container #suites-list li.suite.error {
+  background:#DB4F32;
+}
+
+#container #suites-list li.suite.running {
+  background:#CCC;
+}
+
+#container #suites-list li.suite .overview {
+  background:#FFF;
+  margin:0 0 0 4px;
+  padding:.5em 1em .5em 2em;
+}
+
+#container #suites-list li.suite .overview h3 {
+  cursor:pointer;
+  font-weight:700;
+  line-height:1.4em;
+  margin:.5em 0 0;
+}
+
+#container #suites-list li.suite .overview button {
+  background:#777;
+  border:medium none;
+  color:#FFF;
+  cursor:pointer;
+  display:block;
+  font-size:13px;
+  padding:3px 8px;
+  position:absolute;
+  right:20px;
+  top:15px;
+}
+
+#container #suites-list li.suite .tests-list {
+  background:#FFF;
+  display:block;
+  list-style-type:none;
+  margin:0;
+  padding:0 0 .5em;
+}
+
+#container #suites-list li.suite .tests-list li {
+  border-top:1px solid #ddd;
+  cursor:pointer;
+  display:block;
+  font-size:.9em;
+  font-weight:400;
+  padding:.5em 0;
+  position:relative;
+}
+
+#container #suites-list li.suite .tests-list li:hover {
+  background-color:#f9f9f9;
+}
+
+#container #suites-list li.suite .tests-list li p.name {
+  display:block;
+  margin:0;
+  overflow:hidden;
+  padding:0 0 0 2.5em;
+  white-space:pre;
+}
+
+#container #suites-list li.suite .tests-list li p.name em {
+  font-style:normal;
+  text-transform:uppercase;
+}
+
+#container #suites-list li.suite .tests-list li.success p.name {
+  color:#489F25;
+}
+
+#container #suites-list li.suite .tests-list li.failure p.name,#container #suites-list li.suite .tests-list li.error p.name {
+  color:#DB4F32;
+  font-weight:700;
+}
+
+#container #suites-list li.suite .tests-list li.running p.name {
+  color:#888;
+}
+
+#container #suites-list li.suite .tests-list li .result {
+  border-top:1px dotted #eee;
+  display:none;
+  margin:10px 0 0;
+  overflow:auto;
+  padding:8px 0 5px 2.5em;
+  white-space:pre;
+}
+
+#container #suites-list li.suite .tests-list li .test-func {
+  border-top:1px dotted #eee;
+  display:block;
+  margin:5px 0 2px;
+  overflow:auto;
+  padding:8px 0 8px 2.5em;
+  white-space:pre-wrap;
+}
+
+#container #suites-list li.suite .tests-list li .summary {
+  color:#BBB;
+  font-weight:400;
+  height:20px;
+  margin-left:15px;
+}

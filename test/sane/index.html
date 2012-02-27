@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sane.js - Browser Output</title>
+
+  <link rel="stylesheet" href="main.css" type="text/css" />
+
+  <script src="sane.js"></script>
+  <script src="jquery.js"></script>
+  <script src="browser_display.js"></script>
+
+  <script>
+  Tests.add(new TestCase("plah", function(test) {
+    test.done()
+  }))
+  </script>
+</head>
+<body>
+  <div id="header">
+    <h2>Sane.js - Tests <span id="status"></span></h2>
+    <div id="buttons">
+      <button id="clear">Clear</button>
+      <button id="run-all">Run</button>
+    </div>
+  </div>
+  <div id="log">
+  </div>
+</body>
+</html>
