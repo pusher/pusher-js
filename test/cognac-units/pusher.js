@@ -1,7 +1,7 @@
 ;(function(){
   Pusher.NetInfo = TestNetInfo;
 
-  runner.addSuite('Pusher', {
+  Tests.addSuite('Pusher', {
     'Instantiation': {
       'App key': {
         'No key supplied': [

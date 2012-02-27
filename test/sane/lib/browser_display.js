@@ -27,9 +27,9 @@ $(document).ready(function() {
     writeline('starting tests')
     status.html('running')
     var runner = new TestSuiteRunner(BrowserLog);
-    runner.run(Tests, function() {
+    runner.run(Tests, function(err, duration) {
       status.html('')
-      writeline('finished tests');
+      writeline('finished tests in ' + duration + "s");
     });
   }
 

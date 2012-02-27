@@ -150,7 +150,10 @@ var TestSuiteRunner = function(logger) {
 // Run a test suite/case
 TestSuiteRunner.prototype.run = function(suite, cb) {
   var self = this;
-  suite.run(self, cb);
+  var start_time = +new Date;
+  suite.run(self, function(err) {
+    cb(err, ((+new Date) - start_time)/1000);
+  });
 }
 
 TestSuiteRunner.prototype.descend = function(name) {
