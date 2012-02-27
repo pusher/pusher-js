@@ -2,6 +2,7 @@ var BrowserLog;
 
 $(document).ready(function() {
   var log = $('#log');
+  var status = $('#status');
 
   var writeline = function(data) {
     var msg = document.createElement('pre');
@@ -24,8 +25,10 @@ $(document).ready(function() {
 
   var run = function() {
     writeline('starting tests')
+    status.html('running')
     var runner = new TestSuiteRunner(BrowserLog);
     runner.run(Tests, function() {
+      status.html('')
       writeline('finished tests');
     });
   }

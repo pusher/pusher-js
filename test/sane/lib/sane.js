@@ -124,11 +124,20 @@ TestCaseRunner.prototype.done = function() {
   }
 }
 
-TestCaseRunner.prototype.equal = function(a, b, fn) {
+TestCaseRunner.prototype.finish = function() {
   var self = this;
-  if (a === b) {
-    fn();
-  } else {
+  self.done();
+}
+
+TestCaseRunner.prototype.equal = function(a, b) {
+  var self = this;
+  if (a !== b) {
+    self.fail();
+  }
+}
+
+TestCaseRunner.prototype.ok = function(cnd) {
+  if (!cnd) {
     self.fail();
   }
 }
@@ -161,6 +170,25 @@ var TestSuite = function(name, suites) {
 TestSuite.prototype.add = function(suite) {
   var self = this;
   self.suites.push(suite);
+}
+
+TestSuite.prototype.addCase = function(name, fn) {
+  var self = this;
+  self.add(new TestCase(name, fn))
+}
+
+// Convenience function
+TestSuite.prototype.addSuite = function(name, suite) {
+  var self = this;
+  var ts = new TestSuite(name)
+  self.add(ts)
+  for (var key in suite) {
+    if (typeof suite[key] == 'function') {
+      ts.addCase(key, suite[key])
+    } else {
+      ts.addSuite(key, suite[key])
+    }
+  }
 }
 
 // Run everything (don't invoke directly, use a TestSuiteRunner)

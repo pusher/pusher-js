@@ -3,17 +3,25 @@
 <head>
   <title>Sane.js - Browser Output</title>
 
-  <link rel="stylesheet" href="main.css" type="text/css" />
+  <link rel="stylesheet" href="./lib/main.css" type="text/css" />
 
-  <script src="sane.js"></script>
-  <script src="jquery.js"></script>
-  <script src="browser_display.js"></script>
+  <!-- Sane.js -->
+  <script src="./lib/sane.js"></script>
+  <script src="./lib/jquery.js"></script>
+  <script src="./lib/browser_display.js"></script>
 
-  <script>
-  Tests.add(new TestCase("plah", function(test) {
-    test.done()
-  }))
+  <!-- Libraries -->
+  <script type="text/javascript" src="../../src/pusher.js"></script>
+  <script type="text/javascript">
+    Pusher.VERSION = '';
+    Pusher.cdn_http = 'http://localhost:5555';
+    Pusher.cdn_https = 'http://localhost:5555';
+    Pusher.dependency_suffix = '';
   </script>
+  <script src="../../src/pusher_event_dispatcher.js"></script>
+
+  <!-- Tests -->
+  <script src="./tests/events_dispatcher.js"></script>
 </head>
 <body>
   <div id="header">
