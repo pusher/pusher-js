@@ -40,6 +40,104 @@ var forEachAsync = function(fn, items, cb) {
   sequence(mapSync(curry(fn), items).concat([cb]));
 }
 
+var isFunction = function(fn) {
+  return (typeof fn === 'function');
+}
+
+var deepEqual = function(a, b, stack) {
+  stack = stack || [];
+  // Identical objects are equal. `0 === -0`, but they aren't identical.
+  // See the Harmony `egal` proposal: http://wiki.ecmascript.org/doku.php?id=harmony:egal.
+  if (a === b) return a !== 0 || 1 / a == 1 / b;
+  // A strict comparison is necessary because `null == undefined`.
+  if (a == null || b == null) return a === b;
+  // Unwrap any wrapped objects.
+  if (a._chain) a = a._wrapped;
+  if (b._chain) b = b._wrapped;
+  // Invoke a custom `isEqual` method if one is provided.
+  if (isFunction(a.isEqual)) return a.isEqual(b);
+  if (isFunction(b.isEqual)) return b.isEqual(a);
+  // Compare `[[Class]]` names.
+  var className = toString.call(a);
+  if (className != toString.call(b)) return false;
+  switch (className) {
+    // Strings, numbers, dates, and booleans are compared by value.
+    case '[object String]':
+      // Primitives and their corresponding object wrappers are equivalent; thus, `"5"` is
+      // equivalent to `new String("5")`.
+      return String(a) == String(b);
+    case '[object Number]':
+      a = +a;
+      b = +b;
+      // `NaN`s are equivalent, but non-reflexive. An `egal` comparison is performed for
+      // other numeric values.
+      return a != a ? b != b : (a == 0 ? 1 / a == 1 / b : a == b);
+    case '[object Date]':
+    case '[object Boolean]':
+      // Coerce dates and booleans to numeric primitive values. Dates are compared by their
+      // millisecond representations. Note that invalid dates with millisecond representations
+      // of `NaN` are not equivalent.
+      return +a == +b;
+    // RegExps are compared by their source patterns and flags.
+    case '[object RegExp]':
+      return a.source == b.source &&
+             a.global == b.global &&
+             a.multiline == b.multiline &&
+             a.ignoreCase == b.ignoreCase;
+  }
+  if (typeof a != 'object' || typeof b != 'object') return false;
+  // Assume equality for cyclic structures. The algorithm for detecting cyclic
+  // structures is adapted from ES 5.1 section 15.12.3, abstract operation `JO`.
+  var length = stack.length;
+  while (length--) {
+    // Linear search. Performance is inversely proportional to the number of
+    // unique nested structures.
+    if (stack[length] == a) return true;
+  }
+  // Add the first object to the stack of traversed objects.
+  stack.push(a);
+  var size = 0, result = true;
+  // Recursively compare objects and arrays.
+  if (className == '[object Array]') {
+    // Compare array lengths to determine if a deep comparison is necessary.
+    size = a.length;
+    result = size == b.length;
+    if (result) {
+      // Deep compare the contents, ignoring non-numeric properties.
+      while (size--) {
+        // Ensure commutative equality for sparse arrays.
+        if (!(result = size in a == size in b && deepEqual(a[size], b[size], stack))) break;
+      }
+    }
+  } else {
+    // Objects with different constructors are not equivalent.
+    if ("constructor" in a != "constructor" in b || a.constructor != b.constructor) return false;
+    // Deep compare objects.
+    for (var key in a) {
+      if (hasOwnProperty.call(a, key)) {
+        // Count the expected number of properties.
+        size++;
+        // Deep compare each member.
+        if (!(result = hasOwnProperty.call(b, key) && deepEqual(a[key], b[key], stack))) break;
+      }
+    }
+    // Ensure that both objects contain the same number of properties.
+    if (result) {
+      for (key in b) {
+        if (hasOwnProperty.call(b, key) && !(size--)) break;
+      }
+      result = !size;
+    }
+  }
+  // Remove the first object from the stack of traversed objects.
+  stack.pop();
+  return result;
+}
+
+var near = function(a, b, tolerance) {
+  return (Math.abs(a - b) < tolerance);
+}
+
 // Main Objects
 
 // Top level object
@@ -129,16 +227,27 @@ TestCaseRunner.prototype.finish = function() {
   self.done();
 }
 
-TestCaseRunner.prototype.equal = function(a, b) {
+TestCaseRunner.prototype.equal = function(a, b, msg, cb) {
   var self = this;
-  if (a !== b) {
-    self.fail();
-  }
+  self.ok(a===b, msg, cb);
 }
 
-TestCaseRunner.prototype.ok = function(cnd) {
+TestCaseRunner.prototype.deepEqual = function(a, b, msg, cb) {
+  var self = this;
+  self.ok(deepEqual(a, b), JSON.stringify(a) + " !== " + JSON.stringify(b) + ", " + msg, cb);
+}
+
+TestCaseRunner.prototype.near = function(a, b, tolerance, msg, cb) {
+  var self = this;
+  self.ok(near(a, b, tolerance), "expected " + a + ", got " + b + " (with a tolerance of " + tolerance + ")");
+}
+
+TestCaseRunner.prototype.ok = function(cnd, msg, cb) {
+  var self = this;
   if (!cnd) {
-    self.fail();
+    self.fail(msg);
+  } else if (cb) {
+    cb();
   }
 }
 
@@ -183,7 +292,7 @@ TestSuite.prototype.addSuite = function(name, suite) {
   var ts = new TestSuite(name)
   self.add(ts)
   for (var key in suite) {
-    if (typeof suite[key] == 'function') {
+    if (isFunction(suite[key])) {
       ts.addCase(key, suite[key])
     } else {
       ts.addSuite(key, suite[key])
@@ -208,5 +317,3 @@ TestSuite.prototype.run = function(suite_runner, run_cb) {
     run_cb();
   });
 }
-
-Tests = new TestSuite("");

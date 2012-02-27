@@ -10,18 +10,38 @@
   <script src="./lib/jquery.js"></script>
   <script src="./lib/browser_display.js"></script>
 
+  <!-- Create Global Tests object -->
+  <script>
+    Tests = new TestSuite('');
+  </script>
+
   <!-- Libraries -->
-  <script type="text/javascript" src="../../src/pusher.js"></script>
-  <script type="text/javascript">
+  <script src="../../src/pusher.js"></script>
+  <script>
     Pusher.VERSION = '';
     Pusher.cdn_http = 'http://localhost:5555';
     Pusher.cdn_https = 'http://localhost:5555';
     Pusher.dependency_suffix = '';
   </script>
   <script src="../../src/pusher_event_dispatcher.js"></script>
+  <script src="../../src/pusher_machine.js"></script>
+  <script src="../../src/net_info.js"></script>
+  <script src="../../src/pusher_connection.js"></script>
+  <script src="../../src/pusher_channels.js"></script>
+  <script src="../../src/dependencies.js"></script>
 
   <!-- Tests -->
   <script src="./tests/events_dispatcher.js"></script>
+  <script src="./tests/ping_pong.js"></script>
+
+  <!--Any helpers / stubs / mocks  -->
+  <script src="../testxhr.js"></script>
+  <script src="../testsocket.js"></script>
+  <script src="../testnetinfo.js"></script>
+
+  <!-- Helpers -->
+  <script src="_helpers.js"></script>
+
 </head>
 <body>
   <div id="header">
