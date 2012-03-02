@@ -54,6 +54,30 @@
       test.finish();
     },
 
+    'Flash reporting': {
+      'should send flash is false when TransportType is not flash': function(test) {
+        Pusher.TransportType = "";
+        Pusher.Transport = TestSocket;
+        withConnectedConnection(test, {}, function(connection) {
+          test.equal(connection.socket.URL.split("?")[1],
+                     'protocol=5&client=js&version=' + Pusher.VERSION + "&flash=false");
+          test.finish();
+        })
+      },
+
+      'should send flash is false when TransportType is flash': function(test) {
+        Pusher.TransportType = "flash";
+        Pusher.Transport = TestSocket;
+
+        withConnectedConnection(test, {}, function(connection) {
+          test.equal(connection.socket.URL.split("?")[1],
+                     'protocol=5&client=js&version=' + Pusher.VERSION + "&flash=true");
+          Pusher.TransportType = "";
+          test.finish();
+        })
+      }
+    },
+
     'State-flow': {
 
       'State machine should be valid': function(test) {
@@ -164,7 +188,10 @@
             test.equal(e.newState, 'connected', 'state should progress to "connected"');
             test.equal(connection.socket.readyState, connection.socket.OPEN, 'the socket readyState should change to open');
 
-            test.equal(connection.socket.URL, 'ws://ws.pusherapp.com:80/app/a?protocol=5&client=js&version=' + Pusher.VERSION);
+            test.equal(connection.socket.URL,
+                       'ws://ws.pusherapp.com:80/app/a?protocol=5&client=js&version='
+                       + Pusher.VERSION
+                       + "&flash=false");
             test.equal(connection.socket_id, '804.1456320', 'the socket_id should be set on connected.');
 
             // This needs to be in a timer to break the callstack,
