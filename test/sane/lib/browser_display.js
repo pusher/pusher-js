@@ -30,6 +30,7 @@ $(document).ready(function() {
     runner.run(Tests, function(err, duration) {
       status.html('')
       writeline('finished tests in ' + duration + "s");
+      writeline(runner.successes + ' successes and ' + runner.failures + ' failures');
     });
   }
 

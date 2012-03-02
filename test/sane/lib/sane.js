@@ -145,6 +145,8 @@ var TestSuiteRunner = function(logger) {
   var self = this;
   self.logger = logger;
   self.path = [];
+  self.successes = 0;
+  self.failures = 0;
 }
 
 // Run a test suite/case
@@ -178,6 +180,7 @@ TestSuiteRunner.prototype.log_error = function(err) {
 
 TestSuiteRunner.prototype.log_failure = function(reason) {
   var self = this;
+  self.failures += 1;
   if (reason) {
     self.logger.log(self.current_path() + ": failed with: \"" + reason + "\"");
   } else {
@@ -187,6 +190,7 @@ TestSuiteRunner.prototype.log_failure = function(reason) {
 
 TestSuiteRunner.prototype.log_success = function() {
   var self = this;
+  self.successes += 1;
   self.logger.log(self.current_path() + ": succeeded");
 }
 
