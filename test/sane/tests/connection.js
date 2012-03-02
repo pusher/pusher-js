@@ -471,77 +471,77 @@
       //-----------------------------------------------
       //-----------------------------------------------
 
-//      'timeout occurs when in connecting and awaiting open': function(test) {
-//        Pusher.Transport = TestSocket;
-//        var connection = new Pusher.Connection('g');
-//        var watcher = new EventsWatcher(connection, [
-//          'connecting',
-//          'connecting_in'
-//        ]);
+      'timeout occurs when in connecting and awaiting open': function(test) {
+        Pusher.Transport = TestSocket;
+        var connection = new Pusher.Connection('g');
+        var watcher = new EventsWatcher(connection, [
+          'connecting',
+          'connecting_in'
+        ]);
 
-//        SteppedObserver(connection._machine, 'state_change', [
-//          // waiting
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should initially be "waiting"');
-//          },
-//          // connecting
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-//            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
-//            // open is not fired
-//          },
-//          // impermanentlyClosing
-//          function(e) {
-//            test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermantentlyClosing"');
-//          },
-//          // waiting
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//            connection.disconnect();
-//          },
-//          function(e) {
-//            test.finish();
-//          }
-//        ]);
+        SteppedObserver(connection._machine, 'state_change', [
+          // waiting
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should initially be "waiting"');
+          },
+          // connecting
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
+            // open is not fired
+          },
+          // impermanentlyClosing
+          function(e) {
+            test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermantentlyClosing"');
+          },
+          // waiting
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+            connection.disconnect();
+          },
+          function(e) {
+            test.finish();
+          }
+        ]);
 
-//        connection.connect();
-//      },
+        connection.connect();
+      },
 
-//      'timeout occurs when awaiting pusher connected event': function(test) {
-//        Pusher.Transport = TestSocket;
-//        var connection = new Pusher.Connection('h');
-//        var watcher = new EventsWatcher(connection, [
-//          'connecting',
-//          'connecting_in'
-//        ]);
+      'timeout occurs when awaiting pusher connected event': function(test) {
+        Pusher.Transport = TestSocket;
+        var connection = new Pusher.Connection('h');
+        var watcher = new EventsWatcher(connection, [
+          'connecting',
+          'connecting_in'
+        ]);
 
-//        SteppedObserver(connection._machine, 'state_change', [
-//          // waiting
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
-//          },
-//          // connecting
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-//            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
-//            connection.socket.trigger('open');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'open', 'state should progress to "open"');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermanentlyClosing"');
-//          },
-//          // waiting
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//            connection.disconnect();
-//            test.finish();
-//          }
-//        ]);
+        SteppedObserver(connection._machine, 'state_change', [
+          // waiting
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          // connecting
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
+            connection.socket.trigger('open');
+          },
+          function(e) {
+            test.equal(e.newState, 'open', 'state should progress to "open"');
+          },
+          function(e) {
+            test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermanentlyClosing"');
+          },
+          // waiting
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+            connection.disconnect();
+            test.finish();
+          }
+        ]);
 
-//        connection.connect();
-//      },
+        connection.connect();
+      },
 
       //-----------------------------------------------
       //-----------------------------------------------
@@ -718,130 +718,130 @@
       //
       // For this test we must first fail a connection by (onclose) so that
       // we increment the connectionWait time and toggle ssl
-//      'Successful connection resets conn wait to 0 and ssl to its default initial value': function(test) {
-//        Pusher.Transport = TestSocket;
-//        var connection = new Pusher.Connection('n');
+      'Successful connection resets conn wait to 0 and ssl to its default initial value': function(test) {
+        Pusher.Transport = TestSocket;
+        var connection = new Pusher.Connection('n');
 
-//        var watcher = new EventsWatcher(connection, [
-//          'connecting',
-//          'connecting_in',
-//          'connected'
-//          // trigger disconnected?
-//        ]);
+        var watcher = new EventsWatcher(connection, [
+          'connecting',
+          'connecting_in',
+          'connected'
+          // trigger disconnected?
+        ]);
 
-//        SteppedObserver(connection._machine, 'state_change', [
-//          // waiting
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
-//          },
-//          // connecting
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-//            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
-//            test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
+        SteppedObserver(connection._machine, 'state_change', [
+          // waiting
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          // connecting
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
+            test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'the socket readyState should change to connecting');
 
-//            connection.socket.trigger('close');
-//          },
-//          // waiting
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+            connection.socket.trigger('close');
+          },
+          // waiting
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
 
-//            test.equal(connection.connectionSecure, true, 'connection should switch to using wss');
-//            test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
-//          },
-//          // connecting
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-//            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 2000}, '"connecting_in" should be emitted w/ [Number:2000]');
-//            test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'socket readyState should change to connecting');
+            test.equal(connection.connectionSecure, true, 'connection should switch to using wss');
+            test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
+          },
+          // connecting
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            test.deepEqual(watcher.next(), {name: 'connecting_in', data: 2000}, '"connecting_in" should be emitted w/ [Number:2000]');
+            test.equal(connection.socket.readyState, connection.socket.CONNECTING, 'socket readyState should change to connecting');
 
-//            connection.socket.trigger('open');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'open', 'state should progress to "open"');
+            connection.socket.trigger('open');
+          },
+          function(e) {
+            test.equal(e.newState, 'open', 'state should progress to "open"');
 
-//            connection.socket.trigger('message', JSON.stringify({
-//              event: 'pusher:connection_established',
-//              data: '{\"socket_id\":\"804.1456320\"}'
-//            }));
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'connected', 'state should progress to "connected"');
-//            connection.socket.trigger('close');
-//          },
-//          function(e) {
-//            // have to test connected event in next state because, in prev one, connectedPost has not been run
-//            test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
-//            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
-//            test.equal(connection.connectionSecure, false, 'connection should switch to using ws');
-//            test.equal(connection.connectionWait, 0, 'connectionWait should reset to 0');
-//            connection.disconnect();
-//            test.finish();
-//          }
-//        ]);
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'pusher:connection_established',
+              data: '{\"socket_id\":\"804.1456320\"}'
+            }));
+          },
+          function(e) {
+            test.equal(e.newState, 'connected', 'state should progress to "connected"');
+            connection.socket.trigger('close');
+          },
+          function(e) {
+            // have to test connected event in next state because, in prev one, connectedPost has not been run
+            test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+            test.equal(connection.connectionSecure, false, 'connection should switch to using ws');
+            test.equal(connection.connectionWait, 0, 'connectionWait should reset to 0');
+            connection.disconnect();
+            test.finish();
+          }
+        ]);
 
-//        connection.connect();
-//      },
+        connection.connect();
+      },
 
       //-----------------------------------------------
       //-----------------------------------------------
 
-//      'check that forced ssl actually uses ssl first time, on second try and after successful connect': function(test) {
-//        Pusher.Transport = TestSocket;
-//        var connection = new Pusher.Connection('o', {encrypted: true});
+      'check that forced ssl actually uses ssl first time, on second try and after successful connect': function(test) {
+        Pusher.Transport = TestSocket;
+        var connection = new Pusher.Connection('o', {encrypted: true});
 
-//        test.deepEqual(connection.options, {encrypted: true}, 'this.options should be {encrypted: true}');
+        test.deepEqual(connection.options, {encrypted: true}, 'this.options should be {encrypted: true}');
 
-//        SteppedObserver(connection._machine, 'state_change', [
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-//            test.equal(connection.socket.URL.substr(0, 3), 'wss'); // should use ssl
-//            connection.socket.trigger('open');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'open', 'state should progress to "open"');
-//            connection.socket.trigger('close');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-//            test.equal(connection.socket.URL.substr(0, 3), 'wss'); // should still use ssl
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            test.equal(connection.socket.URL.substr(0, 3), 'wss'); // should use ssl
+            connection.socket.trigger('open');
+          },
+          function(e) {
+            test.equal(e.newState, 'open', 'state should progress to "open"');
+            connection.socket.trigger('close');
+          },
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          },
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            test.equal(connection.socket.URL.substr(0, 3), 'wss'); // should still use ssl
 
-//            connection.socket.trigger('open');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'open', 'state should progress to "open"');
+            connection.socket.trigger('open');
+          },
+          function(e) {
+            test.equal(e.newState, 'open', 'state should progress to "open"');
 
-//            connection.socket.trigger('message', JSON.stringify({
-//              event: 'pusher:connection_established',
-//              data: '{\"socket_id\":\"804.1456320\"}'
-//            }));
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'connected', 'state should progress to "connected"');
-//            connection.socket.trigger('close');
-//          },
-//          function(e) {
-//            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
-//          },
-//          // connecting
-//          function(e) {
-//            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'pusher:connection_established',
+              data: '{\"socket_id\":\"804.1456320\"}'
+            }));
+          },
+          function(e) {
+            test.equal(e.newState, 'connected', 'state should progress to "connected"');
+            connection.socket.trigger('close');
+          },
+          function(e) {
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          // connecting
+          function(e) {
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
 
-//            test.equal(connection.socket.URL.substr(0, 3), 'wss'); // should still be using ssl
+            test.equal(connection.socket.URL.substr(0, 3), 'wss'); // should still be using ssl
 
-//            connection.disconnect();
-//            test.finish();
-//          }
-//        ]);
+            connection.disconnect();
+            test.finish();
+          }
+        ]);
 
-//        connection.connect();
-//      },
+        connection.connect();
+      },
 
 //-----------------------------------------------
 //-----------------------------------------------
@@ -1170,133 +1170,133 @@
       }
     },
 
-//    'Test connection back-off limit': function(test) {
-//      Pusher.Transport = TestSocket;
-//      var connection = new Pusher.Connection('z');
+    'Test connection back-off limit': function(test) {
+      Pusher.Transport = TestSocket;
+      var connection = new Pusher.Connection('z');
 
-//      var watcher = new EventsWatcher(connection, [
-//        'connecting_in',
-//        'connecting',
-//        'unavailable',
-//        'connected'
-//      ]);
+      var watcher = new EventsWatcher(connection, [
+        'connecting_in',
+        'connecting',
+        'unavailable',
+        'connected'
+      ]);
 
-//      SteppedObserver(connection._machine, 'state_change', [
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 0, 'connectionWait should be 0');
-//        },
-//        // connecting
-//        function(e) {
-//          test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          connection.socket.trigger('close');
-//        },
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
-//        },
-//        function(e) {
-//          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 2000}, '"connecting_in" event should be emitted with [Number:2000]');
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          connection.socket.trigger('close');
-//        },
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 4000, 'connectionWait should increase by 2000');
-//        },
-//        function(e) {
-//          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 4000}, '"connecting_in" event should be emitted with [Number:4000]');
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          connection.socket.trigger('close');
-//        },
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 6000, 'connectionWait should increase by 2000');
-//        },
-//        function(e) {
-//          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 6000}, '"connecting_in" event should be emitted with [Number:6000]');
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          connection.socket.trigger('close');
-//        },
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 8000, 'connectionWait should increase by 2000');
-//        },
-//        function(e) {
-//          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 8000}, '"connecting_in" event should be emitted with [Number:8000]');
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          connection.socket.trigger('close');
-//        },
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 10000, 'connectionWait should increase by 2000');
-//        },
-//        function(e) {
-//          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '"connecting_in" event should be emitted with [Number:10000]');
-//          test.equal(watcher.next().name, 'unavailable', 'the "unavailable" event should be emitted');
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          connection.socket.trigger('close');
-//        },
-//        // waiting
-//        function(e) {
-//          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
-//          test.equal(connection.connectionWait, 10000, 'connectionWait should remain constant at 10000');
-//        },
-//        function(e) {
-//          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '"connecting_in" event should be emitted with [Number:10000]');
+      SteppedObserver(connection._machine, 'state_change', [
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 0, 'connectionWait should be 0');
+        },
+        // connecting
+        function(e) {
+          test.equal(watcher.next().name, 'connecting', 'the "connecting" event should be emitted');
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          connection.socket.trigger('close');
+        },
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 2000, 'connectionWait should increase by 2000');
+        },
+        function(e) {
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 2000}, '"connecting_in" event should be emitted with [Number:2000]');
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          connection.socket.trigger('close');
+        },
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 4000, 'connectionWait should increase by 2000');
+        },
+        function(e) {
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 4000}, '"connecting_in" event should be emitted with [Number:4000]');
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          connection.socket.trigger('close');
+        },
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 6000, 'connectionWait should increase by 2000');
+        },
+        function(e) {
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 6000}, '"connecting_in" event should be emitted with [Number:6000]');
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          connection.socket.trigger('close');
+        },
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 8000, 'connectionWait should increase by 2000');
+        },
+        function(e) {
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 8000}, '"connecting_in" event should be emitted with [Number:8000]');
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          connection.socket.trigger('close');
+        },
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 10000, 'connectionWait should increase by 2000');
+        },
+        function(e) {
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '"connecting_in" event should be emitted with [Number:10000]');
+          test.equal(watcher.next().name, 'unavailable', 'the "unavailable" event should be emitted');
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          connection.socket.trigger('close');
+        },
+        // waiting
+        function(e) {
+          test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+          test.equal(connection.connectionWait, 10000, 'connectionWait should remain constant at 10000');
+        },
+        function(e) {
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '"connecting_in" event should be emitted with [Number:10000]');
 
-//          // The next event on the watcher should be undefined
-//          // as we should not have emitted another event.
-//          test.equal(watcher.next(), undefined, 'the "unavailable" event should not be emitted');
-//          // now lets actually connect.
-//          connection.socket.trigger('open');
-//        },
-//        // open
-//        function(e) {
-//          test.equal(e.newState, 'open', 'state should progress to "open"');
+          // The next event on the watcher should be undefined
+          // as we should not have emitted another event.
+          test.equal(watcher.next(), undefined, 'the "unavailable" event should not be emitted');
+          // now lets actually connect.
+          connection.socket.trigger('open');
+        },
+        // open
+        function(e) {
+          test.equal(e.newState, 'open', 'state should progress to "open"');
 
-//          connection.socket.trigger('message', JSON.stringify({
-//            event: 'pusher:connection_established',
-//            data: '{\"socket_id\":\"804.1456320\"}'
-//          }));
-//        },
-//        // connected
-//        function(e) {
-//          test.equal(e.newState, 'connected', 'state should progress to "connected"');
-//          defer(connection.disconnect, connection);
-//        },
-//        function(e) {
-//          test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
-//          test.finish();
-//        }
-//      ]);
+          connection.socket.trigger('message', JSON.stringify({
+            event: 'pusher:connection_established',
+            data: '{\"socket_id\":\"804.1456320\"}'
+          }));
+        },
+        // connected
+        function(e) {
+          test.equal(e.newState, 'connected', 'state should progress to "connected"');
+          defer(connection.disconnect, connection);
+        },
+        function(e) {
+          test.equal(watcher.next().name, 'connected', 'the "connected" event should be emitted');
+          test.finish();
+        }
+      ]);
 
-//      connection.connect();
-//    }
+      connection.connect();
+    }
   });
 })();

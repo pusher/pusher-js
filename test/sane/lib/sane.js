@@ -259,7 +259,7 @@ var TestCase = function(name, fn, timeout) {
   var self = this;
   self.name = name;
   self.fn = fn;
-  self.timeout = timeout || 1000;
+  self.timeout = timeout || 100000;
 }
 
 TestCase.prototype.run = function(suite_runner, cb) {
