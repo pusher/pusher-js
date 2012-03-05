@@ -65,7 +65,7 @@
         })
       },
 
-      'should send flash is false when TransportType is flash': function(test) {
+      'should send flash is true when TransportType is flash': function(test) {
         Pusher.TransportType = "flash";
         Pusher.Transport = TestSocket;
 
