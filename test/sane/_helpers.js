@@ -65,8 +65,8 @@
     });
   }
 
-  exports.withConnectedConnection = function(test, options, fn) {
-    var connection = new Pusher.Connection('n', options);
+  exports.withConnectedConnection = function(test, options, callback) {
+    var connection = new Pusher.Connection(Math.random().toString(), options);
 
     SteppedObserver(connection._machine, 'state_change', [
       function(e) {
