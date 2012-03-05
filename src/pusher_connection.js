@@ -91,10 +91,12 @@
           updateState('unavailable');
         }
 
-        if (self.netInfo.isOnLine() === true) {
+        // When in the unavailable state we attempt to connect, but don't
+        // broadcast that fact
+        if (self.netInfo.isOnLine()) {
           self._waitingTimer = setTimeout(function() {
             self._machine.transition('connecting');
-          }, self.connectionWait);
+          }, connectionDelay());
         }
       },
 
@@ -172,6 +174,7 @@
         self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
+        self.connectedAt = new Date().getTime();
 
         resetActivityCheck();
       },
@@ -279,6 +282,25 @@
 
     function stopActivityCheck() {
       if (self._activityTimer) { clearTimeout(self._activityTimer); }
+    }
+
+    // Returns the delay before the next connection attempt should be made
+    //
+    // This function guards against attempting to connect more frequently than
+    // once every second
+    //
+    function connectionDelay() {
+      var delay = self.connectionWait;
+      if (delay === 0) {
+        if (self.connectedAt) {
+          var t = 1000;
+          var connectedFor = new Date().getTime() - self.connectedAt;
+          if (connectedFor < t) {
+            delay = t - connectedFor;
+          }
+        }
+      }
+      return delay;
     }
 
     /*-----------------------------------------------

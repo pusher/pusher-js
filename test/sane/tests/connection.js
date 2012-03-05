@@ -870,6 +870,49 @@
         connection.connect();
       },
 
+
+      'should reconnect immediately when connection attempt was a) successful and b) a while ago': function(test) {
+        withConnectedConnection("asdhj", test, function(connection) {
+          var loopDefenceDelay = 1000;
+
+          setTimeout(function() {
+            var began = new Date().getTime();
+
+            SteppedObserver(connection._machine, 'state_change', [
+              function(e) {
+                test.equal(e.newState, 'waiting', 'state should be "waiting"');
+              },
+              function(e) {
+                test.equal(e.newState, 'connecting', 'state should be "connecting"');
+                test.ok(new Date().getTime() - began < 50, "should have reconnected immediately");
+                test.finish();
+              }
+            ]);
+
+            connection.socket.close();
+          }, loopDefenceDelay + 500);
+        });
+      },
+
+      'should delay reconnect if last connection attempt was a) successful and b) happened within last second': function(test) {
+        withConnectedConnection("sdfjh", test, function(connection) {
+          var began = new Date().getTime();
+          SteppedObserver(connection._machine, 'state_change', [
+            function(e) {
+              test.equal(e.newState, 'waiting', 'state should be "waiting"');
+            },
+            function(e) {
+              test.equal(e.newState, 'connecting', 'state should be "connecting"');
+              var delta = new Date().getTime() - began;
+              test.ok(delta > 50 && delta < 1000, "should have waited to reconnect");
+              test.finish();
+            }
+          ]);
+
+          connection.socket.close();
+        });
+      },
+
 //-----------------------------------------------
 //-----------------------------------------------
 
