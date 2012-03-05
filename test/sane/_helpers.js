@@ -85,7 +85,11 @@
       },
       function(e) {
         test.equal(e.newState, 'connected', 'state should progress to "connected"');
-        fn(connection);
+
+        // run callback after SO terminated
+        setTimeout(function() {
+          callback(connection);
+        }, 0);
       },
     ]);
 
