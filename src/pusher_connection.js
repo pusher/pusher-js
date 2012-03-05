@@ -253,10 +253,7 @@
         protocol = 'wss://';
       }
 
-      var flash = "false";
-      if(Pusher.TransportType === "flash") {
-        flash = "true";
-      }
+      var flash = (Pusher.TransportType === "flash") ? "true" : "false";
 
       return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js'
         + '&version=' + Pusher.VERSION
