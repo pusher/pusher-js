@@ -253,7 +253,11 @@
         protocol = 'wss://';
       }
 
-      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js&version=' + Pusher.VERSION;
+      var flash = (Pusher.TransportType === "flash") ? "true" : "false";
+
+      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js'
+        + '&version=' + Pusher.VERSION
+        + '&flash=' + flash;
     }
 
     // callback for close and retry.  Used on timeouts.
