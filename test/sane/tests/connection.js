@@ -872,7 +872,7 @@
 
 
       'should reconnect immediately when connection attempt was a) successful and b) a while ago': function(test) {
-        withConnectedConnection("asdhj", test, function(connection) {
+        withConnectedConnection(test, {}, function(connection) {
           var loopDefenceDelay = 1000;
 
           setTimeout(function() {
@@ -895,7 +895,7 @@
       },
 
       'should delay reconnect if last connection attempt was a) successful and b) happened within last second': function(test) {
-        withConnectedConnection("sdfjh", test, function(connection) {
+        withConnectedConnection(test, {}, function(connection) {
           var began = new Date().getTime();
           SteppedObserver(connection._machine, 'state_change', [
             function(e) {
