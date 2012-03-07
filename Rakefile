@@ -13,15 +13,30 @@ config = YAML.load_file('./config/config.yml')[environment]
 
 task :default => :build
 
+def build(version=nil)
+  JBundle.config_from_file 'JFile'
+  JBundle.config.version(version) if version # force version to passed value
+  JBundle.write!
+  return JBundle.config
+end
+
+def upload(jbundle_config, config)
+  S3Uploader.new(jbundle_config.target_dir, jbundle_config.version, config[:s3]).upload
+end
+
 desc 'Bundle and minify source files.'
 task :build do
-  JBundle.config_from_file 'JFile'
-  JBundle.write!
+  build
 end
 
 desc 'upload files to s3'
-task :upload => :build do
-  S3Uploader.new(JBundle.config.target_dir, JBundle.config.version, config[:s3]).upload
+task :upload do
+  upload(build, config)
+end
+
+desc 'upload files as version 7.7.7 - for testing against when not on localhost (e.g. with DNR)'
+task :test_version_upload do
+  upload(build("7.7.7"), config)
 end
 
 namespace :acf do
