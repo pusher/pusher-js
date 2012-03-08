@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.11.1 (2012-03-09)
+
+[NEW] Unit tests run twice as fast.
+
+[CHANGED] The reconnection attempt following a dropped connection will happen a minimum of one second after the connection was previously established.
+
+[FIXED] Calling connect after some failed connection attempts means the attempt to connect is delayed.
+
+[FIXED] Connection closing after calling disconnect is not emitted to the developer.
+
 ## 1.11.0 (2012-01-03)
 
 [NEW] You can now unbind from an event.
