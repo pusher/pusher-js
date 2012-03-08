@@ -45,7 +45,7 @@ Example:
     var callbacks = this.callbacks[event_name];
     if (callbacks) {
       for (var i = 0; i < callbacks.length; i++) {
-        callbacks[i](data);
+        callbacks[i].call(this, data);
       }
     } else if (this.failThrough) {
       this.failThrough(event_name, data)
