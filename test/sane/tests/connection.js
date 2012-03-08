@@ -54,6 +54,30 @@
       test.finish();
     },
 
+    'Flash reporting': {
+      'should send flash is false when TransportType is not flash': function(test) {
+        Pusher.TransportType = "";
+        Pusher.Transport = TestSocket;
+        withConnectedConnection(test, {}, function(connection) {
+          test.equal(connection.socket.URL.split("?")[1],
+                     'protocol=5&client=js&version=' + Pusher.VERSION + "&flash=false");
+          test.finish();
+        })
+      },
+
+      'should send flash is true when TransportType is flash': function(test) {
+        Pusher.TransportType = "flash";
+        Pusher.Transport = TestSocket;
+
+        withConnectedConnection(test, {}, function(connection) {
+          test.equal(connection.socket.URL.split("?")[1],
+                     'protocol=5&client=js&version=' + Pusher.VERSION + "&flash=true");
+          Pusher.TransportType = "";
+          test.finish();
+        })
+      }
+    },
+
     'State-flow': {
 
       'State machine should be valid': function(test) {
@@ -164,7 +188,10 @@
             test.equal(e.newState, 'connected', 'state should progress to "connected"');
             test.equal(connection.socket.readyState, connection.socket.OPEN, 'the socket readyState should change to open');
 
-            test.equal(connection.socket.URL, 'ws://ws.pusherapp.com:80/app/a?protocol=5&client=js&version=' + Pusher.VERSION);
+            test.equal(connection.socket.URL,
+                       'ws://ws.pusherapp.com:80/app/a?protocol=5&client=js&version='
+                       + Pusher.VERSION
+                       + "&flash=false");
             test.equal(connection.socket_id, '804.1456320', 'the socket_id should be set on connected.');
 
             // This needs to be in a timer to break the callstack,
@@ -841,6 +868,49 @@
         ]);
 
         connection.connect();
+      },
+
+
+      'should reconnect immediately when connection attempt was a) successful and b) a while ago': function(test) {
+        withConnectedConnection(test, {}, function(connection) {
+          var loopDefenceDelay = 1000;
+
+          setTimeout(function() {
+            var began = new Date().getTime();
+
+            SteppedObserver(connection._machine, 'state_change', [
+              function(e) {
+                test.equal(e.newState, 'waiting', 'state should be "waiting"');
+              },
+              function(e) {
+                test.equal(e.newState, 'connecting', 'state should be "connecting"');
+                test.ok(new Date().getTime() - began < 50, "should have reconnected immediately");
+                test.finish();
+              }
+            ]);
+
+            connection.socket.close();
+          }, loopDefenceDelay + 500);
+        });
+      },
+
+      'should delay reconnect if last connection attempt was a) successful and b) happened within last second': function(test) {
+        withConnectedConnection(test, {}, function(connection) {
+          var began = new Date().getTime();
+          SteppedObserver(connection._machine, 'state_change', [
+            function(e) {
+              test.equal(e.newState, 'waiting', 'state should be "waiting"');
+            },
+            function(e) {
+              test.equal(e.newState, 'connecting', 'state should be "connecting"');
+              var delta = new Date().getTime() - began;
+              test.ok(delta > 50 && delta < 1000, "should have waited to reconnect");
+              test.finish();
+            }
+          ]);
+
+          connection.socket.close();
+        });
       },
 
 //-----------------------------------------------

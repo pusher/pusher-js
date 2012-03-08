@@ -91,10 +91,12 @@
           updateState('unavailable');
         }
 
-        if (self.netInfo.isOnLine() === true) {
+        // When in the unavailable state we attempt to connect, but don't
+        // broadcast that fact
+        if (self.netInfo.isOnLine()) {
           self._waitingTimer = setTimeout(function() {
             self._machine.transition('connecting');
-          }, self.connectionWait);
+          }, connectionDelay());
         }
       },
 
@@ -172,6 +174,7 @@
         self.socket.onclose = transitionToWaiting;
 
         resetConnectionParameters(self);
+        self.connectedAt = new Date().getTime();
 
         resetActivityCheck();
       },
@@ -253,7 +256,11 @@
         protocol = 'wss://';
       }
 
-      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js&version=' + Pusher.VERSION;
+      var flash = (Pusher.TransportType === "flash") ? "true" : "false";
+
+      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js'
+        + '&version=' + Pusher.VERSION
+        + '&flash=' + flash;
     }
 
     // callback for close and retry.  Used on timeouts.
@@ -277,6 +284,25 @@
       if (self._activityTimer) { clearTimeout(self._activityTimer); }
     }
 
+    // Returns the delay before the next connection attempt should be made
+    //
+    // This function guards against attempting to connect more frequently than
+    // once every second
+    //
+    function connectionDelay() {
+      var delay = self.connectionWait;
+      if (delay === 0) {
+        if (self.connectedAt) {
+          var t = 1000;
+          var connectedFor = new Date().getTime() - self.connectedAt;
+          if (connectedFor < t) {
+            delay = t - connectedFor;
+          }
+        }
+      }
+      return delay;
+    }
+
     /*-----------------------------------------------
       WebSocket Callbacks
       -----------------------------------------------*/
@@ -286,28 +312,40 @@
       self._machine.transition('open');
     };
 
+    function handleCloseCode(code, message) {
+      // first inform the end-developer of this error
+      self.emit('error', {type: 'PusherError', data: {code: code, message: message}});
+
+      if (code === 4000) {
+        // SSL only app
+        self.compulsorySecure = true;
+        self.connectionSecure = true;
+        self.options.encrypted = true;
+
+        self._machine.transition('impermanentlyClosing')
+      } else if (code < 4100) {
+        // Permentently close connection
+        self._machine.transition('permanentlyClosing')
+      } else if (code < 4200) {
+        // Backoff before reconnecting
+        self.connectionWait = 1000;
+        self._machine.transition('waiting')
+      } else if (code < 4300) {
+        // Reconnect immediately
+        self._machine.transition('impermanentlyClosing')
+      } else {
+        // Unknown error
+        self._machine.transition('permanentlyClosing')
+      }
+    }
+
     function ws_onMessageOpen(event) {
       var params = parseWebSocketEvent(event);
       if (params !== undefined) {
         if (params.event === 'pusher:connection_established') {
           self._machine.transition('connected', params.data.socket_id);
         } else if (params.event === 'pusher:error') {
-          // first inform the end-developer of this error
-          self.emit('error', {type: 'PusherError', data: params.data});
-
-          switch (params.data.code) {
-            case 4000:
-              Pusher.warn(params.data.message);
-
-              self.compulsorySecure = true;
-              self.connectionSecure = true;
-              self.options.encrypted = true;
-              break;
-            case 4001:
-              // App not found by key - close connection
-              self._machine.transition('permanentlyClosing');
-              break;
-          }
+          handleCloseCode(params.data.code, params.data.message)
         }
       }
     }

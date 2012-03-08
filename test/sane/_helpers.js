@@ -65,6 +65,37 @@
     });
   }
 
+  exports.withConnectedConnection = function(test, options, callback) {
+    var connection = new Pusher.Connection(Math.random().toString(), options);
+
+    SteppedObserver(connection._machine, 'state_change', [
+      function(e) {
+        test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+      },
+      function(e) {
+        test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+        connection.socket.trigger('open');
+      },
+      function(e) {
+        test.equal(e.newState, 'open', 'state should progress to "open"');
+        connection.socket.trigger('message', JSON.stringify({
+          event: 'pusher:connection_established',
+          data: '{\"socket_id\":\"804.1456320\"}'
+        }));
+      },
+      function(e) {
+        test.equal(e.newState, 'connected', 'state should progress to "connected"');
+
+        // run callback after SO terminated
+        setTimeout(function() {
+          callback(connection);
+        }, 0);
+      },
+    ]);
+
+    connection.connect();
+  }
+
   exports.mock = {};
 
   exports.mock.log = {};
