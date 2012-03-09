@@ -1226,7 +1226,11 @@
           // connected
           function() {
             test.equal(connection.send(payload), true, 'connection.send should return true if connected');
-            test.equal(connection.socket._sendQueue.length, 1, 'connection.socket should have one message queued for sending');
+
+            // send happens in timeout, so must wait for it to occur
+            setTimeout(function() {
+              test.equal(connection.socket._sendQueue.length, 1, 'connection.socket should have one message queued for sending');
+            }, 0);
 
             test.finish();
           }
