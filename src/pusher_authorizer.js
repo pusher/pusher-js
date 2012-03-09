@@ -59,7 +59,7 @@
               callback(false, data);
             }
           } else {
-            Pusher.warn("Couldn't get auth info from your webapp", status);
+            Pusher.warn("Couldn't get auth info from your webapp", xhr.status);
             callback(true, xhr.status);
           }
         }
