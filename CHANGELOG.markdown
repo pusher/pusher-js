@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.11.2 (2012-03-15)
+
+[FIXED] Mobile Safari crashing after receiving data on closed connection.
+
+[FIXED] Attempt to transition from impermanentlyClosing to connected.
+
 ## 1.11.1 (2012-03-09)
 
 [NEW] Unit tests run twice as fast.
