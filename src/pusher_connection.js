@@ -163,6 +163,11 @@
       },
 
       openToImpermanentlyClosing: function() {
+        // Possible to receive connection_established event after transition to impermanentlyClosing
+        // but before socket close.  Prevent this triggering a transition from impermanentlyClosing to connected
+        // by unbinding onmessage callback.
+        self.socket.onmessage = undefined;
+
         updateConnectionParameters();
       },
 

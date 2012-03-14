@@ -39,6 +39,11 @@
     var stateCallbacks = this.stateActions;
 
     if (prevState && (Pusher.Util.arrayIndexOf(this.transitions[prevState], nextState) == -1)) {
+      this.emit('invalid_transition_attempt', {
+        oldState: prevState,
+        newState: nextState
+      });
+
       throw new Error('Invalid transition [' + prevState + ' to ' + nextState + ']');
     }
 
