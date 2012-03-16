@@ -1,0 +1,84 @@
+;(function() {
+  Tests.addSuite('Pusher.ConnectionRegressions', {
+    'Bug: impermanentlyClosing to connected should not occur if': {
+      'open state, get error, get conn_est': function(test) {
+        Pusher.Transport = TestSocket;
+        var connection = new Pusher.Connection('a');
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) { // waiting
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          function(e) { // connecting
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            connection.socket.trigger('open');
+          },
+          function(e) { // open
+            test.equal(e.newState, 'open', 'state should progress to "open"');
+
+            // error will trigger transition to impermanentlyClosing
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'pusher:error', data: { code: 4201, message: 'blah' }
+            }));
+          },
+          function(e) { // impermanentlyClosing
+            test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermanentlyClosing"');
+
+            // fail if invalid transition happens
+            connection._machine.bind('invalid_transition_attempt', function(data) {
+              test.ok(false, "Should not transition from " + data.oldState + " to " + data.newState);
+            });
+
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'pusher:connection_established', data: '{\"socket_id\":\"804.1456320\"}'
+            }));
+          },
+          function(e) { // waiting
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+            test.finish();
+          }
+        ]);
+
+        connection.connect();
+      },
+
+      'open state, timeout on connected, close sock, get conn_est during close handshake': function(test) {
+        Pusher.Transport = TestSocket;
+        var connection = new Pusher.Connection('a');
+
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) { // waiting
+            test.equal(e.newState, 'waiting', 'state should intially be "waiting"');
+          },
+          function(e) { // connecting
+            test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
+            connection.socket.trigger('open');
+          },
+          function(e) { // open
+            test.equal(e.newState, 'open', 'state should progress to "open"');
+            // allow timeout by not sending connection_established
+          },
+          function(e) { // impermanentlyClosing
+            test.equal(e.newState, 'impermanentlyClosing', 'state should progress to "impermanentlyClosing"');
+
+            // fail if invalid transition happens
+            connection._machine.bind('invalid_transition_attempt', function(data) {
+              test.ok(false, "Should not transition from " + data.oldState + " to " + data.newState);
+            });
+
+            connection.socket.trigger('message', JSON.stringify({
+              event: 'pusher:connection_established', data: '{\"socket_id\":\"804.1456320\"}'
+            }));
+          },
+          function(e) { // waiting
+            test.equal(e.newState, 'waiting', 'state should progress to "waiting"');
+            test.finish();
+          }
+        ]);
+
+        connection.connect();
+      }
+    }
+  });
+})();
+
