@@ -131,6 +131,7 @@
 
       connectingExit: function() {
         clearTimeout(self._connectingTimer);
+        self.socket.onopen = undefined; // unbind to avoid open events that are no longer relevant
       },
 
       connectingToWaiting: function() {
@@ -156,6 +157,7 @@
 
       openExit: function() {
         clearTimeout(self._openTimer);
+        self.socket.onmessage = undefined; // unbind to avoid messages that are no longer relevant
       },
 
       openToWaiting: function() {
@@ -163,11 +165,6 @@
       },
 
       openToImpermanentlyClosing: function() {
-        // Possible to receive connection_established event after transition to impermanentlyClosing
-        // but before socket close.  Prevent this triggering a transition from impermanentlyClosing to connected
-        // by unbinding onmessage callback.
-        self.socket.onmessage = undefined;
-
         updateConnectionParameters();
       },
 
