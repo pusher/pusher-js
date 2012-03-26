@@ -116,6 +116,49 @@
         pusher.subscribeAll();
       }
     },
+
+
+    'composeOptions': {
+      'global options should be used if undefined subscription options': function(test) {
+        Pusher.Transport = TestSocket;
+        var globalOptions = { auth: { params: { a: 1 } } };
+        var subscriptionOptions = undefined;
+
+        test.deepEqual({ auth: { params: { a: 1 } } },
+                       Pusher.composeOptions(globalOptions, subscriptionOptions));
+        test.finish();
+      },
+
+      'global options should be used if empty subscription options': function(test) {
+        Pusher.Transport = TestSocket;
+        var globalOptions = { auth: { params: { a: 1 } } };
+        var subscriptionOptions = {};
+
+        test.deepEqual({ auth: { params: { a: 1 } } },
+                       Pusher.composeOptions(globalOptions, subscriptionOptions));
+        test.finish();
+      },
+
+      'subscription option should override global option': function(test) {
+        Pusher.Transport = TestSocket;
+        var globalOptions = { auth: { headers: { a: 1 } } };
+        var subscriptionOptions = { auth: { headers: { a: 2 } } };
+
+        test.deepEqual(subscriptionOptions, Pusher.composeOptions(globalOptions, subscriptionOptions));
+        test.finish();
+      },
+
+      'should keep non-overridden global object keys of partially overridden global objects': function(test) {
+        Pusher.Transport = TestSocket;
+        var globalOptions = { auth: { headers: { a: 1, c: 2 } } };
+        var subscriptionOptions = { auth: { headers: { a: 3 } } };
+
+        test.deepEqual({ auth: { headers: { a: 3, c: 2 } } }, Pusher.composeOptions(globalOptions, subscriptionOptions));
+        test.finish();
+      }
+    },
+
+
     'user_info is sent if specified': function(test) {
       user_id = '123';
       user_info = "g";
