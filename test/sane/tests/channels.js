@@ -91,6 +91,31 @@
       }
     },
 
+    'subscription': {
+      'should save passed options to channel': function(test) {
+        Pusher.Transport = TestSocket;
+        var pusher = new Pusher('testing');
+        var options = { a: "b", c: "d" };
+        var channel = pusher.subscribe('foo', options);
+
+        test.deepEqual(options, channel.subscribeOptions); // look, Ma, no requirement to pass a fail message
+        test.finish();
+      },
+
+      'should reuse subscription options when calling subscribeAll': function(test) {
+        Pusher.Transport = TestSocket;
+        var pusher = new Pusher('testing');
+        var options = { a: "b", c: "d" };
+        var channel = pusher.subscribe('foo', options);
+
+        pusher.subscribe = function(name, subscribeOptions) { // stub that mother
+          test.deepEqual(options, subscribeOptions);
+          test.finish();
+        };
+
+        pusher.subscribeAll();
+      }
+    },
     'user_info is sent if specified': function(test) {
       user_id = '123';
       user_info = "g";
