@@ -73,9 +73,9 @@ Pusher.prototype = {
 
   subscribeAll: function() {
     var channel;
-    for (channel in this.channels.channels) {
-      if (this.channels.channels.hasOwnProperty(channel)) {
-        this.subscribe(channel);
+    for (channelName in this.channels.channels) {
+      if (this.channels.channels.hasOwnProperty(channelName)) {
+        this.subscribe(channelName, this.channels.channels[channelName].subscribeOptions);
       }
     }
   },
@@ -83,6 +83,9 @@ Pusher.prototype = {
   subscribe: function(channel_name, subscribeOptions) {
     var self = this;
     var channel = this.channels.add(channel_name, this);
+
+    channel.subscribeOptions = subscribeOptions; // save options used to subscribe for reconnects
+
     var options = Pusher.composeOptions(this.options, subscribeOptions);
     if (this.connection.state === 'connected') {
       channel.authorize(this.connection.socket_id, options, function(err, data) {
