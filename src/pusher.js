@@ -193,3 +193,15 @@ Pusher.ready = function() {
     Pusher.instances[i].connect();
   }
 };
+
+Pusher.composeOptions = function(globalOptions, subscribeOptions) {
+  globalOptions = globalOptions || {};
+  subscribeOptions = subscribeOptions || {};
+
+  var options = {};
+  Pusher.Util.extend(options, globalOptions);
+  Pusher.Util.extend(options, subscribeOptions); // any clashes result in sub call options overriding global ones
+  return options;
+};
+
+this.Pusher = Pusher;
