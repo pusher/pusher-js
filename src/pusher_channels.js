@@ -65,59 +65,6 @@ Pusher.Channel.prototype = {
 
 Pusher.Util.extend(Pusher.Channel.prototype, Pusher.EventsDispatcher.prototype);
 
-
-
-Pusher.auth_callbacks = {};
-
-Pusher.authorizers = {
-  ajax: function(pusher, callback){
-    var self = this, xhr;
-
-    if (Pusher.XHR) {
-      xhr = new Pusher.XHR();
-    } else {
-      xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
-    }
-
-    xhr.open("POST", Pusher.channel_auth_endpoint, true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
-          var data, parsed = false;
-
-          try {
-            data = JSON.parse(xhr.responseText);
-            parsed = true;
-          } catch (e) {
-            callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
-          }
-
-          if (parsed) { // prevents double execution.
-            callback(false, data);
-          }
-        } else {
-          Pusher.warn("Couldn't get auth info from your webapp", status);
-          callback(true, xhr.status);
-        }
-      }
-    };
-    xhr.send('socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(self.name));
-  },
-  jsonp: function(pusher, callback){
-    var qstring = 'socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
-    var script = document.createElement("script");
-    // Hacked wrapper.
-    Pusher.auth_callbacks[this.name] = function(data) {
-      callback(false, data);
-    };
-    var callback_name = "Pusher.auth_callbacks['" + this.name + "']";
-    script.src = Pusher.channel_auth_endpoint+'?callback='+encodeURIComponent(callback_name)+'&'+qstring;
-    var head = document.getElementsByTagName("head")[0] || document.documentElement;
-    head.insertBefore( script, head.firstChild );
-  }
-};
-
 Pusher.Channel.PrivateChannel = {
   authorize: function(pusher, callback){
     Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);

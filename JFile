@@ -17,6 +17,7 @@ bundle 'pusher.js' do
   file 'net_info.js'
   file 'pusher_connection.js'
   file 'pusher_channels.js'
+  file 'pusher_authorizer.js'
   file 'dependencies.js'
 end
 
