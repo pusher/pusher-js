@@ -54,8 +54,8 @@ Pusher.Channel.prototype = {
     this.emit('pusher:subscription_succeeded');
   },
 
-  authorize: function(pusher, callback){
-    callback(false, {}); // normal channels don't require auth
+  authorize: function(socketId, options, callback){
+    return callback(false, {}); // normal channels don't require auth
   },
 
   trigger: function(event, data) {
@@ -66,8 +66,9 @@ Pusher.Channel.prototype = {
 Pusher.Util.extend(Pusher.Channel.prototype, Pusher.EventsDispatcher.prototype);
 
 Pusher.Channel.PrivateChannel = {
-  authorize: function(pusher, callback){
-    Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);
+  authorize: function(socketId, options, callback){
+    var authorizer = new Pusher.Channel.Authorizer(this, Pusher.channel_auth_transport, options);
+    return authorizer.authorize(socketId, callback);
   }
 };
 
