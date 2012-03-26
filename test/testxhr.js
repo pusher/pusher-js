@@ -19,7 +19,7 @@
 
     this._args = {
       open: undefined,
-      setRequestHeader: undefined,
+      headers: {},
       send: undefined
     };
 
@@ -40,7 +40,7 @@
   };
 
   TestXHR.prototype.setRequestHeader = function(header, value) {
-    this._args.setRequestHeader = arguments;
+    this._args.headers[header] = value;
   };
 
   TestXHR.prototype.send = function(data) {
