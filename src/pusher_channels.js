@@ -68,8 +68,15 @@
 
   Pusher.Channel.PrivateChannel = {
     authorize: function(socketId, options, callback){
+      var self = this;
       var authorizer = new Pusher.Channel.Authorizer(this, Pusher.channel_auth_transport, options);
-      return authorizer.authorize(socketId, callback);
+      return authorizer.authorize(socketId, function(err, authData) {
+        if(!err) {
+          self.emit('pusher_internal:authorized', authData);
+        }
+
+        callback(err, authData);
+      });
     }
   };
 
