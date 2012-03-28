@@ -84,73 +84,71 @@
 
   Pusher.Channel.PresenceChannel = {
     init: function(){
-      this.bind('pusher_internal:member_added', function(data){
-        var member = this.members.add(data.user_id, data.user_info);
-        this.emit('pusher:member_added', member);
-      }.scopedTo(this))
-
-      this.bind('pusher_internal:member_removed', function(data){
-        var member = this.members.remove(data.user_id);
-        if (member) {
-          this.emit('pusher:member_removed', member);
-        }
-      }.scopedTo(this))
-    },
-
-    disconnect: function(){
-      this.members.clear();
+      this.members = new Members(this); // leeches off channel events
     },
 
     onSubscriptionSucceeded: function(data) {
-      this.members._members_map = data.presence.hash;
-      this.members.count = data.presence.count;
       this.subscribed = true;
+      // We override this because we want the Members obj to be responsible for
+      // emitting the pusher:subscription_succeeded.  It will do this after it has done its work.
+    }
+  };
 
-      this.emit('pusher:subscription_succeeded', this.members);
+  var Members = function(channel) {
+    var self = this;
+
+    var reset = function() {
+      this._members_map = {};
+      this.count = 0;
+    };
+    reset.call(this);
+
+    channel.bind('pusher_internal:authorized', function(authorizedData) {
+      channel.bind("pusher_internal:subscription_succeeded", function(subscriptionData) {
+        self._members_map = subscriptionData.presence.hash;
+        self.count = subscriptionData.presence.count;
+        channel.emit('pusher:subscription_succeeded', self);
+      });
+    });
+
+    channel.bind('pusher_internal:member_added', function(data) {
+      if(self.get(data.user_id) === null) { // only incr if user_id does not already exist
+        self.count++;
+      }
+
+      self._members_map[data.user_id] = data.user_info;
+      channel.emit('pusher:member_added', self.get(data.user_id));
+    });
+
+    channel.bind('pusher_internal:member_removed', function(data) {
+      var member = self.get(data.user_id);
+      if(member) {
+        delete self._members_map[data.user_id];
+        self.count--;
+        channel.emit('pusher:member_removed', member);
+      }
+    });
+
+    channel.bind('pusher_internal:disconnected', function() {
+      reset.call(self);
+    });
+  };
+
+  Members.prototype = {
+    each: function(callback) {
+      for(var i in this._members_map) {
+        callback(this.get(i));
+      }
     },
 
-    members: {
-      _members_map: {},
-      count: 0,
-
-      each: function(callback) {
-        for(var i in this._members_map) {
-          callback({
-            id: i,
-            info: this._members_map[i]
-          });
+    get: function(user_id) {
+      if (this._members_map.hasOwnProperty(user_id)) { // have heard of this user user_id
+        return {
+          id: user_id,
+          info: this._members_map[user_id]
         }
-      },
-
-      add: function(id, info) {
-        this._members_map[id] = info;
-        this.count++;
-        return this.get(id);
-      },
-
-      remove: function(user_id) {
-        var member = this.get(user_id);
-        if (member) {
-          delete this._members_map[user_id];
-          this.count--;
-        }
-        return member;
-      },
-
-      get: function(user_id) {
-        if (this._members_map.hasOwnProperty(user_id)) { // have heard of this user user_id
-          return {
-            id: user_id,
-            info: this._members_map[user_id]
-          }
-        } else { // have never heard of this user
-          return null;
-        }
-      },
-
-      clear: function() {
-        this._members_map = {};
-        this.count = 0;
+      } else { // have never heard of this user
+        return null;
       }
     }
   };
