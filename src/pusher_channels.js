@@ -48,7 +48,9 @@
   Pusher.Channel.prototype = {
     // inheritable constructor
     init: function() {},
-    disconnect: function() {},
+    disconnect: function() {
+      this.emit("pusher_internal:disconnected");
+    },
 
     onSubscriptionSucceeded: function(data) {
       this.subscribed = true;
