@@ -117,13 +117,13 @@
 
       'me': {
         'returns undefined when initialised': function(test) {
-          test.equal(Pusher.Channel.factory('presence-channel', {}).members.me(), undefined);
+          test.equal(Pusher.Channel.factory('presence-channel', {}).members.me, null);
           test.finish();
         },
 
         'returns user_id and user_info of local user when subscribed': function(test) {
           withSubscribedPresenceChannel(function(channel) {
-            test.deepEqual(channel.members.me(), { "id": "6", "info": { "a":"1" } });
+            test.deepEqual(channel.members.me, { "id": "6", "info": { "a":"1" } });
             test.finish();
           });
         },
@@ -131,7 +131,7 @@
         'returns undefined when disconnected after subscribe': function(test) {
           withSubscribedPresenceChannel(function(channel) {
             channel.disconnect();
-            test.deepEqual(channel.members.me(), undefined);
+            test.deepEqual(channel.members.me, null);
             test.finish();
           });
         },
