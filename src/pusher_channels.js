@@ -100,9 +100,7 @@
     var reset = function() {
       this._members_map = {};
       this.count = 0;
-      this.me = function() {
-        return undefined;
-      };
+      this.me = null;
     };
     reset.call(this);
 
@@ -110,10 +108,7 @@
       channel.bind("pusher_internal:subscription_succeeded", function(subscriptionData) {
         self._members_map = subscriptionData.presence.hash;
         self.count = subscriptionData.presence.count;
-        self.me = function() {
-          return self.get(authorizedData.channel_data.user_id);
-        };
-
+        self.me = self.get(authorizedData.channel_data.user_id);
         channel.emit('pusher:subscription_succeeded', self);
       });
     });
