@@ -2,16 +2,14 @@
   Tests.addSuite('Pusher.Channel', {
     'Events': {
       'Public Channel': {
-        'subscription callback': function(test) {
-          Pusher.channel_auth_transport = 'test';
-          Pusher.authorizers['test'] = function() {
-            callback({});
-          };
-
+        'subscription lifecycle': function(test) {
           var channel = Pusher.Channel.factory('public-channel', {});
-
           channel.bind('pusher:subscription_succeeded', function() {
             test.equal(channel.subscribed, true, 'Channel should be marked as subscribed after ack');
+
+            channel.disconnect();
+            test.equal(channel.subscribed, false);
+
             test.finish();
           });
 
@@ -21,16 +19,19 @@
       },
 
       'Private Channel': {
-        'subscription callback': function(test) {
+        'subscription lifecycle': function(test) {
           Pusher.channel_auth_transport = 'test';
           Pusher.authorizers['test'] = function() {
             callback({});
           };
 
           var channel = Pusher.Channel.factory('private-channel', {});
-
           channel.bind('pusher:subscription_succeeded', function() {
             test.equal(channel.subscribed, true, 'Channel should be marked as subscribed after ack');
+
+            channel.disconnect();
+            test.equal(channel.subscribed, false);
+
             test.finish();
           });
 

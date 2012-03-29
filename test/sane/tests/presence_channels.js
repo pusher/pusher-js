@@ -202,6 +202,14 @@
           test.finish();
         });
       },
+
+      'subscribed set to false after disconnection': function(test) {
+        withSubscribedPresenceChannel(function(channel) {
+          channel.disconnect();
+          test.equal(channel.subscribed, false);
+          test.finish();
+        });
+      }
     }
   });
 })(this);
