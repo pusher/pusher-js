@@ -49,6 +49,7 @@
     // inheritable constructor
     init: function() {},
     disconnect: function() {
+      this.subscribed = false;
       this.emit("pusher_internal:disconnected");
     },
 
