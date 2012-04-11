@@ -1,14 +1,12 @@
 ;(function(context) {
   var withSubscribedPresenceChannel = function(callback) {
-    var user_id = "6";
-    var user_info = { "a":"1" };
     Pusher.channel_auth_transport = 'ajax';
     Pusher.XHR = context.TestXHR;
     var channel = Pusher.Channel.factory('presence-channel', {}); // 1 channel connecting
 
     channel.bind('pusher_internal:authorized', function() { // 4 on authorized event
       channel.emit('pusher_internal:subscription_succeeded', { // 5 send sub succ event
-        "presence": { "count": 1, "hash": { "6": user_info } }
+        "presence": { "count": 1, "hash": { "6": { "a":"1" } } }
       });
     });
 
@@ -21,7 +19,7 @@
       status: 200,
       responseText:JSON.stringify({
         "auth":"278d425bdf160c739803:a99e78e7cd40dcd0d4ae06be0a5395b6cd3c085764229fd40b39ce92c39af33e",
-        "channel_data": { "user_id": user_id, "user_info": user_info }
+        "channel_data": "{ \"user_id\": \"6\", \"user_info\": { \"a\":\"1\" } }" // will come over wire as str
       })
     });
   };
