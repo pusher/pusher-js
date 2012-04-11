@@ -135,6 +135,22 @@
           status: 200
         });
       }
+    },
+
+    'jsonp authorizer': {
+      'if options contain auth headers, print warning': function(test) {
+        var logs = new mock.log.LogMock();
+        Pusher.channel_auth_transport = 'jsonp';
+        Pusher.channel_auth_endpoint = '//:la'; // will avoid GET req failure
+        var options = { auth: { headers: { "a": "b" } } };
+
+        var channel = Pusher.Channel.factory('private-channel', PusherMock);
+        channel.authorize(PusherMock.connection.socket_id, options);
+
+        test.equal(logs.messages["Warn"][0],
+                   "Pusher : Warn : To send headers with the auth request, you must use AJAX, rather than JSONP.");
+        test.finish();
+      }
     }
   });
 })(this);
