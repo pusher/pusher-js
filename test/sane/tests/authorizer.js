@@ -29,6 +29,26 @@
       }
     },
 
+    'subscribe': {
+      'should pass global auth options to authorizer': function(test) {
+        Pusher.XHR = context.TestXHR;
+        var options = { auth: { headers: { }, params: { } } };
+        var channelName = "private-foo";
+
+        var pusher = new Pusher('b599fe0f1e4b6f6eb8a6', options);
+        pusher.connection.state = "connected"; // hack connected state so subscribe() will call authorize
+        var channel = pusher.channels.add(channelName, pusher); // artifically add to channel list
+
+        // rewrite authorize fn so we can check passed args
+        channel.authorize = function(socketId, options, callback) {
+          test.deepEqual(options.auth, options.auth);
+          test.finish();
+        };
+
+        var channel = pusher.subscribe(channelName);
+      }
+    },
+
     'ajax authorizer': {
       'invalid JSON in xhr.responseText results in Error': function(test) {
         test.numAssertions = 2;
