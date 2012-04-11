@@ -70,6 +70,10 @@
     },
 
     jsonp: function(socketId, callback){
+      if(this.authOptions.headers !== undefined) {
+        Pusher.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
+      }
+
       var script = document.createElement("script");
       // Hacked wrapper.
       Pusher.auth_callbacks[this.channel.name] = function(data) {
