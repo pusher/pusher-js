@@ -3,8 +3,7 @@
     this.channel = channel;
     this.type = type;
 
-    var ops = options || {};
-    this.authOptions = ops.auth || {};
+    this.authOptions = (options || {}).auth || {};
   };
 
   Pusher.Channel.Authorizer.prototype = {
