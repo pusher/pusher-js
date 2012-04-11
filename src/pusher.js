@@ -76,20 +76,17 @@
       var channel;
       for (channelName in this.channels.channels) {
         if (this.channels.channels.hasOwnProperty(channelName)) {
-          this.subscribe(channelName, this.channels.channels[channelName].subscribeOptions);
+          this.subscribe(channelName);
         }
       }
     },
 
-    subscribe: function(channel_name, subscribeOptions) {
+    subscribe: function(channel_name) {
       var self = this;
       var channel = this.channels.add(channel_name, this);
 
-      channel.subscribeOptions = subscribeOptions; // save options used to subscribe for reconnects
-
-      var options = Pusher.composeOptions(this.options, subscribeOptions);
       if (this.connection.state === 'connected') {
-        channel.authorize(this.connection.socket_id, options, function(err, data) {
+        channel.authorize(this.connection.socket_id, this.options, function(err, data) {
           if (err) {
             channel.emit('pusher:subscription_error', data);
           } else {
@@ -197,16 +194,6 @@
     for (var i = 0, l = Pusher.instances.length; i < l; i++) {
       Pusher.instances[i].connect();
     }
-  };
-
-  Pusher.composeOptions = function(globalOptions, subscribeOptions) {
-    globalOptions = globalOptions || {};
-    subscribeOptions = subscribeOptions || {};
-
-    var options = {};
-    Pusher.Util.extend(options, globalOptions);
-    Pusher.Util.extend(options, subscribeOptions); // any clashes result in sub call options overriding global ones
-    return options;
   };
 
   this.Pusher = Pusher;
