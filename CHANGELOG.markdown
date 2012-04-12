@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.12.0 (2012-04-14)
+
+[NEW] Use `channel.members.me` to get the id and info for the local presence user.  See the docs for more information: http://pusher.com/docs
+
+[NEW] Send extra headers and query parameters with the private/presence channel authentication requests sent to your server.  This is useful for, amongst other things, frameworks that require cross-site request forgery validation.  See the docs for more information: http://pusher.com/docs
+
+[FIXED] `channel.subscribed` not set to `false` when library loses connection to server.
+
+[REMOVED] `channel.members.add()`, `channel.members.remove()` and `channel.members.clear()`.
+
 ## 1.11.2 (2012-03-15)
 
 [FIXED] Mobile Safari crashing after receiving data on closed connection.
