@@ -6,7 +6,9 @@
 
 [NEW] Send extra headers and query parameters with the private/presence channel authentication requests sent to your server.  This is useful for, amongst other things, frameworks that require cross-site request forgery validation.  See the docs for more information: http://pusher.com/docs
 
-[FIXED] `channel.subscribed` not set to `false` when library loses connection to server.
+[FIXED] `channel.subscribed` not set to `false` when `disconnect` event occurs on the connection.
+
+[UPGRADE] The linked version of web-socket-js. Amongst other things, this includes a switch to the WebSocket version defined in RFC 6455.  For the full list of changes in web-socket-js, see <https://github.com/gimite/web-socket-js/compare/bb5797cad5244dc86410e35726ef886bbc49afe9...2ee87e910e92f2366d562efebbbec96349924df3>
 
 [REMOVED] `channel.members.add()`, `channel.members.remove()` and `channel.members.clear()`.
 
