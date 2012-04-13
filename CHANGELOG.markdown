@@ -8,6 +8,8 @@
 
 [FIXED] `channel.subscribed` not set to `false` when library loses connection to server.
 
+[UPGRADE] The linked version of web-socket-js. Amongst other things, this includes a switch to the WebSocket version defined in RFC 6455.  For the full list of changes in web-socket-js, see <https://github.com/gimite/web-socket-js/compare/bb5797cad5244dc86410e35726ef886bbc49afe9...2ee87e910e92f2366d562efebbbec96349924df3>
+
 [REMOVED] `channel.members.add()`, `channel.members.remove()` and `channel.members.clear()`.
 
 ## 1.11.2 (2012-03-15)
