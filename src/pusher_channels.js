@@ -1,182 +1,148 @@
-Pusher.Channels = function() {
-  this.channels = {};
-};
+;(function() {
+  Pusher.Channels = function() {
+    this.channels = {};
+  };
 
-Pusher.Channels.prototype = {
-  add: function(channel_name, pusher) {
-    var existing_channel = this.find(channel_name);
-    if (!existing_channel) {
-      var channel = Pusher.Channel.factory(channel_name, pusher);
-      this.channels[channel_name] = channel;
-      return channel;
-    } else {
-      return existing_channel;
+  Pusher.Channels.prototype = {
+    add: function(channel_name, pusher) {
+      var existing_channel = this.find(channel_name);
+      if (!existing_channel) {
+        var channel = Pusher.Channel.factory(channel_name, pusher);
+        this.channels[channel_name] = channel;
+        return channel;
+      } else {
+        return existing_channel;
+      }
+    },
+
+    find: function(channel_name) {
+      return this.channels[channel_name];
+    },
+
+    remove: function(channel_name) {
+      delete this.channels[channel_name];
+    },
+
+    disconnect: function () {
+      for(var channel_name in this.channels){
+        this.channels[channel_name].disconnect()
+      }
     }
-  },
+  };
 
-  find: function(channel_name) {
-    return this.channels[channel_name];
-  },
+  Pusher.Channel = function(channel_name, pusher) {
+    var self = this;
+    Pusher.EventsDispatcher.call(this, function(event_name, event_data) {
+      Pusher.debug('No callbacks on ' + channel_name + ' for ' + event_name);
+    });
 
-  remove: function(channel_name) {
-    delete this.channels[channel_name];
-  },
+    this.pusher = pusher;
+    this.name = channel_name;
+    this.subscribed = false;
 
-  disconnect: function () {
-    for(var channel_name in this.channels){
-      this.channels[channel_name].disconnect()
+    this.bind('pusher_internal:subscription_succeeded', function(data) {
+      self.onSubscriptionSucceeded(data);
+    });
+  };
+
+  Pusher.Channel.prototype = {
+    // inheritable constructor
+    init: function() {},
+    disconnect: function() {
+      this.subscribed = false;
+      this.emit("pusher_internal:disconnected");
+    },
+
+    onSubscriptionSucceeded: function(data) {
+      this.subscribed = true;
+      this.emit('pusher:subscription_succeeded');
+    },
+
+    authorize: function(socketId, options, callback){
+      return callback(false, {}); // normal channels don't require auth
+    },
+
+    trigger: function(event, data) {
+      return this.pusher.send_event(event, data, this.name);
     }
-  }
-};
+  };
 
-Pusher.Channel = function(channel_name, pusher) {
-  var self = this;
-  Pusher.EventsDispatcher.call(this, function(event_name, event_data) {
-    Pusher.debug('No callbacks on ' + channel_name + ' for ' + event_name);
-  });
+  Pusher.Util.extend(Pusher.Channel.prototype, Pusher.EventsDispatcher.prototype);
 
-  this.pusher = pusher;
-  this.name = channel_name;
-  this.subscribed = false;
-
-  this.bind('pusher_internal:subscription_succeeded', function(data) {
-    self.onSubscriptionSucceeded(data);
-  });
-};
-
-Pusher.Channel.prototype = {
-  // inheritable constructor
-  init: function() {},
-  disconnect: function() {},
-
-  onSubscriptionSucceeded: function(data) {
-    this.subscribed = true;
-    this.emit('pusher:subscription_succeeded');
-  },
-
-  authorize: function(pusher, callback){
-    callback(false, {}); // normal channels don't require auth
-  },
-
-  trigger: function(event, data) {
-    return this.pusher.send_event(event, data, this.name);
-  }
-};
-
-Pusher.Util.extend(Pusher.Channel.prototype, Pusher.EventsDispatcher.prototype);
-
-
-
-Pusher.auth_callbacks = {};
-
-Pusher.authorizers = {
-  ajax: function(pusher, callback){
-    var self = this, xhr;
-
-    if (Pusher.XHR) {
-      xhr = new Pusher.XHR();
-    } else {
-      xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
-    }
-
-    xhr.open("POST", Pusher.channel_auth_endpoint, true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
-          var data, parsed = false;
-
-          try {
-            data = JSON.parse(xhr.responseText);
-            parsed = true;
-          } catch (e) {
-            callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
-          }
-
-          if (parsed) { // prevents double execution.
-            callback(false, data);
-          }
-        } else {
-          Pusher.warn("Couldn't get auth info from your webapp", status);
-          callback(true, xhr.status);
+  Pusher.Channel.PrivateChannel = {
+    authorize: function(socketId, options, callback){
+      var self = this;
+      var authorizer = new Pusher.Channel.Authorizer(this, Pusher.channel_auth_transport, options);
+      return authorizer.authorize(socketId, function(err, authData) {
+        if(!err) {
+          self.emit('pusher_internal:authorized', authData);
         }
-      }
+
+        callback(err, authData);
+      });
+    }
+  };
+
+  Pusher.Channel.PresenceChannel = {
+    init: function(){
+      this.members = new Members(this); // leeches off channel events
+    },
+
+    onSubscriptionSucceeded: function(data) {
+      this.subscribed = true;
+      // We override this because we want the Members obj to be responsible for
+      // emitting the pusher:subscription_succeeded.  It will do this after it has done its work.
+    }
+  };
+
+  var Members = function(channel) {
+    var self = this;
+
+    var reset = function() {
+      this._members_map = {};
+      this.count = 0;
+      this.me = null;
     };
-    xhr.send('socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(self.name));
-  },
-  jsonp: function(pusher, callback){
-    var qstring = 'socket_id=' + encodeURIComponent(pusher.connection.socket_id) + '&channel_name=' + encodeURIComponent(this.name);
-    var script = document.createElement("script");
-    // Hacked wrapper.
-    Pusher.auth_callbacks[this.name] = function(data) {
-      callback(false, data);
-    };
-    var callback_name = "Pusher.auth_callbacks['" + this.name + "']";
-    script.src = Pusher.channel_auth_endpoint+'?callback='+encodeURIComponent(callback_name)+'&'+qstring;
-    var head = document.getElementsByTagName("head")[0] || document.documentElement;
-    head.insertBefore( script, head.firstChild );
-  }
-};
+    reset.call(this);
 
-Pusher.Channel.PrivateChannel = {
-  authorize: function(pusher, callback){
-    Pusher.authorizers[Pusher.channel_auth_transport].scopedTo(this)(pusher, callback);
-  }
-};
+    channel.bind('pusher_internal:authorized', function(authorizedData) {
+      var channelData = JSON.parse(authorizedData.channel_data);
+      channel.bind("pusher_internal:subscription_succeeded", function(subscriptionData) {
+        self._members_map = subscriptionData.presence.hash;
+        self.count = subscriptionData.presence.count;
+        self.me = self.get(channelData.user_id);
+        channel.emit('pusher:subscription_succeeded', self);
+      });
+    });
 
-Pusher.Channel.PresenceChannel = {
-  init: function(){
-    this.bind('pusher_internal:member_added', function(data){
-      var member = this.members.add(data.user_id, data.user_info);
-      this.emit('pusher:member_added', member);
-    }.scopedTo(this))
-
-    this.bind('pusher_internal:member_removed', function(data){
-      var member = this.members.remove(data.user_id);
-      if (member) {
-        this.emit('pusher:member_removed', member);
+    channel.bind('pusher_internal:member_added', function(data) {
+      if(self.get(data.user_id) === null) { // only incr if user_id does not already exist
+        self.count++;
       }
-    }.scopedTo(this))
-  },
 
-  disconnect: function(){
-    this.members.clear();
-  },
+      self._members_map[data.user_id] = data.user_info;
+      channel.emit('pusher:member_added', self.get(data.user_id));
+    });
 
-  onSubscriptionSucceeded: function(data) {
-    this.members._members_map = data.presence.hash;
-    this.members.count = data.presence.count;
-    this.subscribed = true;
+    channel.bind('pusher_internal:member_removed', function(data) {
+      var member = self.get(data.user_id);
+      if(member) {
+        delete self._members_map[data.user_id];
+        self.count--;
+        channel.emit('pusher:member_removed', member);
+      }
+    });
 
-    this.emit('pusher:subscription_succeeded', this.members);
-  },
+    channel.bind('pusher_internal:disconnected', function() {
+      reset.call(self);
+    });
+  };
 
-  members: {
-    _members_map: {},
-    count: 0,
-
+  Members.prototype = {
     each: function(callback) {
       for(var i in this._members_map) {
-        callback({
-          id: i,
-          info: this._members_map[i]
-        });
+        callback(this.get(i));
       }
-    },
-
-    add: function(id, info) {
-      this._members_map[id] = info;
-      this.count++;
-      return this.get(id);
-    },
-
-    remove: function(user_id) {
-      var member = this.get(user_id);
-      if (member) {
-        delete this._members_map[user_id];
-        this.count--;
-      }
-      return member;
     },
 
     get: function(user_id) {
@@ -188,23 +154,18 @@ Pusher.Channel.PresenceChannel = {
       } else { // have never heard of this user
         return null;
       }
-    },
-
-    clear: function() {
-      this._members_map = {};
-      this.count = 0;
     }
-  }
-};
-
-Pusher.Channel.factory = function(channel_name, pusher){
-  var channel = new Pusher.Channel(channel_name, pusher);
-  if (channel_name.indexOf('private-') === 0) {
-    Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
-  } else if (channel_name.indexOf('presence-') === 0) {
-    Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
-    Pusher.Util.extend(channel, Pusher.Channel.PresenceChannel);
   };
-  channel.init();
-  return channel;
-};
+
+  Pusher.Channel.factory = function(channel_name, pusher){
+    var channel = new Pusher.Channel(channel_name, pusher);
+    if (channel_name.indexOf('private-') === 0) {
+      Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
+    } else if (channel_name.indexOf('presence-') === 0) {
+      Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
+      Pusher.Util.extend(channel, Pusher.Channel.PresenceChannel);
+    };
+    channel.init();
+    return channel;
+  };
+}).call(this);

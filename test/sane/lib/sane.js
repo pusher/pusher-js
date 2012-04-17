@@ -234,14 +234,26 @@ TestCaseRunner.prototype.finish = function() {
   self.done();
 }
 
-TestCaseRunner.prototype.equal = function(a, b, msg, cb) {
+TestCaseRunner.prototype.equal = function(a, b, userMsg, cb) {
   var self = this;
+
+  var msg = JSON.stringify(a) + " !== " + JSON.stringify(b);
+  if(userMsg) {
+    msg += ", " + userMsg;
+  }
+
   self.ok(a===b, msg, cb);
 }
 
-TestCaseRunner.prototype.deepEqual = function(a, b, msg, cb) {
+TestCaseRunner.prototype.deepEqual = function(a, b, userMsg, cb) {
   var self = this;
-  self.ok(deepEqual(a, b), JSON.stringify(a) + " !== " + JSON.stringify(b) + ", " + msg, cb);
+
+  var msg = JSON.stringify(a) + " !== " + JSON.stringify(b);
+  if(userMsg) {
+    msg += ", " + userMsg;
+  }
+
+  self.ok(deepEqual(a, b), msg, cb);
 }
 
 TestCaseRunner.prototype.near = function(a, b, tolerance, msg, cb) {

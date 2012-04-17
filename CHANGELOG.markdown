@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.12.0 (2012-04-14)
+
+[NEW] Use `channel.members.me` to get the id and info for the local presence user.  See the docs for more information: http://pusher.com/docs
+
+[NEW] Send extra headers and query parameters with the private/presence channel authentication requests sent to your server.  This is useful for, amongst other things, frameworks that require cross-site request forgery validation.  See the docs for more information: http://pusher.com/docs
+
+[FIXED] `channel.subscribed` not set to `false` when `disconnect` event occurs on the connection.
+
+[UPGRADE] The linked version of web-socket-js. This includes a switch to the WebSocket version defined in RFC 6455.  For the full list of changes in web-socket-js, see <https://github.com/gimite/web-socket-js/compare/bb5797cad5244dc86410e35726ef886bbc49afe9...2ee87e910e92f2366d562efebbbec96349924df3>.
+
+[REMOVED] `channel.members.add()`, `channel.members.remove()` and `channel.members.clear()`.
+
 ## 1.11.2 (2012-03-15)
 
 [FIXED] Mobile Safari crashing after receiving data on closed connection.
@@ -34,7 +46,7 @@
 
 ## 1.10.1 (2011-12-1)
 
-[NEW] Changed channel.trigger() returns a boolean indicating whether the message was actually sent.
+[NEW] Changed `channel.trigger()` to return a boolean indicating whether the message was actually sent.
 
 [NEW] Private and public channels now emit `pusher:subscription_succeeded` events.  This is consistent with presence channels.
 
