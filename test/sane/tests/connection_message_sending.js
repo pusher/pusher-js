@@ -119,10 +119,34 @@
         }
       ]);
 
-      // Try and send a message while not connected.
-      test.equal(connection.send(payload), false, 'connection.send should return false if not connected');
-
       // Connect the socket to continue the tests.
+      connection.connect();
+    },
+
+    'Should get false returned if try to send on conn that has not started connecting': function(test) {
+      var connection = new Pusher.Connection('a');
+      test.equal(connection.send("{}"), false);
+      test.finish();
+    },
+
+    'Should get false returned if try to send on conn that is closed': function(test) {
+      Pusher.Transport = TestSocket;
+
+      var connection = new Pusher.Connection('b599fe0f1e4b6f6eb8a6');
+      SteppedObserver(connection._machine, 'state_change', [
+        function(e) {}, // waiting
+        function(e) { // connecting
+          connection.disconnect();
+        },
+        function(e) {}, // permanentlyClosing
+        function(e) { // permanentlyClosed
+          test.equal(e.newState, "permanentlyClosed");
+          test.equal(connection.socket.readyState, 3);
+          test.equal(connection.send("{}"), false);
+          test.finish();
+        }
+      ]);
+
       connection.connect();
     },
 
@@ -144,7 +168,7 @@
         function(e) {}, // waiting
         function(e) { // connecting
           test.equal(connection.send("{}"), false);
-          test.equal(connection.state, "connecting"); // conn should not be closed
+          test.equal(e.newState, "connecting"); // conn should not be closed
           if(caughtRawTestSocketException) {
             test.finish();
           }
