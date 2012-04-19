@@ -406,8 +406,6 @@
         type: 'WebSocketError'
       });
 
-      // note: required? is the socket auto closed in the case of error?
-      self.socket.close();
       self._machine.transition('impermanentlyClosing');
     }
 
