@@ -111,19 +111,21 @@
     },
 
     'trigger() should return true if connected': function(test) {
-      test.numAssertions = 1;
-
+      // make real pusher and stop it connecting
       var pusher = new Pusher('testing');
-      var channel = pusher.subscribe('foo');
-      // stop the initial connection attempt.
       pusher.disconnect();
-      // Override the state machine, as trigger only checks
-      // the value of the machine state.
-      pusher.connection._machine.state = 'connected';
-      pusher.connection.socket = new TestSocket()
 
-      test.equal(channel.trigger('foo', 'bar'), true, 'channel.trigger should return true.');
-      test.finish();
+      // create connected connection with mocked ws
+      Pusher.Transport = TestSocket;
+      withConnectedConnection(test, {}, function(connection) {
+        // graft connection w/ mocked ws onto real pusher
+        pusher.connection = connection;
+
+        // check trigger returns true
+        var channel = pusher.subscribe('foo');
+        test.equal(channel.trigger('foo', 'bar'), true);
+        test.finish();
+      });
     }
   });
 })(this);
