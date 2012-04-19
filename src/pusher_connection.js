@@ -114,8 +114,6 @@
           return;
         }
 
-        // removed: if not closed, something is wrong that we should fix
-        // if(self.socket !== undefined) self.socket.close();
         var url = formatURL(self.key, self.connectionSecure);
         Pusher.debug('Connecting', url);
         self.socket = new Pusher.Transport(url);
