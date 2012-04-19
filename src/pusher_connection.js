@@ -322,7 +322,7 @@
         self.connectionSecure = true;
         self.options.encrypted = true;
 
-        self._machine.transition('impermanentlyClosing')
+        TransitionToImpermanentlyClosing();
       } else if (code < 4100) {
         // Permentently close connection
         self._machine.transition('permanentlyClosing')
@@ -332,7 +332,7 @@
         self._machine.transition('waiting')
       } else if (code < 4300) {
         // Reconnect immediately
-        self._machine.transition('impermanentlyClosing')
+        TransitionToImpermanentlyClosing();
       } else {
         // Unknown error
         self._machine.transition('permanentlyClosing')
