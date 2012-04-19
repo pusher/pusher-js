@@ -124,7 +124,7 @@
         self.socket.onerror = ws_onError;
 
         // allow time to get ws_onOpen, otherwise close socket and try again
-        self._connectingTimer = setTimeout(TransitionToImpermanentClosing, self.openTimeout);
+        self._connectingTimer = setTimeout(TransitionToImpermanentlyClosing, self.openTimeout);
       },
 
       connectingExit: function() {
@@ -150,7 +150,7 @@
         self.socket.onclose = transitionToWaiting;
 
         // allow time to get connected-to-Pusher message, otherwise close socket, try again
-        self._openTimer = setTimeout(TransitionToImpermanentClosing, self.connectedTimeout);
+        self._openTimer = setTimeout(TransitionToImpermanentlyClosing, self.connectedTimeout);
       },
 
       openExit: function() {
@@ -264,7 +264,7 @@
     }
 
     // callback for close and retry.  Used on timeouts.
-    function TransitionToImpermanentClosing() {
+    function TransitionToImpermanentlyClosing() {
       self._machine.transition('impermanentlyClosing');
     }
 
