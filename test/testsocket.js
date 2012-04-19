@@ -86,16 +86,21 @@
   TestSocket.prototype.send = function(data) {
     var socket = this;
 
-    //if (socket.readyState === socket.CONNECTING) throw new InvalidStateError();
-    if (socket.readyState !== socket.OPEN) return false;
+    if (socket.readyState === socket.CONNECTING) {
+      throw new InvalidStateError();
+    }
+    else if (socket.readyState !== socket.OPEN) {
+      return false;
+    }
+    else {
+      socket._sendQueue.push(data);
 
-    socket._sendQueue.push(data);
+      defer(function() {
+        socket._onsend.call(socket, data);
+      });
 
-    defer(function() {
-      socket._onsend.call(socket, data);
-    });
-
-    return true;
+      return true;
+    }
   };
 
   /**
