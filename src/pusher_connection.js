@@ -401,12 +401,10 @@
       self._machine.transition('waiting');
     }
 
-    function ws_onError() {
-      self.emit('error', {
-        type: 'WebSocketError'
-      });
-
       self._machine.transition('impermanentlyClosing');
+    function ws_onError(error) {
+      // just emit error to user - socket will already be closed by browser
+      self.emit('error', { type: 'WebSocketError', error: error });
     }
 
     // Updates the public state information exposed by connection
