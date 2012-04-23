@@ -6,7 +6,7 @@
     'waiting': ['connecting', 'permanentlyClosed'],
     'connecting': ['open', 'permanentlyClosing', 'impermanentlyClosing', 'waiting'],
     'open': ['connected', 'permanentlyClosing', 'impermanentlyClosing', 'waiting'],
-    'connected': ['permanentlyClosing', 'impermanentlyClosing', 'waiting'],
+    'connected': ['permanentlyClosing', 'waiting'],
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
     'permanentlyClosed': ['waiting'],
