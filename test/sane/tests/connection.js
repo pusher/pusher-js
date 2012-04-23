@@ -967,7 +967,7 @@
             connection.disconnect();
           },
           function(e) {
-            test.equal(e.newState, 'permanentlyClosing', 'the state should transition to "permanentlyClosing".');
+            test.equal(e.newState, 'permanentlyClosed');
             test.finish();
           }
         ]);
