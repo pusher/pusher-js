@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.12.1 (2012-05-02)
+
+[CHANGED] The error argument passed into `socket.onerror()` is included with the error emitted to the user.
+
+[FIXED] impermanentlyClosing to impermanentlyClosing state machine transition.
+
 ## 1.12.0 (2012-04-14)
 
 [NEW] Use `channel.members.me` to get the id and info for the local presence user.  See the docs for more information: http://pusher.com/docs
