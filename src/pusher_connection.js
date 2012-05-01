@@ -10,7 +10,7 @@
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
     'permanentlyClosed': ['waiting'],
-    'failed': ['permanentlyClosed'],
+    'failed': ['permanentlyClosed']
   };
 
 
