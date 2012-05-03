@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.12.1 (2012-05-02)
+## 1.12.1 (2012-05-03)
 
 [CHANGED] The error argument passed into `socket.onerror()` is included with the error emitted to the user.
 
