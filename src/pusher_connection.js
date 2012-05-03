@@ -6,11 +6,11 @@
     'waiting': ['connecting', 'permanentlyClosed'],
     'connecting': ['open', 'permanentlyClosing', 'impermanentlyClosing', 'waiting'],
     'open': ['connected', 'permanentlyClosing', 'impermanentlyClosing', 'waiting'],
-    'connected': ['permanentlyClosing', 'impermanentlyClosing', 'waiting'],
+    'connected': ['permanentlyClosing', 'waiting'],
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
     'permanentlyClosed': ['waiting'],
-    'failed': ['permanentlyClosing']
+    'failed': ['permanentlyClosed']
   };
 
 
@@ -477,7 +477,7 @@
   Connection.prototype.disconnect = function() {
     if (this._machine.is('permanentlyClosed')) return;
 
-    if (this._machine.is('waiting')) {
+    if (this._machine.is('waiting') || this._machine.is('failed')) {
       this._machine.transition('permanentlyClosed');
     } else {
       this._machine.transition('permanentlyClosing');
