@@ -46,7 +46,7 @@ var _require = (function () {
   }
 })();
 
-;(function() {
+(function() {
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
   var deps = [];
@@ -101,19 +101,20 @@ var _require = (function () {
   }();
 
   var ondocumentbody = function(callback) {
-    var load_body = function() {
-      document.body ? callback() : setTimeout(load_body, 0);
-    }
-    load_body();
+    return !!document.body;
   };
 
-  var initializeOnDocumentBody = function() {
-    ondocumentbody(initialize);
-  }
+  var initializeOnReady = function() {
+    var is_ready = function() {
+      var ready_check = Pusher.onreadycheck || ondocumentbody;
+      ready_check() ? initialize() : setTimeout(is_ready, 0);
+    }
+    is_ready();
+  };
 
   if (deps.length > 0) {
-    _require(deps, initializeOnDocumentBody);
+    _require(deps, initializeOnReady);
   } else {
-    initializeOnDocumentBody();
+    initializeOnReady();
   }
 })();
