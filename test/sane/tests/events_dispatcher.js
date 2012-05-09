@@ -15,8 +15,8 @@
       var callback = function() {};
       eventDispatcher.bind('test_event', callback);
 
-      test.equal(1, eventDispatcher.callbacks['test_event'].length);
-      test.equal(callback, eventDispatcher.callbacks['test_event'][0]);
+      test.equal(1, eventDispatcher.callbacks.get('test_event').length);
+      test.equal(callback, eventDispatcher.callbacks.get('test_event')[0]);
 
       test.finish();
     },
@@ -64,11 +64,11 @@
       };
       eventDispatcher.bind('test_event', callback);
 
-      test.equal(1, eventDispatcher.callbacks['test_event'].length);
+      test.equal(1, eventDispatcher.callbacks.get('test_event').length);
 
       eventDispatcher.unbind('test_event', callback);
 
-      eventDispatcher.emit('test_event', {});      
+      eventDispatcher.emit('test_event', {});
       test.equal(callbackCalled, false, "Unbound callback should not have been called.");
 
       test.finish();
