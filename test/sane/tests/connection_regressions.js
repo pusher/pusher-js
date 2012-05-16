@@ -195,6 +195,30 @@
 
         connection.connect(); // initial, automatic conn attempt
       }
+    },
+
+    'Bug: permanentlyClosed -> failed should be allowed if': {
+      'no transport, already failed, call disconnect() and then connect()': function(test) {
+        Pusher.Transport = null;
+        var connection = new Pusher.Connection('q');
+        SteppedObserver(connection._machine, 'state_change', [
+          function(e) {
+            test.equal(e.newState, 'failed');
+            connection.disconnect() // explicit conn attempt
+          },
+          function(e) {
+            test.equal(e.newState, 'permanentlyClosed');
+            connection.connect();
+          },
+          function(e) {
+            test.equal(e.newState, 'failed');
+            Pusher.Transport = TestSocket; // restore
+            test.finish();
+          },
+        ]);
+
+        connection.connect(); // initial, automatic conn attempt
+      }
     }
   });
 })();

@@ -9,7 +9,7 @@
     'connected': ['permanentlyClosing', 'waiting'],
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
-    'permanentlyClosed': ['waiting'],
+    'permanentlyClosed': ['waiting', 'failed'],
     'failed': ['permanentlyClosed']
   };
 
