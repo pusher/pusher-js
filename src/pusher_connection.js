@@ -9,7 +9,7 @@
     'connected': ['permanentlyClosing', 'waiting'],
     'impermanentlyClosing': ['waiting', 'permanentlyClosing'],
     'permanentlyClosing': ['permanentlyClosed'],
-    'permanentlyClosed': ['waiting'],
+    'permanentlyClosed': ['waiting', 'failed'],
     'failed': ['permanentlyClosed']
   };
 
@@ -426,7 +426,8 @@
 
   Connection.prototype.connect = function() {
     // no WebSockets
-    if (Pusher.Transport === null || Pusher.Transport === undefined) {
+    if (!this._machine.is('failed')
+        && (Pusher.Transport === null || Pusher.Transport === undefined)) {
       this._machine.transition('failed');
     }
     // initial open of connection
