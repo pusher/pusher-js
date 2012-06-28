@@ -178,6 +178,7 @@
   Pusher.VERSION = '<VERSION>';
 
   Pusher.host = 'ws.pusherapp.com';
+  Pusher.sockjs = 'http://sockjs.pusher.com/pusher';
   Pusher.ws_port = 80;
   Pusher.wss_port = 443;
   Pusher.channel_auth_endpoint = '/pusher/auth';

@@ -115,12 +115,23 @@
         }
 
         var path = connectPath(self.key);
-        var url = connectBaseURL(self.connectionSecure) + path;
-        Pusher.debug('Connecting', url);
-        self.socket = new Pusher.Transport(url);
-        // now that the socket connection attempt has been started,
-        // set up the callbacks fired by the socket for different outcomes
-        self.socket.onopen = ws_onopen;
+        if (Pusher.TransportType === 'sockjs') {
+          Pusher.debug('Connecting to sockjs', Pusher.sockjs);
+          self.socket = new SockJS(Pusher.sockjs);
+          self.socket.onopen = function() {
+            // SockJS does not yet support custom paths and query params
+            self.socket.send(JSON.stringify({path: path}));
+            self._machine.transition('open');
+          }
+        } else {
+          var url = connectBaseURL(self.connectionSecure) + path;
+          Pusher.debug('Connecting', url);
+          self.socket = new Pusher.Transport(url);
+          self.socket.onopen = function() {
+            self._machine.transition('open');
+          }
+        }
+
         self.socket.onclose = transitionToWaiting;
         self.socket.onerror = ws_onError;
 
@@ -303,11 +314,6 @@
     /*-----------------------------------------------
       WebSocket Callbacks
       -----------------------------------------------*/
-
-    // no-op, as we only care when we get pusher:connection_established
-    function ws_onopen() {
-      self._machine.transition('open');
-    };
 
     function handleCloseCode(code, message) {
       // first inform the end-developer of this error
