@@ -46,6 +46,11 @@ var _require = (function() {
     window['WebSocket'] = window['MozWebSocket']
   }
 
+  if (window['WebSocket']) {
+    Pusher.Transport = window['WebSocket'];
+    Pusher.TransportType = 'native';
+  }
+
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
   var deps = [];
@@ -63,8 +68,6 @@ var _require = (function() {
     if (window['WebSocket']) {
       // Initialize function in the case that we have native WebSocket support
       return function() {
-        Pusher.Transport = window['WebSocket'];
-        Pusher.TransportType = 'native';
         Pusher.ready();
       }
     } else {
