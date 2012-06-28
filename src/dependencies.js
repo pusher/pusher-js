@@ -1,47 +1,41 @@
-var _require = (function () {
-
-  var handleScriptLoaded;
-  if (document.addEventListener) {
-    handleScriptLoaded = function (elem, callback) {
-      elem.addEventListener('load', callback, false)
-    }
-  } else {
-    handleScriptLoaded = function(elem, callback) {
+// _require(dependencies, callback) takes an array of dependency urls and a
+// callback to call when all the dependecies have finished loading
+var _require = (function() {
+  function handleScriptLoaded(elem, callback) {
+    if (document.addEventListener) {
+      elem.addEventListener('load', callback, false);
+    } else {
       elem.attachEvent('onreadystatechange', function () {
-        if(elem.readyState == 'loaded' || elem.readyState == 'complete') callback()
-      })
+        if (elem.readyState == 'loaded' || elem.readyState == 'complete') {
+          callback();
+        }
+      });
     }
   }
 
-  return function (deps, callback) {
-    var dep_count = 0,
-    dep_length = deps.length;
+  function addScript(src, callback) {
+    var head = document.getElementsByTagName('head')[0];
+    var script = document.createElement('script');
+    script.setAttribute('src', src);
+    script.setAttribute("type","text/javascript");
+    script.setAttribute('async', true);
 
-    function checkReady (callback) {
-      dep_count++;
-      if ( dep_length == dep_count ) {
-        // Opera needs the timeout for page initialization weirdness
-        setTimeout(callback, 0);
-      }
-    }
+    handleScriptLoaded(script, function() {
+      callback();
+    });
 
-    function addScript (src, callback) {
-      callback = callback || function(){}
-      var head = document.getElementsByTagName('head')[0];
-      var script = document.createElement('script');
-      script.setAttribute('src', src);
-      script.setAttribute("type","text/javascript");
-      script.setAttribute('async', true);
+    head.appendChild(script);
+  }
 
-      handleScriptLoaded(script, function () {
-        checkReady(callback);
+  return function(deps, callback) {
+    var deps_loaded = 0;
+    for (var i = 0; i < deps.length; i++) {
+      addScript(deps[i], function() {
+        if (deps.length == ++deps_loaded) {
+          // This setTimeout is a workaround for an Opera issue
+          setTimeout(callback, 0);
+        }
       });
-
-      head.appendChild(script);
-    }
-
-    for(var i = 0; i < dep_length; i++) {
-      addScript(deps[i], callback);
     }
   }
 })();
