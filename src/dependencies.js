@@ -47,6 +47,11 @@ var _require = (function () {
 })();
 
 ;(function() {
+  // Support Firefox versions which prefix WebSocket
+  if (window['WebSocket'] === undefined && window['MozWebSocket']) {
+    window['WebSocket'] = window['MozWebSocket']
+  }
+
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
   var deps = [];
@@ -54,17 +59,17 @@ var _require = (function () {
   if (window['JSON'] === undefined) {
     deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
-  if (window['WebSocket'] === undefined && window['MozWebSocket'] === undefined) {
+  if (window['WebSocket'] === undefined) {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
   }
 
   var initialize = function() {
-    if (window['WebSocket'] === undefined && window['MozWebSocket'] === undefined) {
+    if (window['WebSocket'] === undefined) {
       return function() {
         // This runs after flashfallback.js has loaded
-        if (window['WebSocket'] !== undefined && window['MozWebSocket'] === undefined) {
+        if (window['WebSocket']) {
           // window['WebSocket'] is a flash emulation of WebSocket
           Pusher.Transport = window['WebSocket'];
           Pusher.TransportType = 'flash';
@@ -83,23 +88,14 @@ var _require = (function () {
       }
     } else {
       return function() {
-        // This is because Mozilla have decided to
-        // prefix the WebSocket constructor with "Moz".
-        if (window['MozWebSocket'] !== undefined) {
-          Pusher.Transport = window['MozWebSocket'];
-        } else {
-          Pusher.Transport = window['WebSocket'];
-        }
-        // We have some form of a native websocket,
-        // even if the constructor is prefixed:
+        Pusher.Transport = window['WebSocket'];
         Pusher.TransportType = 'native';
-
-        // Initialise Pusher.
         Pusher.ready();
       }
     }
   }();
 
+  // Allows calling a function when the document body is available
   var ondocumentbody = function(callback) {
     var load_body = function() {
       document.body ? callback() : setTimeout(load_body, 0);
