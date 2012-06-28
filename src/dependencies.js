@@ -42,7 +42,7 @@ var _require = (function() {
 
 ;(function() {
   // Support Firefox versions which prefix WebSocket
-  if (window['WebSocket'] === undefined && window['MozWebSocket']) {
+  if (!window['WebSocket'] && window['MozWebSocket']) {
     window['WebSocket'] = window['MozWebSocket']
   }
 
@@ -50,10 +50,10 @@ var _require = (function() {
   var root = cdn + Pusher.VERSION;
   var deps = [];
 
-  if (window['JSON'] === undefined) {
+  if (!window['JSON']) {
     deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
-  if (window['WebSocket'] === undefined) {
+  if (!window['WebSocket']) {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');

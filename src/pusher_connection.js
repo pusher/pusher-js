@@ -426,8 +426,7 @@
 
   Connection.prototype.connect = function() {
     // no WebSockets
-    if (!this._machine.is('failed')
-        && (Pusher.Transport === null || Pusher.Transport === undefined)) {
+    if (!this._machine.is('failed') && !Pusher.Transport) {
       this._machine.transition('failed');
     }
     // initial open of connection
