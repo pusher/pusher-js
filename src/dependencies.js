@@ -60,9 +60,16 @@ var _require = (function() {
   }
 
   var initialize = function() {
-    if (window['WebSocket'] === undefined) {
+    if (window['WebSocket']) {
+      // Initialize function in the case that we have native WebSocket support
       return function() {
-        // This runs after flashfallback.js has loaded
+        Pusher.Transport = window['WebSocket'];
+        Pusher.TransportType = 'native';
+        Pusher.ready();
+      }
+    } else {
+      // Initialize function for fallback case
+      return function() {
         if (window['WebSocket']) {
           // window['WebSocket'] is a flash emulation of WebSocket
           Pusher.Transport = window['WebSocket'];
@@ -79,12 +86,6 @@ var _require = (function() {
           Pusher.TransportType = 'none';
           Pusher.ready();
         }
-      }
-    } else {
-      return function() {
-        Pusher.Transport = window['WebSocket'];
-        Pusher.TransportType = 'native';
-        Pusher.ready();
       }
     }
   }();
