@@ -114,7 +114,8 @@
           return;
         }
 
-        var url = formatURL(self.key, self.connectionSecure);
+        var path = connectPath(self.key);
+        var url = connectBaseURL(self.connectionSecure) + path;
         Pusher.debug('Connecting', url);
         self.socket = new Pusher.Transport(url);
         // now that the socket connection attempt has been started,
@@ -242,25 +243,21 @@
       self.connectionAttempts++;
     }
 
-    function formatURL(key, isSecure) {
-      var port = Pusher.ws_port;
-      var protocol = 'ws://';
+    function connectBaseURL(isSecure) {
+      // Always connect with SSL if the current page served over https
+      var ssl = (isSecure || document.location.protocol === 'https:')
+      var port = ssl ? Pusher.wss_port : Pusher.ws_port;
+      var scheme = ssl ? 'wss://' : 'ws://';
 
-      // Always connect with SSL if the current page has
-      // been loaded via HTTPS.
-      //
-      // FUTURE: Always connect using SSL.
-      //
-      if (isSecure || document.location.protocol === 'https:') {
-        port = Pusher.wss_port;
-        protocol = 'wss://';
-      }
+      return scheme + Pusher.host + ':' + port;
+    }
 
+    function connectPath(key) {
       var flash = (Pusher.TransportType === "flash") ? "true" : "false";
-
-      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js'
+      var path = '/app/' + key + '?protocol=5&client=js'
         + '&version=' + Pusher.VERSION
         + '&flash=' + flash;
+      return path;
     }
 
     // callback for close and retry.  Used on timeouts.
