@@ -59,7 +59,7 @@ var _require = (function() {
     deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
   if (!window['WebSocket']) {
-    // We manually initialize web-socket-js to iron out cross browser issues
+    // Try to use web-socket-js (flash WebSocket emulation)
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
     deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
@@ -85,10 +85,12 @@ var _require = (function() {
           })
           WebSocket.__initialize();
         } else {
-          // Flash must not be installed
-          Pusher.Transport = null;
-          Pusher.TransportType = 'none';
-          Pusher.ready();
+          // web-socket-js cannot initialize (most likely flash not installed)
+          _require(["http://cdn.sockjs.org/sockjs-0.3.js"], function() {
+            Pusher.Transport = SockJS;
+            Pusher.TransportType = 'sockjs';
+            Pusher.ready();
+          })
         }
       }
     }
