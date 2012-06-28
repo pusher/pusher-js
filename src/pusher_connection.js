@@ -448,17 +448,12 @@
 
   Connection.prototype.send = function(data) {
     if (this._machine.is('connected')) {
-      // Bug in iOS (reproduced in 5.0.1) Mobile Safari:
-      // 1. Open page/tab, connect WS, get some data.
-      // 2. Switch tab or close Mobile Safari and wait for WS connection to get closed (probably by server).
-      // 3. Switch back to tab or open Mobile Safari and Mobile Safari crashes.
-      // The problem is that WS tries to send data on closed WS connection before it realises it is closed.
-      // The timeout means that by the time the send happens, the WS readyState correctly reflects closed state.
+      // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
       var self = this;
       setTimeout(function() {
         self.socket.send(data);
       }, 0);
-      return true; // only a reflection of fact that WS thinks it is open - could get returned before some lower-level failure.
+      return true;
     } else {
       return false;
     }
