@@ -1,70 +1,79 @@
-var _require = (function () {
-
-  var handleScriptLoaded;
-  if (document.addEventListener) {
-    handleScriptLoaded = function (elem, callback) {
-      elem.addEventListener('load', callback, false)
-    }
-  } else {
-    handleScriptLoaded = function(elem, callback) {
+// _require(dependencies, callback) takes an array of dependency urls and a
+// callback to call when all the dependecies have finished loading
+var _require = (function() {
+  function handleScriptLoaded(elem, callback) {
+    if (document.addEventListener) {
+      elem.addEventListener('load', callback, false);
+    } else {
       elem.attachEvent('onreadystatechange', function () {
-        if(elem.readyState == 'loaded' || elem.readyState == 'complete') callback()
-      })
+        if (elem.readyState == 'loaded' || elem.readyState == 'complete') {
+          callback();
+        }
+      });
     }
   }
 
-  return function (deps, callback) {
-    var dep_count = 0,
-    dep_length = deps.length;
+  function addScript(src, callback) {
+    var head = document.getElementsByTagName('head')[0];
+    var script = document.createElement('script');
+    script.setAttribute('src', src);
+    script.setAttribute("type","text/javascript");
+    script.setAttribute('async', true);
 
-    function checkReady (callback) {
-      dep_count++;
-      if ( dep_length == dep_count ) {
-        // Opera needs the timeout for page initialization weirdness
-        setTimeout(callback, 0);
-      }
-    }
+    handleScriptLoaded(script, function() {
+      callback();
+    });
 
-    function addScript (src, callback) {
-      callback = callback || function(){}
-      var head = document.getElementsByTagName('head')[0];
-      var script = document.createElement('script');
-      script.setAttribute('src', src);
-      script.setAttribute("type","text/javascript");
-      script.setAttribute('async', true);
+    head.appendChild(script);
+  }
 
-      handleScriptLoaded(script, function () {
-        checkReady(callback);
+  return function(deps, callback) {
+    var deps_loaded = 0;
+    for (var i = 0; i < deps.length; i++) {
+      addScript(deps[i], function() {
+        if (deps.length == ++deps_loaded) {
+          // This setTimeout is a workaround for an Opera issue
+          setTimeout(callback, 0);
+        }
       });
-
-      head.appendChild(script);
-    }
-
-    for(var i = 0; i < dep_length; i++) {
-      addScript(deps[i], callback);
     }
   }
 })();
 
 ;(function() {
+  // Support Firefox versions which prefix WebSocket
+  if (!window['WebSocket'] && window['MozWebSocket']) {
+    window['WebSocket'] = window['MozWebSocket']
+  }
+
+  if (window['WebSocket']) {
+    Pusher.Transport = window['WebSocket'];
+    Pusher.TransportType = 'native';
+  }
+
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
   var deps = [];
 
-  if (window['JSON'] === undefined) {
+  if (!window['JSON']) {
     deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
-  if (window['WebSocket'] === undefined && window['MozWebSocket'] === undefined) {
+  if (!window['WebSocket']) {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
     deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
   }
 
   var initialize = function() {
-    if (window['WebSocket'] === undefined && window['MozWebSocket'] === undefined) {
+    if (window['WebSocket']) {
+      // Initialize function in the case that we have native WebSocket support
       return function() {
-        // This runs after flashfallback.js has loaded
-        if (window['WebSocket'] !== undefined && window['MozWebSocket'] === undefined) {
+        Pusher.ready();
+      }
+    } else {
+      // Initialize function for fallback case
+      return function() {
+        if (window['WebSocket']) {
           // window['WebSocket'] is a flash emulation of WebSocket
           Pusher.Transport = window['WebSocket'];
           Pusher.TransportType = 'flash';
@@ -81,25 +90,10 @@ var _require = (function () {
           Pusher.ready();
         }
       }
-    } else {
-      return function() {
-        // This is because Mozilla have decided to
-        // prefix the WebSocket constructor with "Moz".
-        if (window['MozWebSocket'] !== undefined) {
-          Pusher.Transport = window['MozWebSocket'];
-        } else {
-          Pusher.Transport = window['WebSocket'];
-        }
-        // We have some form of a native websocket,
-        // even if the constructor is prefixed:
-        Pusher.TransportType = 'native';
-
-        // Initialise Pusher.
-        Pusher.ready();
-      }
     }
   }();
 
+  // Allows calling a function when the document body is available
   var ondocumentbody = function(callback) {
     var load_body = function() {
       document.body ? callback() : setTimeout(load_body, 0);
