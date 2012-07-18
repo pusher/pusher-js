@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.12.2 (2012-07-18)
+
+[FIXED] Issues with Flash fallback when port 843 is blocked.
+
+[FIXED] Binding to events with names of Object's native methods.
+
 ## 1.12.1 (2012-05-03)
 
 [CHANGED] The error argument passed into `socket.onerror()` is included with the error emitted to the user.
