@@ -42,6 +42,7 @@
 
     Pusher.EventsDispatcher.call(this);
 
+    this.ping = true
     this.options = Pusher.Util.extend({encrypted: false}, options);
 
     this.netInfo = new Pusher.NetInfo();
@@ -118,6 +119,8 @@
         if (Pusher.TransportType === 'sockjs') {
           Pusher.debug('Connecting to sockjs', Pusher.sockjs);
           var url = buildSockJSURL(self.connectionSecure);
+
+          self.ping = false
           self.socket = new SockJS(url);
           self.socket.onopen = function() {
             // SockJS does not yet support custom paths and query params
@@ -288,13 +291,15 @@
     function resetActivityCheck() {
       if (self._activityTimer) { clearTimeout(self._activityTimer); }
       // Send ping after inactivity
-      self._activityTimer = setTimeout(function() {
-        self.send_event('pusher:ping', {})
-        // Wait for pong response
+      if (self.ping) {
         self._activityTimer = setTimeout(function() {
-          self.socket.close();
-        }, (self.options.pong_timeout || Pusher.pong_timeout))
-      }, (self.options.activity_timeout || Pusher.activity_timeout))
+          self.send_event('pusher:ping', {})
+          // Wait for pong response
+          self._activityTimer = setTimeout(function() {
+            self.socket.close();
+          }, (self.options.pong_timeout || Pusher.pong_timeout))
+        }, (self.options.activity_timeout || Pusher.activity_timeout))
+      }
     }
 
     function stopActivityCheck() {
