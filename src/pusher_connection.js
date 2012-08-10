@@ -117,7 +117,8 @@
         var path = connectPath(self.key);
         if (Pusher.TransportType === 'sockjs') {
           Pusher.debug('Connecting to sockjs', Pusher.sockjs);
-          self.socket = new SockJS(Pusher.sockjs);
+          var url = buildSockJSURL(self.connectionSecure);
+          self.socket = new SockJS(url);
           self.socket.onopen = function() {
             // SockJS does not yet support custom paths and query params
             self.socket.send(JSON.stringify({path: path}));
@@ -256,7 +257,7 @@
 
     function connectBaseURL(isSecure) {
       // Always connect with SSL if the current page served over https
-      var ssl = (isSecure || document.location.protocol === 'https:')
+      var ssl = (isSecure || document.location.protocol === 'https:');
       var port = ssl ? Pusher.wss_port : Pusher.ws_port;
       var scheme = ssl ? 'wss://' : 'ws://';
 
@@ -269,6 +270,14 @@
         + '&version=' + Pusher.VERSION
         + '&flash=' + flash;
       return path;
+    }
+
+    function buildSockJSURL(isSecure) {
+      var ssl = (isSecure || document.location.protocol === 'https:');
+      var port = ssl ? Pusher.sockjs_https_port : Pusher.sockjs_http_port;
+      var scheme = ssl ? 'https://' : 'http://';
+
+      return scheme + Pusher.sockjs_host + ':' + port + Pusher.sockjs_path;
     }
 
     // callback for close and retry.  Used on timeouts.

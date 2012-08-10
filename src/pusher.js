@@ -176,11 +176,16 @@
 
   // Pusher defaults
   Pusher.VERSION = '<VERSION>';
-
+  // WS connection parameters
   Pusher.host = 'ws.pusherapp.com';
-  Pusher.sockjs = 'http://sockjs.pusher.com/pusher';
   Pusher.ws_port = 80;
   Pusher.wss_port = 443;
+  // SockJS fallback parameters
+  Pusher.sockjs_host = 'localhost';
+  Pusher.sockjs_http_port = 18080
+  Pusher.sockjs_https_port = 18443
+  Pusher.sockjs_path = "/pusher"
+  // Other settings
   Pusher.channel_auth_endpoint = '/pusher/auth';
   Pusher.cdn_http = '<CDN_HTTP>'
   Pusher.cdn_https = '<CDN_HTTPS>'
