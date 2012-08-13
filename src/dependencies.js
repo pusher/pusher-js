@@ -86,7 +86,8 @@ var _require = (function() {
           WebSocket.__initialize();
         } else {
           // web-socket-js cannot initialize (most likely flash not installed)
-          _require(["http://cdn.sockjs.org/sockjs-0.3.js"], function() {
+          sockjsPath = root + '/sockjs' + Pusher.dependency_suffix + '.js';
+          _require([sockjsPath], function() {
             Pusher.Transport = SockJS;
             Pusher.TransportType = 'sockjs';
             Pusher.ready();
