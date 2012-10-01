@@ -61,6 +61,7 @@ var _require = (function() {
   if (!window['WebSocket']) {
     // We manually initialize web-socket-js to iron out cross browser issues
     window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
+    window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
     deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
   }
 

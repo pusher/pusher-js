@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.3 (2012-10-01)
+
+[FIXED] Error when Flash fallback files are served cross-domain.
+
 ## 1.12.2 (2012-07-18)
 
 [FIXED] Issues with Flash fallback when port 843 is blocked.
