@@ -181,9 +181,9 @@
   Pusher.ws_port = 80;
   Pusher.wss_port = 443;
   // SockJS fallback parameters
-  Pusher.sockjs_host = 'localhost';
-  Pusher.sockjs_http_port = 18080
-  Pusher.sockjs_https_port = 18443
+  Pusher.sockjs_host = 'sockjs.pusher.com';
+  Pusher.sockjs_http_port = 80
+  Pusher.sockjs_https_port = 443
   Pusher.sockjs_path = "/pusher"
   // Other settings
   Pusher.channel_auth_endpoint = '/pusher/auth';
