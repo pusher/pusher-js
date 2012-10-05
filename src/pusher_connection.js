@@ -42,6 +42,7 @@
 
     Pusher.EventsDispatcher.call(this);
 
+    this.ping = true
     this.options = Pusher.Util.extend({encrypted: false}, options);
 
     this.netInfo = new Pusher.NetInfo();
@@ -114,12 +115,27 @@
           return;
         }
 
-        var url = formatURL(self.key, self.connectionSecure);
-        Pusher.debug('Connecting', url);
-        self.socket = new Pusher.Transport(url);
-        // now that the socket connection attempt has been started,
-        // set up the callbacks fired by the socket for different outcomes
-        self.socket.onopen = ws_onopen;
+        var path = connectPath(self.key);
+        if (Pusher.TransportType === 'sockjs') {
+          Pusher.debug('Connecting to sockjs', Pusher.sockjs);
+          var url = buildSockJSURL(self.connectionSecure);
+
+          self.ping = false
+          self.socket = new SockJS(url);
+          self.socket.onopen = function() {
+            // SockJS does not yet support custom paths and query params
+            self.socket.send(JSON.stringify({path: path}));
+            self._machine.transition('open');
+          }
+        } else {
+          var url = connectBaseURL(self.connectionSecure) + path;
+          Pusher.debug('Connecting', url);
+          self.socket = new Pusher.Transport(url);
+          self.socket.onopen = function() {
+            self._machine.transition('open');
+          }
+        }
+
         self.socket.onclose = transitionToWaiting;
         self.socket.onerror = ws_onError;
 
@@ -242,25 +258,29 @@
       self.connectionAttempts++;
     }
 
-    function formatURL(key, isSecure) {
-      var port = Pusher.ws_port;
-      var protocol = 'ws://';
+    function connectBaseURL(isSecure) {
+      // Always connect with SSL if the current page served over https
+      var ssl = (isSecure || document.location.protocol === 'https:');
+      var port = ssl ? Pusher.wss_port : Pusher.ws_port;
+      var scheme = ssl ? 'wss://' : 'ws://';
 
-      // Always connect with SSL if the current page has
-      // been loaded via HTTPS.
-      //
-      // FUTURE: Always connect using SSL.
-      //
-      if (isSecure || document.location.protocol === 'https:') {
-        port = Pusher.wss_port;
-        protocol = 'wss://';
-      }
+      return scheme + Pusher.host + ':' + port;
+    }
 
+    function connectPath(key) {
       var flash = (Pusher.TransportType === "flash") ? "true" : "false";
-
-      return protocol + Pusher.host + ':' + port + '/app/' + key + '?protocol=5&client=js'
+      var path = '/app/' + key + '?protocol=5&client=js'
         + '&version=' + Pusher.VERSION
         + '&flash=' + flash;
+      return path;
+    }
+
+    function buildSockJSURL(isSecure) {
+      var ssl = (isSecure || document.location.protocol === 'https:');
+      var port = ssl ? Pusher.sockjs_https_port : Pusher.sockjs_http_port;
+      var scheme = ssl ? 'https://' : 'http://';
+
+      return scheme + Pusher.sockjs_host + ':' + port + Pusher.sockjs_path;
     }
 
     // callback for close and retry.  Used on timeouts.
@@ -271,13 +291,15 @@
     function resetActivityCheck() {
       if (self._activityTimer) { clearTimeout(self._activityTimer); }
       // Send ping after inactivity
-      self._activityTimer = setTimeout(function() {
-        self.send_event('pusher:ping', {})
-        // Wait for pong response
+      if (self.ping) {
         self._activityTimer = setTimeout(function() {
-          self.socket.close();
-        }, (self.options.pong_timeout || Pusher.pong_timeout))
-      }, (self.options.activity_timeout || Pusher.activity_timeout))
+          self.send_event('pusher:ping', {})
+          // Wait for pong response
+          self._activityTimer = setTimeout(function() {
+            self.socket.close();
+          }, (self.options.pong_timeout || Pusher.pong_timeout))
+        }, (self.options.activity_timeout || Pusher.activity_timeout))
+      }
     }
 
     function stopActivityCheck() {
@@ -306,11 +328,6 @@
     /*-----------------------------------------------
       WebSocket Callbacks
       -----------------------------------------------*/
-
-    // no-op, as we only care when we get pusher:connection_established
-    function ws_onopen() {
-      self._machine.transition('open');
-    };
 
     function handleCloseCode(code, message) {
       // first inform the end-developer of this error

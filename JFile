@@ -27,6 +27,11 @@ bundle 'flashfallback.js' do
   file 'web-socket-js/web_socket.js'
 end
 
+bundle 'sockjs.js' do
+  license 'sockjs-licence.js'
+  file 'sockjs/sockjs.js'
+end
+
 file 'json2.js'
 
 # Just copy this file across
