@@ -26,11 +26,11 @@
   function resetConnectionParameters(connection) {
     connection.connectionWait = 0;
 
-    if (Pusher.TransportType === 'flash') {
-      // Flash needs a bit more time
-      connection.openTimeout = 5000;
-    } else {
+    if (Pusher.TransportType === 'native') {
       connection.openTimeout = 2000;
+    } else {
+      // Flash and SockJS need a bit more time
+      connection.openTimeout = 5000;
     }
     connection.connectedTimeout = 2000;
     connection.connectionSecure = connection.compulsorySecure;
