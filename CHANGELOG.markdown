@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.4 (2012-10-08)
+
+[NEW] Added experimental fallback used when Flash fallback fails.
+
 ## 1.12.3 (2012-10-01)
 
 [FIXED] Error when Flash fallback files are served cross-domain.

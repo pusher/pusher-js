@@ -7,7 +7,7 @@ target_dir './dist'
 
 src_dir './src'
 
-version '1.12.3'
+version '1.12.4'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
@@ -25,6 +25,11 @@ bundle 'flashfallback.js' do
   license 'web-socket-js-licence.js'
   file 'web-socket-js/swfobject.js'
   file 'web-socket-js/web_socket.js'
+end
+
+bundle 'sockjs.js' do
+  license 'sockjs-licence.js'
+  file 'sockjs/sockjs.js'
 end
 
 file 'json2.js'
