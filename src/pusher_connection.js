@@ -34,7 +34,7 @@
     }
     connection.connectedTimeout = 2000;
     connection.connectionSecure = connection.compulsorySecure;
-    connection.connectionAttempts = 0;
+    connection.failedAttempts = 0;
   }
 
   function Connection(key, options) {
@@ -86,18 +86,18 @@
           self.emit('connecting_in', self.connectionWait);
         }
 
-        if (self.netInfo.isOnLine() && self.connectionAttempts <= 4) {
-          updateState('connecting');
-        } else {
-          updateState('unavailable');
-        }
-
-        // When in the unavailable state we attempt to connect, but don't
-        // broadcast that fact
         if (self.netInfo.isOnLine()) {
+          if (self.failedAttempts < 5) {
+            updateState('connecting');
+          } else {
+            updateState('unavailable');
+          }
           self._waitingTimer = setTimeout(function() {
+            // Even when unavailable we try connecting (not changing state)
             self._machine.transition('connecting');
           }, connectionDelay());
+        } else {
+          updateState('unavailable');
         }
       },
 
@@ -255,7 +255,7 @@
         self.connectionSecure = !self.connectionSecure;
       }
 
-      self.connectionAttempts++;
+      self.failedAttempts++;
     }
 
     function connectBaseURL(isSecure) {
