@@ -1155,8 +1155,8 @@
         // second connection attempt
         function(e) {
           test.equal(e.newState, 'connecting', 'state should progress to "connecting"');
-          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '(1) "connecting_in" event should be emitted with [Number:4000]');
           test.deepEqual(watcher.next(), {name: 'unavailable', data: undefined}, '(1) "unavailable" event should be emitted');
+          test.deepEqual(watcher.next(), {name: 'connecting_in', data: 10000}, '(1) "connecting_in" event should be emitted with [Number:4000]');
 
           connection.socket.trigger('open');
         },

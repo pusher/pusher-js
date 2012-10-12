@@ -20,8 +20,6 @@
   var MAX_OPEN_TIMEOUT = 10000;
   var MAX_CONNECTED_TIMEOUT = 10000;
 
-  var FAILED_ATTEMPTS_BEFORE_UNAVAILABLE = 2;
-
   function resetConnectionParameters(connection) {
     connection.connectionWait = 0;
 
@@ -82,16 +80,19 @@
       },
 
       waitingPre: function() {
-        if (self.connectionWait > 0) {
-          self.emit('connecting_in', self.connectionWait);
-        }
-
         if (self.netInfo.isOnLine()) {
-          if (self.failedAttempts < FAILED_ATTEMPTS_BEFORE_UNAVAILABLE) {
+          if (self.failedAttempts < 2) {
             updateState('connecting');
           } else {
             updateState('unavailable');
+            // Delay 10s between connection attempts on entering unavailable
+            self.connectionWait = 10000;
           }
+
+          if (self.connectionWait > 0) {
+            self.emit('connecting_in', connectionDelay());
+          }
+
           self._waitingTimer = setTimeout(function() {
             // Even when unavailable we try connecting (not changing state)
             self._machine.transition('connecting');
@@ -253,13 +254,6 @@
       }
 
       self.failedAttempts++;
-
-      // Delay 10s between connection attempts on entering unavailable
-      if (self.netInfo.isOnLine()) {
-        if (self.failedAttempts >= FAILED_ATTEMPTS_BEFORE_UNAVAILABLE) {
-          self.connectionWait = 10000;
-        }
-      }
     }
 
     function connectBaseURL(isSecure) {
