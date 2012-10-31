@@ -14,27 +14,25 @@
   };
 
 
-  // Amount to add to time between connection attemtpts per failed attempt.
-  var UNSUCCESSFUL_CONNECTION_ATTEMPT_ADDITIONAL_WAIT = 2000;
-  var UNSUCCESSFUL_OPEN_ATTEMPT_ADDITIONAL_TIMEOUT = 2000;
-  var UNSUCCESSFUL_CONNECTED_ATTEMPT_ADDITIONAL_TIMEOUT = 2000;
+  var OPEN_TIMEOUT_INCREMENT = 2000;
+  var CONNECTED_TIMEOUT_INCREMENT = 2000;
 
-  var MAX_CONNECTION_ATTEMPT_WAIT = 5 * UNSUCCESSFUL_CONNECTION_ATTEMPT_ADDITIONAL_WAIT;
-  var MAX_OPEN_ATTEMPT_TIMEOUT = 5 * UNSUCCESSFUL_OPEN_ATTEMPT_ADDITIONAL_TIMEOUT;
-  var MAX_CONNECTED_ATTEMPT_TIMEOUT = 5 * UNSUCCESSFUL_CONNECTED_ATTEMPT_ADDITIONAL_TIMEOUT;
+  var MAX_OPEN_TIMEOUT = 10000;
+  var MAX_CONNECTED_TIMEOUT = 10000;
 
   function resetConnectionParameters(connection) {
     connection.connectionWait = 0;
 
     if (Pusher.TransportType === 'native') {
-      connection.openTimeout = 2000;
-    } else {
-      // Flash and SockJS need a bit more time
-      connection.openTimeout = 5000;
+      connection.openTimeout = 4000;
+    } else if (Pusher.TransportType === 'flash') {
+      connection.openTimeout = 7000;
+    } else { // SockJS
+      connection.openTimeout = 6000;
     }
     connection.connectedTimeout = 2000;
     connection.connectionSecure = connection.compulsorySecure;
-    connection.connectionAttempts = 0;
+    connection.failedAttempts = 0;
   }
 
   function Connection(key, options) {
@@ -82,22 +80,25 @@
       },
 
       waitingPre: function() {
-        if (self.connectionWait > 0) {
-          self.emit('connecting_in', self.connectionWait);
-        }
-
-        if (self.netInfo.isOnLine() && self.connectionAttempts <= 4) {
-          updateState('connecting');
-        } else {
-          updateState('unavailable');
-        }
-
-        // When in the unavailable state we attempt to connect, but don't
-        // broadcast that fact
         if (self.netInfo.isOnLine()) {
+          if (self.failedAttempts < 2) {
+            updateState('connecting');
+          } else {
+            updateState('unavailable');
+            // Delay 10s between connection attempts on entering unavailable
+            self.connectionWait = 10000;
+          }
+
+          if (self.connectionWait > 0) {
+            self.emit('connecting_in', connectionDelay());
+          }
+
           self._waitingTimer = setTimeout(function() {
+            // Even when unavailable we try connecting (not changing state)
             self._machine.transition('connecting');
           }, connectionDelay());
+        } else {
+          updateState('unavailable');
         }
       },
 
@@ -239,23 +240,20 @@
       -----------------------------------------------*/
 
     function updateConnectionParameters() {
-      if (self.connectionWait < MAX_CONNECTION_ATTEMPT_WAIT) {
-        self.connectionWait += UNSUCCESSFUL_CONNECTION_ATTEMPT_ADDITIONAL_WAIT;
+      if (self.openTimeout < MAX_OPEN_TIMEOUT) {
+        self.openTimeout += OPEN_TIMEOUT_INCREMENT;
       }
 
-      if (self.openTimeout < MAX_OPEN_ATTEMPT_TIMEOUT) {
-        self.openTimeout += UNSUCCESSFUL_OPEN_ATTEMPT_ADDITIONAL_TIMEOUT;
+      if (self.connectedTimeout < MAX_CONNECTED_TIMEOUT) {
+        self.connectedTimeout += CONNECTED_TIMEOUT_INCREMENT;
       }
 
-      if (self.connectedTimeout < MAX_CONNECTED_ATTEMPT_TIMEOUT) {
-        self.connectedTimeout += UNSUCCESSFUL_CONNECTED_ATTEMPT_ADDITIONAL_TIMEOUT;
-      }
-
+      // Toggle between ws & wss
       if (self.compulsorySecure !== true) {
         self.connectionSecure = !self.connectionSecure;
       }
 
-      self.connectionAttempts++;
+      self.failedAttempts++;
     }
 
     function connectBaseURL(isSecure) {
