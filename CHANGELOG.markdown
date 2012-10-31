@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.5 (2012-10-31)
+
+[CHANGED] Improved connection timeout strategy.
+
 ## 1.12.4 (2012-10-08)
 
 [NEW] Added experimental fallback used when Flash fallback fails.
