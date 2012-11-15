@@ -131,4 +131,8 @@ describe("PusherWSTransport", function() {
       expect(closedCallback).toHaveBeenCalled();
     });
   });
+
+  it("should not support ping", function() {
+    expect(this.transport.supportsPing()).toBe(false);
+  });
 });

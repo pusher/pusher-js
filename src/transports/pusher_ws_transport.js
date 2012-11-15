@@ -54,6 +54,11 @@
     }
   };
 
+  prototype.supportsPing = function() {
+    // We have no way to know whether we're using a browser that supports ping
+    return false;
+  }
+
   // helpers
 
   function getURL(options) {
