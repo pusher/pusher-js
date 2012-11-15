@@ -28,6 +28,7 @@
     }
     this.socket.onclose = function() {
       changeState(self, "closed");
+      self.socket = undefined;
     }
     this.socket.onmessage = function(message) {
       self.emit("message", message);
