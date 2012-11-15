@@ -8,4 +8,5 @@ group :development do
   gem 'pusher'
   gem 'aws-s3'
   gem 'httparty'
+  gem 'jasmine'
 end

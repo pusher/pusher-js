@@ -1,0 +1,6 @@
+src_dir: src
+
+src_files:
+  - pusher.js
+  - pusher_event_dispatcher.js
+  - transports/pusher_ws_transport.js
