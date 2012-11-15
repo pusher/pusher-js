@@ -39,7 +39,7 @@ describe("PusherWSTransport", function() {
       var connectingCallback = jasmine.createSpy("connectingCallback");
       this.transport.bind("connecting", connectingCallback);
 
-      this.transport.connect();
+      expect(this.transport.connect()).toBe(true);
       expect(window.WebSocket).toHaveBeenCalled();
       expect(this.transport.state).toEqual("connecting");
       expect(connectingCallback).toHaveBeenCalled();
@@ -54,6 +54,19 @@ describe("PusherWSTransport", function() {
 
       expect(this.transport.state).toEqual("open");
       expect(openCallback).toHaveBeenCalled();
+    });
+
+    it("should not do anything when connection is being established", function() {
+      expect(this.transport.connect()).toBe(true);
+      expect(window.WebSocket.calls.length).toEqual(1);
+
+      var connectingCallback = jasmine.createSpy("connectingCallback");
+      this.transport.bind("connecting", connectingCallback);
+
+      expect(this.transport.connect()).toBe(false);
+      expect(this.transport.state).toEqual("connecting");
+      expect(connectingCallback).not.toHaveBeenCalled();
+      expect(window.WebSocket.calls.length).toEqual(1);
     });
   });
 

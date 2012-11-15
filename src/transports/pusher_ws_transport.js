@@ -15,6 +15,10 @@
   prototype.name = "ws";
 
   prototype.connect = function() {
+    if (this.socket) {
+      return false;
+    }
+
     var self = this;
     var url = getURL(this.options);
 
@@ -35,7 +39,7 @@
     }
 
     changeState(this, "connecting");
-    Pusher.debug('Connecting', url);
+    return true;
   };
 
   prototype.close = function() {
