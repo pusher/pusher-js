@@ -20,7 +20,7 @@
     }
 
     var self = this;
-    var url = getURL(this.options);
+    var url = getURL(this.key, this.options);
 
     this.socket = new WebSocket(url);
     this.socket.onopen = function() {
@@ -66,11 +66,15 @@
 
   // helpers
 
-  function getURL(options) {
+  function getURL(key, options) {
     var port = options.secure ? options.securePort : options.nonsecurePort;
     var scheme = options.secure ? "wss" : "ws";
 
-    return scheme + "://" + options.host + ':' + port + options.path;
+    var flash = (Pusher.TransportType === "flash") ? "true" : "false";
+    var path = '/app/' + key + '?protocol=5&client=js&flash=false'
+      + '&version=' + Pusher.VERSION
+
+    return scheme + "://" + options.host + ':' + port + path;
   }
 
   function changeState(o, state, params) {

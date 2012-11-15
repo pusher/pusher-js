@@ -6,7 +6,6 @@ describe("PusherWSTransport", function() {
       host: "example.com",
       nonsecurePort: 12345,
       securePort: 54321,
-      path: "/bar",
     }, options);
 
     return new PusherWSTransport(key, options);
@@ -24,15 +23,21 @@ describe("PusherWSTransport", function() {
 
       transport.connect();
       expect(window.WebSocket)
-        .toHaveBeenCalledWith("ws://example.com:12345/bar");
+        .toHaveBeenCalledWith(
+          "ws://example.com:12345/app/foo" +
+          "?protocol=5&client=js&flash=false&version=<VERSION>"
+        );
     });
 
     it("should create secure WebSocket connection", function() {
-      var transport = new getTransport("foo", { secure: true });
+      var transport = new getTransport("bar", { secure: true });
 
       transport.connect();
       expect(window.WebSocket)
-        .toHaveBeenCalledWith("wss://example.com:54321/bar");
+        .toHaveBeenCalledWith(
+          "wss://example.com:54321/app/bar" +
+          "?protocol=5&client=js&flash=false&version=<VERSION>"
+        );
     });
 
     it("should change the state to 'connecting' on connection attempt", function() {
