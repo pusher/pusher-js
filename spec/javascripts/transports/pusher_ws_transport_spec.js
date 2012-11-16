@@ -153,4 +153,43 @@ describe("PusherWSTransport", function() {
   it("should not support ping", function() {
     expect(this.transport.supportsPing()).toBe(false);
   });
+
+  it("should be supported in browsers with WebSocket implementation", function() {
+    var _WebSocket = window.WebSocket;
+    var _MozWebSocket = window.MozWebSocket;
+
+    window.WebSocket = {};
+    window.MozWebSocket = undefined;
+
+    expect(PusherWSTransport.isSupported()).toBe(true);
+
+    window.WebSocket = _WebSocket;
+    window.MozWebSocket = _MozWebSocket;
+  });
+
+  it("should be supported in Firefox < 10.0", function() {
+    var _WebSocket = window.WebSocket;
+    var _MozWebSocket = window.MozWebSocket;
+
+    window.WebSocket = undefined;
+    window.MozWebSocket = {};
+
+    expect(PusherWSTransport.isSupported()).toBe(true);
+
+    window.WebSocket = _WebSocket;
+    window.MozWebSocket = _MozWebSocket;
+  });
+
+  it("should not be supported in browsers without WebSocket implementation", function() {
+    var _WebSocket = window.WebSocket;
+    var _MozWebSocket = window.MozWebSocket;
+
+    window.WebSocket = undefined;
+    window.MozWebSocket = undefined;
+
+    expect(PusherWSTransport.isSupported()).toBe(false);
+
+    window.WebSocket = _WebSocket;
+    window.MozWebSocket = _MozWebSocket;
+  });
 });

@@ -12,6 +12,10 @@
 
   // interface
 
+  PusherWSTransport.isSupported = function() {
+    return window.WebSocket != undefined || window.MozWebSocket != undefined;
+  }
+
   prototype.name = "ws";
 
   prototype.connect = function() {
