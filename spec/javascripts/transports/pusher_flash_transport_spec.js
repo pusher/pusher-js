@@ -11,12 +11,20 @@ describe("PusherFlashTransport", function() {
     return new PusherFlashTransport(key, options);
   }
 
+  var _WebSocket;
+
   beforeEach(function() {
     this.socket = {};
     this.transport = getTransport("foo");
-    spyOn(window, "WebSocket").andReturn(this.socket);
 
     Pusher.Dependencies.loaded["flashfallback"] = true;
+
+    _WebSocket = window.WebSocket;
+    window.WebSocket = jasmine.createSpy("WebSocket").andReturn(this.socket);
+  });
+
+  afterEach(function() {
+    window.WebSocket = _WebSocket;
   });
 
   it("should expose its name", function() {
@@ -24,19 +32,22 @@ describe("PusherFlashTransport", function() {
   });
 
   it("should be supported only if Flash is present", function() {
-    var navigator = window.navigator;
+    var _mimeTypes = navigator.mimeTypes;
 
-    window.navigator = {
-      mimeTypes: { "application/x-shockwave-flash": {} },
-    };
+    navigator.__defineGetter__("mimeTypes", function() {
+      return { "application/x-shockwave-flash": {} };
+    });
     expect(PusherFlashTransport.isSupported()).toBe(true);
 
-    window.navigator = {
-      mimeTypes: {},
-    };
+    navigator.__defineGetter__("mimeTypes", function() {
+      return {};
+    });
+    console.log(window.navigator);
     expect(PusherFlashTransport.isSupported()).toBe(false);
 
-    window.navigator = navigator;
+    navigator.__defineGetter__("mimeTypes", function() {
+      return _mimeTypes;
+    });
   });
 
   describe("when initializing", function() {

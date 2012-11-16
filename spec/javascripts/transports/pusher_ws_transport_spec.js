@@ -11,11 +11,19 @@ describe("PusherWSTransport", function() {
     return new PusherWSTransport(key, options);
   }
 
+  var _WebSocket;
+
   beforeEach(function() {
     this.socket = {};
     this.transport = getTransport("foo");
     this.transport.initialize();
-    spyOn(window, "WebSocket").andReturn(this.socket);
+
+    _WebSocket = window.WebSocket;
+    window.WebSocket = jasmine.createSpy("WebSocket").andReturn(this.socket);
+  });
+
+  afterEach(function() {
+    window.WebSocket = _WebSocket;
   });
 
   it("should expose its name", function() {
@@ -27,16 +35,16 @@ describe("PusherWSTransport", function() {
   });
 
   it("should be supported in browsers with WebSocket implementation", function() {
-    var _WebSocket = window.WebSocket;
-    var _MozWebSocket = window.MozWebSocket;
+    var __WebSocket = window.WebSocket;
+    var __MozWebSocket = window.MozWebSocket;
 
     window.WebSocket = {};
     window.MozWebSocket = undefined;
 
     expect(PusherWSTransport.isSupported()).toBe(true);
 
-    window.WebSocket = _WebSocket;
-    window.MozWebSocket = _MozWebSocket;
+    window.WebSocket = __WebSocket;
+    window.MozWebSocket = __MozWebSocket;
   });
 
   it("should be supported in Firefox < 10.0", function() {
