@@ -4,5 +4,5 @@ src_files:
   - pusher.js
   - dependencies.js
   - pusher_event_dispatcher.js
-  - transports/pusher_ws_transport.js
-  - transports/pusher_flash_transport.js
+  - transports/ws_transport.js
+  - transports/flash_transport.js
