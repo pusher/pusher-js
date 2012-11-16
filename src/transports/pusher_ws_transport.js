@@ -18,6 +18,10 @@
 
   prototype.name = "ws";
 
+  prototype.load = function() {
+    this.changeState("loaded");
+  }
+
   prototype.connect = function() {
     if (this.socket) {
       return false;
@@ -28,21 +32,21 @@
 
     this.socket = new (WebSocket || MozWebSocket)(url);
     this.socket.onopen = function() {
-      changeState(self, "open");
+      self.changeState("open");
       self.socket.onopen = undefined;
     };
     this.socket.onerror = function(error) {
       self.emit("error", { type: 'WebSocketError', error: error });
     };
     this.socket.onclose = function() {
-      changeState(self, "closed");
+      self.changeState("closed");
       self.socket = undefined;
     };
     this.socket.onmessage = function(message) {
       self.emit("message", message);
     };
 
-    changeState(this, "connecting");
+    this.changeState("connecting");
     return true;
   };
 
@@ -68,6 +72,8 @@
     return false;
   };
 
+  // helpers
+
   prototype.getURL = function() {
     if (this.options.secure) {
       var port = this.options.securePort;
@@ -85,11 +91,9 @@
     return "?protocol=5&client=js&flash=false&version=" + Pusher.VERSION;
   };
 
-  // helpers
-
-  function changeState(o, state, params) {
-    o.state = state;
-    o.emit(state, params);
+  prototype.changeState = function(state, params) {
+    this.state = state;
+    this.emit(state, params);
   };
 
   this.PusherWSTransport = PusherWSTransport;

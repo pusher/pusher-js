@@ -64,6 +64,16 @@ describe("PusherWSTransport", function() {
     window.MozWebSocket = _MozWebSocket;
   });
 
+  describe("when loading", function() {
+    it("should emit 'loaded' immediately", function() {
+      var loadedCallback = jasmine.createSpy("loadedCallback");
+      this.transport.bind("loaded", loadedCallback);
+
+      this.transport.load();
+      expect(loadedCallback).toHaveBeenCalled();
+    });
+  });
+
   describe("when opening connections", function() {
     it("should create non-secure WebSocket connection", function() {
       var transport = getTransport("foo", { secure: false });

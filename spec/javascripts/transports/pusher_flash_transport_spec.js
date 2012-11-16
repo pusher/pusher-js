@@ -37,6 +37,28 @@ describe("PusherFlashTransport", function() {
     window.navigator = navigator;
   });
 
+  describe("when loading", function() {
+    it("should load flashfallback dependency and then emit 'loaded'", function() {
+      var loadedCallback = jasmine.createSpy("loadedCallback");
+      this.transport.bind("loaded", loadedCallback);
+
+      var dependencyCallback = null;
+      spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
+        expect(name).toEqual("flashfallback");
+        dependencyCallback = c;
+      });
+
+      this.transport.load();
+
+      expect(Pusher.Dependencies.load).toHaveBeenCalled();
+      expect(loadedCallback).not.toHaveBeenCalled();
+
+      dependencyCallback();
+
+      expect(loadedCallback).toHaveBeenCalled();
+    });
+  });
+
   describe("when opening connections", function() {
     it("should pass correct query string", function() {
       var transport = getTransport("foo", { secure: false });
