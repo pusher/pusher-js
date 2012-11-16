@@ -1,15 +1,15 @@
 ;(function() {
 
-  function PusherFlashTransport(key, options) {
-    PusherWSTransport.call(this, key, options);
+  function FlashTransport(key, options) {
+    Pusher.WSTransport.call(this, key, options);
   };
-  var prototype = PusherFlashTransport.prototype;
+  var prototype = FlashTransport.prototype;
 
-  Pusher.Util.extend(prototype, PusherWSTransport.prototype);
+  Pusher.Util.extend(prototype, Pusher.WSTransport.prototype);
 
   // interface
 
-  PusherFlashTransport.isSupported = function() {
+  FlashTransport.isSupported = function() {
     return navigator.mimeTypes["application/x-shockwave-flash"] != undefined;
   };
 
@@ -27,5 +27,5 @@
     return "?protocol=5&client=js&flash=true&version=" + Pusher.VERSION;
   };
 
-  this.PusherFlashTransport = PusherFlashTransport;
+  Pusher.FlashTransport = FlashTransport;
 }).call(this);

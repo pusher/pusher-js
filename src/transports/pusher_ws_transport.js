@@ -1,18 +1,18 @@
 ;(function() {
 
-  function PusherWSTransport(key, options) {
+  function WSTransport(key, options) {
     Pusher.EventsDispatcher.call(this);
 
     this.key = key;
     this.options = options;
   };
-  var prototype = PusherWSTransport.prototype;
+  var prototype = WSTransport.prototype;
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   // interface
 
-  PusherWSTransport.isSupported = function() {
+  WSTransport.isSupported = function() {
     return window.WebSocket != undefined || window.MozWebSocket != undefined;
   };
 
@@ -101,5 +101,5 @@
     this.emit(state, params);
   };
 
-  this.PusherWSTransport = PusherWSTransport;
+  Pusher.WSTransport = WSTransport;
 }).call(this);

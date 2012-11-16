@@ -1,4 +1,4 @@
-describe("PusherFlashTransport", function() {
+describe("FlashTransport", function() {
   function getTransport(key, options) {
     key = key || "foo";
     options = Pusher.Util.extend({
@@ -8,7 +8,7 @@ describe("PusherFlashTransport", function() {
       securePort: 54321,
     }, options);
 
-    return new PusherFlashTransport(key, options);
+    return new Pusher.FlashTransport(key, options);
   }
 
   var _WebSocket;
@@ -37,13 +37,13 @@ describe("PusherFlashTransport", function() {
     navigator.__defineGetter__("mimeTypes", function() {
       return { "application/x-shockwave-flash": {} };
     });
-    expect(PusherFlashTransport.isSupported()).toBe(true);
+    expect(Pusher.FlashTransport.isSupported()).toBe(true);
 
     navigator.__defineGetter__("mimeTypes", function() {
       return {};
     });
     console.log(window.navigator);
-    expect(PusherFlashTransport.isSupported()).toBe(false);
+    expect(Pusher.FlashTransport.isSupported()).toBe(false);
 
     navigator.__defineGetter__("mimeTypes", function() {
       return _mimeTypes;

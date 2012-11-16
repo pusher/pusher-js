@@ -1,4 +1,4 @@
-describe("PusherWSTransport", function() {
+describe("WSTransport", function() {
   function getTransport(key, options) {
     key = key || "foo";
     options = Pusher.Util.extend({
@@ -8,7 +8,7 @@ describe("PusherWSTransport", function() {
       securePort: 54321,
     }, options);
 
-    return new PusherWSTransport(key, options);
+    return new Pusher.WSTransport(key, options);
   }
 
   var _WebSocket;
@@ -41,7 +41,7 @@ describe("PusherWSTransport", function() {
     window.WebSocket = {};
     window.MozWebSocket = undefined;
 
-    expect(PusherWSTransport.isSupported()).toBe(true);
+    expect(Pusher.WSTransport.isSupported()).toBe(true);
 
     window.WebSocket = __WebSocket;
     window.MozWebSocket = __MozWebSocket;
@@ -54,7 +54,7 @@ describe("PusherWSTransport", function() {
     window.WebSocket = undefined;
     window.MozWebSocket = {};
 
-    expect(PusherWSTransport.isSupported()).toBe(true);
+    expect(Pusher.WSTransport.isSupported()).toBe(true);
 
     window.WebSocket = _WebSocket;
     window.MozWebSocket = _MozWebSocket;
@@ -67,7 +67,7 @@ describe("PusherWSTransport", function() {
     window.WebSocket = undefined;
     window.MozWebSocket = undefined;
 
-    expect(PusherWSTransport.isSupported()).toBe(false);
+    expect(Pusher.WSTransport.isSupported()).toBe(false);
 
     window.WebSocket = _WebSocket;
     window.MozWebSocket = _MozWebSocket;
