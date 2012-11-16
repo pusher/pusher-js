@@ -18,8 +18,8 @@
 
   prototype.name = "ws";
 
-  prototype.load = function() {
-    this.changeState("loaded");
+  prototype.initialize = function() {
+    this.changeState("initialized");
   }
 
   prototype.connect = function() {

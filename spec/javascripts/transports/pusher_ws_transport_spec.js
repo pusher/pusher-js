@@ -14,6 +14,7 @@ describe("PusherWSTransport", function() {
   beforeEach(function() {
     this.socket = {};
     this.transport = getTransport("foo");
+    this.transport.initialize();
     spyOn(window, "WebSocket").andReturn(this.socket);
   });
 
@@ -65,12 +66,14 @@ describe("PusherWSTransport", function() {
   });
 
   describe("when loading", function() {
-    it("should emit 'loaded' immediately", function() {
-      var loadedCallback = jasmine.createSpy("loadedCallback");
-      this.transport.bind("loaded", loadedCallback);
+    it("should emit 'initialized' immediately", function() {
+      var transport = getTransport("foo", { secure: false });
 
-      this.transport.load();
-      expect(loadedCallback).toHaveBeenCalled();
+      var initializedCallback = jasmine.createSpy("initializedCallback");
+      transport.bind("initialized", initializedCallback);
+
+      transport.initialize();
+      expect(initializedCallback).toHaveBeenCalled();
     });
   });
 
@@ -78,6 +81,7 @@ describe("PusherWSTransport", function() {
     it("should create non-secure WebSocket connection", function() {
       var transport = getTransport("foo", { secure: false });
 
+      transport.initialize();
       transport.connect();
       expect(window.WebSocket)
         .toHaveBeenCalledWith(
@@ -89,6 +93,7 @@ describe("PusherWSTransport", function() {
     it("should create secure WebSocket connection", function() {
       var transport = new getTransport("bar", { secure: true });
 
+      transport.initialize();
       transport.connect();
       expect(window.WebSocket)
         .toHaveBeenCalledWith(

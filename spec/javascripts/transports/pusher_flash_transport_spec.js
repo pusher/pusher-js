@@ -15,6 +15,8 @@ describe("PusherFlashTransport", function() {
     this.socket = {};
     this.transport = getTransport("foo");
     spyOn(window, "WebSocket").andReturn(this.socket);
+
+    Pusher.Dependencies.loaded["flashfallback"] = true;
   });
 
   it("should expose its name", function() {
@@ -37,10 +39,10 @@ describe("PusherFlashTransport", function() {
     window.navigator = navigator;
   });
 
-  describe("when loading", function() {
-    it("should load flashfallback dependency and then emit 'loaded'", function() {
-      var loadedCallback = jasmine.createSpy("loadedCallback");
-      this.transport.bind("loaded", loadedCallback);
+  describe("when initializing", function() {
+    it("should load flashfallback dependency and then emit 'initialized'", function() {
+      var initializedCallback = jasmine.createSpy("initializedCallback");
+      this.transport.bind("initialized", initializedCallback);
 
       var dependencyCallback = null;
       spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
@@ -48,14 +50,14 @@ describe("PusherFlashTransport", function() {
         dependencyCallback = c;
       });
 
-      this.transport.load();
+      this.transport.initialize();
 
       expect(Pusher.Dependencies.load).toHaveBeenCalled();
-      expect(loadedCallback).not.toHaveBeenCalled();
+      expect(initializedCallback).not.toHaveBeenCalled();
 
       dependencyCallback();
 
-      expect(loadedCallback).toHaveBeenCalled();
+      expect(initializedCallback).toHaveBeenCalled();
     });
   });
 
@@ -63,6 +65,7 @@ describe("PusherFlashTransport", function() {
     it("should pass correct query string", function() {
       var transport = getTransport("foo", { secure: false });
 
+      transport.initialize();
       transport.connect();
       expect(window.WebSocket)
         .toHaveBeenCalledWith(

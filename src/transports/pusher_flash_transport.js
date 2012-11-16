@@ -15,11 +15,11 @@
 
   prototype.name = "flash";
 
-  prototype.load = function() {
+  prototype.initialize = function() {
     var self = this;
 
     Pusher.Dependencies.load("flashfallback", function() {
-      self.changeState("loaded");
+      self.changeState("initialized");
     });
   }
 
