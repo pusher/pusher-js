@@ -41,6 +41,51 @@ var _require = (function() {
 })();
 
 ;(function() {
+
+  function DependencyLoader(options) {
+    this.loading = {}
+    this.loaded = {}
+  }
+
+  DependencyLoader.prototype = {
+    load: function(name, callback) {
+      if (this.loaded[name]) {
+        callback();
+        return;
+      }
+
+      if (!this.loading[name]) {
+        this.loading[name] = [];
+      }
+      this.loading[name].push(callback);
+      if (this.loading[name].length > 1) {
+        return;
+      }
+
+      if (document.location.protocol == "http:") {
+        var cdn = this.options.cdn_http;
+      } else {
+        var cdn = this.options.cdn_https;
+      }
+      var root = cdn + this.options.version;
+      var path = root + '/' + name + this.options.suffix + '.js';
+
+      _require([path], function() {
+        for (var i = 0; i < this.loading[name].length; i++) {
+          this.loading[name][i]();
+        }
+        delete this.loading[name];
+      });
+    },
+  }
+
+  Pusher.Dependencies = new DependencyLoader({
+    cdn_http: Pusher.cdn_http,
+    cdn_https: Pusher.cdn_https,
+    version: Pusher.VERSION,
+    suffix: Pusher.dependency_suffix,
+  });
+
   // Support Firefox versions which prefix WebSocket
   if (!window['WebSocket'] && window['MozWebSocket']) {
     window['WebSocket'] = window['MozWebSocket']
@@ -54,16 +99,6 @@ var _require = (function() {
   var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
   var root = cdn + Pusher.VERSION;
   var deps = [];
-
-  if (!window['JSON']) {
-    deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
-  }
-  if (!window['WebSocket']) {
-    // Try to use web-socket-js (flash WebSocket emulation)
-    window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
-    window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-    deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
-  }
 
   var initialize = function() {
     if (window['WebSocket']) {
@@ -109,8 +144,8 @@ var _require = (function() {
     ondocumentbody(initialize);
   }
 
-  if (deps.length > 0) {
-    _require(deps, initializeOnDocumentBody);
+  if (!window['JSON']) {
+    Pusher.Dependencies.load("json2", initializeOnDocumentBody);
   } else {
     initializeOnDocumentBody();
   }
