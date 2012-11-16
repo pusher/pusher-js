@@ -43,6 +43,7 @@ var _require = (function() {
 ;(function() {
 
   function DependencyLoader(options) {
+    this.options = {}
     this.loading = {}
     this.loaded = {}
   }
@@ -75,6 +76,7 @@ var _require = (function() {
           this.loading[name][i]();
         }
         delete this.loading[name];
+        this.loaded[name] = true;
       });
     },
   }
