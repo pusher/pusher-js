@@ -23,7 +23,7 @@
   }
 
   prototype.connect = function() {
-    if (this.socket) {
+    if (this.socket || this.state === undefined) {
       return false;
     }
 
@@ -51,7 +51,12 @@
   };
 
   prototype.close = function() {
-    this.socket.close();
+    if (this.socket) {
+      this.socket.close();
+      return true;
+    } else {
+      return false;
+    }
   };
 
   prototype.send = function(data) {
