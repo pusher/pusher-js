@@ -26,7 +26,7 @@
     var self = this;
     var url = this.getURL(this.key, this.options);
 
-    this.socket = new WebSocket(url);
+    this.socket = new (WebSocket || MozWebSocket)(url);
     this.socket.onopen = function() {
       changeState(self, "open");
       self.socket.onopen = undefined;
