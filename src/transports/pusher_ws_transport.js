@@ -14,7 +14,7 @@
 
   PusherWSTransport.isSupported = function() {
     return window.WebSocket != undefined || window.MozWebSocket != undefined;
-  }
+  };
 
   prototype.name = "ws";
 
@@ -24,7 +24,7 @@
     }
 
     var self = this;
-    var url = getURL(this.key, this.options);
+    var url = this.getURL(this.key, this.options);
 
     this.socket = new WebSocket(url);
     this.socket.onopen = function() {
@@ -33,14 +33,14 @@
     };
     this.socket.onerror = function(error) {
       self.emit("error", { type: 'WebSocketError', error: error });
-    }
+    };
     this.socket.onclose = function() {
       changeState(self, "closed");
       self.socket = undefined;
-    }
+    };
     this.socket.onmessage = function(message) {
       self.emit("message", message);
-    }
+    };
 
     changeState(this, "connecting");
     return true;
@@ -66,25 +66,31 @@
   prototype.supportsPing = function() {
     // We have no way to know whether we're using a browser that supports ping
     return false;
-  }
+  };
+
+  prototype.getURL = function() {
+    if (this.options.secure) {
+      var port = this.options.securePort;
+      var scheme = "wss"
+    } else {
+      var port = this.options.nonsecurePort;
+      var scheme = "ws";
+    }
+    var path = "/app/" + this.key + this.getQueryString();
+
+    return scheme + "://" + this.options.host + ':' + port + path;
+  };
+
+  prototype.getQueryString = function() {
+    return "?protocol=5&client=js&flash=false&version=" + Pusher.VERSION;
+  };
 
   // helpers
-
-  function getURL(key, options) {
-    var port = options.secure ? options.securePort : options.nonsecurePort;
-    var scheme = options.secure ? "wss" : "ws";
-
-    var flash = (Pusher.TransportType === "flash") ? "true" : "false";
-    var path = '/app/' + key + '?protocol=5&client=js&flash=false'
-      + '&version=' + Pusher.VERSION
-
-    return scheme + "://" + options.host + ':' + port + path;
-  }
 
   function changeState(o, state, params) {
     o.state = state;
     o.emit(state, params);
-  }
+  };
 
   this.PusherWSTransport = PusherWSTransport;
 }).call(this);
