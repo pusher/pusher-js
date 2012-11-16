@@ -17,6 +17,53 @@ describe("PusherWSTransport", function() {
     spyOn(window, "WebSocket").andReturn(this.socket);
   });
 
+  it("should expose its name", function() {
+    expect(this.transport.name).toEqual("ws");
+  });
+
+  it("should not support ping", function() {
+    expect(this.transport.supportsPing()).toBe(false);
+  });
+
+  it("should be supported in browsers with WebSocket implementation", function() {
+    var _WebSocket = window.WebSocket;
+    var _MozWebSocket = window.MozWebSocket;
+
+    window.WebSocket = {};
+    window.MozWebSocket = undefined;
+
+    expect(PusherWSTransport.isSupported()).toBe(true);
+
+    window.WebSocket = _WebSocket;
+    window.MozWebSocket = _MozWebSocket;
+  });
+
+  it("should be supported in Firefox < 10.0", function() {
+    var _WebSocket = window.WebSocket;
+    var _MozWebSocket = window.MozWebSocket;
+
+    window.WebSocket = undefined;
+    window.MozWebSocket = {};
+
+    expect(PusherWSTransport.isSupported()).toBe(true);
+
+    window.WebSocket = _WebSocket;
+    window.MozWebSocket = _MozWebSocket;
+  });
+
+  it("should not be supported in browsers without WebSocket implementation", function() {
+    var _WebSocket = window.WebSocket;
+    var _MozWebSocket = window.MozWebSocket;
+
+    window.WebSocket = undefined;
+    window.MozWebSocket = undefined;
+
+    expect(PusherWSTransport.isSupported()).toBe(false);
+
+    window.WebSocket = _WebSocket;
+    window.MozWebSocket = _MozWebSocket;
+  });
+
   describe("when opening connections", function() {
     it("should create non-secure WebSocket connection", function() {
       var transport = getTransport("foo", { secure: false });
@@ -148,48 +195,5 @@ describe("PusherWSTransport", function() {
       this.socket.onclose();
       expect(closedCallback).toHaveBeenCalled();
     });
-  });
-
-  it("should not support ping", function() {
-    expect(this.transport.supportsPing()).toBe(false);
-  });
-
-  it("should be supported in browsers with WebSocket implementation", function() {
-    var _WebSocket = window.WebSocket;
-    var _MozWebSocket = window.MozWebSocket;
-
-    window.WebSocket = {};
-    window.MozWebSocket = undefined;
-
-    expect(PusherWSTransport.isSupported()).toBe(true);
-
-    window.WebSocket = _WebSocket;
-    window.MozWebSocket = _MozWebSocket;
-  });
-
-  it("should be supported in Firefox < 10.0", function() {
-    var _WebSocket = window.WebSocket;
-    var _MozWebSocket = window.MozWebSocket;
-
-    window.WebSocket = undefined;
-    window.MozWebSocket = {};
-
-    expect(PusherWSTransport.isSupported()).toBe(true);
-
-    window.WebSocket = _WebSocket;
-    window.MozWebSocket = _MozWebSocket;
-  });
-
-  it("should not be supported in browsers without WebSocket implementation", function() {
-    var _WebSocket = window.WebSocket;
-    var _MozWebSocket = window.MozWebSocket;
-
-    window.WebSocket = undefined;
-    window.MozWebSocket = undefined;
-
-    expect(PusherWSTransport.isSupported()).toBe(false);
-
-    window.WebSocket = _WebSocket;
-    window.MozWebSocket = _MozWebSocket;
   });
 });
