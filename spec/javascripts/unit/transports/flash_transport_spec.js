@@ -72,15 +72,13 @@ describe("FlashTransport", function() {
   });
 
   describe("when opening connections", function() {
-    it("should pass correct query string", function() {
-      var transport = getTransport("foo", { secure: false });
-
-      transport.initialize();
-      transport.connect();
+    it("should create a WebSocket with correct URL", function() {
+      this.transport.initialize();
+      this.transport.connect();
       expect(window.WebSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
-          "?protocol=5&client=js&flash=true&version=<VERSION>"
+          "?protocol=5&client=js&version=<VERSION>&flash=true"
         );
     });
   });

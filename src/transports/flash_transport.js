@@ -1,11 +1,11 @@
 ;(function() {
 
   function FlashTransport(key, options) {
-    Pusher.WSTransport.call(this, key, options);
+    Pusher.AbstractTransport.call(this, key, options);
   };
   var prototype = FlashTransport.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.WSTransport.prototype);
+  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
   // interface
 
@@ -23,8 +23,13 @@
     });
   }
 
+  prototype.getSocket = function(url) {
+    return new WebSocket(url);
+  }
+
   prototype.getQueryString = function() {
-    return "?protocol=5&client=js&flash=true&version=" + Pusher.VERSION;
+    return Pusher.AbstractTransport.prototype.getQueryString.call(this)
+      + "&flash=true";
   };
 
   Pusher.FlashTransport = FlashTransport;
