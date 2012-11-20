@@ -31,6 +31,10 @@ describe("FlashTransport", function() {
     expect(this.transport.name).toEqual("flash");
   });
 
+  it("should not support ping", function() {
+    expect(this.transport.supportsPing()).toBe(false);
+  });
+
   it("should be supported only if Flash is present", function() {
     var _mimeTypes = navigator.mimeTypes;
 
