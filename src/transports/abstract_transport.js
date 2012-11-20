@@ -20,7 +20,7 @@
 
   prototype.initialize = function() {
     this.changeState("initialized");
-  }
+  };
 
   prototype.connect = function() {
     if (this.socket || this.state === undefined) {
@@ -97,11 +97,11 @@
 
   prototype.createSocket = function (url) {
     return null;
-  }
+  };
 
   prototype.getScheme = function() {
     return this.options.secure ? "wss" : "ws";
-  }
+  };
 
   prototype.getBaseURL = function() {
     if (this.options.secure) {

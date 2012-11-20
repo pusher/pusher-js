@@ -22,7 +22,7 @@
 
   prototype.createSocket = function(url) {
     return new (WebSocket || MozWebSocket)(url);
-  }
+  };
 
   prototype.getQueryString = function() {
     return Pusher.AbstractTransport.prototype.getQueryString.call(this)

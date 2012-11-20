@@ -9,7 +9,7 @@ describe("FlashTransport", function() {
     }, options);
 
     return new Pusher.FlashTransport(key, options);
-  }
+  };
 
   var _WebSocket;
 

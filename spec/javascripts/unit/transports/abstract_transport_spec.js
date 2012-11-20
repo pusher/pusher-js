@@ -8,7 +8,7 @@ describe("AbstractTransport", function() {
     }, options);
 
     return new Pusher.AbstractTransport(key || "foo", options);
-  }
+  };
 
   beforeEach(function() {
     this.socket = {};
