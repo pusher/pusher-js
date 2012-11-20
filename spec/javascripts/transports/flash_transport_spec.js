@@ -42,7 +42,6 @@ describe("FlashTransport", function() {
     navigator.__defineGetter__("mimeTypes", function() {
       return {};
     });
-    console.log(window.navigator);
     expect(Pusher.FlashTransport.isSupported()).toBe(false);
 
     navigator.__defineGetter__("mimeTypes", function() {
