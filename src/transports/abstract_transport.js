@@ -113,12 +113,16 @@
     return this.getScheme() + "://" + this.options.host + ':' + port;
   };
 
+  prototype.getPath = function() {
+    return "/app/" + this.key;
+  };
+
   prototype.getQueryString = function() {
     return "?protocol=5&client=js&version=" + Pusher.VERSION;
   };
 
   prototype.getURL = function() {
-    return this.getBaseURL() + "/app/" + this.key + this.getQueryString();
+    return this.getBaseURL() + this.getPath() + this.getQueryString();
   };
 
   prototype.changeState = function(state, params) {
