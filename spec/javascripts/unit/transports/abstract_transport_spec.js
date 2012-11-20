@@ -15,7 +15,7 @@ describe("AbstractTransport", function() {
     this.transport = getTransport("foo");
     this.transport.initialize();
 
-    spyOn(this.transport, "getSocket").andReturn(this.socket);
+    spyOn(this.transport, "createSocket").andReturn(this.socket);
   });
 
   describe("when loading", function() {
@@ -33,11 +33,11 @@ describe("AbstractTransport", function() {
   describe("when opening connections", function() {
     it("should create a non-secure connection", function() {
       var transport = getTransport("foo", { secure: false });
-      spyOn(transport, "getSocket").andReturn({});
+      spyOn(transport, "createSocket").andReturn({});
 
       transport.initialize();
       transport.connect();
-      expect(transport.getSocket)
+      expect(transport.createSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
           "?protocol=5&client=js&version=<VERSION>"
@@ -46,11 +46,11 @@ describe("AbstractTransport", function() {
 
     it("should create a secure connection", function() {
       var transport = new getTransport("bar", { secure: true });
-      spyOn(transport, "getSocket").andReturn({});
+      spyOn(transport, "createSocket").andReturn({});
 
       transport.initialize();
       transport.connect();
-      expect(transport.getSocket)
+      expect(transport.createSocket)
         .toHaveBeenCalledWith(
           "wss://example.com:54321/app/bar" +
           "?protocol=5&client=js&version=<VERSION>"
@@ -62,7 +62,7 @@ describe("AbstractTransport", function() {
       this.transport.bind("connecting", connectingCallback);
 
       expect(this.transport.connect()).toBe(true);
-      expect(this.transport.getSocket).toHaveBeenCalled();
+      expect(this.transport.createSocket).toHaveBeenCalled();
       expect(this.transport.state).toEqual("connecting");
       expect(connectingCallback).toHaveBeenCalled();
     });
@@ -80,7 +80,7 @@ describe("AbstractTransport", function() {
 
     it("should not do anything when connection is being established", function() {
       expect(this.transport.connect()).toBe(true);
-      expect(this.transport.getSocket.calls.length).toEqual(1);
+      expect(this.transport.createSocket.calls.length).toEqual(1);
 
       var connectingCallback = jasmine.createSpy("connectingCallback");
       this.transport.bind("connecting", connectingCallback);
@@ -88,7 +88,7 @@ describe("AbstractTransport", function() {
       expect(this.transport.connect()).toBe(false);
       expect(this.transport.state).toEqual("connecting");
       expect(connectingCallback).not.toHaveBeenCalled();
-      expect(this.transport.getSocket.calls.length).toEqual(1);
+      expect(this.transport.createSocket.calls.length).toEqual(1);
     });
   });
 

@@ -21,11 +21,11 @@
     Pusher.Dependencies.load("flashfallback", function() {
       self.changeState("initialized");
     });
-  }
+  };
 
-  prototype.getSocket = function(url) {
+  prototype.createSocket = function(url) {
     return new WebSocket(url);
-  }
+  };
 
   prototype.getQueryString = function() {
     return Pusher.AbstractTransport.prototype.getQueryString.call(this)

@@ -30,7 +30,7 @@
     var self = this;
     var url = this.getURL(this.key, this.options);
 
-    this.socket = this.getSocket(url);
+    this.socket = this.createSocket(url);
     this.bindListeners();
 
     this.changeState("connecting");
@@ -95,28 +95,30 @@
 
   // helpers
 
-  prototype.getSocket = function (url) {
+  prototype.createSocket = function (url) {
     return null;
+  }
+
+  prototype.getScheme = function() {
+    return this.options.secure ? "wss" : "ws";
   }
 
   prototype.getBaseURL = function() {
     if (this.options.secure) {
       var port = this.options.securePort;
-      var scheme = "wss"
     } else {
       var port = this.options.nonsecurePort;
-      var scheme = "ws";
     }
 
-    return scheme + "://" + this.options.host + ':' + port;
-  };
-
-  prototype.getURL = function() {
-    return this.getBaseURL() + "/app/" + this.key + this.getQueryString();
+    return this.getScheme() + "://" + this.options.host + ':' + port;
   };
 
   prototype.getQueryString = function() {
     return "?protocol=5&client=js&version=" + Pusher.VERSION;
+  };
+
+  prototype.getURL = function() {
+    return this.getBaseURL() + "/app/" + this.key + this.getQueryString();
   };
 
   prototype.changeState = function(state, params) {

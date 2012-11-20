@@ -20,7 +20,7 @@
 
   // helpers
 
-  prototype.getSocket = function(url) {
+  prototype.createSocket = function(url) {
     return new (WebSocket || MozWebSocket)(url);
   }
 
