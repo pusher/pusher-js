@@ -4,6 +4,7 @@ src_files:
   - pusher.js
   - dependencies.js
   - pusher_event_dispatcher.js
+  - strategies/sequential_strategy.js
   - transports/abstract_transport.js
   - transports/flash_transport.js
   - transports/sockjs_transport.js
