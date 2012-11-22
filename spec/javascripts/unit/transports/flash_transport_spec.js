@@ -36,7 +36,10 @@ describe("FlashTransport", function() {
   });
 
   it("should be supported only if Flash is present", function() {
+    var _navigator = navigator;
     var _mimeTypes = navigator.mimeTypes;
+
+    navigator = {};
 
     navigator.__defineGetter__("mimeTypes", function() {
       return { "application/x-shockwave-flash": {} };
@@ -51,6 +54,7 @@ describe("FlashTransport", function() {
     navigator.__defineGetter__("mimeTypes", function() {
       return _mimeTypes;
     });
+    navigator = _navigator;
   });
 
   describe("when initializing", function() {
