@@ -64,6 +64,11 @@
       self.connection.unbind("closed", onClosed);
     };
 
+    this.abortCallback = function() {
+      unbindListeners();
+      self.connection.close();
+    };
+
     this.connection.bind("open", onOpen);
     this.connection.bind("error", onError);
     this.connection.bind("closed", onClosed);
@@ -74,11 +79,12 @@
   };
 
   prototype.abort = function() {
-    if (!this.connection) {
-      return false
-    } else {
-      this.connection.close();
+    if (this.abortCallback) {
+      this.abortCallback();
+      this.abortCallback = null;
       return true;
+    } else {
+      return false;
     }
   };
 

@@ -93,14 +93,17 @@
 
   prototype.tryStrategy = function(strategy, timeoutLength, callback) {
     var onOpen = function(connection) {
+      this.abortCallback = null;
       unbindListeners();
       callback(null, connection);
     };
     var onError = function(error) {
+      this.abortCallback = null;
       unbindListeners();
       callback(error);
     };
     var onTimeout = function() {
+      this.abortCallback = null;
       strategy.abort();
       unbindListeners();
       callback("timeout");
