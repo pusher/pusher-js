@@ -23,6 +23,10 @@
     var self = this;
 
     this.changeState("initializing");
+
+    window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
+    window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
+      "/WebSocketMain.swf";
     Pusher.Dependencies.load("flashfallback", function() {
       self.changeState("initialized");
     });
