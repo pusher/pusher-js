@@ -50,6 +50,8 @@ var _require = (function() {
 
   DependencyLoader.prototype = {
     load: function(name, callback) {
+      var self = this;
+
       if (this.loaded[name]) {
         callback();
         return;
@@ -63,21 +65,24 @@ var _require = (function() {
         return;
       }
 
+      var path = this.getRoot() + '/' + name + this.options.suffix + '.js';
+
+      _require([path], function() {
+        for (var i = 0; i < self.loading[name].length; i++) {
+          self.loading[name][i]();
+        }
+        delete self.loading[name];
+        self.loaded[name] = true;
+      });
+    },
+
+    getRoot: function() {
       if (document.location.protocol == "http:") {
         var cdn = this.options.cdn_http;
       } else {
         var cdn = this.options.cdn_https;
       }
-      var root = cdn + this.options.version;
-      var path = root + '/' + name + this.options.suffix + '.js';
-
-      _require([path], function() {
-        for (var i = 0; i < this.loading[name].length; i++) {
-          this.loading[name][i]();
-        }
-        delete this.loading[name];
-        this.loaded[name] = true;
-      });
+      return cdn + "/" + this.options.version;
     },
   }
 
