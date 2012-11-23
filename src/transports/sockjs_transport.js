@@ -13,6 +13,10 @@
     return true;
   };
 
+  SockJSTransport.createConnection = function(key, options) {
+    return new SockJSTransport(key, options);
+  };
+
   prototype.name = "sockjs";
 
   prototype.initialize = function() {

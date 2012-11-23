@@ -16,6 +16,10 @@
     return window.WebSocket != undefined || window.MozWebSocket != undefined;
   };
 
+  WSTransport.createConnection = function(key, options) {
+    return new WSTransport(key, options);
+  };
+
   prototype.name = "ws";
 
   // helpers

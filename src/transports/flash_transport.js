@@ -13,6 +13,10 @@
     return navigator.mimeTypes["application/x-shockwave-flash"] != undefined;
   };
 
+  FlashTransport.createConnection = function(key, options) {
+    return new FlashTransport(key, options);
+  };
+
   prototype.name = "flash";
 
   prototype.initialize = function() {
