@@ -40,9 +40,11 @@ describe("SockJSTransport", function() {
   });
 
   describe("when initializing", function() {
-    it("should load sockjs dependency and then emit 'initialized'", function() {
+    it("should load sockjs dependency and emit appropriate events", function() {
       var initializedCallback = jasmine.createSpy("initializedCallback");
+      var initializingCallback = jasmine.createSpy("initializingCallback");
       this.transport.bind("initialized", initializedCallback);
+      this.transport.bind("initializing", initializingCallback);
 
       var dependencyCallback = null;
       spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
@@ -53,6 +55,7 @@ describe("SockJSTransport", function() {
       this.transport.initialize();
 
       expect(Pusher.Dependencies.load).toHaveBeenCalled();
+      expect(initializingCallback).toHaveBeenCalled();
       expect(initializedCallback).not.toHaveBeenCalled();
 
       dependencyCallback();

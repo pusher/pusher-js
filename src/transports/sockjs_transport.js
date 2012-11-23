@@ -18,6 +18,7 @@
   prototype.initialize = function() {
     var self = this;
 
+    this.changeState("initializing");
     Pusher.Dependencies.load("sockjs", function() {
       self.changeState("initialized");
     });
