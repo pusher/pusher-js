@@ -3,7 +3,7 @@
   function SequentialStrategy(substrategies, options) {
     Pusher.EventsDispatcher.call(this);
 
-    this.substrategies = substrategies;
+    this.substrategies = this.getSupported(substrategies);
     this.options = options || {};
   };
   var prototype = SequentialStrategy.prototype;
@@ -15,14 +15,12 @@
   prototype.name = "seq";
 
   prototype.isSupported = function() {
-    return this.getSupported().length > 0;
+    return this.substrategies.length > 0;
   };
 
   prototype.initialize = function() {
-    var strategies = this.getSupported();
-
-    for (var i = 0; i < strategies.length; i++) {
-      strategies[i].initialize();
+    for (var i = 0; i < this.substrategies.length; i++) {
+      this.substrategies[i].initialize();
     }
   };
 
@@ -33,7 +31,6 @@
 
     var self = this;
 
-    var strategies = this.getSupported();
     var current = 0;
     var timeout = this.options.timeout;
 
@@ -43,18 +40,18 @@
       } else {
         current = current + 1;
         if (self.options.loop) {
-          current = current % strategies.length;
+          current = current % self.substrategies.length;
         }
 
-        if (current < strategies.length) {
+        if (current < self.substrategies.length) {
           if (timeout) {
             timeout = timeout * 2;
             if (self.options.timeoutLimit) {
               timeout = Math.min(timeout, self.options.timeoutLimit);
             }
           }
-          this.abortCallback = self.tryStrategy(
-            strategies[current], timeout, tryNextStrategy
+          self.abortCallback = self.tryStrategy(
+            self.substrategies[current], timeout, tryNextStrategy
           );
         } else {
           self.emit("error");
@@ -63,7 +60,7 @@
     };
 
     this.abortCallback = this.tryStrategy(
-      strategies[current], this.options.timeout, tryNextStrategy
+      this.substrategies[current], this.options.timeout, tryNextStrategy
     );
 
     return true;
@@ -81,11 +78,11 @@
 
   // private
 
-  prototype.getSupported = function() {
+  prototype.getSupported = function(substrategies) {
     var supported = [];
-    for (var i = 0; i < this.substrategies.length; i++) {
-      if (this.substrategies[i].isSupported()) {
-        supported.push(this.substrategies[i]);
+    for (var i = 0; i < substrategies.length; i++) {
+      if (substrategies[i].isSupported()) {
+        supported.push(substrategies[i]);
       }
     }
     return supported;

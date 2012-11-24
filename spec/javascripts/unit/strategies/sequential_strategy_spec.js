@@ -168,6 +168,23 @@ describe("SequentialStrategy", function() {
       expect(substrategies[1].connect).not.toHaveBeenCalled();
     });
 
+    it("should send abort to second substrategy", function() {
+      var substrategies = [
+        getSubstrategyMock(true),
+        getSubstrategyMock(true),
+      ];
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
+
+      strategy.connect();
+      substrategies[0].emit("error", 666);
+
+      expect(substrategies[1].connect).toHaveBeenCalled();
+
+      strategy.abort();
+
+      expect(substrategies[1].abort).toHaveBeenCalled();
+    });
+
     it("should not abort when there is no attempt being made", function() {
       var substrategies = [
         getSubstrategyMock(true),
