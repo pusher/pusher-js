@@ -30,67 +30,22 @@
     }
 
     var self = this;
-    var callbacks = {};
 
-    var getOnOpenListener = function(i) {
-      return function(connection) {
-        this.abortCallback = null;
-        abortSubstrategiesExceptFor(i);
-        unbindAllListeners();
-        self.emit("open", connection);
-      };
-    };
-    var getOnErrorListener = function(i) {
-      return function(error) {
-        unbindListeners(i);
-        if (allFailed()) {
-          this.abortCallback = null;
-          self.emit("error", "all substrategies failed"); // TODO
-        }
-      };
-    };
-
-    var abortSubstrategiesExceptFor = function(ignored) {
-      for (var i = 0; i < self.substrategies.length; i++) {
-        if (i !== ignored && callbacks[i] != undefined) {
-          self.substrategies[i].abort();
-        }
-      }
-    };
-    var unbindListeners = function(i) {
-      if (callbacks[i] != undefined) {
-        self.substrategies[i].unbind("open", callbacks[i].onOpen);
-        self.substrategies[i].unbind("error", callbacks[i].onError);
-        callbacks[i] = null;
-      }
-    };
-    var unbindAllListeners = function() {
-      for (var i = 0; i < self.substrategies.length; i++) {
-        unbindListeners(i);
-      }
-    };
-    var allFailed = function() {
-      for (var i = 0; i < self.substrategies.length; i++) {
-        if (callbacks[i] != undefined) {
-          return false;
-        }
-      }
-      return true;
-    };
+    this.listeners = {};
 
     this.abortCallback = function() {
-      abortSubstrategiesExceptFor();
-      unbindAllListeners();
+      self.abortSubstrategies();
+      self.unbindAllListeners();
     };
 
     for (var i = 0; i < self.substrategies.length; i++) {
-      callbacks[i] = {
-        onOpen: getOnOpenListener(i),
-        onError: getOnErrorListener(i),
+      this.listeners[i] = {
+        onOpen: this.getOnOpenListener(i),
+        onError: this.getOnErrorListener(i),
       };
 
-      this.substrategies[i].bind("open", callbacks[i].onOpen);
-      this.substrategies[i].bind("error", callbacks[i].onError);
+      this.substrategies[i].bind("open", this.listeners[i].onOpen);
+      this.substrategies[i].bind("error", this.listeners[i].onError);
 
       this.substrategies[i].connect();
     }
@@ -105,6 +60,60 @@
       return true;
     } else {
       return false;
+    }
+  };
+
+  // protected
+
+  prototype.getOnOpenListener = function(i) {
+    var self = this;
+    return function(connection) {
+      self.abortCallback = null;
+      self.abortSubstrategies(i);
+      self.unbindAllListeners();
+      self.emit("open", connection);
+    };
+  };
+
+  prototype.getOnErrorListener = function(i) {
+    var self = this;
+    return function(error) {
+      self.unbindListeners(i);
+      if (self.allFinished()) {
+        self.abortCallback = null;
+        self.emit("error", "all substrategies failed"); // TODO
+      }
+    };
+  };
+
+  prototype.allFinished = function() {
+    for (var i = 0; i < this.substrategies.length; i++) {
+      if (this.listeners[i] != undefined) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  prototype.unbindListeners = function(i) {
+    if (this.listeners[i]) {
+      this.substrategies[i].unbind("open", this.listeners[i].onOpen);
+      this.substrategies[i].unbind("error", this.listeners[i].onError);
+      this.listeners[i] = null;
+    }
+  };
+
+  prototype.unbindAllListeners = function() {
+    for (var i = 0; i < this.substrategies.length; i++) {
+      this.unbindListeners(i);
+    }
+  };
+
+  prototype.abortSubstrategies = function(ignored) {
+    for (var i = 0; i < this.substrategies.length; i++) {
+      if (i !== ignored && this.listeners[i]) {
+        this.substrategies[i].abort();
+      }
     }
   };
 
