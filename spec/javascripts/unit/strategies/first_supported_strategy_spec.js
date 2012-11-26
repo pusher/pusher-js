@@ -54,7 +54,7 @@ describe("FirstSupportedStrategy", function() {
   });
 
   describe("on connection attempt", function() {
-    it("should succeed on first supported strategy", function() {
+    it("should succeed on the first supported strategy", function() {
       var substrategies = [
         getSubstrategyMock(false),
         getSubstrategyMock(true),
@@ -98,19 +98,6 @@ describe("FirstSupportedStrategy", function() {
       expect(substrategies[1].connect).toHaveBeenCalled();
       expect(substrategies[2].connect).not.toHaveBeenCalled();
     });
-
-    it("should not allow second attempt", function() {
-      var substrategies = [
-        getSubstrategyMock(true),
-      ];
-      var strategy = new Pusher.FirstSupportedStrategy(substrategies);
-
-      expect(strategy.connect()).toBe(true);
-      expect(substrategies[0].connect.calls.length).toEqual(1);
-
-      expect(strategy.connect()).toBe(false);
-      expect(substrategies[0].connect.calls.length).toEqual(1);
-    });
   });
 
   describe("on aborting", function() {
@@ -128,17 +115,6 @@ describe("FirstSupportedStrategy", function() {
       expect(substrategies[0].abort).not.toHaveBeenCalled();
       expect(substrategies[1].abort).toHaveBeenCalled();
       expect(substrategies[2].abort).not.toHaveBeenCalled();
-    });
-
-    it("should not abort when there is no attempt being made", function() {
-      var substrategies = [
-        getSubstrategyMock(true),
-      ];
-      var strategy = new Pusher.FirstSupportedStrategy(substrategies);
-
-      expect(strategy.abort()).toBe(false);
-      expect(substrategies[0].connect.calls.length).toEqual(0);
-      expect(substrategies[0].abort.calls.length).toEqual(0);
     });
   });
 });
