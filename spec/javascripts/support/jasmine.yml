@@ -6,6 +6,7 @@ src_files:
   - pusher_event_dispatcher.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js
+  - strategies/first_connected_ever_strategy.js
   - strategies/first_supported_strategy.js
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
