@@ -1,26 +1,15 @@
 ;(function() {
 
   function FirstConnectedStrategy(substrategies, options) {
-    Pusher.AbstractStrategy.call(this, options);
-    this.substrategies = this.getSupported(substrategies);
+    Pusher.AbstractMultiStrategy.call(this, substrategies, options);
   };
   var prototype = FirstConnectedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.AbstractMultiStrategy.prototype);
 
   // interface
 
   prototype.name = "first_connected";
-
-  prototype.isSupported = function() {
-    return this.substrategies.length > 0;
-  };
-
-  prototype.initialize = function() {
-    for (var i = 0; i < this.substrategies.length; i++) {
-      this.substrategies[i].initialize();
-    }
-  };
 
   prototype.connect = function() {
     if (!this.isSupported() || this.abortCallback) {
@@ -106,16 +95,6 @@
   };
 
   // private
-
-  prototype.getSupported = function(substrategies) {
-    var supported = [];
-    for (var i = 0; i < substrategies.length; i++) {
-      if (substrategies[i].isSupported()) {
-        supported.push(substrategies[i]);
-      }
-    }
-    return supported;
-  };
 
   Pusher.FirstConnectedStrategy = FirstConnectedStrategy;
 }).call(this);
