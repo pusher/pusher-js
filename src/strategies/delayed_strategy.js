@@ -17,9 +17,14 @@
   };
 
   prototype.initialize = function() {
+    if (this.initializeTimer) {
+      return;
+    }
+
     var self = this;
 
     this.initializeTimer = setTimeout(function() {
+      self.initializeTimer = null;
       self.initializeSubstrategy();
     }, this.options.delay);
   };
@@ -32,8 +37,10 @@
     var self = this;
 
     this.connectTimer = setTimeout(function() {
+      self.connectTimer = null;
       self.connectSubstrategy();
     }, this.options.delay);
+
     this.abortCallback = function() {
       if (this.initializeTimer) {
         clearTimeout(this.initializeTimer);
@@ -65,12 +72,12 @@
     }
 
     var onOpen = function(connection) {
-      this.abortCallback = null;
+      self.abortCallback = null;
       unbindListeners();
       self.emit("open", connection);
     };
     var onError = function(error) {
-      this.abortCallback = null;
+      self.abortCallback = null;
       unbindListeners();
       self.emit("error", error);
     };

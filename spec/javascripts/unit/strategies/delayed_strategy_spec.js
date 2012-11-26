@@ -64,6 +64,9 @@ describe("DelayedStrategy", function() {
         delay: 200,
       });
 
+      var openCallback = jasmine.createSpy("openCallback");
+      strategy.bind("open", openCallback);
+
       var startTimestamp = Date.now();
       var initializeCalledAt = null;
       var connectCalledAt = null;
@@ -85,6 +88,11 @@ describe("DelayedStrategy", function() {
       runs(function() {
         expect(initializeCalledAt - startTimestamp).toBeGreaterThan(180);
         expect(connectCalledAt - startTimestamp).toBeGreaterThan(180);
+
+        var connection = {};
+        substrategy.emit("open", connection);
+
+        expect(openCallback).toHaveBeenCalledWith(connection);
       });
     });
 
@@ -116,7 +124,47 @@ describe("DelayedStrategy", function() {
       });
     });
 
-    it("should not allow second attempt", function() {
+    it("should allow reinitialization and reconnection", function() {
+      var substrategy = getSubstrategyMock(true);
+      var strategy = new Pusher.DelayedStrategy(substrategy, {
+        delay: 50,
+      });
+
+      var openCallback = jasmine.createSpy("openCallback");
+      strategy.bind("open", openCallback);
+
+      runs(function() {
+        strategy.initialize();
+        strategy.connect();
+      });
+      waitsFor(function() {
+        return substrategy.initialize.calls.length == 1;
+      }, "initialize to be called", 100);
+      waitsFor(function() {
+        return substrategy.connect.calls.length == 1;
+      }, "connect to be called", 100);
+      runs(function() {
+        expect(substrategy.initialize.calls.length).toEqual(1);
+        substrategy.emit("open", {});
+
+        expect(openCallback.calls.length).toEqual(1);
+
+        strategy.initialize();
+        strategy.connect();
+      });
+      waitsFor(function() {
+        return substrategy.initialize.calls.length == 2;
+      }, "initialize to be called again", 100);
+      waitsFor(function() {
+        return substrategy.connect.calls.length == 2;
+      }, "connect to be called again", 100);
+      runs(function() {
+        substrategy.emit("open", {});
+        expect(openCallback.calls.length).toEqual(2);
+      });
+    });
+
+    it("should allow one attempt at once", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
         delay: 0,
