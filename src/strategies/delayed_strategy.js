@@ -1,14 +1,12 @@
 ;(function() {
 
   function DelayedStrategy(substrategy, options) {
-    Pusher.EventsDispatcher.call(this);
-
+    Pusher.AbstractStrategy.call(this, options);
     this.substrategy = substrategy;
-    this.options = options || {};
   };
   var prototype = DelayedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
+  Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
 
   // interface
 
@@ -48,16 +46,6 @@
     };
 
     return true;
-  };
-
-  prototype.abort = function() {
-    if (this.abortCallback) {
-      this.abortCallback();
-      this.abortCallback = null;
-      return true;
-    } else {
-      return false;
-    }
   };
 
   // private

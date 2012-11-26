@@ -4,6 +4,7 @@ src_files:
   - pusher.js
   - dependencies.js
   - pusher_event_dispatcher.js
+  - strategies/abstract_strategy.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js
   - strategies/first_connected_ever_strategy.js

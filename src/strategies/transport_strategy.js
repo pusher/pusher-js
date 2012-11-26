@@ -1,14 +1,12 @@
 ;(function() {
 
   function TransportStrategy(transport, options) {
-    Pusher.EventsDispatcher.call(this);
-
+    Pusher.AbstractStrategy.call(this, options);
     this.transport = transport;
-    this.options = options || {};
   };
   var prototype = TransportStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
+  Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
 
   prototype.name = "transport";
 
@@ -76,16 +74,6 @@
     this.connection.connect();
 
     return true;
-  };
-
-  prototype.abort = function() {
-    if (this.abortCallback) {
-      this.abortCallback();
-      this.abortCallback = null;
-      return true;
-    } else {
-      return false;
-    }
   };
 
   Pusher.TransportStrategy = TransportStrategy;
