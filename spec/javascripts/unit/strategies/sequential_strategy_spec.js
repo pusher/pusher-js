@@ -133,6 +133,9 @@ describe("SequentialStrategy", function() {
 
       expect(substrategies[0].connect.calls.length).toEqual(2);
       expect(substrategies[1].connect.calls.length).toEqual(1);
+
+      strategy.abort();
+      expect(substrategies[0].abort.calls.length).toEqual(1);
     });
 
     it("should allow one attempt at once", function() {
