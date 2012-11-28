@@ -115,7 +115,7 @@ describe("FirstConnectedStrategy", function() {
       expect(substrategies[1].connect).not.toHaveBeenCalled();
     });
 
-    it("should not allow second connection attempt", function() {
+    it("should allow one attempt at once", function() {
       var substrategies = [
         getSubstrategyMock(true),
       ];
@@ -126,6 +126,47 @@ describe("FirstConnectedStrategy", function() {
 
       expect(strategy.connect()).toBe(false);
       expect(substrategies[0].connect.calls.length).toEqual(1);
+    });
+
+    it("should allow reinitialization and reconnection", function() {
+      var substrategies = [
+        getSubstrategyMock(true),
+        getSubstrategyMock(true),
+      ];
+      var strategy = new Pusher.FirstConnectedStrategy(substrategies);
+
+      var openCallback = jasmine.createSpy("openCallback");
+      strategy.bind("open", openCallback);
+
+      strategy.initialize();
+      expect(substrategies[0].initialize.calls.length).toEqual(1);
+      expect(substrategies[1].initialize.calls.length).toEqual(1);
+
+      strategy.connect();
+      expect(substrategies[0].connect.calls.length).toEqual(1);
+      expect(substrategies[1].connect.calls.length).toEqual(1);
+
+      var connection = {};
+      substrategies[1].emit("open", connection);
+
+      expect(substrategies[0].abort.calls.length).toEqual(1);
+      expect(substrategies[1].abort.calls.length).toEqual(0);
+
+      strategy.initialize();
+      expect(substrategies[0].initialize.calls.length).toEqual(2);
+      expect(substrategies[1].initialize.calls.length).toEqual(2);
+
+      strategy.connect();
+      expect(substrategies[0].connect.calls.length).toEqual(2);
+      expect(substrategies[1].connect.calls.length).toEqual(2);
+
+      var connection2 = {};
+      substrategies[0].emit("open", connection);
+
+      expect(substrategies[0].abort.calls.length).toEqual(1);
+      expect(substrategies[1].abort.calls.length).toEqual(1);
+
+      expect(openCallback).toHaveBeenCalledWith(connection2);
     });
   });
 
