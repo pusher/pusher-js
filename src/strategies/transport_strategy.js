@@ -65,6 +65,7 @@
     this.abortCallback = function() {
       unbindListeners();
       self.connection.close();
+      self.connection = null;
     };
 
     this.connection.bind("open", onOpen);

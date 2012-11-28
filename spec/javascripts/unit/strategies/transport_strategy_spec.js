@@ -110,7 +110,7 @@ describe("TransportStrategy", function() {
       expect(transport.createConnection).not.toHaveBeenCalled();
     });
 
-    it("should not allow connecting twice", function() {
+    it("should allow one attempt at once", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport);
@@ -178,6 +178,45 @@ describe("TransportStrategy", function() {
       connection.state = "closed";
       connection.emit("closed");
       expect(errorCallback).toHaveBeenCalledWith("closed");
+    });
+
+    it("should allow reinitialization and reconnection", function() {
+      var connection = getConnectionMock();
+      var transport = getTransportMock(true, connection);
+      var strategy = new Pusher.TransportStrategy(transport);
+
+      var openCallback = jasmine.createSpy("openCallback");
+      strategy.bind("open", openCallback);
+
+      strategy.initialize();
+
+      connection.state = "initialized";
+      connection.emit("initialized");
+
+      strategy.connect();
+      expect(connection.connect).toHaveBeenCalled();
+
+      connection.state = "open";
+      connection.emit("open")
+      expect(openCallback).toHaveBeenCalledWith(connection);
+
+      var connection2 = getConnectionMock();
+      transport.createConnection = jasmine.createSpy("createConnection")
+        .andReturn(connection2);
+
+      strategy.initialize();
+
+      connection2.state = "initialized";
+      connection2.emit("initialized");
+
+      strategy.connect();
+      expect(connection2.connect).toHaveBeenCalled();
+
+      connection2.state = "open";
+      connection2.emit("open")
+
+      expect(openCallback.calls.length).toEqual(2);
+      expect(openCallback).toHaveBeenCalledWith(connection2);
     });
   });
 
