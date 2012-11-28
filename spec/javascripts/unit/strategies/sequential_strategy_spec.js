@@ -135,7 +135,7 @@ describe("SequentialStrategy", function() {
       expect(substrategies[1].connect.calls.length).toEqual(1);
     });
 
-    it("should not allow second attempt", function() {
+    it("should allow one attempt at once", function() {
       var substrategies = [
         getSubstrategyMock(true),
       ];
@@ -146,6 +146,39 @@ describe("SequentialStrategy", function() {
 
       expect(strategy.connect()).toBe(false);
       expect(substrategies[0].connect.calls.length).toEqual(1);
+    });
+
+    it("should allow reinitialization and reconnection", function() {
+      var substrategies = [
+        getSubstrategyMock(true),
+        getSubstrategyMock(true),
+      ];
+      var strategy = new Pusher.SequentialStrategy(substrategies, {
+        loop: true,
+      });
+
+      strategy.initialize();
+      expect(substrategies[0].initialize.calls.length).toEqual(1);
+      expect(substrategies[1].initialize.calls.length).toEqual(1);
+
+      strategy.connect();
+      expect(substrategies[0].connect.calls.length).toEqual(1);
+      expect(substrategies[1].connect.calls.length).toEqual(0);
+      expect(substrategies[0].initialize.calls.length).toEqual(2);
+      expect(substrategies[1].initialize.calls.length).toEqual(1);
+
+      substrategies[0].emit("open", {});
+      expect(substrategies[0].connect.calls.length).toEqual(1);
+
+      strategy.initialize();
+      expect(substrategies[0].initialize.calls.length).toEqual(3);
+      expect(substrategies[1].initialize.calls.length).toEqual(2);
+
+      strategy.connect();
+      expect(substrategies[0].connect.calls.length).toEqual(2);
+      expect(substrategies[1].connect.calls.length).toEqual(0);
+      expect(substrategies[0].initialize.calls.length).toEqual(4);
+      expect(substrategies[1].initialize.calls.length).toEqual(2);
     });
   });
 

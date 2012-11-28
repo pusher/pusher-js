@@ -22,6 +22,7 @@
     var timeout = this.options.timeout;
 
     var tryNextStrategy = function(error, connection) {
+      self.abortCallback = null;
       if (connection) {
         self.emit("open", connection);
       } else {
@@ -57,17 +58,14 @@
 
   prototype.tryStrategy = function(strategy, timeoutLength, callback) {
     var onOpen = function(connection) {
-      this.abortCallback = null;
       unbindListeners();
       callback(null, connection);
     };
     var onError = function(error) {
-      this.abortCallback = null;
       unbindListeners();
       callback(error);
     };
     var onTimeout = function() {
-      this.abortCallback = null;
       strategy.abort();
       unbindListeners();
       callback("timeout");
@@ -93,6 +91,9 @@
     strategy.bind("open", onOpen);
     strategy.bind("error", onError);
 
+    // we initialize here again, because we might be trying this strategy again
+    // initialize calls should do as little as possible
+    strategy.initialize();
     strategy.connect();
 
     return abortCallback;
