@@ -20,7 +20,7 @@ describe("FirstSupportedStrategy", function() {
     it("should return true when one of substrategies is supported", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
@@ -30,7 +30,7 @@ describe("FirstSupportedStrategy", function() {
     it("should return false when none of substrategies is supported", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(false),
+        getSubstrategyMock(false)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
@@ -42,7 +42,7 @@ describe("FirstSupportedStrategy", function() {
     it("should delegate initialization to the first supported substrategy immediately", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
@@ -58,7 +58,7 @@ describe("FirstSupportedStrategy", function() {
       var substrategies = [
         getSubstrategyMock(false),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
@@ -81,7 +81,7 @@ describe("FirstSupportedStrategy", function() {
       var substrategies = [
         getSubstrategyMock(false),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
@@ -105,7 +105,7 @@ describe("FirstSupportedStrategy", function() {
       var substrategies = [
         getSubstrategyMock(false),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies, {});
 

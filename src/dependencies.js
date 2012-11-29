@@ -83,14 +83,14 @@ var _require = (function() {
         var cdn = this.options.cdn_https;
       }
       return cdn + "/" + this.options.version;
-    },
-  }
+    }
+  };
 
   Pusher.Dependencies = new DependencyLoader({
     cdn_http: Pusher.cdn_http,
     cdn_https: Pusher.cdn_https,
     version: Pusher.VERSION,
-    suffix: Pusher.dependency_suffix,
+    suffix: Pusher.dependency_suffix
   });
 
   // Support Firefox versions which prefix WebSocket

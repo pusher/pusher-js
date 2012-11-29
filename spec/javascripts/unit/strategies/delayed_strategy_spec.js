@@ -36,13 +36,13 @@ describe("DelayedStrategy", function() {
     it("should delegate initialization to the substrategy with a delay", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 200,
+        delay: 200
       });
 
-      var startTimestamp = Date.now();
+      var startTimestamp = Pusher.Util.now();
       var initializeCalledAt = null;
       substrategy.initialize = jasmine.createSpy().andCallFake(function() {
-        initializeCalledAt = Date.now();
+        initializeCalledAt = Pusher.Util.now();
       });
 
       runs(function() {
@@ -61,21 +61,21 @@ describe("DelayedStrategy", function() {
     it("should connect to a substrategy after a delay", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 200,
+        delay: 200
       });
 
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
 
-      var startTimestamp = Date.now();
+      var startTimestamp = Pusher.Util.now();
       var initializeCalledAt = null;
       var connectCalledAt = null;
       substrategy.initialize = jasmine.createSpy().andCallFake(function() {
-        initializeCalledAt = Date.now();
+        initializeCalledAt = Pusher.Util.now();
         expect(connectCalledAt).toBe(null);
       });
       substrategy.connect = jasmine.createSpy().andCallFake(function() {
-        connectCalledAt = Date.now();
+        connectCalledAt = Pusher.Util.now();
       });
 
       runs(function() {
@@ -99,13 +99,13 @@ describe("DelayedStrategy", function() {
     it("should emit an error when the substrategy fails", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       var errorCallback = jasmine.createSpy();
       strategy.bind("error", errorCallback);
 
-      var startTimestamp = Date.now();
+      var startTimestamp = Pusher.Util.now();
       var connectCalled = false;
       substrategy.connect = jasmine.createSpy().andCallFake(function() {
         connectCalled = true;
@@ -127,7 +127,7 @@ describe("DelayedStrategy", function() {
     it("should allow reinitialization and reconnection", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 50,
+        delay: 50
       });
 
       var openCallback = jasmine.createSpy("openCallback");
@@ -167,7 +167,7 @@ describe("DelayedStrategy", function() {
     it("should allow one attempt at once", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       expect(strategy.connect()).toBe(true);
@@ -179,7 +179,7 @@ describe("DelayedStrategy", function() {
     it("should send abort to the substrategy after connect was called", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       var timerCalled = false;
@@ -215,7 +215,7 @@ describe("DelayedStrategy", function() {
     it("should not send abort to the substrategy before connect was called", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       var timerCalled = false;
@@ -252,7 +252,7 @@ describe("DelayedStrategy", function() {
     it("should not send abort when waiting", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       strategy.initialize();
@@ -267,7 +267,7 @@ describe("DelayedStrategy", function() {
     it("should not send abort when there's no attempt being made", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       strategy.abort();
@@ -279,7 +279,7 @@ describe("DelayedStrategy", function() {
     it("should not send abort twice", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 0,
+        delay: 0
       });
 
       strategy.initialize();

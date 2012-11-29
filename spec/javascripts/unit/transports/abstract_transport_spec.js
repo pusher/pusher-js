@@ -4,7 +4,7 @@ describe("AbstractTransport", function() {
       secure: false,
       host: "example.com",
       nonsecurePort: 12345,
-      securePort: 54321,
+      securePort: 54321
     }, options);
 
     return new Pusher.AbstractTransport(key || "foo", options);
@@ -143,7 +143,7 @@ describe("AbstractTransport", function() {
 
       expect(errorCallback).toHaveBeenCalledWith({
         type: "WebSocketError",
-        error: "We're doomed",
+        error: "We're doomed"
       });
       expect(closedCallback).toHaveBeenCalled();
       expect(this.transport.state).toEqual("closed");

@@ -21,7 +21,7 @@ describe("FirstConnectedEverStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 
@@ -52,7 +52,7 @@ describe("FirstConnectedEverStrategy", function() {
     it("should emit error after all substrategies failed", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 
@@ -71,7 +71,7 @@ describe("FirstConnectedEverStrategy", function() {
     it("should not emit errors after one substrategy succeede and other failed", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 
@@ -93,7 +93,7 @@ describe("FirstConnectedEverStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 
@@ -111,7 +111,7 @@ describe("FirstConnectedEverStrategy", function() {
     it("should not allow aborting after all strategies succeeded", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 
@@ -128,7 +128,7 @@ describe("FirstConnectedEverStrategy", function() {
     it("should not allow aborting after all strategies failed", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 

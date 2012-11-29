@@ -37,6 +37,10 @@
     var self = this;
 
     this.connectTimer = setTimeout(function() {
+      if (self.connectTimer === null) {
+        // hack for misbehaving clearTimeout in IE < 9
+        return;
+      }
       self.connectTimer = null;
       self.connectSubstrategy();
     }, this.options.delay);

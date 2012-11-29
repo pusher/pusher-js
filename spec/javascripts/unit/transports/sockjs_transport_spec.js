@@ -5,7 +5,7 @@ describe("SockJSTransport", function() {
       secure: false,
       host: "example.com",
       nonsecurePort: 12345,
-      securePort: 54321,
+      securePort: 54321
     }, options);
 
     return new Pusher.SockJSTransport(key, options);
@@ -93,7 +93,7 @@ describe("SockJSTransport", function() {
 
       expect(openCallback).toHaveBeenCalled();
       expect(this.socket.send).toHaveBeenCalledWith(JSON.stringify({
-        path: "/app/foo",
+        path: "/app/foo"
       }));
     });
   });

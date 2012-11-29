@@ -41,7 +41,7 @@ describe("TransportStrategy", function() {
     it("should pass key and options to the transport", function() {
       var options = {
         key: "asdf",
-        foo: "bar",
+        foo: "bar"
       };
       var transport = getTransportMock(true);
       var strategy = new Pusher.TransportStrategy(transport, options);

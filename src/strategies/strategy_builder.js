@@ -5,7 +5,7 @@
   StrategyBuilder.transports = {
     ws: Pusher.WSTransport,
     flash: Pusher.FlashTransport,
-    sockjs: Pusher.SockJSTransport,
+    sockjs: Pusher.SockJSTransport
   };
 
   StrategyBuilder.builders = {
@@ -15,12 +15,12 @@
         throw ("unsupported transport " + scheme.transport); // TODO
       }
 
-      var options = filter(scheme, ["type", "transport"]);
+      var options = filter(scheme, {"type": true, "transport": true});
       return new Pusher.TransportStrategy(klass, options);
     },
 
     delayed: function(scheme) {
-      var options = filter(scheme, ["type", "child"]);
+      var options = filter(scheme, {"type": true, "child": true});
 
       return new Pusher.DelayedStrategy(
         StrategyBuilder.build(merge(options, scheme.child)),
@@ -42,7 +42,7 @@
 
     first_connected_ever: function(scheme) {
       return buildWithSubstrategies(Pusher.FirstConnectedEverStrategy, scheme);
-    },
+    }
   };
 
   StrategyBuilder.build = function(scheme) {
@@ -58,7 +58,7 @@
   // helpers
 
   function buildWithSubstrategies(constructor, scheme) {
-    var options = filter(scheme, ["type", "children"]);
+    var options = filter(scheme, {"type": true, "children": true});
     var substrategies = [];
 
     for (var i = 0; i < scheme.children.length; i++) {
@@ -70,11 +70,11 @@
     return new constructor(substrategies, options);
   };
 
-  function filter(object, keys) {
+  function filter(object, filteredKeys) {
     var result = {};
     for (var key in object) {
-      if (object.hasOwnProperty(key)) {
-        if (keys.indexOf(key) === -1) {
+      if (Object.prototype.hasOwnProperty.call(object, key)) {
+        if (!filteredKeys[key]) {
           result[key] = object[key];
         }
       }
@@ -86,12 +86,12 @@
   function merge(a, b) {
     var result = {};
     for (var key in a) {
-      if (a.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(a, key)) {
         result[key] = a[key];
       }
     }
     for (var key in b) {
-      if (b.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(b, key)) {
         result[key] = b[key];
       }
     }

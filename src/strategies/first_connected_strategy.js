@@ -28,7 +28,7 @@
     for (var i = 0; i < self.substrategies.length; i++) {
       this.listeners[i] = {
         onOpen: this.getOnOpenListener(i),
-        onError: this.getOnErrorListener(i),
+        onError: this.getOnErrorListener(i)
       };
 
       this.substrategies[i].bind("open", this.listeners[i].onOpen);

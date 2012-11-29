@@ -5,7 +5,7 @@ describe("WSTransport", function() {
       secure: false,
       host: "example.com",
       nonsecurePort: 12345,
-      securePort: 54321,
+      securePort: 54321
     }, options);
 
     return new Pusher.WSTransport(key, options);

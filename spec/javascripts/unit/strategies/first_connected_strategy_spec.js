@@ -20,7 +20,7 @@ describe("FirstConnectedStrategy", function() {
     it("should return true when one of substrategies is supported", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -30,7 +30,7 @@ describe("FirstConnectedStrategy", function() {
     it("should return false when none of substrategies is supported", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(false),
+        getSubstrategyMock(false)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -43,7 +43,7 @@ describe("FirstConnectedStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(false),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -60,7 +60,7 @@ describe("FirstConnectedStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -87,7 +87,7 @@ describe("FirstConnectedStrategy", function() {
     it("should emit error after all substrategies failed", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -106,7 +106,7 @@ describe("FirstConnectedStrategy", function() {
     it("should not connect when there are no supported substrategies", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(false),
+        getSubstrategyMock(false)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -117,7 +117,7 @@ describe("FirstConnectedStrategy", function() {
 
     it("should allow one attempt at once", function() {
       var substrategies = [
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -131,7 +131,7 @@ describe("FirstConnectedStrategy", function() {
     it("should allow reinitialization and reconnection", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -175,7 +175,7 @@ describe("FirstConnectedStrategy", function() {
       var substrategies = [
         getSubstrategyMock(false),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -190,7 +190,7 @@ describe("FirstConnectedStrategy", function() {
     it("should not abort failed substrategies", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -205,7 +205,7 @@ describe("FirstConnectedStrategy", function() {
 
     it("should not abort twice", function() {
       var substrategies = [
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
@@ -217,7 +217,7 @@ describe("FirstConnectedStrategy", function() {
 
     it("should not abort when there is no attempt being made", function() {
       var substrategies = [
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 

@@ -19,7 +19,7 @@ describe("SequentialStrategy", function() {
     it("should return true when one of substrategies is supported", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -29,7 +29,7 @@ describe("SequentialStrategy", function() {
     it("should return false when none of substrategies is supported", function() {
       var substrategies = [
         getSubstrategyMock(false),
-        getSubstrategyMock(false),
+        getSubstrategyMock(false)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -42,7 +42,7 @@ describe("SequentialStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(false),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -58,7 +58,7 @@ describe("SequentialStrategy", function() {
     it("should finish on first successful substrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -83,7 +83,7 @@ describe("SequentialStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(false),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -113,10 +113,10 @@ describe("SequentialStrategy", function() {
     it("should support looping", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {
-        loop: true,
+        loop: true
       });
 
       strategy.connect();
@@ -140,7 +140,7 @@ describe("SequentialStrategy", function() {
 
     it("should allow one attempt at once", function() {
       var substrategies = [
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -154,10 +154,10 @@ describe("SequentialStrategy", function() {
     it("should allow reinitialization and reconnection", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {
-        loop: true,
+        loop: true
       });
 
       strategy.initialize();
@@ -189,7 +189,7 @@ describe("SequentialStrategy", function() {
     it("should send abort to substrategy and not try another one", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
@@ -207,7 +207,7 @@ describe("SequentialStrategy", function() {
     it("should send abort to second substrategy", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
@@ -223,7 +223,7 @@ describe("SequentialStrategy", function() {
 
     it("should not abort when there is no attempt being made", function() {
       var substrategies = [
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
@@ -237,18 +237,18 @@ describe("SequentialStrategy", function() {
     it("should advance to next substrategy if possible", function() {
       var substrategies = [
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, { timeout: 100 });
 
-      var testStartTimestamp = Date.now();
+      var testStartTimestamp = Pusher.Util.now();
       var nextStrategyDelay = null;
 
       runs(function() {
         strategy.connect();
       });
       waitsFor(function() {
-        nextStrategyDelay = Date.now() - testStartTimestamp;
+        nextStrategyDelay = Pusher.Util.now() - testStartTimestamp;
         return substrategies[1].connect.wasCalled;
       }, "error callback to be called", 190);
       runs(function() {
@@ -262,11 +262,11 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(true),
         getSubstrategyMock(true),
         getSubstrategyMock(true),
-        getSubstrategyMock(true),
+        getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {
         timeout: 100,
-        timeoutLimit: 400,
+        timeoutLimit: 400
       });
 
       strategy.connect();
@@ -275,31 +275,31 @@ describe("SequentialStrategy", function() {
       var substrategyDelay = null;
 
       runs(function() {
-        substrategyStartTimestamp = Date.now();
+        substrategyStartTimestamp = Pusher.Util.now();
       });
       waitsFor(function() {
-        substrategyDelay = Date.now() - substrategyStartTimestamp;
+        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
         return substrategies[1].connect.wasCalled;
       }, "error callback to be called", 190);
       runs(function() {
         expect(substrategyDelay).toBeGreaterThan(99);
       });
       waitsFor(function() {
-        substrategyDelay = Date.now() - substrategyStartTimestamp;
+        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
         return substrategies[2].connect.wasCalled;
       }, "error callback to be called", 290);
       runs(function() {
         expect(substrategyDelay).toBeGreaterThan(199);
       });
       waitsFor(function() {
-        substrategyDelay = Date.now() - substrategyStartTimestamp;
+        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
         return substrategies[3].connect.wasCalled;
       }, "error callback to be called", 490);
       runs(function() {
         expect(substrategyDelay).toBeGreaterThan(399);
       });
       waitsFor(function() {
-        substrategyDelay = Date.now() - substrategyStartTimestamp;
+        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
         return substrategies[4].connect.wasCalled;
       }, "error callback to be called", 490);
       runs(function() {

@@ -3,7 +3,7 @@ describe("StrategyBuilder", function() {
     var strategy = Pusher.StrategyBuilder.build(
       { type: "transport",
         transport: "ws",
-        option: "value",
+        option: "value"
       }
     );
 
@@ -20,9 +20,9 @@ describe("StrategyBuilder", function() {
         child: {
           type: "transport",
           transport: "ws",
-          option: "value",
+          option: "value"
         },
-        delay: 2000,
+        delay: 2000
       }
     );
 
@@ -30,36 +30,39 @@ describe("StrategyBuilder", function() {
     expect(strategy.substrategy).toEqual(jasmine.any(Pusher.TransportStrategy));
 
     expect(strategy.options).toEqual({
-      delay: 2000,
+      delay: 2000
     });
     expect(strategy.substrategy.options).toEqual({
       option: "value",
-      delay: 2000,
+      delay: 2000
     });
   });
 
   it("should construct a sequential strategy", function() {
+    spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
+
     var strategy = Pusher.StrategyBuilder.build(
       { type: "sequential",
         children: [
           { type: "transport",
-            transport: "ws",
+            transport: "ws"
           },
           { type: "transport",
             transport: "sockjs",
-            host: "sockjs.pusher.com",
-          },
+            host: "sockjs.pusher.com"
+          }
         ],
         host: "ws.pusherapp.com",
         loop: true,
         timeout: 2000,
-        timeoutLimit: 8000,
+        timeoutLimit: 8000
       }
     );
 
     expect(strategy).toEqual(jasmine.any(Pusher.SequentialStrategy));
     expect(strategy.substrategies[0])
       .toEqual(jasmine.any(Pusher.TransportStrategy));
+
     expect(strategy.substrategies[0].transport).toBe(Pusher.WSTransport);
     expect(strategy.substrategies[1])
       .toEqual(jasmine.any(Pusher.TransportStrategy));
@@ -69,19 +72,19 @@ describe("StrategyBuilder", function() {
       host: "ws.pusherapp.com",
       loop: true,
       timeout: 2000,
-      timeoutLimit: 8000,
+      timeoutLimit: 8000
     });
     expect(strategy.substrategies[0].options).toEqual({
       host: "ws.pusherapp.com",
       loop: true,
       timeout: 2000,
-      timeoutLimit: 8000,
+      timeoutLimit: 8000
     });
     expect(strategy.substrategies[1].options).toEqual({
       host: "sockjs.pusher.com",
       loop: true,
       timeout: 2000,
-      timeoutLimit: 8000,
+      timeoutLimit: 8000
     });
   });
 
@@ -89,10 +92,8 @@ describe("StrategyBuilder", function() {
     var strategy = Pusher.StrategyBuilder.build(
       { type: "first_supported",
         children: [
-          { type: "transport", transport: "ws" },
-          { type: "transport", transport: "flash" },
-          { type: "transport", transport: "sockjs" },
-        ],
+          { type: "transport", transport: "sockjs" }
+        ]
       }
     );
     expect(strategy).toEqual(jasmine.any(Pusher.FirstSupportedStrategy));
@@ -102,9 +103,8 @@ describe("StrategyBuilder", function() {
     var strategy = Pusher.StrategyBuilder.build(
       { type: "first_connected",
         children: [
-          { type: "transport", transport: "ws" },
-          { type: "transport", transport: "flash" },
-        ],
+          { type: "transport", transport: "sockjs" }
+        ]
       }
     );
     expect(strategy).toEqual(jasmine.any(Pusher.FirstConnectedStrategy));
@@ -114,9 +114,8 @@ describe("StrategyBuilder", function() {
     var strategy = Pusher.StrategyBuilder.build(
       { type: "first_connected_ever",
         children: [
-          { type: "transport", transport: "ws" },
-          { type: "transport", transport: "flash" },
-        ],
+          { type: "transport", transport: "sockjs" }
+        ]
       }
     );
     expect(strategy).toEqual(jasmine.any(Pusher.FirstConnectedEverStrategy));

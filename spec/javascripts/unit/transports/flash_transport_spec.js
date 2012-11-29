@@ -5,7 +5,7 @@ describe("FlashTransport", function() {
       secure: false,
       host: "example.com",
       nonsecurePort: 12345,
-      securePort: 54321,
+      securePort: 54321
     }, options);
 
     return new Pusher.FlashTransport(key, options);
@@ -36,25 +36,29 @@ describe("FlashTransport", function() {
   });
 
   it("should be supported only if Flash is present", function() {
-    var _navigator = navigator;
-    var _mimeTypes = navigator.mimeTypes;
+    // workaround for IE to skip this test
+    if (navigator.__defineGetter__) {
+      var _navigator = navigator;
+      var _mimeTypes = navigator.mimeTypes;
 
-    navigator = {};
+      navigator = {};
 
-    navigator.__defineGetter__("mimeTypes", function() {
-      return { "application/x-shockwave-flash": {} };
-    });
-    expect(Pusher.FlashTransport.isSupported()).toBe(true);
+      navigator.__defineGetter__("mimeTypes", function() {
+        return { "application/x-shockwave-flash": {} };
+      });
+      expect(Pusher.FlashTransport.isSupported()).toBe(true);
 
-    navigator.__defineGetter__("mimeTypes", function() {
-      return {};
-    });
-    expect(Pusher.FlashTransport.isSupported()).toBe(false);
+      navigator.__defineGetter__("mimeTypes", function() {
+        return {};
+      });
+      expect(Pusher.FlashTransport.isSupported()).toBe(false);
 
-    navigator.__defineGetter__("mimeTypes", function() {
-      return _mimeTypes;
-    });
-    navigator = _navigator;
+      navigator.__defineGetter__("mimeTypes", function() {
+        return _mimeTypes;
+      });
+
+      navigator = _navigator;
+    }
   });
 
   describe("when initializing", function() {
