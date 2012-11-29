@@ -11,6 +11,14 @@ describe("SequentialStrategy", function() {
     return substrategy;
   }
 
+  function mockSetTimeout(delayList) {
+    spyOn(window, "setTimeout").andCallFake(function(callback, delay) {
+      expect(delayList.length).toBeGreaterThan(0);
+      expect(delay).toEqual(delayList.shift());
+      callback();
+    });
+  }
+
   it("should expose its name", function() {
     expect(new Pusher.SequentialStrategy([]).name).toEqual("seq");
   });
@@ -234,29 +242,7 @@ describe("SequentialStrategy", function() {
   });
 
   describe("on timeout", function() {
-    it("should advance to next substrategy if possible", function() {
-      var substrategies = [
-        getSubstrategyMock(true),
-        getSubstrategyMock(true)
-      ];
-      var strategy = new Pusher.SequentialStrategy(substrategies, { timeout: 100 });
-
-      var testStartTimestamp = Pusher.Util.now();
-      var nextStrategyDelay = null;
-
-      runs(function() {
-        strategy.connect();
-      });
-      waitsFor(function() {
-        nextStrategyDelay = Pusher.Util.now() - testStartTimestamp;
-        return substrategies[1].connect.wasCalled;
-      }, "error callback to be called", 190);
-      runs(function() {
-        expect(nextStrategyDelay).toBeGreaterThan(99);
-      });
-    });
-
-    it("should increase timeout exponentially until the limit", function() {
+    it("should try substrategies while increasing timeout exponentially", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(true),
@@ -269,42 +255,29 @@ describe("SequentialStrategy", function() {
         timeoutLimit: 400
       });
 
+      mockSetTimeout([100, 200, 400, 400, 400]);
+
+      substrategies[0].connect = jasmine.createSpy().andCallFake(function() {
+        expect(substrategies[1].connect).not.toHaveBeenCalled();
+      });
+      substrategies[1].connect = jasmine.createSpy().andCallFake(function() {
+        expect(substrategies[2].connect).not.toHaveBeenCalled();
+      });
+      substrategies[2].connect = jasmine.createSpy().andCallFake(function() {
+        expect(substrategies[3].connect).not.toHaveBeenCalled();
+      });
+      substrategies[3].connect = jasmine.createSpy().andCallFake(function() {
+        expect(substrategies[4].connect).not.toHaveBeenCalled();
+      });
+
       strategy.connect();
+      expect(setTimeout.calls.length).toEqual(5);
 
-      var substrategyStartTimestamp = null;
-      var substrategyDelay = null;
-
-      runs(function() {
-        substrategyStartTimestamp = Pusher.Util.now();
-      });
-      waitsFor(function() {
-        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
-        return substrategies[1].connect.wasCalled;
-      }, "error callback to be called", 190);
-      runs(function() {
-        expect(substrategyDelay).toBeGreaterThan(99);
-      });
-      waitsFor(function() {
-        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
-        return substrategies[2].connect.wasCalled;
-      }, "error callback to be called", 290);
-      runs(function() {
-        expect(substrategyDelay).toBeGreaterThan(199);
-      });
-      waitsFor(function() {
-        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
-        return substrategies[3].connect.wasCalled;
-      }, "error callback to be called", 490);
-      runs(function() {
-        expect(substrategyDelay).toBeGreaterThan(399);
-      });
-      waitsFor(function() {
-        substrategyDelay = Pusher.Util.now() - substrategyStartTimestamp;
-        return substrategies[4].connect.wasCalled;
-      }, "error callback to be called", 490);
-      runs(function() {
-        expect(substrategyDelay).toBeGreaterThan(399);
-      });
+      expect(substrategies[0].connect).toHaveBeenCalled();
+      expect(substrategies[1].connect).toHaveBeenCalled();
+      expect(substrategies[2].connect).toHaveBeenCalled();
+      expect(substrategies[3].connect).toHaveBeenCalled();
+      expect(substrategies[4].connect).toHaveBeenCalled();
     });
   });
 });

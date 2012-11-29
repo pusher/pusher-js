@@ -11,6 +11,14 @@ describe("DelayedStrategy", function() {
     return substrategy;
   }
 
+  function mockSetTimeout(delayList) {
+    spyOn(window, "setTimeout").andCallFake(function(callback, delay) {
+      expect(delayList.length).toBeGreaterThan(0);
+      expect(delay).toEqual(delayList.shift());
+      callback();
+    });
+  }
+
   it("should expose its name", function() {
     expect(new Pusher.DelayedStrategy([]).name)
       .toEqual("delayed");
@@ -39,21 +47,11 @@ describe("DelayedStrategy", function() {
         delay: 200
       });
 
-      var startTimestamp = Pusher.Util.now();
-      var initializeCalledAt = null;
-      substrategy.initialize = jasmine.createSpy().andCallFake(function() {
-        initializeCalledAt = Pusher.Util.now();
-      });
+      mockSetTimeout([200]);
 
-      runs(function() {
-        strategy.initialize();
-      });
-      waitsFor(function() {
-        return initializeCalledAt;
-      }, "initialize to be called", 400);
-      runs(function() {
-        expect(initializeCalledAt - startTimestamp).toBeGreaterThan(180);
-      });
+      expect(substrategy.initialize).not.toHaveBeenCalled();
+      strategy.initialize();
+      expect(substrategy.initialize).toHaveBeenCalled();
     });
   });
 
@@ -61,39 +59,24 @@ describe("DelayedStrategy", function() {
     it("should connect to a substrategy after a delay", function() {
       var substrategy = getSubstrategyMock(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 200
+        delay: 100
       });
 
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
 
-      var startTimestamp = Pusher.Util.now();
-      var initializeCalledAt = null;
-      var connectCalledAt = null;
-      substrategy.initialize = jasmine.createSpy().andCallFake(function() {
-        initializeCalledAt = Pusher.Util.now();
-        expect(connectCalledAt).toBe(null);
-      });
-      substrategy.connect = jasmine.createSpy().andCallFake(function() {
-        connectCalledAt = Pusher.Util.now();
-      });
+      mockSetTimeout([100, 100]);
 
-      runs(function() {
-        strategy.initialize();
-        strategy.connect();
-      });
-      waitsFor(function() {
-        return connectCalledAt;
-      }, "connect to be called", 400);
-      runs(function() {
-        expect(initializeCalledAt - startTimestamp).toBeGreaterThan(180);
-        expect(connectCalledAt - startTimestamp).toBeGreaterThan(180);
+      strategy.initialize();
+      strategy.connect();
 
-        var connection = {};
-        substrategy.emit("open", connection);
+      expect(substrategy.initialize).toHaveBeenCalled();
+      expect(substrategy.connect).toHaveBeenCalled();
 
-        expect(openCallback).toHaveBeenCalledWith(connection);
-      });
+      var connection = {};
+      substrategy.emit("open", connection);
+
+      expect(openCallback).toHaveBeenCalledWith(connection);
     });
 
     it("should emit an error when the substrategy fails", function() {
@@ -105,23 +88,13 @@ describe("DelayedStrategy", function() {
       var errorCallback = jasmine.createSpy();
       strategy.bind("error", errorCallback);
 
-      var startTimestamp = Pusher.Util.now();
-      var connectCalled = false;
-      substrategy.connect = jasmine.createSpy().andCallFake(function() {
-        connectCalled = true;
-      });
+      mockSetTimeout([0, 0]);
 
-      runs(function() {
-        strategy.initialize();
-        strategy.connect();
-      });
-      waitsFor(function() {
-        return connectCalled;
-      }, "connect to be called", 10);
-      runs(function() {
-        strategy.emit("error", 123);
-        expect(errorCallback).toHaveBeenCalledWith(123);
-      });
+      strategy.initialize();
+      strategy.connect();
+
+      strategy.emit("error", 123);
+      expect(errorCallback).toHaveBeenCalledWith(123);
     });
 
     it("should allow reinitialization and reconnection", function() {
@@ -133,35 +106,25 @@ describe("DelayedStrategy", function() {
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
 
-      runs(function() {
-        strategy.initialize();
-        strategy.connect();
-      });
-      waitsFor(function() {
-        return substrategy.initialize.calls.length == 1;
-      }, "initialize to be called", 100);
-      waitsFor(function() {
-        return substrategy.connect.calls.length == 1;
-      }, "connect to be called", 100);
-      runs(function() {
-        expect(substrategy.initialize.calls.length).toEqual(1);
-        substrategy.emit("open", {});
+      mockSetTimeout([50, 50, 50, 50]);
 
-        expect(openCallback.calls.length).toEqual(1);
+      strategy.initialize();
+      strategy.connect();
 
-        strategy.initialize();
-        strategy.connect();
-      });
-      waitsFor(function() {
-        return substrategy.initialize.calls.length == 2;
-      }, "initialize to be called again", 100);
-      waitsFor(function() {
-        return substrategy.connect.calls.length == 2;
-      }, "connect to be called again", 100);
-      runs(function() {
-        substrategy.emit("open", {});
-        expect(openCallback.calls.length).toEqual(2);
-      });
+      expect(substrategy.initialize.calls.length).toEqual(1);
+      expect(substrategy.connect.calls.length).toEqual(1);
+
+      substrategy.emit("open", {});
+      expect(openCallback.calls.length).toEqual(1);
+
+      strategy.initialize();
+      strategy.connect();
+
+      expect(substrategy.initialize.calls.length).toEqual(2);
+      expect(substrategy.connect.calls.length).toEqual(2);
+
+      substrategy.emit("open", {});
+      expect(openCallback.calls.length).toEqual(2);
     });
 
     it("should allow one attempt at once", function() {
@@ -182,34 +145,17 @@ describe("DelayedStrategy", function() {
         delay: 0
       });
 
-      var timerCalled = false;
-      var abortCalled = false;
+      mockSetTimeout([0, 0]);
 
-      substrategy.connect = jasmine.createSpy("connect").andCallFake(function() {
-        strategy.abort();
-        abortCalled = true;
-      });
+      strategy.initialize();
+      strategy.connect();
 
-      runs(function() {
-        strategy.initialize();
-        strategy.connect();
-      });
-      waitsFor(function() {
-        return abortCalled;
-      }, "attempt to be aborted", 50);
-      runs(function() {
-        expect(substrategy.abort).toHaveBeenCalled();
+      expect(substrategy.initialize).toHaveBeenCalled();
+      expect(substrategy.connect).toHaveBeenCalled();
 
-        setTimeout(function() {
-          timerCalled = true;
-        }, 10);
-      });
-      waitsFor(function() {
-        return timerCalled;
-      }, "~10ms", 50);
-      runs(function() {
-        expect(substrategy.initialize).toHaveBeenCalled();
-      });
+      strategy.abort();
+
+      expect(substrategy.abort).toHaveBeenCalled();
     });
 
     it("should not send abort to the substrategy before connect was called", function() {
@@ -221,32 +167,21 @@ describe("DelayedStrategy", function() {
       var timerCalled = false;
       var abortCalled = false;
 
-      substrategy.initialize = jasmine.createSpy().andCallFake(function() {
-        expect(substrategy.connect).not.toHaveBeenCalled();
-        strategy.abort();
-        abortCalled = true;
+      substrategy.initialize = jasmine.createSpy()
+
+      spyOn(window, "setTimeout").andCallFake(function(callback, delay) {
+        expect(delay).toEqual(0);
+        if (setTimeout.calls.length === 1) {
+          callback();
+        }
       });
 
-      runs(function() {
-        strategy.initialize();
-        strategy.connect();
-      });
-      waitsFor(function() {
-        return abortCalled;
-      }, "attempt to be aborted", 50);
-      runs(function() {
-        expect(substrategy.abort).not.toHaveBeenCalled();
+      strategy.initialize();
+      strategy.connect();
 
-        setTimeout(function() {
-          timerCalled = true;
-        }, 10);
-      });
-      waitsFor(function() {
-        return timerCalled;
-      }, "~10ms", 50);
-      runs(function() {
-        expect(substrategy.connect).not.toHaveBeenCalled();
-      });
+      expect(substrategy.connect).not.toHaveBeenCalled();
+      strategy.abort();
+      expect(substrategy.abort).not.toHaveBeenCalled();
     });
 
     it("should not send abort when waiting", function() {

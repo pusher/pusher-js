@@ -71,10 +71,6 @@
       callback("timeout");
     };
 
-    if (timeoutLength > 0) {
-      var timeout = setTimeout(onTimeout, timeoutLength);
-    }
-
     var unbindListeners = function() {
       strategy.unbind("open", onOpen);
       strategy.unbind("error", onError);
@@ -95,6 +91,10 @@
     // initialize calls should do as little as possible
     strategy.initialize();
     strategy.connect();
+
+    if (timeoutLength > 0) {
+      var timeout = setTimeout(onTimeout, timeoutLength);
+    }
 
     return abortCallback;
   };
