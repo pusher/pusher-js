@@ -4,6 +4,7 @@ src_files:
   - pusher.js
   - dependencies.js
   - pusher_event_dispatcher.js
+
   - strategies/abstract_strategy.js
   - strategies/abstract_multi_strategy.js
   - strategies/delayed_strategy.js
@@ -12,7 +13,10 @@ src_files:
   - strategies/first_supported_strategy.js
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
+
   - transports/abstract_transport.js
   - transports/flash_transport.js
   - transports/sockjs_transport.js
   - transports/ws_transport.js
+
+  - strategies/strategy_builder.js
