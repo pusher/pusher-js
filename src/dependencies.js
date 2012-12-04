@@ -43,7 +43,7 @@ var _require = (function() {
 ;(function() {
 
   function DependencyLoader(options) {
-    this.options = {}
+    this.options = options;
     this.loading = {}
     this.loaded = {}
   }
