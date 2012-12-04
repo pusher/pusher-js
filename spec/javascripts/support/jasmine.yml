@@ -22,3 +22,4 @@ src_files:
   - strategies/strategy_builder.js
 
   - connection/protocol_wrapper.js
+  - connection/connection_manager.js
