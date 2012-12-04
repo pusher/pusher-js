@@ -20,3 +20,5 @@ src_files:
   - transports/ws_transport.js
 
   - strategies/strategy_builder.js
+
+  - connection/protocol_wrapper.js
