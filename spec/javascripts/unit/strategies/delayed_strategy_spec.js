@@ -2,11 +2,12 @@ describe("DelayedStrategy", function() {
   function getSubstrategyMock(supported) {
     var substrategy = new Pusher.EventsDispatcher();
 
+    substrategy.isSupported = jasmine.createSpy("isSupported")
+      .andReturn(supported);
+    substrategy.forceSecure = jasmine.createSpy("forceSecure");
     substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
-    substrategy.isSupported = jasmine.createSpy("initialize")
-      .andReturn(supported);
 
     return substrategy;
   }
@@ -22,6 +23,17 @@ describe("DelayedStrategy", function() {
   it("should expose its name", function() {
     expect(new Pusher.DelayedStrategy([]).name)
       .toEqual("delayed");
+  });
+
+  it("should call forceSecure on the substrategy", function() {
+    var substrategy = getSubstrategyMock(true);
+    var strategy = new Pusher.DelayedStrategy(substrategy);
+
+    strategy.forceSecure(true);
+    expect(substrategy.forceSecure).toHaveBeenCalledWith(true);
+
+    strategy.forceSecure(false);
+    expect(substrategy.forceSecure).toHaveBeenCalledWith(false);
   });
 
   describe("when asked if it's supported", function() {

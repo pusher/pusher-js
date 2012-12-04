@@ -14,6 +14,12 @@
     return this.substrategies.length > 0;
   };
 
+  prototype.forceSecure = function(value) {
+    for (var i = 0; i < this.substrategies.length; i++) {
+      this.substrategies[i].forceSecure(value);
+    }
+  };
+
   prototype.initialize = function() {
     for (var i = 0; i < this.substrategies.length; i++) {
       this.substrategies[i].initialize();

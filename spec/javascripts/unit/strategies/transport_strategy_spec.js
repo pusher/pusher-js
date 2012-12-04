@@ -13,6 +13,7 @@ describe("TransportStrategy", function() {
   function getTransportMock(supported, connection) {
     var transport = new Object();
 
+    transport.initialize = jasmine.createSpy("forceSecure");
     transport.createConnection = jasmine.createSpy("transport")
       .andReturn(connection || getConnectionMock());
     transport.isSupported = jasmine.createSpy("initialize")
@@ -23,6 +24,25 @@ describe("TransportStrategy", function() {
 
   it("should expose its name", function() {
     expect(new Pusher.TransportStrategy(null).name).toEqual("transport");
+  });
+
+  it("should pass correct secure value after calling forceSecure", function() {
+    var transport = getTransportMock(true);
+    var strategy = new Pusher.TransportStrategy(transport, { key: "foo" });
+
+    strategy.forceSecure(true);
+    strategy.initialize();
+    expect(transport.createConnection).toHaveBeenCalledWith("foo", {
+      key: "foo",
+      secure: true
+    });
+
+    strategy.forceSecure(false);
+    strategy.initialize();
+    expect(transport.createConnection).toHaveBeenCalledWith("foo", {
+      key: "foo",
+      secure: false
+    });
   });
 
   describe("when asked if it's supported", function() {

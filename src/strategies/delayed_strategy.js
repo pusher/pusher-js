@@ -16,6 +16,10 @@
     return this.substrategy.isSupported();
   };
 
+  prototype.forceSecure = function(value) {
+    this.substrategy.forceSecure(value);
+  };
+
   prototype.initialize = function() {
     if (this.initializeTimer) {
       return;

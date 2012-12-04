@@ -14,6 +14,10 @@
     return this.transport.isSupported();
   };
 
+  prototype.forceSecure = function(value) {
+    this.options.secure = value;
+  };
+
   prototype.initialize = function() {
     this.connection = this.transport.createConnection(
       this.options.key, this.options

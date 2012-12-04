@@ -2,11 +2,12 @@ describe("SequentialStrategy", function() {
   function getSubstrategyMock(supported) {
     var substrategy = new Pusher.EventsDispatcher();
 
+    substrategy.isSupported = jasmine.createSpy("isSupported")
+      .andReturn(supported);
+    substrategy.forceSecure = jasmine.createSpy("forceSecure");
     substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
-    substrategy.isSupported = jasmine.createSpy("initialize")
-      .andReturn(supported);
 
     return substrategy;
   }
@@ -21,6 +22,22 @@ describe("SequentialStrategy", function() {
 
   it("should expose its name", function() {
     expect(new Pusher.SequentialStrategy([]).name).toEqual("seq");
+  });
+
+  it("should call forceSecure on all substrategies", function() {
+    var substrategies = [
+      getSubstrategyMock(true),
+      getSubstrategyMock(true),
+    ];
+    var strategy = new Pusher.SequentialStrategy(substrategies);
+
+    strategy.forceSecure(true);
+    expect(substrategies[0].forceSecure).toHaveBeenCalledWith(true);
+    expect(substrategies[1].forceSecure).toHaveBeenCalledWith(true);
+
+    strategy.forceSecure(false);
+    expect(substrategies[0].forceSecure).toHaveBeenCalledWith(false);
+    expect(substrategies[1].forceSecure).toHaveBeenCalledWith(false);
   });
 
   describe("when asked if it's supported", function() {
