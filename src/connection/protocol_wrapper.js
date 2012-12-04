@@ -4,7 +4,7 @@
     Pusher.EventsDispatcher.call(this);
     this.transport = transport;
     this.bindListeners();
-  };
+  }
   var prototype = ProtocolWrapper.prototype;
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
@@ -25,11 +25,11 @@
       data: data
     };
     if (channel) {
-      payload["channel"] = channel;
+      payload.channel = channel;
     }
 
     Pusher.debug('Event sent', payload); // TODO make debug nicer
-    return this.send(JSON.stringify(payload))
+    return this.send(JSON.stringify(payload));
   };
 
   prototype.close = function() {
@@ -42,7 +42,7 @@
     var self = this;
 
     var onMessageOpen = function(message) {
-      var message = self.parseMessage(message);
+      message = self.parseMessage(message);
 
       if (message !== undefined) {
         if (message.event === 'pusher:connection_established') {
@@ -51,7 +51,7 @@
           self.transport.bind("message", onMessageConnected);
           self.emit("connected", self.id);
         } else if (message.event === 'pusher:error') {
-          self.handleCloseCode(message.data.code, message.data.message)
+          self.handleCloseCode(message.data.code, message.data.message);
         }
       }
     };
@@ -85,7 +85,7 @@
       self.transport.unbind("error", onError);
       self.transport.unbind("closed", onClosed);
       self.transport = null;
-      self.emit("closed")
+      self.emit("closed");
     };
 
     this.transport.bind("message", onMessageOpen);
@@ -130,7 +130,7 @@
       this.emit("retry");
     }
     this.transport.close();
-  }
+  };
 
   Pusher.ProtocolWrapper = ProtocolWrapper;
 }).call(this);

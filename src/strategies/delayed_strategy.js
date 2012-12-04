@@ -3,7 +3,7 @@
   function DelayedStrategy(substrategy, options) {
     Pusher.AbstractStrategy.call(this, options);
     this.substrategy = substrategy;
-  };
+  }
   var prototype = DelayedStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
@@ -100,7 +100,7 @@
     this.substrategy.bind("error", onError);
 
     this.substrategy.connect();
-  }
+  };
 
   Pusher.DelayedStrategy = DelayedStrategy;
 }).call(this);

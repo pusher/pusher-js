@@ -3,7 +3,7 @@
   function AbstractMultiStrategy(substrategies, options) {
     Pusher.AbstractStrategy.call(this, options);
     this.substrategies = this.getSupported(substrategies);
-  };
+  }
   var prototype = AbstractMultiStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);

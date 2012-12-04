@@ -5,7 +5,7 @@
 
     this.key = key;
     this.options = options;
-  };
+  }
   var prototype = WSTransport.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -13,7 +13,7 @@
   // interface
 
   WSTransport.isSupported = function() {
-    return window.WebSocket != undefined || window.MozWebSocket != undefined;
+    return window.WebSocket !== undefined || window.MozWebSocket !== undefined;
   };
 
   WSTransport.createConnection = function(key, options) {
@@ -25,12 +25,13 @@
   // helpers
 
   prototype.createSocket = function(url) {
-    return new (WebSocket || MozWebSocket)(url);
+    var constructor = WebSocket || MozWebSocket;
+    return new constructor(url);
   };
 
   prototype.getQueryString = function() {
-    return Pusher.AbstractTransport.prototype.getQueryString.call(this)
-      + "&flash=false";
+    return Pusher.AbstractTransport.prototype.getQueryString.call(this) +
+      "&flash=false";
   };
 
   Pusher.WSTransport = WSTransport;

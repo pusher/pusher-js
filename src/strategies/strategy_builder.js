@@ -68,7 +68,7 @@
     }
 
     return new constructor(substrategies, options);
-  };
+  }
 
   function filter(object, filteredKeys) {
     var result = {};
@@ -81,23 +81,24 @@
     }
 
     return result;
-  };
+  }
 
   function merge(a, b) {
+    var key;
     var result = {};
-    for (var key in a) {
+    for (key in a) {
       if (Object.prototype.hasOwnProperty.call(a, key)) {
         result[key] = a[key];
       }
     }
-    for (var key in b) {
+    for (key in b) {
       if (Object.prototype.hasOwnProperty.call(b, key)) {
         result[key] = b[key];
       }
     }
 
     return result;
-  };
+  }
 
   Pusher.StrategyBuilder = StrategyBuilder;
 

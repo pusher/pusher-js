@@ -2,7 +2,7 @@
 
   function SequentialStrategy(substrategies, options) {
     Pusher.AbstractMultiStrategy.call(this, substrategies, options);
-  };
+  }
   var prototype = SequentialStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractMultiStrategy.prototype);

@@ -2,7 +2,7 @@
 
   function SockJSTransport(key, options) {
     Pusher.AbstractTransport.call(this, key, options);
-  };
+  }
   var prototype = SockJSTransport.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);

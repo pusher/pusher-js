@@ -2,7 +2,7 @@
 
   function FirstSupportedStrategy(substrategies, options) {
     Pusher.FirstConnectedStrategy.call(this, substrategies, options);
-  };
+  }
   var prototype = FirstSupportedStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.FirstConnectedStrategy.prototype);
@@ -20,7 +20,7 @@
       }
     }
     return [];
-  }
+  };
 
   Pusher.FirstSupportedStrategy = FirstSupportedStrategy;
 }).call(this);

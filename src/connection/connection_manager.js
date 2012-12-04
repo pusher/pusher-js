@@ -22,7 +22,7 @@
       self.clearUnavailableTimer();
       self.setConnection(self.wrapTransport(transport));
     });
-  };
+  }
   var prototype = ConnectionManager.prototype;
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
@@ -101,7 +101,7 @@
     if (!this.connection.supportsPing()) {
       var self = this;
       this.activityTimer = setTimeout(function() {
-        self.send_event('pusher:ping', {})
+        self.send_event('pusher:ping', {});
         // wait for pong response
         self.activityTimer = setTimeout(function() {
           self.connection.close();
@@ -115,7 +115,7 @@
       clearTimeout(this.activityTimer);
       this.activityTimer = null;
     }
-  }
+  };
 
   prototype.setConnection = function(connection) {
     this.connection = connection;
@@ -173,7 +173,7 @@
       this.emit('state_change', { previous: previousState, current: newState });
       this.emit(newState, data);
     }
-  }
+  };
 
   Pusher.ConnectionManager = ConnectionManager;
 }).call(this);

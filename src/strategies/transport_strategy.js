@@ -3,7 +3,7 @@
   function TransportStrategy(transport, options) {
     Pusher.AbstractStrategy.call(this, options);
     this.transport = transport;
-  };
+  }
   var prototype = TransportStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);

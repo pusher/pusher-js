@@ -3,7 +3,7 @@
   function AbstractStrategy(options) {
     Pusher.EventsDispatcher.call(this);
     this.options = options || {};
-  };
+  }
   var prototype = AbstractStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);

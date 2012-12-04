@@ -2,7 +2,7 @@
 
   function FirstConnectedStrategy(substrategies, options) {
     Pusher.AbstractMultiStrategy.call(this, substrategies, options);
-  };
+  }
   var prototype = FirstConnectedStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractMultiStrategy.prototype);
@@ -65,7 +65,7 @@
 
   prototype.allFinished = function() {
     for (var i = 0; i < this.substrategies.length; i++) {
-      if (this.listeners[i] != undefined) {
+      if (this.listeners[i] !== undefined) {
         return false;
       }
     }
@@ -76,7 +76,7 @@
     if (this.listeners[i]) {
       this.substrategies[i].unbind("open", this.listeners[i].onOpen);
       this.substrategies[i].unbind("error", this.listeners[i].onError);
-      this.listeners[i] = null;
+      this.listeners[i] = undefined;
     }
   };
 

@@ -5,7 +5,7 @@
 
     this.key = key;
     this.options = options;
-  };
+  }
   var prototype = AbstractTransport.prototype;
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
@@ -33,6 +33,7 @@
     this.socket = this.createSocket(url);
     this.bindListeners();
 
+    Pusher.debug("Connecting", { transport: this.name, url: url });
     this.changeState("connecting");
     return true;
   };
@@ -104,10 +105,11 @@
   };
 
   prototype.getBaseURL = function() {
+    var port;
     if (this.options.secure) {
-      var port = this.options.securePort;
+      port = this.options.securePort;
     } else {
-      var port = this.options.nonsecurePort;
+      port = this.options.nonsecurePort;
     }
 
     return this.getScheme() + "://" + this.options.host + ':' + port;

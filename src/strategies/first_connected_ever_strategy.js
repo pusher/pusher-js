@@ -4,7 +4,7 @@
     Pusher.FirstConnectedStrategy.call(this, substrategies, options);
 
     this.succeeded = [];
-  };
+  }
   var prototype = FirstConnectedEverStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.FirstConnectedStrategy.prototype);
@@ -32,7 +32,7 @@
     var self = this;
     return function(error) {
       self.unbindListeners(i);
-      if (self.allFinished() && self.succeeded.length == 0) {
+      if (self.allFinished() && self.succeeded.length === 0) {
         self.abortCallback = null;
         self.emit("error", "all substrategies failed"); // TODO
       }

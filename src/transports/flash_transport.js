@@ -2,7 +2,7 @@
 
   function FlashTransport(key, options) {
     Pusher.AbstractTransport.call(this, key, options);
-  };
+  }
   var prototype = FlashTransport.prototype;
 
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -10,7 +10,7 @@
   // interface
 
   FlashTransport.isSupported = function() {
-    return navigator.mimeTypes["application/x-shockwave-flash"] != undefined;
+    return navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
   };
 
   FlashTransport.createConnection = function(key, options) {
@@ -37,8 +37,8 @@
   };
 
   prototype.getQueryString = function() {
-    return Pusher.AbstractTransport.prototype.getQueryString.call(this)
-      + "&flash=true";
+    return Pusher.AbstractTransport.prototype.getQueryString.call(this) +
+      "&flash=true";
   };
 
   Pusher.FlashTransport = FlashTransport;
