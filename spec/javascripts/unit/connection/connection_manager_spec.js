@@ -14,6 +14,7 @@ describe("ConnectionManager", function() {
 
     this.strategy = new Pusher.EventsDispatcher();
 
+    this.strategy.forceSecure = jasmine.createSpy("forceSecure");
     this.strategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(true);
     this.strategy.initialize = jasmine.createSpy("initialize");
@@ -204,6 +205,16 @@ describe("ConnectionManager", function() {
       // activity check should be cleared here
       // unavailable timer was cleared when connection was open
       expect(clearTimeout.calls.length).toEqual(2);
+    });
+
+    it("should force secure after receiving 'ssl_only' event", function() {
+      var self = this;
+
+      this.manager.connect();
+      this.strategy.emit("open", this.transport);
+      this.connection.emit("ssl_only");
+
+      expect(this.strategy.forceSecure).toHaveBeenCalledWith(true);
     });
   });
 

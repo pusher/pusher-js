@@ -1,7 +1,6 @@
 ;(function() {
 
   // TODO use netinfo
-  // TODO compulsory secure
   // TODO chrome connected but offline
 
   function ConnectionManager(key, options) {
@@ -84,6 +83,12 @@
 
   // private
 
+  // TODO implement delay
+  prototype.retryIn = function() {
+    this.disconnect();
+    this.connect();
+  };
+
   prototype.wrapTransport = function(transport) {
     return new Pusher.ProtocolWrapper(transport);
   };
@@ -147,9 +152,14 @@
       self.connection = null;
 
       if (self.state !== "disconnected") {
-        self.disconnect();
-        self.connect();
+        self.retryIn(0);
       }
+    };
+
+    // handling close conditions
+    var onSSLOnly = function(id) {
+      self.strategy.forceSecure(true);
+      self.retryIn(0);
     };
 
     connection.bind("connected", onConnected);
@@ -157,6 +167,8 @@
     connection.bind("ping", onPing);
     connection.bind("error", onError);
     connection.bind("closed", onClosed);
+
+    connection.bind("ssl_only", onSSLOnly);
 
     this.resetActivityCheck();
   };
