@@ -49,7 +49,7 @@
           self.id = message.data.socket_id;
           self.transport.unbind("message", onMessageOpen);
           self.transport.bind("message", onMessageConnected);
-          self.emit("connected");
+          self.emit("connected", self.id);
         } else if (message.event === 'pusher:error') {
           self.handleCloseCode(message.data.code, message.data.message)
         }

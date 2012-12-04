@@ -46,7 +46,7 @@ describe("ProtocolWrapper", function() {
         })
       });
 
-      expect(onConnected).toHaveBeenCalled();
+      expect(onConnected).toHaveBeenCalledWith("123.456");
     });
 
     it("should emit 'ssl_only' when receiving 4000 close code", function() {
