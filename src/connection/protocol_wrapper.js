@@ -128,6 +128,9 @@
       this.emit("backoff");
     } else if (code < 4300) {
       this.emit("retry");
+    } else {
+      // unknown error
+      this.emit("refused");
     }
     this.transport.close();
   };

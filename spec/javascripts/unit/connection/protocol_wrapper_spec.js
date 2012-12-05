@@ -132,6 +132,27 @@ describe("ProtocolWrapper", function() {
       expect(onRetry).toHaveBeenCalled();
       expect(this.transport.close).toHaveBeenCalled();
     });
+
+    it("should emit 'refused' when receiving unknown close code", function() {
+      var onConnected = jasmine.createSpy("onConnected");
+      var onRefused = jasmine.createSpy("onRefused");
+      this.wrapper.bind("refused", onRefused);
+      this.wrapper.bind("connected", onConnected);
+
+      this.transport.emit("message", {
+        data: JSON.stringify({
+          event: "pusher:error",
+          data: {
+            code: 4301,
+            message: "unknown error"
+          }
+        })
+      });
+
+      expect(onConnected).not.toHaveBeenCalled();
+      expect(onRefused).toHaveBeenCalled();
+      expect(this.transport.close).toHaveBeenCalled();
+    });
   });
 
   describe("when sending messages", function() {
