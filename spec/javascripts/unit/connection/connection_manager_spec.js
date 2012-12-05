@@ -207,7 +207,7 @@ describe("ConnectionManager", function() {
       expect(clearTimeout.calls.length).toEqual(2);
     });
 
-    it("should force secure after receiving 'ssl_only' event", function() {
+    it("should force secure and reconnect after receiving 'ssl_only' event", function() {
       var self = this;
 
       this.manager.connect();
@@ -215,6 +215,27 @@ describe("ConnectionManager", function() {
       this.connection.emit("ssl_only");
 
       expect(this.strategy.forceSecure).toHaveBeenCalledWith(true);
+      expect(this.manager.state).toEqual("connecting");
+    });
+
+    it("should disconnect after receiving 'refused' event", function() {
+      var self = this;
+
+      this.manager.connect();
+      this.strategy.emit("open", this.transport);
+      this.connection.emit("refused");
+
+      expect(this.manager.state).toEqual("disconnected");
+    });
+
+    it("should reconnect immediately after receiving 'retry' event", function() {
+      var self = this;
+
+      this.manager.connect();
+      this.strategy.emit("open", this.transport);
+      this.connection.emit("retry");
+
+      expect(this.manager.state).toEqual("connecting");
     });
   });
 

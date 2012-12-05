@@ -161,6 +161,12 @@
       self.strategy.forceSecure(true);
       self.retryIn(0);
     };
+    var onRefused = function(id) {
+      self.disconnect();
+    };
+    var onRetry = function(id) {
+      self.retryIn(0);
+    };
 
     connection.bind("connected", onConnected);
     connection.bind("message", onMessage);
@@ -169,6 +175,8 @@
     connection.bind("closed", onClosed);
 
     connection.bind("ssl_only", onSSLOnly);
+    connection.bind("refused", onRefused);
+    connection.bind("retry", onRetry);
 
     this.resetActivityCheck();
   };
