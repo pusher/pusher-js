@@ -20,16 +20,6 @@
     }
   };
 
-  prototype.abort = function() {
-    if (this.abortCallback) {
-      this.abortCallback();
-      this.abortCallback = null;
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   // protected
 
   prototype.getSupported = function(substrategies) {
