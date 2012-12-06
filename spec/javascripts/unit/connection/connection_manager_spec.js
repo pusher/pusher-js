@@ -2,8 +2,6 @@ describe("ConnectionManager", function() {
   beforeEach(function() {
     var self = this;
 
-    this.transport = new Object();
-
     this.connection = new Pusher.EventsDispatcher();
     this.connection.supportsPing = jasmine.createSpy("supportsPing");
     this.connection.send = jasmine.createSpy("send")
@@ -80,7 +78,7 @@ describe("ConnectionManager", function() {
       this.manager.bind("connected", onConnected);
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
 
       expect(onConnected).not.toHaveBeenCalled();
       this.connection.emit("connected", "123.456");
@@ -93,7 +91,7 @@ describe("ConnectionManager", function() {
       this.manager.connect();
       expect(this.strategy.abort).not.toHaveBeenCalled();
 
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       expect(this.strategy.abort).toHaveBeenCalled();
     });
 
@@ -101,14 +99,14 @@ describe("ConnectionManager", function() {
       setTimeout.andReturn(123);
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
 
       expect(clearTimeout).toHaveBeenCalledWith(123);
     });
 
     it("should not try to connect again", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
 
       expect(this.strategy.initialize.calls.length).toEqual(1);
       expect(this.strategy.connect.calls.length).toEqual(1);
@@ -123,7 +121,7 @@ describe("ConnectionManager", function() {
   describe("when sending messages", function() {
     it("should pass data to the transport", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("connected", "123.456");
       expect(this.manager.send("howdy")).toBe(true);
 
@@ -149,7 +147,7 @@ describe("ConnectionManager", function() {
 
     it("should close the connection", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.manager.disconnect();
 
       expect(this.connection.close).toHaveBeenCalled();
@@ -164,7 +162,7 @@ describe("ConnectionManager", function() {
 
     it("should clear unavailable timer and activity check", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport)
+      this.strategy.emit("open", {})
       this.manager.disconnect();
 
       expect(clearTimeout.calls.length).toEqual(2);
@@ -176,7 +174,7 @@ describe("ConnectionManager", function() {
       var self = this;
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
 
       var onConnecting = jasmine.createSpy("onConnecting");
       var onDisconnected = jasmine.createSpy("onDisconnected")
@@ -195,7 +193,7 @@ describe("ConnectionManager", function() {
       var self = this;
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       // unavailable timer should be cleared here
       expect(clearTimeout.calls.length).toEqual(1);
 
@@ -211,7 +209,7 @@ describe("ConnectionManager", function() {
       var self = this;
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("ssl_only");
 
       expect(this.strategy.forceSecure).toHaveBeenCalledWith(true);
@@ -222,7 +220,7 @@ describe("ConnectionManager", function() {
       var self = this;
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("refused");
 
       expect(this.manager.state).toEqual("disconnected");
@@ -232,7 +230,7 @@ describe("ConnectionManager", function() {
       var self = this;
 
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("retry");
 
       expect(this.manager.state).toEqual("connecting");
@@ -249,7 +247,7 @@ describe("ConnectionManager", function() {
       expect(this.strategy.initialize.calls.length).toEqual(1);
       expect(this.strategy.connect.calls.length).toEqual(1);
 
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("connected", "123.456");
 
       expect(onConnected.calls.length).toEqual(1);
@@ -261,7 +259,7 @@ describe("ConnectionManager", function() {
       expect(this.strategy.initialize.calls.length).toEqual(2);
       expect(this.strategy.connect.calls.length).toEqual(2);
 
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("connected", "666.999");
 
       expect(onConnected.calls.length).toEqual(2);
@@ -286,7 +284,7 @@ describe("ConnectionManager", function() {
   describe("on activity timeout", function() {
     it("should send a pusher:ping event", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("connected", "666.999");
 
       // on connection open and on pusher:connection_established
@@ -314,7 +312,7 @@ describe("ConnectionManager", function() {
 
     it("should close the connection on timeout", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
 
       setTimeout.calls[1].args[0].call(window);
 
@@ -327,7 +325,7 @@ describe("ConnectionManager", function() {
   describe("on ping", function() {
     it("should reply with a pusher:pong event", function() {
       this.manager.connect();
-      this.strategy.emit("open", this.transport);
+      this.strategy.emit("open", {});
       this.connection.emit("connected", "666.999");
 
       this.connection.emit("ping");
