@@ -20,62 +20,28 @@
     this.substrategy.forceSecure(value);
   };
 
-  prototype.connect = function() {
-    if (!this.isSupported() || this.abortCallback) {
-      return false;
+  prototype.connect = function(callback) {
+    if (!this.isSupported()) {
+      return null;
     }
 
     var self = this;
-
-    this.abortCallback = function() {
-      if (this.connectTimer) {
-        clearTimeout(this.connectTimer);
-        this.connectTimer = null;
-      }
+    var abort = function() {
+      clearTimeout(this.timer);
+      this.timer = null;
     };
-
-    this.connectTimer = setTimeout(function() {
-      if (self.connectTimer === null) {
+    this.timer = setTimeout(function() {
+      if (self.timer === null) {
         // hack for misbehaving clearTimeout in IE < 9
         return;
       }
-      self.connectTimer = null;
-      self.connectSubstrategy();
+      self.timer = null;
+      abort = self.substrategy.connect(callback).abort;
     }, this.options.delay);
 
-    return true;
-  };
-
-  // private
-
-  prototype.connectSubstrategy = function() {
-    var self = this;
-
-    var onOpen = function(connection) {
-      self.abortCallback = null;
-      unbindListeners();
-      self.emit("open", connection);
+    return {
+      abort: abort
     };
-    var onError = function(error) {
-      self.abortCallback = null;
-      unbindListeners();
-      self.emit("error", error);
-    };
-
-    var unbindListeners = function() {
-      self.substrategy.unbind("open", onOpen);
-      self.substrategy.unbind("error", onError);
-    };
-
-    this.abortCallback = function() {
-      unbindListeners();
-      self.substrategy.abort();
-    };
-
-    this.substrategy.bind("open", onOpen);
-    this.substrategy.bind("error", onError);
-
-    this.substrategy.connect();
   };
 
   Pusher.DelayedStrategy = DelayedStrategy;
