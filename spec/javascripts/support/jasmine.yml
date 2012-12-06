@@ -4,6 +4,7 @@ src_files:
   - pusher.js
   - dependencies.js
   - pusher_event_dispatcher.js
+  - net_info.js
 
   - strategies/abstract_strategy.js
   - strategies/abstract_multi_strategy.js

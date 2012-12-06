@@ -20,6 +20,7 @@ describe("ConnectionManager", function() {
     this.strategy.abort = jasmine.createSpy("abort");
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(this.strategy);
+    spyOn(Pusher.NetInfo, "isOnline").andReturn(true);
     spyOn(window, "setTimeout").andReturn(666);
     spyOn(window, "clearTimeout");
 
@@ -331,6 +332,46 @@ describe("ConnectionManager", function() {
       this.connection.emit("ping");
       expect(this.connection.send_event)
         .toHaveBeenCalledWith("pusher:pong", {}, undefined);
+    });
+  });
+
+  describe("on network connection/disconnection", function() {
+    it("should transition to unavailable before connecting and browser is offline", function() {
+      Pusher.NetInfo.isOnline.andReturn(false);
+
+      this.manager.connect();
+      expect(this.manager.state).toEqual("unavailable");
+      expect(this.strategy.connect).not.toHaveBeenCalled();
+    });
+
+    it("should transition to unavailable when connecting and browser goes offline", function() {
+      this.manager.connect();
+      expect(this.manager.state).toEqual("connecting");
+
+      Pusher.NetInfo.isOnline.andReturn(false);
+      Pusher.NetInfo.emit("offline");
+
+      expect(this.manager.state).toEqual("unavailable");
+    });
+
+    it("should transition to unavailable when connected and browser goes offline", function() {
+      this.manager.connect();
+      this.strategy.emit("open", {});
+
+      Pusher.NetInfo.isOnline.andReturn(false);
+      Pusher.NetInfo.emit("offline");
+
+      expect(this.manager.state).toEqual("unavailable");
+    });
+
+    it("should try connecting when unavailable browser goes back online", function() {
+      Pusher.NetInfo.isOnline.andReturn(false);
+      this.manager.connect();
+      Pusher.NetInfo.isOnline.andReturn(true);
+      Pusher.NetInfo.emit("online");
+
+      expect(this.manager.state).toEqual("connecting");
+      expect(this.strategy.connect).toHaveBeenCalled();
     });
   });
 

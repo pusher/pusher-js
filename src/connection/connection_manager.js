@@ -1,8 +1,5 @@
 ;(function() {
 
-  // TODO use netinfo
-  // TODO chrome connected but offline
-
   function ConnectionManager(key, options) {
     Pusher.EventsDispatcher.call(this);
 
@@ -15,11 +12,24 @@
     );
 
     var self = this;
+
     this.strategy.bind("open", function(transport) {
       // we don't support switching connections yet
       self.strategy.abort();
       self.clearUnavailableTimer();
       self.setConnection(self.wrapTransport(transport));
+    });
+
+    Pusher.NetInfo.bind("online", function() {
+      if (self.state === "unavailable") {
+        self.connect();
+      }
+    });
+    Pusher.NetInfo.bind("offline", function() {
+      if (self.shouldRetry()) {
+        self.disconnect();
+        self.updateState("unavailable");
+      }
     });
   }
   var prototype = ConnectionManager.prototype;
@@ -37,6 +47,11 @@
     }
     if (!this.strategy.isSupported()) {
       this.updateState("failed");
+      return;
+    }
+    if (Pusher.NetInfo.isOnline() === false) {
+      this.updateState("unavailable");
+      return;
     }
 
     this.updateState("connecting");
@@ -87,10 +102,6 @@
   prototype.retryIn = function() {
     this.disconnect();
     this.connect();
-  };
-
-  prototype.wrapTransport = function(transport) {
-    return new Pusher.ProtocolWrapper(transport);
   };
 
   prototype.clearUnavailableTimer = function() {
@@ -151,7 +162,7 @@
       connection.unbind("closed", onClosed);
       self.connection = null;
 
-      if (self.state !== "disconnected") {
+      if (self.shouldRetry()) {
         self.retryIn(0);
       }
     };
@@ -193,6 +204,14 @@
       this.emit('state_change', { previous: previousState, current: newState });
       this.emit(newState, data);
     }
+  };
+
+  prototype.shouldRetry = function() {
+    return this.state === "connecting" || this.state === "connected";
+  }
+
+  prototype.wrapTransport = function(transport) {
+    return new Pusher.ProtocolWrapper(transport);
   };
 
   Pusher.ConnectionManager = ConnectionManager;
