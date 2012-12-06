@@ -98,9 +98,6 @@ describe("SequentialStrategy", function() {
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
-      var errorCallback = jasmine.createSpy("errorCallback");
-      strategy.bind("error", errorCallback);
-
       strategy.connect(this.callback);
 
       expect(substrategies[0].connect).toHaveBeenCalled();

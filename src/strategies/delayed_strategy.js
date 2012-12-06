@@ -8,8 +8,6 @@
   }
   var prototype = DelayedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
-
   // interface
 
   prototype.name = "delayed";

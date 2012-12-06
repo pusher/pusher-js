@@ -72,9 +72,6 @@ describe("FirstConnectedStrategy", function() {
       ];
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
-      var openCallback = jasmine.createSpy("openCallback");
-      strategy.bind("open", openCallback);
-
       strategy.connect(this.callback);
 
       expect(substrategies[0].connect).toHaveBeenCalled();

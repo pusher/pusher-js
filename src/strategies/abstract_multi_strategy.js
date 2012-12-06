@@ -6,8 +6,6 @@
   }
   var prototype = AbstractMultiStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
-
   // interface
 
   prototype.isSupported = function() {

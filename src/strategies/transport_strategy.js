@@ -7,8 +7,6 @@
   }
   var prototype = TransportStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
-
   prototype.name = "transport";
 
   prototype.isSupported = function() {
