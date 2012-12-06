@@ -14,27 +14,19 @@
 
   // protected
 
-  prototype.getOnOpenListener = function(i) {
+  prototype.getCallback = function(i, runners, callback) {
     var self = this;
-    return function(connection) {
+
+    return function(error, connection) {
+      if (error) {
+        runners[i] = null;
+        if (self.allFinished(runners) && self.succeeded.length === 0) {
+          callback(true);
+        }
+        return;
+      }
       self.succeeded.push(i);
-
-      self.unbindListeners(i);
-      if (self.allFinished()) {
-        self.abortCallback = null;
-      }
-      self.emit("open", connection);
-    };
-  };
-
-  prototype.getOnErrorListener = function(i) {
-    var self = this;
-    return function(error) {
-      self.unbindListeners(i);
-      if (self.allFinished() && self.succeeded.length === 0) {
-        self.abortCallback = null;
-        self.emit("error", "all substrategies failed"); // TODO
-      }
+      callback(null, connection);
     };
   };
 

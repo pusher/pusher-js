@@ -2,14 +2,23 @@ describe("FirstSupportedStrategy", function() {
   function getSubstrategyMock(supported) {
     var substrategy = new Pusher.EventsDispatcher();
 
+    substrategy.forceSecure = jasmine.createSpy("forceSecure");
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
-    substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.connect = jasmine.createSpy("connect");
-    substrategy.abort = jasmine.createSpy("abort");
+    substrategy.connect = jasmine.createSpy("connect")
+      .andCallFake(function(callback) {
+        substrategy._callback = callback;
+        return { abort: substrategy._abort }
+      });
+
+    substrategy._abort = jasmine.createSpy();
 
     return substrategy;
   }
+
+  beforeEach(function() {
+    this.callback = jasmine.createSpy();
+  });
 
   it("should expose its name", function() {
     expect(new Pusher.FirstSupportedStrategy([]).name)
@@ -62,20 +71,16 @@ describe("FirstSupportedStrategy", function() {
         getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
-
-      var openCallback = jasmine.createSpy("openCallback");
-      strategy.bind("open", openCallback);
-
-      strategy.connect();
+      strategy.connect(this.callback);
 
       expect(substrategies[0].connect).not.toHaveBeenCalled();
       expect(substrategies[1].connect).toHaveBeenCalled();
       expect(substrategies[2].connect).not.toHaveBeenCalled();
 
-      var connection = {};
-      substrategies[1].emit("open", connection);
+      var connection = new Object();
+      substrategies[1]._callback(null, connection);
 
-      expect(openCallback).toHaveBeenCalledWith(connection);
+      expect(this.callback).toHaveBeenCalledWith(null, connection);
     });
 
     it("should emit error after first supported strategy fails", function() {
@@ -85,15 +90,12 @@ describe("FirstSupportedStrategy", function() {
         getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
+      strategy.connect(this.callback);
 
-      var errorCallback = jasmine.createSpy("errorCallback");
-      strategy.bind("error", errorCallback);
-
-      strategy.connect();
       expect(substrategies[1].connect).toHaveBeenCalled();
-      substrategies[1].emit("error", 666);
+      substrategies[1]._callback(true);
 
-      expect(errorCallback).toHaveBeenCalled();
+      expect(this.callback).toHaveBeenCalledWith(true);
 
       expect(substrategies[0].connect).not.toHaveBeenCalled();
       expect(substrategies[1].connect).toHaveBeenCalled();
@@ -102,20 +104,20 @@ describe("FirstSupportedStrategy", function() {
   });
 
   describe("on aborting", function() {
-    it("should send abort to the first supported substrategy", function() {
+    it("should send abort only to the first supported substrategy", function() {
       var substrategies = [
         getSubstrategyMock(false),
         getSubstrategyMock(true),
         getSubstrategyMock(true)
       ];
       var strategy = new Pusher.FirstSupportedStrategy(substrategies, {});
+      var runner = strategy.connect(this.callback);
 
-      strategy.connect();
-      strategy.abort();
+      runner.abort();
 
-      expect(substrategies[0].abort).not.toHaveBeenCalled();
-      expect(substrategies[1].abort).toHaveBeenCalled();
-      expect(substrategies[2].abort).not.toHaveBeenCalled();
+      expect(substrategies[0]._abort).not.toHaveBeenCalled();
+      expect(substrategies[1]._abort).toHaveBeenCalled();
+      expect(substrategies[2]._abort).not.toHaveBeenCalled();
     });
   });
 });
