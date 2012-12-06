@@ -1,8 +1,7 @@
 ;(function() {
 
-  function FirstConnectedEverStrategy(substrategies, options) {
-    Pusher.FirstConnectedStrategy.call(this, substrategies, options);
-
+  function FirstConnectedEverStrategy(substrategies) {
+    Pusher.FirstConnectedStrategy.call(this, substrategies);
     this.succeeded = [];
   }
   var prototype = FirstConnectedEverStrategy.prototype;

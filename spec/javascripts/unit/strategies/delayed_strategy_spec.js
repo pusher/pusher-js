@@ -45,14 +45,14 @@ describe("DelayedStrategy", function() {
   describe("when asked if it's supported", function() {
     it("should return true if the substrategy is supported", function() {
       var substrategy = getSubstrategyMock(true);
-      var strategy = new Pusher.DelayedStrategy(substrategy);
+      var strategy = new Pusher.DelayedStrategy(substrategy, {});
 
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false if the substrategy is not supported", function() {
       var substrategy = getSubstrategyMock(false);
-      var strategy = new Pusher.DelayedStrategy(substrategy);
+      var strategy = new Pusher.DelayedStrategy(substrategy, {});
 
       expect(strategy.isSupported()).toBe(false);
     });

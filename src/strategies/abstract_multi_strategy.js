@@ -1,12 +1,12 @@
 ;(function() {
 
-  function AbstractMultiStrategy(substrategies, options) {
-    Pusher.AbstractStrategy.call(this, options);
+  function AbstractMultiStrategy(substrategies) {
+    Pusher.EventsDispatcher.call(this);
     this.substrategies = this.getSupported(substrategies);
   }
   var prototype = AbstractMultiStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   // interface
 
@@ -17,6 +17,16 @@
   prototype.forceSecure = function(value) {
     for (var i = 0; i < this.substrategies.length; i++) {
       this.substrategies[i].forceSecure(value);
+    }
+  };
+
+  prototype.abort = function() {
+    if (this.abortCallback) {
+      this.abortCallback();
+      this.abortCallback = null;
+      return true;
+    } else {
+      return false;
     }
   };
 

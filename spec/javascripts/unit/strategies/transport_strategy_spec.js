@@ -27,7 +27,7 @@ describe("TransportStrategy", function() {
   };
 
   it("should expose its name", function() {
-    expect(new Pusher.TransportStrategy(null).name).toEqual("transport");
+    expect(new Pusher.TransportStrategy(null, {}).name).toEqual("transport");
   });
 
   it("should pass correct secure value after calling forceSecure", function() {
@@ -77,7 +77,7 @@ describe("TransportStrategy", function() {
     it("should emit open on success", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
@@ -98,7 +98,7 @@ describe("TransportStrategy", function() {
     it("should allow one attempt at once", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       expect(strategy.connect()).toBe(true);
 
@@ -113,7 +113,7 @@ describe("TransportStrategy", function() {
     it("should emit error on a connection error", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
@@ -129,7 +129,7 @@ describe("TransportStrategy", function() {
     it("should emit error on a connection error", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
@@ -145,7 +145,7 @@ describe("TransportStrategy", function() {
     it("should emit error on connection closed", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
@@ -162,7 +162,7 @@ describe("TransportStrategy", function() {
     it("should allow reconnection", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
@@ -198,7 +198,7 @@ describe("TransportStrategy", function() {
     it("should close the connection when connecting", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       strategy.connect();
 
@@ -215,7 +215,7 @@ describe("TransportStrategy", function() {
     it("should not allow aborting when not connecting", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy(transport, {});
 
       expect(strategy.abort()).toBe(false);
     });

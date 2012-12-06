@@ -6,7 +6,6 @@ src_files:
   - pusher_event_dispatcher.js
   - net_info.js
 
-  - strategies/abstract_strategy.js
   - strategies/abstract_multi_strategy.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js

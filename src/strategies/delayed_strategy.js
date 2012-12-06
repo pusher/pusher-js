@@ -1,12 +1,14 @@
 ;(function() {
 
   function DelayedStrategy(substrategy, options) {
-    Pusher.AbstractStrategy.call(this, options);
+    Pusher.EventsDispatcher.call(this);
+
     this.substrategy = substrategy;
+    this.delay = options.delay;
   }
   var prototype = DelayedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   // interface
 
@@ -37,7 +39,7 @@
       }
       self.timer = null;
       abort = self.substrategy.connect(callback).abort;
-    }, this.options.delay);
+    }, this.delay);
 
     return {
       abort: abort

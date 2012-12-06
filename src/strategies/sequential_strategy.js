@@ -1,7 +1,11 @@
 ;(function() {
 
   function SequentialStrategy(substrategies, options) {
-    Pusher.AbstractMultiStrategy.call(this, substrategies, options);
+    Pusher.AbstractMultiStrategy.call(this, substrategies);
+
+    this.loop = options.loop;
+    this.timeout = options.timeout;
+    this.timeoutLimit = options.timeoutLimit;
   }
   var prototype = SequentialStrategy.prototype;
 
@@ -17,9 +21,8 @@
     }
 
     var self = this;
-
     var current = 0;
-    var timeout = this.options.timeout;
+    var timeout = self.timeout;
 
     var tryNextStrategy = function(error, connection) {
       self.abortCallback = null;
@@ -27,15 +30,15 @@
         self.emit("open", connection);
       } else {
         current = current + 1;
-        if (self.options.loop) {
+        if (self.loop) {
           current = current % self.substrategies.length;
         }
 
         if (current < self.substrategies.length) {
           if (timeout) {
             timeout = timeout * 2;
-            if (self.options.timeoutLimit) {
-              timeout = Math.min(timeout, self.options.timeoutLimit);
+            if (self.timeoutLimit) {
+              timeout = Math.min(timeout, self.timeoutLimit);
             }
           }
           self.abortCallback = self.tryStrategy(
@@ -48,7 +51,7 @@
     };
 
     this.abortCallback = this.tryStrategy(
-      this.substrategies[current], this.options.timeout, tryNextStrategy
+      this.substrategies[current], this.timeout, tryNextStrategy
     );
 
     return true;

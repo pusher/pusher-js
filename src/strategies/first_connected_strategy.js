@@ -1,7 +1,7 @@
 ;(function() {
 
-  function FirstConnectedStrategy(substrategies, options) {
-    Pusher.AbstractMultiStrategy.call(this, substrategies, options);
+  function FirstConnectedStrategy(substrategies) {
+    Pusher.AbstractMultiStrategy.call(this, substrategies);
   }
   var prototype = FirstConnectedStrategy.prototype;
 

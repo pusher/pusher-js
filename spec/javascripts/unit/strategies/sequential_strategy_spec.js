@@ -20,7 +20,7 @@ describe("SequentialStrategy", function() {
   }
 
   it("should expose its name", function() {
-    expect(new Pusher.SequentialStrategy([]).name).toEqual("seq");
+    expect(new Pusher.SequentialStrategy([], {}).name).toEqual("seq");
   });
 
   it("should call forceSecure on all substrategies", function() {
@@ -28,7 +28,7 @@ describe("SequentialStrategy", function() {
       getSubstrategyMock(true),
       getSubstrategyMock(true),
     ];
-    var strategy = new Pusher.SequentialStrategy(substrategies);
+    var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
     strategy.forceSecure(true);
     expect(substrategies[0].forceSecure).toHaveBeenCalledWith(true);
@@ -45,7 +45,7 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(false),
         getSubstrategyMock(true)
       ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
       expect(strategy.isSupported()).toBe(true);
     });
@@ -55,7 +55,7 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(false),
         getSubstrategyMock(false)
       ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
       expect(strategy.isSupported()).toBe(false);
     });
@@ -67,7 +67,7 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(true),
         getSubstrategyMock(true)
       ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
@@ -92,7 +92,7 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(false),
         getSubstrategyMock(true)
       ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
@@ -149,7 +149,7 @@ describe("SequentialStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true)
       ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
       expect(strategy.connect()).toBe(true);
       expect(substrategies[0].connect.calls.length).toEqual(1);
@@ -220,7 +220,7 @@ describe("SequentialStrategy", function() {
       var substrategies = [
         getSubstrategyMock(true)
       ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
+      var strategy = new Pusher.SequentialStrategy(substrategies, {});
 
       expect(strategy.abort()).toBe(false);
       expect(substrategies[0].connect.calls.length).toEqual(0);

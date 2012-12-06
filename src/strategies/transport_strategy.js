@@ -1,12 +1,14 @@
 ;(function() {
 
   function TransportStrategy(transport, options) {
-    Pusher.AbstractStrategy.call(this, options);
+    Pusher.EventsDispatcher.call(this);
+
     this.transport = transport;
+    this.options = options;
   }
   var prototype = TransportStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.AbstractStrategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   prototype.name = "transport";
 
@@ -40,6 +42,16 @@
     }
 
     return this.connectInitialized();
+  };
+
+  prototype.abort = function() {
+    if (this.abortCallback) {
+      this.abortCallback();
+      this.abortCallback = null;
+      return true;
+    } else {
+      return false;
+    }
   };
 
   // private
