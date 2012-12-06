@@ -15,19 +15,16 @@
 
   prototype.name = "seq";
 
-  prototype.connect = function() {
-    if (this.abortCallback) {
-      return false;
-    }
-
+  prototype.connect = function(callback) {
     var self = this;
+
     var current = 0;
     var timeout = self.timeout;
+    var runner = null;
 
     var tryNextStrategy = function(error, connection) {
-      self.abortCallback = null;
       if (connection) {
-        self.emit("open", connection);
+        callback(null, connection);
       } else {
         current = current + 1;
         if (self.loop) {
@@ -41,62 +38,47 @@
               timeout = Math.min(timeout, self.timeoutLimit);
             }
           }
-          self.abortCallback = self.tryStrategy(
+          runner = self.tryStrategy(
             self.substrategies[current], timeout, tryNextStrategy
           );
         } else {
-          self.emit("error");
+          callback(true);
         }
       }
     };
 
-    this.abortCallback = this.tryStrategy(
+    runner = this.tryStrategy(
       this.substrategies[current], this.timeout, tryNextStrategy
     );
 
-    return true;
+    return {
+      abort: function() {
+        runner.abort();
+      }
+    };
   };
 
   // private
 
   prototype.tryStrategy = function(strategy, timeoutLength, callback) {
-    var onOpen = function(connection) {
-      unbindListeners();
-      callback(null, connection);
-    };
-    var onError = function(error) {
-      unbindListeners();
-      callback(error);
-    };
-    var onTimeout = function() {
-      strategy.abort();
-      unbindListeners();
-      callback("timeout");
-    };
+    var timeout = null;
+    var runner = null;
 
-    var unbindListeners = function() {
-      strategy.unbind("open", onOpen);
-      strategy.unbind("error", onError);
+    runner = strategy.connect(function(error, connection) {
       if (timeout) {
         clearTimeout(timeout);
       }
-    };
-
-    var abortCallback = function() {
-      strategy.abort();
-      unbindListeners();
-    };
-
-    strategy.bind("open", onOpen);
-    strategy.bind("error", onError);
-
-    strategy.connect();
+      callback(error, connection);
+    });
 
     if (timeoutLength > 0) {
-      var timeout = setTimeout(onTimeout, timeoutLength);
+      timeout = setTimeout(function() {
+        runner.abort();
+        callback(true);
+      }, timeoutLength);
     }
 
-    return abortCallback;
+    return runner;
   };
 
   Pusher.SequentialStrategy = SequentialStrategy;

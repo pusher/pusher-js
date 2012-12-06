@@ -2,11 +2,16 @@ describe("SequentialStrategy", function() {
   function getSubstrategyMock(supported) {
     var substrategy = new Pusher.EventsDispatcher();
 
+    substrategy.forceSecure = jasmine.createSpy("forceSecure");
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
-    substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.connect = jasmine.createSpy("connect");
-    substrategy.abort = jasmine.createSpy("abort");
+    substrategy.connect = jasmine.createSpy("connect")
+      .andCallFake(function(callback) {
+        substrategy._callback = callback;
+        return { abort: substrategy._abort }
+      });
+
+    substrategy._abort = jasmine.createSpy();
 
     return substrategy;
   }
@@ -18,6 +23,10 @@ describe("SequentialStrategy", function() {
       callback();
     });
   }
+
+  beforeEach(function() {
+    this.callback = jasmine.createSpy();
+  });
 
   it("should expose its name", function() {
     expect(new Pusher.SequentialStrategy([], {}).name).toEqual("seq");
@@ -68,21 +77,16 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {});
-
-      var openCallback = jasmine.createSpy("openCallback");
-      strategy.bind("open", openCallback);
-
-      strategy.connect();
+      strategy.connect(this.callback);
 
       expect(substrategies[0].connect).toHaveBeenCalled();
-      expect(substrategies[0].abort).not.toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
 
-      var connection = {};
-      substrategies[0].emit("open", connection);
+      var connection = new Object();
+      substrategies[0]._callback(null, connection);
 
-      expect(openCallback).toHaveBeenCalledWith(connection);
-      expect(substrategies[0].abort).not.toHaveBeenCalled();
+      expect(this.callback).toHaveBeenCalledWith(null, connection);
+      expect(substrategies[0]._abort).not.toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
     });
 
@@ -97,24 +101,21 @@ describe("SequentialStrategy", function() {
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
 
-      strategy.connect();
+      strategy.connect(this.callback);
 
       expect(substrategies[0].connect).toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
 
-      substrategies[0].emit("error", 1);
+      substrategies[0]._callback(true);
 
-      expect(substrategies[0].abort).not.toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
-      expect(substrategies[1].abort).not.toHaveBeenCalled();
       expect(substrategies[2].connect).toHaveBeenCalled();
 
-      expect(errorCallback).not.toHaveBeenCalled();
+      substrategies[2]._callback(true);
 
-      substrategies[2].emit("error", 2);
-
-      expect(substrategies[2].abort).not.toHaveBeenCalled();
-      expect(errorCallback).toHaveBeenCalled();
+      expect(substrategies[2]._abort).not.toHaveBeenCalled();
+      expect(this.callback).toHaveBeenCalledWith(true);
+      expect(this.callback.calls.length).toEqual(1);
     });
 
     it("should support looping", function() {
@@ -126,36 +127,23 @@ describe("SequentialStrategy", function() {
         loop: true
       });
 
-      strategy.connect();
+      var runner = strategy.connect(this.callback);
 
       expect(substrategies[0].connect.calls.length).toEqual(1);
       expect(substrategies[1].connect.calls.length).toEqual(0);
 
-      substrategies[0].emit("error", 1);
+      substrategies[0]._callback(true);
 
       expect(substrategies[0].connect.calls.length).toEqual(1);
       expect(substrategies[1].connect.calls.length).toEqual(1);
 
-      substrategies[1].emit("error", 2);
+      substrategies[1]._callback(true);
 
       expect(substrategies[0].connect.calls.length).toEqual(2);
       expect(substrategies[1].connect.calls.length).toEqual(1);
 
-      strategy.abort();
-      expect(substrategies[0].abort.calls.length).toEqual(1);
-    });
-
-    it("should allow one attempt at once", function() {
-      var substrategies = [
-        getSubstrategyMock(true)
-      ];
-      var strategy = new Pusher.SequentialStrategy(substrategies, {});
-
-      expect(strategy.connect()).toBe(true);
-      expect(substrategies[0].connect.calls.length).toEqual(1);
-
-      expect(strategy.connect()).toBe(false);
-      expect(substrategies[0].connect.calls.length).toEqual(1);
+      runner.abort();
+      expect(substrategies[0]._abort).toHaveBeenCalled();
     });
 
     it("should allow reconnection", function() {
@@ -167,16 +155,20 @@ describe("SequentialStrategy", function() {
         loop: true
       });
 
-      strategy.connect();
+      strategy.connect(this.callback);
       expect(substrategies[0].connect.calls.length).toEqual(1);
       expect(substrategies[1].connect.calls.length).toEqual(0);
 
-      substrategies[0].emit("open", {});
-      expect(substrategies[0].connect.calls.length).toEqual(1);
+      var connection1 = new Object();
+      substrategies[0]._callback(null, connection1);
+      expect(this.callback).toHaveBeenCalledWith(null, connection1);
+      expect(this.callback.calls.length).toEqual(1);
 
-      strategy.connect();
-      expect(substrategies[0].connect.calls.length).toEqual(2);
-      expect(substrategies[1].connect.calls.length).toEqual(0);
+      var connection2 = new Object();
+      strategy.connect(this.callback);
+      substrategies[0]._callback(null, connection2);
+      expect(this.callback).toHaveBeenCalledWith(null, connection2);
+      expect(this.callback.calls.length).toEqual(2);
     });
   });
 
@@ -187,15 +179,14 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {});
-
-      strategy.connect();
+      var runner = strategy.connect(this.callback);
 
       expect(substrategies[0].connect).toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
 
-      strategy.abort();
+      runner.abort();
 
-      expect(substrategies[0].abort).toHaveBeenCalled();
+      expect(substrategies[0]._abort).toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
     });
 
@@ -205,26 +196,13 @@ describe("SequentialStrategy", function() {
         getSubstrategyMock(true)
       ];
       var strategy = new Pusher.SequentialStrategy(substrategies, {});
+      var runner = strategy.connect(this.callback);
 
-      strategy.connect();
-      substrategies[0].emit("error", 666);
-
+      substrategies[0]._callback(true);
       expect(substrategies[1].connect).toHaveBeenCalled();
 
-      strategy.abort();
-
-      expect(substrategies[1].abort).toHaveBeenCalled();
-    });
-
-    it("should not abort when there is no attempt being made", function() {
-      var substrategies = [
-        getSubstrategyMock(true)
-      ];
-      var strategy = new Pusher.SequentialStrategy(substrategies, {});
-
-      expect(strategy.abort()).toBe(false);
-      expect(substrategies[0].connect.calls.length).toEqual(0);
-      expect(substrategies[0].abort.calls.length).toEqual(0);
+      runner.abort();
+      expect(substrategies[1]._abort).toHaveBeenCalled();
     });
   });
 
@@ -246,18 +224,22 @@ describe("SequentialStrategy", function() {
 
       substrategies[0].connect = jasmine.createSpy().andCallFake(function() {
         expect(substrategies[1].connect).not.toHaveBeenCalled();
+        return { abort: substrategies[0]._abort };
       });
       substrategies[1].connect = jasmine.createSpy().andCallFake(function() {
         expect(substrategies[2].connect).not.toHaveBeenCalled();
+        return { abort: substrategies[1]._abort };
       });
       substrategies[2].connect = jasmine.createSpy().andCallFake(function() {
         expect(substrategies[3].connect).not.toHaveBeenCalled();
+        return { abort: substrategies[2]._abort };
       });
       substrategies[3].connect = jasmine.createSpy().andCallFake(function() {
         expect(substrategies[4].connect).not.toHaveBeenCalled();
+        return { abort: substrategies[3]._abort };
       });
 
-      strategy.connect();
+      strategy.connect(this.callback);
       expect(setTimeout.calls.length).toEqual(5);
 
       expect(substrategies[0].connect).toHaveBeenCalled();
