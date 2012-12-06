@@ -98,46 +98,9 @@ var _require = (function() {
     window['WebSocket'] = window['MozWebSocket']
   }
 
-  if (window['WebSocket']) {
-    Pusher.Transport = window['WebSocket'];
-    Pusher.TransportType = 'native';
-  }
-
-  var cdn = (document.location.protocol == 'http:') ? Pusher.cdn_http : Pusher.cdn_https;
-  var root = cdn + Pusher.VERSION;
-  var deps = [];
-
   var initialize = function() {
-    if (window['WebSocket']) {
-      // Initialize function in the case that we have native WebSocket support
-      return function() {
-        Pusher.ready();
-      }
-    } else {
-      // Initialize function for fallback case
-      return function() {
-        if (window['WebSocket']) {
-          // window['WebSocket'] is a flash emulation of WebSocket
-          Pusher.Transport = window['WebSocket'];
-          Pusher.TransportType = 'flash';
-
-          window.WEB_SOCKET_SWF_LOCATION = root + "/WebSocketMain.swf";
-          WebSocket.__addTask(function() {
-            Pusher.ready();
-          })
-          WebSocket.__initialize();
-        } else {
-          // web-socket-js cannot initialize (most likely flash not installed)
-          sockjsPath = root + '/sockjs' + Pusher.dependency_suffix + '.js';
-          _require([sockjsPath], function() {
-            Pusher.Transport = SockJS;
-            Pusher.TransportType = 'sockjs';
-            Pusher.ready();
-          })
-        }
-      }
-    }
-  }();
+    Pusher.ready();
+  };
 
   // Allows calling a function when the document body is available
   var ondocumentbody = function(callback) {
