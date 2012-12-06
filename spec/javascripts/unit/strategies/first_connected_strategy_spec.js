@@ -5,7 +5,6 @@ describe("FirstConnectedStrategy", function() {
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
     substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
 
@@ -52,23 +51,6 @@ describe("FirstConnectedStrategy", function() {
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
 
       expect(strategy.isSupported()).toBe(false);
-    });
-  });
-
-  describe("on initialization", function() {
-    it("should delegate initialization to all substrategies immediately", function() {
-      var substrategies = [
-        getSubstrategyMock(true),
-        getSubstrategyMock(false),
-        getSubstrategyMock(true)
-      ];
-      var strategy = new Pusher.FirstConnectedStrategy(substrategies);
-
-      strategy.initialize();
-
-      expect(substrategies[0].initialize).toHaveBeenCalled();
-      expect(substrategies[1].initialize).not.toHaveBeenCalled();
-      expect(substrategies[2].initialize).toHaveBeenCalled();
     });
   });
 
@@ -145,7 +127,7 @@ describe("FirstConnectedStrategy", function() {
       expect(substrategies[0].connect.calls.length).toEqual(1);
     });
 
-    it("should allow reinitialization and reconnection", function() {
+    it("should allow reconnection", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(true)
@@ -154,10 +136,6 @@ describe("FirstConnectedStrategy", function() {
 
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
-
-      strategy.initialize();
-      expect(substrategies[0].initialize.calls.length).toEqual(1);
-      expect(substrategies[1].initialize.calls.length).toEqual(1);
 
       strategy.connect();
       expect(substrategies[0].connect.calls.length).toEqual(1);
@@ -168,10 +146,6 @@ describe("FirstConnectedStrategy", function() {
 
       expect(substrategies[0].abort.calls.length).toEqual(1);
       expect(substrategies[1].abort.calls.length).toEqual(0);
-
-      strategy.initialize();
-      expect(substrategies[0].initialize.calls.length).toEqual(2);
-      expect(substrategies[1].initialize.calls.length).toEqual(2);
 
       strategy.connect();
       expect(substrategies[0].connect.calls.length).toEqual(2);

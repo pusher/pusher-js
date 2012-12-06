@@ -5,7 +5,6 @@ describe("SequentialStrategy", function() {
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
     substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
 
@@ -59,23 +58,6 @@ describe("SequentialStrategy", function() {
       var strategy = new Pusher.SequentialStrategy(substrategies);
 
       expect(strategy.isSupported()).toBe(false);
-    });
-  });
-
-  describe("on initialization", function() {
-    it("should delegate initialization to all substrategies immediately", function() {
-      var substrategies = [
-        getSubstrategyMock(true),
-        getSubstrategyMock(false),
-        getSubstrategyMock(true)
-      ];
-      var strategy = new Pusher.SequentialStrategy(substrategies);
-
-      strategy.initialize();
-
-      expect(substrategies[0].initialize).toHaveBeenCalled();
-      expect(substrategies[1].initialize).not.toHaveBeenCalled();
-      expect(substrategies[2].initialize).toHaveBeenCalled();
     });
   });
 
@@ -176,7 +158,7 @@ describe("SequentialStrategy", function() {
       expect(substrategies[0].connect.calls.length).toEqual(1);
     });
 
-    it("should allow reinitialization and reconnection", function() {
+    it("should allow reconnection", function() {
       var substrategies = [
         getSubstrategyMock(true),
         getSubstrategyMock(true)
@@ -185,28 +167,16 @@ describe("SequentialStrategy", function() {
         loop: true
       });
 
-      strategy.initialize();
-      expect(substrategies[0].initialize.calls.length).toEqual(1);
-      expect(substrategies[1].initialize.calls.length).toEqual(1);
-
       strategy.connect();
       expect(substrategies[0].connect.calls.length).toEqual(1);
       expect(substrategies[1].connect.calls.length).toEqual(0);
-      expect(substrategies[0].initialize.calls.length).toEqual(2);
-      expect(substrategies[1].initialize.calls.length).toEqual(1);
 
       substrategies[0].emit("open", {});
       expect(substrategies[0].connect.calls.length).toEqual(1);
 
-      strategy.initialize();
-      expect(substrategies[0].initialize.calls.length).toEqual(3);
-      expect(substrategies[1].initialize.calls.length).toEqual(2);
-
       strategy.connect();
       expect(substrategies[0].connect.calls.length).toEqual(2);
       expect(substrategies[1].connect.calls.length).toEqual(0);
-      expect(substrategies[0].initialize.calls.length).toEqual(4);
-      expect(substrategies[1].initialize.calls.length).toEqual(2);
     });
   });
 

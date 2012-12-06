@@ -20,19 +20,6 @@
     this.substrategy.forceSecure(value);
   };
 
-  prototype.initialize = function() {
-    if (this.initializeTimer) {
-      return;
-    }
-
-    var self = this;
-
-    this.initializeTimer = setTimeout(function() {
-      self.initializeTimer = null;
-      self.initializeSubstrategy();
-    }, this.options.delay);
-  };
-
   prototype.connect = function() {
     if (!this.isSupported() || this.abortCallback) {
       return false;
@@ -41,10 +28,6 @@
     var self = this;
 
     this.abortCallback = function() {
-      if (this.initializeTimer) {
-        clearTimeout(this.initializeTimer);
-        this.initializeTimer = null;
-      }
       if (this.connectTimer) {
         clearTimeout(this.connectTimer);
         this.connectTimer = null;
@@ -65,19 +48,8 @@
 
   // private
 
-  prototype.initializeSubstrategy = function() {
-    this.initializeTimer = null;
-    this.substrategy.initialize();
-  };
-
   prototype.connectSubstrategy = function() {
     var self = this;
-
-    if (this.initializeTimer) {
-      clearTimeout(this.initializeTimer);
-      this.initializeTimer = null;
-      this.initializeSubstrategy();
-    }
 
     var onOpen = function(connection) {
       self.abortCallback = null;

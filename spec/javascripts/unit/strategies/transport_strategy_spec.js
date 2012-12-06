@@ -2,7 +2,11 @@ describe("TransportStrategy", function() {
   function getConnectionMock() {
     var connection = new Pusher.EventsDispatcher();
 
-    connection.initialize = jasmine.createSpy("initialize");
+    connection.initialize = jasmine.createSpy("initialize")
+      .andCallFake(function() {
+        connection.state = "initializing";
+        connection.emit("initializing");
+      });
     connection.connect = jasmine.createSpy("connect");
     connection.close = jasmine.createSpy("abort");
     connection.state = undefined;
@@ -31,14 +35,14 @@ describe("TransportStrategy", function() {
     var strategy = new Pusher.TransportStrategy(transport, { key: "foo" });
 
     strategy.forceSecure(true);
-    strategy.initialize();
+    strategy.connect();
     expect(transport.createConnection).toHaveBeenCalledWith("foo", {
       key: "foo",
       secure: true
     });
 
     strategy.forceSecure(false);
-    strategy.initialize();
+    strategy.connect();
     expect(transport.createConnection).toHaveBeenCalledWith("foo", {
       key: "foo",
       secure: false
@@ -57,7 +61,7 @@ describe("TransportStrategy", function() {
     });
   });
 
-  describe("on initialization", function() {
+  describe("on connection attempt", function() {
     it("should pass key and options to the transport", function() {
       var options = {
         key: "asdf",
@@ -66,23 +70,10 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true);
       var strategy = new Pusher.TransportStrategy(transport, options);
 
-      strategy.initialize();
+      strategy.connect();
       expect(transport.createConnection).toHaveBeenCalledWith("asdf", options);
     });
 
-    it("should delegate initialization to the transport immediately", function() {
-      var connection = getConnectionMock();
-      var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
-
-      strategy.initialize();
-
-      expect(transport.createConnection).toHaveBeenCalled();
-      expect(connection.initialize).toHaveBeenCalled();
-    });
-  });
-
-  describe("on connection attempt", function() {
     it("should emit open on success", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
@@ -91,12 +82,12 @@ describe("TransportStrategy", function() {
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
 
-      strategy.initialize();
+      strategy.connect();
+      expect(connection.initialize).toHaveBeenCalled();
+      expect(connection.connect).not.toHaveBeenCalled();
 
       connection.state = "initialized";
       connection.emit("initialized");
-
-      strategy.connect();
       expect(connection.connect).toHaveBeenCalled();
 
       connection.state = "open";
@@ -104,44 +95,15 @@ describe("TransportStrategy", function() {
       expect(openCallback).toHaveBeenCalledWith(connection);
     });
 
-    it("should wait for connection to initialize", function() {
-      var connection = getConnectionMock();
-      var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport);
-
-      strategy.initialize();
-      connection.state = "initializing";
-      connection.emit("initializing");
-
-      strategy.connect();
-      expect(connection.connect).not.toHaveBeenCalled();
-
-      connection.state = "initialized";
-      connection.emit("initialized");
-
-      expect(connection.connect).toHaveBeenCalled();
-    });
-
-    it("should not allow connecting before initialization", function() {
-      var transport = getTransportMock(true);
-      var strategy = new Pusher.TransportStrategy(transport);
-
-      strategy.connect();
-      expect(transport.createConnection).not.toHaveBeenCalled();
-    });
-
     it("should allow one attempt at once", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport);
 
-      strategy.initialize();
+      expect(strategy.connect()).toBe(true);
 
       connection.state = "initialized";
       connection.emit("initialized");
-
-      expect(strategy.connect()).toBe(true);
-
       connection.state = "connecting";
       connection.emit("connecting");
 
@@ -156,10 +118,9 @@ describe("TransportStrategy", function() {
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
 
-      strategy.initialize();
+      strategy.connect();
       connection.state = "initialized";
       connection.emit("initialized");
-      strategy.connect();
 
       connection.emit("error", 123);
       expect(errorCallback).toHaveBeenCalledWith(123);
@@ -173,10 +134,9 @@ describe("TransportStrategy", function() {
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
 
-      strategy.initialize();
+      strategy.connect();
       connection.state = "initialized";
       connection.emit("initialized");
-      strategy.connect();
 
       connection.emit("error", 123);
       expect(errorCallback).toHaveBeenCalledWith(123);
@@ -190,17 +150,16 @@ describe("TransportStrategy", function() {
       var errorCallback = jasmine.createSpy("errorCallback");
       strategy.bind("error", errorCallback);
 
-      strategy.initialize();
+      strategy.connect();
       connection.state = "initialized";
       connection.emit("initialized");
-      strategy.connect();
 
       connection.state = "closed";
       connection.emit("closed");
       expect(errorCallback).toHaveBeenCalledWith("closed");
     });
 
-    it("should allow reinitialization and reconnection", function() {
+    it("should allow reconnection", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport);
@@ -208,12 +167,10 @@ describe("TransportStrategy", function() {
       var openCallback = jasmine.createSpy("openCallback");
       strategy.bind("open", openCallback);
 
-      strategy.initialize();
-
-      connection.state = "initialized";
-      connection.emit("initialized");
 
       strategy.connect();
+      connection.state = "initialized";
+      connection.emit("initialized");
       expect(connection.connect).toHaveBeenCalled();
 
       connection.state = "open";
@@ -224,12 +181,9 @@ describe("TransportStrategy", function() {
       transport.createConnection = jasmine.createSpy("createConnection")
         .andReturn(connection2);
 
-      strategy.initialize();
-
+      strategy.connect();
       connection2.state = "initialized";
       connection2.emit("initialized");
-
-      strategy.connect();
       expect(connection2.connect).toHaveBeenCalled();
 
       connection2.state = "open";
@@ -246,11 +200,10 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport);
 
-      strategy.initialize();
-      connection.state = "initialized";
-      connection.emit("initialized");
       strategy.connect();
 
+      connection.state = "initialized";
+      connection.emit("initialized");
       connection.state = "connecting";
       connection.emit("connecting");
 
@@ -259,7 +212,7 @@ describe("TransportStrategy", function() {
       expect(connection.close).toHaveBeenCalledWith();
     });
 
-    it("should not allow aborting when not initialized", function() {
+    it("should not allow aborting when not connecting", function() {
       var connection = getConnectionMock();
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport);

@@ -5,7 +5,6 @@ describe("FirstSupportedStrategy", function() {
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
     substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
 
@@ -52,21 +51,6 @@ describe("FirstSupportedStrategy", function() {
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
       expect(strategy.isSupported()).toBe(false);
-    });
-  });
-
-  describe("on initialization", function() {
-    it("should delegate initialization to the first supported substrategy immediately", function() {
-      var substrategies = [
-        getSubstrategyMock(true),
-        getSubstrategyMock(true)
-      ];
-      var strategy = new Pusher.FirstSupportedStrategy(substrategies);
-
-      strategy.initialize();
-
-      expect(substrategies[0].initialize).toHaveBeenCalled();
-      expect(substrategies[1].initialize).not.toHaveBeenCalled();
     });
   });
 

@@ -5,7 +5,6 @@ describe("FirstConnectedEverStrategy", function() {
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
     substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
 

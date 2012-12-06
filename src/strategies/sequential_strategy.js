@@ -87,9 +87,6 @@
     strategy.bind("open", onOpen);
     strategy.bind("error", onError);
 
-    // we initialize here again, because we might be trying this strategy again
-    // initialize calls should do as little as possible
-    strategy.initialize();
     strategy.connect();
 
     if (timeoutLength > 0) {

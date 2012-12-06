@@ -18,44 +18,51 @@
     this.options.secure = value;
   };
 
-  prototype.initialize = function() {
+  prototype.connect = function() {
+    if (this.abortCallback) {
+      return false;
+    }
+
     this.connection = this.transport.createConnection(
       this.options.key, this.options
     );
     this.connection.initialize();
-  };
 
-  prototype.connect = function() {
-    var self = this;
-
-    if (!this.connection) {
-      return false;
-    }
     if (this.connection.state === "initializing") {
-      if (this.initializedCallback) {
-        return false;
-      }
+      var self = this;
       this.initializedCallback = function() {
         self.connection.unbind("initialized", self.initializedCallback);
         self.initializedCallback = null;
-        self.connect();
+        self.connectInitialized();
       };
       this.connection.bind("initialized", this.initializedCallback);
       return true;
     }
+
+    return this.connectInitialized();
+  };
+
+  // private
+
+  prototype.connectInitialized = function() {
     if (this.connection.state !== "initialized") {
       return false;
     }
 
+    var self = this;
+
     var onOpen = function() {
+      self.abortCallback = null;
       unbindListeners();
       self.emit("open", self.connection);
     };
     var onError = function(error) {
+      self.abortCallback = null;
       unbindListeners();
       self.emit("error", error);
     };
     var onClosed = function() {
+      self.abortCallback = null;
       unbindListeners();
       self.emit("error", "closed"); // TODO return something meaningful
     };

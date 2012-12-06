@@ -5,7 +5,6 @@ describe("DelayedStrategy", function() {
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
     substrategy.forceSecure = jasmine.createSpy("forceSecure");
-    substrategy.initialize = jasmine.createSpy("initialize");
     substrategy.connect = jasmine.createSpy("connect");
     substrategy.abort = jasmine.createSpy("abort");
 
@@ -52,21 +51,6 @@ describe("DelayedStrategy", function() {
     });
   });
 
-  describe("on initialization", function() {
-    it("should delegate initialization to the substrategy with a delay", function() {
-      var substrategy = getSubstrategyMock(true);
-      var strategy = new Pusher.DelayedStrategy(substrategy, {
-        delay: 200
-      });
-
-      mockSetTimeout([200]);
-
-      expect(substrategy.initialize).not.toHaveBeenCalled();
-      strategy.initialize();
-      expect(substrategy.initialize).toHaveBeenCalled();
-    });
-  });
-
   describe("on connection attempt", function() {
     it("should connect to a substrategy after a delay", function() {
       var substrategy = getSubstrategyMock(true);
@@ -79,10 +63,7 @@ describe("DelayedStrategy", function() {
 
       mockSetTimeout([100, 100]);
 
-      strategy.initialize();
       strategy.connect();
-
-      expect(substrategy.initialize).toHaveBeenCalled();
       expect(substrategy.connect).toHaveBeenCalled();
 
       var connection = {};
@@ -101,11 +82,9 @@ describe("DelayedStrategy", function() {
       strategy.bind("error", errorCallback);
 
       mockSetTimeout([0, 0]);
-
-      strategy.initialize();
       strategy.connect();
-
       strategy.emit("error", 123);
+
       expect(errorCallback).toHaveBeenCalledWith(123);
     });
 
@@ -119,20 +98,13 @@ describe("DelayedStrategy", function() {
       strategy.bind("open", openCallback);
 
       mockSetTimeout([50, 50, 50, 50]);
-
-      strategy.initialize();
       strategy.connect();
-
-      expect(substrategy.initialize.calls.length).toEqual(1);
       expect(substrategy.connect.calls.length).toEqual(1);
 
       substrategy.emit("open", {});
       expect(openCallback.calls.length).toEqual(1);
 
-      strategy.initialize();
       strategy.connect();
-
-      expect(substrategy.initialize.calls.length).toEqual(2);
       expect(substrategy.connect.calls.length).toEqual(2);
 
       substrategy.emit("open", {});
@@ -158,15 +130,10 @@ describe("DelayedStrategy", function() {
       });
 
       mockSetTimeout([0, 0]);
-
-      strategy.initialize();
       strategy.connect();
-
-      expect(substrategy.initialize).toHaveBeenCalled();
       expect(substrategy.connect).toHaveBeenCalled();
 
       strategy.abort();
-
       expect(substrategy.abort).toHaveBeenCalled();
     });
 
@@ -179,19 +146,6 @@ describe("DelayedStrategy", function() {
       var timerCalled = false;
       var abortCalled = false;
 
-      substrategy.initialize = jasmine.createSpy()
-
-      spyOn(window, "setTimeout").andCallFake(function(callback, delay) {
-        expect(delay).toEqual(0);
-        if (setTimeout.calls.length === 1) {
-          callback();
-        }
-      });
-
-      strategy.initialize();
-      strategy.connect();
-
-      expect(substrategy.connect).not.toHaveBeenCalled();
       strategy.abort();
       expect(substrategy.abort).not.toHaveBeenCalled();
     });
@@ -202,11 +156,9 @@ describe("DelayedStrategy", function() {
         delay: 0
       });
 
-      strategy.initialize();
       strategy.connect();
       strategy.abort();
 
-      expect(substrategy.initialize).not.toHaveBeenCalled();
       expect(substrategy.connect).not.toHaveBeenCalled();
       expect(substrategy.abort).not.toHaveBeenCalled();
     });
@@ -218,7 +170,6 @@ describe("DelayedStrategy", function() {
       });
 
       strategy.abort();
-      expect(substrategy.initialize).not.toHaveBeenCalled();
       expect(substrategy.connect).not.toHaveBeenCalled();
       expect(substrategy.abort).not.toHaveBeenCalled();
     });
@@ -229,7 +180,6 @@ describe("DelayedStrategy", function() {
         delay: 0
       });
 
-      strategy.initialize();
       strategy.connect();
 
       expect(strategy.abort()).toBe(true);

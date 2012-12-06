@@ -20,12 +20,6 @@
     }
   };
 
-  prototype.initialize = function() {
-    for (var i = 0; i < this.substrategies.length; i++) {
-      this.substrategies[i].initialize();
-    }
-  };
-
   // protected
 
   prototype.getSupported = function(substrategies) {
