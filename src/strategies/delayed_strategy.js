@@ -42,7 +42,9 @@
     }, this.delay);
 
     return {
-      abort: abort
+      abort: function() {
+        abort();
+      }
     };
   };
 

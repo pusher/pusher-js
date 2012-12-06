@@ -60,6 +60,9 @@
 
     return {
       abort: function() {
+        if (connection.state === "open") {
+          return;
+        }
         unbindListeners();
         connection.close();
       }

@@ -171,5 +171,24 @@ describe("TransportStrategy", function() {
 
       expect(connection.close).toHaveBeenCalled();
     });
+
+    it("should not close open connections", function() {
+      var connection = getConnectionMock();
+      var transport = getTransportMock(true, connection);
+      var strategy = new Pusher.TransportStrategy(transport, {});
+
+      var runner = strategy.connect(this.callback);
+
+      connection.state = "initialized";
+      connection.emit("initialized");
+      connection.state = "connecting";
+      connection.emit("connecting");
+      connection.state = "open";
+      connection.emit("open");
+
+      runner.abort();
+
+      expect(connection.close).not.toHaveBeenCalled();
+    });
   });
 });
