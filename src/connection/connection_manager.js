@@ -13,13 +13,6 @@
 
     var self = this;
 
-    this.strategy.bind("open", function(transport) {
-      // we don't support switching connections yet
-      self.strategy.abort();
-      self.clearUnavailableTimer();
-      self.setConnection(self.wrapTransport(transport));
-    });
-
     Pusher.NetInfo.bind("online", function() {
       if (self.state === "unavailable") {
         self.connect();
@@ -55,8 +48,12 @@
     }
 
     this.updateState("connecting");
-    this.strategy.initialize();
-    this.strategy.connect();
+    this.runner = this.strategy.connect(function(error, transport) {
+      // we don't support switching connections yet
+      self.runner.abort();
+      self.clearUnavailableTimer();
+      self.setConnection(self.wrapTransport(transport));
+    });
 
     var self = this;
     this.unavailableTimer = setTimeout(function() {
@@ -85,9 +82,11 @@
   };
 
   prototype.disconnect = function(data) {
+    if (this.runner) {
+      this.runner.abort();
+    }
     this.clearUnavailableTimer();
     this.stopActivityCheck();
-    this.strategy.abort();
     this.updateState("disconnected");
     // we're in disconnected state, so closing will not cause reconnecting
     if (this.connection) {
