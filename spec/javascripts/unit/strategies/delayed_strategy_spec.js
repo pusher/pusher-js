@@ -69,17 +69,17 @@ describe("DelayedStrategy", function() {
       expect(this.substrategy.connect).toHaveBeenCalled();
 
       var connection = new Object();
-      this.substrategy._callback("open", connection);
+      this.substrategy._callback(null, connection);
 
-      expect(this.callback).toHaveBeenCalledWith("open", connection);
+      expect(this.callback).toHaveBeenCalledWith(null, connection);
     });
 
     it("should pass the error when the substrategy fails", function() {
       mockSetTimeout([0]);
       this.strategy.connect(this.callback);
-      this.substrategy._callback("error", 123)
+      this.substrategy._callback(true)
 
-      expect(this.callback).toHaveBeenCalledWith("error", 123);
+      expect(this.callback).toHaveBeenCalledWith(true);
     });
 
     it("should allow reconnection", function() {
@@ -87,17 +87,17 @@ describe("DelayedStrategy", function() {
 
       var connection1 = new Object();
       this.strategy.connect(this.callback);
-      this.substrategy._callback("open", connection1);
+      this.substrategy._callback(null, connection1);
       expect(this.substrategy.connect.calls.length).toEqual(1);
       expect(this.callback.calls.length).toEqual(1);
-      expect(this.callback).toHaveBeenCalledWith("open", connection1);
+      expect(this.callback).toHaveBeenCalledWith(null, connection1);
 
       var connection2 = new Object();
       this.strategy.connect(this.callback);
-      this.substrategy._callback("open", connection2);
+      this.substrategy._callback(null, connection2);
       expect(this.substrategy.connect.calls.length).toEqual(2);
       expect(this.callback.calls.length).toEqual(2);
-      expect(this.callback).toHaveBeenCalledWith("open", connection2);
+      expect(this.callback).toHaveBeenCalledWith(null, connection2);
     });
   });
 
