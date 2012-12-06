@@ -19,7 +19,16 @@
 
     this.checkAppKey();
 
-    this.connection = new Pusher.Connection(this.key, this.options);
+    this.connection = new Pusher.ConnectionManager(
+      this.key,
+      Pusher.Util.extend(
+        { activityTimeout: Pusher.activityTimeout,
+          pongTimeout: Pusher.pongTimeout,
+          unavailableTimeout: Pusher.unavailableTimeout
+        },
+        this.options
+      )
+    );
 
     // Setup / teardown connection
     this.connection
@@ -191,8 +200,9 @@
   Pusher.cdn_https = '<CDN_HTTPS>'
   Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
   Pusher.channel_auth_transport = 'ajax';
-  Pusher.activity_timeout = 120000;
-  Pusher.pong_timeout = 30000;
+  Pusher.activityTimeout = 120000;
+  Pusher.pongTimeout = 30000;
+  Pusher.unavailableTimeout = 10000;
 
   Pusher.isReady = false;
   Pusher.ready = function() {
@@ -200,6 +210,39 @@
     for (var i = 0, l = Pusher.instances.length; i < l; i++) {
       Pusher.instances[i].connect();
     }
+  };
+
+  Pusher.defaultStrategy = {
+    type: "first_supported",
+    host: "ws.pusherapp.com",
+    nonsecurePort: 80,
+    securePort: 443,
+    loop: true,
+    timeoutLimit: 8000,
+    children: [
+      { type: "sequential",
+        timeout: 2000,
+        children: [
+          { type: "transport", transport: "ws" },
+          { type: "transport", transport: "ws", secure: true }
+        ]
+      },
+      { type: "sequential",
+        timeout: 5000,
+        children: [
+          { type: "transport", transport: "flash" },
+          { type: "transport", transport: "flash", secure: true }
+        ]
+      },
+      { type: "sequential",
+        timeout: 2000,
+        host: "sockjs.pusher.com",
+        children: [
+          { type: "transport", transport: "sockjs" },
+          { type: "transport", transport: "sockjs", secure: true }
+        ]
+      }
+    ]
   };
 
   this.Pusher = Pusher;
