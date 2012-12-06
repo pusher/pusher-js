@@ -26,6 +26,10 @@ describe("TransportStrategy", function() {
     return transport;
   };
 
+  beforeEach(function() {
+    this.callback = jasmine.createSpy();
+  });
+
   it("should expose its name", function() {
     expect(new Pusher.TransportStrategy(null, {}).name).toEqual("transport");
   });
@@ -35,14 +39,14 @@ describe("TransportStrategy", function() {
     var strategy = new Pusher.TransportStrategy(transport, { key: "foo" });
 
     strategy.forceSecure(true);
-    strategy.connect();
+    strategy.connect(this.callback);
     expect(transport.createConnection).toHaveBeenCalledWith("foo", {
       key: "foo",
       secure: true
     });
 
     strategy.forceSecure(false);
-    strategy.connect();
+    strategy.connect(this.callback);
     expect(transport.createConnection).toHaveBeenCalledWith("foo", {
       key: "foo",
       secure: false
@@ -70,7 +74,7 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true);
       var strategy = new Pusher.TransportStrategy(transport, options);
 
-      strategy.connect();
+      strategy.connect(this.callback);
       expect(transport.createConnection).toHaveBeenCalledWith("asdf", options);
     });
 
@@ -79,10 +83,7 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport, {});
 
-      var openCallback = jasmine.createSpy("openCallback");
-      strategy.bind("open", openCallback);
-
-      strategy.connect();
+      strategy.connect(this.callback);
       expect(connection.initialize).toHaveBeenCalled();
       expect(connection.connect).not.toHaveBeenCalled();
 
@@ -92,22 +93,7 @@ describe("TransportStrategy", function() {
 
       connection.state = "open";
       connection.emit("open")
-      expect(openCallback).toHaveBeenCalledWith(connection);
-    });
-
-    it("should allow one attempt at once", function() {
-      var connection = getConnectionMock();
-      var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport, {});
-
-      expect(strategy.connect()).toBe(true);
-
-      connection.state = "initialized";
-      connection.emit("initialized");
-      connection.state = "connecting";
-      connection.emit("connecting");
-
-      expect(strategy.connect()).toBe(false);
+      expect(this.callback).toHaveBeenCalledWith(null, connection);
     });
 
     it("should emit error on a connection error", function() {
@@ -115,31 +101,12 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport, {});
 
-      var errorCallback = jasmine.createSpy("errorCallback");
-      strategy.bind("error", errorCallback);
-
-      strategy.connect();
+      strategy.connect(this.callback);
       connection.state = "initialized";
       connection.emit("initialized");
 
       connection.emit("error", 123);
-      expect(errorCallback).toHaveBeenCalledWith(123);
-    });
-
-    it("should emit error on a connection error", function() {
-      var connection = getConnectionMock();
-      var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport, {});
-
-      var errorCallback = jasmine.createSpy("errorCallback");
-      strategy.bind("error", errorCallback);
-
-      strategy.connect();
-      connection.state = "initialized";
-      connection.emit("initialized");
-
-      connection.emit("error", 123);
-      expect(errorCallback).toHaveBeenCalledWith(123);
+      expect(this.callback).toHaveBeenCalledWith(123);
     });
 
     it("should emit error on connection closed", function() {
@@ -147,50 +114,43 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport, {});
 
-      var errorCallback = jasmine.createSpy("errorCallback");
-      strategy.bind("error", errorCallback);
-
-      strategy.connect();
+      strategy.connect(this.callback);
       connection.state = "initialized";
       connection.emit("initialized");
 
       connection.state = "closed";
       connection.emit("closed");
-      expect(errorCallback).toHaveBeenCalledWith("closed");
+      expect(this.callback).toHaveBeenCalledWith("closed");
     });
 
     it("should allow reconnection", function() {
-      var connection = getConnectionMock();
-      var transport = getTransportMock(true, connection);
+      var connection1 = getConnectionMock();
+      var transport = getTransportMock(true, connection1);
       var strategy = new Pusher.TransportStrategy(transport, {});
 
-      var openCallback = jasmine.createSpy("openCallback");
-      strategy.bind("open", openCallback);
+      strategy.connect(this.callback);
+      connection1.state = "initialized";
+      connection1.emit("initialized");
+      expect(connection1.connect).toHaveBeenCalled();
 
-
-      strategy.connect();
-      connection.state = "initialized";
-      connection.emit("initialized");
-      expect(connection.connect).toHaveBeenCalled();
-
-      connection.state = "open";
-      connection.emit("open")
-      expect(openCallback).toHaveBeenCalledWith(connection);
+      connection1.state = "open";
+      connection1.emit("open")
+      expect(this.callback).toHaveBeenCalledWith(null, connection1);
+      expect(this.callback.calls.length).toEqual(1);
 
       var connection2 = getConnectionMock();
       transport.createConnection = jasmine.createSpy("createConnection")
         .andReturn(connection2);
 
-      strategy.connect();
+      strategy.connect(this.callback);
       connection2.state = "initialized";
       connection2.emit("initialized");
       expect(connection2.connect).toHaveBeenCalled();
 
       connection2.state = "open";
       connection2.emit("open")
-
-      expect(openCallback.calls.length).toEqual(2);
-      expect(openCallback).toHaveBeenCalledWith(connection2);
+      expect(this.callback).toHaveBeenCalledWith(null, connection2);
+      expect(this.callback.calls.length).toEqual(2);
     });
   });
 
@@ -200,24 +160,16 @@ describe("TransportStrategy", function() {
       var transport = getTransportMock(true, connection);
       var strategy = new Pusher.TransportStrategy(transport, {});
 
-      strategy.connect();
+      var runner = strategy.connect(this.callback);
 
       connection.state = "initialized";
       connection.emit("initialized");
       connection.state = "connecting";
       connection.emit("connecting");
 
-      expect(strategy.abort()).toBe(true);
+      runner.abort();
 
-      expect(connection.close).toHaveBeenCalledWith();
-    });
-
-    it("should not allow aborting when not connecting", function() {
-      var connection = getConnectionMock();
-      var transport = getTransportMock(true, connection);
-      var strategy = new Pusher.TransportStrategy(transport, {});
-
-      expect(strategy.abort()).toBe(false);
+      expect(connection.close).toHaveBeenCalled();
     });
   });
 });
