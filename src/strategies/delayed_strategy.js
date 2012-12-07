@@ -27,15 +27,15 @@
 
     var self = this;
     var abort = function() {
-      clearTimeout(this.timer);
-      this.timer = null;
+      clearTimeout(timer);
+      timer = null;
     };
-    this.timer = setTimeout(function() {
-      if (self.timer === null) {
+    var timer = setTimeout(function() {
+      if (timer === null) {
         // hack for misbehaving clearTimeout in IE < 9
         return;
       }
-      self.timer = null;
+      timer = null;
       abort = self.substrategy.connect(callback).abort;
     }, this.delay);
 

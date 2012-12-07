@@ -48,7 +48,7 @@
     };
 
     runner = this.tryStrategy(
-      this.substrategies[current], this.timeout, tryNextStrategy
+      this.substrategies[current], timeout, tryNextStrategy
     );
 
     return {

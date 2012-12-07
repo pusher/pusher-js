@@ -37,9 +37,9 @@
     var self = this;
 
     return function(error, connection) {
+      runners[i].error = error;
       if (error) {
-        runners[i] = null;
-        if (self.allFinished(runners)) {
+        if (self.allFailed(runners)) {
           callback(true);
         }
         return;
@@ -49,9 +49,9 @@
     };
   };
 
-  prototype.allFinished = function(runners) {
+  prototype.allFailed = function(runners) {
     for (var i = 0; i < runners.length; i++) {
-      if (runners[i]) {
+      if (!runners[i].error) {
         return false;
       }
     }
@@ -60,7 +60,7 @@
 
   prototype.abortRunners = function(runners) {
     for (var i = 0; i < runners.length; i++) {
-      if (runners[i]) {
+      if (!runners[i].error) {
         runners[i].abort();
       }
     }

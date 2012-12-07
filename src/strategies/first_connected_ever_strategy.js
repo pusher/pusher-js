@@ -2,7 +2,6 @@
 
   function FirstConnectedEverStrategy(substrategies) {
     Pusher.FirstConnectedStrategy.call(this, substrategies);
-    this.succeeded = [];
   }
   var prototype = FirstConnectedEverStrategy.prototype;
 
@@ -18,14 +17,13 @@
     var self = this;
 
     return function(error, connection) {
+      runners[i].error = error;
       if (error) {
-        runners[i] = null;
-        if (self.allFinished(runners) && self.succeeded.length === 0) {
+        if (self.allFailed(runners)) {
           callback(true);
         }
         return;
       }
-      self.succeeded.push(i);
       callback(null, connection);
     };
   };
