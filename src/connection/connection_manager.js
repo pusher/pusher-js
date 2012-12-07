@@ -168,7 +168,7 @@
 
     // handling close conditions
     var onSSLOnly = function(id) {
-      self.strategy.forceSecure(true);
+      self.strategy = self.strategy.getEncrypted();
       self.retryIn(0);
     };
     var onRefused = function(id) {

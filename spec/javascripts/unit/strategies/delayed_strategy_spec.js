@@ -34,12 +34,16 @@ describe("DelayedStrategy", function() {
     expect(this.strategy.name).toEqual("delayed");
   });
 
-  it("should call forceSecure on the substrategy", function() {
-    this.strategy.forceSecure(true);
-    expect(this.substrategy.forceSecure).toHaveBeenCalledWith(true);
 
-    this.strategy.forceSecure(false);
-    expect(this.substrategy.forceSecure).toHaveBeenCalledWith(false);
+  it("should construct a secure strategy", function() {
+    var encryptedSubstrategy = getSubstrategyMock(true);
+
+    this.substrategy.getEncrypted = jasmine.createSpy()
+      .andReturn(encryptedSubstrategy);
+
+    var encryptedStrategy = this.strategy.getEncrypted(true);
+    expect(encryptedStrategy.substrategy).toBe(encryptedSubstrategy);
+    expect(encryptedStrategy.delay).toEqual(this.strategy.delay);
   });
 
   describe("when asked if it's supported", function() {

@@ -25,20 +25,25 @@ describe("FirstSupportedStrategy", function() {
       .toEqual("first_supported");
   });
 
-  it("should call forceSecure on the first supported strategy", function() {
+  it("should construct a secure strategy", function() {
     var substrategies = [
+      getSubstrategyMock(false),
+      getSubstrategyMock(true),
+    ];
+    var encryptedSubstrategies = [
       getSubstrategyMock(false),
       getSubstrategyMock(true),
     ];
     var strategy = new Pusher.FirstSupportedStrategy(substrategies);
 
-    strategy.forceSecure(true);
-    expect(substrategies[0].forceSecure).not.toHaveBeenCalledWith();
-    expect(substrategies[1].forceSecure).toHaveBeenCalledWith(true);
+    substrategies[0].getEncrypted = jasmine.createSpy()
+      .andReturn(encryptedSubstrategies[0]);
+    substrategies[1].getEncrypted = jasmine.createSpy()
+      .andReturn(encryptedSubstrategies[1]);
 
-    strategy.forceSecure(false);
-    expect(substrategies[0].forceSecure).not.toHaveBeenCalledWith();
-    expect(substrategies[1].forceSecure).toHaveBeenCalledWith(false);
+    var encryptedStrategy = strategy.getEncrypted(true);
+    expect(encryptedStrategy.substrategies.length).toEqual(1);
+    expect(encryptedStrategy.substrategies[0]).toBe(encryptedSubstrategies[1]);
   });
 
   describe("when asked if it's supported", function() {

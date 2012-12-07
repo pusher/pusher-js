@@ -15,6 +15,18 @@
 
   prototype.name = "seq";
 
+  prototype.getEncrypted = function() {
+    var substrategies = [];
+    for (var i = 0; i < this.substrategies.length; i++) {
+      substrategies.push(this.substrategies[i].getEncrypted());
+    }
+    return new this.constructor(substrategies, {
+      loop: this.loop,
+      timeout: this.timeout,
+      timeoutLimit: this.timeoutLimit,
+    });
+  };
+
   prototype.connect = function(callback) {
     var self = this;
 

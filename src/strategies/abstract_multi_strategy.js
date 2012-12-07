@@ -12,10 +12,12 @@
     return this.substrategies.length > 0;
   };
 
-  prototype.forceSecure = function(value) {
+  prototype.getEncrypted = function() {
+    var substrategies = [];
     for (var i = 0; i < this.substrategies.length; i++) {
-      this.substrategies[i].forceSecure(value);
+      substrategies.push(this.substrategies[i].getEncrypted());
     }
+    return new this.constructor(substrategies);
   };
 
   // protected

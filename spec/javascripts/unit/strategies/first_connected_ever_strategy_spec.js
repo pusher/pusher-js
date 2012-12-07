@@ -2,7 +2,6 @@ describe("FirstConnectedEverStrategy", function() {
   function getSubstrategyMock(supported) {
     var substrategy = new Pusher.EventsDispatcher();
 
-    substrategy.forceSecure = jasmine.createSpy("forceSecure");
     substrategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
     substrategy.connect = jasmine.createSpy("connect")
@@ -25,20 +24,25 @@ describe("FirstConnectedEverStrategy", function() {
       .toEqual("first_connected_ever");
   });
 
-  it("should call forceSecure on all substrategies", function() {
+  it("should construct a secure strategy", function() {
     var substrategies = [
+      getSubstrategyMock(true),
+      getSubstrategyMock(true),
+    ];
+    var encryptedSubstrategies = [
       getSubstrategyMock(true),
       getSubstrategyMock(true),
     ];
     var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
 
-    strategy.forceSecure(true);
-    expect(substrategies[0].forceSecure).toHaveBeenCalledWith(true);
-    expect(substrategies[1].forceSecure).toHaveBeenCalledWith(true);
+    substrategies[0].getEncrypted = jasmine.createSpy()
+      .andReturn(encryptedSubstrategies[0]);
+    substrategies[1].getEncrypted = jasmine.createSpy()
+      .andReturn(encryptedSubstrategies[1]);
 
-    strategy.forceSecure(false);
-    expect(substrategies[0].forceSecure).toHaveBeenCalledWith(false);
-    expect(substrategies[1].forceSecure).toHaveBeenCalledWith(false);
+    var encryptedStrategy = strategy.getEncrypted(true);
+    expect(encryptedStrategy.substrategies[0]).toBe(encryptedSubstrategies[0]);
+    expect(encryptedStrategy.substrategies[1]).toBe(encryptedSubstrategies[1]);
   });
 
   describe("on connection attempt", function() {

@@ -13,8 +13,11 @@
     return this.transport.isSupported();
   };
 
-  prototype.forceSecure = function(value) {
-    this.options.secure = value;
+  prototype.getEncrypted = function() {
+    return new TransportStrategy(
+      this.transport,
+      Pusher.Util.extend(this.options, { secure: true })
+    )
   };
 
   prototype.connect = function(callback) {

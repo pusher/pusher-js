@@ -12,7 +12,6 @@ describe("ConnectionManager", function() {
 
     this.strategy = new Pusher.EventsDispatcher();
 
-    this.strategy.forceSecure = jasmine.createSpy("forceSecure");
     this.strategy.isSupported = jasmine.createSpy("isSupported")
       .andReturn(true);
     this.strategy.connect = jasmine.createSpy("connect")
@@ -208,11 +207,22 @@ describe("ConnectionManager", function() {
     it("should force secure and reconnect after receiving 'ssl_only' event", function() {
       var self = this;
 
+      var encryptedStrategy = new Pusher.EventsDispatcher();
+      encryptedStrategy.isSupported = jasmine.createSpy("isSupported")
+        .andReturn(true);
+      encryptedStrategy.connect = jasmine.createSpy("connect")
+        .andCallFake(function(callback) {
+          return { abort: function() {} }
+        });
+      this.strategy.getEncrypted = jasmine.createSpy("getEncrypted")
+        .andReturn(encryptedStrategy);
+
       this.manager.connect();
       this.strategy._callback(null, {});
       this.connection.emit("ssl_only");
 
-      expect(this.strategy.forceSecure).toHaveBeenCalledWith(true);
+      expect(this.strategy.getEncrypted).toHaveBeenCalled();
+      expect(encryptedStrategy.connect).toHaveBeenCalled();
       expect(this.manager.state).toEqual("connecting");
     });
 

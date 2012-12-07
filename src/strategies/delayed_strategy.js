@@ -16,8 +16,11 @@
     return this.substrategy.isSupported();
   };
 
-  prototype.forceSecure = function(value) {
-    this.substrategy.forceSecure(value);
+  prototype.getEncrypted = function() {
+    return new DelayedStrategy(
+      this.substrategy.getEncrypted(),
+      { delay: this.delay }
+    );
   };
 
   prototype.connect = function(callback) {
