@@ -215,8 +215,8 @@
   Pusher.defaultStrategy = {
     type: "first_supported",
     host: "ws.pusherapp.com",
-    nonsecurePort: 80,
-    securePort: 443,
+    unencryptedPort: 80,
+    encryptedPort: 443,
     loop: true,
     timeoutLimit: 8000,
     children: [
@@ -224,14 +224,14 @@
         timeout: 2000,
         children: [
           { type: "transport", transport: "ws" },
-          { type: "transport", transport: "ws", secure: true }
+          { type: "transport", transport: "ws", encrypted: true }
         ]
       },
       { type: "sequential",
         timeout: 5000,
         children: [
           { type: "transport", transport: "flash" },
-          { type: "transport", transport: "flash", secure: true }
+          { type: "transport", transport: "flash", encrypted: true }
         ]
       },
       { type: "sequential",
@@ -239,7 +239,7 @@
         host: "sockjs.pusher.com",
         children: [
           { type: "transport", transport: "sockjs" },
-          { type: "transport", transport: "sockjs", secure: true }
+          { type: "transport", transport: "sockjs", encrypted: true }
         ]
       }
     ]

@@ -16,7 +16,7 @@
   prototype.getEncrypted = function() {
     return new TransportStrategy(
       this.transport,
-      Pusher.Util.extend(this.options, { secure: true })
+      Pusher.Util.extend(this.options, { encrypted: true })
     )
   };
 

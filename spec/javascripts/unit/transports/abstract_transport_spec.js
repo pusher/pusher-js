@@ -1,10 +1,10 @@
 describe("AbstractTransport", function() {
   function getTransport(key, options) {
     options = Pusher.Util.extend({
-      secure: false,
+      encrypted: false,
       host: "example.com",
-      nonsecurePort: 12345,
-      securePort: 54321
+      unencryptedPort: 12345,
+      encryptedPort: 54321
     }, options);
 
     return new Pusher.AbstractTransport(key || "foo", options);
@@ -20,7 +20,7 @@ describe("AbstractTransport", function() {
 
   describe("when loading", function() {
     it("should emit 'initialized' immediately", function() {
-      var transport = getTransport("foo", { secure: false });
+      var transport = getTransport("foo", { encrypted: false });
 
       var initializedCallback = jasmine.createSpy("initializedCallback");
       transport.bind("initialized", initializedCallback);
@@ -31,8 +31,8 @@ describe("AbstractTransport", function() {
   });
 
   describe("when opening connections", function() {
-    it("should create a non-secure connection", function() {
-      var transport = getTransport("foo", { secure: false });
+    it("should create a unencrypted connection", function() {
+      var transport = getTransport("foo", { encrypted: false });
       spyOn(transport, "createSocket").andReturn({});
 
       transport.initialize();
@@ -44,8 +44,8 @@ describe("AbstractTransport", function() {
         );
     });
 
-    it("should create a secure connection", function() {
-      var transport = new getTransport("bar", { secure: true });
+    it("should create an encrypted connection", function() {
+      var transport = new getTransport("bar", { encrypted: true });
       spyOn(transport, "createSocket").andReturn({});
 
       transport.initialize();

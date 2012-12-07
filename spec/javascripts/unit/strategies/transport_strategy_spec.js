@@ -34,7 +34,7 @@ describe("TransportStrategy", function() {
     expect(new Pusher.TransportStrategy(null, {}).name).toEqual("transport");
   });
 
-  it("should pass correct secure value for encrypted strategy", function() {
+  it("should pass correct encrypted value for encrypted strategy", function() {
     var transport = getTransportMock(true);
     var strategy = new Pusher.TransportStrategy(transport, { key: "foo" });
 
@@ -42,7 +42,7 @@ describe("TransportStrategy", function() {
     encryptedStrategy.connect(this.callback);
     expect(transport.createConnection).toHaveBeenCalledWith("foo", {
       key: "foo",
-      secure: true
+      encrypted: true
     });
   });
 

@@ -2,10 +2,10 @@ describe("WSTransport", function() {
   function getTransport(key, options) {
     key = key || "foo";
     options = Pusher.Util.extend({
-      secure: false,
+      encrypted: false,
       host: "example.com",
-      nonsecurePort: 12345,
-      securePort: 54321
+      unencryptedPort: 12345,
+      encryptedPort: 54321
     }, options);
 
     return new Pusher.WSTransport(key, options);

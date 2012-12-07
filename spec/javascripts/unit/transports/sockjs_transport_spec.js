@@ -2,10 +2,10 @@ describe("SockJSTransport", function() {
   function getTransport(key, options) {
     key = key || "foo";
     options = Pusher.Util.extend({
-      secure: false,
+      encrypted: false,
       host: "example.com",
-      nonsecurePort: 12345,
-      securePort: 54321
+      unencryptedPort: 12345,
+      encryptedPort: 54321
     }, options);
 
     return new Pusher.SockJSTransport(key, options);
@@ -72,8 +72,8 @@ describe("SockJSTransport", function() {
         .toHaveBeenCalledWith("http://example.com:12345/pusher");
     });
 
-    it("should create a secure SockJS connection with correct URL", function() {
-      var transport = new getTransport("bar", { secure: true });
+    it("should create an encrypted SockJS connection with correct URL", function() {
+      var transport = new getTransport("bar", { encrypted: true });
 
       transport.initialize();
       transport.connect();

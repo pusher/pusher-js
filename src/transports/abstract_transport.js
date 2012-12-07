@@ -101,15 +101,15 @@
   };
 
   prototype.getScheme = function() {
-    return this.options.secure ? "wss" : "ws";
+    return this.options.encrypted ? "wss" : "ws";
   };
 
   prototype.getBaseURL = function() {
     var port;
-    if (this.options.secure) {
-      port = this.options.securePort;
+    if (this.options.encrypted) {
+      port = this.options.encryptedPort;
     } else {
-      port = this.options.nonsecurePort;
+      port = this.options.unencryptedPort;
     }
 
     return this.getScheme() + "://" + this.options.host + ':' + port;

@@ -37,7 +37,7 @@
   };
 
   prototype.getScheme = function() {
-    return this.options.secure ? "https" : "http";
+    return this.options.encrypted ? "https" : "http";
   };
 
   prototype.getPath = function() {
