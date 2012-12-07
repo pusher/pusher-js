@@ -14,7 +14,7 @@ describe("SequentialStrategy", function() {
   });
 
   it("should expose its name", function() {
-    expect(new Pusher.SequentialStrategy([], {}).name).toEqual("seq");
+    expect(this.strategy.name).toEqual("seq");
   });
 
   it("should construct a secure strategy", function() {

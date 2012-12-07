@@ -7,8 +7,7 @@ describe("FirstSupportedStrategy", function() {
   });
 
   it("should expose its name", function() {
-    expect(new Pusher.FirstSupportedStrategy([]).name)
-      .toEqual("first_supported");
+    expect(this.strategy.name).toEqual("first_supported");
   });
 
   it("should construct a secure strategy", function() {
