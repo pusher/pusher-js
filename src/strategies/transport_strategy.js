@@ -21,8 +21,6 @@
   };
 
   prototype.connect = function(callback) {
-    var self = this;
-
     connection = this.transport.createConnection(
       this.options.key, this.options
     );
