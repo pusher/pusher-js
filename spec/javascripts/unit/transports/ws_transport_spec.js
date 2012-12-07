@@ -59,8 +59,8 @@ describe("WSTransport", function() {
     expect(Pusher.WSTransport.isSupported()).toBe(false);
   });
 
-  describe("when opening connections", function() {
-    it("should create a WebSocket with correct URL", function() {
+  describe("on connect", function() {
+    it("should create a WebSocket", function() {
       this.transport.initialize();
       this.transport.connect();
       expect(window.WebSocket)

@@ -39,40 +39,40 @@ describe("SockJSTransport", function() {
     expect(this.transport.supportsPing()).toBe(true);
   });
 
-  describe("when initializing", function() {
+  describe("on initialize", function() {
     it("should load sockjs dependency and emit appropriate events", function() {
-      var initializedCallback = jasmine.createSpy("initializedCallback");
-      var initializingCallback = jasmine.createSpy("initializingCallback");
-      this.transport.bind("initialized", initializedCallback);
-      this.transport.bind("initializing", initializingCallback);
+      var onInitialized = jasmine.createSpy("onInitialized");
+      var onInitializing = jasmine.createSpy("onInitializing");
+      this.transport.bind("initialized", onInitialized);
+      this.transport.bind("initializing", onInitializing);
 
-      var dependencyCallback = null;
+      var onDependencyLoaded = null;
       spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
         expect(name).toEqual("sockjs");
-        dependencyCallback = c;
+        onDependencyLoaded = c;
       });
 
       this.transport.initialize();
 
       expect(Pusher.Dependencies.load).toHaveBeenCalled();
-      expect(initializingCallback).toHaveBeenCalled();
-      expect(initializedCallback).not.toHaveBeenCalled();
+      expect(onInitializing).toHaveBeenCalled();
+      expect(onInitialized).not.toHaveBeenCalled();
 
-      dependencyCallback();
+      onDependencyLoaded();
 
-      expect(initializedCallback).toHaveBeenCalled();
+      expect(onInitialized).toHaveBeenCalled();
     });
   });
 
-  describe("when opening connections", function() {
-    it("should create a SockJS connection with correct URL", function() {
+  describe("on connect", function() {
+    it("should create a SockJS connection", function() {
       this.transport.initialize();
       this.transport.connect();
       expect(window.SockJS)
         .toHaveBeenCalledWith("http://example.com:12345/pusher");
     });
 
-    it("should create an encrypted SockJS connection with correct URL", function() {
+    it("should create an encrypted SockJS", function() {
       var transport = new getTransport("bar", { encrypted: true });
 
       transport.initialize();
@@ -81,7 +81,7 @@ describe("SockJSTransport", function() {
         .toHaveBeenCalledWith("https://example.com:54321/pusher");
     });
 
-    it("should send path immediately after opening connection", function() {
+    it("should send path after opening connection", function() {
       var openCallback = jasmine.createSpy("openCallback");
       this.transport.bind("open", openCallback);
 

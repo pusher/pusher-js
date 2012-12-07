@@ -61,32 +61,32 @@ describe("FlashTransport", function() {
     }
   });
 
-  describe("when initializing", function() {
-    it("should load flashfallback dependency and emit appropriate events", function() {
-      var initializedCallback = jasmine.createSpy("initializedCallback");
-      var initializingCallback = jasmine.createSpy("initializingCallback");
-      this.transport.bind("initialized", initializedCallback);
-      this.transport.bind("initializing", initializingCallback);
+  describe("on initialize", function() {
+    it("should load flashfallback and emit an 'initialized' event", function() {
+      var onInitialized = jasmine.createSpy("onInitialized");
+      var onInitializing = jasmine.createSpy("onInitializing");
+      this.transport.bind("initialized", onInitialized);
+      this.transport.bind("initializing", onInitializing);
 
-      var dependencyCallback = null;
+      var onDependencyLoaded = null;
       spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
         expect(name).toEqual("flashfallback");
-        dependencyCallback = c;
+        onDependencyLoaded = c;
       });
 
       this.transport.initialize();
 
       expect(Pusher.Dependencies.load).toHaveBeenCalled();
-      expect(initializingCallback).toHaveBeenCalled();
-      expect(initializedCallback).not.toHaveBeenCalled();
+      expect(onInitializing).toHaveBeenCalled();
+      expect(onInitialized).not.toHaveBeenCalled();
 
-      dependencyCallback();
+      onDependencyLoaded();
 
-      expect(initializedCallback).toHaveBeenCalled();
+      expect(onInitialized).toHaveBeenCalled();
     });
   });
 
-  describe("when opening connections", function() {
+  describe("on connect", function() {
     it("should create a WebSocket with correct URL", function() {
       this.transport.initialize();
       this.transport.connect();

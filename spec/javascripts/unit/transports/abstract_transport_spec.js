@@ -18,26 +18,21 @@ describe("AbstractTransport", function() {
     spyOn(this.transport, "createSocket").andReturn(this.socket);
   });
 
-  describe("when loading", function() {
+  describe("on initialize", function() {
     it("should emit 'initialized' immediately", function() {
-      var transport = getTransport("foo", { encrypted: false });
+      var onInitialized = jasmine.createSpy("onInitialized");
+      this.transport.bind("initialized", onInitialized);
 
-      var initializedCallback = jasmine.createSpy("initializedCallback");
-      transport.bind("initialized", initializedCallback);
-
-      transport.initialize();
-      expect(initializedCallback).toHaveBeenCalled();
+      this.transport.initialize();
+      expect(onInitialized).toHaveBeenCalled();
     });
   });
 
-  describe("when opening connections", function() {
+  describe("on connect", function() {
     it("should create a unencrypted connection", function() {
-      var transport = getTransport("foo", { encrypted: false });
-      spyOn(transport, "createSocket").andReturn({});
-
-      transport.initialize();
-      transport.connect();
-      expect(transport.createSocket)
+      this.transport.initialize();
+      this.transport.connect();
+      expect(this.transport.createSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
           "?protocol=5&client=js&version=<VERSION>"
@@ -57,59 +52,59 @@ describe("AbstractTransport", function() {
         );
     });
 
-    it("should change the state to 'connecting' on connection attempt", function() {
-      var connectingCallback = jasmine.createSpy("connectingCallback");
-      this.transport.bind("connecting", connectingCallback);
+    it("should transition to 'connecting'", function() {
+      var onConnecting = jasmine.createSpy("onConnecting");
+      this.transport.bind("connecting", onConnecting);
 
       expect(this.transport.connect()).toBe(true);
       expect(this.transport.createSocket).toHaveBeenCalled();
       expect(this.transport.state).toEqual("connecting");
-      expect(connectingCallback).toHaveBeenCalled();
+      expect(onConnecting).toHaveBeenCalled();
     });
 
-    it("should change the state to 'open' on connection open", function() {
-      var openCallback = jasmine.createSpy("openCallback");
-      this.transport.bind("open", openCallback);
+    it("should transition to 'open' after connection is established", function() {
+      var onOpen = jasmine.createSpy("onOpen");
+      this.transport.bind("open", onOpen);
 
       this.transport.connect();
       this.socket.onopen();
 
       expect(this.transport.state).toEqual("open");
-      expect(openCallback).toHaveBeenCalled();
+      expect(onOpen).toHaveBeenCalled();
     });
 
-    it("should not do anything when connection is being established", function() {
+    it("should not allow simultaneous connect calls", function() {
       expect(this.transport.connect()).toBe(true);
       expect(this.transport.createSocket.calls.length).toEqual(1);
+      expect(this.transport.state).toEqual("connecting");
 
-      var connectingCallback = jasmine.createSpy("connectingCallback");
-      this.transport.bind("connecting", connectingCallback);
+      var onConnecting = jasmine.createSpy("onConnecting");
+      this.transport.bind("connecting", onConnecting);
 
       expect(this.transport.connect()).toBe(false);
       expect(this.transport.state).toEqual("connecting");
-      expect(connectingCallback).not.toHaveBeenCalled();
       expect(this.transport.createSocket.calls.length).toEqual(1);
+      expect(onConnecting).not.toHaveBeenCalled();
     });
   });
 
-  describe("when receiving a message", function() {
-    it("should emit received data", function() {
-      var messageCallback = jasmine.createSpy("messageCallback");
-      this.transport.bind("message", messageCallback);
+  describe("after receiving a message", function() {
+    it("should emit message event with received object", function() {
+      var onMessage = jasmine.createSpy("onMessage");
+      this.transport.bind("message", onMessage);
 
       this.transport.connect();
       this.socket.onopen();
       this.socket.onmessage("ugabuga");
 
       expect(this.transport.state).toEqual("open");
-      expect(messageCallback).toHaveBeenCalledWith("ugabuga");
+      expect(onMessage).toHaveBeenCalledWith("ugabuga");
     });
   });
 
-  describe("when sending a message", function() {
-    it("should defer passing it to the socket until this tick ends", function() {
+  describe("on send", function() {
+    it("should defer sending data to the socket", function() {
       var sendCalled = false;
-
       this.socket.send = jasmine.createSpy("send").andCallFake(function() {
         sendCalled = true;
       });
@@ -130,40 +125,41 @@ describe("AbstractTransport", function() {
     });
   });
 
-  describe("when receiving an error", function() {
-    it("should emit error and close events when connection fails", function() {
-      var errorCallback = jasmine.createSpy("errorCallback");
-      var closedCallback = jasmine.createSpy("closedCallback");
-      this.transport.bind("error", errorCallback);
-      this.transport.bind("closed", closedCallback);
+  describe("after receiving an error", function() {
+    it("should emit error and closed events", function() {
+      var onError = jasmine.createSpy("onError");
+      var onClosed = jasmine.createSpy("onClosed");
+      this.transport.bind("error", onError);
+      this.transport.bind("closed", onClosed);
 
       this.transport.connect();
       this.socket.onerror("We're doomed");
       this.socket.onclose();
 
-      expect(errorCallback).toHaveBeenCalledWith({
+      expect(onError).toHaveBeenCalledWith({
         type: "WebSocketError",
         error: "We're doomed"
       });
-      expect(closedCallback).toHaveBeenCalled();
+      expect(onError.calls.length).toEqual(1);
+      expect(onClosed.calls.length).toEqual(1);
       expect(this.transport.state).toEqual("closed");
     });
   });
 
-  describe("when being closed", function() {
+  describe("on close", function() {
     it("should call close on the socket and emit a 'closed' event", function() {
       this.transport.connect();
       this.socket.onopen();
 
-      var closedCallback = jasmine.createSpy("closedCallback");
+      var onClosed = jasmine.createSpy("onClosed");
       this.socket.close = jasmine.createSpy("close");
-      this.transport.bind("closed", closedCallback);
+      this.transport.bind("closed", onClosed);
 
       this.transport.close();
       expect(this.socket.close).toHaveBeenCalled();
 
       this.socket.onclose();
-      expect(closedCallback).toHaveBeenCalled();
+      expect(onClosed).toHaveBeenCalled();
     });
   });
 });
