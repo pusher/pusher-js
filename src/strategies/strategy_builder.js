@@ -23,7 +23,7 @@
       var options = filter(scheme, {"type": true, "child": true});
 
       return new Pusher.DelayedStrategy(
-        StrategyBuilder.build(merge(options, scheme.child)),
+        StrategyBuilder.build(Pusher.Util.extend({}, options, scheme.child)),
         options
       );
     },
@@ -63,7 +63,9 @@
 
     for (var i = 0; i < scheme.children.length; i++) {
       substrategies.push(
-        StrategyBuilder.build(merge(options, scheme.children[i]))
+        StrategyBuilder.build(
+          Pusher.Util.extend({}, options, scheme.children[i])
+        )
       );
     }
 
@@ -77,23 +79,6 @@
         if (!filteredKeys[key]) {
           result[key] = object[key];
         }
-      }
-    }
-
-    return result;
-  }
-
-  function merge(a, b) {
-    var key;
-    var result = {};
-    for (key in a) {
-      if (Object.prototype.hasOwnProperty.call(a, key)) {
-        result[key] = a[key];
-      }
-    }
-    for (key in b) {
-      if (Object.prototype.hasOwnProperty.call(b, key)) {
-        result[key] = b[key];
       }
     }
 
