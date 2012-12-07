@@ -2,25 +2,8 @@ describe("ConnectionManager", function() {
   beforeEach(function() {
     var self = this;
 
-    this.connection = new Pusher.EventsDispatcher();
-    this.connection.supportsPing = jasmine.createSpy("supportsPing");
-    this.connection.send = jasmine.createSpy("send")
-      .andReturn(true);
-    this.connection.send_event = jasmine.createSpy("send_event")
-      .andReturn(true);
-    this.connection.close = jasmine.createSpy("close");
-
-    this.strategy = new Pusher.EventsDispatcher();
-
-    this.strategy.isSupported = jasmine.createSpy("isSupported")
-      .andReturn(true);
-    this.strategy.connect = jasmine.createSpy("connect")
-      .andCallFake(function(callback) {
-        self.strategy._callback = callback;
-        return { abort: self.strategy._abort }
-      });
-
-    this.strategy._abort = jasmine.createSpy();
+    this.connection = Pusher.Mocks.getConnection();
+    this.strategy = Pusher.Mocks.getStrategy(true);
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(this.strategy);
     spyOn(Pusher.NetInfo, "isOnline").andReturn(true);
@@ -36,18 +19,18 @@ describe("ConnectionManager", function() {
       .andReturn(this.connection);
   });
 
-  describe("on initialization", function() {
+  describe("on initialize", function() {
     it("should transition to initialized state", function() {
       expect(this.manager.state).toEqual("initialized");
     });
 
-    it("should pass the key to the strategy builder", function() {
+    it("should pass key to strategy builder", function() {
       expect(Pusher.StrategyBuilder.build.calls[0].args[0].key)
         .toEqual("foo");
     });
   });
 
-  describe("on connecting", function() {
+  describe("on connect", function() {
     it("should initialize strategy and try to connect", function() {
       this.manager.connect();
       expect(this.strategy.connect).toHaveBeenCalled();
@@ -117,7 +100,7 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("when sending messages", function() {
+  describe("on send", function() {
     it("should pass data to the transport", function() {
       this.manager.connect();
       this.strategy._callback(null, {});
@@ -133,7 +116,7 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("on requested disconnection", function() {
+  describe("on disconnect", function() {
     it("should transition to disconnected", function() {
       var onDisconnected = jasmine.createSpy("onDisconnected");
       this.manager.bind("disconnected", onDisconnected);
@@ -144,7 +127,7 @@ describe("ConnectionManager", function() {
       expect(onDisconnected).toHaveBeenCalled();
     });
 
-    it("should close the connection", function() {
+    it("should close connection", function() {
       this.manager.connect();
       this.strategy._callback(null, {});
       this.manager.disconnect();
@@ -152,14 +135,14 @@ describe("ConnectionManager", function() {
       expect(this.connection.close).toHaveBeenCalled();
     });
 
-    it("should abort the connection attempt", function() {
+    it("should abort connection attempt", function() {
       this.manager.connect();
       this.manager.disconnect();
 
       expect(this.strategy._abort).toHaveBeenCalled();
     });
 
-    it("should clear unavailable timer and activity check", function() {
+    it("should clear the unavailable timer and activity check", function() {
       this.manager.connect();
       this.strategy._callback(null, {});
       this.manager.disconnect();
@@ -168,7 +151,7 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("on unexpected disconnection", function() {
+  describe("on lost connection", function() {
     it("should transition to disconnected then to connecting", function() {
       var self = this;
 
@@ -247,7 +230,7 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("on reconnection", function() {
+  describe("on reconnect", function() {
     it("should use the same strategy to reconnect", function() {
       var onConnected = jasmine.createSpy("onConnected");
       this.manager.bind("connected", onConnected);

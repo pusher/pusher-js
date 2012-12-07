@@ -26,7 +26,7 @@ describe("ProtocolWrapper", function() {
     expect(this.transport.supportsPing).toHaveBeenCalled();
   });
 
-  describe("on connection attempt", function() {
+  describe("on connect", function() {
     beforeEach(function() {
       this.wrapper = new Pusher.ProtocolWrapper(this.transport);
     });
@@ -155,7 +155,7 @@ describe("ProtocolWrapper", function() {
     });
   });
 
-  describe("when sending messages", function() {
+  describe("on send", function() {
     it("should proxy send calls", function() {
       this.transport.send = jasmine.createSpy().andReturn(true);
       expect(this.wrapper.send("proxy")).toBe(true);
@@ -184,7 +184,7 @@ describe("ProtocolWrapper", function() {
     });
   });
 
-  describe("when receiving messages", function() {
+  describe("after receiving a message", function() {
     it("should emit general messages", function() {
       var onMessage = jasmine.createSpy("onMessage");
       this.wrapper.bind("message", onMessage);
@@ -261,7 +261,7 @@ describe("ProtocolWrapper", function() {
     });
   });
 
-  describe("on transport error", function() {
+  describe("after receiving a transport error", function() {
     it("should emit the error", function() {
       var onError = jasmine.createSpy("onError");
       this.wrapper.bind("error", onError);

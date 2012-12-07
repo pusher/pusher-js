@@ -48,5 +48,19 @@ Pusher.Mocks = {
       strategies.push(Pusher.Mocks.getStrategy(isSupportedList[i]));
     }
     return strategies;
+  },
+
+  getConnection: function() {
+    var connection = new Pusher.EventsDispatcher();
+
+    connection.supportsPing = jasmine.createSpy("supportsPing")
+      .andReturn(false);
+    connection.send = jasmine.createSpy("send")
+      .andReturn(true);
+    connection.send_event = jasmine.createSpy("send_event")
+      .andReturn(true);
+    connection.close = jasmine.createSpy("close");
+
+    return connection;
   }
 };
