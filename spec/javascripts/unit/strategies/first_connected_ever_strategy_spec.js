@@ -26,7 +26,7 @@ describe("FirstConnectedEverStrategy", function() {
   });
 
   describe("on connect", function() {
-    it("should emit connections from all successful substrategies", function() {
+    it("should call back with all connections", function() {
       this.strategy.connect(this.callback);
 
       expect(this.substrategies[0].connect).toHaveBeenCalled();
@@ -45,12 +45,17 @@ describe("FirstConnectedEverStrategy", function() {
       expect(this.callback).toHaveBeenCalledWith(null, transport2);
       expect(this.callback.calls.length).toEqual(2);
 
+      var transport3 = Pusher.Mocks.getTransport();
+      this.substrategies[2]._callback(null, transport3);
+      expect(this.callback).toHaveBeenCalledWith(null, transport3);
+      expect(this.callback.calls.length).toEqual(3);
+
       expect(this.substrategies[0]._abort).not.toHaveBeenCalled();
       expect(this.substrategies[1]._abort).not.toHaveBeenCalled();
       expect(this.substrategies[2]._abort).not.toHaveBeenCalled();
     });
 
-    it("should emit error after all substrategies failed", function() {
+    it("should pass an error after all substrategies failed", function() {
       this.strategy.connect(this.callback);
 
       this.substrategies[1]._callback(true);
@@ -61,7 +66,7 @@ describe("FirstConnectedEverStrategy", function() {
       expect(this.callback).toHaveBeenCalledWith(true);
     });
 
-    it("should not emit errors after one substrategy succeeded and all other failed", function() {
+    it("should pass errors after one substrategy succeeded", function() {
       this.strategy.connect(this.callback);
 
       var transport = Pusher.Mocks.getTransport();

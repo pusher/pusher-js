@@ -40,7 +40,7 @@ describe("SockJSTransport", function() {
   });
 
   describe("on initialize", function() {
-    it("should load sockjs dependency and emit appropriate events", function() {
+    it("should load sockjs and emit an 'initialized' event", function() {
       var onInitialized = jasmine.createSpy("onInitialized");
       var onInitializing = jasmine.createSpy("onInitializing");
       this.transport.bind("initialized", onInitialized);

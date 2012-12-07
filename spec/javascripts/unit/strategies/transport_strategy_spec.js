@@ -35,8 +35,8 @@ describe("TransportStrategy", function() {
     });
   });
 
-  describe("on connection attempt", function() {
-    it("should pass the key and options to the transport", function() {
+  describe("on connect", function() {
+    it("should pass key and options to the transport", function() {
       var options = {
         key: "asdf",
         foo: "bar"

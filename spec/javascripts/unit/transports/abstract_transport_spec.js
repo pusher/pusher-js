@@ -29,7 +29,7 @@ describe("AbstractTransport", function() {
   });
 
   describe("on connect", function() {
-    it("should create a unencrypted connection", function() {
+    it("should create an unencrypted connection", function() {
       this.transport.initialize();
       this.transport.connect();
       expect(this.transport.createSocket)

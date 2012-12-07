@@ -39,7 +39,7 @@ describe("FirstSupportedStrategy", function() {
     });
   });
 
-  describe("on connection attempt", function() {
+  describe("on connect", function() {
     it("should succeed on the first supported strategy", function() {
       this.strategy.connect(this.callback);
 
@@ -53,7 +53,7 @@ describe("FirstSupportedStrategy", function() {
       expect(this.callback).toHaveBeenCalledWith(null, connection);
     });
 
-    it("should emit error after first supported strategy fails", function() {
+    it("should pass an error after first supported strategy fails", function() {
       this.strategy.connect(this.callback);
 
       expect(this.substrategies[1].connect).toHaveBeenCalled();
@@ -67,8 +67,8 @@ describe("FirstSupportedStrategy", function() {
     });
   });
 
-  describe("on aborting", function() {
-    it("should send abort only to the first supported substrategy", function() {
+  describe("on abort", function() {
+    it("should send abort only to first supported substrategy", function() {
       var runner = this.strategy.connect(this.callback);
 
       runner.abort();

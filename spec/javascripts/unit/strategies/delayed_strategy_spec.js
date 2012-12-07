@@ -32,13 +32,13 @@ describe("DelayedStrategy", function() {
   });
 
   describe("after calling isSupported", function() {
-    it("should return true if the substrategy is supported", function() {
+    it("should return true if substrategy is supported", function() {
       var substrategy = Pusher.Mocks.getStrategy(true);
       var strategy = new Pusher.DelayedStrategy(substrategy, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
-    it("should return false if the substrategy is not supported", function() {
+    it("should return false if substrategy is not supported", function() {
       var substrategy = Pusher.Mocks.getStrategy(false);
       var strategy = new Pusher.DelayedStrategy(substrategy, {});
       expect(strategy.isSupported()).toBe(false);
@@ -46,7 +46,7 @@ describe("DelayedStrategy", function() {
   });
 
   describe("on connect", function() {
-    it("should connect to a substrategy after a delay", function() {
+    it("should connect to substrategy after a delay", function() {
       var strategy = new Pusher.DelayedStrategy(this.substrategy, {
         delay: 100
       });
@@ -61,7 +61,7 @@ describe("DelayedStrategy", function() {
       expect(this.callback).toHaveBeenCalledWith(null, connection);
     });
 
-    it("should pass the error when the substrategy fails", function() {
+    it("should pass an error when substrategy fails", function() {
       mockSetTimeout([0]);
       this.strategy.connect(this.callback);
       this.substrategy._callback(true)
@@ -71,7 +71,7 @@ describe("DelayedStrategy", function() {
   });
 
   describe("on abort", function() {
-    it("should abort the substrategy when connecting", function() {
+    it("should abort substrategy when connecting", function() {
       mockSetTimeout([0]);
       var run = this.strategy.connect();
       expect(this.substrategy.connect).toHaveBeenCalled();
@@ -80,7 +80,7 @@ describe("DelayedStrategy", function() {
       expect(this.substrategy._abort).toHaveBeenCalled();
     });
 
-    it("should clear the timer and not abort the substrategy when waiting", function() {
+    it("should clear the timer and not abort substrategy when waiting", function() {
       // do not fire the connect timer
       spyOn(window, "setTimeout").andReturn(111);
       spyOn(window, "clearTimeout");

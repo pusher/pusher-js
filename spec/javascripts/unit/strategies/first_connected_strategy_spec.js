@@ -7,8 +7,7 @@ describe("FirstConnectedStrategy", function() {
   });
 
   it("should expose its name", function() {
-    expect(new Pusher.FirstConnectedStrategy([]).name)
-      .toEqual("first_connected");
+    expect(this.strategy.name).toEqual("first_connected");
   });
 
   it("should construct a secure strategy", function() {
@@ -26,7 +25,7 @@ describe("FirstConnectedStrategy", function() {
     expect(encryptedStrategy.substrategies[1]).toBe(encryptedSubstrategies[1]);
   });
 
-  describe("when asked if it's supported", function() {
+  describe("after calling isSupported", function() {
     it("should return true when one of substrategies is supported", function() {
       var substrategies = Pusher.Mocks.getStrategies([false, true]);
       var strategy = new Pusher.FirstConnectedStrategy(substrategies);
@@ -59,7 +58,7 @@ describe("FirstConnectedStrategy", function() {
       expect(this.substrategies[2]._abort).toHaveBeenCalled();
     });
 
-    it("should emit error after all substrategies failed", function() {
+    it("should pass an error after all substrategies failed", function() {
       this.strategy.connect(this.callback);
 
       this.substrategies[1]._callback(true);
