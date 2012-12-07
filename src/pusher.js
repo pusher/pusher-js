@@ -131,13 +131,16 @@
   };
 
   Pusher.Util = {
-    extend: function extend(target, extensions) {
-      for (var property in extensions) {
-        if (extensions[property] && extensions[property].constructor &&
-            extensions[property].constructor === Object) {
-          target[property] = extend(target[property] || {}, extensions[property]);
-        } else {
-          target[property] = extensions[property];
+    extend: function extend(target) {
+      for (var i = 1; i < arguments.length; i++) {
+        var extensions = arguments[i];
+        for (var property in extensions) {
+          if (extensions[property] && extensions[property].constructor &&
+              extensions[property].constructor === Object) {
+            target[property] = extend(target[property] || {}, extensions[property]);
+          } else {
+            target[property] = extensions[property];
+          }
         }
       }
       return target;
