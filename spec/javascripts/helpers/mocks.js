@@ -23,5 +23,30 @@ Pusher.Mocks = {
       .andReturn(transport || Pusher.Mocks.getTransport());
 
     return klass;
+  },
+
+  getStrategy: function(isSupported) {
+    var strategy = new Pusher.EventsDispatcher();
+
+    strategy._abort = jasmine.createSpy();
+    strategy._callback = null;
+
+    strategy.isSupported = jasmine.createSpy("isSupported")
+      .andReturn(isSupported);
+    strategy.connect = jasmine.createSpy("connect")
+      .andCallFake(function(callback) {
+        strategy._callback = callback;
+        return { abort: strategy._abort }
+      });
+
+    return strategy;
+  },
+
+  getStrategies: function(isSupportedList) {
+    var strategies = [];
+    for (var i = 0; i < isSupportedList.length; i++) {
+      strategies.push(Pusher.Mocks.getStrategy(isSupportedList[i]));
+    }
+    return strategies;
   }
 };
