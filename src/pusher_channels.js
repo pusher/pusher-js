@@ -102,17 +102,20 @@
       this._members_map = {};
       this.count = 0;
       this.me = null;
+      this._channelData = null;
     };
     reset.call(this);
 
+    var subscriptionSucceeded = function(subscriptionData) {
+      self._members_map = subscriptionData.presence.hash;
+      self.count = subscriptionData.presence.count;
+      self.me = self.get(self._channelData.user_id);
+      channel.emit('pusher:subscription_succeeded', self);
+    };
+
     channel.bind('pusher_internal:authorized', function(authorizedData) {
-      var channelData = JSON.parse(authorizedData.channel_data);
-      channel.bind("pusher_internal:subscription_succeeded", function(subscriptionData) {
-        self._members_map = subscriptionData.presence.hash;
-        self.count = subscriptionData.presence.count;
-        self.me = self.get(channelData.user_id);
-        channel.emit('pusher:subscription_succeeded', self);
-      });
+      self._channelData = JSON.parse(authorizedData.channel_data);
+      channel.bind("pusher_internal:subscription_succeeded", subscriptionSucceeded);
     });
 
     channel.bind('pusher_internal:member_added', function(data) {
@@ -135,6 +138,7 @@
 
     channel.bind('pusher_internal:disconnected', function() {
       reset.call(self);
+      channel.unbind("pusher_internal:subscription_succeeded", subscriptionSucceeded);
     });
   };
 
