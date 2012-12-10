@@ -197,7 +197,6 @@
     this.state = newState;
     // Only emit when the state changes
     if (previousState !== newState) {
-      // TODO nicer debug
       Pusher.debug('State changed', previousState + ' -> ' + newState);
 
       this.emit('state_change', { previous: previousState, current: newState });

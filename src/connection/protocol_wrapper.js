@@ -28,7 +28,7 @@
       payload.channel = channel;
     }
 
-    Pusher.debug('Event sent', payload); // TODO make debug nicer
+    Pusher.debug('Event sent', payload);
     return this.send(JSON.stringify(payload));
   };
 
