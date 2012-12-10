@@ -9,7 +9,7 @@ describe("FlashTransport", function() {
     }, options);
 
     return new Pusher.FlashTransport(key, options);
-  };
+  }
 
   var _WebSocket;
 
@@ -17,7 +17,7 @@ describe("FlashTransport", function() {
     this.socket = {};
     this.transport = getTransport("foo");
 
-    Pusher.Dependencies.loaded["flashfallback"] = true;
+    Pusher.Dependencies.loaded.flashfallback = true;
 
     _WebSocket = window.WebSocket;
     window.WebSocket = jasmine.createSpy("WebSocket").andReturn(this.socket);

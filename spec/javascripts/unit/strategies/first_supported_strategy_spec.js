@@ -27,13 +27,13 @@ describe("FirstSupportedStrategy", function() {
 
   describe("after calling isSupported", function() {
     it("should return true when one of substrategies is supported", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, true]);;
+      var substrategies = Pusher.Mocks.getStrategies([false, true]);
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when none of substrategies is supported", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, false]);;
+      var substrategies = Pusher.Mocks.getStrategies([false, false]);
       var strategy = new Pusher.FirstSupportedStrategy(substrategies);
       expect(strategy.isSupported()).toBe(false);
     });
@@ -47,7 +47,7 @@ describe("FirstSupportedStrategy", function() {
       expect(this.substrategies[1].connect).toHaveBeenCalled();
       expect(this.substrategies[2].connect).not.toHaveBeenCalled();
 
-      var connection = new Object();
+      var connection = {};
       this.substrategies[1]._callback(null, connection);
 
       expect(this.callback).toHaveBeenCalledWith(null, connection);

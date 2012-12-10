@@ -17,7 +17,7 @@
     return new TransportStrategy(
       this.transport,
       Pusher.Util.extend(this.options, { encrypted: true })
-    )
+    );
   };
 
   prototype.connect = function(callback) {
@@ -65,7 +65,7 @@
         unbindListeners();
         connection.close();
       }
-    }
+    };
   };
 
   Pusher.TransportStrategy = TransportStrategy;

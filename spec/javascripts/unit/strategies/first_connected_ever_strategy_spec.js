@@ -86,7 +86,7 @@ describe("FirstConnectedEverStrategy", function() {
       var runner = this.strategy.connect(this.callback);
 
       this.substrategies[1]._callback(true);
-      this.substrategies[2]._callback(null, new Object());
+      this.substrategies[2]._callback(null, {});
       runner.abort();
 
       expect(this.substrategies[0]._abort).toHaveBeenCalled();

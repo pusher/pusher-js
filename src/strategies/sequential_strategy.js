@@ -23,7 +23,7 @@
     return new this.constructor(substrategies, {
       loop: this.loop,
       timeout: this.timeout,
-      timeoutLimit: this.timeoutLimit,
+      timeoutLimit: this.timeoutLimit
     });
   };
 

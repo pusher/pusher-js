@@ -15,7 +15,7 @@ Pusher.Mocks = {
   },
 
   getTransportClass: function(supported, transport) {
-    var klass = new Object();
+    var klass = {};
 
     klass.isSupported = jasmine.createSpy("isSupported")
       .andReturn(supported);
@@ -36,7 +36,7 @@ Pusher.Mocks = {
     strategy.connect = jasmine.createSpy("connect")
       .andCallFake(function(callback) {
         strategy._callback = callback;
-        return { abort: strategy._abort }
+        return { abort: strategy._abort };
       });
 
     return strategy;

@@ -10,7 +10,7 @@ describe("SequentialStrategy", function() {
   beforeEach(function() {
     this.callback = jasmine.createSpy();
     this.substrategies = Pusher.Mocks.getStrategies([true, true]);
-    this.strategy = new Pusher.SequentialStrategy(this.substrategies, {})
+    this.strategy = new Pusher.SequentialStrategy(this.substrategies, {});
   });
 
   it("should expose its name", function() {
@@ -61,7 +61,7 @@ describe("SequentialStrategy", function() {
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
 
-      var connection = new Object();
+      var connection = {};
       this.substrategies[0]._callback(null, connection);
 
       expect(this.callback).toHaveBeenCalledWith(null, connection);
@@ -87,7 +87,7 @@ describe("SequentialStrategy", function() {
     it("should support looping", function() {
       var strategy = new Pusher.SequentialStrategy(this.substrategies, {
         loop: true
-      })
+      });
       var runner = strategy.connect(this.callback);
 
       expect(this.substrategies[0].connect.calls.length).toEqual(1);

@@ -59,7 +59,6 @@
       message = self.parseMessage(message);
 
       if (message !== undefined) {
-        // TODO make debug nicer
         Pusher.debug('Event recd', message);
 
         switch (message.event) {

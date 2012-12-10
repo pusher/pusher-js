@@ -9,7 +9,7 @@ describe("SockJSTransport", function() {
     }, options);
 
     return new Pusher.SockJSTransport(key, options);
-  };
+  }
 
   var _SockJS;
 
@@ -17,7 +17,7 @@ describe("SockJSTransport", function() {
     this.socket = {};
     this.transport = getTransport("foo");
 
-    Pusher.Dependencies.loaded["sockjs"] = true;
+    Pusher.Dependencies.loaded.sockjs = true;
 
     _SockJS = window.SockJS;
     window.SockJS = jasmine.createSpy("SockJS").andReturn(this.socket);

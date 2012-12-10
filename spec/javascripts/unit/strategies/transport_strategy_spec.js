@@ -58,7 +58,7 @@ describe("TransportStrategy", function() {
       expect(this.transport.connect).toHaveBeenCalled();
 
       this.transport.state = "open";
-      this.transport.emit("open")
+      this.transport.emit("open");
       expect(this.callback).toHaveBeenCalledWith(null, this.transport);
     });
 

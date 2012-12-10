@@ -9,7 +9,7 @@ describe("WSTransport", function() {
     }, options);
 
     return new Pusher.WSTransport(key, options);
-  };
+  }
 
   var _WebSocket;
   var _MozWebSocket;

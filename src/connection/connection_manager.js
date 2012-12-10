@@ -207,7 +207,7 @@
 
   prototype.shouldRetry = function() {
     return this.state === "connecting" || this.state === "connected";
-  }
+  };
 
   prototype.wrapTransport = function(transport) {
     return new Pusher.ProtocolWrapper(transport);

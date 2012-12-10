@@ -55,7 +55,7 @@ describe("DelayedStrategy", function() {
       strategy.connect(this.callback);
       expect(this.substrategy.connect).toHaveBeenCalled();
 
-      var connection = new Object();
+      var connection = {};
       this.substrategy._callback(null, connection);
 
       expect(this.callback).toHaveBeenCalledWith(null, connection);
@@ -64,7 +64,7 @@ describe("DelayedStrategy", function() {
     it("should pass an error when substrategy fails", function() {
       mockSetTimeout([0]);
       this.strategy.connect(this.callback);
-      this.substrategy._callback(true)
+      this.substrategy._callback(true);
 
       expect(this.callback).toHaveBeenCalledWith(true);
     });

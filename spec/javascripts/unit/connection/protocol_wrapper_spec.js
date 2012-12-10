@@ -194,7 +194,7 @@ describe("ProtocolWrapper", function() {
           event: "random",
           data: { foo: "bar" }
         })
-      })
+      });
       expect(onMessage).toHaveBeenCalledWith({
         event: "random",
         data: { foo: "bar" }
@@ -210,7 +210,7 @@ describe("ProtocolWrapper", function() {
           event: "pusher:error",
           data: ":("
         })
-      })
+      });
       expect(onError).toHaveBeenCalledWith({
         type: "PusherError",
         data: ":("
@@ -226,7 +226,7 @@ describe("ProtocolWrapper", function() {
           event: "pusher:ping",
           data: {}
         })
-      })
+      });
       expect(onPing).toHaveBeenCalled();
     });
 
@@ -239,7 +239,7 @@ describe("ProtocolWrapper", function() {
           event: "pusher:pong",
           data: {}
         })
-      })
+      });
       expect(onPong).toHaveBeenCalled();
     });
 
@@ -255,7 +255,7 @@ describe("ProtocolWrapper", function() {
 
       this.transport.emit("message", {
         data: "this is not json"
-      })
+      });
       expect(onMessage).not.toHaveBeenCalled();
       expect(error.type).toEqual("MessageParseError");
       expect(error.data).toEqual("this is not json");

@@ -195,7 +195,7 @@ describe("ConnectionManager", function() {
         .andReturn(true);
       encryptedStrategy.connect = jasmine.createSpy("connect")
         .andCallFake(function(callback) {
-          return { abort: function() {} }
+          return { abort: function() {} };
         });
       this.strategy.getEncrypted = jasmine.createSpy("getEncrypted")
         .andReturn(encryptedStrategy);
@@ -368,7 +368,7 @@ describe("ConnectionManager", function() {
   describe("with unsupported strategy", function() {
     it("should transition to failed on connect", function() {
       this.strategy.isSupported = jasmine.createSpy("isSupported")
-        .andReturn(false)
+        .andReturn(false);
 
       var onFailed = jasmine.createSpy("onFailed");
       this.manager.bind("failed", onFailed);
