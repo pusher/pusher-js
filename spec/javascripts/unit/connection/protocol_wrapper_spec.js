@@ -244,8 +244,12 @@ describe("ProtocolWrapper", function() {
     });
 
     it("should emit an error after receiving invalid JSON", function() {
+      var error = {};
+
       var onMessage = jasmine.createSpy("onMessage");
-      var onError = jasmine.createSpy("onError");
+      var onError = jasmine.createSpy("onError").andCallFake(function(e) {
+        error = e;
+      });
       this.wrapper.bind("message", onMessage);
       this.wrapper.bind("error", onError);
 
@@ -253,11 +257,8 @@ describe("ProtocolWrapper", function() {
         data: "this is not json"
       })
       expect(onMessage).not.toHaveBeenCalled();
-      expect(onError).toHaveBeenCalledWith({
-        type: "MessageParseError",
-        error: {},
-        data: "this is not json"
-      });
+      expect(error.type).toEqual("MessageParseError");
+      expect(error.data).toEqual("this is not json");
     });
   });
 
