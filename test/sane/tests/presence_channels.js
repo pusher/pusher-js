@@ -1,5 +1,5 @@
 ;(function(context) {
-  var withSubscribedPresenceChannel = function(callback) {
+  var setupPresenceChannel = function() {
     Pusher.channel_auth_transport = 'ajax';
     Pusher.XHR = context.TestXHR;
     var channel = Pusher.Channel.factory('presence-channel', {}); // 1 channel connecting
@@ -9,6 +9,12 @@
         "presence": { "count": 1, "hash": { "6": { "a":"1" } } }
       });
     });
+
+    return channel;
+  };
+
+  var withSubscribedPresenceChannel = function(callback) {
+    var channel = setupPresenceChannel();
 
     channel.bind('pusher:subscription_succeeded', function(members) { // 6 on sub succ event
       callback(channel); // 7 run callback
@@ -214,18 +220,10 @@
       },
 
       'pusher_internal:subscription_succeeded triggers pusher:subscription_succeeded callback': function( test ) {
-        Pusher.channel_auth_transport = 'ajax';
-        Pusher.XHR = context.TestXHR;
-        var channel = Pusher.Channel.factory('presence-channel', {}); // 1 channel connecting
-
-        channel.bind('pusher_internal:authorized', function() { // 4 on authorized event
-          channel.emit('pusher_internal:subscription_succeeded', { // 5 send sub succ event
-            "presence": { "count": 1, "hash": { "6": { "a":"1" } } }
-          });
-        });
+        var channel = setupPresenceChannel();
 
         var callbackCount = 0
-        channel.bind('pusher:subscription_succeeded', function(members) { // 6 on sub succ event
+        channel.bind('pusher:subscription_succeeded', function(members) {
           ++callbackCount;
         });
 
@@ -239,26 +237,14 @@
       },
 
       'pusher_internal:subscription_succeeded triggers pusher:subscription_succeeded callback once upon reconnection': function( test ) {
-        Pusher.channel_auth_transport = 'ajax';
-        Pusher.XHR = context.TestXHR;
-        var channel = Pusher.Channel.factory('presence-channel', {}); // 1 channel connecting
-
-        channel.bind('pusher_internal:authorized', function() { // 4 on authorized event
-          channel.emit('pusher_internal:subscription_succeeded', { // 5 send sub succ event
-            "presence": { "count": 1, "hash": { "6": { "a":"1" } } }
-          });
-        });
+        var channel = setupPresenceChannel();
 
         var callbackCount = 0
-        channel.bind('pusher:subscription_succeeded', function(members) { // 6 on sub succ event
+        channel.bind('pusher:subscription_succeeded', function(members) {
           ++callbackCount;
         });
 
-        test.equal( callbackCount, 0 );
-
         fakeAuth( channel );
-
-        test.equal( callbackCount, 1 );
 
         channel.disconnect();
 
