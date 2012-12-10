@@ -12,6 +12,7 @@ version '1.12.5'
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
+  file 'errors.js'
   file 'pusher_event_dispatcher.js'
   file 'dependencies.js'
 
