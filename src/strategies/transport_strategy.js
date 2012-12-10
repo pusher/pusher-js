@@ -39,7 +39,7 @@
     };
     var onClosed = function() {
       unbindListeners();
-      callback("closed"); // TODO return something meaningful
+      callback(new Pusher.Errors.TransportClosed(this.transport));
     };
 
     var unbindListeners = function() {

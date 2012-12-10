@@ -78,7 +78,8 @@ describe("TransportStrategy", function() {
 
       this.transport.state = "closed";
       this.transport.emit("closed");
-      expect(this.callback).toHaveBeenCalledWith("closed");
+      expect(this.callback)
+        .toHaveBeenCalledWith(jasmine.any(Pusher.Errors.TransportClosed));
     });
   });
 

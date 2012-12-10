@@ -9,5 +9,7 @@
     return klass;
   }
 
-  Pusher.Errors = {};
+  Pusher.Errors = {
+    TransportClosed: buildExceptionClass("TransportClosed")
+  };
 }).call(this);
