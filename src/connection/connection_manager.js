@@ -85,6 +85,7 @@
     if (this.runner) {
       this.runner.abort();
     }
+    this.clearRetryTimer();
     this.clearUnavailableTimer();
     this.stopActivityCheck();
     this.updateState("disconnected");
@@ -97,10 +98,23 @@
 
   // private
 
-  // TODO implement delay
-  prototype.retryIn = function() {
-    this.disconnect();
-    this.connect();
+  prototype.retryIn = function(delay) {
+    var self = this;
+    this.retryTimer = setTimeout(function() {
+      if (self.retryTimer === null) {
+        return;
+      }
+      self.retryTimer = null;
+      self.disconnect();
+      self.connect();
+    }, delay || 0);
+  };
+
+  prototype.clearRetryTimer = function() {
+    if (this.retryTimer) {
+      clearTimeout(this.retryTimer);
+      this.retryTimer = null;
+    }
   };
 
   prototype.clearUnavailableTimer = function() {
@@ -174,6 +188,9 @@
     var onRefused = function(id) {
       self.disconnect();
     };
+    var onBackoff = function(id) {
+      self.retryIn(1000);
+    };
     var onRetry = function(id) {
       self.retryIn(0);
     };
@@ -186,6 +203,7 @@
 
     connection.bind("ssl_only", onSSLOnly);
     connection.bind("refused", onRefused);
+    connection.bind("backoff", onBackoff);
     connection.bind("retry", onRetry);
 
     this.resetActivityCheck();

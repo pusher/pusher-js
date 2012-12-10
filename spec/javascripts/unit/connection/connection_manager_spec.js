@@ -166,6 +166,9 @@ describe("ConnectionManager", function() {
       this.manager.bind("disconnected", onDisconnected);
 
       this.connection.emit("closed");
+      // call retry timer
+      expect(setTimeout.calls[2].args[1]).toEqual(0);
+      setTimeout.calls[2].args[0]();
 
       expect(onDisconnected).toHaveBeenCalled();
       expect(onConnecting).toHaveBeenCalled();
@@ -180,6 +183,9 @@ describe("ConnectionManager", function() {
       expect(clearTimeout.calls.length).toEqual(1);
 
       this.connection.emit("closed");
+      // call retry timer
+      expect(setTimeout.calls[2].args[1]).toEqual(0);
+      setTimeout.calls[2].args[0]();
 
       expect(this.strategy._abort).toHaveBeenCalled();
       // activity check should be cleared here
@@ -205,6 +211,11 @@ describe("ConnectionManager", function() {
       this.connection.emit("ssl_only");
 
       expect(this.strategy.getEncrypted).toHaveBeenCalled();
+
+      // call retry timer
+      expect(setTimeout.calls[2].args[1]).toEqual(0);
+      setTimeout.calls[2].args[0]();
+
       expect(encryptedStrategy.connect).toHaveBeenCalled();
       expect(this.manager.state).toEqual("connecting");
     });
@@ -226,6 +237,23 @@ describe("ConnectionManager", function() {
       this.strategy._callback(null, {});
       this.connection.emit("retry");
 
+      // call retry timer
+      expect(setTimeout.calls[2].args[1]).toEqual(0);
+      setTimeout.calls[2].args[0]();
+
+      expect(this.manager.state).toEqual("connecting");
+    });
+
+    it("should reconnect with a 1s delay after receiving 'backoff' event", function() {
+      var self = this;
+
+      this.manager.connect();
+      this.strategy._callback(null, {});
+      this.connection.emit("backoff");
+
+      // call retry timer
+      expect(setTimeout.calls[2].args[1]).toEqual(1000);
+      setTimeout.calls[2].args[0]();
       expect(this.manager.state).toEqual("connecting");
     });
   });
