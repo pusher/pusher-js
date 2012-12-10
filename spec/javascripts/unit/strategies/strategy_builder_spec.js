@@ -116,4 +116,21 @@ describe("StrategyBuilder", function() {
     );
     expect(strategy).toEqual(jasmine.any(Pusher.FirstConnectedEverStrategy));
   });
+
+  it("should throw an error on unsupported transport", function() {
+    expect(function() {
+      var strategy = Pusher.StrategyBuilder.build(
+        { type: "transport", transport: "fake" }
+      );
+    }).toThrow(jasmine.any(Pusher.Errors.UnsupportedTransport));
+  });
+
+
+  it("should throw an error on unsupported strategy", function() {
+    expect(function() {
+      var strategy = Pusher.StrategyBuilder.build(
+        { type: "fake" }
+      );
+    }).toThrow(jasmine.any(Pusher.Errors.UnsupportedStrategy));
+  });
 });

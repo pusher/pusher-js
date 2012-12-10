@@ -12,7 +12,7 @@
     transport: function(scheme) {
       var klass = StrategyBuilder.transports[scheme.transport];
       if (!klass) {
-        throw ("unsupported transport " + scheme.transport); // TODO
+        throw new Pusher.Errors.UnsupportedTransport(scheme.transport);
       }
 
       var options = filter(scheme, {"type": true, "transport": true});
@@ -49,7 +49,7 @@
     var builder = this.builders[scheme.type];
 
     if (!builder) {
-      throw ("unsupported strategy type " + scheme.type); // TODO
+      throw new Pusher.Errors.UnsupportedStrategy(scheme.type);
     }
 
     return builder(scheme);

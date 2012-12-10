@@ -10,6 +10,8 @@
   }
 
   Pusher.Errors = {
+    UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
+    UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy"),
     TransportClosed: buildExceptionClass("TransportClosed")
   };
 }).call(this);
