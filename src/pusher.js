@@ -22,9 +22,9 @@
     this.connection = new Pusher.ConnectionManager(
       this.key,
       Pusher.Util.extend(
-        { activityTimeout: Pusher.activityTimeout,
-          pongTimeout: Pusher.pongTimeout,
-          unavailableTimeout: Pusher.unavailableTimeout
+        { activityTimeout: Pusher.activity_timeout,
+          pongTimeout: Pusher.pong_timeout,
+          unavailableTimeout: Pusher.unavailable_timeout
         },
         this.options
       )
@@ -203,9 +203,9 @@
   Pusher.cdn_https = '<CDN_HTTPS>'
   Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
   Pusher.channel_auth_transport = 'ajax';
-  Pusher.activityTimeout = 120000;
-  Pusher.pongTimeout = 30000;
-  Pusher.unavailableTimeout = 10000;
+  Pusher.activity_timeout = 120000;
+  Pusher.pong_timeout = 30000;
+  Pusher.unavailable_timeout = 10000;
 
   Pusher.isReady = false;
   Pusher.ready = function() {
