@@ -13,12 +13,12 @@
 
     var self = this;
 
-    Pusher.NetInfo.bind("online", function() {
+    Pusher.Network.bind("online", function() {
       if (self.state === "unavailable") {
         self.connect();
       }
     });
-    Pusher.NetInfo.bind("offline", function() {
+    Pusher.Network.bind("offline", function() {
       if (self.shouldRetry()) {
         self.disconnect();
         self.updateState("unavailable");
@@ -42,7 +42,7 @@
       this.updateState("failed");
       return;
     }
-    if (Pusher.NetInfo.isOnline() === false) {
+    if (Pusher.Network.isOnline() === false) {
       this.updateState("unavailable");
       return;
     }

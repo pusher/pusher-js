@@ -6,7 +6,7 @@ describe("ConnectionManager", function() {
     this.strategy = Pusher.Mocks.getStrategy(true);
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(this.strategy);
-    spyOn(Pusher.NetInfo, "isOnline").andReturn(true);
+    spyOn(Pusher.Network, "isOnline").andReturn(true);
     spyOn(window, "setTimeout").andReturn(666);
     spyOn(window, "clearTimeout");
 
@@ -355,7 +355,7 @@ describe("ConnectionManager", function() {
 
   describe("on network connection/disconnection", function() {
     it("should transition to unavailable before connecting and browser is offline", function() {
-      Pusher.NetInfo.isOnline.andReturn(false);
+      Pusher.Network.isOnline.andReturn(false);
 
       this.manager.connect();
       expect(this.manager.state).toEqual("unavailable");
@@ -366,8 +366,8 @@ describe("ConnectionManager", function() {
       this.manager.connect();
       expect(this.manager.state).toEqual("connecting");
 
-      Pusher.NetInfo.isOnline.andReturn(false);
-      Pusher.NetInfo.emit("offline");
+      Pusher.Network.isOnline.andReturn(false);
+      Pusher.Network.emit("offline");
 
       expect(this.manager.state).toEqual("unavailable");
     });
@@ -376,17 +376,17 @@ describe("ConnectionManager", function() {
       this.manager.connect();
       this.strategy.emit("open", {});
 
-      Pusher.NetInfo.isOnline.andReturn(false);
-      Pusher.NetInfo.emit("offline");
+      Pusher.Network.isOnline.andReturn(false);
+      Pusher.Network.emit("offline");
 
       expect(this.manager.state).toEqual("unavailable");
     });
 
     it("should try connecting when unavailable browser goes back online", function() {
-      Pusher.NetInfo.isOnline.andReturn(false);
+      Pusher.Network.isOnline.andReturn(false);
       this.manager.connect();
-      Pusher.NetInfo.isOnline.andReturn(true);
-      Pusher.NetInfo.emit("online");
+      Pusher.Network.isOnline.andReturn(true);
+      Pusher.Network.emit("online");
 
       expect(this.manager.state).toEqual("connecting");
       expect(this.strategy.connect).toHaveBeenCalled();
