@@ -14,6 +14,7 @@ bundle 'pusher.js' do
   file 'pusher.js'
   file 'errors.js'
   file 'pusher_event_dispatcher.js'
+  file 'dependency_loader.js'
   file 'dependencies.js'
 
   file 'strategies/abstract_multi_strategy.js'
