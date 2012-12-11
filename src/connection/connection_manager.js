@@ -1,5 +1,26 @@
 ;(function() {
-
+  /** Manages connection to Pusher.
+   *
+   * Uses a strategy (currently only default), timers and network availability
+   * info to establish a connection and export its state. In case of failures,
+   * manages reconnection attempts.
+   *
+   * Exports state changes as following events:
+   * - "state_change", { previous: p, current: state }
+   * - state
+   *
+   * States:
+   * - initialized - initial state, never transitioned to
+   * - connecting - connection is being established
+   * - connected - connection has been fully established
+   * - disconnected - on requested disconnection or before reconnecting
+   * - unavailable - after connection timeout or when there's no network
+   *
+   * Options:
+   * - unavailableTimeout - time to transition to unavailable state
+   * - activityTimeout - time after which ping message should be sent
+   * - pongTimeout - time for Pusher to respond with pong before reconnecting
+   */
   function ConnectionManager(key, options) {
     Pusher.EventsDispatcher.call(this);
 
@@ -29,8 +50,11 @@
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  // interface
-
+  /** Establishes a connection to Pusher.
+   *
+   * Does nothing when connection is already established. See top-level doc
+   * to find events emitted on connection attempts.
+   */
   prototype.connect = function() {
     if (this.connection) {
       return;
@@ -65,6 +89,10 @@
     }, this.options.unavailableTimeout);
   };
 
+  /** Sends raw data.
+   *
+   * @param {String} data
+   */
   prototype.send = function(data) {
     if (this.connection) {
       return this.connection.send(data);
@@ -73,6 +101,13 @@
     }
   };
 
+  /** Sends an event.
+   *
+   * @param {String} name
+   * @param {String} data
+   * @param {String} [channel]
+   * @returns {Boolean} whether message was sent or not
+   */
   prototype.send_event = function(name, data, channel) {
     if (this.connection) {
       return this.connection.send_event(name, data, channel);
@@ -81,7 +116,8 @@
     }
   };
 
-  prototype.disconnect = function(data) {
+  /** Closes the connection. */
+  prototype.disconnect = function() {
     if (this.runner) {
       this.runner.abort();
     }
@@ -96,8 +132,7 @@
     }
   };
 
-  // private
-
+  /** @private */
   prototype.retryIn = function(delay) {
     var self = this;
     this.retryTimer = setTimeout(function() {
@@ -110,6 +145,7 @@
     }, delay || 0);
   };
 
+  /** @private */
   prototype.clearRetryTimer = function() {
     if (this.retryTimer) {
       clearTimeout(this.retryTimer);
@@ -117,6 +153,7 @@
     }
   };
 
+  /** @private */
   prototype.clearUnavailableTimer = function() {
     if (this.unavailableTimer) {
       clearTimeout(this.unavailableTimer);
@@ -124,6 +161,7 @@
     }
   };
 
+  /** @private */
   prototype.resetActivityCheck = function() {
     this.stopActivityCheck();
     // send ping after inactivity
@@ -139,6 +177,7 @@
     }
   };
 
+  /** @private */
   prototype.stopActivityCheck = function() {
     if (this.activityTimer) {
       clearTimeout(this.activityTimer);
@@ -146,6 +185,7 @@
     }
   };
 
+  /** @private */
   prototype.setConnection = function(connection) {
     this.connection = connection;
 
@@ -209,6 +249,7 @@
     this.resetActivityCheck();
   };
 
+  /** @private */
   prototype.updateState = function(newState, data) {
     var previousState = this.state;
 
@@ -222,10 +263,12 @@
     }
   };
 
+  /** @private */
   prototype.shouldRetry = function() {
     return this.state === "connecting" || this.state === "connected";
   };
 
+  /** @private */
   prototype.wrapTransport = function(transport) {
     return new Pusher.ProtocolWrapper(transport);
   };

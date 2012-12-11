@@ -1,5 +1,19 @@
 ;(function() {
-
+  /**
+   * Provides Pusher protocol interface for transports.
+   *
+   * Emits following events:
+   * - connected - after establishing connection and receiving a socket id
+   * - message - on received messages
+   * - ping - on ping requests
+   * - pong - on pong responses
+   * - error - when the transport emits an error
+   * - closed - after closing the transport
+   * - ssl_only - after trying to connect without ssl to a ssl-only app
+   * - retry - when closed connection should be retried immediately
+   * - backoff - when closed connection should be retried with a delay
+   * - refused - when closed connection should not be retried
+   */
   function ProtocolWrapper(transport) {
     Pusher.EventsDispatcher.call(this);
     this.transport = transport;
@@ -9,16 +23,29 @@
 
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  // interface
-
+  /** Returns whether used transport handles ping/pong by itself
+   *
+   * @returns {Boolean} true if ping is handled by the transport
+   */
   prototype.supportsPing = function() {
     return this.transport.supportsPing();
   };
 
+  /** Sends raw data.
+   *
+   * @param {String} data
+   */
   prototype.send = function(data) {
     return this.transport.send(data);
   };
 
+  /** Sends an event.
+   *
+   * @param {String} name
+   * @param {String} data
+   * @param {String} [channel]
+   * @returns {Boolean} whether message was sent or not
+   */
   prototype.send_event = function(name, data, channel) {
     var payload = {
       event: name,
@@ -32,12 +59,12 @@
     return this.send(JSON.stringify(payload));
   };
 
+  /** Closes the transport.  */
   prototype.close = function() {
     this.transport.close();
   };
 
-  // private
-
+  /** @private */
   prototype.bindListeners = function() {
     var self = this;
 
@@ -92,6 +119,7 @@
     this.transport.bind("closed", onClosed);
   };
 
+  /** @private */
   prototype.parseMessage = function(message) {
     try {
       var params = JSON.parse(message.data);
@@ -114,6 +142,7 @@
     }
   };
 
+  /** @private */
   prototype.handleCloseCode = function(code, message) {
     this.emit(
       'error', { type: 'PusherError', data: { code: code, message: message } }
