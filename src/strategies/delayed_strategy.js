@@ -1,8 +1,6 @@
 ;(function() {
 
   function DelayedStrategy(substrategy, options) {
-    Pusher.EventsDispatcher.call(this);
-
     this.substrategy = substrategy;
     this.delay = options.delay;
   }

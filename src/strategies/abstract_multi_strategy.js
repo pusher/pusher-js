@@ -1,7 +1,6 @@
 ;(function() {
 
   function AbstractMultiStrategy(substrategies) {
-    Pusher.EventsDispatcher.call(this);
     this.substrategies = this.getSupported(substrategies);
   }
   var prototype = AbstractMultiStrategy.prototype;

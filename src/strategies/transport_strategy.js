@@ -1,7 +1,6 @@
 ;(function() {
 
   function TransportStrategy(transport, options) {
-    Pusher.EventsDispatcher.call(this);
     this.transport = transport;
     this.options = options;
   }
