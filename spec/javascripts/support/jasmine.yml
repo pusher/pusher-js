@@ -3,6 +3,7 @@ src_dir: src
 src_files:
   - pusher.js
   - errors.js
+  - dependency_loader.js
   - dependencies.js
   - pusher_event_dispatcher.js
   - net_info.js
