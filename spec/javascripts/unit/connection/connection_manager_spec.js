@@ -393,6 +393,17 @@ describe("ConnectionManager", function() {
     });
   });
 
+  describe("on strategy error", function() {
+    it("should connect again using the same strategy", function() {
+      this.manager.connect();
+      expect(this.strategy.connect.calls.length).toEqual(1);
+
+      this.strategy._callback(true);
+      expect(this.strategy.connect.calls.length).toEqual(2);
+      expect(this.manager.state).toEqual("connecting")
+    });
+  });
+
   describe("with unsupported strategy", function() {
     it("should transition to failed on connect", function() {
       this.strategy.isSupported = jasmine.createSpy("isSupported")

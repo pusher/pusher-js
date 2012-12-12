@@ -71,15 +71,21 @@
       return;
     }
 
-    this.updateState("connecting");
-    this.runner = this.strategy.connect(function(error, transport) {
-      // we don't support switching connections yet
-      self.runner.abort();
-      self.clearUnavailableTimer();
-      self.setConnection(self.wrapTransport(transport));
-    });
-
     var self = this;
+
+    this.updateState("connecting");
+    var callback = function(error, transport) {
+      if (error) {
+        self.runner = self.strategy.connect(callback);
+      } else {
+        // we don't support switching connections yet
+        self.runner.abort();
+        self.clearUnavailableTimer();
+        self.setConnection(self.wrapTransport(transport));
+      }
+    };
+    this.runner = this.strategy.connect(callback);
+
     this.unavailableTimer = setTimeout(function() {
       if (!self.unavailableTimer) {
         return;
