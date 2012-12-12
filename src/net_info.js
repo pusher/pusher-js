@@ -3,13 +3,15 @@
   // Basic interface for querying network availability.
   function NetInfo() {
     Pusher.EventsDispatcher.call(this);
+
+    var self = this;
     // This is okay, as IE doesn't support this stuff anyway.
     if (window.addEventListener !== undefined) {
       window.addEventListener("online", function() {
-        this.emit('online');
+        self.emit('online');
       }, false);
       window.addEventListener("offline", function() {
-        this.emit('offline');
+        self.emit('offline');
       }, false);
     }
   }
