@@ -1,5 +1,14 @@
 ;(function() {
-
+  /** Handles loading dependency files.
+   *
+   * Options:
+   * - cdn_http - url to HTTP CND
+   * - cdn_https - url to HTTPS CDN
+   * - version - version of pusher-js
+   * - suffix - suffix appended to all names of dependency files
+   *
+   * @param {Object} options
+   */
   function DependencyLoader(options) {
     this.options = options;
     this.loading = {};
@@ -7,6 +16,11 @@
   }
   var prototype = DependencyLoader.prototype;
 
+  /** Loads the dependency from CDN.
+   *
+   * @param  {String} name
+   * @param  {Function} callback
+   */
   prototype.load = function(name, callback) {
     var self = this;
 
@@ -34,6 +48,10 @@
     });
   };
 
+  /** Returns a root URL for pusher-js CDN.
+   *
+   * @returns {String}
+   */
   prototype.getRoot = function() {
     var cdn;
     if (document.location.protocol === "http:") {
@@ -43,8 +61,6 @@
     }
     return cdn + "/" + this.options.version;
   };
-
-  // helpers
 
   function handleScriptLoaded(elem, callback) {
     if (document.addEventListener) {
@@ -74,5 +90,4 @@
   }
 
   Pusher.DependencyLoader = DependencyLoader;
-
 }).call(this);
