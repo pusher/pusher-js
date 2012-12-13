@@ -1,5 +1,14 @@
 ;(function() {
-
+  /** Loops through substrategies with optional timeouts.
+   *
+   * Options:
+   * - loop - whether it should loop through the substrategy list
+   * - timeout - initial timeout for a single substrategy
+   * - timeoutLimit - maximum timeout
+   *
+   * @param {Strategy} substrategy
+   * @param {Object} options
+   */
   function SequentialStrategy(substrategies, options) {
     Pusher.AbstractMultiStrategy.call(this, substrategies);
 
@@ -11,10 +20,12 @@
 
   Pusher.Util.extend(prototype, Pusher.AbstractMultiStrategy.prototype);
 
-  // interface
-
   prototype.name = "seq";
 
+  /** Creates an encrypted-only copy of itself, copying all options.
+   *
+   * @returns {SequentialStrategy}
+   */
   prototype.getEncrypted = function() {
     var substrategies = [];
     for (var i = 0; i < this.substrategies.length; i++) {
@@ -27,6 +38,11 @@
     });
   };
 
+  /** Launches a connection attempt and returns a strategy runner.
+   *
+   * @param  {Function} callback
+   * @return {Object} strategy runner
+   */
   prototype.connect = function(callback) {
     var self = this;
 
@@ -70,8 +86,7 @@
     };
   };
 
-  // private
-
+  /** @private */
   prototype.tryStrategy = function(strategy, timeoutLength, callback) {
     var timeout = null;
     var runner = null;

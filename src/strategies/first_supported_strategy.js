@@ -1,5 +1,8 @@
 ;(function() {
-
+  /** Takes the first supported substrategy and uses it to establish connection.
+   *
+   * @param {Array} substrategies
+   */
   function FirstSupportedStrategy(substrategies) {
     Pusher.FirstConnectedStrategy.call(this, substrategies);
   }
@@ -7,12 +10,9 @@
 
   Pusher.Util.extend(prototype, Pusher.FirstConnectedStrategy.prototype);
 
-  // interface
-
   prototype.name = "first_supported";
 
-  // private
-
+  /** @protected */
   prototype.getSupported = function(substrategies) {
     for (var i = 0; i < substrategies.length; i++) {
       if (substrategies[i].isSupported()) {

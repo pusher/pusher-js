@@ -1,5 +1,9 @@
 ;(function() {
-
+  /** Provides a strategy interface for transports.
+   *
+   * @param {Class} transport
+   * @param {Object} options options to pass to the transport
+   */
   function TransportStrategy(transport, options) {
     this.transport = transport;
     this.options = options;
@@ -8,10 +12,18 @@
 
   prototype.name = "transport";
 
+  /** Returns whether the transport is supported in the browser.
+   *
+   * @returns {Boolean}
+   */
   prototype.isSupported = function() {
     return this.transport.isSupported();
   };
 
+  /** Creates an encrypted-only copy of itself, respecting the delay.
+   *
+   * @returns {TransportStrategy}
+   */
   prototype.getEncrypted = function() {
     return new TransportStrategy(
       this.transport,
@@ -19,6 +31,11 @@
     );
   };
 
+  /** Launches a connection attempt and returns a strategy runner.
+   *
+   * @param  {Function} callback
+   * @return {Object} strategy runner
+   */
   prototype.connect = function(callback) {
     connection = this.transport.createConnection(
       this.options.key, this.options

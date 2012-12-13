@@ -1,5 +1,11 @@
 ;(function() {
-
+  /** Launches all substrategies at the same time and uses the first connected.
+   *
+   * After establishing the connection, aborts all substrategies so that no
+   * other attempts are made later.
+   *
+   * @param {Array} substrategies
+   */
   function FirstConnectedStrategy(substrategies) {
     Pusher.AbstractMultiStrategy.call(this, substrategies);
   }
@@ -7,10 +13,13 @@
 
   Pusher.Util.extend(prototype, Pusher.AbstractMultiStrategy.prototype);
 
-  // interface
-
   prototype.name = "first_connected";
 
+  /** Launches a connection attempt and returns a strategy runner.
+   *
+   * @param  {Function} callback
+   * @return {Object} strategy runner
+   */
   prototype.connect = function(callback) {
     if (!this.isSupported()) {
       return null;
@@ -31,8 +40,7 @@
     };
   };
 
-  // protected
-
+  /** @protected */
   prototype.getCallback = function(i, runners, callback) {
     var self = this;
 
@@ -49,6 +57,7 @@
     };
   };
 
+  /** @protected */
   prototype.allFailed = function(runners) {
     for (var i = 0; i < runners.length; i++) {
       if (!runners[i].error) {
@@ -58,6 +67,7 @@
     return true;
   };
 
+  /** @protected */
   prototype.abortRunners = function(runners) {
     for (var i = 0; i < runners.length; i++) {
       if (!runners[i].error) {
