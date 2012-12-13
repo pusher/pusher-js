@@ -1,5 +1,8 @@
 ;(function() {
-
+  /** Fallback transport using SockJS.
+   *
+   * @see AbstractTransport
+   */
   function SockJSTransport(key, options) {
     Pusher.AbstractTransport.call(this, key, options);
   }
@@ -7,18 +10,30 @@
 
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
-  // interface
+  prototype.name = "sockjs";
 
-  SockJSTransport.isSupported = function() {
-    return true;
-  };
-
+  /** Creates a new instance of SockJSTransport.
+   *
+   * @param  {String} key
+   * @param  {Object} options
+   * @return {SockJSTransport}
+   */
   SockJSTransport.createConnection = function(key, options) {
     return new SockJSTransport(key, options);
   };
 
-  prototype.name = "sockjs";
+  /** Assumes that SockJS is always supported.
+   *
+   * @returns {Boolean} always true
+   */
+  SockJSTransport.isSupported = function() {
+    return true;
+  };
 
+  /** Fetches sockjs dependency if needed.
+   *
+   * @see AbstractTransport.prototype.initialize
+   */
   prototype.initialize = function() {
     var self = this;
 
@@ -28,26 +43,41 @@
     });
   };
 
-  prototype.createSocket = function(url) {
-    return new SockJS(url);
-  };
-
+  /** Always returns true, since SockJS handles ping on its own.
+   *
+   * @returns {Boolean} always true
+   */
   prototype.supportsPing = function() {
     return true;
   };
 
+  /** @protected */
+  prototype.createSocket = function(url) {
+    return new SockJS(url);
+  };
+
+  /** @protected */
   prototype.getScheme = function() {
     return this.options.encrypted ? "https" : "http";
   };
 
+  /** @protected */
   prototype.getPath = function() {
     return "/pusher";
   };
 
+  /** @protected */
   prototype.getQueryString = function() {
     return "";
   };
 
+  /** Handles opening a SockJS connection to Pusher.
+   *
+   * Since SockJS does not handle custom paths, we send it immediately after
+   * establishing the connection.
+   *
+   * @protected
+   */
   prototype.onOpen = function() {
     this.socket.send(JSON.stringify({
       path: Pusher.AbstractTransport.prototype.getPath.call(this)

@@ -1,5 +1,8 @@
 ;(function() {
-
+  /** WebSocket transport.
+   *
+   * @see AbstractTransport
+   */
   function WSTransport(key, options) {
     Pusher.AbstractTransport.call(this);
 
@@ -10,25 +13,33 @@
 
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
-  // interface
+  prototype.name = "ws";
 
-  WSTransport.isSupported = function() {
-    return window.WebSocket !== undefined || window.MozWebSocket !== undefined;
-  };
-
+  /** Creates a new instance of WSTransport.
+   *
+   * @param  {String} key
+   * @param  {Object} options
+   * @return {WSTransport}
+   */
   WSTransport.createConnection = function(key, options) {
     return new WSTransport(key, options);
   };
 
-  prototype.name = "ws";
+  /** Checks whether the browser supports WebSockets in any form.
+   *
+   * @returns {Boolean} true if browser supports WebSockets
+   */
+  WSTransport.isSupported = function() {
+    return window.WebSocket !== undefined || window.MozWebSocket !== undefined;
+  };
 
-  // helpers
-
+  /** @protected */
   prototype.createSocket = function(url) {
     var constructor = WebSocket || MozWebSocket;
     return new constructor(url);
   };
 
+  /** @protected */
   prototype.getQueryString = function() {
     return Pusher.AbstractTransport.prototype.getQueryString.call(this) +
       "&flash=false";
