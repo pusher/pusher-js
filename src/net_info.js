@@ -1,6 +1,10 @@
 ;(function() {
-
-  // Basic interface for querying network availability.
+  /** Really basic interface providing network availability info.
+   *
+   * Emits:
+   * - online - when browser goes online
+   * - offline - when browser goes offline
+   */
   function NetInfo() {
     Pusher.EventsDispatcher.call(this);
 
@@ -19,9 +23,14 @@
 
   var prototype = NetInfo.prototype;
 
-  // Offline means definitely offline (no connection to router).
-  // Inverse does NOT mean definitely online (only currently supported in Safari
-  // and even there only means the device has a connection to the router).
+  /** Returns whether browser is online or not
+   *
+   * Offline means definitely offline (no connection to router).
+   * Inverse does NOT mean definitely online (only currently supported in Safari
+   * and even there only means the device has a connection to the router).
+   *
+   * @return {Boolean}
+   */
   prototype.isOnline = function() {
     if (window.navigator.onLine === undefined) {
       return true;
@@ -32,5 +41,4 @@
 
   Pusher.NetInfo = NetInfo;
   Pusher.Network = new NetInfo();
-
 }).call(this);
