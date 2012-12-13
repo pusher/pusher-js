@@ -1,19 +1,19 @@
-describe("FirstConnectedEverStrategy", function() {
+describe("BestConnectedEverStrategy", function() {
   beforeEach(function() {
     this.substrategies = Pusher.Mocks.getStrategies([true, true, true]);
-    this.strategy = new Pusher.FirstConnectedEverStrategy(this.substrategies);
+    this.strategy = new Pusher.BestConnectedEverStrategy(this.substrategies);
 
     this.callback = jasmine.createSpy();
   });
 
   it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("first_connected_ever");
+    expect(this.strategy.name).toEqual("best_connected_ever");
   });
 
   it("should construct a secure strategy", function() {
     var substrategies = Pusher.Mocks.getStrategies([true, true]);
     var encryptedSubstrategies = Pusher.Mocks.getStrategies([true, true]);
-    var strategy = new Pusher.FirstConnectedEverStrategy(substrategies);
+    var strategy = new Pusher.BestConnectedEverStrategy(substrategies);
 
     substrategies[0].getEncrypted = jasmine.createSpy()
       .andReturn(encryptedSubstrategies[0]);

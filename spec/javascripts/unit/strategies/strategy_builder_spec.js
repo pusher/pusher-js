@@ -108,13 +108,13 @@ describe("StrategyBuilder", function() {
 
   it("should construct a first connected ever strategy", function() {
     var strategy = Pusher.StrategyBuilder.build(
-      { type: "first_connected_ever",
+      { type: "best_connected_ever",
         children: [
           { type: "transport", transport: "sockjs" }
         ]
       }
     );
-    expect(strategy).toEqual(jasmine.any(Pusher.FirstConnectedEverStrategy));
+    expect(strategy).toEqual(jasmine.any(Pusher.BestConnectedEverStrategy));
   });
 
   it("should throw an error on unsupported transport", function() {

@@ -54,8 +54,8 @@
       return buildWithSubstrategies(Pusher.FirstConnectedStrategy, scheme);
     },
 
-    first_connected_ever: function(scheme) {
-      return buildWithSubstrategies(Pusher.FirstConnectedEverStrategy, scheme);
+    best_connected_ever: function(scheme) {
+      return buildWithSubstrategies(Pusher.BestConnectedEverStrategy, scheme);
     }
   };
 

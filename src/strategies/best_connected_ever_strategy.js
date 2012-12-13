@@ -9,14 +9,14 @@
    *
    * @param {Array} substrategies
    */
-  function FirstConnectedEverStrategy(substrategies) {
+  function BestConnectedEverStrategy(substrategies) {
     Pusher.FirstConnectedStrategy.call(this, substrategies);
   }
-  var prototype = FirstConnectedEverStrategy.prototype;
+  var prototype = BestConnectedEverStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.FirstConnectedStrategy.prototype);
 
-  prototype.name = "first_connected_ever";
+  prototype.name = "best_connected_ever";
 
   /** @protected */
   prototype.getCallback = function(i, runners, callback) {
@@ -37,5 +37,5 @@
     };
   };
 
-  Pusher.FirstConnectedEverStrategy = FirstConnectedEverStrategy;
+  Pusher.BestConnectedEverStrategy = BestConnectedEverStrategy;
 }).call(this);
