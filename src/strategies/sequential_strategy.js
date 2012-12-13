@@ -92,7 +92,7 @@
     var runner = null;
 
     runner = strategy.connect(function(error, connection) {
-      if (error) {
+      if (error && timeout) {
         // advance to the next strategy after the timeout
         return;
       }

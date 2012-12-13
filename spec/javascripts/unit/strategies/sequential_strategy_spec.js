@@ -1,16 +1,10 @@
 describe("SequentialStrategy", function() {
-  function mockSetTimeout(delayList) {
-    spyOn(window, "setTimeout").andCallFake(function(callback, delay) {
-      expect(delayList.length).toBeGreaterThan(0);
-      expect(delay).toEqual(delayList.shift());
-      callback();
-    });
-  }
-
   beforeEach(function() {
     this.callback = jasmine.createSpy();
     this.substrategies = Pusher.Mocks.getStrategies([true, true]);
     this.strategy = new Pusher.SequentialStrategy(this.substrategies, {});
+
+    jasmine.Clock.useMock();
   });
 
   it("should expose its name", function() {
@@ -142,32 +136,24 @@ describe("SequentialStrategy", function() {
         timeoutLimit: 400
       });
 
-      mockSetTimeout([100, 200, 400, 400, 400]);
-
-      substrategies[0].connect = jasmine.createSpy().andCallFake(function() {
-        expect(substrategies[1].connect).not.toHaveBeenCalled();
-        return { abort: substrategies[0]._abort };
-      });
-      substrategies[1].connect = jasmine.createSpy().andCallFake(function() {
-        expect(substrategies[2].connect).not.toHaveBeenCalled();
-        return { abort: substrategies[1]._abort };
-      });
-      substrategies[2].connect = jasmine.createSpy().andCallFake(function() {
-        expect(substrategies[3].connect).not.toHaveBeenCalled();
-        return { abort: substrategies[2]._abort };
-      });
-      substrategies[3].connect = jasmine.createSpy().andCallFake(function() {
-        expect(substrategies[4].connect).not.toHaveBeenCalled();
-        return { abort: substrategies[3]._abort };
-      });
-
       strategy.connect(this.callback);
-      expect(setTimeout.calls.length).toEqual(5);
 
       expect(substrategies[0].connect).toHaveBeenCalled();
+      expect(substrategies[1].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(100);
       expect(substrategies[1].connect).toHaveBeenCalled();
+      expect(substrategies[2].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(200);
       expect(substrategies[2].connect).toHaveBeenCalled();
+      expect(substrategies[3].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(400);
       expect(substrategies[3].connect).toHaveBeenCalled();
+      expect(substrategies[4].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(400);
       expect(substrategies[4].connect).toHaveBeenCalled();
     });
   });
