@@ -83,7 +83,6 @@
       } else {
         // we don't support switching connections yet
         self.runner.abort();
-        self.clearUnavailableTimer();
         self.setConnection(self.wrapTransport(transport));
       }
     };
@@ -200,6 +199,7 @@
 
     var self = this;
     var onConnected = function(id) {
+      self.clearUnavailableTimer();
       self.socket_id = id;
       self.updateState("connected");
       self.resetActivityCheck();
