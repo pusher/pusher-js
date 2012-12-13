@@ -9,6 +9,7 @@
     return klass;
   }
 
+  /** Error classes used throughout pusher-js library. */
   Pusher.Errors = {
     UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
     UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy"),

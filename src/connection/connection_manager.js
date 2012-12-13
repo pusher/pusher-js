@@ -20,6 +20,9 @@
    * - unavailableTimeout - time to transition to unavailable state
    * - activityTimeout - time after which ping message should be sent
    * - pongTimeout - time for Pusher to respond with pong before reconnecting
+   *
+   * @param {String} key application key
+   * @param {Object} options
    */
   function ConnectionManager(key, options) {
     Pusher.EventsDispatcher.call(this);

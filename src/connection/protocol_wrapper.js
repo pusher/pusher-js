@@ -13,6 +13,8 @@
    * - retry - when closed connection should be retried immediately
    * - backoff - when closed connection should be retried with a delay
    * - refused - when closed connection should not be retried
+   *
+   * @param {AbstractTransport} transport
    */
   function ProtocolWrapper(transport) {
     Pusher.EventsDispatcher.call(this);
