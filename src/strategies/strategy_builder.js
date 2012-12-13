@@ -1,16 +1,30 @@
 ;(function() {
+  var StrategyBuilder = {
+    /** Transforms a JSON scheme to a strategy tree.
+     *
+     * @param {Object} scheme JSON strategy scheme
+     * @returns {Strategy} strategy tree that's represented by the scheme
+     */
+    build: function(scheme) {
+      var builder = builders[scheme.type];
 
-  var StrategyBuilder = {};
+      if (!builder) {
+        throw new Pusher.Errors.UnsupportedStrategy(scheme.type);
+      }
 
-  StrategyBuilder.transports = {
+      return builder(scheme);
+    }
+  };
+
+  var transports = {
     ws: Pusher.WSTransport,
     flash: Pusher.FlashTransport,
     sockjs: Pusher.SockJSTransport
   };
 
-  StrategyBuilder.builders = {
+  var builders = {
     transport: function(scheme) {
-      var klass = StrategyBuilder.transports[scheme.transport];
+      var klass = transports[scheme.transport];
       if (!klass) {
         throw new Pusher.Errors.UnsupportedTransport(scheme.transport);
       }
@@ -45,18 +59,6 @@
     }
   };
 
-  StrategyBuilder.build = function(scheme) {
-    var builder = this.builders[scheme.type];
-
-    if (!builder) {
-      throw new Pusher.Errors.UnsupportedStrategy(scheme.type);
-    }
-
-    return builder(scheme);
-  };
-
-  // helpers
-
   function buildWithSubstrategies(constructor, scheme) {
     var options = filter(scheme, {"type": true, "children": true});
     var substrategies = [];
@@ -86,5 +88,4 @@
   }
 
   Pusher.StrategyBuilder = StrategyBuilder;
-
 }).call(this);
