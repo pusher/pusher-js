@@ -68,11 +68,17 @@
   };
 
   /** @protected */
+  prototype.abortRunner = function(runners, i) {
+    if (!runners[i].error && !runners[i].aborted) {
+      runners[i].abort();
+      runners[i].aborted = true;
+    }
+  };
+
+  /** @protected */
   prototype.abortRunners = function(runners) {
     for (var i = 0; i < runners.length; i++) {
-      if (!runners[i].error) {
-        runners[i].abort();
-      }
+      this.abortRunner(runners, i);
     }
   };
 
