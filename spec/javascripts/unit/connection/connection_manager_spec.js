@@ -7,16 +7,16 @@ describe("ConnectionManager", function() {
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(this.strategy);
     spyOn(Pusher.Network, "isOnline").andReturn(true);
-    spyOn(window, "setTimeout").andReturn(666);
-    spyOn(window, "clearTimeout");
 
     this.manager = new Pusher.ConnectionManager("foo", {
-      activityTimeout: 111,
-      pongTimeout: 222,
-      unavailableTimeout: 333
+      activityTimeout: 3456,
+      pongTimeout: 2345,
+      unavailableTimeout: 1234
     });
     this.manager.wrapTransport = jasmine.createSpy("wrapTransport")
       .andReturn(this.connection);
+
+    jasmine.Clock.useMock();
   });
 
   describe("on initialize", function() {
@@ -51,11 +51,6 @@ describe("ConnectionManager", function() {
         current: "connecting"
       });
     });
-
-    it("should set the unavailable timer", function() {
-      this.manager.connect();
-      expect(setTimeout).toHaveBeenCalledWith(jasmine.any(Function), 333);
-    });
   });
 
   describe("after successful connection attempt", function() {
@@ -82,12 +77,13 @@ describe("ConnectionManager", function() {
     });
 
     it("should clear the unavailable timer", function() {
-      setTimeout.andReturn(123);
-
       this.manager.connect();
-      this.strategy._callback(null, {});
+      this.strategy._callback(null, this.connection);
+      this.connection.emit("connected")
 
-      expect(clearTimeout).toHaveBeenCalledWith(123);
+      jasmine.Clock.tick(1500);
+      // if unavailable timer was not cleared, state should be unavailable
+      expect(this.manager.state).toEqual("connected");
     });
 
     it("should not try to connect again", function() {
@@ -109,7 +105,6 @@ describe("ConnectionManager", function() {
 
       expect(this.connection.send).toHaveBeenCalledWith("howdy");
     });
-
 
     it("should not send data when not connected", function() {
       expect(this.manager.send("FALSE!")).toBe(false);
@@ -147,7 +142,10 @@ describe("ConnectionManager", function() {
       this.strategy._callback(null, {});
       this.manager.disconnect();
 
-      expect(clearTimeout.calls.length).toEqual(2);
+      jasmine.Clock.tick(10000);
+      expect(this.manager.state).toEqual("disconnected");
+      expect(this.connection.send).not.toHaveBeenCalled();
+      expect(this.connection.send_event).not.toHaveBeenCalled();
     });
   });
 
@@ -166,31 +164,26 @@ describe("ConnectionManager", function() {
       this.manager.bind("disconnected", onDisconnected);
 
       this.connection.emit("closed");
-      // call retry timer
-      expect(setTimeout.calls[2].args[1]).toEqual(0);
-      setTimeout.calls[2].args[0]();
-
+      jasmine.Clock.tick(0);
       expect(onDisconnected).toHaveBeenCalled();
       expect(onConnecting).toHaveBeenCalled();
     });
 
-    it("should clean up timers and abort strategy", function() {
+    it("should clean up activity timer and abort strategy", function() {
       var self = this;
 
       this.manager.connect();
       this.strategy._callback(null, {});
-      // unavailable timer should be cleared here
-      expect(clearTimeout.calls.length).toEqual(1);
+      this.connection.emit("connected")
+      expect(this.strategy._abort).toHaveBeenCalled();
 
       this.connection.emit("closed");
-      // call retry timer
-      expect(setTimeout.calls[2].args[1]).toEqual(0);
-      setTimeout.calls[2].args[0]();
+      jasmine.Clock.tick(0);
 
-      expect(this.strategy._abort).toHaveBeenCalled();
-      // activity check should be cleared here
-      // unavailable timer was cleared when connection was open
-      expect(clearTimeout.calls.length).toEqual(2);
+      jasmine.Clock.tick(10000);
+      // there should be no messages (including ping) sent over the connection
+      expect(this.connection.send).not.toHaveBeenCalled();
+      expect(this.connection.send_event).not.toHaveBeenCalled();
     });
 
     it("should force secure and reconnect after receiving 'ssl_only' event", function() {
@@ -212,10 +205,7 @@ describe("ConnectionManager", function() {
 
       expect(this.strategy.getEncrypted).toHaveBeenCalled();
 
-      // call retry timer
-      expect(setTimeout.calls[2].args[1]).toEqual(0);
-      setTimeout.calls[2].args[0]();
-
+      jasmine.Clock.tick(0);
       expect(encryptedStrategy.connect).toHaveBeenCalled();
       expect(this.manager.state).toEqual("connecting");
     });
@@ -237,10 +227,7 @@ describe("ConnectionManager", function() {
       this.strategy._callback(null, {});
       this.connection.emit("retry");
 
-      // call retry timer
-      expect(setTimeout.calls[2].args[1]).toEqual(0);
-      setTimeout.calls[2].args[0]();
-
+      jasmine.Clock.tick(0);
       expect(this.manager.state).toEqual("connecting");
     });
 
@@ -251,10 +238,10 @@ describe("ConnectionManager", function() {
       this.strategy._callback(null, {});
       this.connection.emit("backoff");
 
-      // call retry timer
-      expect(setTimeout.calls[2].args[1]).toEqual(1000);
-      setTimeout.calls[2].args[0]();
-      expect(this.manager.state).toEqual("connecting");
+      jasmine.Clock.tick(999);
+      expect(this.strategy.connect.calls.length).toEqual(1);
+      jasmine.Clock.tick(1);
+      expect(this.strategy.connect.calls.length).toEqual(2);
     });
   });
 
@@ -294,7 +281,9 @@ describe("ConnectionManager", function() {
       var onUnavailable = jasmine.createSpy("onUnavailable");
       this.manager.bind("unavailable", onUnavailable);
 
-      setTimeout.calls[0].args[0].call(window);
+      jasmine.Clock.tick(1233);
+      expect(this.manager.state).toEqual("connecting");
+      jasmine.Clock.tick(1);
       expect(this.manager.state).toEqual("unavailable");
       expect(onUnavailable).toHaveBeenCalled();
     });
@@ -306,37 +295,35 @@ describe("ConnectionManager", function() {
       this.strategy._callback(null, {});
       this.connection.emit("connected", "666.999");
 
-      // on connection open and on pusher:connection_established
-      expect(setTimeout.calls.length).toEqual(3);
-      expect(clearTimeout.calls.length).toEqual(2);
-      // call the activity timer
-      setTimeout.calls[2].args[0].call(window);
+      jasmine.Clock.tick(3455);
+      expect(this.connection.send_event).not.toHaveBeenCalled();
 
+      jasmine.Clock.tick(1);
       expect(this.connection.send_event)
         .toHaveBeenCalledWith("pusher:ping", {}, undefined);
-      // set the pong timeout
-      expect(setTimeout.calls.length).toEqual(4);
-      expect(clearTimeout.calls.length).toEqual(2);
+
+      jasmine.Clock.tick(2344);
+      expect(this.connection.close).not.toHaveBeenCalled();
 
       this.connection.emit("pong");
       this.connection.emit("message", {
         event: "pusher:pong",
         data: {}
       });
-      // clear the pong timeout
-      expect(clearTimeout.calls.length).toEqual(3);
-      // set the new activity timeout
-      expect(setTimeout.calls.length).toEqual(5);
+
+      // pong received, connection should not get closed
+      jasmine.Clock.tick(1000);
+      expect(this.connection.close).not.toHaveBeenCalled();
     });
 
-    it("should close the connection on timeout", function() {
+    it("should close the connection after pong timeout", function() {
       this.manager.connect();
       this.strategy._callback(null, {});
+      this.connection.emit("connected", "666.999");
 
-      setTimeout.calls[1].args[0].call(window);
-
+      jasmine.Clock.tick(3456);
       expect(this.connection.close).not.toHaveBeenCalled();
-      setTimeout.calls[2].args[0].call(window);
+      jasmine.Clock.tick(2345);
       expect(this.connection.close).toHaveBeenCalled();
     });
   });

@@ -141,19 +141,31 @@ describe("SequentialStrategy", function() {
       expect(substrategies[0].connect).toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(100);
+      jasmine.Clock.tick(99);
+      expect(substrategies[1].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
       expect(substrategies[1].connect).toHaveBeenCalled();
       expect(substrategies[2].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(200);
+      jasmine.Clock.tick(199);
+      expect(substrategies[2].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
       expect(substrategies[2].connect).toHaveBeenCalled();
       expect(substrategies[3].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(400);
+      jasmine.Clock.tick(399);
+      expect(substrategies[3].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
       expect(substrategies[3].connect).toHaveBeenCalled();
       expect(substrategies[4].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(400);
+      jasmine.Clock.tick(399);
+      expect(substrategies[4].connect).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
       expect(substrategies[4].connect).toHaveBeenCalled();
     });
   });

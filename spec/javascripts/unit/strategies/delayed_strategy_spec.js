@@ -1,17 +1,10 @@
 describe("DelayedStrategy", function() {
-  function mockSetTimeout(delayList) {
-    spyOn(window, "setTimeout").andCallFake(function(callback, delay) {
-      expect(delayList.length).toBeGreaterThan(0);
-      expect(delay).toEqual(delayList.shift());
-      callback();
-    });
-  }
-
   beforeEach(function() {
     this.substrategy = Pusher.Mocks.getStrategy(true);
     this.strategy = new Pusher.DelayedStrategy(this.substrategy, { delay: 0 });
-
     this.callback = jasmine.createSpy();
+
+    jasmine.Clock.useMock();
   });
 
   it("should expose its name", function() {
@@ -51,8 +44,12 @@ describe("DelayedStrategy", function() {
         delay: 100
       });
 
-      mockSetTimeout([100]);
       strategy.connect(this.callback);
+
+      expect(this.substrategy.connect).not.toHaveBeenCalled();
+      jasmine.Clock.tick(99);
+      expect(this.substrategy.connect).not.toHaveBeenCalled();
+      jasmine.Clock.tick(100);
       expect(this.substrategy.connect).toHaveBeenCalled();
 
       var connection = {};
@@ -62,8 +59,8 @@ describe("DelayedStrategy", function() {
     });
 
     it("should pass an error when substrategy fails", function() {
-      mockSetTimeout([0]);
       this.strategy.connect(this.callback);
+      jasmine.Clock.tick(0);
       this.substrategy._callback(true);
 
       expect(this.callback).toHaveBeenCalledWith(true);
@@ -72,26 +69,19 @@ describe("DelayedStrategy", function() {
 
   describe("on abort", function() {
     it("should abort substrategy when connecting", function() {
-      mockSetTimeout([0]);
       var run = this.strategy.connect();
-      expect(this.substrategy.connect).toHaveBeenCalled();
-
+      jasmine.Clock.tick(0);
       run.abort();
       expect(this.substrategy._abort).toHaveBeenCalled();
     });
 
     it("should clear the timer and not abort substrategy when waiting", function() {
-      // do not fire the connect timer
-      spyOn(window, "setTimeout").andReturn(111);
-      spyOn(window, "clearTimeout");
-
       var run = this.strategy.connect();
       expect(this.substrategy.connect).not.toHaveBeenCalled();
-
-      expect(clearTimeout).not.toHaveBeenCalled();
       run.abort();
+      jasmine.Clock.tick(10000);
       expect(this.substrategy._abort).not.toHaveBeenCalled();
-      expect(clearTimeout).toHaveBeenCalledWith(111);
+      expect(this.substrategy.connect).not.toHaveBeenCalled();
     });
   });
 });
