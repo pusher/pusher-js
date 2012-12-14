@@ -10,6 +10,8 @@
   }
   var prototype = TransportStrategy.prototype;
 
+  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
+
   prototype.name = "transport";
 
   /** Returns whether the transport is supported in the browser.

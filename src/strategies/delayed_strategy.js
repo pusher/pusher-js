@@ -4,33 +4,26 @@
    * Options:
    * - delay - time in miliseconds to delay the substrategy attempt
    *
-   * @param {Strategy} substrategy
+   * @param {Strategy} strategy
    * @param {Object} options
    */
-  function DelayedStrategy(substrategy, options) {
-    this.substrategy = substrategy;
+  function DelayedStrategy(strategy, options) {
+    Pusher.Strategy.call(this, Pusher.Strategy.filterUnsupported([strategy]));
     this.delay = options.delay;
   }
   var prototype = DelayedStrategy.prototype;
 
+  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
+
   prototype.name = "delayed";
 
-  /** Checks whether the substrategy is supported.
-   *
-   * @returns {Boolean}
-   */
-  prototype.isSupported = function() {
-    return this.substrategy.isSupported();
-  };
+  prototype.getOptions = function() {
+    return { delay: this.delay };
+  }
 
-  /** Creates an encrypted-only copy of itself, respecting the delay.
-   *
-   * @returns {DelayedStrategy}
-   */
   prototype.getEncrypted = function() {
     return new DelayedStrategy(
-      this.substrategy.getEncrypted(),
-      { delay: this.delay }
+      this.strategies[0].getEncrypted(), this.getOptions()
     );
   };
 
@@ -55,7 +48,7 @@
         return;
       }
       timer = null;
-      abort = self.substrategy.connect(callback).abort;
+      abort = self.strategies[0].connect(callback).abort;
     }, this.delay);
 
     return {

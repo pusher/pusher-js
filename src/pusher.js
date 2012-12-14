@@ -182,6 +182,45 @@
       if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
       for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
       return -1;
+    },
+
+    apply: function(array, f) {
+      for (var i = 0; i < array.length; i++) {
+        f(array[i], i, array);
+      }
+    },
+
+    map: function(array, f) {
+      var result = [];
+      for (var i = 0; i < array.length; i++) {
+        result.push(f(array[i], i, array, result));
+      }
+      return result;
+    },
+
+    filter: function(array, test) {
+      var result = [];
+      for (var i = 0; i < array.length; i++) {
+        if (test(array[i], i, array, result)) {
+          result.push(array[i]);
+        }
+      }
+      return result;
+    },
+
+    all: function(array, test) {
+      for (var i = 0; i < array.length; i++) {
+        if (!test(array[i], i, array)) {
+          return false;
+        }
+      }
+      return true;
+    },
+
+    method: function(name) {
+      return function(object) {
+        return object[name].apply(object, arguments);
+      };
     }
   };
 

@@ -21,8 +21,8 @@ describe("FirstSupportedStrategy", function() {
       .andReturn(encryptedSubstrategies[1]);
 
     var encryptedStrategy = strategy.getEncrypted(true);
-    expect(encryptedStrategy.substrategies.length).toEqual(1);
-    expect(encryptedStrategy.substrategies[0]).toBe(encryptedSubstrategies[1]);
+    expect(encryptedStrategy.strategies.length).toEqual(1);
+    expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategies[1]);
   });
 
   describe("after calling isSupported", function() {

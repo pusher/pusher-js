@@ -1,5 +1,5 @@
 ;(function() {
-  /** Loops through substrategies with optional timeouts.
+  /** Loops through strategies with optional timeouts.
    *
    * Options:
    * - loop - whether it should loop through the substrategy list
@@ -9,8 +9,8 @@
    * @param {Strategy} substrategy
    * @param {Object} options
    */
-  function SequentialStrategy(substrategies, options) {
-    Pusher.AbstractMultiStrategy.call(this, substrategies);
+  function SequentialStrategy(strategies, options) {
+    Pusher.Strategy.call(this, Pusher.Strategy.filterUnsupported(strategies));
 
     this.loop = options.loop;
     this.timeout = options.timeout;
@@ -18,24 +18,16 @@
   }
   var prototype = SequentialStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.AbstractMultiStrategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
 
   prototype.name = "seq";
 
-  /** Creates an encrypted-only copy of itself, copying all options.
-   *
-   * @returns {SequentialStrategy}
-   */
-  prototype.getEncrypted = function() {
-    var substrategies = [];
-    for (var i = 0; i < this.substrategies.length; i++) {
-      substrategies.push(this.substrategies[i].getEncrypted());
-    }
-    return new this.constructor(substrategies, {
+  prototype.getOptions = function() {
+    return {
       loop: this.loop,
       timeout: this.timeout,
       timeoutLimit: this.timeoutLimit
-    });
+    };
   };
 
   /** Launches a connection attempt and returns a strategy runner.
@@ -56,10 +48,10 @@
       } else {
         current = current + 1;
         if (self.loop) {
-          current = current % self.substrategies.length;
+          current = current % self.strategies.length;
         }
 
-        if (current < self.substrategies.length) {
+        if (current < self.strategies.length) {
           if (timeout) {
             timeout = timeout * 2;
             if (self.timeoutLimit) {
@@ -67,7 +59,7 @@
             }
           }
           runner = self.tryStrategy(
-            self.substrategies[current], timeout, tryNextStrategy
+            self.strategies[current], timeout, tryNextStrategy
           );
         } else {
           callback(true);
@@ -76,7 +68,7 @@
     };
 
     runner = this.tryStrategy(
-      this.substrategies[current], timeout, tryNextStrategy
+      this.strategies[current], timeout, tryNextStrategy
     );
 
     return {

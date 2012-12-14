@@ -4,23 +4,15 @@
    * @param {Array} substrategies
    */
   function FirstSupportedStrategy(substrategies) {
-    Pusher.FirstConnectedStrategy.call(this, substrategies);
+    Pusher.FirstConnectedStrategy.call(
+      this, Pusher.Strategy.filterUnsupported(substrategies).slice(0, 1)
+    );
   }
   var prototype = FirstSupportedStrategy.prototype;
 
   Pusher.Util.extend(prototype, Pusher.FirstConnectedStrategy.prototype);
 
   prototype.name = "first_supported";
-
-  /** @protected */
-  prototype.getSupported = function(substrategies) {
-    for (var i = 0; i < substrategies.length; i++) {
-      if (substrategies[i].isSupported()) {
-        return [substrategies[i]];
-      }
-    }
-    return [];
-  };
 
   Pusher.FirstSupportedStrategy = FirstSupportedStrategy;
 }).call(this);

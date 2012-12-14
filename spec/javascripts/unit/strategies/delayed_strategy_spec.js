@@ -20,7 +20,7 @@ describe("DelayedStrategy", function() {
       .andReturn(encryptedSubstrategy);
 
     var encryptedStrategy = strategy.getEncrypted(true);
-    expect(encryptedStrategy.substrategy).toBe(encryptedSubstrategy);
+    expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategy);
     expect(encryptedStrategy.delay).toEqual(strategy.delay);
   });
 

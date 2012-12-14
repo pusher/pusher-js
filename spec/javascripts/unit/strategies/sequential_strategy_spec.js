@@ -30,8 +30,8 @@ describe("SequentialStrategy", function() {
     expect(encryptedStrategy.loop).toBe(true);
     expect(encryptedStrategy.timeout).toEqual(1);
     expect(encryptedStrategy.timeoutLimit).toEqual(2);
-    expect(encryptedStrategy.substrategies[0]).toBe(encryptedSubstrategies[0]);
-    expect(encryptedStrategy.substrategies[1]).toBe(encryptedSubstrategies[1]);
+    expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategies[0]);
+    expect(encryptedStrategy.strategies[1]).toBe(encryptedSubstrategies[1]);
   });
 
   describe("after calling isSupported", function() {
