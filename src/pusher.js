@@ -131,6 +131,20 @@
   };
 
   Pusher.Util = {
+    /** Merges multiple objects into the target argument.
+     *
+     * For properties that are plain Objects, performs a deep-merge. For the
+     * rest it just copies the value of the property.
+     *
+     * To extend prototypes use it as following:
+     *   Pusher.Util.extend(Target.prototype, Base.prototype)
+     *
+     * You can also use it to merge objects without altering them:
+     *   Pusher.Util.extend({}, object1, object2)
+     *
+     * @param  {Object} target
+     * @return {Object} the target argument
+     */
     extend: function extend(target) {
       for (var i = 1; i < arguments.length; i++) {
         var extensions = arguments[i];
