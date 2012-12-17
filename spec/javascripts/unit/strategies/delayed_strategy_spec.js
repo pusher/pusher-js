@@ -21,7 +21,7 @@ describe("DelayedStrategy", function() {
 
     var encryptedStrategy = strategy.getEncrypted(true);
     expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategy);
-    expect(encryptedStrategy.delay).toEqual(strategy.delay);
+    expect(encryptedStrategy.getOptions().delay).toEqual(1);
   });
 
   describe("after calling isSupported", function() {

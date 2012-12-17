@@ -7,14 +7,15 @@
    * @param {Array} strategies
    */
   function FirstConnectedStrategy(strategies) {
-    Pusher.Strategy.call(this, Pusher.Strategy.filterUnsupported(strategies));
+    Pusher.MultiStrategy.call(this, strategies);
   }
   var prototype = FirstConnectedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
   prototype.name = "first_connected";
 
+  /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
     if (!this.isSupported()) {
       return null;

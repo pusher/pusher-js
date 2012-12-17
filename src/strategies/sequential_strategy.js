@@ -10,36 +10,24 @@
    * @param {Object} options
    */
   function SequentialStrategy(strategies, options) {
-    Pusher.Strategy.call(this, Pusher.Strategy.filterUnsupported(strategies));
-
-    this.loop = options.loop;
-    this.timeout = options.timeout;
-    this.timeoutLimit = options.timeoutLimit;
+    Pusher.MultiStrategy.call(this, strategies, {
+      loop: options.loop,
+      timeout: options.timeout,
+      timeoutLimit: options.timeoutLimit
+    });
   }
   var prototype = SequentialStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
   prototype.name = "seq";
 
-  prototype.getOptions = function() {
-    return {
-      loop: this.loop,
-      timeout: this.timeout,
-      timeoutLimit: this.timeoutLimit
-    };
-  };
-
-  /** Launches a connection attempt and returns a strategy runner.
-   *
-   * @param  {Function} callback
-   * @return {Object} strategy runner
-   */
+  /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
     var self = this;
 
     var current = 0;
-    var timeout = self.timeout;
+    var timeout = this.options.timeout;
     var runner = null;
 
     var tryNextStrategy = function(error, connection) {
@@ -47,15 +35,15 @@
         callback(null, connection);
       } else {
         current = current + 1;
-        if (self.loop) {
+        if (self.options.loop) {
           current = current % self.strategies.length;
         }
 
         if (current < self.strategies.length) {
           if (timeout) {
             timeout = timeout * 2;
-            if (self.timeoutLimit) {
-              timeout = Math.min(timeout, self.timeoutLimit);
+            if (self.options.timeoutLimit) {
+              timeout = Math.min(timeout, self.options.timeoutLimit);
             }
           }
           runner = self.tryStrategy(

@@ -9,7 +9,7 @@ describe("StrategyBuilder", function() {
 
     expect(strategy).toEqual(jasmine.any(Pusher.TransportStrategy));
     expect(strategy.transport).toBe(Pusher.WSTransport);
-    expect(strategy.options).toEqual({
+    expect(strategy.getOptions()).toEqual({
       option: "value"
     });
   });
@@ -29,8 +29,8 @@ describe("StrategyBuilder", function() {
     expect(strategy).toEqual(jasmine.any(Pusher.DelayedStrategy));
     expect(strategy.strategies[0]).toEqual(jasmine.any(Pusher.TransportStrategy));
 
-    expect(strategy.delay).toEqual(2000);
-    expect(strategy.strategies[0].options).toEqual({
+    expect(strategy.getOptions().delay).toEqual(2000);
+    expect(strategy.strategies[0].getOptions()).toEqual({
       option: "value",
       delay: 2000
     });
@@ -66,17 +66,17 @@ describe("StrategyBuilder", function() {
       .toEqual(jasmine.any(Pusher.TransportStrategy));
     expect(strategy.strategies[1].transport).toBe(Pusher.SockJSTransport);
 
-    expect(strategy.loop).toBe(true);
-    expect(strategy.timeout).toEqual(2000);
-    expect(strategy.timeoutLimit).toEqual(8000);
+    expect(strategy.getOptions().loop).toBe(true);
+    expect(strategy.getOptions().timeout).toEqual(2000);
+    expect(strategy.getOptions().timeoutLimit).toEqual(8000);
 
-    expect(strategy.strategies[0].options).toEqual({
+    expect(strategy.strategies[0].getOptions()).toEqual({
       host: "ws.pusherapp.com",
       loop: true,
       timeout: 2000,
       timeoutLimit: 8000
     });
-    expect(strategy.strategies[1].options).toEqual({
+    expect(strategy.strategies[1].getOptions()).toEqual({
       host: "sockjs.pusher.com",
       loop: true,
       timeout: 2000,

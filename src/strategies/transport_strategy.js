@@ -10,8 +10,6 @@
   }
   var prototype = TransportStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
-
   prototype.name = "transport";
 
   /** Returns whether the transport is supported in the browser.
@@ -31,6 +29,14 @@
       this.transport,
       Pusher.Util.extend(this.options, { encrypted: true })
     );
+  };
+
+  /** Returns an object with strategy's options
+   *
+   * @returns {Object}
+   */
+  prototype.getOptions = function() {
+    return this.options;
   };
 
   /** Launches a connection attempt and returns a strategy runner.

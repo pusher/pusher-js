@@ -17,7 +17,8 @@ bundle 'pusher.js' do
   file 'dependency_loader.js'
   file 'dependencies.js'
 
-  file 'strategies/abstract_multi_strategy.js'
+  file 'strategies/multi_strategy.js'
+  file 'strategies/parallel_strategy.js'
   file 'strategies/delayed_strategy.js'
   file 'strategies/first_connected_strategy.js'
   file 'strategies/best_connected_ever_strategy.js'

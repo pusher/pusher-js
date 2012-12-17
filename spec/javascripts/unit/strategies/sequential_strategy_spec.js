@@ -27,9 +27,9 @@ describe("SequentialStrategy", function() {
 
     var encryptedStrategy = strategy.getEncrypted(true);
 
-    expect(encryptedStrategy.loop).toBe(true);
-    expect(encryptedStrategy.timeout).toEqual(1);
-    expect(encryptedStrategy.timeoutLimit).toEqual(2);
+    expect(encryptedStrategy.getOptions().loop).toBe(true);
+    expect(encryptedStrategy.getOptions().timeout).toEqual(1);
+    expect(encryptedStrategy.getOptions().timeoutLimit).toEqual(2);
     expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategies[0]);
     expect(encryptedStrategy.strategies[1]).toBe(encryptedSubstrategies[1]);
   });

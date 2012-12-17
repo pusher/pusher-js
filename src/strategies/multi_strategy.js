@@ -1,14 +1,15 @@
 ;(function() {
-  /** Base class for all strategies.
+  /** Base class for all non-transport strategies.
    *
    * @param {Array} substrategies list of children strategies
    */
-  function Strategy(strategies) {
-    this.strategies = strategies;
+  function MultiStrategy(strategies, options) {
+    this.strategies = Pusher.MultiStrategy.filterUnsupported(strategies);
+    this.options = options || {};
   }
-  var prototype = Strategy.prototype;
+  var prototype = MultiStrategy.prototype;
 
-  Strategy.filterUnsupported = function(strategies) {
+  MultiStrategy.filterUnsupported = function(strategies) {
     return Pusher.Util.filter(strategies, Pusher.Util.method("isSupported"));
   };
 
@@ -22,7 +23,7 @@
 
   /** Makes an encrypted-only copy of itself.
    *
-   * @returns {AbstractMultiStrategy}
+   * @returns {MultiStrategy}
    */
   prototype.getEncrypted = function() {
     return new this.constructor(
@@ -31,9 +32,13 @@
     );
   };
 
+  /** Returns an object with strategy's options
+   *
+   * @returns {Object}
+   */
   prototype.getOptions = function() {
-    return {};
+    return this.options;
   };
 
-  Pusher.Strategy = Strategy;
+  Pusher.MultiStrategy = MultiStrategy;
 }).call(this);

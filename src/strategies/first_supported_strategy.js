@@ -5,7 +5,7 @@
    */
   function FirstSupportedStrategy(substrategies) {
     Pusher.FirstConnectedStrategy.call(
-      this, Pusher.Strategy.filterUnsupported(substrategies).slice(0, 1)
+      this, Pusher.MultiStrategy.filterUnsupported(substrategies).slice(0, 1)
     );
   }
   var prototype = FirstSupportedStrategy.prototype;

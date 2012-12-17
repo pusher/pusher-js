@@ -184,12 +184,33 @@
       return -1;
     },
 
+    /** Applies a function f to all elements of an array.
+     *
+     * Function f gets 3 arguments passed:
+     * - element from the array
+     * - index of the element
+     * - reference to the array
+     *
+     * @param {Array} array
+     * @param {Function} f
+     */
     apply: function(array, f) {
       for (var i = 0; i < array.length; i++) {
         f(array[i], i, array);
       }
     },
 
+    /** Maps all elements of the array and returns the result.
+     *
+     * Function f gets 4 arguments passed:
+     * - element from the array
+     * - index of the element
+     * - reference to the source array
+     * - reference to the destination array
+     *
+     * @param {Array} array
+     * @param {Function} f
+     */
     map: function(array, f) {
       var result = [];
       for (var i = 0; i < array.length; i++) {
@@ -198,6 +219,17 @@
       return result;
     },
 
+    /** Filters elements of the array using a test function.
+     *
+     * Function test gets 4 arguments passed:
+     * - element from the array
+     * - index of the element
+     * - reference to the source array
+     * - reference to the destination array
+     *
+     * @param {Array} array
+     * @param {Function} f
+     */
     filter: function(array, test) {
       var result = [];
       for (var i = 0; i < array.length; i++) {
@@ -208,6 +240,16 @@
       return result;
     },
 
+    /** Checks whether all elements of the array pass the test.
+     *
+     * Function test gets 3 arguments passed:
+     * - element from the array
+     * - index of the element
+     * - reference to the source array
+     *
+     * @param {Array} array
+     * @param {Function} f
+     */
     all: function(array, test) {
       for (var i = 0; i < array.length; i++) {
         if (!test(array[i], i, array)) {
@@ -217,6 +259,11 @@
       return true;
     },
 
+    /** Builds a function that will proxy a method call to its first argument.
+     *
+     * @param  {String} name method name
+     * @return {Function} proxy function
+     */
     method: function(name) {
       return function(object) {
         return object[name].apply(object, arguments);

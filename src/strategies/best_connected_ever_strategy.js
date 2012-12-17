@@ -10,14 +10,15 @@
    * @param {Array} substrategies
    */
   function BestConnectedEverStrategy(strategies) {
-    Pusher.Strategy.call(this, strategies);
+    Pusher.MultiStrategy.call(this, strategies);
   }
   var prototype = BestConnectedEverStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.Strategy.prototype);
+  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
   prototype.name = "best_connected_ever";
 
+  /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
     if (!this.isSupported()) {
       return null;

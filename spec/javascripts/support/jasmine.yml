@@ -8,7 +8,7 @@ src_files:
   - pusher_event_dispatcher.js
   - net_info.js
 
-  - strategies/strategy.js
+  - strategies/multi_strategy.js
   - strategies/parallel_strategy.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js
