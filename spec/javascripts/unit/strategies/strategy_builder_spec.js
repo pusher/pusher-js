@@ -2,13 +2,13 @@ describe("StrategyBuilder", function() {
   it("should construct a transport strategy", function() {
     var strategy = Pusher.StrategyBuilder.build(
       { type: "transport",
-        transport: "ws",
+        transport: "sockjs",
         option: "value"
       }
     );
 
     expect(strategy).toEqual(jasmine.any(Pusher.TransportStrategy));
-    expect(strategy.transport).toBe(Pusher.WSTransport);
+    expect(strategy.transport).toBe(Pusher.SockJSTransport);
     expect(strategy.getOptions()).toEqual({
       option: "value"
     });
@@ -19,7 +19,7 @@ describe("StrategyBuilder", function() {
       { type: "delayed",
         child: {
           type: "transport",
-          transport: "ws",
+          transport: "sockjs",
           option: "value"
         },
         delay: 2000
