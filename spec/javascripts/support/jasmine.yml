@@ -1,0 +1,28 @@
+src_dir: src
+
+src_files:
+  - pusher.js
+  - errors.js
+  - dependency_loader.js
+  - dependencies.js
+  - pusher_event_dispatcher.js
+  - net_info.js
+
+  - strategies/multi_strategy.js
+  - strategies/parallel_strategy.js
+  - strategies/delayed_strategy.js
+  - strategies/first_connected_strategy.js
+  - strategies/best_connected_ever_strategy.js
+  - strategies/first_supported_strategy.js
+  - strategies/sequential_strategy.js
+  - strategies/transport_strategy.js
+
+  - transports/abstract_transport.js
+  - transports/flash_transport.js
+  - transports/sockjs_transport.js
+  - transports/ws_transport.js
+
+  - strategies/strategy_builder.js
+
+  - connection/protocol_wrapper.js
+  - connection/connection_manager.js

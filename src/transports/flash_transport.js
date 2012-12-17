@@ -1,0 +1,68 @@
+;(function() {
+  /** Transport using Flash to emulate WebSockets.
+   *
+   * @see AbstractTransport
+   */
+  function FlashTransport(key, options) {
+    Pusher.AbstractTransport.call(this, key, options);
+  }
+  var prototype = FlashTransport.prototype;
+
+  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
+
+  prototype.name = "flash";
+
+  /** Creates a new instance of FlashTransport.
+   *
+   * @param  {String} key
+   * @param  {Object} options
+   * @return {FlashTransport}
+   */
+  FlashTransport.createConnection = function(key, options) {
+    return new FlashTransport(key, options);
+  };
+
+  /** Checks whether Flash is supported in the browser.
+   *
+   * @see AbstractTransport.isSupported
+   * @returns {Boolean}
+   */
+  FlashTransport.isSupported = function() {
+    return navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
+  };
+
+  /** Fetches flashfallback dependency if needed.
+   *
+   * Sets WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR to true (if not set before)
+   * and WEB_SOCKET_SWF_LOCATION to Pusher's cdn before loading Flash resources.
+   *
+   * @see AbstractTransport.prototype.initialize
+   */
+  prototype.initialize = function() {
+    var self = this;
+
+    this.changeState("initializing");
+
+    if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
+      window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
+    }
+    window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
+      "/WebSocketMain.swf";
+    Pusher.Dependencies.load("flashfallback", function() {
+      self.changeState("initialized");
+    });
+  };
+
+  /** @protected */
+  prototype.createSocket = function(url) {
+    return new WebSocket(url);
+  };
+
+  /** @protected */
+  prototype.getQueryString = function() {
+    return Pusher.AbstractTransport.prototype.getQueryString.call(this) +
+      "&flash=true";
+  };
+
+  Pusher.FlashTransport = FlashTransport;
+}).call(this);

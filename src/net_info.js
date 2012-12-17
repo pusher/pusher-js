@@ -1,27 +1,37 @@
 ;(function() {
-  /*
-    A little bauble to interface with window.navigator.onLine,
-    window.ononline and window.onoffline.  Easier to mock.
-  */
-
-  var NetInfo = function() {
-    var self = this;
+  /** Really basic interface providing network availability info.
+   *
+   * Emits:
+   * - online - when browser goes online
+   * - offline - when browser goes offline
+   */
+  function NetInfo() {
     Pusher.EventsDispatcher.call(this);
+
+    var self = this;
     // This is okay, as IE doesn't support this stuff anyway.
     if (window.addEventListener !== undefined) {
       window.addEventListener("online", function() {
-        self.emit('online', null);
+        self.emit('online');
       }, false);
       window.addEventListener("offline", function() {
-        self.emit('offline', null);
+        self.emit('offline');
       }, false);
     }
-  };
+  }
+  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
 
-  // Offline means definitely offline (no connection to router).
-  // Inverse does NOT mean definitely online (only currently supported in Safari
-  // and even there only means the device has a connection to the router).
-  NetInfo.prototype.isOnLine = function() {
+  var prototype = NetInfo.prototype;
+
+  /** Returns whether browser is online or not
+   *
+   * Offline means definitely offline (no connection to router).
+   * Inverse does NOT mean definitely online (only currently supported in Safari
+   * and even there only means the device has a connection to the router).
+   *
+   * @return {Boolean}
+   */
+  prototype.isOnline = function() {
     if (window.navigator.onLine === undefined) {
       return true;
     } else {
@@ -29,7 +39,6 @@
     }
   };
 
-  Pusher.Util.extend(NetInfo.prototype, Pusher.EventsDispatcher.prototype);
-
-  this.Pusher.NetInfo = NetInfo;
+  Pusher.NetInfo = NetInfo;
+  Pusher.Network = new NetInfo();
 }).call(this);
