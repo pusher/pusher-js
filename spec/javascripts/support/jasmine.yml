@@ -7,6 +7,8 @@ src_files:
   - dependencies.js
   - pusher_event_dispatcher.js
   - net_info.js
+  - jsonp/jsonp_request.js
+  - jsonp/jsonp_handler.js
 
   - strategies/multi_strategy.js
   - strategies/parallel_strategy.js
