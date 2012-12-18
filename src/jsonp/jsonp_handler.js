@@ -9,6 +9,8 @@
   var prototype = JSONPHandler.prototype;
 
   prototype.send = function(data, callback) {
+    this.index++;
+
     var id = this.index;
     var request = new Pusher.JSONPRequest(id, this.options);
 

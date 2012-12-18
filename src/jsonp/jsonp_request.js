@@ -1,7 +1,7 @@
 (function() {
 
   function JSONPRequest(id, options) {
-    this.id = 0;
+    this.id = id;
     this.options = options;
   }
 
