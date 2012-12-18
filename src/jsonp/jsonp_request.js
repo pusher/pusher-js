@@ -11,9 +11,9 @@
     var params = Pusher.Util.extend(
       {}, data, { receiver: this.options.receiver }
     );
-    var query = Pusher.Util.map(Pusher.Util.flatten(params), function(pair) {
-      return pair[0] + "=" + encodeValue(pair[1]);
-    }).join("&");
+    var query = Pusher.Util.map(
+      Pusher.Util.flatten(encodeData(params)), Pusher.Util.method("join", "=")
+    ).join("&");
 
     var script = document.createElement("script");
     script.id = this.options.prefix + this.id;
@@ -27,20 +27,21 @@
     return true;
   };
 
+  function encodeData(data, path) {
+    var result = {};
 
-  function encodeValue(value) {
-    if (typeof value === "object") {
-      value = JSON.stringify(value);
+    if (typeof data === "object") {
+      Pusher.Util.objectApply(data, function(value, key) {
+        Pusher.Util.extend(
+          result,
+          encodeData(value, Pusher.Util.filter([path, key]).join("."))
+        );
+      });
+    } else if (data !== undefined) {
+      result[path] = encodeURIComponent(data.toString());
     }
-    return encodeURIComponent(value);
-  }
 
-  function decodeValue(value) {
-    try {
-      return JSON.parse(value);
-    } catch(e) {
-      return value;
-    }
+    return result;
   }
 
   Pusher.JSONPRequest = JSONPRequest;
