@@ -1,12 +1,14 @@
 ;(function() {
   if (Function.prototype.scopedTo === undefined) {
-    Function.prototype.scopedTo = function(context, args) {
+    var scopedTo = function(context, args) {
       var f = this;
       return function() {
         return f.apply(context, Array.prototype.slice.call(args || [])
                        .concat(Array.prototype.slice.call(arguments)));
       };
     };
+    Object.defineProperty ? Object.defineProperty(Function.prototype,"scopedTo",{value: scopedTo}) :
+                            Function.prototype.scopedTo = scopedTo; 
   }
 
   var Pusher = function(app_key, options) {
