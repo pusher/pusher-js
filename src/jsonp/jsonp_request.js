@@ -27,9 +27,6 @@
     return true;
   };
 
-  prototype.receive = function(error, result, callback) {
-    callback(error, Pusher.Util.mapObject(result, decodeValue));
-  }
 
   function encodeValue(value) {
     if (typeof value === "object") {

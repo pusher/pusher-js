@@ -13,10 +13,7 @@
 
     var id = this.index;
     var request = new Pusher.JSONPRequest(id, this.options);
-
-    this.callbacks[id] = function(error, result) {
-      request.receive(error, result, callback);
-    };
+    this.callbacks[id] = callback;
 
     request.send(data);
   };
@@ -31,8 +28,7 @@
   Pusher.JSONPHandler = JSONPHandler;
   Pusher.JSONP = new JSONPHandler({
     url: "http://localhost:4567/jsonp",
-    prefix: "_pusher_jsonp_",
-    receiver: "Pusher.JSONP.receive"
+    prefix: "_pusher_jsonp_"
   });
 
 }).call(this);
