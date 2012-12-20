@@ -13,9 +13,13 @@
 
     var id = this.index;
     var request = new Pusher.JSONPRequest(id, this.options);
-    this.callbacks[id] = callback;
 
-    request.send(data);
+    this.callbacks[id] = function(error, result) {
+      runner.cleanup();
+      callback(error, result);
+    };
+
+    var runner = request.send(data);
   };
 
   prototype.receive = function(id, data) {

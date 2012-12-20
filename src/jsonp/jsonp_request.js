@@ -26,12 +26,17 @@
     script.id = this.options.prefix + this.id;
     script.src = this.options.url + "/" + this.id + "?" + query;
     script.type = "text/javascript";
+    script.async = true;
     script.charset = "UTF-8";
 
     var head = document.getElementsByTagName('head')[0];
     head.insertBefore(script, head.firstChild);
 
-    return true;
+    return {
+      cleanup: function() {
+        script.parentNode.removeChild(script);
+      }
+    };
   };
 
   function encodeData(data) {
