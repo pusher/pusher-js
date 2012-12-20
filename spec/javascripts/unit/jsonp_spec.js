@@ -61,4 +61,21 @@ describe("JSONPHandler", function() {
       });
     });
   });
+
+  it("should clean up after receiving a response", function() {
+    var responded = false;
+    runs(function() {
+      expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
+      this.handler.send({}, function(_, _) {
+        responded = true;
+      });
+      expect(document.getElementById("_pusher_jsonp_jasmine_1")).not.toBe(null);
+    });
+    waitsFor(function() {
+      return responded;
+    }, "JSONP to respond", 2000);
+    runs(function() {
+      expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
+    });
+  });
 });
