@@ -30,3 +30,8 @@ get '/jsonp/:id' do
 
   "#{receiver}(#{params[:id]}, #{JSON.generate(decoded_params)});"
 end
+
+get '/parse_error/:id' do
+  content_type 'text/javascript', :charset => 'utf-8'
+  "not really javascript"
+end

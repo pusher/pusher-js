@@ -69,7 +69,6 @@ describe("JSONPHandler", function() {
       this.handler.send({}, function(_, _) {
         responded = true;
       });
-      expect(document.getElementById("_pusher_jsonp_jasmine_1")).not.toBe(null);
     });
     waitsFor(function() {
       return responded;
@@ -77,5 +76,45 @@ describe("JSONPHandler", function() {
     runs(function() {
       expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
     });
+  });
+
+  it("should fail on malformed response", function() {
+    var handler = new Pusher.JSONPHandler({
+      url: "http://localhost:8889/parse_error",
+      prefix: "_pusher_jsonp_jasmine_",
+      receiver: "Pusher.Mocks.JSONP.receive"
+    });
+
+    var responded = false;
+    runs(function() {
+      handler.send({}, function(error, result) {
+        expect(error).not.toBe(null);
+        expect(result).toBe(undefined);
+        responded = true;
+      });
+    });
+    waitsFor(function() {
+      return responded;
+    }, "JSONP to respond", 2000);
+  });
+
+  it("should fail on 404 response", function() {
+    var handler = new Pusher.JSONPHandler({
+      url: "http://localhost:8889/404",
+      prefix: "_pusher_jsonp_jasmine_",
+      receiver: "Pusher.Mocks.JSONP.receive"
+    });
+
+    var responded = false;
+    runs(function() {
+      handler.send({}, function(error, result) {
+        expect(error).not.toBe(null);
+        expect(result).toBe(undefined);
+        responded = true;
+      });
+    });
+    waitsFor(function() {
+      return responded;
+    }, "JSONP to fail", 2000);
   });
 });

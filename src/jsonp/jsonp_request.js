@@ -7,7 +7,11 @@
 
   var prototype = JSONPRequest.prototype;
 
-  prototype.send = function(data) {
+  prototype.send = function(data, callback) {
+    if (this.script) {
+      return false;
+    }
+
     var params = Pusher.Util.extend(
       {}, data, { receiver: this.options.receiver }
     );
@@ -22,21 +26,25 @@
       Pusher.Util.method("join", "=")
     ).join("&");
 
-    var script = document.createElement("script");
-    script.id = this.options.prefix + this.id;
-    script.src = this.options.url + "/" + this.id + "?" + query;
-    script.type = "text/javascript";
-    script.async = true;
-    script.charset = "UTF-8";
+    this.script = document.createElement("script");
+    this.script.id = this.options.prefix + this.id;
+    this.script.src = this.options.url + "/" + this.id + "?" + query;
+    this.script.type = "text/javascript";
+    this.script.async = true;
+    this.script.charset = "UTF-8";
+    this.script.onerror = this.script.onload = callback;
 
     var head = document.getElementsByTagName('head')[0];
-    head.insertBefore(script, head.firstChild);
+    head.insertBefore(this.script, head.firstChild);
 
-    return {
-      cleanup: function() {
-        script.parentNode.removeChild(script);
-      }
-    };
+    return true;
+  };
+
+  prototype.cleanup = function() {
+    if (this.script && this.script.parentNode) {
+      this.script.parentNode.removeChild(this.script);
+      this.script = null;
+    }
   };
 
   function encodeData(data) {

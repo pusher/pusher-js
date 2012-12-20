@@ -11,15 +11,22 @@
   prototype.send = function(data, callback) {
     this.index++;
 
+    var self = this;
     var id = this.index;
     var request = new Pusher.JSONPRequest(id, this.options);
+    var runner;
 
     this.callbacks[id] = function(error, result) {
-      runner.cleanup();
+      request.cleanup();
       callback(error, result);
     };
 
-    var runner = request.send(data);
+    request.send(data, function(error) {
+      if (self.callbacks[id]) {
+        self.callbacks[id](error);
+        delete self.callbacks[id];
+      }
+    });
   };
 
   prototype.receive = function(id, data) {
