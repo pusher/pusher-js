@@ -383,6 +383,8 @@
   Pusher.sockjs_http_port = 80
   Pusher.sockjs_https_port = 443
   Pusher.sockjs_path = "/pusher"
+  // Stats
+  Pusher.stats_host = 'stats.pusher.com';
   // Other settings
   Pusher.channel_auth_endpoint = '/pusher/auth';
   Pusher.cdn_http = '<CDN_HTTP>'
