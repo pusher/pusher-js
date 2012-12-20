@@ -12,7 +12,14 @@
       {}, data, { receiver: this.options.receiver }
     );
     var query = Pusher.Util.map(
-      Pusher.Util.flatten(encodeData(params)), Pusher.Util.method("join", "=")
+      Pusher.Util.flatten(
+        encodeData(
+          Pusher.Util.filterObject(params, function(value) {
+            return value !== undefined;
+          })
+        )
+      ),
+      Pusher.Util.method("join", "=")
     ).join("&");
 
     var script = document.createElement("script");
@@ -27,21 +34,13 @@
     return true;
   };
 
-  function encodeData(data, path) {
-    var result = {};
-
-    if (typeof data === "object") {
-      Pusher.Util.objectApply(data, function(value, key) {
-        Pusher.Util.extend(
-          result,
-          encodeData(value, Pusher.Util.filter([path, key]).join("."))
-        );
-      });
-    } else if (data !== undefined) {
-      result[path] = encodeURIComponent(data.toString());
-    }
-
-    return result;
+  function encodeData(data) {
+    return Pusher.Util.mapObject(data, function(value) {
+      if (typeof value === "object") {
+        value = JSON.stringify(value);
+      }
+      return encodeURIComponent(Pusher.Base64.encode(value.toString()));
+    });
   }
 
   Pusher.JSONPRequest = JSONPRequest;
