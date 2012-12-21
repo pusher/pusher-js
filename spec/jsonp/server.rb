@@ -12,6 +12,7 @@ def decode(value)
 end
 
 get '/jsonp/:id' do
+  cache_control :private, :must_revalidate, :max_age => 0
   content_type 'text/javascript', :charset => 'utf-8'
 
   decoded_params = Hash[
@@ -28,10 +29,9 @@ get '/jsonp/:id' do
     "Pusher.JSONP.receive";
   end
 
-  "#{receiver}(#{params[:id]}, #{JSON.generate(decoded_params)});"
+  "#{receiver}(#{params[:id]}, null, #{JSON.generate(decoded_params)});"
 end
 
-get '/parse_error/:id' do
-  content_type 'text/javascript', :charset => 'utf-8'
-  "not really javascript"
+get '/500' do
+  status 500
 end

@@ -7,8 +7,8 @@ describe("JSONPHandler", function() {
       prefix: "_pusher_jsonp_jasmine_",
       receiver: "Pusher.Mocks.JSONP.receive"
     });
-    spyOn(Pusher.Mocks.JSONP, "receive").andCallFake(function(id, data) {
-      self.handler.receive(id, data);
+    spyOn(Pusher.Mocks.JSONP, "receive").andCallFake(function(id, error, data) {
+      self.handler.receive(id, error, data);
     });
   });
 
@@ -66,6 +66,7 @@ describe("JSONPHandler", function() {
     var responded = false;
     runs(function() {
       expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
+      expect(document.getElementById("_pusher_jsonp_jasmine_1_error")).toBe(null);
       this.handler.send({}, function(_, _) {
         responded = true;
       });
@@ -75,31 +76,12 @@ describe("JSONPHandler", function() {
     }, "JSONP to respond", 2000);
     runs(function() {
       expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
+      expect(document.getElementById("_pusher_jsonp_jasmine_1_error")).toBe(null);
     });
-  });
-
-  it("should fail on malformed response", function() {
-    var handler = new Pusher.JSONPHandler({
-      url: "http://localhost:8889/parse_error",
-      prefix: "_pusher_jsonp_jasmine_",
-      receiver: "Pusher.Mocks.JSONP.receive"
-    });
-
-    var responded = false;
-    runs(function() {
-      handler.send({}, function(error, result) {
-        expect(error).not.toBe(null);
-        expect(result).toBe(undefined);
-        responded = true;
-      });
-    });
-    waitsFor(function() {
-      return responded;
-    }, "JSONP to respond", 2000);
   });
 
   it("should fail on 404 response", function() {
-    var handler = new Pusher.JSONPHandler({
+    this.handler = new Pusher.JSONPHandler({
       url: "http://localhost:8889/404",
       prefix: "_pusher_jsonp_jasmine_",
       receiver: "Pusher.Mocks.JSONP.receive"
@@ -107,7 +89,28 @@ describe("JSONPHandler", function() {
 
     var responded = false;
     runs(function() {
-      handler.send({}, function(error, result) {
+      this.handler.send({}, function(error, result) {
+        expect(error).not.toBe(null);
+        expect(result).toBe(undefined);
+        responded = true;
+      });
+    });
+    waitsFor(function() {
+      return responded;
+    }, "JSONP to fail", 2000);
+  });
+
+
+  it("should fail on 500 response", function() {
+    this.handler = new Pusher.JSONPHandler({
+      url: "http://localhost:8889/500",
+      prefix: "_pusher_jsonp_jasmine_",
+      receiver: "Pusher.Mocks.JSONP.receive"
+    });
+
+    var responded = false;
+    runs(function() {
+      this.handler.send({}, function(error, result) {
         expect(error).not.toBe(null);
         expect(result).toBe(undefined);
         responded = true;

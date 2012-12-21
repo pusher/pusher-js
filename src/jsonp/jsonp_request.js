@@ -30,12 +30,30 @@
     this.script.id = this.options.prefix + this.id;
     this.script.src = this.options.url + "/" + this.id + "?" + query;
     this.script.type = "text/javascript";
-    this.script.async = true;
     this.script.charset = "UTF-8";
     this.script.onerror = this.script.onload = callback;
 
+    // Opera<11.6 hack for missing onerror callback
+    if (this.script.async === undefined && document.attachEvent) {
+      if (/opera/i.test(navigator.userAgent)) {
+        this.errorScript = document.createElement("script");
+        this.errorScript.text = this.options.receiver + "(" + this.id + ", true);";
+        this.script.async = this.errorScript.async = false;
+      }
+    }
+
+    var self = this;
+    this.script.onreadystatechange = function() {
+      if (self.script && /loaded|complete/.test(self.script.readyState)) {
+        callback(true);
+      }
+    };
+
     var head = document.getElementsByTagName('head')[0];
     head.insertBefore(this.script, head.firstChild);
+    if (this.errorScript) {
+      head.insertBefore(this.errorScript, this.script.nextSibling);
+    }
 
     return true;
   };
@@ -44,6 +62,10 @@
     if (this.script && this.script.parentNode) {
       this.script.parentNode.removeChild(this.script);
       this.script = null;
+    }
+    if (this.errorScript && this.errorScript.parentNode) {
+      this.errorScript.parentNode.removeChild(this.errorScript);
+      this.errorScript = null;
     }
   };
 

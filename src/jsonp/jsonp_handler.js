@@ -29,9 +29,9 @@
     });
   };
 
-  prototype.receive = function(id, data) {
+  prototype.receive = function(id, error, data) {
     if (this.callbacks[id]) {
-      this.callbacks[id](null, data);
+      this.callbacks[id](error, data);
       delete this.callbacks[id];
     }
   };
