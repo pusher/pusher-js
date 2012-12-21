@@ -1,16 +1,17 @@
 (function() {
 
-  function JSONPRequest(id, options) {
-    this.id = id;
+  function JSONPRequest(options) {
     this.options = options;
   }
 
   var prototype = JSONPRequest.prototype;
 
-  prototype.send = function(data, callback) {
+  prototype.send = function(id, data, callback) {
     if (this.script) {
       return false;
     }
+
+    var tagPrefix = this.options.tagPrefix || "_pusher_jsonp_";
 
     var params = Pusher.Util.extend(
       {}, data, { receiver: this.options.receiver }
@@ -27,8 +28,8 @@
     ).join("&");
 
     this.script = document.createElement("script");
-    this.script.id = this.options.prefix + this.id;
-    this.script.src = this.options.url + "/" + this.id + "?" + query;
+    this.script.id = tagPrefix + id;
+    this.script.src = this.options.url + "/" + id + "?" + query;
     this.script.type = "text/javascript";
     this.script.charset = "UTF-8";
     this.script.onerror = this.script.onload = callback;
@@ -36,8 +37,9 @@
     // Opera<11.6 hack for missing onerror callback
     if (this.script.async === undefined && document.attachEvent) {
       if (/opera/i.test(navigator.userAgent)) {
+        var receiverName = this.options.receiver || "Pusher.JSONP.receive";
         this.errorScript = document.createElement("script");
-        this.errorScript.text = this.options.receiver + "(" + this.id + ", true);";
+        this.errorScript.text = receiverName + "(" + id + ", true);";
         this.script.async = this.errorScript.async = false;
       }
     }

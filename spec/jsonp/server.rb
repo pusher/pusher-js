@@ -32,6 +32,6 @@ get '/jsonp/:id' do
   "#{receiver}(#{params[:id]}, null, #{JSON.generate(decoded_params)});"
 end
 
-get '/500' do
+get '/500/:id' do
   status 500
 end
