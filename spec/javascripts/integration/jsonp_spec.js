@@ -1,14 +1,11 @@
-describe("JSONPHandler", function() {
+describe("JSONP", function() {
   beforeEach(function() {
     var self = this;
 
-    this.handler = new Pusher.JSONPHandler({
+    this.sender = new Pusher.JSONPSender({
       url: "http://localhost:8889/jsonp",
-      prefix: "_pusher_jsonp_jasmine_",
-      receiver: "Pusher.Mocks.JSONP.receive"
-    });
-    spyOn(Pusher.Mocks.JSONP, "receive").andCallFake(function(id, error, data) {
-      self.handler.receive(id, error, data);
+      receiver: Pusher.JSONP,
+      tagPrefix: "_pusher_jsonp_jasmine_"
     });
   });
 
@@ -16,7 +13,7 @@ describe("JSONPHandler", function() {
     var response;
 
     runs(function() {
-      this.handler.send(
+      this.sender.send(
         { "session": 2289545,
           "features": ["ws", "flash", "sockjs"],
           "version": "1.13.0",
@@ -67,7 +64,7 @@ describe("JSONPHandler", function() {
     runs(function() {
       expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
       expect(document.getElementById("_pusher_jsonp_jasmine_1_error")).toBe(null);
-      this.handler.send({}, function(_, _) {
+      this.sender.send({}, function(_, _) {
         responded = true;
       });
     });
@@ -81,15 +78,15 @@ describe("JSONPHandler", function() {
   });
 
   it("should fail on 404 response", function() {
-    this.handler = new Pusher.JSONPHandler({
+    this.sender = new Pusher.JSONPSender({
       url: "http://localhost:8889/404",
-      prefix: "_pusher_jsonp_jasmine_",
-      receiver: "Pusher.Mocks.JSONP.receive"
+      receiver: Pusher.JSONP,
+      tagPrefix: "_pusher_jsonp_jasmine_"
     });
 
     var responded = false;
     runs(function() {
-      this.handler.send({}, function(error, result) {
+      this.sender.send({}, function(error, result) {
         expect(error).not.toBe(null);
         expect(result).toBe(undefined);
         responded = true;
@@ -102,15 +99,15 @@ describe("JSONPHandler", function() {
 
 
   it("should fail on 500 response", function() {
-    this.handler = new Pusher.JSONPHandler({
+    this.sender = new Pusher.JSONPSender({
       url: "http://localhost:8889/500",
-      prefix: "_pusher_jsonp_jasmine_",
-      receiver: "Pusher.Mocks.JSONP.receive"
+      receiver: Pusher.JSONP,
+      tagPrefix: "_pusher_jsonp_jasmine_"
     });
 
     var responded = false;
     runs(function() {
-      this.handler.send({}, function(error, result) {
+      this.sender.send({}, function(error, result) {
         expect(error).not.toBe(null);
         expect(result).toBe(undefined);
         responded = true;
