@@ -97,24 +97,25 @@
 
   var Members = function(channel) {
     var self = this;
+    var channelData = null;
 
     var reset = function() {
-      this._members_map = {};
-      this.count = 0;
-      this.me = null;
-      this._channelData = null;
+      self._members_map = {};
+      self.count = 0;
+      self.me = null;
+      channelData = null;
     };
-    reset.call(this);
+    reset();
 
     var subscriptionSucceeded = function(subscriptionData) {
       self._members_map = subscriptionData.presence.hash;
       self.count = subscriptionData.presence.count;
-      self.me = self.get(self._channelData.user_id);
+      self.me = self.get(channelData.user_id);
       channel.emit('pusher:subscription_succeeded', self);
     };
 
     channel.bind('pusher_internal:authorized', function(authorizedData) {
-      self._channelData = JSON.parse(authorizedData.channel_data);
+      channelData = JSON.parse(authorizedData.channel_data);
       channel.bind("pusher_internal:subscription_succeeded", subscriptionSucceeded);
     });
 
@@ -137,7 +138,7 @@
     });
 
     channel.bind('pusher_internal:disconnected', function() {
-      reset.call(self);
+      reset();
       channel.unbind("pusher_internal:subscription_succeeded", subscriptionSucceeded);
     });
   };
