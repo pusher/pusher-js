@@ -1,9 +1,9 @@
 ;(function() {
   Pusher.Mocks = {
-    JSONP: {
-      receive: function() {
-        // just a mock
-      }
+    getJSONPSender: function() {
+      return {
+        send: jasmine.createSpy("send")
+      };
     },
 
     getTransport: function() {

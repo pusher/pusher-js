@@ -13,6 +13,8 @@ src_files:
   - jsonp/jsonp_receiver.js
   - jsonp/jsonp_sender.js
 
+  - timeline.js
+
   - strategies/multi_strategy.js
   - strategies/parallel_strategy.js
   - strategies/delayed_strategy.js
