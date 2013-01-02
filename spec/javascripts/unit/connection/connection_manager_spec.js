@@ -4,11 +4,17 @@ describe("ConnectionManager", function() {
 
     this.connection = Pusher.Mocks.getConnection();
     this.strategy = Pusher.Mocks.getStrategy(true);
+    this.timeline = Pusher.Mocks.getTimeline();
 
-    spyOn(Pusher.StrategyBuilder, "build").andReturn(this.strategy);
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     this.manager = new Pusher.ConnectionManager("foo", {
+      getStrategy: jasmine.createSpy("getStrategy").andCallFake(function() {
+        return self.strategy;
+      }),
+      getTimeline: jasmine.createSpy("getTimeline").andCallFake(function() {
+        return self.timeline;
+      }),
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
@@ -21,32 +27,17 @@ describe("ConnectionManager", function() {
 
   describe("on construction", function() {
     it("should pass a timeline to the strategy builder", function() {
-      var timeline = Pusher.StrategyBuilder.build.calls[0].args[0].timeline;
-      expect(timeline).toEqual(jasmine.any(Pusher.Timeline));
-      expect(timeline.session).toEqual(jasmine.any(Number));
-    });
-
-    it("should not create a JSONP sender when stats are disabled", function() {
-      spyOn(Pusher, "JSONPSender");
-      var manager = new Pusher.ConnectionManager("foo", {
+      new Pusher.ConnectionManager("foo", {
+        getStrategy: function(options) {
+          expect(options.timeline).toBe(self.timeline);
+          return self.strategy;
+        },
+        getTimeline: function(options) {
+          return self.timeline;
+        },
         activityTimeout: 3456,
         pongTimeout: 2345,
         unavailableTimeout: 1234
-      });
-      expect(Pusher.JSONPSender).not.toHaveBeenCalled();
-    });
-
-    it("should create a JSONP sender when stats are enabled", function() {
-      spyOn(Pusher, "JSONPSender");
-      var manager = new Pusher.ConnectionManager("foo", {
-        activityTimeout: 3456,
-        pongTimeout: 2345,
-        unavailableTimeout: 1234,
-        stats: true
-      });
-      expect(Pusher.JSONPSender).toHaveBeenCalledWith({
-        url: "http://" + Pusher.stats_host,
-        receiver: Pusher.JSONP
       });
     });
   });
@@ -57,7 +48,7 @@ describe("ConnectionManager", function() {
     });
 
     it("should pass key to strategy builder", function() {
-      expect(Pusher.StrategyBuilder.build.calls[0].args[0].key)
+      expect(this.manager.options.getStrategy.calls[0].args[0].key)
         .toEqual("foo");
     });
   });

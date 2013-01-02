@@ -14,6 +14,7 @@
     this.key = app_key;
     this.channels = new Pusher.Channels();
     this.global_emitter = new Pusher.EventsDispatcher()
+    this.sessionID = Math.floor(Math.random() * 1000000000);
 
     var self = this;
 
@@ -22,7 +23,15 @@
     this.connection = new Pusher.ConnectionManager(
       this.key,
       Pusher.Util.extend(
-        { activityTimeout: Pusher.activity_timeout,
+        { getStrategy: function(options) {
+            return Pusher.StrategyBuilder.build(
+              Pusher.Util.extend(Pusher.defaultStrategy, self.options, options)
+            );
+          },
+          getTimeline: function(options) {
+            return new Pusher.Timeline(self.sessionID, null, { limit: 25 });
+          },
+          activityTimeout: Pusher.activity_timeout,
           pongTimeout: Pusher.pong_timeout,
           unavailableTimeout: Pusher.unavailable_timeout
         },
