@@ -73,7 +73,7 @@
     },
 
     subscribeAll: function() {
-      var channel;
+      var channelName;
       for (channelName in this.channels.channels) {
         if (this.channels.channels.hasOwnProperty(channelName)) {
           this.subscribe(channelName);
