@@ -1,5 +1,5 @@
 ;(function(context) {
-  var withSubscribedPresenceChannel = function(callback) {
+  var setupPresenceChannel = function() {
     Pusher.channel_auth_transport = 'ajax';
     Pusher.XHR = context.TestXHR;
     var channel = Pusher.Channel.factory('presence-channel', {}); // 1 channel connecting
@@ -10,10 +10,20 @@
       });
     });
 
+    return channel;
+  };
+
+  var withSubscribedPresenceChannel = function(callback) {
+    var channel = setupPresenceChannel();
+
     channel.bind('pusher:subscription_succeeded', function(members) { // 6 on sub succ event
       callback(channel); // 7 run callback
     });
 
+    fakeAuth( channel );
+  };
+
+  var fakeAuth = function( channel ) {
     var xhr = channel.authorize("1.1", {}, function(err, data) {}); // 2 auth channel
     TestXHR.lastInstance().trigger('DONE', { // 3 send auth response
       status: 200,
@@ -207,7 +217,44 @@
           test.equal(channel.subscribed, false);
           test.finish();
         });
+      },
+
+      'pusher_internal:subscription_succeeded triggers pusher:subscription_succeeded callback': function( test ) {
+        var channel = setupPresenceChannel();
+
+        var callbackCount = 0
+        channel.bind('pusher:subscription_succeeded', function(members) {
+          ++callbackCount;
+        });
+
+        test.equal( callbackCount, 0 );
+
+        fakeAuth( channel );
+
+        test.equal( callbackCount, 1 );
+
+        test.finish( channel );
+      },
+
+      'pusher_internal:subscription_succeeded triggers pusher:subscription_succeeded callback once upon reconnection': function( test ) {
+        var channel = setupPresenceChannel();
+
+        var callbackCount = 0
+        channel.bind('pusher:subscription_succeeded', function(members) {
+          ++callbackCount;
+        });
+
+        fakeAuth( channel );
+
+        channel.disconnect();
+
+        fakeAuth( channel );
+
+        test.equal( callbackCount, 2 );
+
+        test.finish();
       }
+
     }
   });
 })(this);
