@@ -36,7 +36,6 @@ bundle 'pusher.js' do
   file 'connection/protocol_wrapper.js'
   file 'connection/connection_manager.js'
 
-  file 'pusher_machine.js'
   file 'net_info.js'
   file 'pusher_channels.js'
   file 'pusher_authorizer.js'
