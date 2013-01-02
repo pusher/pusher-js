@@ -17,8 +17,12 @@ bundle 'pusher.js' do
   file 'dependency_loader.js'
   file 'dependencies.js'
 
+  file 'base64.js'
   file 'jsonp/jsonp_request.js'
-  file 'jsonp/jsonp_handler.js'
+  file 'jsonp/jsonp_receiver.js'
+  file 'jsonp/jsonp_sender.js'
+
+  file 'timeline.js'
 
   file 'strategies/multi_strategy.js'
   file 'strategies/parallel_strategy.js'
