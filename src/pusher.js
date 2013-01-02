@@ -115,7 +115,8 @@
     },
 
     checkAppKey: function() {
-      if(this.key === null || this.key === undefined) {
+      if (!this.key) {
+        // do not allow undefined, null or empty string
         Pusher.warn('Warning', 'You must pass your app key when you instantiate Pusher.');
       }
     }
