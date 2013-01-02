@@ -31,8 +31,20 @@
     this.state = "initialized";
     this.connection = null;
 
+    var session = Math.floor(Math.random() * 1000000000);
+    var jsonp = null;
+    if (options.stats) {
+      jsonp = new Pusher.JSONPSender({
+        url: "http://" + Pusher.stats_host,
+        receiver: Pusher.JSONP
+      });
+    }
+
     this.strategy = Pusher.StrategyBuilder.build(
-      Pusher.Util.extend(Pusher.defaultStrategy, { key: key })
+      Pusher.Util.extend(Pusher.defaultStrategy, {
+        key: key,
+        timeline: new Pusher.Timeline(session, jsonp, { limit: 25 })
+      })
     );
 
     var self = this;

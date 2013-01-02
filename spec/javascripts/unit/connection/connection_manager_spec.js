@@ -19,6 +19,38 @@ describe("ConnectionManager", function() {
     jasmine.Clock.useMock();
   });
 
+  describe("on construction", function() {
+    it("should pass a timeline to the strategy builder", function() {
+      var timeline = Pusher.StrategyBuilder.build.calls[0].args[0].timeline;
+      expect(timeline).toEqual(jasmine.any(Pusher.Timeline));
+      expect(timeline.session).toEqual(jasmine.any(Number));
+    });
+
+    it("should not create a JSONP sender when stats are disabled", function() {
+      spyOn(Pusher, "JSONPSender");
+      var manager = new Pusher.ConnectionManager("foo", {
+        activityTimeout: 3456,
+        pongTimeout: 2345,
+        unavailableTimeout: 1234
+      });
+      expect(Pusher.JSONPSender).not.toHaveBeenCalled();
+    });
+
+    it("should create a JSONP sender when stats are enabled", function() {
+      spyOn(Pusher, "JSONPSender");
+      var manager = new Pusher.ConnectionManager("foo", {
+        activityTimeout: 3456,
+        pongTimeout: 2345,
+        unavailableTimeout: 1234,
+        stats: true
+      });
+      expect(Pusher.JSONPSender).toHaveBeenCalledWith({
+        url: "http://" + Pusher.stats_host,
+        receiver: Pusher.JSONP
+      });
+    });
+  });
+
   describe("on initialize", function() {
     it("should transition to initialized state", function() {
       expect(this.manager.state).toEqual("initialized");
