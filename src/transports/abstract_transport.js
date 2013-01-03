@@ -198,7 +198,7 @@
   prototype.log = function(message) {
     if (this.timeline) {
       this.timeline.push(Pusher.Util.extend({
-        transport: this.name + (this.options.encrypted ? "s" : ""),
+        transport: this.name + (this.options.encrypted ? "s" : "")
       }, message));
     }
   };

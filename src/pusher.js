@@ -28,10 +28,12 @@
               self.sessionID, jsonp, {
                 key: self.key,
                 features: Pusher.Util.keys(
-                  Pusher.Util.filterObject({
-                    "ws": Pusher.WSTransport,
-                    "flash": Pusher.FlashTransport,
-                  }, function (t) { return t.isSupported(); })
+                  Pusher.Util.filterObject(
+                    { "ws": Pusher.WSTransport,
+                      "flash": Pusher.FlashTransport
+                    },
+                    function (t) { return t.isSupported(); }
+                  )
                 ),
                 limit: 25
               }
