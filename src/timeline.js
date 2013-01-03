@@ -16,6 +16,10 @@
     }
   };
 
+  prototype.isEmpty = function() {
+    return this.events.length === 0;
+  };
+
   prototype.send = function(callback) {
     if (!this.jsonp) {
       return false;

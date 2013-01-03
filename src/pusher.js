@@ -18,8 +18,16 @@
               Pusher.Util.extend(Pusher.defaultStrategy, self.options, options)
             );
           },
-          getTimeline: function(options) {
-            return new Pusher.Timeline(self.sessionID, null, { limit: 25 });
+          getTimeline: function(options, manager) {
+            var timeline = new Pusher.Timeline(
+              self.sessionID, null, { limit: 25 }
+            );
+            manager.bind("connected", function() {
+              if (!timeline.isEmpty()) {
+                timeline.send();
+              }
+            });
+            return timeline;
           },
           activityTimeout: Pusher.activity_timeout,
           pongTimeout: Pusher.pong_timeout,

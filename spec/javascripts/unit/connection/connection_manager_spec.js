@@ -222,7 +222,7 @@ describe("ConnectionManager", function() {
 
       expect(this.managerOptions.getTimeline).toHaveBeenCalledWith({
         encrypted: true
-      });
+      }, this.manager);
       expect(this.managerOptions.getStrategy).toHaveBeenCalledWith({
         key: "foo",
         encrypted: true,

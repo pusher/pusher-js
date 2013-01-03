@@ -34,7 +34,7 @@
 
     this.strategy = options.getStrategy({
       key: key,
-      timeline: options.getTimeline()
+      timeline: options.getTimeline({}, this)
     });
 
     var self = this;
@@ -236,7 +236,7 @@
       self.strategy = self.options.getStrategy({
         key: self.key,
         encrypted: true,
-        timeline: self.options.getTimeline({ encrypted: true })
+        timeline: self.options.getTimeline({ encrypted: true }, self)
       });
       self.retryIn(0);
     };
