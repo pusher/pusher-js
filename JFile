@@ -12,6 +12,7 @@ version '1.13.0-pre'
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
+  file 'util.js'
   file 'errors.js'
   file 'pusher_event_dispatcher.js'
   file 'dependency_loader.js'

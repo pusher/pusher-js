@@ -2,6 +2,7 @@ src_dir: src
 
 src_files:
   - pusher.js
+  - util.js
   - errors.js
   - dependency_loader.js
   - dependencies.js
