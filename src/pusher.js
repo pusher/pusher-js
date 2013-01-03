@@ -28,11 +28,13 @@
               self.sessionID, jsonp, { limit: 25 }
             );
 
-            manager.bind("connected", function() {
+            var sendTimeline = function() {
               if (!timeline.isEmpty()) {
                 timeline.send(function() {});
               }
-            });
+            };
+            manager.bind("connected", sendTimeline);
+            setInterval(sendTimeline, 60000);
 
             return timeline;
           },
