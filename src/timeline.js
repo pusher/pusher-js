@@ -11,7 +11,9 @@
   var prototype = Timeline.prototype;
 
   prototype.push = function(event) {
-    this.events.push(Pusher.Util.extend({}, event, { timestamp: Date.now() }));
+    this.events.push(
+      Pusher.Util.extend({}, event, { timestamp: Pusher.Util.now() })
+    );
     if (this.options.limit && this.events.length > this.options.limit) {
       this.events.shift();
     }

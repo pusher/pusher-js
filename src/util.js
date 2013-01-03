@@ -1,5 +1,13 @@
 ;(function() {
   Pusher.Util = {
+    now: function() {
+      if (Date.now) {
+        return Date.now();
+      } else {
+        return new Date().valueOf();
+      }
+    },
+
     /** Merges multiple objects into the target argument.
      *
      * For properties that are plain Objects, performs a deep-merge. For the

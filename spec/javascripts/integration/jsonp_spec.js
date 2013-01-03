@@ -1,7 +1,5 @@
 describe("JSONP", function() {
   beforeEach(function() {
-    var self = this;
-
     this.sender = new Pusher.JSONPSender({
       url: "http://localhost:8889/jsonp",
       receiver: Pusher.JSONP,

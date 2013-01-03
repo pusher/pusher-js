@@ -26,13 +26,13 @@ describe("Timeline", function() {
     });
 
     it("should include pushed events", function() {
-      spyOn(Date, "now");
+      spyOn(Pusher.Util, "now");
 
-      Date.now.andReturn(1000);
+      Pusher.Util.now.andReturn(1000);
       this.timeline.push({a: 1});
-      Date.now.andReturn(2000);
+      Pusher.Util.now.andReturn(2000);
       this.timeline.push({ foo: "bar" });
-      Date.now.andReturn(100000);
+      Pusher.Util.now.andReturn(100000);
       this.timeline.push({b: 2.2});
 
       expect(this.timeline.send(this.onSend)).toBe(true);
@@ -79,7 +79,7 @@ describe("Timeline", function() {
     });
 
     it("should respect the size limit", function() {
-      spyOn(Date, "now").andReturn(123);
+      spyOn(Pusher.Util, "now").andReturn(123);
 
       var timeline = new Pusher.Timeline(123, this.jsonp, { limit: 3 });
       for (var i = 1; i <= 4; i++) {

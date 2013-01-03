@@ -19,7 +19,7 @@
             );
           },
           getTimeline: function(options, manager) {
-            var scheme = "http" + (options.secure ? "s" : "") + "://";
+            var scheme = "http" + (options.encrypted ? "s" : "") + "://";
             var jsonp = new Pusher.JSONPSender({
               url: scheme + Pusher.stats_host + "/timeline",
               receiver: Pusher.JSONP
