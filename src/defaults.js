@@ -7,15 +7,15 @@
   Pusher.wss_port = 443;
   // SockJS fallback parameters
   Pusher.sockjs_host = 'sockjs.pusher.com';
-  Pusher.sockjs_http_port = 80
-  Pusher.sockjs_https_port = 443
-  Pusher.sockjs_path = "/pusher"
+  Pusher.sockjs_http_port = 80;
+  Pusher.sockjs_https_port = 443;
+  Pusher.sockjs_path = "/pusher";
   // Stats
   Pusher.stats_host = 'stats.pusher.com';
   // Other settings
   Pusher.channel_auth_endpoint = '/pusher/auth';
-  Pusher.cdn_http = '<CDN_HTTP>'
-  Pusher.cdn_https = '<CDN_HTTPS>'
+  Pusher.cdn_http = '<CDN_HTTP>';
+  Pusher.cdn_https = '<CDN_HTTPS>';
   Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
   Pusher.channel_auth_transport = 'ajax';
   Pusher.activity_timeout = 120000;

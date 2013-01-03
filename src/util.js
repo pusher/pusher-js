@@ -32,26 +32,34 @@
     },
 
     stringify: function() {
-      var m = ["Pusher"]
-      for (var i = 0; i < arguments.length; i++){
+      var m = ["Pusher"];
+      for (var i = 0; i < arguments.length; i++) {
         if (typeof arguments[i] === "string") {
-          m.push(arguments[i])
+          m.push(arguments[i]);
         } else {
-          if (window['JSON'] == undefined) {
+          if (window.JSON === undefined) {
             m.push(arguments[i].toString());
           } else {
-            m.push(JSON.stringify(arguments[i]))
+            m.push(JSON.stringify(arguments[i]));
           }
         }
-      };
-      return m.join(" : ")
+      }
+      return m.join(" : ");
     },
 
     arrayIndexOf: function(array, item) { // MSIE doesn't have array.indexOf
       var nativeIndexOf = Array.prototype.indexOf;
-      if (array == null) return -1;
-      if (nativeIndexOf && array.indexOf === nativeIndexOf) return array.indexOf(item);
-      for (i = 0, l = array.length; i < l; i++) if (array[i] === item) return i;
+      if (array === null) {
+        return -1;
+      }
+      if (nativeIndexOf && array.indexOf === nativeIndexOf) {
+        return array.indexOf(item);
+      }
+      for (i = 0, l = array.length; i < l; i++) {
+        if (array[i] === item) {
+          return i;
+        }
+      }
       return -1;
     },
 

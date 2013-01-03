@@ -5,7 +5,7 @@
     this.options = options || {};
     this.key = app_key;
     this.channels = new Pusher.Channels();
-    this.global_emitter = new Pusher.EventsDispatcher()
+    this.global_emitter = new Pusher.EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
     this.checkAppKey();
@@ -54,8 +54,8 @@
       .bind('message', function(params) {
         var internal = (params.event.indexOf('pusher_internal:') === 0);
         if (params.channel) {
-          var channel;
-          if (channel = self.channel(params.channel)) {
+          var channel = self.channel(params.channel);
+          if (channel) {
             channel.emit(params.event, params.data);
           }
         }
@@ -72,7 +72,7 @@
     Pusher.instances.push(this);
 
     if (Pusher.isReady) self.connect();
-  };
+  }
 
   Pusher.instances = [];
   Pusher.isReady = false;
@@ -80,15 +80,19 @@
   // To receive log output provide a Pusher.log function, for example
   // Pusher.log = function(m){console.log(m)}
   Pusher.debug = function() {
-    if (!Pusher.log) return
-    Pusher.log(Pusher.Util.stringify.apply(this, arguments))
-  }
+    if (!Pusher.log) {
+      return;
+    }
+    Pusher.log(Pusher.Util.stringify.apply(this, arguments));
+  };
 
   Pusher.warn = function() {
     if (window.console && window.console.warn) {
       window.console.warn(Pusher.Util.stringify.apply(this, arguments));
     } else {
-      if (!Pusher.log) return
+      if (!Pusher.log) {
+        return;
+      }
       Pusher.log(Pusher.Util.stringify.apply(this, arguments));
     }
   };
@@ -124,7 +128,7 @@
     },
 
     subscribeAll: function() {
-      var channel;
+      var channelName;
       for (channelName in this.channels.channels) {
         if (this.channels.channels.hasOwnProperty(channelName)) {
           this.subscribe(channelName);
