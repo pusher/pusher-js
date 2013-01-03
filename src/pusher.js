@@ -19,14 +19,21 @@
             );
           },
           getTimeline: function(options, manager) {
+            var scheme = "http" + (options.secure ? "s" : "") + "://";
+            var jsonp = new Pusher.JSONPSender({
+              url: scheme + Pusher.stats_host + "/timeline",
+              receiver: Pusher.JSONP
+            });
             var timeline = new Pusher.Timeline(
-              self.sessionID, null, { limit: 25 }
+              self.sessionID, jsonp, { limit: 25 }
             );
+
             manager.bind("connected", function() {
               if (!timeline.isEmpty()) {
-                timeline.send();
+                timeline.send(function() {});
               }
             });
+
             return timeline;
           },
           activityTimeout: Pusher.activity_timeout,
