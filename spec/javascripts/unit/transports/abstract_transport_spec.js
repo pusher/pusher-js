@@ -148,6 +148,15 @@ describe("AbstractTransport", function() {
       expect(onClosed.calls.length).toEqual(1);
       expect(this.transport.state).toEqual("closed");
     });
+
+    it("should log the error to timeline", function() {
+      this.transport.connect();
+      this.socket.onerror("We're doomed");
+      expect(this.timeline.push).toHaveBeenCalledWith({
+        transport: "abstract",
+        error: "We're doomed"
+      });
+    });
   });
 
   describe("on close", function() {

@@ -126,6 +126,7 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
+    this.log({ error: error });
   };
 
   /** @protected */
@@ -190,12 +191,15 @@
   prototype.changeState = function(state, params) {
     this.state = state;
     this.emit(state, params);
+    this.log({ state: state, params: params });
+  };
+
+  /** @protected */
+  prototype.log = function(message) {
     if (this.timeline) {
-      this.timeline.push({
+      this.timeline.push(Pusher.Util.extend({
         transport: this.name + (this.options.encrypted ? "s" : ""),
-        state: state,
-        params: params
-      });
+      }, message));
     }
   };
 
