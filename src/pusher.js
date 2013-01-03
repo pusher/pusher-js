@@ -1,22 +1,12 @@
 ;(function() {
-  if (Function.prototype.scopedTo === undefined) {
-    Function.prototype.scopedTo = function(context, args) {
-      var f = this;
-      return function() {
-        return f.apply(context, Array.prototype.slice.call(args || [])
-                       .concat(Array.prototype.slice.call(arguments)));
-      };
-    };
-  }
+  function Pusher(app_key, options) {
+    var self = this;
 
-  var Pusher = function(app_key, options) {
     this.options = options || {};
     this.key = app_key;
     this.channels = new Pusher.Channels();
     this.global_emitter = new Pusher.EventsDispatcher()
     this.sessionID = Math.floor(Math.random() * 1000000000);
-
-    var self = this;
 
     this.checkAppKey();
 
