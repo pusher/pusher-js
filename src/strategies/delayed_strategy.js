@@ -16,10 +16,6 @@
 
   prototype.name = "delayed";
 
-  prototype.getEncrypted = function() {
-    return new DelayedStrategy(this.strategies[0].getEncrypted(), this.options);
-  };
-
   /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
     if (!this.isSupported()) {

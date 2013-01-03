@@ -20,17 +20,6 @@
     return this.transport.isSupported();
   };
 
-  /** Creates an encrypted-only copy of itself, respecting the delay.
-   *
-   * @returns {TransportStrategy}
-   */
-  prototype.getEncrypted = function() {
-    return new TransportStrategy(
-      this.transport,
-      Pusher.Util.extend(this.options, { encrypted: true })
-    );
-  };
-
   /** Returns an object with strategy's options
    *
    * @returns {Object}

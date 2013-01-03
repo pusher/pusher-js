@@ -21,17 +21,6 @@
     return this.strategies.length > 0;
   };
 
-  /** Makes an encrypted-only copy of itself.
-   *
-   * @returns {MultiStrategy}
-   */
-  prototype.getEncrypted = function() {
-    return new this.constructor(
-      Pusher.Util.map(this.strategies, Pusher.Util.method("getEncrypted")),
-      this.getOptions()
-    );
-  };
-
   /** Returns an object with strategy's options
    *
    * @returns {Object}

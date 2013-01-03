@@ -8,7 +8,7 @@ describe("ConnectionManager", function() {
 
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
-    this.manager = new Pusher.ConnectionManager("foo", {
+    this.managerOptions = {
       getStrategy: jasmine.createSpy("getStrategy").andCallFake(function() {
         return self.strategy;
       }),
@@ -18,7 +18,8 @@ describe("ConnectionManager", function() {
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
-    });
+    };
+    this.manager = new Pusher.ConnectionManager("foo", this.managerOptions);
     this.manager.wrapTransport = jasmine.createSpy("wrapTransport")
       .andReturn(this.connection);
 
@@ -211,22 +212,22 @@ describe("ConnectionManager", function() {
 
     it("should force secure and reconnect after receiving 'ssl_only' event", function() {
       var self = this;
+      var encryptedStrategy = Pusher.Mocks.getStrategy(true);
 
-      var encryptedStrategy = new Pusher.EventsDispatcher();
-      encryptedStrategy.isSupported = jasmine.createSpy("isSupported")
-        .andReturn(true);
-      encryptedStrategy.connect = jasmine.createSpy("connect")
-        .andCallFake(function(callback) {
-          return { abort: function() {} };
-        });
-      this.strategy.getEncrypted = jasmine.createSpy("getEncrypted")
-        .andReturn(encryptedStrategy);
+      this.managerOptions.getStrategy.andReturn(encryptedStrategy);
 
       this.manager.connect();
       this.strategy._callback(null, {});
       this.connection.emit("ssl_only");
 
-      expect(this.strategy.getEncrypted).toHaveBeenCalled();
+      expect(this.managerOptions.getTimeline).toHaveBeenCalledWith({
+        encrypted: true
+      });
+      expect(this.managerOptions.getStrategy).toHaveBeenCalledWith({
+        key: "foo",
+        encrypted: true,
+        timeline: this.timeline
+      });
 
       jasmine.Clock.tick(0);
       expect(encryptedStrategy.connect).toHaveBeenCalled();
@@ -411,6 +412,22 @@ describe("ConnectionManager", function() {
       this.strategy._callback(true);
       expect(this.strategy.connect.calls.length).toEqual(2);
       expect(this.manager.state).toEqual("connecting")
+    });
+  });
+
+  describe("on connection error", function() {
+    it("should emit an error", function() {
+      var onError = jasmine.createSpy("onError");
+      this.manager.bind("error", onError);
+
+      this.manager.connect();
+      this.strategy._callback(null, {});
+      this.connection.emit("error", { boom: "boom" });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "WebSocketError",
+        error: { boom: "boom" }
+      });
     });
   });
 

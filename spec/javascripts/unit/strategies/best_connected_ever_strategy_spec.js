@@ -10,21 +10,6 @@ describe("BestConnectedEverStrategy", function() {
     expect(this.strategy.name).toEqual("best_connected_ever");
   });
 
-  it("should construct a secure strategy", function() {
-    var substrategies = Pusher.Mocks.getStrategies([true, true]);
-    var encryptedSubstrategies = Pusher.Mocks.getStrategies([true, true]);
-    var strategy = new Pusher.BestConnectedEverStrategy(substrategies);
-
-    substrategies[0].getEncrypted = jasmine.createSpy()
-      .andReturn(encryptedSubstrategies[0]);
-    substrategies[1].getEncrypted = jasmine.createSpy()
-      .andReturn(encryptedSubstrategies[1]);
-
-    var encryptedStrategy = strategy.getEncrypted(true);
-    expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategies[0]);
-    expect(encryptedStrategy.strategies[1]).toBe(encryptedSubstrategies[1]);
-  });
-
   describe("on connect", function() {
     it("should call back with the preferred transport and cancel worse ones", function() {
       this.strategy.connect(this.callback);

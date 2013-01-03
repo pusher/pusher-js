@@ -10,21 +10,6 @@ describe("FirstConnectedStrategy", function() {
     expect(this.strategy.name).toEqual("first_connected");
   });
 
-  it("should construct a secure strategy", function() {
-    var substrategies = Pusher.Mocks.getStrategies([true, true]);
-    var encryptedSubstrategies = Pusher.Mocks.getStrategies([true, true]);
-    var strategy = new Pusher.FirstConnectedStrategy(substrategies);
-
-    substrategies[0].getEncrypted = jasmine.createSpy()
-      .andReturn(encryptedSubstrategies[0]);
-    substrategies[1].getEncrypted = jasmine.createSpy()
-      .andReturn(encryptedSubstrategies[1]);
-
-    var encryptedStrategy = strategy.getEncrypted(true);
-    expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategies[0]);
-    expect(encryptedStrategy.strategies[1]).toBe(encryptedSubstrategies[1]);
-  });
-
   describe("after calling isSupported", function() {
     it("should return true when one of substrategies is supported", function() {
       var substrategies = Pusher.Mocks.getStrategies([false, true]);
