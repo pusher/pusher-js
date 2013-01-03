@@ -25,7 +25,16 @@
               receiver: Pusher.JSONP
             });
             var timeline = new Pusher.Timeline(
-              self.sessionID, jsonp, { limit: 25 }
+              self.sessionID, jsonp, {
+                key: self.key,
+                features: Pusher.Util.keys(
+                  Pusher.Util.filterObject({
+                    "ws": Pusher.WSTransport,
+                    "flash": Pusher.FlashTransport,
+                  }, function (t) { return t.isSupported(); })
+                ),
+                limit: 25
+              }
             );
 
             var sendTimeline = function() {

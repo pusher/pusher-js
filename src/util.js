@@ -63,6 +63,16 @@
       return -1;
     },
 
+    keys: function(object) {
+      var result = [];
+      for (var key in object) {
+        if (Object.prototype.hasOwnProperty.call(object, key)) {
+          result.push(key);
+        }
+      }
+      return result;
+    },
+
     /** Applies a function f to all elements of an array.
      *
      * Function f gets 3 arguments passed:
