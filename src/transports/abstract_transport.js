@@ -36,6 +36,7 @@
     this.key = key;
     this.options = options;
     this.state = "new";
+    this.timeline = options.timeline;
   }
   var prototype = AbstractTransport.prototype;
 
@@ -189,6 +190,13 @@
   prototype.changeState = function(state, params) {
     this.state = state;
     this.emit(state, params);
+    if (this.timeline) {
+      this.timeline.push({
+        transport: this.name + (this.options.encrypted ? "s" : ""),
+        state: state,
+        params: params
+      });
+    }
   };
 
   Pusher.AbstractTransport = AbstractTransport;

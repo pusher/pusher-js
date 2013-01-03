@@ -12,7 +12,11 @@ describe("AbstractTransport", function() {
 
   beforeEach(function() {
     this.socket = {};
-    this.transport = getTransport("foo");
+    this.timeline = Pusher.Mocks.getTimeline();
+    this.transport = getTransport("foo", {
+      timeline: this.timeline
+    });
+    this.transport.name = "abstract";
     this.transport.initialize();
 
     spyOn(this.transport, "createSocket").andReturn(this.socket);
@@ -160,6 +164,40 @@ describe("AbstractTransport", function() {
 
       this.socket.onclose();
       expect(onClosed).toHaveBeenCalled();
+    });
+  });
+
+  describe("on state change", function () {
+    it("should log the new state to timeline", function() {
+      // initialization happens in beforeEach
+      expect(this.timeline.push.calls.length).toEqual(1);
+      expect(this.timeline.push).toHaveBeenCalledWith({
+        transport: "abstract",
+        state: "initialized"
+      });
+
+      this.transport.connect();
+      expect(this.timeline.push.calls.length).toEqual(2);
+      expect(this.timeline.push).toHaveBeenCalledWith({
+        transport: "abstract",
+        state: "connecting"
+      });
+    });
+
+    it("should append an 's' suffix for encrypted connections", function() {
+      var timeline = Pusher.Mocks.getTimeline();
+      var transport = getTransport("xxx", {
+        timeline: timeline,
+        encrypted: true
+      });
+      transport.name = "abstract";
+      transport.initialize();
+
+      expect(timeline.push.calls.length).toEqual(1);
+      expect(timeline.push).toHaveBeenCalledWith({
+        transport: "abstracts",
+        state: "initialized"
+      });
     });
   });
 });

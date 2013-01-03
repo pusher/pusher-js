@@ -4,10 +4,7 @@
    * @see AbstractTransport
    */
   function WSTransport(key, options) {
-    Pusher.AbstractTransport.call(this);
-
-    this.key = key;
-    this.options = options;
+    Pusher.AbstractTransport.call(this, key, options);
   }
   var prototype = WSTransport.prototype;
 
