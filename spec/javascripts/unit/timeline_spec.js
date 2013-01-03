@@ -6,15 +6,17 @@ describe("Timeline", function() {
   });
 
   describe("on send", function() {
-    it("should include session id, features and version", function() {
+    it("should include key, session id, features and version", function() {
       var timeline = new Pusher.Timeline(666, this.jsonp, {
+        key: "foobar",
         features: ["x", "y", "z"],
         version: "6.6.6"
       });
 
       expect(timeline.send(this.onSend)).toBe(true);
       expect(this.jsonp.send).toHaveBeenCalledWith(
-        { session: 666,
+        { key: "foobar",
+          session: 666,
           features: ["x", "y", "z"],
           version: "6.6.6",
           timeline: []
@@ -43,6 +45,36 @@ describe("Timeline", function() {
           ]
         },
         jasmine.any(Function)
+      );
+    });
+
+    it("should not send extra info in second request", function() {
+      var sendCallback = null;
+      this.jsonp.send.andCallFake(function(data, callback) {
+        sendCallback = callback;
+      });
+      var timeline = new Pusher.Timeline(666, this.jsonp, {
+        key: "foobar",
+        features: ["x", "y", "z"],
+        version: "6.6.6"
+      });
+
+      // first call
+      expect(timeline.send(this.onSend)).toBe(true);
+      expect(this.jsonp.send).toHaveBeenCalledWith(
+        { key: "foobar",
+          session: 666,
+          features: ["x", "y", "z"],
+          version: "6.6.6",
+          timeline: []
+        },
+        jasmine.any(Function)
+      );
+      sendCallback(null);
+      // second call
+      expect(timeline.send(this.onSend)).toBe(true);
+      expect(this.jsonp.send).toHaveBeenCalledWith(
+        { session: 666, timeline: [] }, jasmine.any(Function)
       );
     });
 

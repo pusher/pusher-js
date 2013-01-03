@@ -5,6 +5,7 @@
     this.jsonp = jsonp;
     this.events = [];
     this.options = options || {};
+    this.sent = 0;
   }
 
   var prototype = Timeline.prototype;
@@ -24,16 +25,27 @@
     if (!this.jsonp) {
       return false;
     }
+    var self = this;
 
-    var data = Pusher.Util.filterObject({
-      session: this.session,
-      features: this.options.features,
-      version: this.options.version,
-      timeline: this.events
-    }, function(v) { return v !== undefined; });
+    var data = {};
+    if (this.sent === 0) {
+      data = {
+        key: this.options.key,
+        features: this.options.features,
+        version: this.options.version
+      };
+    }
+    data.session = this.session;
+    data.timeline = this.events;
+    Pusher.Util.filterObject(data, function(v) { return v !== undefined; });
 
     this.events = [];
-    this.jsonp.send(data, callback);
+    this.jsonp.send(data, function(error, result) {
+      if (!error) {
+        self.sent++;
+      }
+      callback(error, result);
+    });
 
     return true;
   };
