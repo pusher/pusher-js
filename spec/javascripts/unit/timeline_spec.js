@@ -6,11 +6,15 @@ describe("Timeline", function() {
   });
 
   describe("on send", function() {
-    it("should include key, session id, features and version", function() {
+    it("should include key, session id, features, version and params", function() {
       var timeline = new Pusher.Timeline(666, this.jsonp, {
         key: "foobar",
         features: ["x", "y", "z"],
-        version: "6.6.6"
+        version: "6.6.6",
+        params: {
+          x: 1,
+          y: "2"
+        }
       });
 
       expect(timeline.send(this.onSend)).toBe(true);
@@ -19,6 +23,8 @@ describe("Timeline", function() {
           session: 666,
           features: ["x", "y", "z"],
           version: "6.6.6",
+          x: 1,
+          y: "2",
           timeline: []
         },
         jasmine.any(Function)

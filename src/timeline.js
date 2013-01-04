@@ -31,11 +31,11 @@
 
     var data = {};
     if (this.sent === 0) {
-      data = {
+      data = Pusher.Util.extend({
         key: this.options.key,
         features: this.options.features,
         version: this.options.version
-      };
+      }, this.options.params || {});
     }
     data.session = this.session;
     data.timeline = this.events;
