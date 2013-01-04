@@ -35,6 +35,7 @@
                     function (t) { return t.isSupported(); }
                   )
                 ),
+                params: self.options.timelineParams || {},
                 limit: 25
               }
             );
