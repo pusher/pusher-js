@@ -34,7 +34,7 @@
    * @return {Object} strategy runner
    */
   prototype.connect = function(callback) {
-    connection = this.transport.createConnection(
+    var connection = this.transport.createConnection(
       this.options.key, this.options
     );
 
