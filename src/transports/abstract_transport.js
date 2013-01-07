@@ -126,7 +126,7 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.log({ error: error });
+    this.log({ error: error.name || "unknown" });
   };
 
   /** @protected */

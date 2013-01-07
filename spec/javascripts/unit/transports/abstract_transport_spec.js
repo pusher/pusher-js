@@ -151,10 +151,10 @@ describe("AbstractTransport", function() {
 
     it("should log the error to timeline", function() {
       this.transport.connect();
-      this.socket.onerror("We're doomed");
+      this.socket.onerror({ name: "doom" });
       expect(this.timeline.push).toHaveBeenCalledWith({
         transport: "abstract",
-        error: "We're doomed"
+        error: "doom"
       });
     });
   });
