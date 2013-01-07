@@ -32,7 +32,7 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    var constructor = WebSocket || MozWebSocket;
+    var constructor = window.WebSocket || window.MozWebSocket;
     return new constructor(url);
   };
 
