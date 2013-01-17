@@ -36,6 +36,7 @@
     this.key = key;
     this.options = options;
     this.state = "new";
+    this.timeline = options.timeline;
   }
   var prototype = AbstractTransport.prototype;
 
@@ -125,6 +126,7 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
+    this.log({ error: error.name || "unknown" });
   };
 
   /** @protected */
@@ -189,6 +191,16 @@
   prototype.changeState = function(state, params) {
     this.state = state;
     this.emit(state, params);
+    this.log({ state: state, params: params });
+  };
+
+  /** @protected */
+  prototype.log = function(message) {
+    if (this.timeline) {
+      this.timeline.push(Pusher.Util.extend({
+        transport: this.name + (this.options.encrypted ? "s" : "")
+      }, message));
+    }
   };
 
   Pusher.AbstractTransport = AbstractTransport;

@@ -7,15 +7,24 @@ target_dir './dist'
 
 src_dir './src'
 
-version '1.12.5'
+version '1.13.0-pre'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
+  file 'util.js'
+  file 'defaults.js'
   file 'errors.js'
   file 'pusher_event_dispatcher.js'
   file 'dependency_loader.js'
   file 'dependencies.js'
+
+  file 'base64.js'
+  file 'jsonp/jsonp_request.js'
+  file 'jsonp/jsonp_receiver.js'
+  file 'jsonp/jsonp_sender.js'
+
+  file 'timeline.js'
 
   file 'strategies/multi_strategy.js'
   file 'strategies/parallel_strategy.js'

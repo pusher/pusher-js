@@ -2,11 +2,19 @@ src_dir: src
 
 src_files:
   - pusher.js
+  - util.js
+  - defaults.js
   - errors.js
   - dependency_loader.js
   - dependencies.js
   - pusher_event_dispatcher.js
   - net_info.js
+
+  - base64.js
+  - jsonp/jsonp_request.js
+  - jsonp/jsonp_receiver.js
+
+  - timeline.js
 
   - strategies/multi_strategy.js
   - strategies/parallel_strategy.js

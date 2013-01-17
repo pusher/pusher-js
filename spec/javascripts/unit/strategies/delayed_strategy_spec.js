@@ -11,19 +11,6 @@ describe("DelayedStrategy", function() {
     expect(this.strategy.name).toEqual("delayed");
   });
 
-  it("should construct a secure strategy", function() {
-    var substrategy = Pusher.Mocks.getStrategy(true);
-    var encryptedSubstrategy = Pusher.Mocks.getStrategy(true);
-    var strategy = new Pusher.DelayedStrategy(substrategy, { delay: 1 });
-
-    substrategy.getEncrypted = jasmine.createSpy()
-      .andReturn(encryptedSubstrategy);
-
-    var encryptedStrategy = strategy.getEncrypted(true);
-    expect(encryptedStrategy.strategies[0]).toBe(encryptedSubstrategy);
-    expect(encryptedStrategy.getOptions().delay).toEqual(1);
-  });
-
   describe("after calling isSupported", function() {
     it("should return true if substrategy is supported", function() {
       var substrategy = Pusher.Mocks.getStrategy(true);

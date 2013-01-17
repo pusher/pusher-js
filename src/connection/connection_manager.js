@@ -27,13 +27,15 @@
   function ConnectionManager(key, options) {
     Pusher.EventsDispatcher.call(this);
 
+    this.key = key;
     this.options = options || {};
     this.state = "initialized";
     this.connection = null;
 
-    this.strategy = Pusher.StrategyBuilder.build(
-      Pusher.Util.extend(Pusher.defaultStrategy, { key: key })
-    );
+    this.strategy = options.getStrategy({
+      key: key,
+      timeline: options.getTimeline({}, this)
+    });
 
     var self = this;
 
@@ -212,7 +214,7 @@
     var onPing = function() {
       self.send_event('pusher:pong', {});
     };
-    var onError = function() {
+    var onError = function(error) {
       // just emit error to user - socket will already be closed by browser
       self.emit("error", { type: "WebSocketError", error: error });
     };
@@ -230,17 +232,21 @@
     };
 
     // handling close conditions
-    var onSSLOnly = function(id) {
-      self.strategy = self.strategy.getEncrypted();
+    var onSSLOnly = function() {
+      self.strategy = self.options.getStrategy({
+        key: self.key,
+        encrypted: true,
+        timeline: self.options.getTimeline({ encrypted: true }, self)
+      });
       self.retryIn(0);
     };
-    var onRefused = function(id) {
+    var onRefused = function() {
       self.disconnect();
     };
-    var onBackoff = function(id) {
+    var onBackoff = function() {
       self.retryIn(1000);
     };
-    var onRetry = function(id) {
+    var onRetry = function() {
       self.retryIn(0);
     };
 

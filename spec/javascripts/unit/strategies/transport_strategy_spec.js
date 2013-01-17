@@ -13,12 +13,6 @@ describe("TransportStrategy", function() {
     expect(this.strategy.name).toEqual("transport");
   });
 
-  it("should pass correct options for encrypted strategy", function() {
-    this.strategy.getEncrypted().connect(this.callback);
-    expect(this.transportClass.createConnection)
-      .toHaveBeenCalledWith("foo", { key: "foo", encrypted: true });
-  });
-
   describe("after calling isSupported", function() {
     it("should return true when transport is supported", function() {
       var strategy = new Pusher.TransportStrategy(

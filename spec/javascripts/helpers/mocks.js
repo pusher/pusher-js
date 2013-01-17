@@ -1,5 +1,18 @@
 ;(function() {
   Pusher.Mocks = {
+    getJSONPSender: function() {
+      return {
+        send: jasmine.createSpy("send")
+      };
+    },
+
+    getTimeline: function() {
+      return {
+        push: jasmine.createSpy("push"),
+        send: jasmine.createSpy("send")
+      };
+    },
+
     getTransport: function() {
       var transport = new Pusher.EventsDispatcher();
 
