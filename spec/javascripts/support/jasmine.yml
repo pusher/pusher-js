@@ -13,7 +13,6 @@ src_files:
   - base64.js
   - jsonp/jsonp_request.js
   - jsonp/jsonp_receiver.js
-  - jsonp/jsonp_sender.js
 
   - timeline.js
 

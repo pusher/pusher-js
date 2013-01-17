@@ -20,12 +20,15 @@
           },
           getTimeline: function(options, manager) {
             var scheme = "http" + (options.encrypted ? "s" : "") + "://";
-            var jsonp = new Pusher.JSONPSender({
-              url: scheme + Pusher.stats_host + "/timeline",
-              receiver: Pusher.JSONP
-            });
+            var sendJSONP = function(data, callback) {
+              return Pusher.JSONPRequest.send({
+                data: data,
+                url: scheme + Pusher.stats_host + "/timeline",
+                receiver: Pusher.JSONP
+              }, callback);
+            };
             var timeline = new Pusher.Timeline(
-              self.sessionID, jsonp, {
+              self.sessionID, sendJSONP, {
                 key: self.key,
                 features: Pusher.Util.keys(
                   Pusher.Util.filterObject(

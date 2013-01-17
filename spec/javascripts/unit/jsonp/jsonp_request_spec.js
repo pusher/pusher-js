@@ -1,26 +1,33 @@
-describe("JSONPSender", function() {
+describe("JSONPRequest", function() {
   beforeEach(function() {
     var self = this;
 
     this.receiver = new Pusher.JSONPReceiver();
-    this.sender = new Pusher.JSONPSender({
+    this.options = {
       url: "http://localhost:8889/jsonp",
       receiver: this.receiver,
       receiverName: "mock",
       tagPrefix: "_pusher_jsonp_jasmine_"
-    });
+    };
 
     this.request = undefined;
+    var send = Pusher.JSONPRequest.send;
     spyOn(Pusher, "JSONPRequest").andCallFake(function(options) {
       self.request = this;
       this.send = jasmine.createSpy("send");
       this.cleanup = jasmine.createSpy("cleanup");
     })
+    Pusher.JSONPRequest.send = send;
   });
 
   describe("on send", function() {
     it("should send a JSONP request", function() {
-      this.sender.send({a: 1}, function() {});
+      Pusher.JSONPRequest.send(
+        Pusher.Util.extend(this.options, {
+          data: { a: 1 }
+        }),
+        function() {}
+      );
 
       expect(Pusher.JSONPRequest).toHaveBeenCalledWith({
         url: "http://localhost:8889/jsonp",
@@ -33,7 +40,12 @@ describe("JSONPSender", function() {
 
     it("should call back after calling the receiver", function() {
       var sendCallback = jasmine.createSpy("sendCallback");
-      this.sender.send({a: 1}, sendCallback);
+      Pusher.JSONPRequest.send(
+        Pusher.Util.extend(this.options, {
+          data: { a: 1 }
+        }),
+        sendCallback
+      );
 
       expect(sendCallback).not.toHaveBeenCalled();
       this.receiver.receive(1, "x", "y");
@@ -41,7 +53,12 @@ describe("JSONPSender", function() {
     });
 
     it("should clean up after calling the receiver", function() {
-      this.sender.send({a: 1}, function() {});
+      Pusher.JSONPRequest.send(
+        Pusher.Util.extend(this.options, {
+          data: { a: 1 }
+        }),
+        function() {}
+      );
       this.receiver.receive(1, "x", "y");
       expect(this.request.cleanup).toHaveBeenCalled();
     });
@@ -50,7 +67,12 @@ describe("JSONPSender", function() {
   describe("on error", function() {
     it("should call back with the error", function() {
       var sendCallback = jasmine.createSpy("sendCallback");
-      this.sender.send({a: 1}, sendCallback);
+      Pusher.JSONPRequest.send(
+        Pusher.Util.extend(this.options, {
+          data: { a: 1 }
+        }),
+        sendCallback
+      );
       this.request.send.calls[0].args[2]("boom");
 
       expect(sendCallback).toHaveBeenCalledWith("boom", undefined);
@@ -59,7 +81,13 @@ describe("JSONPSender", function() {
     it("should unregister from the receiver", function() {
       spyOn(this.receiver, "unregister");
 
-      this.sender.send({a: 1}, function() {});
+      Pusher.JSONPRequest.send(
+        Pusher.Util.extend(this.options, {
+          data: { a: 1 }
+        }),
+        function() {}
+      );
+
       this.request.send.calls[0].args[2]("boom");
 
       expect(this.receiver.unregister).toHaveBeenCalledWith(1);

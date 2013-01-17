@@ -4,6 +4,25 @@
     this.options = options;
   }
 
+  JSONPRequest.send = function(options, callback) {
+    var request = new Pusher.JSONPRequest({
+      url: options.url,
+      receiver: options.receiverName,
+      tagPrefix: options.tagPrefix
+    });
+    var id = options.receiver.register(function(error, result) {
+      request.cleanup();
+      callback(error, result);
+    });
+
+    return request.send(id, options.data, function(error) {
+      var callback = options.receiver.unregister(id);
+      if (callback) {
+        callback(error);
+      }
+    });
+  };
+
   var prototype = JSONPRequest.prototype;
 
   prototype.send = function(id, data, callback) {

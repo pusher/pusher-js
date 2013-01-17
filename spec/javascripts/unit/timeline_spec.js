@@ -1,13 +1,13 @@
 describe("Timeline", function() {
   beforeEach(function() {
-    this.jsonp = Pusher.Mocks.getJSONPSender();
-    this.timeline = new Pusher.Timeline(666, this.jsonp);
+    this.sendJSONP = jasmine.createSpy("sendJSONP")
+    this.timeline = new Pusher.Timeline(666, this.sendJSONP);
     this.onSend = jasmine.createSpy("onSend")
   });
 
   describe("on send", function() {
     it("should include key, session id, features, version and params", function() {
-      var timeline = new Pusher.Timeline(666, this.jsonp, {
+      var timeline = new Pusher.Timeline(666, this.sendJSONP, {
         key: "foobar",
         features: ["x", "y", "z"],
         version: "6.6.6",
@@ -18,7 +18,7 @@ describe("Timeline", function() {
       });
 
       expect(timeline.send(this.onSend)).toBe(true);
-      expect(this.jsonp.send).toHaveBeenCalledWith(
+      expect(this.sendJSONP).toHaveBeenCalledWith(
         { key: "foobar",
           session: 666,
           features: ["x", "y", "z"],
@@ -42,7 +42,7 @@ describe("Timeline", function() {
       this.timeline.push({b: 2.2});
 
       expect(this.timeline.send(this.onSend)).toBe(true);
-      expect(this.jsonp.send).toHaveBeenCalledWith(
+      expect(this.sendJSONP).toHaveBeenCalledWith(
         { session: 666,
           timeline: [
             { timestamp: 1000, a: 1 },
@@ -56,10 +56,10 @@ describe("Timeline", function() {
 
     it("should not send extra info in second request", function() {
       var sendCallback = null;
-      this.jsonp.send.andCallFake(function(data, callback) {
+      this.sendJSONP.andCallFake(function(data, callback) {
         sendCallback = callback;
       });
-      var timeline = new Pusher.Timeline(666, this.jsonp, {
+      var timeline = new Pusher.Timeline(666, this.sendJSONP, {
         key: "foobar",
         features: ["x", "y", "z"],
         version: "6.6.6"
@@ -67,7 +67,7 @@ describe("Timeline", function() {
 
       // first call
       expect(timeline.send(this.onSend)).toBe(true);
-      expect(this.jsonp.send).toHaveBeenCalledWith(
+      expect(this.sendJSONP).toHaveBeenCalledWith(
         { key: "foobar",
           session: 666,
           features: ["x", "y", "z"],
@@ -79,7 +79,7 @@ describe("Timeline", function() {
       sendCallback(null);
       // second call
       expect(timeline.send(this.onSend)).toBe(true);
-      expect(this.jsonp.send).toHaveBeenCalledWith(
+      expect(this.sendJSONP).toHaveBeenCalledWith(
         { session: 666, timeline: [] }, jasmine.any(Function)
       );
     });
@@ -87,13 +87,13 @@ describe("Timeline", function() {
     it("should respect the size limit", function() {
       spyOn(Pusher.Util, "now").andReturn(123);
 
-      var timeline = new Pusher.Timeline(123, this.jsonp, { limit: 3 });
+      var timeline = new Pusher.Timeline(123, this.sendJSONP, { limit: 3 });
       for (var i = 1; i <= 4; i++) {
         timeline.push({ i: i })
       }
 
       expect(timeline.send(this.onSend)).toBe(true);
-      expect(this.jsonp.send).toHaveBeenCalledWith(
+      expect(this.sendJSONP).toHaveBeenCalledWith(
         { session: 123,
           timeline: [
             { timestamp: 123, i: 2},

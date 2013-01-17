@@ -1,8 +1,8 @@
 (function() {
 
-  function Timeline(session, jsonp, options) {
+  function Timeline(session, sendJSONP, options) {
     this.session = session;
-    this.jsonp = jsonp;
+    this.sendJSONP = sendJSONP;
     this.events = [];
     this.options = options || {};
     this.sent = 0;
@@ -24,7 +24,7 @@
   };
 
   prototype.send = function(callback) {
-    if (!this.jsonp) {
+    if (!this.sendJSONP) {
       return false;
     }
     var self = this;
@@ -42,7 +42,7 @@
     Pusher.Util.filterObject(data, function(v) { return v !== undefined; });
 
     this.events = [];
-    this.jsonp.send(data, function(error, result) {
+    this.sendJSONP(data, function(error, result) {
       if (!error) {
         self.sent++;
       }
