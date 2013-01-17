@@ -22,7 +22,6 @@ bundle 'pusher.js' do
   file 'base64.js'
   file 'jsonp/jsonp_request.js'
   file 'jsonp/jsonp_receiver.js'
-  file 'jsonp/jsonp_sender.js'
 
   file 'timeline.js'
 
