@@ -36,10 +36,13 @@ describe("FlashTransport", function() {
   });
 
   it("should be supported only if Flash is present", function() {
-    // workaround for IE to skip this test
+    var _navigator = navigator;
+    var _mimeTypes = navigator.mimeTypes;
+
+    // workaround for IE to skip navigator tests
     if (navigator.__defineGetter__) {
-      var _navigator = navigator;
-      var _mimeTypes = navigator.mimeTypes;
+
+      // For browsers with navigator object
 
       navigator = {};
 
@@ -52,11 +55,29 @@ describe("FlashTransport", function() {
         return {};
       });
       expect(Pusher.FlashTransport.isSupported()).toBe(false);
+    }
 
+    // IE compatibility
+
+    var _ActiveXObject = window.ActiveXObject;
+    window.ActiveXObject = jasmine.createSpy("ActiveXObject")
+
+    expect(Pusher.FlashTransport.isSupported()).toBe(true);
+    expect(window.ActiveXObject)
+      .toHaveBeenCalledWith("ShockwaveFlash.ShockwaveFlash");
+
+    window.ActiveXObject.andCallFake(function() {
+      throw new Error("Automation server can't create object");
+    });
+    expect(Pusher.FlashTransport.isSupported()).toBe(false);
+
+    window.ActiveXObject = _ActiveXObject;
+
+    // restore navigator for non-IE browsers
+    if (navigator.__defineGetter__) {
       navigator.__defineGetter__("mimeTypes", function() {
         return _mimeTypes;
       });
-
       navigator = _navigator;
     }
   });
