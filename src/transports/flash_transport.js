@@ -28,7 +28,11 @@
    * @returns {Boolean}
    */
   FlashTransport.isSupported = function() {
-    return navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
+    try {
+      return !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+    } catch (e) {
+      return navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
+    }
   };
 
   /** Fetches flashfallback dependency if needed.
