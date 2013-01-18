@@ -153,8 +153,8 @@
   };
 
   /** @protected */
-  prototype.onClose = function() {
-    this.changeState("closed");
+  prototype.onClose = function(reason) {
+    this.changeState("closed", reason);
     this.socket = undefined;
   };
 
@@ -170,7 +170,7 @@
 
     this.socket.onopen = function() { self.onOpen(); };
     this.socket.onerror = function(error) { self.onError(error); };
-    this.socket.onclose = function() { self.onClose(); };
+    this.socket.onclose = function(reason) { self.onClose(reason); };
     this.socket.onmessage = function(message) { self.onMessage(message); };
   };
 
