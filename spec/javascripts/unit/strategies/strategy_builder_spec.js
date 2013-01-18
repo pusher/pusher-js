@@ -95,6 +95,17 @@ describe("StrategyBuilder", function() {
     expect(strategy).toEqual(jasmine.any(Pusher.FirstSupportedStrategy));
   });
 
+  it("should construct an all supported strategy", function() {
+    var strategy = Pusher.StrategyBuilder.build(
+      { type: "all_supported",
+        children: [
+          { type: "transport", transport: "sockjs" }
+        ]
+      }
+    );
+    expect(strategy).toEqual(jasmine.any(Pusher.AllSupportedStrategy));
+  });
+
   it("should construct a first connected strategy", function() {
     var strategy = Pusher.StrategyBuilder.build(
       { type: "first_connected",

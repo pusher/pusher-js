@@ -50,6 +50,10 @@
       return buildWithSubstrategies(Pusher.FirstSupportedStrategy, scheme);
     },
 
+    all_supported: function(scheme) {
+      return buildWithSubstrategies(Pusher.AllSupportedStrategy, scheme);
+    },
+
     first_connected: function(scheme) {
       return buildWithSubstrategies(Pusher.FirstConnectedStrategy, scheme);
     },
