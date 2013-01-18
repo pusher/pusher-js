@@ -218,6 +218,25 @@
       return result;
     },
 
+    /** Checks whether any element of the array passes the test.
+     *
+     * Function test gets 3 arguments passed:
+     * - element from the array
+     * - index of the element
+     * - reference to the source array
+     *
+     * @param {Array} array
+     * @param {Function} f
+     */
+    any: function(array, test) {
+      for (var i = 0; i < array.length; i++) {
+        if (test(array[i], i, array)) {
+          return true;
+        }
+      }
+      return false;
+    },
+
     /** Checks whether all elements of the array pass the test.
      *
      * Function test gets 3 arguments passed:
