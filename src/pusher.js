@@ -57,7 +57,8 @@
           pongTimeout: Pusher.pong_timeout,
           unavailableTimeout: Pusher.unavailable_timeout
         },
-        this.options
+        this.options,
+        { encrypted: this.isEncrypted }
       )
     );
 
@@ -187,6 +188,14 @@
     checkAppKey: function() {
       if(this.key === null || this.key === undefined) {
         Pusher.warn('Warning', 'You must pass your app key when you instantiate Pusher.');
+      }
+    },
+
+    isEncrypted: function() {
+      if (document.location.protocol === "https:") {
+        return true;
+      } else {
+        return !!this.options.encrypted;
       }
     }
   };
