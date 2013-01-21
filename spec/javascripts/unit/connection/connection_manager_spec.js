@@ -52,6 +52,15 @@ describe("ConnectionManager", function() {
       expect(this.manager.options.getStrategy.calls[0].args[0].key)
         .toEqual("foo");
     });
+
+    it("should pass whether connection is encrypted to timeline", function() {
+      var options = Pusher.Util.extend({}, this.managerOptions, {
+        encrypted: true
+      });
+      var manager = new Pusher.ConnectionManager("foo", options);
+      expect(options.getTimeline)
+        .toHaveBeenCalledWith({ encrypted: true }, manager);
+    });
   });
 
   describe("on connect", function() {
