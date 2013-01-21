@@ -10,49 +10,52 @@
 
     this.checkAppKey();
 
+    var getStrategy = function(options) {
+      return Pusher.StrategyBuilder.build(
+        Pusher.Util.extend(Pusher.defaultStrategy, self.options, options)
+      );
+    };
+    var getTimeline = function(options, manager) {
+      var scheme = "http" + (self.isEncrypted() ? "s" : "") + "://";
+      var sendJSONP = function(data, callback) {
+        return Pusher.JSONPRequest.send({
+          data: data,
+          url: scheme + Pusher.stats_host + "/timeline",
+          receiver: Pusher.JSONP
+        }, callback);
+      };
+      var timeline = new Pusher.Timeline(
+        self.sessionID, sendJSONP, {
+          key: self.key,
+          features: Pusher.Util.keys(
+            Pusher.Util.filterObject(
+              { "ws": Pusher.WSTransport,
+                "flash": Pusher.FlashTransport
+              },
+              function (t) { return t.isSupported(); }
+            )
+          ),
+          params: self.options.timelineParams || {},
+          limit: 25
+        }
+      );
+
+      var sendTimeline = function() {
+        if (!timeline.isEmpty()) {
+          timeline.send(function() {});
+        }
+      };
+      manager.bind("connected", sendTimeline);
+      setInterval(sendTimeline, 60000);
+
+      return timeline;
+    };
+
     this.connection = new Pusher.ConnectionManager(
       this.key,
       Pusher.Util.extend(
-        { getStrategy: function(options) {
-            return Pusher.StrategyBuilder.build(
-              Pusher.Util.extend(Pusher.defaultStrategy, self.options, options)
-            );
-          },
-          getTimeline: function(options, manager) {
-            var scheme = "http" + (options.encrypted ? "s" : "") + "://";
-            var sendJSONP = function(data, callback) {
-              return Pusher.JSONPRequest.send({
-                data: data,
-                url: scheme + Pusher.stats_host + "/timeline",
-                receiver: Pusher.JSONP
-              }, callback);
-            };
-            var timeline = new Pusher.Timeline(
-              self.sessionID, sendJSONP, {
-                key: self.key,
-                features: Pusher.Util.keys(
-                  Pusher.Util.filterObject(
-                    { "ws": Pusher.WSTransport,
-                      "flash": Pusher.FlashTransport
-                    },
-                    function (t) { return t.isSupported(); }
-                  )
-                ),
-                params: self.options.timelineParams || {},
-                limit: 25
-              }
-            );
-
-            var sendTimeline = function() {
-              if (!timeline.isEmpty()) {
-                timeline.send(function() {});
-              }
-            };
-            manager.bind("connected", sendTimeline);
-            setInterval(sendTimeline, 60000);
-
-            return timeline;
-          },
+        { getStrategy: getStrategy,
+          getTimeline: getTimeline,
           activityTimeout: Pusher.activity_timeout,
           pongTimeout: Pusher.pong_timeout,
           unavailableTimeout: Pusher.unavailable_timeout
