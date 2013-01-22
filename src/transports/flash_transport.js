@@ -24,10 +24,17 @@
 
   /** Checks whether Flash is supported in the browser.
    *
+   * It is possible to disable flash by passing an envrionment object with the
+   * disableFlash property set to true.
+   *
    * @see AbstractTransport.isSupported
+   * @param {Object} environment
    * @returns {Boolean}
    */
-  FlashTransport.isSupported = function() {
+  FlashTransport.isSupported = function(environment) {
+    if (environment && environment.disableFlash) {
+      return false;
+    }
     try {
       return !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {

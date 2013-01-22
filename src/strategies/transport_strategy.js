@@ -6,7 +6,7 @@
    */
   function TransportStrategy(transport, options) {
     this.transport = transport;
-    this.options = options;
+    this.options = options || {};
   }
   var prototype = TransportStrategy.prototype;
 
@@ -17,7 +17,9 @@
    * @returns {Boolean}
    */
   prototype.isSupported = function() {
-    return this.transport.isSupported();
+    return this.transport.isSupported({
+      disableFlash: !!this.options.disableFlash
+    });
   };
 
   /** Returns an object with strategy's options

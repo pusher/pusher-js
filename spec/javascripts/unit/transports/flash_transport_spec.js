@@ -51,6 +51,10 @@ describe("FlashTransport", function() {
       });
       expect(Pusher.FlashTransport.isSupported()).toBe(true);
 
+      expect(Pusher.FlashTransport.isSupported({
+        disableFlash: true
+      })).toBe(false);
+
       navigator.__defineGetter__("mimeTypes", function() {
         return {};
       });
@@ -65,6 +69,10 @@ describe("FlashTransport", function() {
     expect(Pusher.FlashTransport.isSupported()).toBe(true);
     expect(window.ActiveXObject)
       .toHaveBeenCalledWith("ShockwaveFlash.ShockwaveFlash");
+
+    expect(Pusher.FlashTransport.isSupported({
+      disableFlash: true
+    })).toBe(false);
 
     window.ActiveXObject.andCallFake(function() {
       throw new Error("Automation server can't create object");
