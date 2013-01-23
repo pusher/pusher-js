@@ -202,7 +202,8 @@
 
   /** @protected */
   prototype.getQueryString = function() {
-    return "?protocol=5&client=js&version=" + Pusher.VERSION;
+    return "?protocol=" + Pusher.PROTOCOL +
+      "&client=js&version=" + Pusher.VERSION;
   };
 
   /** @protected */

@@ -152,7 +152,7 @@ describe("FlashTransport", function() {
       expect(window.WebSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
-          "?protocol=5&client=js&version=<VERSION>&flash=true"
+          "?protocol=6&client=js&version=<VERSION>&flash=true"
         );
     });
   });
