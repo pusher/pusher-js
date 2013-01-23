@@ -79,6 +79,11 @@
           self.transport.unbind("message", onMessageOpen);
           self.transport.bind("message", onMessageConnected);
           self.emit("connected", self.id);
+        } else if (message.event === "pusher:error") {
+          // From protocol 6 close codes are sent only once, so this only
+          // happens when connection does not support close codes
+          self.handleCloseCode(message.data.code, message.data.message);
+          self.transport.close();
         }
       }
     };

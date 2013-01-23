@@ -48,6 +48,24 @@ describe("ProtocolWrapper", function() {
 
       expect(onConnected).toHaveBeenCalledWith("123.456");
     });
+
+    it("should emit 'ssl_only' and close connection when receiving close code 4000 via pusher:error", function() {
+      var onSSLOnly = jasmine.createSpy("onSSLOnly");
+      this.wrapper.bind("ssl_only", onSSLOnly);
+
+      this.transport.emit("message", {
+        data: JSON.stringify({
+          event: "pusher:error",
+          data: {
+            code: 4000,
+            message: "SSL only"
+          }
+        })
+      });
+
+      expect(onSSLOnly).toHaveBeenCalled();
+      expect(this.transport.close).toHaveBeenCalled();
+    });
   });
 
   describe("on send", function() {
