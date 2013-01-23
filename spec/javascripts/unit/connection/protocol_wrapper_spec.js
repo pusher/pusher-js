@@ -50,8 +50,10 @@ describe("ProtocolWrapper", function() {
     });
 
     it("should emit 'ssl_only' and close connection when receiving close code 4000 via pusher:error", function() {
+      var onConnected = jasmine.createSpy("onConnected");
       var onSSLOnly = jasmine.createSpy("onSSLOnly");
       this.wrapper.bind("ssl_only", onSSLOnly);
+      this.wrapper.bind("connected", onConnected);
 
       this.transport.emit("message", {
         data: JSON.stringify({
@@ -63,6 +65,7 @@ describe("ProtocolWrapper", function() {
         })
       });
 
+      expect(onConnected).not.toHaveBeenCalled();
       expect(onSSLOnly).toHaveBeenCalled();
       expect(this.transport.close).toHaveBeenCalled();
     });
