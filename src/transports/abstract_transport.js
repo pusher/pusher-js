@@ -126,7 +126,11 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.log({ error: error.name || "unknown" });
+    this.log({
+      error: Pusher.Util.filterObject(error, function(value, key) {
+        return (typeof value !== "object" && typeof value !== "function");
+      })
+    });
   };
 
   /** @protected */
