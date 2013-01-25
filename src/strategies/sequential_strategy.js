@@ -26,6 +26,7 @@
   prototype.connect = function(callback) {
     var self = this;
 
+    var strategies = Pusher.MultiStrategy.filterUnsupported(this.strategies);
     var current = 0;
     var timeout = this.options.timeout;
     var runner = null;
@@ -36,10 +37,10 @@
       } else {
         current = current + 1;
         if (self.options.loop) {
-          current = current % self.strategies.length;
+          current = current % strategies.length;
         }
 
-        if (current < self.strategies.length) {
+        if (current < strategies.length) {
           if (timeout) {
             timeout = timeout * 2;
             if (self.options.timeoutLimit) {
@@ -47,7 +48,7 @@
             }
           }
           runner = self.tryStrategy(
-            self.strategies[current], timeout, tryNextStrategy
+            strategies[current], timeout, tryNextStrategy
           );
         } else {
           callback(true);
@@ -55,9 +56,7 @@
       }
     };
 
-    runner = this.tryStrategy(
-      this.strategies[current], timeout, tryNextStrategy
-    );
+    runner = this.tryStrategy(strategies[current], timeout, tryNextStrategy);
 
     return {
       abort: function() {

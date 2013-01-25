@@ -24,7 +24,7 @@
       return null;
     }
     return Pusher.ParallelStrategy.connect(
-      this.strategies,
+      Pusher.MultiStrategy.filterUnsupported(this.strategies),
       function(i, runners) {
         return function(error, connection) {
           runners[i].error = error;

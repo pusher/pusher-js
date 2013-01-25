@@ -4,7 +4,7 @@
    * @param {Array} substrategies list of children strategies
    */
   function MultiStrategy(strategies, options) {
-    this.strategies = Pusher.MultiStrategy.filterUnsupported(strategies);
+    this.strategies = strategies;
     this.options = options || {};
   }
   var prototype = MultiStrategy.prototype;
@@ -18,7 +18,7 @@
    * @returns {Boolean}
    */
   prototype.isSupported = function() {
-    return this.strategies.length > 0;
+    return Pusher.Util.any(this.strategies, Pusher.Util.method("isSupported"));
   };
 
   /** Returns an object with strategy's options
