@@ -31,11 +31,7 @@
     this.options = options || {};
     this.state = "initialized";
     this.connection = null;
-
-    this.strategy = options.getStrategy({
-      key: key,
-      timeline: options.getTimeline({ encrypted: !!options.encrypted }, this)
-    });
+    this.encrypted = !!options.encrypted;
 
     var self = this;
 
@@ -67,7 +63,14 @@
     if (this.state === "connecting") {
       return;
     }
-    if (!this.strategy.isSupported()) {
+
+    var strategy = this.options.getStrategy({
+      key: this.key,
+      timeline: this.options.getTimeline({ encrypted: this.encrypted }, this),
+      encrypted: this.encrypted
+    });
+
+    if (!strategy.isSupported()) {
       this.updateState("failed");
       return;
     }
@@ -81,14 +84,14 @@
     this.updateState("connecting");
     var callback = function(error, transport) {
       if (error) {
-        self.runner = self.strategy.connect(callback);
+        self.runner = strategy.connect(callback);
       } else {
         // we don't support switching connections yet
         self.runner.abort();
         self.setConnection(self.wrapTransport(transport));
       }
     };
-    this.runner = this.strategy.connect(callback);
+    this.runner = strategy.connect(callback);
 
     this.unavailableTimer = setTimeout(function() {
       if (!self.unavailableTimer) {
@@ -233,11 +236,7 @@
 
     // handling close conditions
     var onSSLOnly = function() {
-      self.strategy = self.options.getStrategy({
-        key: self.key,
-        encrypted: true,
-        timeline: self.options.getTimeline({ encrypted: true }, self)
-      });
+      self.encrypted = true;
       self.retryIn(0);
     };
     var onRefused = function() {

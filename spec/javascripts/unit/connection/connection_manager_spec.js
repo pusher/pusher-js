@@ -41,14 +41,15 @@ describe("ConnectionManager", function() {
         unavailableTimeout: 1234
       });
     });
-  });
 
-  describe("on initialize", function() {
     it("should transition to initialized state", function() {
       expect(this.manager.state).toEqual("initialized");
     });
+  });
 
+  describe("on connect", function() {
     it("should pass key to strategy builder", function() {
+      this.manager.connect();
       expect(this.manager.options.getStrategy.calls[0].args[0].key)
         .toEqual("foo");
     });
@@ -58,12 +59,11 @@ describe("ConnectionManager", function() {
         encrypted: true
       });
       var manager = new Pusher.ConnectionManager("foo", options);
+      manager.connect();
       expect(options.getTimeline)
         .toHaveBeenCalledWith({ encrypted: true }, manager);
     });
-  });
 
-  describe("on connect", function() {
     it("should initialize strategy and try to connect", function() {
       this.manager.connect();
       expect(this.strategy.connect).toHaveBeenCalled();
@@ -223,22 +223,22 @@ describe("ConnectionManager", function() {
       var self = this;
       var encryptedStrategy = Pusher.Mocks.getStrategy(true);
 
-      this.managerOptions.getStrategy.andReturn(encryptedStrategy);
-
       this.manager.connect();
       this.strategy._callback(null, {});
+
+      this.managerOptions.getStrategy.andReturn(encryptedStrategy);
       this.connection.emit("ssl_only");
 
-      expect(this.managerOptions.getTimeline).toHaveBeenCalledWith({
-        encrypted: true
-      }, this.manager);
+      jasmine.Clock.tick(0);
+
+      expect(this.managerOptions.getTimeline)
+        .toHaveBeenCalledWith({ encrypted: true }, this.manager);
       expect(this.managerOptions.getStrategy).toHaveBeenCalledWith({
         key: "foo",
         encrypted: true,
         timeline: this.timeline
       });
 
-      jasmine.Clock.tick(0);
       expect(encryptedStrategy.connect).toHaveBeenCalled();
       expect(this.manager.state).toEqual("connecting");
     });
