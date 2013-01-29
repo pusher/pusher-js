@@ -3,4 +3,4 @@
 	url = git://github.com/pusher/web-socket-js.git
 [submodule "src/sockjs"]
 	path = src/sockjs
-	url = git://github.com/sockjs/sockjs-client.git
+	url = git://github.com/pusher/sockjs-client.git
