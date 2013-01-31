@@ -39,7 +39,7 @@
 
     var path = this.getRoot() + '/' + name + this.options.suffix + '.js';
 
-    require([path], function() {
+    require(path, function() {
       for (var i = 0; i < self.loading[name].length; i++) {
         self.loading[name][i]();
       }
