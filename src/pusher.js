@@ -15,40 +15,27 @@
         Pusher.Util.extend(Pusher.defaultStrategy, self.options, options)
       );
     };
-    var getTimeline = function(options, manager) {
-      var scheme = "http" + (self.isEncrypted() ? "s" : "") + "://";
-      var sendJSONP = function(data, callback) {
-        return Pusher.JSONPRequest.send({
-          data: data,
-          url: scheme + Pusher.stats_host + "/timeline",
-          receiver: Pusher.JSONP
-        }, callback);
-      };
-      var timeline = new Pusher.Timeline(
-        self.sessionID, sendJSONP, {
-          key: self.key,
-          features: Pusher.Util.keys(
-            Pusher.Util.filterObject(
-              { "ws": Pusher.WSTransport,
-                "flash": Pusher.FlashTransport
-              },
-              function (t) { return t.isSupported(); }
-            )
-          ),
-          params: self.options.timelineParams || {},
-          limit: 25
-        }
-      );
+    var getTimeline = function() {
+      return new Pusher.Timeline(self.key, self.sessionID, {
+        features: Pusher.Util.getClientFeatures(),
+        params: self.options.timelineParams || {},
+        limit: 25
+      });
+    };
+    var getTimelineSender = function(timeline, options, manager) {
+      var sender = new Pusher.TimelineSender(timeline, {
+        encrypted: self.isEncrypted() || !!options.encrypted,
+        host: Pusher.stats_host,
+        path: "/timeline"
+      });
 
       var sendTimeline = function() {
-        if (!timeline.isEmpty()) {
-          timeline.send(function() {});
-        }
+        sender.send(function() {});
       };
       manager.bind("connected", sendTimeline);
       setInterval(sendTimeline, 60000);
 
-      return timeline;
+      return sender;
     };
 
     this.connection = new Pusher.ConnectionManager(
@@ -56,6 +43,7 @@
       Pusher.Util.extend(
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
+          getTimelineSender: getTimelineSender,
           activityTimeout: Pusher.activity_timeout,
           pongTimeout: Pusher.pong_timeout,
           unavailableTimeout: Pusher.unavailable_timeout

@@ -5,16 +5,17 @@ describe("ConnectionManager", function() {
     this.connection = Pusher.Mocks.getConnection();
     this.strategy = Pusher.Mocks.getStrategy(true);
     this.timeline = Pusher.Mocks.getTimeline();
+    this.timelineSender = Pusher.Mocks.getTimelineSender();
 
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     this.managerOptions = {
-      getStrategy: jasmine.createSpy("getStrategy").andCallFake(function() {
-        return self.strategy;
-      }),
-      getTimeline: jasmine.createSpy("getTimeline").andCallFake(function() {
-        return self.timeline;
-      }),
+      getStrategy: jasmine.createSpy("getStrategy")
+        .andReturn(self.strategy),
+      getTimeline: jasmine.createSpy("getTimeline")
+        .andReturn(self.timeline),
+      getTimelineSender: jasmine.createSpy("getTimelineSender")
+        .andReturn(self.timelineSender),
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
@@ -60,8 +61,8 @@ describe("ConnectionManager", function() {
       });
       var manager = new Pusher.ConnectionManager("foo", options);
       manager.connect();
-      expect(options.getTimeline)
-        .toHaveBeenCalledWith({ encrypted: true }, manager);
+      expect(options.getTimelineSender)
+        .toHaveBeenCalledWith(this.timeline, { encrypted: true }, manager);
     });
 
     it("should initialize strategy and try to connect", function() {
@@ -231,8 +232,8 @@ describe("ConnectionManager", function() {
 
       jasmine.Clock.tick(0);
 
-      expect(this.managerOptions.getTimeline)
-        .toHaveBeenCalledWith({ encrypted: true }, this.manager);
+      expect(this.managerOptions.getTimelineSender)
+        .toHaveBeenCalledWith(this.timeline, { encrypted: true }, this.manager);
       expect(this.managerOptions.getStrategy).toHaveBeenCalledWith({
         key: "foo",
         encrypted: true,

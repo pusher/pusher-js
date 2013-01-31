@@ -64,11 +64,19 @@
       return;
     }
 
+    var timeline = this.options.getTimeline();
     var strategy = this.options.getStrategy({
       key: this.key,
-      timeline: this.options.getTimeline({ encrypted: this.encrypted }, this),
+      timeline: timeline,
       encrypted: this.encrypted
     });
+
+    // TODO: bind sender to events here
+    var timelineSender = this.options.getTimelineSender(
+      timeline,
+      { encrypted: this.encrypted },
+      this
+    );
 
     if (!strategy.isSupported()) {
       this.updateState("failed");

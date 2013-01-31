@@ -9,6 +9,14 @@
     getTimeline: function() {
       return {
         push: jasmine.createSpy("push"),
+        send: jasmine.createSpy("send"),
+        isEmpty: jasmine.createSpy("isEmpty")
+      };
+    },
+
+    getTimelineSender: function() {
+      return {
+        isEncrypted: jasmine.createSpy("isEncrypted"),
         send: jasmine.createSpy("send")
       };
     },

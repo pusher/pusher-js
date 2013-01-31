@@ -14,7 +14,8 @@ src_files:
   - jsonp/jsonp_request.js
   - jsonp/jsonp_receiver.js
 
-  - timeline.js
+  - timeline/timeline.js
+  - timeline/timeline_sender.js
 
   - strategies/multi_strategy.js
   - strategies/parallel_strategy.js
