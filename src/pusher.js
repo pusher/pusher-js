@@ -61,7 +61,7 @@
           unavailableTimeout: Pusher.unavailable_timeout
         },
         this.options,
-        { encrypted: this.isEncrypted }
+        { encrypted: this.isEncrypted() }
       )
     );
 
