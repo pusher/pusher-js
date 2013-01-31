@@ -30,26 +30,36 @@
     loop: true,
     timeoutLimit: 8000,
     children: [
-      { type: "sequential",
-        timeout: 2000,
+      { type: "first_supported",
         children: [
-          { type: "transport", transport: "ws" },
-          { type: "transport", transport: "ws", encrypted: true }
-        ]
-      },
-      { type: "sequential",
-        timeout: 5000,
-        children: [
-          { type: "transport", transport: "flash" },
-          { type: "transport", transport: "flash", encrypted: true }
-        ]
-      },
-      { type: "sequential",
-        timeout: 2000,
-        host: "sockjs.pusher.com",
-        children: [
-          { type: "transport", transport: "sockjs" },
-          { type: "transport", transport: "sockjs", encrypted: true }
+          { type: "all_supported",
+            children: [
+              { type: "first_supported",
+                children: [
+                  { type: "sequential",
+                    timeout: 4000,
+                    children: [{ type: "transport", transport: "ws" }]
+                  },
+                  { type: "sequential",
+                    timeout: 7000,
+                    children: [{ type: "transport", transport: "flash" }]
+                  }
+                ]
+              },
+              { type: "delayed",
+                delay: 2000,
+                child: {
+                  type: "transport",
+                  transport: "sockjs",
+                  host: "sockjs.pusher.com"
+                }
+              }
+            ]
+          },
+          { type: "transport",
+            transport: "sockjs",
+            host: "sockjs.pusher.com"
+          }
         ]
       }
     ]
