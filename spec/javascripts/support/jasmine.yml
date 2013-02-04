@@ -10,6 +10,8 @@ src_files:
   - pusher_event_dispatcher.js
   - net_info.js
 
+  - pusher_channels.js
+
   - base64.js
   - jsonp/jsonp_request.js
   - jsonp/jsonp_receiver.js

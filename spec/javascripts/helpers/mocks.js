@@ -24,6 +24,8 @@
     getTransport: function() {
       var transport = new Pusher.EventsDispatcher();
 
+      transport.supportsPing = jasmine.createSpy("supportsPing")
+        .andReturn(true);
       transport.initialize = jasmine.createSpy("initialize")
         .andCallFake(function() {
           transport.state = "initializing";
@@ -84,6 +86,12 @@
       connection.close = jasmine.createSpy("close");
 
       return connection;
+    },
+
+    getConnectionManager: function() {
+      var manager = new Pusher.EventsDispatcher();
+      manager.connect = jasmine.createSpy("connect");
+      return manager;
     }
   };
 }).call(this);
