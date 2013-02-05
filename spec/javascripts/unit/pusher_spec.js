@@ -3,20 +3,21 @@ describe("Pusher", function() {
   var strategy, manager, pusher;
 
   function expectValidSubscriptions(manager, channels) {
-    for (var channelName in channels) {
-      var channel = channels[channelName];
+    var channel, channelName;
+    for (channelName in channels) {
+      channel = channels[channelName];
       expect(channel.authorize)
-        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function))
+        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function));
     }
 
-    for (var channelName in channels) {
-      var channel = channels[channelName];
+    for (channelName in channels) {
+      channel = channels[channelName];
       channel.authorize.calls[0].args[2](null, {
         auth: { auth: channelName },
         channel_data: { data: channelName }
       });
       expect(channel.authorize)
-        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function))
+        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function));
       expect(manager.send_event).toHaveBeenCalledWith(
         "pusher:subscribe",
         { channel: channel.name,
@@ -88,24 +89,24 @@ describe("Pusher", function() {
       });
       expect(pusher.isEncrypted()).toBe(true);
     });
-  })
+  });
 
   describe("app key validation", function() {
     it("should allow a hex key", function() {
       spyOn(Pusher, "warn");
-      var pusher = new Pusher("1234567890abcdef");
+      new Pusher("1234567890abcdef");
       expect(Pusher.warn).not.toHaveBeenCalled();
     });
 
     it("should warn on a null key", function() {
       spyOn(Pusher, "warn");
-      var pusher = new Pusher(null);
+      pusher = new Pusher(null);
       expect(Pusher.warn).toHaveBeenCalled();
     });
 
     it("should warn on an undefined key", function() {
       spyOn(Pusher, "warn");
-      var pusher = new Pusher();
+      pusher = new Pusher();
       expect(Pusher.warn).toHaveBeenCalled();
     });
   });
@@ -136,7 +137,7 @@ describe("Pusher", function() {
     });
 
     it("should pass user-specified timeouts", function() {
-      var pusher = new Pusher("foo", {
+      new Pusher("foo", {
         activityTimeout: 123,
         pongTimeout: 456,
         unavailableTimeout: 789
@@ -150,7 +151,7 @@ describe("Pusher", function() {
     });
 
     it("should respect the 'encrypted' option", function() {
-      var pusher = new Pusher("foo", { encrypted: true });
+      new Pusher("foo", { encrypted: true });
 
       expect(Pusher.ConnectionManager.calls[0].args[1].encrypted)
         .toEqual(false);
@@ -295,8 +296,8 @@ describe("Pusher", function() {
         "channel2": pusher.subscribe("channel2")
       };
 
-      expect(subscribedChannels["channel1"].authorize).not.toHaveBeenCalled();
-      expect(subscribedChannels["channel2"].authorize).not.toHaveBeenCalled();
+      expect(subscribedChannels.channel1.authorize).not.toHaveBeenCalled();
+      expect(subscribedChannels.channel2.authorize).not.toHaveBeenCalled();
 
       pusher.connect();
       manager.state = "connected";
@@ -313,6 +314,12 @@ describe("Pusher", function() {
       manager.emit("connected");
     });
 
+    it("should send events to connection manager", function() {
+      pusher.send_event("event", { key: "value" }, "channel");
+      expect(manager.send_event)
+        .toHaveBeenCalledWith("event", { key: "value" }, "channel");
+    });
+
     describe("on subscribe", function() {
       it("should return the same channel object for subsequent calls", function() {
         var channel = pusher.subscribe("xxx");
@@ -327,9 +334,11 @@ describe("Pusher", function() {
 
       it("should emit pusher:subscription_error after auth error", function() {
         var channel = pusher.subscribe("wrong");
+        var onSubscriptionError = jasmine.createSpy("onSubscriptionError");
+
+        channel.bind("pusher:subscription_error", onSubscriptionError);
         channel.authorize.calls[0].args[2](true, "ERROR");
-        expect(channel.emit)
-          .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
+        expect(onSubscriptionError).toHaveBeenCalledWith("ERROR");
       });
     });
 
@@ -345,6 +354,71 @@ describe("Pusher", function() {
     });
   });
 
+  describe("on message", function() {
+    it("should publish events to their channels", function() {
+      var channel = pusher.subscribe("chan");
+      var onEvent = jasmine.createSpy("onEvent");
+      channel.bind("event", onEvent);
+
+      manager.emit("message", {
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
+      });
+      expect(onEvent).toHaveBeenCalledWith({ key: "value" });
+    });
+
+    it("should not publish events to other channels", function() {
+      var channel = pusher.subscribe("chan");
+      var onEvent = jasmine.createSpy("onEvent");
+      channel.bind("event", onEvent);
+
+      manager.emit("message", {
+        channel: "different",
+        event: "event",
+        data: {}
+      });
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should publish per-channel events globally (deprecated)", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      pusher.bind("event", onEvent);
+
+      manager.emit("message", {
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
+      });
+      expect(onEvent).toHaveBeenCalledWith({ key: "value" });
+    });
+
+    it("should publish global events (deprecated)", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var onAllEvents = jasmine.createSpy("onAllEvents");
+      pusher.bind("global", onEvent);
+      pusher.bind_all(onAllEvents);
+
+      manager.emit("message", {
+        event: "global",
+        data: "data"
+      });
+      expect(onEvent).toHaveBeenCalledWith("data");
+      expect(onAllEvents).toHaveBeenCalledWith("global", "data");
+    });
+
+    it("should not publish internal events", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      pusher.bind("pusher_internal:test", onEvent);
+
+      manager.emit("message", {
+        event: "pusher_internal:test",
+        data: "data"
+      });
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+  });
+
   describe("on disconnect", function() {
     beforeEach(function() {
       pusher.disconnect();
@@ -352,6 +426,25 @@ describe("Pusher", function() {
 
     it("should call disconnect on connection manager", function() {
       expect(manager.disconnect).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("on disconnected", function() {
+    it("should disconnect channels", function() {
+      var channel1 = pusher.subscribe("channel1");
+      var channel2 = pusher.subscribe("channel2");
+      manager.state = "disconnected";
+      manager.emit("disconnected");
+      expect(channel1.disconnect).toHaveBeenCalledWith();
+      expect(channel2.disconnect).toHaveBeenCalledWith();
+    });
+  });
+
+  describe("on error", function() {
+    it("should log a warning to console", function() {
+      spyOn(Pusher, "warn");
+      manager.emit("error", "something");
+      expect(Pusher.warn).toHaveBeenCalledWith("Error", "something");
     });
   });
 });

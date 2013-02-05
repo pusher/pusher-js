@@ -98,8 +98,10 @@
     },
 
     getChannel: function(name) {
-      var channel = jasmine.createSpyObj("channel", ["authorize", "emit"]);
+      var channel = new Pusher.EventsDispatcher();
       channel.name = name;
+      channel.authorize = jasmine.createSpy("authorize");
+      channel.disconnect = jasmine.createSpy("disconnect");
       return channel;
     }
   };
