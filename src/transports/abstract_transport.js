@@ -75,7 +75,6 @@
       return false;
     }
 
-    var self = this;
     var url = this.getURL(this.key, this.options);
 
     this.socket = this.createSocket(url);
@@ -127,7 +126,7 @@
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
     this.log({
-      error: Pusher.Util.filterObject(error, function(value, key) {
+      error: Pusher.Util.filterObject(error, function(value) {
         return (typeof value !== "object" && typeof value !== "function");
       })
     });

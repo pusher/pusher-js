@@ -1,6 +1,6 @@
 (function() {
 
-  function JSONPReceiver(options) {
+  function JSONPReceiver() {
     this.lastId = 0;
     this.callbacks = {};
   }

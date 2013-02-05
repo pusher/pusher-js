@@ -2,7 +2,7 @@
 
   var Base64 = {
     encode: function (s) {
-      return btoa(utob(s))
+      return btoa(utob(s));
     }
   };
 
@@ -18,11 +18,11 @@
   var cb_utob = function(c) {
     var cc = c.charCodeAt(0);
     return cc < 0x80 ? c
-        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6))
-                     + fromCharCode(0x80 | (cc & 0x3f))
-        : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f))
-        + fromCharCode(0x80 | ((cc >>>  6) & 0x3f))
-        + fromCharCode(0x80 | ( cc         & 0x3f));
+        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +
+                       fromCharCode(0x80 | (cc & 0x3f))
+        : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +
+          fromCharCode(0x80 | ((cc >>>  6) & 0x3f)) +
+          fromCharCode(0x80 | ( cc         & 0x3f));
   };
 
   var utob = function(u) {
