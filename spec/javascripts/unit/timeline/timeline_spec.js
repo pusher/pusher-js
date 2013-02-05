@@ -9,7 +9,7 @@ describe("Timeline", function() {
 
   it("should expose the key, session id and options", function() {
     var timeline = new Pusher.Timeline("foobar", 666, {
-      features: ["x", "y", "z"],
+      features: ["x", "y", "z"]
     });
     expect(timeline.key).toEqual("foobar");
     expect(timeline.session).toEqual(666);

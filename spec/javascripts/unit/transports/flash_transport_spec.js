@@ -64,7 +64,7 @@ describe("FlashTransport", function() {
     // IE compatibility
 
     var _ActiveXObject = window.ActiveXObject;
-    window.ActiveXObject = jasmine.createSpy("ActiveXObject")
+    window.ActiveXObject = jasmine.createSpy("ActiveXObject");
 
     expect(Pusher.FlashTransport.isSupported()).toBe(true);
     expect(window.ActiveXObject)

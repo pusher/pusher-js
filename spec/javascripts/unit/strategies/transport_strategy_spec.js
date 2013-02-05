@@ -37,7 +37,7 @@ describe("TransportStrategy", function() {
         disableFlash: true
       });
 
-      strategy.isSupported()
+      strategy.isSupported();
       expect(transport.isSupported).toHaveBeenCalledWith({
         disableFlash: true
       });

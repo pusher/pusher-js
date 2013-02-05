@@ -56,7 +56,7 @@ describe("TimelineSender", function() {
       sender.send(onSend);
 
       expect(onSend).not.toHaveBeenCalled();
-      jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
+      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
       jsonpCallback(null, {});
       expect(onSend).toHaveBeenCalled();
     });

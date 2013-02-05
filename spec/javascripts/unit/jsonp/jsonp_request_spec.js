@@ -16,7 +16,7 @@ describe("JSONPRequest", function() {
       self.request = this;
       this.send = jasmine.createSpy("send");
       this.cleanup = jasmine.createSpy("cleanup");
-    })
+    });
     Pusher.JSONPRequest.send = send;
   });
 
