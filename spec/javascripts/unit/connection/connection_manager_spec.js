@@ -1,42 +1,40 @@
 describe("ConnectionManager", function() {
-  beforeEach(function() {
-    var self = this;
+  var connection, strategy, timeline, timelineSender;
+  var managerOptions, manager;
 
+  beforeEach(function() {
     jasmine.Clock.useMock();
 
-    this.connection = Pusher.Mocks.getConnection();
-    this.strategy = Pusher.Mocks.getStrategy(true);
-    this.timeline = Pusher.Mocks.getTimeline();
-    this.timelineSender = Pusher.Mocks.getTimelineSender();
+    connection = Pusher.Mocks.getConnection();
+    strategy = Pusher.Mocks.getStrategy(true);
+    timeline = Pusher.Mocks.getTimeline();
+    timelineSender = Pusher.Mocks.getTimelineSender();
 
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
-    this.managerOptions = {
-      getStrategy: jasmine.createSpy("getStrategy")
-        .andReturn(self.strategy),
-      getTimeline: jasmine.createSpy("getTimeline")
-        .andReturn(self.timeline),
+    managerOptions = {
+      getStrategy: jasmine.createSpy("getStrategy").andReturn(strategy),
+      getTimeline: jasmine.createSpy("getTimeline").andReturn(timeline),
       getTimelineSender: jasmine.createSpy("getTimelineSender")
-        .andReturn(self.timelineSender),
+        .andReturn(timelineSender),
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
     };
-    this.manager = new Pusher.ConnectionManager("foo", this.managerOptions);
-    this.manager.wrapTransport = jasmine.createSpy("wrapTransport")
-      .andReturn(this.connection);
-
+    manager = new Pusher.ConnectionManager("foo", managerOptions);
+    manager.wrapTransport = jasmine.createSpy("wrapTransport")
+      .andReturn(connection);
   });
 
   describe("on construction", function() {
     it("should pass a timeline to the strategy builder", function() {
       new Pusher.ConnectionManager("foo", {
         getStrategy: function(options) {
-          expect(options.timeline).toBe(self.timeline);
-          return self.strategy;
+          expect(options.timeline).toBe(timeline);
+          return strategy;
         },
         getTimeline: function(options) {
-          return self.timeline;
+          return timeline;
         },
         activityTimeout: 3456,
         pongTimeout: 2345,
@@ -45,41 +43,41 @@ describe("ConnectionManager", function() {
     });
 
     it("should transition to initialized state", function() {
-      expect(this.manager.state).toEqual("initialized");
+      expect(manager.state).toEqual("initialized");
     });
   });
 
   describe("on connect", function() {
     it("should pass key to strategy builder", function() {
-      this.manager.connect();
-      expect(this.manager.options.getStrategy.calls[0].args[0].key)
+      manager.connect();
+      expect(manager.options.getStrategy.calls[0].args[0].key)
         .toEqual("foo");
     });
 
     it("should pass whether connection is encrypted to timeline", function() {
-      var options = Pusher.Util.extend({}, this.managerOptions, {
+      var options = Pusher.Util.extend({}, managerOptions, {
         encrypted: true
       });
       var manager = new Pusher.ConnectionManager("foo", options);
       manager.connect();
       expect(options.getTimelineSender)
-        .toHaveBeenCalledWith(this.timeline, { encrypted: true }, manager);
+        .toHaveBeenCalledWith(timeline, { encrypted: true }, manager);
     });
 
     it("should initialize strategy and try to connect", function() {
-      this.manager.connect();
-      expect(this.strategy.connect).toHaveBeenCalled();
+      manager.connect();
+      expect(strategy.connect).toHaveBeenCalled();
     });
 
     it("should transition to connecting", function() {
       var onConnecting = jasmine.createSpy("onConnecting");
       var onStateChange = jasmine.createSpy("onStateChange");
-      this.manager.bind("connecting", onConnecting);
-      this.manager.bind("state_change", onStateChange);
+      manager.bind("connecting", onConnecting);
+      manager.bind("state_change", onStateChange);
 
-      this.manager.connect();
+      manager.connect();
 
-      expect(this.manager.state).toEqual("connecting");
+      expect(manager.state).toEqual("connecting");
       expect(onConnecting).toHaveBeenCalled();
       expect(onStateChange).toHaveBeenCalledWith({
         previous: "initialized",
@@ -88,309 +86,298 @@ describe("ConnectionManager", function() {
     });
 
     it("should start sending timeline every minute", function() {
-      this.timeline.isEmpty.andReturn(false);
-      this.manager.connect();
+      timeline.isEmpty.andReturn(false);
+      manager.connect();
 
       jasmine.Clock.tick(59999);
-      expect(this.timelineSender.send.calls.length).toEqual(0);
+      expect(timelineSender.send.calls.length).toEqual(0);
       jasmine.Clock.tick(1);
-      expect(this.timelineSender.send.calls.length).toEqual(1);
+      expect(timelineSender.send.calls.length).toEqual(1);
       jasmine.Clock.tick(60000);
-      expect(this.timelineSender.send.calls.length).toEqual(2);
+      expect(timelineSender.send.calls.length).toEqual(2);
     });
   });
 
   describe("after successful connection attempt", function() {
     it("should transition to connected", function() {
       var onConnected = jasmine.createSpy("onConnected");
-      this.manager.bind("connected", onConnected);
+      manager.bind("connected", onConnected);
 
-      this.manager.connect();
-      this.strategy._callback(null, {});
+      manager.connect();
+      strategy._callback(null, {});
 
       expect(onConnected).not.toHaveBeenCalled();
-      this.connection.emit("connected", "123.456");
+      connection.emit("connected", "123.456");
 
       expect(onConnected).toHaveBeenCalled();
-      expect(this.manager.socket_id).toEqual("123.456");
+      expect(manager.socket_id).toEqual("123.456");
     });
 
     it("should abort substrategy immediately", function() {
-      this.manager.connect();
-      expect(this.strategy._abort).not.toHaveBeenCalled();
+      manager.connect();
+      expect(strategy._abort).not.toHaveBeenCalled();
 
-      this.strategy._callback(null, {});
-      expect(this.strategy._abort).toHaveBeenCalled();
+      strategy._callback(null, {});
+      expect(strategy._abort).toHaveBeenCalled();
     });
 
     it("should clear the unavailable timer", function() {
-      this.manager.connect();
-      this.strategy._callback(null, this.connection);
-      this.connection.emit("connected");
+      manager.connect();
+      strategy._callback(null, connection);
+      connection.emit("connected");
 
       jasmine.Clock.tick(1500);
       // if unavailable timer was not cleared, state should be unavailable
-      expect(this.manager.state).toEqual("connected");
+      expect(manager.state).toEqual("connected");
     });
 
     it("should not try to connect again", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
+      manager.connect();
+      strategy._callback(null, {});
 
-      expect(this.strategy.connect.calls.length).toEqual(1);
-      this.manager.connect();
-      expect(this.strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.length).toEqual(1);
+      manager.connect();
+      expect(strategy.connect.calls.length).toEqual(1);
     });
 
     it("should send timeline", function() {
-      expect(this.timelineSender.send).not.toHaveBeenCalled();
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("connected");
-      expect(this.timelineSender.send).toHaveBeenCalled();
+      expect(timelineSender.send).not.toHaveBeenCalled();
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected");
+      expect(timelineSender.send).toHaveBeenCalled();
     });
   });
 
   describe("on send", function() {
     it("should pass data to the transport", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("connected", "123.456");
-      expect(this.manager.send("howdy")).toBe(true);
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected", "123.456");
+      expect(manager.send("howdy")).toBe(true);
 
-      expect(this.connection.send).toHaveBeenCalledWith("howdy");
+      expect(connection.send).toHaveBeenCalledWith("howdy");
     });
 
     it("should not send data when not connected", function() {
-      expect(this.manager.send("FALSE!")).toBe(false);
+      expect(manager.send("FALSE!")).toBe(false);
     });
   });
 
   describe("on disconnect", function() {
     it("should transition to disconnected", function() {
       var onDisconnected = jasmine.createSpy("onDisconnected");
-      this.manager.bind("disconnected", onDisconnected);
+      manager.bind("disconnected", onDisconnected);
 
-      this.manager.connect();
-      this.manager.disconnect();
+      manager.connect();
+      manager.disconnect();
 
       expect(onDisconnected).toHaveBeenCalled();
     });
 
     it("should close connection", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.manager.disconnect();
+      manager.connect();
+      strategy._callback(null, {});
+      manager.disconnect();
 
-      expect(this.connection.close).toHaveBeenCalled();
+      expect(connection.close).toHaveBeenCalled();
     });
 
     it("should abort connection attempt", function() {
-      this.manager.connect();
-      this.manager.disconnect();
+      manager.connect();
+      manager.disconnect();
 
-      expect(this.strategy._abort).toHaveBeenCalled();
+      expect(strategy._abort).toHaveBeenCalled();
     });
 
     it("should clear the unavailable timer and activity check", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.manager.disconnect();
+      manager.connect();
+      strategy._callback(null, {});
+      manager.disconnect();
 
       jasmine.Clock.tick(10000);
-      expect(this.manager.state).toEqual("disconnected");
-      expect(this.connection.send).not.toHaveBeenCalled();
-      expect(this.connection.send_event).not.toHaveBeenCalled();
+      expect(manager.state).toEqual("disconnected");
+      expect(connection.send).not.toHaveBeenCalled();
+      expect(connection.send_event).not.toHaveBeenCalled();
     });
   });
 
   describe("on lost connection", function() {
     it("should transition to disconnected then to connecting", function() {
-      var self = this;
-
-      this.manager.connect();
-      this.strategy._callback(null, {});
+      manager.connect();
+      strategy._callback(null, {});
 
       var onConnecting = jasmine.createSpy("onConnecting");
       var onDisconnected = jasmine.createSpy("onDisconnected")
         .andCallFake(function() {
-          self.manager.bind("connecting", onConnecting);
+          manager.bind("connecting", onConnecting);
         });
-      this.manager.bind("disconnected", onDisconnected);
+      manager.bind("disconnected", onDisconnected);
 
-      this.connection.emit("closed");
+      connection.emit("closed");
       jasmine.Clock.tick(0);
       expect(onDisconnected).toHaveBeenCalled();
       expect(onConnecting).toHaveBeenCalled();
     });
 
     it("should clean up activity timer and abort strategy", function() {
-      var self = this;
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected");
+      expect(strategy._abort).toHaveBeenCalled();
 
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("connected");
-      expect(this.strategy._abort).toHaveBeenCalled();
-
-      this.connection.emit("closed");
+      connection.emit("closed");
       jasmine.Clock.tick(0);
 
       jasmine.Clock.tick(10000);
       // there should be no messages (including ping) sent over the connection
-      expect(this.connection.send).not.toHaveBeenCalled();
-      expect(this.connection.send_event).not.toHaveBeenCalled();
+      expect(connection.send).not.toHaveBeenCalled();
+      expect(connection.send_event).not.toHaveBeenCalled();
     });
 
     it("should force secure and reconnect after receiving 'ssl_only' event", function() {
-      var self = this;
       var encryptedStrategy = Pusher.Mocks.getStrategy(true);
 
-      this.manager.connect();
-      this.strategy._callback(null, {});
+      manager.connect();
+      strategy._callback(null, {});
 
-      this.managerOptions.getStrategy.andReturn(encryptedStrategy);
-      this.connection.emit("ssl_only");
+      managerOptions.getStrategy.andReturn(encryptedStrategy);
+      connection.emit("ssl_only");
 
       jasmine.Clock.tick(0);
 
-      expect(this.managerOptions.getTimelineSender)
-        .toHaveBeenCalledWith(this.timeline, { encrypted: true }, this.manager);
-      expect(this.managerOptions.getStrategy).toHaveBeenCalledWith({
+      expect(managerOptions.getTimelineSender)
+        .toHaveBeenCalledWith(timeline, { encrypted: true }, manager);
+      expect(managerOptions.getStrategy).toHaveBeenCalledWith({
         key: "foo",
         encrypted: true,
-        timeline: this.timeline
+        timeline: timeline
       });
 
       expect(encryptedStrategy.connect).toHaveBeenCalled();
-      expect(this.manager.state).toEqual("connecting");
+      expect(manager.state).toEqual("connecting");
     });
 
     it("should disconnect after receiving 'refused' event", function() {
-      var self = this;
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("refused");
 
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("refused");
-
-      expect(this.manager.state).toEqual("disconnected");
+      expect(manager.state).toEqual("disconnected");
     });
 
     it("should reconnect immediately after receiving 'retry' event", function() {
-      var self = this;
-
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("retry");
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("retry");
 
       jasmine.Clock.tick(0);
-      expect(this.manager.state).toEqual("connecting");
+      expect(manager.state).toEqual("connecting");
     });
 
     it("should reconnect with a 1s delay after receiving 'backoff' event", function() {
-      var self = this;
-
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("backoff");
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("backoff");
 
       jasmine.Clock.tick(999);
-      expect(this.strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.length).toEqual(1);
       jasmine.Clock.tick(1);
-      expect(this.strategy.connect.calls.length).toEqual(2);
+      expect(strategy.connect.calls.length).toEqual(2);
     });
   });
 
   describe("on reconnect", function() {
     it("should use the same strategy to reconnect", function() {
       var onConnected = jasmine.createSpy("onConnected");
-      this.manager.bind("connected", onConnected);
+      manager.bind("connected", onConnected);
 
-      this.manager.connect();
+      manager.connect();
 
-      expect(this.strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.length).toEqual(1);
 
-      this.strategy._callback(null, {});
-      this.connection.emit("connected", "123.456");
+      strategy._callback(null, {});
+      connection.emit("connected", "123.456");
 
       expect(onConnected.calls.length).toEqual(1);
-      expect(this.manager.socket_id).toEqual("123.456");
+      expect(manager.socket_id).toEqual("123.456");
 
-      this.manager.disconnect();
-      this.manager.connect();
+      manager.disconnect();
+      manager.connect();
 
-      expect(this.strategy.connect.calls.length).toEqual(2);
+      expect(strategy.connect.calls.length).toEqual(2);
 
-      this.strategy._callback(null, {});
-      this.connection.emit("connected", "666.999");
+      strategy._callback(null, {});
+      connection.emit("connected", "666.999");
 
       expect(onConnected.calls.length).toEqual(2);
-      expect(this.manager.socket_id).toEqual("666.999");
+      expect(manager.socket_id).toEqual("666.999");
     });
   });
 
   describe("on unavailable timeout", function() {
     it("should fire the timer and transition to unavailable", function() {
-      this.manager.connect();
-      expect(this.manager.state).toEqual("connecting");
+      manager.connect();
+      expect(manager.state).toEqual("connecting");
 
       var onUnavailable = jasmine.createSpy("onUnavailable");
-      this.manager.bind("unavailable", onUnavailable);
+      manager.bind("unavailable", onUnavailable);
 
       jasmine.Clock.tick(1233);
-      expect(this.manager.state).toEqual("connecting");
+      expect(manager.state).toEqual("connecting");
       jasmine.Clock.tick(1);
-      expect(this.manager.state).toEqual("unavailable");
+      expect(manager.state).toEqual("unavailable");
       expect(onUnavailable).toHaveBeenCalled();
     });
   });
 
   describe("on activity timeout", function() {
     it("should send a pusher:ping event", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("connected", "666.999");
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected", "666.999");
 
       jasmine.Clock.tick(3455);
-      expect(this.connection.send_event).not.toHaveBeenCalled();
+      expect(connection.send_event).not.toHaveBeenCalled();
 
       jasmine.Clock.tick(1);
-      expect(this.connection.send_event)
+      expect(connection.send_event)
         .toHaveBeenCalledWith("pusher:ping", {}, undefined);
 
       jasmine.Clock.tick(2344);
-      expect(this.connection.close).not.toHaveBeenCalled();
+      expect(connection.close).not.toHaveBeenCalled();
 
-      this.connection.emit("pong");
-      this.connection.emit("message", {
+      connection.emit("pong");
+      connection.emit("message", {
         event: "pusher:pong",
         data: {}
       });
 
       // pong received, connection should not get closed
       jasmine.Clock.tick(1000);
-      expect(this.connection.close).not.toHaveBeenCalled();
+      expect(connection.close).not.toHaveBeenCalled();
     });
 
     it("should close the connection after pong timeout", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("connected", "666.999");
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected", "666.999");
 
       jasmine.Clock.tick(3456);
-      expect(this.connection.close).not.toHaveBeenCalled();
+      expect(connection.close).not.toHaveBeenCalled();
       jasmine.Clock.tick(2345);
-      expect(this.connection.close).toHaveBeenCalled();
+      expect(connection.close).toHaveBeenCalled();
     });
   });
 
   describe("on ping", function() {
     it("should reply with a pusher:pong event", function() {
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("connected", "666.999");
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected", "666.999");
 
-      this.connection.emit("ping");
-      expect(this.connection.send_event)
+      connection.emit("ping");
+      expect(connection.send_event)
         .toHaveBeenCalledWith("pusher:pong", {}, undefined);
     });
   });
@@ -399,61 +386,61 @@ describe("ConnectionManager", function() {
     it("should transition to unavailable before connecting and browser is offline", function() {
       Pusher.Network.isOnline.andReturn(false);
 
-      this.manager.connect();
-      expect(this.manager.state).toEqual("unavailable");
-      expect(this.strategy.connect).not.toHaveBeenCalled();
+      manager.connect();
+      expect(manager.state).toEqual("unavailable");
+      expect(strategy.connect).not.toHaveBeenCalled();
     });
 
     it("should transition to unavailable when connecting and browser goes offline", function() {
-      this.manager.connect();
-      expect(this.manager.state).toEqual("connecting");
+      manager.connect();
+      expect(manager.state).toEqual("connecting");
 
       Pusher.Network.isOnline.andReturn(false);
       Pusher.Network.emit("offline");
 
-      expect(this.manager.state).toEqual("unavailable");
+      expect(manager.state).toEqual("unavailable");
     });
 
     it("should transition to unavailable when connected and browser goes offline", function() {
-      this.manager.connect();
-      this.strategy.emit("open", {});
+      manager.connect();
+      strategy.emit("open", {});
 
       Pusher.Network.isOnline.andReturn(false);
       Pusher.Network.emit("offline");
 
-      expect(this.manager.state).toEqual("unavailable");
+      expect(manager.state).toEqual("unavailable");
     });
 
     it("should try connecting when unavailable browser goes back online", function() {
       Pusher.Network.isOnline.andReturn(false);
-      this.manager.connect();
+      manager.connect();
       Pusher.Network.isOnline.andReturn(true);
       Pusher.Network.emit("online");
 
-      expect(this.manager.state).toEqual("connecting");
-      expect(this.strategy.connect).toHaveBeenCalled();
+      expect(manager.state).toEqual("connecting");
+      expect(strategy.connect).toHaveBeenCalled();
     });
   });
 
   describe("on strategy error", function() {
     it("should connect again using the same strategy", function() {
-      this.manager.connect();
-      expect(this.strategy.connect.calls.length).toEqual(1);
+      manager.connect();
+      expect(strategy.connect.calls.length).toEqual(1);
 
-      this.strategy._callback(true);
-      expect(this.strategy.connect.calls.length).toEqual(2);
-      expect(this.manager.state).toEqual("connecting");
+      strategy._callback(true);
+      expect(strategy.connect.calls.length).toEqual(2);
+      expect(manager.state).toEqual("connecting");
     });
   });
 
   describe("on connection error", function() {
     it("should emit an error", function() {
       var onError = jasmine.createSpy("onError");
-      this.manager.bind("error", onError);
+      manager.bind("error", onError);
 
-      this.manager.connect();
-      this.strategy._callback(null, {});
-      this.connection.emit("error", { boom: "boom" });
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("error", { boom: "boom" });
 
       expect(onError).toHaveBeenCalledWith({
         type: "WebSocketError",
@@ -464,13 +451,13 @@ describe("ConnectionManager", function() {
 
   describe("with unsupported strategy", function() {
     it("should transition to failed on connect", function() {
-      this.strategy.isSupported = jasmine.createSpy("isSupported")
+      strategy.isSupported = jasmine.createSpy("isSupported")
         .andReturn(false);
 
       var onFailed = jasmine.createSpy("onFailed");
-      this.manager.bind("failed", onFailed);
+      manager.bind("failed", onFailed);
 
-      this.manager.connect();
+      manager.connect();
       expect(onFailed).toHaveBeenCalled();
     });
   });
