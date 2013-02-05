@@ -2,6 +2,32 @@ describe("Pusher", function() {
   var _isReady, _instances;
   var strategy, manager, pusher;
 
+  function expectValidSubscriptions(manager, channels) {
+    for (var channelName in channels) {
+      var channel = channels[channelName];
+      expect(channel.authorize)
+        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function))
+    }
+
+    for (var channelName in channels) {
+      var channel = channels[channelName];
+      channel.authorize.calls[0].args[2](null, {
+        auth: { auth: channelName },
+        channel_data: { data: channelName }
+      });
+      expect(channel.authorize)
+        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function))
+      expect(manager.send_event).toHaveBeenCalledWith(
+        "pusher:subscribe",
+        { channel: channel.name,
+          auth: { auth: channelName },
+          channel_data: { data: channelName }
+        },
+        undefined
+      );
+    }
+  }
+
   beforeEach(function() {
     _instances = Pusher.instances;
     _isReady = Pusher.isReady;
@@ -17,7 +43,10 @@ describe("Pusher", function() {
     manager = Pusher.Mocks.getConnectionManager();
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(strategy);
-    spyOn(Pusher, "ConnectionManager").andReturn(strategy);
+    spyOn(Pusher, "ConnectionManager").andReturn(manager);
+    spyOn(Pusher.Channel, "factory").andCallFake(function(name, _) {
+      return Pusher.Mocks.getChannel(name);
+    });
     spyOn(Pusher.JSONPRequest, "send");
 
     pusher = new Pusher("foo");
@@ -26,6 +55,18 @@ describe("Pusher", function() {
   afterEach(function() {
     Pusher.instances = _instances;
     Pusher.isReady = _isReady;
+  });
+
+  it("should find subscribed channels", function() {
+    var channel = pusher.subscribe("chan");
+    expect(pusher.channel("chan")).toBe(channel);
+  });
+
+  it("should not find unsubscribed channels", function() {
+    expect(pusher.channel("chan")).toBe(undefined);
+    pusher.subscribe("chan");
+    pusher.unsubscribe("chan");
+    expect(pusher.channel("chan")).toBe(undefined);
   });
 
   describe("app key validation", function() {
@@ -219,6 +260,63 @@ describe("Pusher", function() {
         expect(sender.send.calls.length).toEqual(1);
         jasmine.Clock.tick(60000);
         expect(sender.send.calls.length).toEqual(2);
+      });
+    });
+  });
+
+  describe("on connected", function() {
+    it("should subscribe to all channels", function() {
+      var subscribedChannels = {
+        "channel1": pusher.subscribe("channel1"),
+        "channel2": pusher.subscribe("channel2")
+      };
+
+      expect(subscribedChannels["channel1"].authorize).not.toHaveBeenCalled();
+      expect(subscribedChannels["channel2"].authorize).not.toHaveBeenCalled();
+
+      pusher.connect();
+      manager.state = "connected";
+      manager.emit("connected");
+
+      expectValidSubscriptions(manager, subscribedChannels);
+    });
+  });
+
+  describe("after connected", function() {
+    beforeEach(function() {
+      pusher.connect();
+      manager.state = "connected";
+      manager.emit("connected");
+    });
+
+    describe("on subscribe", function() {
+      it("should return the same channel object for subsequent calls", function() {
+        var channel = pusher.subscribe("xxx");
+        expect(channel.name).toEqual("xxx");
+        expect(pusher.subscribe("xxx")).toBe(channel);
+      });
+
+      it("should authorize and send a subscribe event", function() {
+        var channel = pusher.subscribe("xxx");
+        expectValidSubscriptions(manager, { "xxx" : channel });
+      });
+
+      it("should emit pusher:subscription_error after auth error", function() {
+        var channel = pusher.subscribe("wrong");
+        channel.authorize.calls[0].args[2](true, "ERROR");
+        expect(channel.emit)
+          .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
+      });
+    });
+
+    describe("on unsubscribe", function() {
+      it("should send a unsubscribe event", function() {
+        pusher.subscribe("yyy");
+        pusher.unsubscribe("yyy");
+
+        expect(manager.send_event).toHaveBeenCalledWith(
+          "pusher:unsubscribe", { channel: "yyy" }, undefined
+        );
       });
     });
   });
