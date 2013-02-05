@@ -92,6 +92,7 @@
       var manager = new Pusher.EventsDispatcher();
       manager.socket_id = socket_id || "1.1";
       manager.connect = jasmine.createSpy("connect");
+      manager.disconnect = jasmine.createSpy("disconnect");
       manager.send_event = jasmine.createSpy("send_event");
       return manager;
     },

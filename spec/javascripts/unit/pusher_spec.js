@@ -147,6 +147,10 @@ describe("Pusher", function() {
       managerOptions = Pusher.ConnectionManager.calls[0].args[1];
     });
 
+    it("should call connect on connection manager", function() {
+      expect(manager.connect).toHaveBeenCalledWith();
+    });
+
     describe("with getStrategy function", function() {
       it("should construct a strategy instance", function() {
         var strategy = managerOptions.getStrategy();
@@ -318,6 +322,16 @@ describe("Pusher", function() {
           "pusher:unsubscribe", { channel: "yyy" }, undefined
         );
       });
+    });
+  });
+
+  describe("on disconnect", function() {
+    beforeEach(function() {
+      pusher.disconnect();
+    });
+
+    it("should call disconnect on connection manager", function() {
+      expect(manager.disconnect).toHaveBeenCalledWith();
     });
   });
 });
