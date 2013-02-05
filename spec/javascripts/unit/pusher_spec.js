@@ -38,8 +38,6 @@ describe("Pusher", function() {
     spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
     spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
 
-    jasmine.Clock.useMock();
-
     strategy = Pusher.Mocks.getStrategy(true);
     manager = Pusher.Mocks.getConnectionManager();
 
@@ -264,27 +262,6 @@ describe("Pusher", function() {
           manager
         );
         expect(sender.isEncrypted()).toBe(true);
-      });
-
-      it("should send timeline on manager's connect event", function() {
-        var sender = managerOptions.getTimelineSender(timeline, {}, manager);
-        spyOn(sender, "send");
-
-        expect(sender.send).not.toHaveBeenCalled();
-        manager.emit("connected");
-        expect(sender.send).toHaveBeenCalled();
-      });
-
-      it("should send timeline every minute", function() {
-        var sender = managerOptions.getTimelineSender(timeline, {}, manager);
-        spyOn(sender, "send");
-
-        jasmine.Clock.tick(59999);
-        expect(sender.send.calls.length).toEqual(0);
-        jasmine.Clock.tick(1);
-        expect(sender.send.calls.length).toEqual(1);
-        jasmine.Clock.tick(60000);
-        expect(sender.send.calls.length).toEqual(2);
       });
     });
   });

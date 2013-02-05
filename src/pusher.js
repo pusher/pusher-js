@@ -22,20 +22,12 @@
         limit: 25
       });
     };
-    var getTimelineSender = function(timeline, options, manager) {
-      var sender = new Pusher.TimelineSender(timeline, {
+    var getTimelineSender = function(timeline, options) {
+      return new Pusher.TimelineSender(timeline, {
         encrypted: self.isEncrypted() || !!options.encrypted,
         host: Pusher.stats_host,
         path: "/timeline"
       });
-
-      var sendTimeline = function() {
-        sender.send(function() {});
-      };
-      manager.bind("connected", sendTimeline);
-      setInterval(sendTimeline, 60000);
-
-      return sender;
     };
 
     this.connection = new Pusher.ConnectionManager(

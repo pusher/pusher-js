@@ -2,6 +2,8 @@ describe("ConnectionManager", function() {
   beforeEach(function() {
     var self = this;
 
+    jasmine.Clock.useMock();
+
     this.connection = Pusher.Mocks.getConnection();
     this.strategy = Pusher.Mocks.getStrategy(true);
     this.timeline = Pusher.Mocks.getTimeline();
@@ -24,7 +26,6 @@ describe("ConnectionManager", function() {
     this.manager.wrapTransport = jasmine.createSpy("wrapTransport")
       .andReturn(this.connection);
 
-    jasmine.Clock.useMock();
   });
 
   describe("on construction", function() {
@@ -85,6 +86,18 @@ describe("ConnectionManager", function() {
         current: "connecting"
       });
     });
+
+    it("should start sending timeline every minute", function() {
+      this.timeline.isEmpty.andReturn(false);
+      this.manager.connect();
+
+      jasmine.Clock.tick(59999);
+      expect(this.timelineSender.send.calls.length).toEqual(0);
+      jasmine.Clock.tick(1);
+      expect(this.timelineSender.send.calls.length).toEqual(1);
+      jasmine.Clock.tick(60000);
+      expect(this.timelineSender.send.calls.length).toEqual(2);
+    });
   });
 
   describe("after successful connection attempt", function() {
@@ -113,7 +126,7 @@ describe("ConnectionManager", function() {
     it("should clear the unavailable timer", function() {
       this.manager.connect();
       this.strategy._callback(null, this.connection);
-      this.connection.emit("connected")
+      this.connection.emit("connected");
 
       jasmine.Clock.tick(1500);
       // if unavailable timer was not cleared, state should be unavailable
@@ -127,6 +140,14 @@ describe("ConnectionManager", function() {
       expect(this.strategy.connect.calls.length).toEqual(1);
       this.manager.connect();
       expect(this.strategy.connect.calls.length).toEqual(1);
+    });
+
+    it("should send timeline", function() {
+      expect(this.timelineSender.send).not.toHaveBeenCalled();
+      this.manager.connect();
+      this.strategy._callback(null, {});
+      this.connection.emit("connected");
+      expect(this.timelineSender.send).toHaveBeenCalled();
     });
   });
 
@@ -208,7 +229,7 @@ describe("ConnectionManager", function() {
 
       this.manager.connect();
       this.strategy._callback(null, {});
-      this.connection.emit("connected")
+      this.connection.emit("connected");
       expect(this.strategy._abort).toHaveBeenCalled();
 
       this.connection.emit("closed");
@@ -421,7 +442,7 @@ describe("ConnectionManager", function() {
 
       this.strategy._callback(true);
       expect(this.strategy.connect.calls.length).toEqual(2);
-      expect(this.manager.state).toEqual("connecting")
+      expect(this.manager.state).toEqual("connecting");
     });
   });
 
