@@ -271,6 +271,10 @@
       };
     },
 
+    getDocumentLocation: function() {
+      return document.location;
+    },
+
     getClientFeatures: function() {
       return Pusher.Util.keys(
         Pusher.Util.filterObject(

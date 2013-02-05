@@ -48,6 +48,9 @@ describe("Pusher", function() {
       return Pusher.Mocks.getChannel(name);
     });
     spyOn(Pusher.JSONPRequest, "send");
+    spyOn(Pusher.Util, "getDocumentLocation").andReturn({
+      protocol: "http:"
+    });
 
     pusher = new Pusher("foo");
   });
@@ -68,6 +71,24 @@ describe("Pusher", function() {
     pusher.unsubscribe("chan");
     expect(pusher.channel("chan")).toBe(undefined);
   });
+
+  describe("encryption", function() {
+    it("should be off by default", function() {
+      expect(pusher.isEncrypted()).toBe(false);
+    });
+
+    it("should be on when 'encrypted' parameter is passed", function() {
+      var pusher = new Pusher("foo", { encrypted: true });
+      expect(pusher.isEncrypted()).toBe(true);
+    });
+
+    it("should be on when using https", function() {
+      Pusher.Util.getDocumentLocation.andReturn({
+        protocol: "https:"
+      });
+      expect(pusher.isEncrypted()).toBe(true);
+    });
+  })
 
   describe("app key validation", function() {
     it("should allow a hex key", function() {
@@ -131,7 +152,6 @@ describe("Pusher", function() {
     it("should respect the 'encrypted' option", function() {
       var pusher = new Pusher("foo", { encrypted: true });
 
-      // Tests are run via HTTP, so default should be not encrypted
       expect(Pusher.ConnectionManager.calls[0].args[1].encrypted)
         .toEqual(false);
       expect(Pusher.ConnectionManager.calls[1].args[1].encrypted)

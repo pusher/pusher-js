@@ -183,7 +183,7 @@
     },
 
     isEncrypted: function() {
-      if (document.location.protocol === "https:") {
+      if (Pusher.Util.getDocumentLocation().protocol === "https:") {
         return true;
       } else {
         return !!this.options.encrypted;
