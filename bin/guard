@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "bundler/setup"
+
+jasmine_pid = spawn("bin/jasmine")
+sleep(1)
+guard_pid = spawn("guard")
+Process.wait(guard_pid)
+Process.kill("INT", jasmine_pid)
+Process.wait(jasmine_pid)

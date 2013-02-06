@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "bundler/setup"
+
+pids = ["rake jasmine", "ruby spec/jsonp/server.rb -p 8889"].map { |cmd|
+  spawn(cmd)
+}
+begin
+  Process.waitall
+rescue Interrupt => e
+  pids.each { |pid| Process.kill("INT", pid) }
+  Process.waitall
+end
