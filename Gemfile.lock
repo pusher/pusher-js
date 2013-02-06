@@ -34,6 +34,8 @@ GEM
       guard (>= 1.1.0)
       multi_json
       thor
+    guard-jshint-node (0.0.7)
+      guard (>= 0.10.0)
     httparty (0.6.1)
       crack (= 0.1.8)
     jasmine (1.2.1)
@@ -94,6 +96,7 @@ DEPENDENCIES
   aws-s3
   guard
   guard-jasmine
+  guard-jshint-node
   httparty
   jasmine
   jbundle!

@@ -13,4 +13,5 @@ group :development do
   gem 'rb-fsevent'
   gem 'guard'
   gem 'guard-jasmine'
+  gem 'guard-jshint-node'
 end
