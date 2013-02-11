@@ -22,46 +22,52 @@
   Pusher.pong_timeout = 30000;
   Pusher.unavailable_timeout = 10000;
 
-  Pusher.defaultStrategy = {
-    type: "first_supported",
-    host: "ws.pusherapp.com",
-    unencryptedPort: 80,
-    encryptedPort: 443,
-    loop: true,
-    timeoutLimit: 8000,
-    children: [
-      { type: "first_supported",
-        children: [
-          { type: "all_supported",
-            children: [
-              { type: "first_supported",
-                children: [
-                  { type: "sequential",
-                    timeout: 4000,
-                    children: [{ type: "transport", transport: "ws" }]
-                  },
-                  { type: "sequential",
-                    timeout: 7000,
-                    children: [{ type: "transport", transport: "flash" }]
+  Pusher.getDefaultStrategy = function() {
+    return {
+      type: "first_supported",
+      host: Pusher.host,
+      unencryptedPort: Pusher.ws_port,
+      encryptedPort: Pusher.wss_port,
+      loop: true,
+      timeoutLimit: 8000,
+      children: [
+        { type: "first_supported",
+          children: [
+            { type: "all_supported",
+              children: [
+                { type: "first_supported",
+                  children: [
+                    { type: "sequential",
+                      timeout: 4000,
+                      children: [{ type: "transport", transport: "ws" }]
+                    },
+                    { type: "sequential",
+                      timeout: 7000,
+                      children: [{ type: "transport", transport: "flash" }]
+                    }
+                  ]
+                },
+                { type: "delayed",
+                  delay: 2000,
+                  child: {
+                    type: "transport",
+                    transport: "sockjs",
+                    host: Pusher.sockjs_host,
+                    unencryptedPort: Pusher.sockjs_http_port,
+                    encryptedPort: Pusher.sockjs_https_port
                   }
-                ]
-              },
-              { type: "delayed",
-                delay: 2000,
-                child: {
-                  type: "transport",
-                  transport: "sockjs",
-                  host: "sockjs.pusher.com"
                 }
-              }
-            ]
-          },
-          { type: "transport",
-            transport: "sockjs",
-            host: "sockjs.pusher.com"
-          }
-        ]
-      }
-    ]
+              ]
+            },
+            { type: "transport",
+              transport: "sockjs",
+              host: Pusher.sockjs_host,
+              unencryptedPort: Pusher.sockjs_http_port,
+              encryptedPort: Pusher.sockjs_https_port
+            }
+          ]
+        }
+      ]
+    };
   };
 }).call(this);
