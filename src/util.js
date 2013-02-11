@@ -269,6 +269,19 @@
       return function(object) {
         return object[name].apply(object, boundArguments.concat(arguments));
       };
+    },
+
+    getDocumentLocation: function() {
+      return document.location;
+    },
+
+    getClientFeatures: function() {
+      return Pusher.Util.keys(
+        Pusher.Util.filterObject(
+          { "ws": Pusher.WSTransport, "flash": Pusher.FlashTransport },
+          function (t) { return t.isSupported(); }
+        )
+      );
     }
   };
 }).call(this);

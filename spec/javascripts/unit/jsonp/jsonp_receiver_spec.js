@@ -11,7 +11,7 @@ describe("JSONPReceiver", function() {
     it("should return an id for the callback", function() {
       expect(this.receiver.register(function() {}))
         .toEqual(jasmine.any(Number));
-    })
+    });
   });
 
   describe("on unregister", function() {
@@ -19,7 +19,7 @@ describe("JSONPReceiver", function() {
       var callback = function() {};
       var id = this.receiver.register(callback);
       expect(this.receiver.unregister(id)).toBe(callback);
-    })
+    });
   });
 
   describe("on call", function() {

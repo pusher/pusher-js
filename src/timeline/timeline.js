@@ -1,13 +1,11 @@
 (function() {
-
-  function Timeline(session, sendJSONP, options) {
+  function Timeline(key, session, options) {
+    this.key = key;
     this.session = session;
-    this.sendJSONP = sendJSONP;
     this.events = [];
     this.options = options || {};
     this.sent = 0;
   }
-
   var prototype = Timeline.prototype;
 
   prototype.push = function(event) {
@@ -23,26 +21,25 @@
     return this.events.length === 0;
   };
 
-  prototype.send = function(callback) {
-    if (!this.sendJSONP) {
-      return false;
-    }
+  prototype.send = function(sendJSONP, callback) {
     var self = this;
 
     var data = {};
     if (this.sent === 0) {
       data = Pusher.Util.extend({
-        key: this.options.key,
+        key: this.key,
         features: this.options.features,
         version: this.options.version
       }, this.options.params || {});
     }
     data.session = this.session;
     data.timeline = this.events;
-    Pusher.Util.filterObject(data, function(v) { return v !== undefined; });
+    data = Pusher.Util.filterObject(data, function(v) {
+      return v !== undefined;
+    });
 
     this.events = [];
-    this.sendJSONP(data, function(error, result) {
+    sendJSONP(data, function(error, result) {
       if (!error) {
         self.sent++;
       }
@@ -53,5 +50,4 @@
   };
 
   Pusher.Timeline = Timeline;
-
 }).call(this);

@@ -23,7 +23,8 @@ bundle 'pusher.js' do
   file 'jsonp/jsonp_request.js'
   file 'jsonp/jsonp_receiver.js'
 
-  file 'timeline.js'
+  file 'timeline/timeline.js'
+  file 'timeline/timeline_sender.js'
 
   file 'strategies/multi_strategy.js'
   file 'strategies/parallel_strategy.js'

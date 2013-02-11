@@ -8,47 +8,26 @@
     this.global_emitter = new Pusher.EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
-    this.checkAppKey();
+    checkAppKey(this.key);
 
     var getStrategy = function(options) {
       return Pusher.StrategyBuilder.build(
         Pusher.Util.extend(Pusher.defaultStrategy, self.options, options)
       );
     };
-    var getTimeline = function(options, manager) {
-      var scheme = "http" + (self.isEncrypted() ? "s" : "") + "://";
-      var sendJSONP = function(data, callback) {
-        return Pusher.JSONPRequest.send({
-          data: data,
-          url: scheme + Pusher.stats_host + "/timeline",
-          receiver: Pusher.JSONP
-        }, callback);
-      };
-      var timeline = new Pusher.Timeline(
-        self.sessionID, sendJSONP, {
-          key: self.key,
-          features: Pusher.Util.keys(
-            Pusher.Util.filterObject(
-              { "ws": Pusher.WSTransport,
-                "flash": Pusher.FlashTransport
-              },
-              function (t) { return t.isSupported(); }
-            )
-          ),
-          params: self.options.timelineParams || {},
-          limit: 25
-        }
-      );
-
-      var sendTimeline = function() {
-        if (!timeline.isEmpty()) {
-          timeline.send(function() {});
-        }
-      };
-      manager.bind("connected", sendTimeline);
-      setInterval(sendTimeline, 60000);
-
-      return timeline;
+    var getTimeline = function() {
+      return new Pusher.Timeline(self.key, self.sessionID, {
+        features: Pusher.Util.getClientFeatures(),
+        params: self.options.timelineParams || {},
+        limit: 25
+      });
+    };
+    var getTimelineSender = function(timeline, options) {
+      return new Pusher.TimelineSender(timeline, {
+        encrypted: self.isEncrypted() || !!options.encrypted,
+        host: Pusher.stats_host,
+        path: "/timeline"
+      });
     };
 
     this.connection = new Pusher.ConnectionManager(
@@ -56,6 +35,7 @@
       Pusher.Util.extend(
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
+          getTimelineSender: getTimelineSender,
           activityTimeout: Pusher.activity_timeout,
           pongTimeout: Pusher.pong_timeout,
           unavailableTimeout: Pusher.unavailable_timeout
@@ -65,33 +45,32 @@
       )
     );
 
-    // Setup / teardown connection
-    this.connection
-      .bind('connected', function() {
-        self.subscribeAll();
-      })
-      .bind('message', function(params) {
-        var internal = (params.event.indexOf('pusher_internal:') === 0);
-        if (params.channel) {
-          var channel = self.channel(params.channel);
-          if (channel) {
-            channel.emit(params.event, params.data);
-          }
+    this.connection.bind('connected', function() {
+      self.subscribeAll();
+    })
+    this.connection.bind('message', function(params) {
+      var internal = (params.event.indexOf('pusher_internal:') === 0);
+      if (params.channel) {
+        var channel = self.channel(params.channel);
+        if (channel) {
+          channel.emit(params.event, params.data);
         }
-        // Emit globaly [deprecated]
-        if (!internal) self.global_emitter.emit(params.event, params.data);
-      })
-      .bind('disconnected', function() {
-        self.channels.disconnect();
-      })
-      .bind('error', function(err) {
-        Pusher.warn('Error', err);
-      });
+      }
+      // Emit globaly [deprecated]
+      if (!internal) self.global_emitter.emit(params.event, params.data);
+    })
+    this.connection.bind('disconnected', function() {
+      self.channels.disconnect();
+    })
+    this.connection.bind('error', function(err) {
+      Pusher.warn('Error', err);
+    });
 
     Pusher.instances.push(this);
 
     if (Pusher.isReady) self.connect();
   }
+  var prototype = Pusher.prototype;
 
   Pusher.instances = [];
   Pusher.isReady = false;
@@ -123,44 +102,46 @@
     }
   };
 
-  Pusher.prototype = {
-    channel: function(name) {
-      return this.channels.find(name);
-    },
+  prototype.channel = function(name) {
+    return this.channels.find(name);
+  };
 
-    connect: function() {
-      this.connection.connect();
-    },
+  prototype.connect = function() {
+    this.connection.connect();
+  };
 
-    disconnect: function() {
-      this.connection.disconnect();
-    },
+  prototype.disconnect = function() {
+    this.connection.disconnect();
+  };
 
-    bind: function(event_name, callback) {
-      this.global_emitter.bind(event_name, callback);
-      return this;
-    },
+  prototype.bind = function(event_name, callback) {
+    this.global_emitter.bind(event_name, callback);
+    return this;
+  };
 
-    bind_all: function(callback) {
-      this.global_emitter.bind_all(callback);
-      return this;
-    },
+  prototype.bind_all = function(callback) {
+    this.global_emitter.bind_all(callback);
+    return this;
+  };
 
-    subscribeAll: function() {
-      var channelName;
-      for (channelName in this.channels.channels) {
-        if (this.channels.channels.hasOwnProperty(channelName)) {
-          this.subscribe(channelName);
-        }
+  prototype.subscribeAll = function() {
+    var channelName;
+    for (channelName in this.channels.channels) {
+      if (this.channels.channels.hasOwnProperty(channelName)) {
+        this.subscribe(channelName);
       }
-    },
+    }
+  };
 
-    subscribe: function(channel_name) {
-      var self = this;
-      var channel = this.channels.add(channel_name, this);
+  prototype.subscribe = function(channel_name) {
+    var self = this;
+    var channel = this.channels.add(channel_name, this);
 
-      if (this.connection.state === 'connected') {
-        channel.authorize(this.connection.socket_id, this.options, function(err, data) {
+    if (this.connection.state === 'connected') {
+      channel.authorize(
+        this.connection.socket_id,
+        this.options,
+        function(err, data) {
           if (err) {
             channel.emit('pusher:subscription_error', data);
           } else {
@@ -170,38 +151,40 @@
               channel_data: data.channel_data
             });
           }
-        });
-      }
-      return channel;
-    },
+        }
+      );
+    }
+    return channel;
+  };
 
-    unsubscribe: function(channel_name) {
-      this.channels.remove(channel_name);
-      if (this.connection.state === 'connected') {
-        this.send_event('pusher:unsubscribe', {
-          channel: channel_name
-        });
-      }
-    },
-
-    send_event: function(event_name, data, channel) {
-      return this.connection.send_event(event_name, data, channel);
-    },
-
-    checkAppKey: function() {
-      if(this.key === null || this.key === undefined) {
-        Pusher.warn('Warning', 'You must pass your app key when you instantiate Pusher.');
-      }
-    },
-
-    isEncrypted: function() {
-      if (document.location.protocol === "https:") {
-        return true;
-      } else {
-        return !!this.options.encrypted;
-      }
+  prototype.unsubscribe = function(channel_name) {
+    this.channels.remove(channel_name);
+    if (this.connection.state === 'connected') {
+      this.send_event('pusher:unsubscribe', {
+        channel: channel_name
+      });
     }
   };
+
+  prototype.send_event = function(event_name, data, channel) {
+    return this.connection.send_event(event_name, data, channel);
+  };
+
+  prototype.isEncrypted = function() {
+    if (Pusher.Util.getDocumentLocation().protocol === "https:") {
+      return true;
+    } else {
+      return !!this.options.encrypted;
+    }
+  };
+
+  function checkAppKey(key) {
+    if (key === null || key === undefined) {
+      Pusher.warn(
+        'Warning', 'You must pass your app key when you instantiate Pusher.'
+      );
+    }
+  }
 
   this.Pusher = Pusher;
 }).call(this);

@@ -9,6 +9,14 @@
     getTimeline: function() {
       return {
         push: jasmine.createSpy("push"),
+        send: jasmine.createSpy("send"),
+        isEmpty: jasmine.createSpy("isEmpty")
+      };
+    },
+
+    getTimelineSender: function() {
+      return {
+        isEncrypted: jasmine.createSpy("isEncrypted"),
         send: jasmine.createSpy("send")
       };
     },
@@ -16,6 +24,8 @@
     getTransport: function() {
       var transport = new Pusher.EventsDispatcher();
 
+      transport.supportsPing = jasmine.createSpy("supportsPing")
+        .andReturn(true);
       transport.initialize = jasmine.createSpy("initialize")
         .andCallFake(function() {
           transport.state = "initializing";
@@ -76,6 +86,23 @@
       connection.close = jasmine.createSpy("close");
 
       return connection;
+    },
+
+    getConnectionManager: function(socket_id) {
+      var manager = new Pusher.EventsDispatcher();
+      manager.socket_id = socket_id || "1.1";
+      manager.connect = jasmine.createSpy("connect");
+      manager.disconnect = jasmine.createSpy("disconnect");
+      manager.send_event = jasmine.createSpy("send_event");
+      return manager;
+    },
+
+    getChannel: function(name) {
+      var channel = new Pusher.EventsDispatcher();
+      channel.name = name;
+      channel.authorize = jasmine.createSpy("authorize");
+      channel.disconnect = jasmine.createSpy("disconnect");
+      return channel;
     }
   };
 }).call(this);

@@ -1,6 +1,8 @@
 describe("JSONP", function() {
+  var options;
+
   beforeEach(function() {
-    this.options = {
+    options = {
       url: "http://localhost:8889/jsonp",
       receiver: Pusher.JSONP,
       tagPrefix: "_pusher_jsonp_jasmine_"
@@ -12,7 +14,7 @@ describe("JSONP", function() {
 
     runs(function() {
       Pusher.JSONPRequest.send(
-        Pusher.Util.extend(this.options, {
+        Pusher.Util.extend(options, {
           data: { "session": 2289545,
             "features": ["ws", "flash", "sockjs"],
             "version": "1.13.0",
@@ -64,7 +66,7 @@ describe("JSONP", function() {
     runs(function() {
       expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
       expect(document.getElementById("_pusher_jsonp_jasmine_1_error")).toBe(null);
-      Pusher.JSONPRequest.send(this.options, function(_, _) {
+      Pusher.JSONPRequest.send(options, function(error, result) {
         responded = true;
       });
     });
@@ -78,7 +80,7 @@ describe("JSONP", function() {
   });
 
   it("should fail on 404 response", function() {
-    options = {
+    var options = {
       url: "http://localhost:8889/404",
       receiver: Pusher.JSONP,
       tagPrefix: "_pusher_jsonp_jasmine_"
@@ -99,7 +101,7 @@ describe("JSONP", function() {
 
 
   it("should fail on 500 response", function() {
-    options = {
+    var options = {
       url: "http://localhost:8889/500",
       receiver: Pusher.JSONP,
       tagPrefix: "_pusher_jsonp_jasmine_"

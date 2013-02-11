@@ -32,6 +32,7 @@
     this.state = "initialized";
     this.connection = null;
     this.encrypted = !!options.encrypted;
+    this.timeline = this.options.getTimeline();
 
     var self = this;
 
@@ -46,6 +47,14 @@
         self.updateState("unavailable");
       }
     });
+
+    var sendTimeline = function() {
+      if (self.timelineSender) {
+        self.timelineSender.send(function() {});
+      }
+    };
+    this.bind("connected", sendTimeline);
+    setInterval(sendTimeline, 60000);
   }
   var prototype = ConnectionManager.prototype;
 
@@ -66,7 +75,7 @@
 
     var strategy = this.options.getStrategy({
       key: this.key,
-      timeline: this.options.getTimeline({ encrypted: this.encrypted }, this),
+      timeline: this.timeline,
       encrypted: this.encrypted
     });
 
@@ -79,9 +88,14 @@
       return;
     }
 
-    var self = this;
-
     this.updateState("connecting");
+    this.timelineSender = this.options.getTimelineSender(
+      this.timeline,
+      { encrypted: this.encrypted },
+      this
+    );
+
+    var self = this;
     var callback = function(error, transport) {
       if (error) {
         self.runner = strategy.connect(callback);
@@ -93,13 +107,7 @@
     };
     this.runner = strategy.connect(callback);
 
-    this.unavailableTimer = setTimeout(function() {
-      if (!self.unavailableTimer) {
-        return;
-      }
-      self.updateState("unavailable");
-      self.unavailableTimer = null;
-    }, this.options.unavailableTimeout);
+    this.setUnavailableTimer();
   };
 
   /** Sends raw data.
@@ -164,6 +172,18 @@
       clearTimeout(this.retryTimer);
       this.retryTimer = null;
     }
+  };
+
+  /** @private */
+  prototype.setUnavailableTimer = function() {
+    var self = this;
+    this.unavailableTimer = setTimeout(function() {
+      if (!self.unavailableTimer) {
+        return;
+      }
+      self.updateState("unavailable");
+      self.unavailableTimer = null;
+    }, this.options.unavailableTimeout);
   };
 
   /** @private */

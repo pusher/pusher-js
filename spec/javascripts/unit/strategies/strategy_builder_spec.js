@@ -130,7 +130,7 @@ describe("StrategyBuilder", function() {
 
   it("should throw an error on unsupported transport", function() {
     expect(function() {
-      var strategy = Pusher.StrategyBuilder.build(
+      Pusher.StrategyBuilder.build(
         { type: "transport", transport: "fake" }
       );
     }).toThrow(jasmine.any(Pusher.Errors.UnsupportedTransport));
@@ -139,7 +139,7 @@ describe("StrategyBuilder", function() {
 
   it("should throw an error on unsupported strategy", function() {
     expect(function() {
-      var strategy = Pusher.StrategyBuilder.build(
+      Pusher.StrategyBuilder.build(
         { type: "fake" }
       );
     }).toThrow(jasmine.any(Pusher.Errors.UnsupportedStrategy));
