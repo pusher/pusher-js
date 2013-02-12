@@ -77,6 +77,7 @@
       }
       if (timeout) {
         clearTimeout(timeout);
+        timeout = null;
       }
       callback(error, connection);
     });
@@ -88,7 +89,15 @@
       }, timeoutLength);
     }
 
-    return runner;
+    return {
+      abort: function() {
+        if (timeout) {
+          clearTimeout(timeout);
+          timeout = null;
+        }
+        runner.abort();
+      }
+    };
   };
 
   Pusher.SequentialStrategy = SequentialStrategy;

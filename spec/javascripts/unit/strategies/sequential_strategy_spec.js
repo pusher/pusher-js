@@ -101,6 +101,20 @@ describe("SequentialStrategy", function() {
       runner.abort();
       expect(this.substrategies[1]._abort).toHaveBeenCalled();
     });
+
+    it("should stop retrying with timeouts", function() {
+      var strategy = new Pusher.SequentialStrategy(this.substrategies, {
+        timeout: 100,
+      });
+      var runner = strategy.connect(this.callback);
+
+      expect(this.substrategies[0].connect).toHaveBeenCalled();
+      expect(this.substrategies[1].connect).not.toHaveBeenCalled();
+
+      runner.abort();
+      jasmine.Clock.tick(100);
+      expect(this.substrategies[1].connect).not.toHaveBeenCalled();
+    });
   });
 
   describe("on timeout", function() {
