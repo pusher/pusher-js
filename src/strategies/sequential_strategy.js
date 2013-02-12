@@ -84,8 +84,10 @@
 
     if (timeoutLength > 0) {
       timeout = setTimeout(function() {
-        runner.abort();
-        callback(true);
+        if (timeout) {
+          runner.abort();
+          callback(true);
+        }
       }, timeoutLength);
     }
 
