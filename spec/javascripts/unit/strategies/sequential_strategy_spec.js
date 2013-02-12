@@ -104,7 +104,7 @@ describe("SequentialStrategy", function() {
 
     it("should stop retrying with timeouts", function() {
       var strategy = new Pusher.SequentialStrategy(this.substrategies, {
-        timeout: 100,
+        timeout: 100
       });
       var runner = strategy.connect(this.callback);
 

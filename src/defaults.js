@@ -29,7 +29,8 @@
       unencryptedPort: Pusher.ws_port,
       encryptedPort: Pusher.wss_port,
       loop: true,
-      timeoutLimit: 8000,
+      timeout: 15000,
+      timeoutLimit: 60000,
       children: [
         { type: "first_supported",
           children: [
@@ -38,11 +39,9 @@
                 { type: "first_supported",
                   children: [
                     { type: "sequential",
-                      timeout: 4000,
                       children: [{ type: "transport", transport: "ws" }]
                     },
                     { type: "sequential",
-                      timeout: 7000,
                       children: [{ type: "transport", transport: "flash" }]
                     }
                   ]
@@ -50,20 +49,26 @@
                 { type: "delayed",
                   delay: 2000,
                   child: {
-                    type: "transport",
-                    transport: "sockjs",
-                    host: Pusher.sockjs_host,
-                    unencryptedPort: Pusher.sockjs_http_port,
-                    encryptedPort: Pusher.sockjs_https_port
+                    type: "sequential",
+                    children: [{
+                      type: "transport",
+                      transport: "sockjs",
+                      host: Pusher.sockjs_host,
+                      unencryptedPort: Pusher.sockjs_http_port,
+                      encryptedPort: Pusher.sockjs_https_port
+                    }]
                   }
                 }
               ]
             },
-            { type: "transport",
-              transport: "sockjs",
-              host: Pusher.sockjs_host,
-              unencryptedPort: Pusher.sockjs_http_port,
-              encryptedPort: Pusher.sockjs_https_port
+            { type: "sequential",
+              children: [{
+                type: "transport",
+                transport: "sockjs",
+                host: Pusher.sockjs_host,
+                unencryptedPort: Pusher.sockjs_http_port,
+                encryptedPort: Pusher.sockjs_https_port
+              }]
             }
           ]
         }
