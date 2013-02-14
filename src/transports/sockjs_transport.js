@@ -53,7 +53,14 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    return new SockJS(url);
+    // exclude iframe transports until we link to correct SockJS version
+    // inside the iframe
+    return new SockJS(url, null, {
+      protocols_whitelist: [
+        'xdr-streaming', 'xhr-streaming',
+        'xdr-polling', 'xhr-polling', 'jsonp-polling'
+      ]
+    });
   };
 
   /** @protected */

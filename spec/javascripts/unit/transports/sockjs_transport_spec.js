@@ -69,7 +69,15 @@ describe("SockJSTransport", function() {
       this.transport.initialize();
       this.transport.connect();
       expect(window.SockJS)
-        .toHaveBeenCalledWith("http://example.com:12345/pusher");
+        .toHaveBeenCalledWith(
+          "http://example.com:12345/pusher",
+          null,
+          { protocols_whitelist: [
+              'xdr-streaming', 'xhr-streaming',
+              'xdr-polling', 'xhr-polling', 'jsonp-polling'
+            ]
+          }
+        );
     });
 
     it("should create an encrypted SockJS", function() {
@@ -78,7 +86,15 @@ describe("SockJSTransport", function() {
       transport.initialize();
       transport.connect();
       expect(window.SockJS)
-        .toHaveBeenCalledWith("https://example.com:54321/pusher");
+        .toHaveBeenCalledWith(
+          "https://example.com:54321/pusher",
+          null,
+          { protocols_whitelist: [
+              'xdr-streaming', 'xhr-streaming',
+              'xdr-polling', 'xhr-polling', 'jsonp-polling'
+            ]
+          }
+        );
     });
 
     it("should send path after opening connection", function() {
