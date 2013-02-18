@@ -44,7 +44,10 @@ describe("AbstractTransport", function() {
     });
 
     it("should create an encrypted connection", function() {
-      var transport = new getTransport("bar", { encrypted: true });
+      var transport = new getTransport("bar", {
+        timeline: this.timeline,
+        encrypted: true
+      });
       spyOn(transport, "createSocket").andReturn({});
 
       transport.initialize();
@@ -158,7 +161,7 @@ describe("AbstractTransport", function() {
         o: { nope: true },
         f: function() {}
       });
-      expect(this.timeline.push).toHaveBeenCalledWith({
+      expect(this.timeline.error).toHaveBeenCalledWith({
         transport: "abstract",
         error: {
           name: "doom",
@@ -189,15 +192,15 @@ describe("AbstractTransport", function() {
   describe("on state change", function () {
     it("should log the new state to timeline", function() {
       // initialization happens in beforeEach
-      expect(this.timeline.push.calls.length).toEqual(1);
-      expect(this.timeline.push).toHaveBeenCalledWith({
+      expect(this.timeline.info.calls.length).toEqual(1);
+      expect(this.timeline.info).toHaveBeenCalledWith({
         transport: "abstract",
         state: "initialized"
       });
 
       this.transport.connect();
-      expect(this.timeline.push.calls.length).toEqual(2);
-      expect(this.timeline.push).toHaveBeenCalledWith({
+      expect(this.timeline.info.calls.length).toEqual(2);
+      expect(this.timeline.info).toHaveBeenCalledWith({
         transport: "abstract",
         state: "connecting"
       });
@@ -212,8 +215,8 @@ describe("AbstractTransport", function() {
       transport.name = "abstract";
       transport.initialize();
 
-      expect(timeline.push.calls.length).toEqual(1);
-      expect(timeline.push).toHaveBeenCalledWith({
+      expect(timeline.info.calls.length).toEqual(1);
+      expect(timeline.info).toHaveBeenCalledWith({
         transport: "abstracts",
         state: "initialized"
       });

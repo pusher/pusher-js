@@ -15,7 +15,8 @@ describe("FlashTransport", function() {
 
   beforeEach(function() {
     this.socket = {};
-    this.transport = getTransport("foo");
+    this.timeline = Pusher.Mocks.getTimeline();
+    this.transport = getTransport("foo", { timeline: this.timeline });
 
     Pusher.Dependencies.loaded.flashfallback = true;
 

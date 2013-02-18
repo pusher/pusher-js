@@ -125,11 +125,11 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.log({
+    this.timeline.error(this.buildTimelineMessage({
       error: Pusher.Util.filterObject(error, function(value) {
         return (typeof value !== "object" && typeof value !== "function");
       })
-    });
+    }));
   };
 
   /** @protected */
@@ -194,16 +194,17 @@
   prototype.changeState = function(state, params) {
     this.state = state;
     this.emit(state, params);
-    this.log({ state: state, params: params });
+    this.timeline.info(this.buildTimelineMessage({
+      state: state,
+      params: params
+    }));
   };
 
   /** @protected */
-  prototype.log = function(message) {
-    if (this.timeline) {
-      this.timeline.push(Pusher.Util.extend({
-        transport: this.name + (this.options.encrypted ? "s" : "")
-      }, message));
-    }
+  prototype.buildTimelineMessage = function(message) {
+    return Pusher.Util.extend({
+      transport: this.name + (this.options.encrypted ? "s" : "")
+    }, message);
   };
 
   Pusher.AbstractTransport = AbstractTransport;

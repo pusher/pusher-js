@@ -8,13 +8,28 @@
   }
   var prototype = Timeline.prototype;
 
-  prototype.push = function(event) {
+  // Log levels
+  Timeline.ERROR = 3;
+  Timeline.INFO = 6;
+
+  prototype.log = function(level, event) {
     this.events.push(
-      Pusher.Util.extend({}, event, { timestamp: Pusher.Util.now() })
+      Pusher.Util.extend({}, event, {
+        timestamp: Pusher.Util.now(),
+        level: level
+      })
     );
     if (this.options.limit && this.events.length > this.options.limit) {
       this.events.shift();
     }
+  };
+
+  prototype.info = function(event) {
+    this.log(Timeline.INFO, event);
+  };
+
+  prototype.error = function(event) {
+    this.log(Timeline.ERROR, event);
   };
 
   prototype.isEmpty = function() {

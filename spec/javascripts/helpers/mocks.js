@@ -8,7 +8,9 @@
 
     getTimeline: function() {
       return {
-        push: jasmine.createSpy("push"),
+        log: jasmine.createSpy("log"),
+        info: jasmine.createSpy("info"),
+        error: jasmine.createSpy("error"),
         send: jasmine.createSpy("send"),
         isEmpty: jasmine.createSpy("isEmpty")
       };

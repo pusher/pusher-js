@@ -15,7 +15,8 @@ describe("SockJSTransport", function() {
 
   beforeEach(function() {
     this.socket = {};
-    this.transport = getTransport("foo");
+    this.timeline = Pusher.Mocks.getTimeline();
+    this.transport = getTransport("foo", { timeline: this.timeline });
 
     Pusher.Dependencies.loaded.sockjs = true;
 
@@ -81,7 +82,10 @@ describe("SockJSTransport", function() {
     });
 
     it("should create an encrypted SockJS", function() {
-      var transport = new getTransport("bar", { encrypted: true });
+      var transport = new getTransport("bar", {
+        encrypted: true,
+        timeline: this.timeline
+      });
 
       transport.initialize();
       transport.connect();
