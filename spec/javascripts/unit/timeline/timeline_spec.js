@@ -25,6 +25,14 @@ describe("Timeline", function() {
     expect(timeline.isEmpty()).toBe(false);
   });
 
+  it("should not log events with too low level", function() {
+    timeline = new Pusher.Timeline("foo", 666, {
+      level: Pusher.Timeline.ERROR
+    });
+    timeline.log(Pusher.Timeline.INFO, {});
+    expect(timeline.isEmpty()).toBe(true);
+  });
+
   describe("on send", function() {
     it("should include key, session id, features, version and params", function() {
       var timeline = new Pusher.Timeline("foobar", 666, {

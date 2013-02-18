@@ -13,14 +13,16 @@
   Timeline.INFO = 6;
 
   prototype.log = function(level, event) {
-    this.events.push(
-      Pusher.Util.extend({}, event, {
-        timestamp: Pusher.Util.now(),
-        level: level
-      })
-    );
-    if (this.options.limit && this.events.length > this.options.limit) {
-      this.events.shift();
+    if (this.options.level === undefined || level <= this.options.level) {
+      this.events.push(
+        Pusher.Util.extend({}, event, {
+          timestamp: Pusher.Util.now(),
+          level: level
+        })
+      );
+      if (this.options.limit && this.events.length > this.options.limit) {
+        this.events.shift();
+      }
     }
   };
 
