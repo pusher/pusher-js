@@ -59,10 +59,22 @@ var _require = (function() {
     deps.push(root + '/json2' + Pusher.dependency_suffix + '.js');
   }
   if (!window['WebSocket']) {
-    // Try to use web-socket-js (flash WebSocket emulation)
-    window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
-    window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-    deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
+    var flashSupported;
+    try {
+      flashSupported = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+    } catch (e) {
+      flashSupported = navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
+    }
+
+    if (flashSupported) {
+      // Try to use web-socket-js (flash WebSocket emulation)
+      window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
+      window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
+      deps.push(root + '/flashfallback' + Pusher.dependency_suffix + '.js');
+    } else {
+      // Use SockJS when Flash is not available
+      deps.push(root + '/sockjs' + Pusher.dependency_suffix + '.js');
+    }
   }
 
   var initialize = function() {
@@ -85,13 +97,10 @@ var _require = (function() {
           })
           WebSocket.__initialize();
         } else {
-          // web-socket-js cannot initialize (most likely flash not installed)
-          sockjsPath = root + '/sockjs' + Pusher.dependency_suffix + '.js';
-          _require([sockjsPath], function() {
-            Pusher.Transport = SockJS;
-            Pusher.TransportType = 'sockjs';
-            Pusher.ready();
-          })
+          // Flash fallback was not loaded, using SockJS
+          Pusher.Transport = window.SockJS;
+          Pusher.TransportType = 'sockjs';
+          Pusher.ready();
         }
       }
     }
