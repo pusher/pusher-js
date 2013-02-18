@@ -5,6 +5,7 @@
     this.events = [];
     this.options = options || {};
     this.sent = 0;
+    this.uniqueID = 0;
   }
   var prototype = Timeline.prototype;
 
@@ -64,6 +65,11 @@
     });
 
     return true;
+  };
+
+  prototype.getUniqueID = function() {
+    this.uniqueID++;
+    return this.uniqueID;
   };
 
   Pusher.Timeline = Timeline;

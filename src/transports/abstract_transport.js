@@ -37,6 +37,7 @@
     this.options = options;
     this.state = "new";
     this.timeline = options.timeline;
+    this.id = this.timeline.getUniqueID();
   }
   var prototype = AbstractTransport.prototype;
 
@@ -203,6 +204,7 @@
   /** @protected */
   prototype.buildTimelineMessage = function(message) {
     return Pusher.Util.extend({
+      cid: this.id,
       transport: this.name + (this.options.encrypted ? "s" : "")
     }, message);
   };

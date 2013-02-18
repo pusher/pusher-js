@@ -33,6 +33,10 @@ describe("Timeline", function() {
     expect(timeline.isEmpty()).toBe(true);
   });
 
+  it("should generate different ids", function() {
+    expect(timeline.getUniqueID()).not.toEqual(timeline.getUniqueID());
+  });
+
   describe("on send", function() {
     it("should include key, session id, features, version and params", function() {
       var timeline = new Pusher.Timeline("foobar", 666, {

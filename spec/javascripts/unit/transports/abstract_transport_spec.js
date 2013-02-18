@@ -13,6 +13,7 @@ describe("AbstractTransport", function() {
   beforeEach(function() {
     this.socket = {};
     this.timeline = Pusher.Mocks.getTimeline();
+    this.timeline.getUniqueID.andReturn(667);
     this.transport = getTransport("foo", {
       timeline: this.timeline
     });
@@ -162,6 +163,7 @@ describe("AbstractTransport", function() {
         f: function() {}
       });
       expect(this.timeline.error).toHaveBeenCalledWith({
+        cid: 667,
         transport: "abstract",
         error: {
           name: "doom",
@@ -194,6 +196,7 @@ describe("AbstractTransport", function() {
       // initialization happens in beforeEach
       expect(this.timeline.info.calls.length).toEqual(1);
       expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
         transport: "abstract",
         state: "initialized"
       });
@@ -201,6 +204,7 @@ describe("AbstractTransport", function() {
       this.transport.connect();
       expect(this.timeline.info.calls.length).toEqual(2);
       expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
         transport: "abstract",
         state: "connecting"
       });
@@ -208,6 +212,7 @@ describe("AbstractTransport", function() {
 
     it("should append an 's' suffix for encrypted connections", function() {
       var timeline = Pusher.Mocks.getTimeline();
+      timeline.getUniqueID.andReturn(11111);
       var transport = getTransport("xxx", {
         timeline: timeline,
         encrypted: true
@@ -217,6 +222,7 @@ describe("AbstractTransport", function() {
 
       expect(timeline.info.calls.length).toEqual(1);
       expect(timeline.info).toHaveBeenCalledWith({
+        cid: 11111,
         transport: "abstracts",
         state: "initialized"
       });
