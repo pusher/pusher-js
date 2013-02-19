@@ -115,6 +115,15 @@ describe("FlashTransport", function() {
 
       expect(onInitialized).toHaveBeenCalled();
     });
+
+    it("should log method call with debug level", function() {
+      this.transport.initialize();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "flash",
+        method: "initialize"
+      });
+    });
   });
 
   describe("on connect", function() {

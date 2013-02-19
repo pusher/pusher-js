@@ -64,6 +64,7 @@
    * Fetches resources if needed and then transitions to initialized.
    */
   prototype.initialize = function() {
+    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
     this.changeState("initialized");
   };
 
@@ -72,11 +73,15 @@
    * @returns {Boolean} false if transport is in invalid state
    */
   prototype.connect = function() {
+    var url = this.getURL(this.key, this.options);
+    this.timeline.debug(this.buildTimelineMessage({
+      method: "connect",
+      url: url
+    }));
+
     if (this.socket || this.state !== "initialized") {
       return false;
     }
-
-    var url = this.getURL(this.key, this.options);
 
     this.socket = this.createSocket(url);
     this.bindListeners();
@@ -91,6 +96,8 @@
    * @return {Boolean} true if there was a connection to close
    */
   prototype.close = function() {
+    this.timeline.debug(this.buildTimelineMessage({ method: "close" }));
+
     if (this.socket) {
       this.socket.close();
       return true;
@@ -105,6 +112,11 @@
    * @return {Boolean} true only when in the "open" state
    */
   prototype.send = function(data) {
+    this.timeline.debug(this.buildTimelineMessage({
+      method: "send",
+      data: data
+    }));
+
     if (this.state === "open") {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
       var self = this;
@@ -141,6 +153,7 @@
 
   /** @protected */
   prototype.onMessage = function(message) {
+    this.timeline.debug(this.buildTimelineMessage({ message: message.data }));
     this.emit("message", message);
   };
 
@@ -194,11 +207,11 @@
   /** @protected */
   prototype.changeState = function(state, params) {
     this.state = state;
-    this.emit(state, params);
     this.timeline.info(this.buildTimelineMessage({
       state: state,
       params: params
     }));
+    this.emit(state, params);
   };
 
   /** @protected */

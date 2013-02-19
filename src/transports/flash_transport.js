@@ -52,6 +52,7 @@
   prototype.initialize = function() {
     var self = this;
 
+    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
     this.changeState("initializing");
 
     if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
