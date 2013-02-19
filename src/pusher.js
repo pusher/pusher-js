@@ -23,6 +23,9 @@
       });
     };
     var getTimelineSender = function(timeline, options) {
+      if (self.options.disableStats) {
+        return null;
+      }
       return new Pusher.TimelineSender(timeline, {
         encrypted: self.isEncrypted() || !!options.encrypted,
         host: Pusher.stats_host,

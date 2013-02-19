@@ -267,6 +267,15 @@ describe("Pusher", function() {
         );
         expect(sender.isEncrypted()).toBe(true);
       });
+
+      it("should create a null sender when stats are disabled", function() {
+        pusher = new Pusher("foo", { disableStats: true });
+        pusher.connect();
+        managerOptions = Pusher.ConnectionManager.calls[1].args[1];
+
+        var sender = managerOptions.getTimelineSender(timeline, {}, manager);
+        expect(sender).toBe(null);
+      });
     });
   });
 
