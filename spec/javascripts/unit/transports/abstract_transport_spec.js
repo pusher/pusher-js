@@ -224,7 +224,15 @@ describe("AbstractTransport", function() {
       expect(this.transport.state).toEqual("closed");
     });
 
-    it("should log the error to timeline", function() {
+    it("should log an error string to timeline", function() {
+      this.socket.onerror("error message");
+      expect(this.timeline.error).toHaveBeenCalledWith({
+        cid: 667,
+        error: "error message"
+      });
+    });
+
+    it("should log an error object to timeline", function() {
       this.socket.onerror({
         name: "doom",
         number: 1,
@@ -237,8 +245,18 @@ describe("AbstractTransport", function() {
         error: {
           name: "doom",
           number: 1,
-          bool: true
+          bool: true,
+          o: "object",
+          f: "function"
         }
+      });
+    });
+
+    it("should log type of an error if it's not a string or object", function() {
+      this.socket.onerror(function() {});
+      expect(this.timeline.error).toHaveBeenCalledWith({
+        cid: 667,
+        error: "function"
       });
     });
   });
