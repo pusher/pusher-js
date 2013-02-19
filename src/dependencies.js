@@ -61,7 +61,7 @@ var _require = (function() {
   if (!window['WebSocket']) {
     var flashSupported;
     try {
-      flashSupported = !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+      flashSupported = Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {
       flashSupported = navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
     }
