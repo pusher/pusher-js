@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.12.6 (2013-02-19)
+
+[CHANGED] Flash is now detected before fetching fallback files
+[CHANGED] Empty app key are now raising warnings
+[FIXED] Fixed local variable leak
+
 ## 1.12.5 (2012-10-31)
 
 [CHANGED] Improved connection timeout strategy.
