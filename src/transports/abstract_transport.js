@@ -64,7 +64,11 @@
    * Fetches resources if needed and then transitions to initialized.
    */
   prototype.initialize = function() {
+    this.timeline.info(this.buildTimelineMessage({
+      transport: this.name + (this.options.encrypted ? "s" : "")
+    }))
     this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
+
     this.changeState("initialized");
   };
 
@@ -216,10 +220,7 @@
 
   /** @protected */
   prototype.buildTimelineMessage = function(message) {
-    return Pusher.Util.extend({
-      cid: this.id,
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }, message);
+    return Pusher.Util.extend({ cid: this.id }, message);
   };
 
   Pusher.AbstractTransport = AbstractTransport;

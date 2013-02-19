@@ -35,8 +35,29 @@ describe("AbstractTransport", function() {
       this.transport.initialize();
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         method: "initialize"
+      });
+    });
+
+    it("should log transport name with info level", function() {
+      this.transport.initialize();
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "abstract"
+      });
+    });
+
+    it("should log transport name with an 's' suffix when encrypted", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline,
+        encrypted: true
+      });
+      transport.name = "abstract";
+      transport.initialize();
+
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "abstracts"
       });
     });
   });
@@ -111,7 +132,6 @@ describe("AbstractTransport", function() {
       this.transport.connect();
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         method: "connect",
         url: "ws://example.com:12345/app/foo?protocol=5&client=js&version=<VERSION>"
       });
@@ -139,7 +159,6 @@ describe("AbstractTransport", function() {
       this.socket.onmessage({ data: "log this" });
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         message: "log this"
       });
     });
@@ -175,7 +194,6 @@ describe("AbstractTransport", function() {
       this.transport.send("foobar");
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         method: "send",
         data: "foobar"
       });
@@ -216,7 +234,6 @@ describe("AbstractTransport", function() {
       });
       expect(this.timeline.error).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         error: {
           name: "doom",
           number: 1,
@@ -249,7 +266,6 @@ describe("AbstractTransport", function() {
       this.transport.close();
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         method: "close"
       });
     });
@@ -259,38 +275,19 @@ describe("AbstractTransport", function() {
     it("should log the new state to timeline", function() {
       this.transport.initialize();
 
-      expect(this.timeline.info.calls.length).toEqual(1);
+      // first call is the transport name
+      expect(this.timeline.info.calls.length).toEqual(2);
       expect(this.timeline.info).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         state: "initialized"
       });
 
       this.transport.connect();
 
-      expect(this.timeline.info.calls.length).toEqual(2);
+      expect(this.timeline.info.calls.length).toEqual(3);
       expect(this.timeline.info).toHaveBeenCalledWith({
         cid: 667,
-        transport: "abstract",
         state: "connecting"
-      });
-    });
-
-    it("should append an 's' suffix for encrypted connections", function() {
-      var timeline = Pusher.Mocks.getTimeline();
-      timeline.getUniqueID.andReturn(11111);
-      var transport = getTransport("xxx", {
-        timeline: timeline,
-        encrypted: true
-      });
-      transport.name = "abstract";
-      transport.initialize();
-
-      expect(timeline.info.calls.length).toEqual(1);
-      expect(timeline.info).toHaveBeenCalledWith({
-        cid: 11111,
-        transport: "abstracts",
-        state: "initialized"
       });
     });
   });

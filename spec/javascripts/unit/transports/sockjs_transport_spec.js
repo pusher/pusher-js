@@ -69,8 +69,28 @@ describe("SockJSTransport", function() {
       this.transport.initialize();
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 1,
-        transport: "sockjs",
         method: "initialize"
+      });
+    });
+
+    it("should log transport name with info level", function() {
+      this.transport.initialize();
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "sockjs"
+      });
+    });
+
+    it("should log transport name with an 's' suffix when encrypted", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline,
+        encrypted: true
+      });
+      transport.initialize();
+
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "sockjss"
       });
     });
   });
