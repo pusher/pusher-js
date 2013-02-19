@@ -68,9 +68,11 @@ describe("Timeline", function() {
       Pusher.Util.now.andReturn(1000);
       timeline.log(2, {a: 1});
       Pusher.Util.now.andReturn(2000);
-      timeline.info({ foo: "bar" });
-      Pusher.Util.now.andReturn(100000);
       timeline.error({ b: 2.2 });
+      Pusher.Util.now.andReturn(100000);
+      timeline.info({ foo: "bar" });
+      Pusher.Util.now.andReturn(100001);
+      timeline.debug({ debug: true });
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
       expect(sendJSONP).toHaveBeenCalledWith(
@@ -78,8 +80,9 @@ describe("Timeline", function() {
           session: 666,
           timeline: [
             { timestamp: 1000, level: 2, a: 1 },
-            { timestamp: 2000, level: 6, foo: "bar" },
-            { timestamp: 100000, level: 3, b: 2.2 }
+            { timestamp: 2000, level: 3, b: 2.2 },
+            { timestamp: 100000, level: 6, foo: "bar" },
+            { timestamp: 100001, level: 7, debug: true }
           ]
         },
         jasmine.any(Function)

@@ -9,8 +9,9 @@
     getTimeline: function() {
       return {
         log: jasmine.createSpy("log"),
-        info: jasmine.createSpy("info"),
         error: jasmine.createSpy("error"),
+        info: jasmine.createSpy("info"),
+        debug: jasmine.createSpy("debug"),
         send: jasmine.createSpy("send"),
         isEmpty: jasmine.createSpy("isEmpty"),
         getUniqueID: jasmine.createSpy("getUniqueID")

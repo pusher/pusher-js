@@ -12,6 +12,7 @@
   // Log levels
   Timeline.ERROR = 3;
   Timeline.INFO = 6;
+  Timeline.DEBUG = 7;
 
   prototype.log = function(level, event) {
     if (this.options.level === undefined || level <= this.options.level) {
@@ -27,12 +28,16 @@
     }
   };
 
+  prototype.error = function(event) {
+    this.log(Timeline.ERROR, event);
+  };
+
   prototype.info = function(event) {
     this.log(Timeline.INFO, event);
   };
 
-  prototype.error = function(event) {
-    this.log(Timeline.ERROR, event);
+  prototype.debug = function(event) {
+    this.log(Timeline.DEBUG, event);
   };
 
   prototype.isEmpty = function() {
