@@ -54,7 +54,7 @@
    */
   prototype.getRoot = function() {
     var cdn;
-    if (document.location.protocol === "http:") {
+    if (Pusher.Util.getDocumentLocation().protocol === "http:") {
       cdn = this.options.cdn_http;
     } else {
       cdn = this.options.cdn_https;
@@ -63,11 +63,11 @@
   };
 
   function handleScriptLoaded(elem, callback) {
-    if (document.addEventListener) {
+    if (Pusher.Util.getDocument().addEventListener) {
       elem.addEventListener('load', callback, false);
     } else {
       elem.attachEvent('onreadystatechange', function () {
-        if (elem.readyState == 'loaded' || elem.readyState == 'complete') {
+        if (elem.readyState === 'loaded' || elem.readyState === 'complete') {
           callback();
         }
       });
@@ -75,8 +75,10 @@
   }
 
   function require(src, callback) {
+    var document = Pusher.Util.getDocument();
     var head = document.getElementsByTagName('head')[0];
     var script = document.createElement('script');
+
     script.setAttribute('src', src);
     script.setAttribute("type","text/javascript");
     script.setAttribute('async', true);
