@@ -1,5 +1,30 @@
 ;(function() {
   Pusher.Mocks = {
+    getDocument: function() {
+      return {
+        location: {
+          protocol: "http:"
+        },
+
+        getElementsByTagName: jasmine.createSpy("getElementsByTagName"),
+        createElement: jasmine.createSpy("createElement"),
+        addEventListener: jasmine.createSpy("addEventListener")
+      };
+    },
+
+    getDocumentHead: function() {
+      return {
+        appendChild: jasmine.createSpy("appendChild")
+      };
+    },
+
+    getDocumentElement: function() {
+      return {
+        setAttribute: jasmine.createSpy("setAttribute"),
+        addEventListener: jasmine.createSpy("addEventListener")
+      };
+    },
+
     getJSONPSender: function() {
       return {
         send: jasmine.createSpy("send")
