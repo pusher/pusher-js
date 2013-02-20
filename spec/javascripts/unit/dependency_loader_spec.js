@@ -4,7 +4,7 @@ describe("DependencyLoader", function() {
   var loader;
 
   beforeEach(function() {
-    head = Pusher.Mocks.getDocumentHead();
+    head = Pusher.Mocks.getDocumentElement();
     script = Pusher.Mocks.getDocumentElement();
 
     document = Pusher.Mocks.getDocument();

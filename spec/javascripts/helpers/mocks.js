@@ -12,16 +12,11 @@
       };
     },
 
-    getDocumentHead: function() {
-      return {
-        appendChild: jasmine.createSpy("appendChild")
-      };
-    },
-
     getDocumentElement: function() {
       return {
         setAttribute: jasmine.createSpy("setAttribute"),
-        addEventListener: jasmine.createSpy("addEventListener")
+        addEventListener: jasmine.createSpy("addEventListener"),
+        appendChild: jasmine.createSpy("appendChild")
       };
     },
 
