@@ -22,14 +22,6 @@
     });
   };
 
-  /** Returns an object with strategy's options
-   *
-   * @returns {Object}
-   */
-  prototype.getOptions = function() {
-    return this.options;
-  };
-
   /** Launches a connection attempt and returns a strategy runner.
    *
    * @param  {Function} callback

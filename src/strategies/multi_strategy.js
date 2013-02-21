@@ -21,13 +21,5 @@
     return Pusher.Util.any(this.strategies, Pusher.Util.method("isSupported"));
   };
 
-  /** Returns an object with strategy's options
-   *
-   * @returns {Object}
-   */
-  prototype.getOptions = function() {
-    return this.options;
-  };
-
   Pusher.MultiStrategy = MultiStrategy;
 }).call(this);
