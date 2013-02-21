@@ -30,43 +30,46 @@
       timeout: 15000,
       timeoutLimit: 60000,
 
-      type: "first_supported",
-      children: [
-        { type: "all_supported",
-          children: [
-            { type: "first_supported",
-              children: [
-                { type: "sequential",
-                  children: [{ type: "transport", transport: "ws" }]
-                },
-                { type: "sequential",
-                  children: [{ type: "transport", transport: "flash" }]
+      type: "last_successful",
+      child: {
+        type: "first_supported",
+        children: [
+          { type: "all_supported",
+            children: [
+              { type: "first_supported",
+                children: [
+                  { type: "sequential",
+                    children: [{ type: "transport", transport: "ws" }]
+                  },
+                  { type: "sequential",
+                    children: [{ type: "transport", transport: "flash" }]
+                  }
+                ]
+              },
+              { type: "delayed",
+                delay: 2000,
+                child: {
+                  type: "sequential",
+                  children: [{
+                    type: "transport",
+                    transport: "sockjs",
+                    hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
+                    hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+                  }]
                 }
-              ]
-            },
-            { type: "delayed",
-              delay: 2000,
-              child: {
-                type: "sequential",
-                children: [{
-                  type: "transport",
-                  transport: "sockjs",
-                  hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
-                  hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
-                }]
               }
-            }
-          ]
-        },
-        { type: "sequential",
-          children: [{
-            type: "transport",
-            transport: "sockjs",
-            hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
-            hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
-          }]
-        }
-      ]
+            ]
+          },
+          { type: "sequential",
+            children: [{
+              type: "transport",
+              transport: "sockjs",
+              hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
+              hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+            }]
+          }
+        ]
+      }
     };
   };
 }).call(this);

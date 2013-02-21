@@ -275,6 +275,10 @@
       return document.location;
     },
 
+    getLocalStorage: function() {
+      return window.localStorage;
+    },
+
     getClientFeatures: function() {
       return Pusher.Util.keys(
         Pusher.Util.filterObject(

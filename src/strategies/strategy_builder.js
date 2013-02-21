@@ -42,6 +42,15 @@
       );
     },
 
+    last_successful: function(scheme) {
+      var options = filter(scheme, {"type": true, "child": true});
+
+      return new Pusher.LastSuccessfulStrategy(
+        StrategyBuilder.build(Pusher.Util.extend({}, options, scheme.child)),
+        options
+      );
+    },
+
     sequential: function(scheme) {
       return buildWithSubstrategies(Pusher.SequentialStrategy, scheme);
     },

@@ -19,6 +19,7 @@ src_files:
   - timeline/timeline.js
   - timeline/timeline_sender.js
 
+  - strategies/last_successful_strategy.js
   - strategies/multi_strategy.js
   - strategies/parallel_strategy.js
   - strategies/delayed_strategy.js
