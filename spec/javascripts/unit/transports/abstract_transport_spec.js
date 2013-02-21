@@ -2,9 +2,8 @@ describe("AbstractTransport", function() {
   function getTransport(key, options) {
     options = Pusher.Util.extend({
       encrypted: false,
-      host: "example.com",
-      unencryptedPort: 12345,
-      encryptedPort: 54321
+      hostUnencrypted: "example.com:12345",
+      hostEncrypted: "example.com:54321"
     }, options);
 
     return new Pusher.AbstractTransport(key || "foo", options);

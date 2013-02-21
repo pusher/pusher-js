@@ -24,53 +24,47 @@
 
   Pusher.getDefaultStrategy = function() {
     return {
-      type: "first_supported",
-      host: Pusher.host,
-      unencryptedPort: Pusher.ws_port,
-      encryptedPort: Pusher.wss_port,
+      hostUnencrypted: Pusher.host + ":" + Pusher.ws_port,
+      hostEncrypted: Pusher.host + ":" + Pusher.wss_port,
       loop: true,
       timeout: 15000,
       timeoutLimit: 60000,
+
+      type: "first_supported",
       children: [
-        { type: "first_supported",
+        { type: "all_supported",
           children: [
-            { type: "all_supported",
+            { type: "first_supported",
               children: [
-                { type: "first_supported",
-                  children: [
-                    { type: "sequential",
-                      children: [{ type: "transport", transport: "ws" }]
-                    },
-                    { type: "sequential",
-                      children: [{ type: "transport", transport: "flash" }]
-                    }
-                  ]
+                { type: "sequential",
+                  children: [{ type: "transport", transport: "ws" }]
                 },
-                { type: "delayed",
-                  delay: 2000,
-                  child: {
-                    type: "sequential",
-                    children: [{
-                      type: "transport",
-                      transport: "sockjs",
-                      host: Pusher.sockjs_host,
-                      unencryptedPort: Pusher.sockjs_http_port,
-                      encryptedPort: Pusher.sockjs_https_port
-                    }]
-                  }
+                { type: "sequential",
+                  children: [{ type: "transport", transport: "flash" }]
                 }
               ]
             },
-            { type: "sequential",
-              children: [{
-                type: "transport",
-                transport: "sockjs",
-                host: Pusher.sockjs_host,
-                unencryptedPort: Pusher.sockjs_http_port,
-                encryptedPort: Pusher.sockjs_https_port
-              }]
+            { type: "delayed",
+              delay: 2000,
+              child: {
+                type: "sequential",
+                children: [{
+                  type: "transport",
+                  transport: "sockjs",
+                  hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
+                  hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+                }]
+              }
             }
           ]
+        },
+        { type: "sequential",
+          children: [{
+            type: "transport",
+            transport: "sockjs",
+            hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
+            hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+          }]
         }
       ]
     };
