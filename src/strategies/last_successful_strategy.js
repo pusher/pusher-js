@@ -19,20 +19,30 @@
   prototype.connect = function(callback) {
     var info = fetchTransportInfo();
 
-    var strategy = this.strategy;
+    var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
-      strategy = Pusher.StrategyBuilder.build(
-        Pusher.Util.extend({}, this.options, info.scheme)
-      );
+      strategies.push(Pusher.StrategyBuilder.build({
+        type: "sequential",
+        timeout: info.latency * 2,
+        children: [ Pusher.Util.extend({}, this.options, info.scheme) ]
+      }));
     }
 
-    return strategy.connect(function(error, connection) {
+    var startTimestamp = Pusher.Util.now();
+    return strategies.pop().connect(function cb(error, connection) {
       if (error) {
         flushTransportInfo();
+        if (strategies.length > 0) {
+          startTimestamp = Pusher.Util.now();
+          strategies.pop().connect(cb);
+        } else {
+          callback(error);
+        }
       } else {
-        storeTransportInfo(connection.name, connection.options);
+        var latency = Pusher.Util.now() - startTimestamp;
+        storeTransportInfo(connection.name, latency, connection.options);
+        callback(null, connection);
       }
-      callback(error, connection);
     });
   };
 
@@ -47,11 +57,12 @@
     return null;
   }
 
-  function storeTransportInfo(name, options) {
+  function storeTransportInfo(name, latency, options) {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
       storage.pusherTransport = JSON.stringify({
         timestamp: Pusher.Util.now(),
+        latency: latency,
         scheme: Pusher.Util.extend(
           { type: "transport", transport: name }, options
         )
