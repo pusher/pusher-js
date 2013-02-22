@@ -117,6 +117,35 @@ describe("SequentialStrategy", function() {
     });
   });
 
+  describe("on error", function() {
+    it("should wait for the timeout before calling back", function() {
+      var substrategy = Pusher.Mocks.getStrategy(true);
+      var strategy = new Pusher.SequentialStrategy([substrategy], {
+        timeout: 100
+      });
+
+      strategy.connect(this.callback);
+      substrategy._callback(true);
+
+      jasmine.Clock.tick(99);
+      expect(this.callback).not.toHaveBeenCalled();
+      jasmine.Clock.tick(1);
+      expect(this.callback).toHaveBeenCalled();
+    });
+
+    it("should not wait for the timeout before calling back if failFast is on", function() {
+      var substrategy = Pusher.Mocks.getStrategy(true);
+      var strategy = new Pusher.SequentialStrategy([substrategy], {
+        timeout: 100,
+        failFast: true
+      });
+
+      strategy.connect(this.callback);
+      substrategy._callback(true);
+      expect(this.callback).toHaveBeenCalled();
+    });
+  });
+
   describe("on timeout", function() {
     it("should try substrategies with exponential timeouts", function() {
       var substrategies = Pusher.Mocks.getStrategies(

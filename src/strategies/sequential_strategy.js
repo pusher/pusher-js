@@ -12,6 +12,7 @@
   function SequentialStrategy(strategies, options) {
     Pusher.MultiStrategy.call(this, strategies, {
       loop: options.loop,
+      failFast: options.failFast,
       timeout: options.timeout,
       timeoutLimit: options.timeoutLimit
     });
@@ -48,7 +49,9 @@
             }
           }
           runner = self.tryStrategy(
-            strategies[current], timeout, tryNextStrategy
+            strategies[current],
+            { timeout: timeout, failFast: self.options.failFast },
+            tryNextStrategy
           );
         } else {
           callback(true);
@@ -56,7 +59,11 @@
       }
     };
 
-    runner = this.tryStrategy(strategies[current], timeout, tryNextStrategy);
+    runner = this.tryStrategy(
+      strategies[current],
+      { timeout: timeout, failFast: this.options.failFast },
+      tryNextStrategy
+    );
 
     return {
       abort: function() {
@@ -66,12 +73,12 @@
   };
 
   /** @private */
-  prototype.tryStrategy = function(strategy, timeoutLength, callback) {
+  prototype.tryStrategy = function(strategy, options, callback) {
     var timeout = null;
     var runner = null;
 
     runner = strategy.connect(function(error, connection) {
-      if (error && timeout) {
+      if (error && timeout && !options.failFast) {
         // advance to the next strategy after the timeout
         return;
       }
@@ -82,13 +89,13 @@
       callback(error, connection);
     });
 
-    if (timeoutLength > 0) {
+    if (options.timeout > 0) {
       timeout = setTimeout(function() {
         if (timeout) {
           runner.abort();
           callback(true);
         }
-      }, timeoutLength);
+      }, options.timeout);
     }
 
     return {
