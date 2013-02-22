@@ -29,12 +29,12 @@
     }
 
     var startTimestamp = Pusher.Util.now();
-    return strategies.pop().connect(function cb(error, connection) {
+    var runner = strategies.pop().connect(function cb(error, connection) {
       if (error) {
         flushTransportInfo();
         if (strategies.length > 0) {
           startTimestamp = Pusher.Util.now();
-          strategies.pop().connect(cb);
+          runner = strategies.pop().connect(cb);
         } else {
           callback(error);
         }
@@ -44,6 +44,12 @@
         callback(null, connection);
       }
     });
+
+    return {
+      abort: function() {
+        runner.abort();
+      }
+    };
   };
 
   function fetchTransportInfo() {
