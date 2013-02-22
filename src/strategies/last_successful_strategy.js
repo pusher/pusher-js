@@ -21,11 +21,13 @@
 
     var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
-      strategies.push(Pusher.StrategyBuilder.build({
-        type: "sequential",
-        timeout: info.latency * 2,
-        children: [ Pusher.Util.extend({}, this.options, info.scheme) ]
-      }));
+      strategies.push(new Pusher.SequentialStrategy(
+        [ Pusher.StrategyBuilder.build(
+            Pusher.Util.extend({}, this.options, info.scheme)
+          )
+        ],
+        { timeout: info.latency * 2, failFast: true }
+      ));
     }
 
     var startTimestamp = Pusher.Util.now();
