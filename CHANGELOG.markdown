@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.12.7 (2013-02-25)
+
+[CHANGED] Various improvements and fixes for HTTP fallbacks
+
 ## 1.12.6 (2013-02-19)
 
 [CHANGED] Flash is now detected before fetching fallback files
