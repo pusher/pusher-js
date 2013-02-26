@@ -20,25 +20,64 @@
     if (!this.isSupported()) {
       return null;
     }
-    return Pusher.ParallelStrategy.connect(
+    return connect(
       Pusher.MultiStrategy.filterUnsupported(this.strategies),
       function(i, runners) {
         return function(error, connection) {
           runners[i].error = error;
           if (error) {
-            if (Pusher.ParallelStrategy.allRunnersFailed(runners)) {
+            if (allRunnersFailed(runners)) {
               callback(true);
             }
             return;
           }
           for (var j = i + 1; j < runners.length; j++) {
-            Pusher.ParallelStrategy.abortRunner(runners[j]);
+            abortRunner(runners[j]);
           }
           callback(null, connection);
         };
       }
     );
   };
+
+  /** Connects to all strategies in parallel.
+   *
+   * Callback builder should be a function that takes two arguments: index
+   * and a list of runners. It should return another function that will be
+   * passed to the substrategy with given index. Runners can be aborted using
+   * abortRunner(s) functions from this class.
+   *
+   * @param  {Array} strategies
+   * @param  {Function} callbackBuilder
+   * @return {Object} strategy runner
+   */
+  function connect(strategies, callbackBuilder) {
+    var runners = Pusher.Util.map(strategies, function(strategy, i, _, rs) {
+      return strategy.connect(callbackBuilder(i, rs));
+    });
+    return {
+      abort: function() {
+        abortRunners(runners);
+      }
+    };
+  }
+
+  function allRunnersFailed(runners) {
+    return Pusher.Util.all(runners, function(runner) {
+      return !!runner.error;
+    });
+  }
+
+  function abortRunner(runner) {
+    if (!runner.error && !runner.aborted) {
+      runner.abort();
+      runner.aborted = true;
+    }
+  }
+
+  function abortRunners(runners) {
+    Pusher.Util.apply(runners, abortRunner);
+  }
 
   Pusher.BestConnectedEverStrategy = BestConnectedEverStrategy;
 }).call(this);

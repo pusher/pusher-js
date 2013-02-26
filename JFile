@@ -28,7 +28,6 @@ bundle 'pusher.js' do
 
   file 'strategies/last_successful_strategy.js'
   file 'strategies/multi_strategy.js'
-  file 'strategies/parallel_strategy.js'
   file 'strategies/delayed_strategy.js'
   file 'strategies/first_connected_strategy.js'
   file 'strategies/best_connected_ever_strategy.js'
