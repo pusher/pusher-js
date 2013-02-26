@@ -28,9 +28,13 @@
 
     getTimeline: function() {
       return {
-        push: jasmine.createSpy("push"),
+        log: jasmine.createSpy("log"),
+        error: jasmine.createSpy("error"),
+        info: jasmine.createSpy("info"),
+        debug: jasmine.createSpy("debug"),
         send: jasmine.createSpy("send"),
-        isEmpty: jasmine.createSpy("isEmpty")
+        isEmpty: jasmine.createSpy("isEmpty"),
+        generateUniqueID: jasmine.createSpy("generateUniqueID")
       };
     },
 

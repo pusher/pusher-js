@@ -15,7 +15,9 @@ describe("FlashTransport", function() {
 
   beforeEach(function() {
     this.socket = {};
-    this.transport = getTransport("foo");
+    this.timeline = Pusher.Mocks.getTimeline();
+    this.timeline.generateUniqueID.andReturn(1);
+    this.transport = getTransport("foo", { timeline: this.timeline });
 
     Pusher.Dependencies.loaded.flashfallback = true;
 
@@ -112,6 +114,35 @@ describe("FlashTransport", function() {
       onDependencyLoaded();
 
       expect(onInitialized).toHaveBeenCalled();
+    });
+
+    it("should log method call with debug level", function() {
+      this.transport.initialize();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 1,
+        method: "initialize"
+      });
+    });
+
+    it("should log transport name with info level", function() {
+      this.transport.initialize();
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "flash"
+      });
+    });
+
+    it("should log transport name with an 's' suffix when encrypted", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline,
+        encrypted: true
+      });
+      transport.initialize();
+
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "flashs"
+      });
     });
   });
 

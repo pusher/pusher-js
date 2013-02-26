@@ -37,6 +37,11 @@
   prototype.initialize = function() {
     var self = this;
 
+    this.timeline.info(this.buildTimelineMessage({
+      transport: "sockjs" + (this.options.encrypted ? "s" : "")
+    }));
+    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
+
     this.changeState("initializing");
     Pusher.Dependencies.load("sockjs", function() {
       self.changeState("initialized");

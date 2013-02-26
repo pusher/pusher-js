@@ -37,6 +37,7 @@
     this.options = options;
     this.state = "new";
     this.timeline = options.timeline;
+    this.id = this.timeline.generateUniqueID();
   }
   var prototype = AbstractTransport.prototype;
 
@@ -63,6 +64,11 @@
    * Fetches resources if needed and then transitions to initialized.
    */
   prototype.initialize = function() {
+    this.timeline.info(this.buildTimelineMessage({
+      transport: this.name + (this.options.encrypted ? "s" : "")
+    }));
+    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
+
     this.changeState("initialized");
   };
 
@@ -71,11 +77,15 @@
    * @returns {Boolean} false if transport is in invalid state
    */
   prototype.connect = function() {
+    var url = this.getURL(this.key, this.options);
+    this.timeline.debug(this.buildTimelineMessage({
+      method: "connect",
+      url: url
+    }));
+
     if (this.socket || this.state !== "initialized") {
       return false;
     }
-
-    var url = this.getURL(this.key, this.options);
 
     this.socket = this.createSocket(url);
     this.bindListeners();
@@ -90,6 +100,8 @@
    * @return {Boolean} true if there was a connection to close
    */
   prototype.close = function() {
+    this.timeline.debug(this.buildTimelineMessage({ method: "close" }));
+
     if (this.socket) {
       this.socket.close();
       return true;
@@ -104,6 +116,11 @@
    * @return {Boolean} true only when in the "open" state
    */
   prototype.send = function(data) {
+    this.timeline.debug(this.buildTimelineMessage({
+      method: "send",
+      data: data
+    }));
+
     if (this.state === "open") {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
       var self = this;
@@ -125,11 +142,9 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.log({
-      error: Pusher.Util.filterObject(error, function(value) {
-        return (typeof value !== "object" && typeof value !== "function");
-      })
-    });
+    this.timeline.error(this.buildTimelineMessage({
+      error: getErrorDetails(error)
+    }));
   };
 
   /** @protected */
@@ -140,6 +155,7 @@
 
   /** @protected */
   prototype.onMessage = function(message) {
+    this.timeline.debug(this.buildTimelineMessage({ message: message.data }));
     this.emit("message", message);
   };
 
@@ -193,18 +209,33 @@
   /** @protected */
   prototype.changeState = function(state, params) {
     this.state = state;
+    this.timeline.info(this.buildTimelineMessage({
+      state: state,
+      params: params
+    }));
     this.emit(state, params);
-    this.log({ state: state, params: params });
   };
 
   /** @protected */
-  prototype.log = function(message) {
-    if (this.timeline) {
-      this.timeline.push(Pusher.Util.extend({
-        transport: this.name + (this.options.encrypted ? "s" : "")
-      }, message));
-    }
+  prototype.buildTimelineMessage = function(message) {
+    return Pusher.Util.extend({ cid: this.id }, message);
   };
+
+  function getErrorDetails(error) {
+    if (typeof error === "string") {
+      return error;
+    }
+    if (typeof error === "object") {
+      return Pusher.Util.mapObject(error, function(value) {
+        var valueType = typeof value;
+        if (valueType === "object" || valueType == "function") {
+          return valueType;
+        }
+        return value;
+      });
+    }
+    return typeof error;
+  }
 
   Pusher.AbstractTransport = AbstractTransport;
 }).call(this);

@@ -19,7 +19,8 @@
       return new Pusher.Timeline(self.key, self.sessionID, {
         features: Pusher.Util.getClientFeatures(),
         params: self.options.timelineParams || {},
-        limit: 25
+        limit: 25,
+        level: Pusher.Timeline.INFO
       });
     };
     var getTimelineSender = function(timeline, options) {
@@ -50,7 +51,7 @@
 
     this.connection.bind('connected', function() {
       self.subscribeAll();
-    })
+    });
     this.connection.bind('message', function(params) {
       var internal = (params.event.indexOf('pusher_internal:') === 0);
       if (params.channel) {
@@ -61,10 +62,10 @@
       }
       // Emit globaly [deprecated]
       if (!internal) self.global_emitter.emit(params.event, params.data);
-    })
+    });
     this.connection.bind('disconnected', function() {
       self.channels.disconnect();
-    })
+    });
     this.connection.bind('error', function(err) {
       Pusher.warn('Error', err);
     });

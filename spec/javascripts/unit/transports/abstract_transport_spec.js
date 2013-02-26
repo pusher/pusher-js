@@ -13,11 +13,11 @@ describe("AbstractTransport", function() {
   beforeEach(function() {
     this.socket = {};
     this.timeline = Pusher.Mocks.getTimeline();
+    this.timeline.generateUniqueID.andReturn(667);
     this.transport = getTransport("foo", {
       timeline: this.timeline
     });
     this.transport.name = "abstract";
-    this.transport.initialize();
 
     spyOn(this.transport, "createSocket").andReturn(this.socket);
   });
@@ -30,9 +30,43 @@ describe("AbstractTransport", function() {
       this.transport.initialize();
       expect(onInitialized).toHaveBeenCalled();
     });
+
+    it("should log method call with debug level", function() {
+      this.transport.initialize();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        method: "initialize"
+      });
+    });
+
+    it("should log transport name with info level", function() {
+      this.transport.initialize();
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "abstract"
+      });
+    });
+
+    it("should log transport name with an 's' suffix when encrypted", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline,
+        encrypted: true
+      });
+      transport.name = "abstract";
+      transport.initialize();
+
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "abstracts"
+      });
+    });
   });
 
   describe("on connect", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+    });
+
     it("should create an unencrypted connection", function() {
       this.transport.initialize();
       this.transport.connect();
@@ -44,7 +78,10 @@ describe("AbstractTransport", function() {
     });
 
     it("should create an encrypted connection", function() {
-      var transport = new getTransport("bar", { encrypted: true });
+      var transport = new getTransport("bar", {
+        timeline: this.timeline,
+        encrypted: true
+      });
       spyOn(transport, "createSocket").andReturn({});
 
       transport.initialize();
@@ -90,23 +127,50 @@ describe("AbstractTransport", function() {
       expect(this.transport.createSocket.calls.length).toEqual(1);
       expect(onConnecting).not.toHaveBeenCalled();
     });
+
+    it("should log method call with debug level", function() {
+      this.transport.connect();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        method: "connect",
+        url: "ws://example.com:12345/app/foo?protocol=5&client=js&version=<VERSION>"
+      });
+    });
   });
 
   describe("after receiving a message", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
+    });
+
     it("should emit message event with received object", function() {
       var onMessage = jasmine.createSpy("onMessage");
       this.transport.bind("message", onMessage);
 
-      this.transport.connect();
-      this.socket.onopen();
       this.socket.onmessage("ugabuga");
 
       expect(this.transport.state).toEqual("open");
       expect(onMessage).toHaveBeenCalledWith("ugabuga");
     });
+
+    it("should log the message with debug level", function() {
+      this.socket.onmessage({ data: "log this" });
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        message: "log this"
+      });
+    });
   });
 
   describe("on send", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
+    });
+
     it("should defer sending data to the socket", function() {
       var sendCalled = false;
       this.socket.send = jasmine.createSpy("send").andCallFake(function() {
@@ -114,9 +178,6 @@ describe("AbstractTransport", function() {
       });
 
       runs(function() {
-        this.transport.connect();
-        this.socket.onopen();
-
         expect(this.transport.send("foobar")).toBe(true);
         expect(this.socket.send).not.toHaveBeenCalled();
       });
@@ -127,16 +188,30 @@ describe("AbstractTransport", function() {
         expect(this.socket.send).toHaveBeenCalledWith("foobar");
       });
     });
+
+
+    it("should log method call with debug level", function() {
+      this.transport.send("foobar");
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        method: "send",
+        data: "foobar"
+      });
+    });
   });
 
   describe("after receiving an error", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+      this.transport.connect();
+    });
+
     it("should emit error and closed events", function() {
       var onError = jasmine.createSpy("onError");
       var onClosed = jasmine.createSpy("onClosed");
       this.transport.bind("error", onError);
       this.transport.bind("closed", onClosed);
 
-      this.transport.connect();
       this.socket.onerror("We're doomed");
       this.socket.onclose();
 
@@ -149,8 +224,15 @@ describe("AbstractTransport", function() {
       expect(this.transport.state).toEqual("closed");
     });
 
-    it("should log the error to timeline", function() {
-      this.transport.connect();
+    it("should log an error string to timeline", function() {
+      this.socket.onerror("error message");
+      expect(this.timeline.error).toHaveBeenCalledWith({
+        cid: 667,
+        error: "error message"
+      });
+    });
+
+    it("should log an error object to timeline", function() {
       this.socket.onerror({
         name: "doom",
         number: 1,
@@ -158,24 +240,37 @@ describe("AbstractTransport", function() {
         o: { nope: true },
         f: function() {}
       });
-      expect(this.timeline.push).toHaveBeenCalledWith({
-        transport: "abstract",
+      expect(this.timeline.error).toHaveBeenCalledWith({
+        cid: 667,
         error: {
           name: "doom",
           number: 1,
-          bool: true
+          bool: true,
+          o: "object",
+          f: "function"
         }
+      });
+    });
+
+    it("should log type of an error if it's not a string or object", function() {
+      this.socket.onerror(function() {});
+      expect(this.timeline.error).toHaveBeenCalledWith({
+        cid: 667,
+        error: "function"
       });
     });
   });
 
   describe("on close", function() {
-    it("should call close on the socket and emit a 'closed' event", function() {
+    beforeEach(function() {
+      this.transport.initialize();
       this.transport.connect();
       this.socket.onopen();
-
-      var onClosed = jasmine.createSpy("onClosed");
       this.socket.close = jasmine.createSpy("close");
+    });
+
+    it("should call close on the socket and emit a 'closed' event", function() {
+      var onClosed = jasmine.createSpy("onClosed");
       this.transport.bind("closed", onClosed);
 
       this.transport.close();
@@ -184,38 +279,33 @@ describe("AbstractTransport", function() {
       this.socket.onclose();
       expect(onClosed).toHaveBeenCalled();
     });
+
+    it("should log method call with debug level", function() {
+      this.transport.close();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        method: "close"
+      });
+    });
   });
 
   describe("on state change", function () {
     it("should log the new state to timeline", function() {
-      // initialization happens in beforeEach
-      expect(this.timeline.push.calls.length).toEqual(1);
-      expect(this.timeline.push).toHaveBeenCalledWith({
-        transport: "abstract",
+      this.transport.initialize();
+
+      // first call is the transport name
+      expect(this.timeline.info.calls.length).toEqual(2);
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
         state: "initialized"
       });
 
       this.transport.connect();
-      expect(this.timeline.push.calls.length).toEqual(2);
-      expect(this.timeline.push).toHaveBeenCalledWith({
-        transport: "abstract",
+
+      expect(this.timeline.info.calls.length).toEqual(3);
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 667,
         state: "connecting"
-      });
-    });
-
-    it("should append an 's' suffix for encrypted connections", function() {
-      var timeline = Pusher.Mocks.getTimeline();
-      var transport = getTransport("xxx", {
-        timeline: timeline,
-        encrypted: true
-      });
-      transport.name = "abstract";
-      transport.initialize();
-
-      expect(timeline.push.calls.length).toEqual(1);
-      expect(timeline.push).toHaveBeenCalledWith({
-        transport: "abstracts",
-        state: "initialized"
       });
     });
   });

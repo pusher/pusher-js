@@ -5,16 +5,39 @@
     this.events = [];
     this.options = options || {};
     this.sent = 0;
+    this.uniqueID = 0;
   }
   var prototype = Timeline.prototype;
 
-  prototype.push = function(event) {
-    this.events.push(
-      Pusher.Util.extend({}, event, { timestamp: Pusher.Util.now() })
-    );
-    if (this.options.limit && this.events.length > this.options.limit) {
-      this.events.shift();
+  // Log levels
+  Timeline.ERROR = 3;
+  Timeline.INFO = 6;
+  Timeline.DEBUG = 7;
+
+  prototype.log = function(level, event) {
+    if (this.options.level === undefined || level <= this.options.level) {
+      this.events.push(
+        Pusher.Util.extend({}, event, {
+          timestamp: Pusher.Util.now(),
+          level: level
+        })
+      );
+      if (this.options.limit && this.events.length > this.options.limit) {
+        this.events.shift();
+      }
     }
+  };
+
+  prototype.error = function(event) {
+    this.log(Timeline.ERROR, event);
+  };
+
+  prototype.info = function(event) {
+    this.log(Timeline.INFO, event);
+  };
+
+  prototype.debug = function(event) {
+    this.log(Timeline.DEBUG, event);
   };
 
   prototype.isEmpty = function() {
@@ -47,6 +70,11 @@
     });
 
     return true;
+  };
+
+  prototype.generateUniqueID = function() {
+    this.uniqueID++;
+    return this.uniqueID;
   };
 
   Pusher.Timeline = Timeline;

@@ -15,7 +15,9 @@ describe("SockJSTransport", function() {
 
   beforeEach(function() {
     this.socket = {};
-    this.transport = getTransport("foo");
+    this.timeline = Pusher.Mocks.getTimeline();
+    this.timeline.generateUniqueID.andReturn(1);
+    this.transport = getTransport("foo", { timeline: this.timeline });
 
     Pusher.Dependencies.loaded.sockjs = true;
 
@@ -62,6 +64,35 @@ describe("SockJSTransport", function() {
 
       expect(onInitialized).toHaveBeenCalled();
     });
+
+    it("should log method call with debug level", function() {
+      this.transport.initialize();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 1,
+        method: "initialize"
+      });
+    });
+
+    it("should log transport name with info level", function() {
+      this.transport.initialize();
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "sockjs"
+      });
+    });
+
+    it("should log transport name with an 's' suffix when encrypted", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline,
+        encrypted: true
+      });
+      transport.initialize();
+
+      expect(this.timeline.info).toHaveBeenCalledWith({
+        cid: 1,
+        transport: "sockjss"
+      });
+    });
   });
 
   describe("on connect", function() {
@@ -81,7 +112,10 @@ describe("SockJSTransport", function() {
     });
 
     it("should create an encrypted SockJS", function() {
-      var transport = new getTransport("bar", { encrypted: true });
+      var transport = new getTransport("bar", {
+        encrypted: true,
+        timeline: this.timeline
+      });
 
       transport.initialize();
       transport.connect();
