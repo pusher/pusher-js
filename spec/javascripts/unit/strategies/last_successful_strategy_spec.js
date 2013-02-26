@@ -38,7 +38,7 @@ describe("LastSuccessfulStrategy", function() {
 
     describe("without cached transport", function() {
       it("should try the substrategy immediately when cache is empty", function() {
-        strategy.connect(callback);
+        strategy.connect(0, callback);
         expect(substrategy.connect).toHaveBeenCalled();
       });
 
@@ -47,14 +47,22 @@ describe("LastSuccessfulStrategy", function() {
           timestamp: Pusher.Util.now() - 1801*1000 // default ttl is 1800s
         });
 
-        strategy.connect(callback);
+        strategy.connect(0, callback);
         expect(substrategy.connect).toHaveBeenCalled();
       });
 
       it("should abort the substrategy when requested", function() {
-        var runner = strategy.connect(callback);
+        var runner = strategy.connect(0, callback);
         runner.abort();
         expect(substrategy._abort).toHaveBeenCalled();
+      });
+
+      describe("on forceMinPriority", function() {
+        it("should force the new priority on the substrategy", function() {
+          var runner = strategy.connect(0, callback);
+          runner.forceMinPriority(10);
+          expect(substrategy._forceMinPriority).toHaveBeenCalledWith(10);
+        });
       });
 
       describe("after connecting successfully", function() {
@@ -65,7 +73,7 @@ describe("LastSuccessfulStrategy", function() {
           startTimestamp = Pusher.Util.now();
           spyOn(Pusher.Util, "now").andReturn(startTimestamp);
 
-          strategy.connect(callback);
+          strategy.connect(0, callback);
           Pusher.Util.now.andReturn(startTimestamp + 1000);
 
           connection = {
@@ -94,7 +102,7 @@ describe("LastSuccessfulStrategy", function() {
           localStorage.pusherTransport = JSON.stringify({
             timestamp: 0
           });
-          strategy.connect(callback);
+          strategy.connect(0, callback);
           substrategy._callback(1);
         });
 
@@ -119,15 +127,23 @@ describe("LastSuccessfulStrategy", function() {
       });
 
       it("should try the cached strategy first", function() {
-        strategy.connect(callback);
+        strategy.connect(0, callback);
         expect(transports.test.connect).toHaveBeenCalled();
       });
 
       it("should abort the cached transport and not call the substrategy", function() {
-        var runner = strategy.connect(callback);
+        var runner = strategy.connect(0, callback);
         runner.abort();
         expect(transports.test._abort).toHaveBeenCalled();
         expect(substrategy.connect).not.toHaveBeenCalled();
+      });
+
+      describe("on forceMinPriority", function() {
+        it("should force the new priority on the cached strategy", function() {
+          var runner = strategy.connect(0, callback);
+          runner.forceMinPriority(1000);
+          expect(transports.test._forceMinPriority).toHaveBeenCalledWith(1000);
+        });
       });
 
       describe("after connecting successfully with cached transport", function() {
@@ -135,7 +151,7 @@ describe("LastSuccessfulStrategy", function() {
           startTimestamp = Pusher.Util.now();
           spyOn(Pusher.Util, "now").andReturn(startTimestamp);
 
-          strategy.connect(callback);
+          strategy.connect(0, callback);
           Pusher.Util.now.andReturn(startTimestamp + 2000);
 
           connection = { name: "test" };
@@ -164,7 +180,7 @@ describe("LastSuccessfulStrategy", function() {
           startTimestamp = Pusher.Util.now();
           spyOn(Pusher.Util, "now").andReturn(startTimestamp);
 
-          strategy.connect(callback);
+          strategy.connect(0, callback);
 
           Pusher.Util.now.andReturn(startTimestamp + 4001);
           jasmine.Clock.tick(4001);
@@ -190,7 +206,8 @@ describe("LastSuccessfulStrategy", function() {
           startTimestamp = Pusher.Util.now();
           spyOn(Pusher.Util, "now").andReturn(startTimestamp);
 
-          runner = strategy.connect(callback);
+          runner = strategy.connect(0, callback);
+          runner.forceMinPriority(666);
           Pusher.Util.now.andReturn(startTimestamp + 2000);
           transports.test._callback("error");
           Pusher.Util.now.andReturn(startTimestamp + 2500);
@@ -208,6 +225,19 @@ describe("LastSuccessfulStrategy", function() {
           runner.abort();
           expect(cachedStrategy._abort).not.toHaveBeenCalled();
           expect(substrategy._abort).toHaveBeenCalled();
+        });
+
+        describe("on forceMinPriority", function() {
+          it("should force the previously set priority on the substrategy", function() {
+            // priority is forced in beforeEach
+            expect(substrategy.connect)
+              .toHaveBeenCalledWith(666, jasmine.any(Function));
+          });
+
+          it("should force the new priority on the substrategy", function() {
+            runner.forceMinPriority(3);
+            expect(substrategy._forceMinPriority).toHaveBeenCalledWith(3);
+          });
         });
 
         describe("and connecting successfully using the substrategy", function() {
@@ -255,7 +285,7 @@ describe("LastSuccessfulStrategy", function() {
     });
 
     it("should try the substrategy immediately", function() {
-      strategy.connect(callback);
+      strategy.connect(0, callback);
       expect(substrategy.connect).toHaveBeenCalled();
     });
   });

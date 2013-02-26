@@ -13,13 +13,16 @@
     return this.strategy.isSupported();
   };
 
-  prototype.connect = function(callback) {
-    var runner = this.strategy.connect(function(error, connection) {
-      if (connection) {
-        runner.abort();
+  prototype.connect = function(minPriority, callback) {
+    var runner = this.strategy.connect(
+      minPriority,
+      function(error, connection) {
+        if (connection) {
+          runner.abort();
+        }
+        callback(error, connection);
       }
-      callback(error, connection);
-    });
+    );
     return runner;
   };
 

@@ -23,7 +23,7 @@ describe("SequentialStrategy", function() {
 
   describe("on connect", function() {
     it("should finish on first successful substrategy", function() {
-      this.strategy.connect(this.callback);
+      this.strategy.connect(0, this.callback);
 
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
@@ -37,7 +37,7 @@ describe("SequentialStrategy", function() {
     });
 
     it("should fail after trying all supported substrategies", function() {
-      this.strategy.connect(this.callback);
+      this.strategy.connect(0, this.callback);
 
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
@@ -55,7 +55,7 @@ describe("SequentialStrategy", function() {
       var strategy = new Pusher.SequentialStrategy(this.substrategies, {
         loop: true
       });
-      var runner = strategy.connect(this.callback);
+      var runner = strategy.connect(0, this.callback);
 
       expect(this.substrategies[0].connect.calls.length).toEqual(1);
       expect(this.substrategies[1].connect.calls.length).toEqual(0);
@@ -77,7 +77,7 @@ describe("SequentialStrategy", function() {
 
   describe("on abort", function() {
     it("should send abort to first tried substrategy", function() {
-      var runner = this.strategy.connect(this.callback);
+      var runner = this.strategy.connect(0, this.callback);
 
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
@@ -89,7 +89,7 @@ describe("SequentialStrategy", function() {
     });
 
     it("should send abort to second tried substrategy", function() {
-      var runner = this.strategy.connect(this.callback);
+      var runner = this.strategy.connect(0, this.callback);
 
       this.substrategies[0]._callback(true);
       expect(this.substrategies[1].connect).toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe("SequentialStrategy", function() {
       var strategy = new Pusher.SequentialStrategy(this.substrategies, {
         timeout: 100
       });
-      var runner = strategy.connect(this.callback);
+      var runner = strategy.connect(0, this.callback);
 
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
@@ -120,7 +120,7 @@ describe("SequentialStrategy", function() {
         timeout: 100
       });
 
-      strategy.connect(this.callback);
+      strategy.connect(0, this.callback);
       substrategy._callback(true);
 
       jasmine.Clock.tick(99);
@@ -136,7 +136,7 @@ describe("SequentialStrategy", function() {
         failFast: true
       });
 
-      strategy.connect(this.callback);
+      strategy.connect(0, this.callback);
       substrategy._callback(true);
       expect(this.callback).toHaveBeenCalled();
     });
@@ -152,7 +152,7 @@ describe("SequentialStrategy", function() {
         timeoutLimit: 400
       });
 
-      strategy.connect(this.callback);
+      strategy.connect(0, this.callback);
 
       expect(substrategies[0].connect).toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
@@ -183,6 +183,23 @@ describe("SequentialStrategy", function() {
 
       jasmine.Clock.tick(1);
       expect(substrategies[4].connect).toHaveBeenCalled();
+    });
+  });
+
+  describe("on forceMinPriority", function() {
+    it("should force the priority on the running substrategy", function() {
+      var runner = this.strategy.connect(0, this.callback);
+      runner.forceMinPriority(5);
+      expect(this.substrategies[0]._forceMinPriority).toHaveBeenCalledWith(5);
+    });
+
+    it("should keep connecting with the new priority", function() {
+      var runner = this.strategy.connect(0, this.callback);
+      runner.forceMinPriority(5);
+
+      this.substrategies[0]._callback(true);
+      expect(this.substrategies[1].connect)
+        .toHaveBeenCalledWith(5, jasmine.any(Function));
     });
   });
 });

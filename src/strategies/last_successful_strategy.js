@@ -16,7 +16,7 @@
     return this.strategy.isSupported();
   };
 
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
     var info = fetchTransportInfo();
 
     var strategies = [this.strategy];
@@ -31,25 +31,34 @@
     }
 
     var startTimestamp = Pusher.Util.now();
-    var runner = strategies.pop().connect(function cb(error, connection) {
-      if (error) {
-        flushTransportInfo();
-        if (strategies.length > 0) {
-          startTimestamp = Pusher.Util.now();
-          runner = strategies.pop().connect(cb);
+    var runner = strategies.pop().connect(
+      minPriority,
+      function cb(error, connection) {
+        if (error) {
+          flushTransportInfo();
+          if (strategies.length > 0) {
+            startTimestamp = Pusher.Util.now();
+            runner = strategies.pop().connect(minPriority, cb);
+          } else {
+            callback(error);
+          }
         } else {
-          callback(error);
+          var latency = Pusher.Util.now() - startTimestamp;
+          storeTransportInfo(connection.name, latency);
+          callback(null, connection);
         }
-      } else {
-        var latency = Pusher.Util.now() - startTimestamp;
-        storeTransportInfo(connection.name, latency);
-        callback(null, connection);
       }
-    });
+    );
 
     return {
       abort: function() {
         runner.abort();
+      },
+      forceMinPriority: function(p) {
+        minPriority = p;
+        if (runner) {
+          runner.forceMinPriority(p);
+        }
       }
     };
   };

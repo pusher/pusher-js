@@ -20,7 +20,7 @@
   var prototype = SequentialStrategy.prototype;
   Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
     var self = this;
 
     var strategies = Pusher.MultiStrategy.filterUnsupported(this.strategies);
@@ -46,6 +46,7 @@
           }
           runner = self.tryStrategy(
             strategies[current],
+            minPriority,
             { timeout: timeout, failFast: self.options.failFast },
             tryNextStrategy
           );
@@ -57,6 +58,7 @@
 
     runner = this.tryStrategy(
       strategies[current],
+      minPriority,
       { timeout: timeout, failFast: this.options.failFast },
       tryNextStrategy
     );
@@ -64,16 +66,22 @@
     return {
       abort: function() {
         runner.abort();
+      },
+      forceMinPriority: function(p) {
+        minPriority = p;
+        if (runner) {
+          runner.forceMinPriority(p);
+        }
       }
     };
   };
 
   /** @private */
-  prototype.tryStrategy = function(strategy, options, callback) {
+  prototype.tryStrategy = function(strategy, minPriority, options, callback) {
     var timeout = null;
     var runner = null;
 
-    runner = strategy.connect(function(error, connection) {
+    runner = strategy.connect(minPriority, function(error, connection) {
       if (error && timeout && !options.failFast) {
         // advance to the next strategy after the timeout
         return;
@@ -101,6 +109,9 @@
           timeout = null;
         }
         runner.abort();
+      },
+      forceMinPriority: function(p) {
+        runner.forceMinPriority(p);
       }
     };
   };

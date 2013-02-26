@@ -18,9 +18,9 @@
     return branch.isSupported();
   };
 
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
     var branch = this.test() ? this.trueBranch : this.falseBranch;
-    return branch.connect(callback);
+    return branch.connect(minPriority, callback);
   };
 
   Pusher.IfStrategy = IfStrategy;

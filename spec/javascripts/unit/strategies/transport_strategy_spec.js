@@ -50,13 +50,13 @@ describe("TransportStrategy", function() {
         "name", 1, this.transportClass, options
       );
 
-      strategy.connect(this.callback);
+      strategy.connect(0, this.callback);
       expect(this.transportClass.createConnection)
         .toHaveBeenCalledWith("name", "asdf", options);
     });
 
     it("should emit open on success", function() {
-      this.strategy.connect(this.callback);
+      this.strategy.connect(0, this.callback);
       expect(this.transport.initialize).toHaveBeenCalled();
       expect(this.transport.connect).not.toHaveBeenCalled();
 
@@ -70,7 +70,7 @@ describe("TransportStrategy", function() {
     });
 
     it("should emit error on a connection error", function() {
-      this.strategy.connect(this.callback);
+      this.strategy.connect(0, this.callback);
       this.transport.state = "initialized";
       this.transport.emit("initialized");
 
@@ -79,7 +79,7 @@ describe("TransportStrategy", function() {
     });
 
     it("should emit error on connection closed", function() {
-      this.strategy.connect(this.callback);
+      this.strategy.connect(0, this.callback);
       this.transport.state = "initialized";
       this.transport.emit("initialized");
 
@@ -88,11 +88,16 @@ describe("TransportStrategy", function() {
       expect(this.callback)
         .toHaveBeenCalledWith(jasmine.any(Pusher.Errors.TransportClosed));
     });
+
+    it("should call back with an error if transport's priority is too low", function() {
+      this.strategy.connect(2, this.callback);
+      expect(this.callback).toHaveBeenCalledWith("Too low priority");
+    });
   });
 
   describe("on abort", function() {
     it("should close unestablished connection", function() {
-      var runner = this.strategy.connect(this.callback);
+      var runner = this.strategy.connect(0, this.callback);
 
       this.transport.state = "initialized";
       this.transport.emit("initialized");
@@ -105,7 +110,7 @@ describe("TransportStrategy", function() {
     });
 
     it("should not close open connections", function() {
-      var runner = this.strategy.connect(this.callback);
+      var runner = this.strategy.connect(0, this.callback);
 
       this.transport.state = "initialized";
       this.transport.emit("initialized");
@@ -115,6 +120,35 @@ describe("TransportStrategy", function() {
       this.transport.emit("open");
 
       runner.abort();
+
+      expect(this.transport.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("on forceMinPriority", function() {
+    it("should close the connection if transport's priority is too low", function() {
+      var runner = this.strategy.connect(0, this.callback);
+      runner.forceMinPriority(5);
+      expect(this.transport.close).toHaveBeenCalled();
+    });
+
+    it("should not close the connection if transport's priority is high enough", function() {
+      var runner = this.strategy.connect(0, this.callback);
+      runner.forceMinPriority(1);
+      expect(this.transport.close).not.toHaveBeenCalled();
+    });
+
+    it("should not close the connection if it's in 'open' state", function() {
+      var runner = this.strategy.connect(0, this.callback);
+
+      this.transport.state = "initialized";
+      this.transport.emit("initialized");
+      this.transport.state = "connecting";
+      this.transport.emit("connecting");
+      this.transport.state = "open";
+      this.transport.emit("open");
+
+      runner.forceMinPriority(5);
 
       expect(this.transport.close).not.toHaveBeenCalled();
     });

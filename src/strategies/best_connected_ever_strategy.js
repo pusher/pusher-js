@@ -15,13 +15,13 @@
   var prototype = BestConnectedEverStrategy.prototype;
   Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
-  prototype.connect = function(callback) {
-    // TODO implement priorities correctly
+  prototype.connect = function(minPriority, callback) {
     if (!this.isSupported()) {
       return null;
     }
     return connect(
       Pusher.MultiStrategy.filterUnsupported(this.strategies),
+      minPriority,
       function(i, runners) {
         return function(error, connection) {
           runners[i].error = error;
@@ -31,9 +31,9 @@
             }
             return;
           }
-          for (var j = i + 1; j < runners.length; j++) {
-            abortRunner(runners[j]);
-          }
+          Pusher.Util.apply(runners, function(runner) {
+            runner.forceMinPriority(connection.priority);
+          });
           callback(null, connection);
         };
       }
@@ -51,20 +51,25 @@
    * @param  {Function} callbackBuilder
    * @return {Object} strategy runner
    */
-  function connect(strategies, callbackBuilder) {
+  function connect(strategies, minPriority, callbackBuilder) {
     var runners = Pusher.Util.map(strategies, function(strategy, i, _, rs) {
-      return strategy.connect(callbackBuilder(i, rs));
+      return strategy.connect(minPriority, callbackBuilder(i, rs));
     });
     return {
       abort: function() {
-        abortRunners(runners);
+        Pusher.Util.apply(runners, abortRunner);
+      },
+      forceMinPriority: function(p) {
+        Pusher.Util.apply(runners, function(runner) {
+          runner.forceMinPriority(p);
+        });
       }
     };
   }
 
   function allRunnersFailed(runners) {
     return Pusher.Util.all(runners, function(runner) {
-      return !!runner.error;
+      return Boolean(runner.error);
     });
   }
 
@@ -73,10 +78,6 @@
       runner.abort();
       runner.aborted = true;
     }
-  }
-
-  function abortRunners(runners) {
-    Pusher.Util.apply(runners, abortRunner);
   }
 
   Pusher.BestConnectedEverStrategy = BestConnectedEverStrategy;

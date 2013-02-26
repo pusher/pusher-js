@@ -27,9 +27,10 @@ describe("FirstConnectedStrategy", function() {
 
   describe("on connect", function() {
     it("should succeed on first connection and abort the substrategy", function() {
-      strategy.connect(callback);
+      strategy.connect(0, callback);
 
-      expect(substrategy.connect).toHaveBeenCalledWith(jasmine.any(Function));
+      expect(substrategy.connect)
+        .toHaveBeenCalledWith(0, jasmine.any(Function));
 
       var connection = {};
       substrategy._callback(null, connection);
@@ -39,7 +40,7 @@ describe("FirstConnectedStrategy", function() {
     });
 
     it("should pass an error when the substrategy fails", function() {
-      strategy.connect(callback);
+      strategy.connect(0, callback);
 
       substrategy._callback(true);
       expect(callback).toHaveBeenCalledWith(true, undefined);
@@ -48,9 +49,17 @@ describe("FirstConnectedStrategy", function() {
 
   describe("on abort", function() {
     it("should abort the substrategy", function() {
-      var runner = strategy.connect();
+      var runner = strategy.connect(0);
       runner.abort();
       expect(substrategy._abort).toHaveBeenCalled();
+    });
+  });
+
+  describe("on forceMinPriority", function() {
+    it("should force the priority on the substrategy", function() {
+      var runner = strategy.connect(0, this.callback);
+      runner.forceMinPriority(5);
+      expect(substrategy._forceMinPriority).toHaveBeenCalledWith(5);
     });
   });
 });

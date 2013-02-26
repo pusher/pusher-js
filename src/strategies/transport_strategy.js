@@ -29,7 +29,14 @@
    * @param  {Function} callback
    * @return {Object} strategy runner
    */
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
+    if (this.priority < minPriority) {
+      // TODO raise a meaningful error
+      callback("Too low priority");
+      return;
+    }
+
+    var self = this;
     var connection = this.transport.createConnection(
       this.name, this.options.key, this.options
     );
@@ -73,6 +80,15 @@
         }
         unbindListeners();
         connection.close();
+      },
+      forceMinPriority: function(p) {
+        if (connection.state === "open") {
+          return;
+        }
+        if (self.priority < p) {
+          // TODO close connection in a nicer way
+          connection.close();
+        }
       }
     };
   };
