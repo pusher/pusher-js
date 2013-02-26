@@ -16,7 +16,7 @@ describe("ConnectionManager", function() {
       getStrategy: jasmine.createSpy("getStrategy").andReturn(strategy),
       getTimeline: jasmine.createSpy("getTimeline").andReturn(timeline),
       getTimelineSender: jasmine.createSpy("getTimelineSender")
-        .andReturn(timelineSender),
+        .andReturn(null),
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
@@ -85,7 +85,15 @@ describe("ConnectionManager", function() {
       });
     });
 
-    it("should start sending timeline every minute", function() {
+    it("should start sending timeline every minute when sender is supplied", function() {
+      var options = Pusher.Util.extend({}, managerOptions, {
+        getTimelineSender: jasmine.createSpy("getTimelineSender")
+          .andReturn(timelineSender)
+      });
+      var manager = new Pusher.ConnectionManager("foo", options);
+      manager.wrapTransport = jasmine.createSpy("wrapTransport")
+        .andReturn(connection);
+
       timeline.isEmpty.andReturn(false);
       manager.connect();
 
@@ -140,7 +148,15 @@ describe("ConnectionManager", function() {
       expect(strategy.connect.calls.length).toEqual(1);
     });
 
-    it("should send timeline", function() {
+    it("should send timeline when sender is supplied", function() {
+      var options = Pusher.Util.extend({}, managerOptions, {
+        getTimelineSender: jasmine.createSpy("getTimelineSender")
+          .andReturn(timelineSender)
+      });
+      var manager = new Pusher.ConnectionManager("foo", options);
+      manager.wrapTransport = jasmine.createSpy("wrapTransport")
+        .andReturn(connection);
+
       expect(timelineSender.send).not.toHaveBeenCalled();
       manager.connect();
       strategy._callback(null, {});
