@@ -2,11 +2,13 @@
   /** Caches last successful transport and uses it for following attempts.
    *
    * @param {Strategy} strategy
+   * @param {Object} transports
+   * @param {Object} options
    */
-  function LastSuccessfulStrategy(strategy, options) {
+  function LastSuccessfulStrategy(strategy, transports, options) {
     this.strategy = strategy;
-    this.options = options;
-    this.ttl = this.options.ttl || 1800*1000;
+    this.transports = transports;
+    this.ttl = options.ttl || 1800*1000;
   }
   var prototype = LastSuccessfulStrategy.prototype;
 
@@ -19,14 +21,13 @@
 
     var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
-      var transport = Pusher.StrategyBuilder.build(
-        [":def_transport", "strategy", info.scheme.transport, 0, info.scheme],
-        this.options
-      )
-      strategies.push(new Pusher.SequentialStrategy([transport], {
-        timeout: info.latency * 2,
-        failFast: true
-      }));
+      var transport = this.transports[info.transport];
+      if (transport && transport.isSupported()) {
+        strategies.push(new Pusher.SequentialStrategy([transport], {
+          timeout: info.latency * 2,
+          failFast: true
+        }));
+      }
     }
 
     var startTimestamp = Pusher.Util.now();
@@ -41,7 +42,7 @@
         }
       } else {
         var latency = Pusher.Util.now() - startTimestamp;
-        storeTransportInfo(connection.name, latency, connection.options);
+        storeTransportInfo(connection.name, latency);
         callback(null, connection);
       }
     });
@@ -64,15 +65,13 @@
     return null;
   }
 
-  function storeTransportInfo(name, latency, options) {
+  function storeTransportInfo(transport, latency) {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
       storage.pusherTransport = JSON.stringify({
         timestamp: Pusher.Util.now(),
+        transport: transport,
         latency: latency,
-        scheme: Pusher.Util.extend(
-          { type: "transport", transport: name }, options
-        )
       });
     }
   }

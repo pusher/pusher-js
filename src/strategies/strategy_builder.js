@@ -3,6 +3,7 @@
     /** Transforms a JSON scheme to a strategy tree.
      *
      * @param {Array} scheme JSON strategy scheme
+     * @param {Object} options a hash of symbols to be included in the scheme
      * @returns {Strategy} strategy tree that's represented by the scheme
      */
     build: function(scheme, options) {
@@ -60,10 +61,8 @@
     }),
 
     last_successful: returnWithOriginalContext(function(context, ttl, strategy) {
-      return new Pusher.LastSuccessfulStrategy(strategy, {
-        key: context.key,
+      return new Pusher.LastSuccessfulStrategy(strategy, context.transports, {
         ttl: ttl,
-        timeline: context.timeline
       });
     }),
 

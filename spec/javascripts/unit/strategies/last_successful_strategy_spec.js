@@ -1,30 +1,29 @@
 describe("LastSuccessfulStrategy", function() {
-  var substrategy;
+  var substrategy, transports;
   var strategy;
   var callback;
 
   beforeEach(function() {
     substrategy = Pusher.Mocks.getStrategy(true);
-    strategy = new Pusher.LastSuccessfulStrategy(substrategy, {});
+    transports = {
+      test: Pusher.Mocks.getStrategy(true)
+    };
+    strategy = new Pusher.LastSuccessfulStrategy(substrategy, transports, {});
     callback = jasmine.createSpy("callback");
 
     jasmine.Clock.useMock();
   });
 
-  it("should expose its name", function() {
-    expect(strategy.name).toEqual("last_successful");
-  });
-
   describe("after calling isSupported", function() {
     it("should return true when the substrategy is supported", function() {
       substrategy = Pusher.Mocks.getStrategy(true);
-      strategy = new Pusher.LastSuccessfulStrategy(substrategy, {});
+      strategy = new Pusher.LastSuccessfulStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when the substrategy is not supported", function() {
       substrategy = Pusher.Mocks.getStrategy(false);
-      strategy = new Pusher.LastSuccessfulStrategy(substrategy, {});
+      strategy = new Pusher.LastSuccessfulStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(false);
     });
   });
@@ -83,13 +82,8 @@ describe("LastSuccessfulStrategy", function() {
         it("should cache the connected transport", function() {
           expect(JSON.parse(localStorage.pusherTransport)).toEqual({
             timestamp: Pusher.Util.now(),
-            latency: 1000,
-            scheme: {
-              type: "transport",
-              transport: "test",
-              encrypted: false,
-              hostUnencrypted: "example.com"
-            }
+            transport: "test",
+            latency: 1000
           });
         });
       });
@@ -115,48 +109,24 @@ describe("LastSuccessfulStrategy", function() {
     });
 
     describe("with cached transport", function() {
-      var cachedStrategy;
-
       beforeEach(function() {
         cachedStrategy = Pusher.Mocks.getStrategy(true);
         localStorage.pusherTransport = JSON.stringify({
           timestamp: Pusher.Util.now(),
-          latency: 1000,
-          scheme: {
-            type: "transport",
-            transport: "test",
-            encrypted: false,
-            hostUnencrypted: "example.com"
-          }
-        });
-        spyOn(Pusher.StrategyBuilder, "build").andReturn(cachedStrategy);
-      });
-
-      it("should reconstruct the transport with correct options", function() {
-        strategy = new Pusher.LastSuccessfulStrategy(substrategy, {
-          key: "itsakey"
-        });
-        strategy.connect(callback);
-
-        expect(Pusher.StrategyBuilder.build.calls.length).toEqual(1);
-        expect(Pusher.StrategyBuilder.build).toHaveBeenCalledWith({
-          type: "transport",
           transport: "test",
-          encrypted: false,
-          hostUnencrypted: "example.com",
-          key: "itsakey"
+          latency: 1000
         });
       });
 
       it("should try the cached strategy first", function() {
         strategy.connect(callback);
-        expect(cachedStrategy.connect).toHaveBeenCalled();
+        expect(transports.test.connect).toHaveBeenCalled();
       });
 
       it("should abort the cached transport and not call the substrategy", function() {
         var runner = strategy.connect(callback);
         runner.abort();
-        expect(cachedStrategy._abort).toHaveBeenCalled();
+        expect(transports.test._abort).toHaveBeenCalled();
         expect(substrategy.connect).not.toHaveBeenCalled();
       });
 
@@ -168,11 +138,8 @@ describe("LastSuccessfulStrategy", function() {
           strategy.connect(callback);
           Pusher.Util.now.andReturn(startTimestamp + 2000);
 
-          connection = {
-            name: "cached",
-            options: { encrypted: false, "hostUnencrypted": "example.org" }
-          };
-          cachedStrategy._callback(null, connection);
+          connection = { name: "test" };
+          transports.test._callback(null, connection);
         });
 
         it("should call back with the connection", function() {
@@ -186,13 +153,8 @@ describe("LastSuccessfulStrategy", function() {
         it("should cache the connected transport", function() {
           expect(JSON.parse(localStorage.pusherTransport)).toEqual({
             timestamp: Pusher.Util.now(),
-            latency: 2000,
-            scheme: {
-              type: "transport",
-              transport: "cached",
-              encrypted: false,
-              hostUnencrypted: "example.org"
-            }
+            transport: "test",
+            latency: 2000
           });
         });
       });
@@ -209,7 +171,7 @@ describe("LastSuccessfulStrategy", function() {
         });
 
         it("should abort the cached strategy", function() {
-          expect(cachedStrategy._abort).toHaveBeenCalled();
+          expect(transports.test._abort).toHaveBeenCalled();
         });
 
         it("should fall back to the substrategy", function() {
@@ -230,7 +192,7 @@ describe("LastSuccessfulStrategy", function() {
 
           runner = strategy.connect(callback);
           Pusher.Util.now.andReturn(startTimestamp + 2000);
-          cachedStrategy._callback("error");
+          transports.test._callback("error");
           Pusher.Util.now.andReturn(startTimestamp + 2500);
         });
 
@@ -251,7 +213,7 @@ describe("LastSuccessfulStrategy", function() {
         describe("and connecting successfully using the substrategy", function() {
           beforeEach(function() {
             connection = {
-              name: "new",
+              name: "test",
               options: { encrypted: true, "hostEncrypted": "example.net" }
             };
             substrategy._callback(null, connection);
@@ -264,13 +226,8 @@ describe("LastSuccessfulStrategy", function() {
           it("should cache the connected transport", function() {
             expect(JSON.parse(localStorage.pusherTransport)).toEqual({
               timestamp: Pusher.Util.now(),
-              latency: 500,
-              scheme: {
-                type: "transport",
-                transport: "new",
-                encrypted: true,
-                hostEncrypted: "example.net"
-              }
+              transport: "test",
+              latency: 500
             });
           });
         });
