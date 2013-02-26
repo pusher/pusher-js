@@ -271,8 +271,12 @@
       };
     },
 
+    getDocument: function() {
+      return document;
+    },
+
     getDocumentLocation: function() {
-      return document.location;
+      return Pusher.Util.getDocument().location;
     },
 
     getClientFeatures: function() {
