@@ -14,7 +14,7 @@
         debug: jasmine.createSpy("debug"),
         send: jasmine.createSpy("send"),
         isEmpty: jasmine.createSpy("isEmpty"),
-        getUniqueID: jasmine.createSpy("getUniqueID")
+        generateUniqueID: jasmine.createSpy("generateUniqueID")
       };
     },
 

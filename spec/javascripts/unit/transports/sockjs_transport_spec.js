@@ -16,7 +16,7 @@ describe("SockJSTransport", function() {
   beforeEach(function() {
     this.socket = {};
     this.timeline = Pusher.Mocks.getTimeline();
-    this.timeline.getUniqueID.andReturn(1);
+    this.timeline.generateUniqueID.andReturn(1);
     this.transport = getTransport("foo", { timeline: this.timeline });
 
     Pusher.Dependencies.loaded.sockjs = true;

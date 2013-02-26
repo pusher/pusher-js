@@ -13,7 +13,7 @@ describe("AbstractTransport", function() {
   beforeEach(function() {
     this.socket = {};
     this.timeline = Pusher.Mocks.getTimeline();
-    this.timeline.getUniqueID.andReturn(667);
+    this.timeline.generateUniqueID.andReturn(667);
     this.transport = getTransport("foo", {
       timeline: this.timeline
     });

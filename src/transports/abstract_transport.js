@@ -37,7 +37,7 @@
     this.options = options;
     this.state = "new";
     this.timeline = options.timeline;
-    this.id = this.timeline.getUniqueID();
+    this.id = this.timeline.generateUniqueID();
   }
   var prototype = AbstractTransport.prototype;
 

@@ -72,7 +72,7 @@
     return true;
   };
 
-  prototype.getUniqueID = function() {
+  prototype.generateUniqueID = function() {
     this.uniqueID++;
     return this.uniqueID;
   };

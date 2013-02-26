@@ -34,7 +34,7 @@ describe("Timeline", function() {
   });
 
   it("should generate different ids", function() {
-    expect(timeline.getUniqueID()).not.toEqual(timeline.getUniqueID());
+    expect(timeline.generateUniqueID()).not.toEqual(timeline.generateUniqueID());
   });
 
   describe("on send", function() {
