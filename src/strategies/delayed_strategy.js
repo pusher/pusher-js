@@ -8,13 +8,16 @@
    * @param {Object} options
    */
   function DelayedStrategy(strategy, options) {
-    Pusher.MultiStrategy.call(this, [strategy], { delay: options.delay });
+    this.strategy = strategy;
+    this.options = { delay: options.delay };
   }
   var prototype = DelayedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
-
   prototype.name = "delayed";
+
+  prototype.isSupported = function() {
+    return this.strategy.isSupported();
+  };
 
   /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
@@ -22,7 +25,7 @@
       return null;
     }
 
-    var self = this;
+    var strategy = this.strategy;
     var abort = function() {
       clearTimeout(timer);
       timer = null;
@@ -33,7 +36,7 @@
         return;
       }
       timer = null;
-      abort = self.strategies[0].connect(callback).abort;
+      abort = strategy.connect(callback).abort;
     }, this.options.delay);
 
     return {

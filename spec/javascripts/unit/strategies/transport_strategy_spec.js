@@ -2,9 +2,9 @@ describe("TransportStrategy", function() {
   beforeEach(function() {
     this.transport = Pusher.Mocks.getTransport();
     this.transportClass = Pusher.Mocks.getTransportClass(true, this.transport);
-    this.strategy = new Pusher.TransportStrategy(this.transportClass, {
-      key: "foo"
-    });
+    this.strategy = new Pusher.TransportStrategy(
+      "name", 1, this.transportClass, { key: "foo" }
+    );
 
     this.callback = jasmine.createSpy("connectCallback");
   });
@@ -16,7 +16,7 @@ describe("TransportStrategy", function() {
   describe("after calling isSupported", function() {
     it("should return true when transport is supported", function() {
       var transport = Pusher.Mocks.getTransportClass(true);
-      var strategy = new Pusher.TransportStrategy(transport);
+      var strategy = new Pusher.TransportStrategy("name", 1, transport);
 
       expect(strategy.isSupported()).toBe(true);
       expect(transport.isSupported).toHaveBeenCalledWith({
@@ -26,14 +26,14 @@ describe("TransportStrategy", function() {
 
     it("should return false when transport is not supported", function() {
       var strategy = new Pusher.TransportStrategy(
-        Pusher.Mocks.getTransportClass(false)
+        "name", 1, Pusher.Mocks.getTransportClass(false)
       );
       expect(strategy.isSupported()).toBe(false);
     });
 
     it("should pass the disableFlash flag to the transport", function() {
       var transport = Pusher.Mocks.getTransportClass(true);
-      var strategy = new Pusher.TransportStrategy(transport, {
+      var strategy = new Pusher.TransportStrategy("name", 1, transport, {
         disableFlash: true
       });
 
@@ -50,7 +50,9 @@ describe("TransportStrategy", function() {
         key: "asdf",
         foo: "bar"
       };
-      var strategy = new Pusher.TransportStrategy(this.transportClass, options);
+      var strategy = new Pusher.TransportStrategy(
+        "name", 1, this.transportClass, options
+      );
 
       strategy.connect(this.callback);
       expect(this.transportClass.createConnection)

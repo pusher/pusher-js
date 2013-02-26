@@ -2,17 +2,12 @@
   var StrategyBuilder = {
     /** Transforms a JSON scheme to a strategy tree.
      *
-     * @param {Object} scheme JSON strategy scheme
+     * @param {Array} scheme JSON strategy scheme
      * @returns {Strategy} strategy tree that's represented by the scheme
      */
-    build: function(scheme) {
-      var builder = builders[scheme.type];
-
-      if (!builder) {
-        throw new Pusher.Errors.UnsupportedStrategy(scheme.type);
-      }
-
-      return builder(scheme);
+    build: function(scheme, options) {
+      var context = Pusher.Util.extend({}, globalContext, options);
+      return evaluate(scheme, context)[1].strategy;
     }
   };
 
@@ -22,82 +17,139 @@
     sockjs: Pusher.SockJSTransport
   };
 
-  var builders = {
-    transport: function(scheme) {
-      var klass = transports[scheme.transport];
-      if (!klass) {
-        throw new Pusher.Errors.UnsupportedTransport(scheme.transport);
-      }
+  // DSL bindings
 
-      var options = filter(scheme, {"type": true, "transport": true});
-      return new Pusher.TransportStrategy(klass, options);
-    },
-
-    delayed: function(scheme) {
-      var options = filter(scheme, {"type": true, "child": true});
-
-      return new Pusher.DelayedStrategy(
-        StrategyBuilder.build(Pusher.Util.extend({}, options, scheme.child)),
-        options
-      );
-    },
-
-    last_successful: function(scheme) {
-      var options = filter(scheme, {"type": true, "child": true});
-
-      return new Pusher.LastSuccessfulStrategy(
-        StrategyBuilder.build(Pusher.Util.extend({}, options, scheme.child)),
-        options
-      );
-    },
-
-    sequential: function(scheme) {
-      return buildWithSubstrategies(Pusher.SequentialStrategy, scheme);
-    },
-
-    first_supported: function(scheme) {
-      return buildWithSubstrategies(Pusher.FirstSupportedStrategy, scheme);
-    },
-
-    all_supported: function(scheme) {
-      return buildWithSubstrategies(Pusher.AllSupportedStrategy, scheme);
-    },
-
-    first_connected: function(scheme) {
-      return buildWithSubstrategies(Pusher.FirstConnectedStrategy, scheme);
-    },
-
-    best_connected_ever: function(scheme) {
-      return buildWithSubstrategies(Pusher.BestConnectedEverStrategy, scheme);
-    }
-  };
-
-  function buildWithSubstrategies(constructor, scheme) {
-    var options = filter(scheme, {"type": true, "children": true});
-    var substrategies = [];
-
-    for (var i = 0; i < scheme.children.length; i++) {
-      substrategies.push(
-        StrategyBuilder.build(
-          Pusher.Util.extend({}, options, scheme.children[i])
-        )
-      );
-    }
-
-    return new constructor(substrategies, options);
+  function returnWithOriginalContext(f) {
+    return function(context) {
+      return [f.apply(this, arguments), context];
+    };
   }
 
-  function filter(object, filteredKeys) {
-    var result = {};
-    for (var key in object) {
-      if (Object.prototype.hasOwnProperty.call(object, key)) {
-        if (!filteredKeys[key]) {
-          result[key] = object[key];
-        }
+  var globalContext = {
+    def: function(context, name, value) {
+      if (context[name] !== undefined) {
+        throw "Redefining symbol " + name;
       }
-    }
+      context[name] = value;
+      return [undefined, context];
+    },
 
-    return result;
+    def_transport: function(context, name, type, priority, options) {
+      var klass = transports[type];
+      if (!klass) {
+        throw new Pusher.Errors.UnsupportedTransport(type);
+      }
+      var transport = new Pusher.TransportStrategy(
+        name,
+        priority,
+        klass,
+        Pusher.Util.extend({}, options, {
+          // TODO clean this up
+          key: (options && options.key) || context.key,
+          timeline: (options && options.timeline) || context.timeline
+        })
+      );
+      var newContext = context.def(context, name, transport)[1];
+      newContext.transports = context.transports || {};
+      newContext.transports[name] = transport;
+      return [undefined, newContext];
+    },
+
+    sequential: returnWithOriginalContext(function(context, options) {
+      var strategies = Array.prototype.slice.call(arguments, 2);
+      return new Pusher.SequentialStrategy(strategies, options);
+    }),
+
+    last_successful: returnWithOriginalContext(function(context, ttl, strategy) {
+      return new Pusher.LastSuccessfulStrategy(strategy, {
+        key: context.key,
+        ttl: ttl,
+        timeline: context.timeline
+      });
+    }),
+
+    first_connected: returnWithOriginalContext(function(context, strategy) {
+      return new Pusher.FirstConnectedStrategy(strategy);
+    }),
+
+    best_connected_ever: returnWithOriginalContext(function(context) {
+      var strategies = Array.prototype.slice.call(arguments, 1);
+      return new Pusher.BestConnectedEverStrategy(strategies);
+    }),
+
+    delayed: returnWithOriginalContext(function(context, delay, strategy) {
+      return new Pusher.DelayedStrategy(strategy, { delay: delay });
+    }),
+
+    "if": returnWithOriginalContext(function(context, condition, trueBranch, falseBranch) {
+      return new Pusher.IfStrategy(condition, trueBranch, falseBranch);
+    }),
+
+    is_supported: returnWithOriginalContext(function(context, strategy) {
+      return function() {
+        return strategy.isSupported();
+      };
+    }),
+  };
+
+  // DSL interpreter
+
+  function isSymbol(expression) {
+    return expression.length > 1 && expression[0] === ":";
+  }
+
+  function getSymbolValue(expression, context) {
+    return context[expression.slice(1)];
+  }
+
+  function evaluateListOfExpressions(expressions, context) {
+    if (expressions.length === 0) {
+      return [[], context];
+    }
+    var head = evaluate(expressions[0], context);
+    var tail = evaluateListOfExpressions(expressions.slice(1), head[1])
+    return [[head[0]].concat(tail[0]), tail[1]];
+  }
+
+  function evaluate(expression, context) {
+    var expressionType = typeof expression;
+    if (typeof expression === "string") {
+      if (!isSymbol(expression)) {
+        return [expression, context];
+      }
+      var value = getSymbolValue(expression, context);
+      if (value !== undefined) {
+        return [value, context];
+      } else {
+        throw "Undefined symbol " + expression;
+      }
+    } else if (typeof expression === "object") {
+      if (expression instanceof Array && expression.length > 0) {
+        if (isSymbol(expression[0])) {
+          var f = getSymbolValue(expression[0], context);
+
+          if (expression.length > 1) {
+            if (typeof f !== "function") {
+              throw "Calling non-function " + expression[0];
+            }
+            var args = [Pusher.Util.extend({}, context)].concat(
+              expression.slice(1).map(function(arg) {
+                return evaluate(arg, Pusher.Util.extend({}, context))[0];
+              })
+            );
+            return f.apply(this, args);
+          } else {
+            return [f, context];
+          }
+        } else {
+          return evaluateListOfExpressions(expression, context);
+        }
+      } else {
+        return [expression, context];
+      }
+    } else {
+      return [expression, context];
+    }
   }
 
   Pusher.StrategyBuilder = StrategyBuilder;

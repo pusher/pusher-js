@@ -1,41 +1,28 @@
 ;(function() {
-  /** Launches all substrategies at the same time and uses the first connected.
+  /** Launches the substrategy and terminates on first open connection.
    *
-   * After establishing the connection, aborts all substrategies so that no
-   * other attempts are made later.
-   *
-   * @param {Array} strategies
+   * @param {Strategy[]} strategies
    */
-  function FirstConnectedStrategy(strategies) {
-    Pusher.MultiStrategy.call(this, strategies);
+  function FirstConnectedStrategy(strategy) {
+    this.strategy = strategy;
+    this.options = {};
   }
   var prototype = FirstConnectedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
-
   prototype.name = "first_connected";
 
-  /** @see TransportStrategy.prototype.connect */
+  prototype.isSupported = function() {
+    return this.strategy.isSupported();
+  };
+
   prototype.connect = function(callback) {
-    if (!this.isSupported()) {
-      return null;
-    }
-    return Pusher.ParallelStrategy.connect(
-      Pusher.MultiStrategy.filterUnsupported(this.strategies),
-      function(i, runners) {
-        return function(error, connection) {
-          runners[i].error = error;
-          if (error) {
-            if (Pusher.ParallelStrategy.allRunnersFailed(runners)) {
-              callback(true);
-            }
-            return;
-          }
-          Pusher.ParallelStrategy.abortRunners(runners);
-          callback(null, connection);
-        };
+    var runner = this.strategy.connect(function(error, connection) {
+      if (connection) {
+        runner.abort();
       }
-    );
+      callback(error, connection);
+    });
+    return runner;
   };
 
   Pusher.FirstConnectedStrategy = FirstConnectedStrategy;

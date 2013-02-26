@@ -12,7 +12,8 @@
 
     var getStrategy = function(options) {
       return Pusher.StrategyBuilder.build(
-        Pusher.Util.extend(Pusher.getDefaultStrategy(), self.options, options)
+        Pusher.getDefaultStrategy(),
+        Pusher.Util.extend({}, self.options, options)
       );
     };
     var getTimeline = function() {

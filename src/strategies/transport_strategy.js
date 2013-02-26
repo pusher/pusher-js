@@ -4,7 +4,9 @@
    * @param {Class} transport
    * @param {Object} options options to pass to the transport
    */
-  function TransportStrategy(transport, options) {
+  function TransportStrategy(name, priority, transport, options) {
+    // this.name = name;
+    this.priority = priority;
     this.transport = transport;
     this.options = options || {};
   }
