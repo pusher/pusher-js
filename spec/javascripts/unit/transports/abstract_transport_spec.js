@@ -6,7 +6,7 @@ describe("AbstractTransport", function() {
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.AbstractTransport(key || "foo", options);
+    return new Pusher.AbstractTransport("abs", key || "foo", options);
   }
 
   beforeEach(function() {

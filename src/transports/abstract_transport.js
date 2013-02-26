@@ -29,9 +29,10 @@
    * @param {String} key application key
    * @param {Object} options
    */
-  function AbstractTransport(key, options) {
+  function AbstractTransport(name, key, options) {
     Pusher.EventsDispatcher.call(this);
 
+    this.name = name;
     this.key = key;
     this.state = "new";
     this.timeline = options.timeline;
@@ -44,7 +45,6 @@
     };
   }
   var prototype = AbstractTransport.prototype;
-
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   /** Checks whether the transport is supported in the browser.

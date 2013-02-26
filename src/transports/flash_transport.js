@@ -3,8 +3,8 @@
    *
    * @see AbstractTransport
    */
-  function FlashTransport(key, options) {
-    Pusher.AbstractTransport.call(this, key, options);
+  function FlashTransport(name, key, options) {
+    Pusher.AbstractTransport.call(this, name, key, options);
   }
   var prototype = FlashTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -15,8 +15,8 @@
    * @param  {Object} options
    * @return {FlashTransport}
    */
-  FlashTransport.createConnection = function(key, options) {
-    return new FlashTransport(key, options);
+  FlashTransport.createConnection = function(name, key, options) {
+    return new FlashTransport(name, key, options);
   };
 
   /** Checks whether Flash is supported in the browser.
@@ -50,7 +50,7 @@
     var self = this;
 
     this.timeline.info(this.buildTimelineMessage({
-      transport: "flash" + (this.options.encrypted ? "s" : "")
+      transport: this.name + (this.options.encrypted ? "s" : "")
     }));
     this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
     this.changeState("initializing");

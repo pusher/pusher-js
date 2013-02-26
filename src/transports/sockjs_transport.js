@@ -3,8 +3,8 @@
    *
    * @see AbstractTransport
    */
-  function SockJSTransport(key, options) {
-    Pusher.AbstractTransport.call(this, key, options);
+  function SockJSTransport(name, key, options) {
+    Pusher.AbstractTransport.call(this, name, key, options);
   }
   var prototype = SockJSTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -15,8 +15,8 @@
    * @param  {Object} options
    * @return {SockJSTransport}
    */
-  SockJSTransport.createConnection = function(key, options) {
-    return new SockJSTransport(key, options);
+  SockJSTransport.createConnection = function(name, key, options) {
+    return new SockJSTransport(name, key, options);
   };
 
   /** Assumes that SockJS is always supported.
@@ -35,7 +35,7 @@
     var self = this;
 
     this.timeline.info(this.buildTimelineMessage({
-      transport: "sockjs" + (this.options.encrypted ? "s" : "")
+      transport: this.name + (this.options.encrypted ? "s" : "")
     }));
     this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
 

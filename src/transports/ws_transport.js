@@ -3,8 +3,8 @@
    *
    * @see AbstractTransport
    */
-  function WSTransport(key, options) {
-    Pusher.AbstractTransport.call(this, key, options);
+  function WSTransport(name, key, options) {
+    Pusher.AbstractTransport.call(this, name, key, options);
   }
   var prototype = WSTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -15,8 +15,8 @@
    * @param  {Object} options
    * @return {WSTransport}
    */
-  WSTransport.createConnection = function(key, options) {
-    return new WSTransport(key, options);
+  WSTransport.createConnection = function(name, key, options) {
+    return new WSTransport(name, key, options);
   };
 
   /** Checks whether the browser supports WebSockets in any form.

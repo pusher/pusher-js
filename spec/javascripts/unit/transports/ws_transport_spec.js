@@ -7,7 +7,7 @@ describe("WSTransport", function() {
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.WSTransport(key, options);
+    return new Pusher.WSTransport("example", key, options);
   }
 
   var _WebSocket;
@@ -32,7 +32,7 @@ describe("WSTransport", function() {
   });
 
   it("should expose its name", function() {
-    expect(this.transport.name).toEqual("ws");
+    expect(this.transport.name).toEqual("example");
   });
 
   it("should not support ping", function() {

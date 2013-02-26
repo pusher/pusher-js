@@ -7,7 +7,7 @@ describe("FlashTransport", function() {
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.FlashTransport(key, options);
+    return new Pusher.FlashTransport("f", key, options);
   }
 
   var _WebSocket;
@@ -29,7 +29,7 @@ describe("FlashTransport", function() {
   });
 
   it("should expose its name", function() {
-    expect(this.transport.name).toEqual("flash");
+    expect(this.transport.name).toEqual("f");
   });
 
   it("should not support ping", function() {
@@ -127,7 +127,7 @@ describe("FlashTransport", function() {
       this.transport.initialize();
       expect(this.timeline.info).toHaveBeenCalledWith({
         cid: 1,
-        transport: "flash"
+        transport: "f"
       });
     });
 
@@ -140,7 +140,7 @@ describe("FlashTransport", function() {
 
       expect(this.timeline.info).toHaveBeenCalledWith({
         cid: 1,
-        transport: "flashs"
+        transport: "fs"
       });
     });
   });

@@ -1,11 +1,13 @@
 ;(function() {
   /** Provides a strategy interface for transports.
    *
+   * @param {String} name
+   * @param {Number} priority
    * @param {Class} transport
-   * @param {Object} options options to pass to the transport
+   * @param {Object} options
    */
   function TransportStrategy(name, priority, transport, options) {
-    // this.name = name;
+    this.name = name;
     this.priority = priority;
     this.transport = transport;
     this.options = options || {};
@@ -29,7 +31,7 @@
    */
   prototype.connect = function(callback) {
     var connection = this.transport.createConnection(
-      this.options.key, this.options
+      this.name, this.options.key, this.options
     );
 
     var onInitialized = function() {
