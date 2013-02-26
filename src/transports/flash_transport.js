@@ -7,10 +7,7 @@
     Pusher.AbstractTransport.call(this, key, options);
   }
   var prototype = FlashTransport.prototype;
-
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
-
-  prototype.name = "flash";
 
   /** Creates a new instance of FlashTransport.
    *

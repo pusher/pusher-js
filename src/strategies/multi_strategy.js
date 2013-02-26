@@ -1,7 +1,8 @@
 ;(function() {
   /** Base class for all non-transport strategies.
    *
-   * @param {Array} substrategies list of children strategies
+   * @param {Strategy[]} strategies
+   * @param {Object} options
    */
   function MultiStrategy(strategies, options) {
     this.strategies = strategies;
@@ -13,10 +14,6 @@
     return Pusher.Util.filter(strategies, Pusher.Util.method("isSupported"));
   };
 
-  /** Returns whether there are any supported substrategies.
-   *
-   * @returns {Boolean}
-   */
   prototype.isSupported = function() {
     return Pusher.Util.any(this.strategies, Pusher.Util.method("isSupported"));
   };

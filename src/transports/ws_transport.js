@@ -7,10 +7,7 @@
     Pusher.AbstractTransport.call(this, key, options);
   }
   var prototype = WSTransport.prototype;
-
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
-
-  prototype.name = "ws";
 
   /** Creates a new instance of WSTransport.
    *

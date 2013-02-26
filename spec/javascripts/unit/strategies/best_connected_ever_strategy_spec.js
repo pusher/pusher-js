@@ -6,10 +6,6 @@ describe("BestConnectedEverStrategy", function() {
     this.callback = jasmine.createSpy();
   });
 
-  it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("best_connected_ever");
-  });
-
   describe("on connect", function() {
     it("should call back with the preferred transport and cancel worse ones", function() {
       this.strategy.connect(this.callback);

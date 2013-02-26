@@ -13,8 +13,6 @@
   }
   var prototype = IfStrategy.prototype;
 
-  prototype.name = "if";
-
   prototype.isSupported = function() {
     var branch = this.test() ? this.trueBranch : this.falseBranch;
     return branch.isSupported();

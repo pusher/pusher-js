@@ -7,10 +7,6 @@ describe("DelayedStrategy", function() {
     jasmine.Clock.useMock();
   });
 
-  it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("delayed");
-  });
-
   describe("after calling isSupported", function() {
     it("should return true if substrategy is supported", function() {
       var substrategy = Pusher.Mocks.getStrategy(true);

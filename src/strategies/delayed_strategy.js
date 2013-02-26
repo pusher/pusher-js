@@ -13,13 +13,10 @@
   }
   var prototype = DelayedStrategy.prototype;
 
-  prototype.name = "delayed";
-
   prototype.isSupported = function() {
     return this.strategy.isSupported();
   };
 
-  /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
     if (!this.isSupported()) {
       return null;

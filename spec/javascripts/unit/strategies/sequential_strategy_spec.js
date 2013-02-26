@@ -7,10 +7,6 @@ describe("SequentialStrategy", function() {
     jasmine.Clock.useMock();
   });
 
-  it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("seq");
-  });
-
   describe("after calling isSupported", function() {
     it("should return true when one of substrategies is supported", function() {
       var substrategies = Pusher.Mocks.getStrategies([false, true]);

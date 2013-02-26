@@ -12,8 +12,6 @@
   }
   var prototype = TransportStrategy.prototype;
 
-  prototype.name = "transport";
-
   /** Returns whether the transport is supported in the browser.
    *
    * @returns {Boolean}

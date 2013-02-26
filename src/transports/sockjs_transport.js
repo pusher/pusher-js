@@ -7,10 +7,7 @@
     Pusher.AbstractTransport.call(this, key, options);
   }
   var prototype = SockJSTransport.prototype;
-
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
-
-  prototype.name = "sockjs";
 
   /** Creates a new instance of SockJSTransport.
    *

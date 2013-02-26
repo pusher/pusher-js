@@ -1,15 +1,13 @@
 ;(function() {
-  /** Launches the substrategy and terminates on first open connection.
+  /** Launches the substrategy and terminates on the first open connection.
    *
-   * @param {Strategy[]} strategies
+   * @param {Strategy} strategy
    */
   function FirstConnectedStrategy(strategy) {
     this.strategy = strategy;
     this.options = {};
   }
   var prototype = FirstConnectedStrategy.prototype;
-
-  prototype.name = "first_connected";
 
   prototype.isSupported = function() {
     return this.strategy.isSupported();

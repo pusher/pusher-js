@@ -10,8 +10,6 @@
   }
   var prototype = LastSuccessfulStrategy.prototype;
 
-  prototype.name = "last_successful";
-
   prototype.isSupported = function() {
     return this.strategy.isSupported();
   };

@@ -6,7 +6,7 @@
    * - timeout - initial timeout for a single substrategy
    * - timeoutLimit - maximum timeout
    *
-   * @param {Strategy} substrategy
+   * @param {Strategy[]} strategies
    * @param {Object} options
    */
   function SequentialStrategy(strategies, options) {
@@ -18,12 +18,8 @@
     });
   }
   var prototype = SequentialStrategy.prototype;
-
   Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
-  prototype.name = "seq";
-
-  /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
     var self = this;
 

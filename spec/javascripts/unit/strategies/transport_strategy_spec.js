@@ -9,10 +9,6 @@ describe("TransportStrategy", function() {
     this.callback = jasmine.createSpy("connectCallback");
   });
 
-  it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("transport");
-  });
-
   describe("after calling isSupported", function() {
     it("should return true when transport is supported", function() {
       var transport = Pusher.Mocks.getTransportClass(true);

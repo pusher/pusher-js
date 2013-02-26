@@ -7,19 +7,16 @@
    * considered worse. Substrategies Y <= X are not aborted and can still emit
    * new connections.
    *
-   * @param {Array} substrategies
+   * @param {Array} strategies
    */
   function BestConnectedEverStrategy(strategies) {
     Pusher.MultiStrategy.call(this, strategies);
   }
   var prototype = BestConnectedEverStrategy.prototype;
-
   Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
 
-  prototype.name = "best_connected_ever";
-
-  /** @see TransportStrategy.prototype.connect */
   prototype.connect = function(callback) {
+    // TODO implement priorities correctly
     if (!this.isSupported()) {
       return null;
     }

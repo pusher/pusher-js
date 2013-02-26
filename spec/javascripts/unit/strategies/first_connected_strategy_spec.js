@@ -11,10 +11,6 @@ describe("FirstConnectedStrategy", function() {
     callback = jasmine.createSpy();
   });
 
-  it("should expose its name", function() {
-    expect(strategy.name).toEqual("first_connected");
-  });
-
   describe("after calling isSupported", function() {
     it("should return true when the substrategy is supported", function() {
       var substrategy = Pusher.Mocks.getStrategy(true);
