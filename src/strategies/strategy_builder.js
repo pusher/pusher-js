@@ -35,19 +35,18 @@
     },
 
     def_transport: function(context, name, type, priority, options) {
-      var klass = transports[type];
-      if (!klass) {
+      var transportClass = transports[type];
+      if (!transportClass) {
         throw new Pusher.Errors.UnsupportedTransport(type);
       }
+      var transportOptions = Pusher.Util.extend({}, {
+        key: context.key,
+        encrypted: context.encrypted,
+        timeline: context.timeline,
+        disableFlash: context.disableFlash
+      }, options)
       var transport = new Pusher.TransportStrategy(
-        name,
-        priority,
-        klass,
-        Pusher.Util.extend({}, options, {
-          // TODO clean this up
-          key: (options && options.key) || context.key,
-          timeline: (options && options.timeline) || context.timeline
-        })
+        name, priority, transportClass, transportOptions
       );
       var newContext = context.def(context, name, transport)[1];
       newContext.transports = context.transports || {};
