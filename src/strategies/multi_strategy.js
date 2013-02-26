@@ -1,5 +1,5 @@
 ;(function() {
-  /** Base class for all non-transport strategies.
+  /** Base class for strategies that have multiple children.
    *
    * @param {Strategy[]} strategies
    * @param {Object} options
