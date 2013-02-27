@@ -46,7 +46,7 @@
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
 
       [":def", "strategy",
-        [":last_successful", 1800000,
+        [":cached", 1800000,
           [":first_connected",
             [":if", [":is_supported", ":ws"], [
                 ":best_connected_ever", ":ws_loop", [":delayed", 2000, [":sockjs_loop"]]

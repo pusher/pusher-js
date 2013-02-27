@@ -60,8 +60,8 @@
       return new Pusher.SequentialStrategy(strategies, options);
     }),
 
-    last_successful: returnWithOriginalContext(function(context, ttl, strategy){
-      return new Pusher.LastSuccessfulStrategy(strategy, context.transports, {
+    cached: returnWithOriginalContext(function(context, ttl, strategy){
+      return new Pusher.CachedStrategy(strategy, context.transports, {
         ttl: ttl
       });
     }),

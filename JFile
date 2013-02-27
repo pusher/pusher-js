@@ -27,10 +27,10 @@ bundle 'pusher.js' do
   file 'timeline/timeline_sender.js'
 
   file 'strategies/best_connected_ever_strategy.js'
+  file 'strategies/cached_strategy.js'
   file 'strategies/delayed_strategy.js'
   file 'strategies/first_connected_strategy.js'
   file 'strategies/if_strategy.js'
-  file 'strategies/last_successful_strategy.js'
   file 'strategies/sequential_strategy.js'
   file 'strategies/transport_strategy.js'
 

@@ -5,12 +5,12 @@
    * @param {Object} transports
    * @param {Object} options
    */
-  function LastSuccessfulStrategy(strategy, transports, options) {
+  function CachedStrategy(strategy, transports, options) {
     this.strategy = strategy;
     this.transports = transports;
     this.ttl = options.ttl || 1800*1000;
   }
-  var prototype = LastSuccessfulStrategy.prototype;
+  var prototype = CachedStrategy.prototype;
 
   prototype.isSupported = function() {
     return this.strategy.isSupported();
@@ -92,5 +92,5 @@
     }
   }
 
-  Pusher.LastSuccessfulStrategy = LastSuccessfulStrategy;
+  Pusher.CachedStrategy = CachedStrategy;
 }).call(this);

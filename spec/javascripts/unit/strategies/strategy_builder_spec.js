@@ -82,7 +82,7 @@ describe("StrategyBuilder", function() {
 
   it("should create the default strategy", function() {
     var strategy = Pusher.StrategyBuilder.build(Pusher.getDefaultStrategy());
-    expect(strategy).toEqual(jasmine.any(Pusher.LastSuccessfulStrategy));
+    expect(strategy).toEqual(jasmine.any(Pusher.CachedStrategy));
   });
 
   it("should throw an error on unsupported transport", function() {

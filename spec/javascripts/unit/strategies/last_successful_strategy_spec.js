@@ -1,4 +1,4 @@
-describe("LastSuccessfulStrategy", function() {
+describe("CachedStrategy", function() {
   var substrategy, transports;
   var strategy;
   var callback;
@@ -8,7 +8,7 @@ describe("LastSuccessfulStrategy", function() {
     transports = {
       test: Pusher.Mocks.getStrategy(true)
     };
-    strategy = new Pusher.LastSuccessfulStrategy(substrategy, transports, {});
+    strategy = new Pusher.CachedStrategy(substrategy, transports, {});
     callback = jasmine.createSpy("callback");
 
     jasmine.Clock.useMock();
@@ -17,13 +17,13 @@ describe("LastSuccessfulStrategy", function() {
   describe("after calling isSupported", function() {
     it("should return true when the substrategy is supported", function() {
       substrategy = Pusher.Mocks.getStrategy(true);
-      strategy = new Pusher.LastSuccessfulStrategy(substrategy, {}, {});
+      strategy = new Pusher.CachedStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when the substrategy is not supported", function() {
       substrategy = Pusher.Mocks.getStrategy(false);
-      strategy = new Pusher.LastSuccessfulStrategy(substrategy, {}, {});
+      strategy = new Pusher.CachedStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(false);
     });
   });
