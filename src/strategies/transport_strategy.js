@@ -31,8 +31,10 @@
    */
   prototype.connect = function(minPriority, callback) {
     if (this.priority < minPriority) {
-      // TODO raise a meaningful error
-      callback("Too low priority");
+      setTimeout(function() {
+        // TODO raise a meaningful error
+        callback("Too low priority");
+      }, 0)
       return;
     }
 
