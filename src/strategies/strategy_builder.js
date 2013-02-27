@@ -109,45 +109,48 @@
     return [[head[0]].concat(tail[0]), tail[1]];
   }
 
+  function evaluateString(expression, context) {
+    if (!isSymbol(expression)) {
+      return [expression, context];
+    }
+    var value = getSymbolValue(expression, context);
+    if (value === undefined) {
+      throw "Undefined symbol " + expression;
+    }
+    return [value, context];
+  }
+
+  function evaluateArray(expression, context) {
+    if (isSymbol(expression[0])) {
+      var f = getSymbolValue(expression[0], context);
+      if (expression.length > 1) {
+        if (typeof f !== "function") {
+          throw "Calling non-function " + expression[0];
+        }
+        var args = [Pusher.Util.extend({}, context)].concat(
+          expression.slice(1).map(function(arg) {
+            return evaluate(arg, Pusher.Util.extend({}, context))[0];
+          })
+        );
+        return f.apply(this, args);
+      } else {
+        return [f, context];
+      }
+    } else {
+      return evaluateListOfExpressions(expression, context);
+    }
+  }
+
   function evaluate(expression, context) {
     var expressionType = typeof expression;
     if (typeof expression === "string") {
-      if (!isSymbol(expression)) {
-        return [expression, context];
-      }
-      var value = getSymbolValue(expression, context);
-      if (value !== undefined) {
-        return [value, context];
-      } else {
-        throw "Undefined symbol " + expression;
-      }
+      return evaluateString(expression, context);
     } else if (typeof expression === "object") {
       if (expression instanceof Array && expression.length > 0) {
-        if (isSymbol(expression[0])) {
-          var f = getSymbolValue(expression[0], context);
-
-          if (expression.length > 1) {
-            if (typeof f !== "function") {
-              throw "Calling non-function " + expression[0];
-            }
-            var args = [Pusher.Util.extend({}, context)].concat(
-              expression.slice(1).map(function(arg) {
-                return evaluate(arg, Pusher.Util.extend({}, context))[0];
-              })
-            );
-            return f.apply(this, args);
-          } else {
-            return [f, context];
-          }
-        } else {
-          return evaluateListOfExpressions(expression, context);
-        }
-      } else {
-        return [expression, context];
+        return evaluateArray(expression, context);
       }
-    } else {
-      return [expression, context];
     }
+    return [expression, context];
   }
 
   Pusher.StrategyBuilder = StrategyBuilder;

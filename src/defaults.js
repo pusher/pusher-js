@@ -53,7 +53,7 @@
               ], [":if", [":is_supported", ":flash"], [
                 ":best_connected_ever", ":flash_loop", [":delayed", 2000, [":sockjs_loop"]]
               ], [
-                [":sockjs_loop"]
+                ":sockjs_loop"
               ]
             ]]
           ]
