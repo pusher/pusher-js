@@ -2,8 +2,8 @@
   /** Proxies method calls to one of substrategies basing on the test function.
    *
    * @param {Function} test
-   * @param {Strategy} trueBranch
-   * @param {Strategy} falseBranch
+   * @param {Strategy} trueBranch strategy used when test returns true
+   * @param {Strategy} falseBranch strategy used when test returns false
    */
   function IfStrategy(test, trueBranch, falseBranch) {
     this.test = test;
