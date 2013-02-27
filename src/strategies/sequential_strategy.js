@@ -10,22 +10,26 @@
    * @param {Object} options
    */
   function SequentialStrategy(strategies, options) {
-    Pusher.MultiStrategy.call(this, strategies, {
-      loop: options.loop,
-      failFast: options.failFast,
-      timeout: options.timeout,
-      timeoutLimit: options.timeoutLimit
-    });
+    this.strategies = strategies;
+    this.loop = Boolean(options.loop);
+    this.failFast = Boolean(options.failFast);
+    this.timeout = options.timeout;
+    this.timeoutLimit = options.timeoutLimit;
   }
   var prototype = SequentialStrategy.prototype;
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
+
+  prototype.isSupported = function() {
+    return Pusher.Util.any(this.strategies, Pusher.Util.method("isSupported"));
+  };
 
   prototype.connect = function(minPriority, callback) {
     var self = this;
 
-    var strategies = Pusher.MultiStrategy.filterUnsupported(this.strategies);
+    var strategies = Pusher.Util.filter(
+      this.strategies, Pusher.Util.method("isSupported")
+    );
     var current = 0;
-    var timeout = this.options.timeout;
+    var timeout = this.timeout;
     var runner = null;
 
     var tryNextStrategy = function(error, connection) {
@@ -33,21 +37,21 @@
         callback(null, connection);
       } else {
         current = current + 1;
-        if (self.options.loop) {
+        if (self.loop) {
           current = current % strategies.length;
         }
 
         if (current < strategies.length) {
           if (timeout) {
             timeout = timeout * 2;
-            if (self.options.timeoutLimit) {
-              timeout = Math.min(timeout, self.options.timeoutLimit);
+            if (self.timeoutLimit) {
+              timeout = Math.min(timeout, self.timeoutLimit);
             }
           }
           runner = self.tryStrategy(
             strategies[current],
             minPriority,
-            { timeout: timeout, failFast: self.options.failFast },
+            { timeout: timeout, failFast: self.failFast },
             tryNextStrategy
           );
         } else {
@@ -59,7 +63,7 @@
     runner = this.tryStrategy(
       strategies[current],
       minPriority,
-      { timeout: timeout, failFast: this.options.failFast },
+      { timeout: timeout, failFast: this.failFast },
       tryNextStrategy
     );
 

@@ -19,12 +19,11 @@ src_files:
   - timeline/timeline.js
   - timeline/timeline_sender.js
 
-  - strategies/last_successful_strategy.js
-  - strategies/multi_strategy.js
+  - strategies/best_connected_ever_strategy.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js
-  - strategies/best_connected_ever_strategy.js
   - strategies/if_strategy.js
+  - strategies/last_successful_strategy.js
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
 

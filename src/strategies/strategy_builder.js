@@ -45,7 +45,7 @@
         encrypted: context.encrypted,
         timeline: context.timeline,
         disableFlash: context.disableFlash
-      }, options)
+      }, options);
       var transport = new Pusher.TransportStrategy(
         name, priority, transportClass, transportOptions
       );
@@ -55,39 +55,39 @@
       return [undefined, newContext];
     },
 
-    sequential: returnWithOriginalContext(function(context, options) {
+    sequential: returnWithOriginalContext(function(_, options) {
       var strategies = Array.prototype.slice.call(arguments, 2);
       return new Pusher.SequentialStrategy(strategies, options);
     }),
 
-    last_successful: returnWithOriginalContext(function(context, ttl, strategy) {
+    last_successful: returnWithOriginalContext(function(context, ttl, strategy){
       return new Pusher.LastSuccessfulStrategy(strategy, context.transports, {
-        ttl: ttl,
+        ttl: ttl
       });
     }),
 
-    first_connected: returnWithOriginalContext(function(context, strategy) {
+    first_connected: returnWithOriginalContext(function(_, strategy) {
       return new Pusher.FirstConnectedStrategy(strategy);
     }),
 
-    best_connected_ever: returnWithOriginalContext(function(context) {
+    best_connected_ever: returnWithOriginalContext(function() {
       var strategies = Array.prototype.slice.call(arguments, 1);
       return new Pusher.BestConnectedEverStrategy(strategies);
     }),
 
-    delayed: returnWithOriginalContext(function(context, delay, strategy) {
+    delayed: returnWithOriginalContext(function(_, delay, strategy) {
       return new Pusher.DelayedStrategy(strategy, { delay: delay });
     }),
 
-    "if": returnWithOriginalContext(function(context, condition, trueBranch, falseBranch) {
-      return new Pusher.IfStrategy(condition, trueBranch, falseBranch);
+    "if": returnWithOriginalContext(function(_, test, trueBranch, falseBranch) {
+      return new Pusher.IfStrategy(test, trueBranch, falseBranch);
     }),
 
-    is_supported: returnWithOriginalContext(function(context, strategy) {
+    is_supported: returnWithOriginalContext(function(_, strategy) {
       return function() {
         return strategy.isSupported();
       };
-    }),
+    })
   };
 
   // DSL interpreter
@@ -105,7 +105,7 @@
       return [[], context];
     }
     var head = evaluate(expressions[0], context);
-    var tail = evaluateListOfExpressions(expressions.slice(1), head[1])
+    var tail = evaluateListOfExpressions(expressions.slice(1), head[1]);
     return [[head[0]].concat(tail[0]), tail[1]];
   }
 

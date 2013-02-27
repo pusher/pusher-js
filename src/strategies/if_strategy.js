@@ -9,7 +9,6 @@
     this.test = test;
     this.trueBranch = trueBranch;
     this.falseBranch = falseBranch;
-    this.options = {};
   }
   var prototype = IfStrategy.prototype;
 

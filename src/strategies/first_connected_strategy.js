@@ -5,7 +5,6 @@
    */
   function FirstConnectedStrategy(strategy) {
     this.strategy = strategy;
-    this.options = {};
   }
   var prototype = FirstConnectedStrategy.prototype;
 

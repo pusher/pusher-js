@@ -42,9 +42,9 @@ describe("StrategyBuilder", function() {
       .toEqual(jasmine.any(Pusher.TransportStrategy));
     expect(strategy.strategies[1].transport).toBe(Pusher.SockJSTransport);
 
-    expect(strategy.options.loop).toBe(true);
-    expect(strategy.options.timeout).toEqual(2000);
-    expect(strategy.options.timeoutLimit).toEqual(8000);
+    expect(strategy.loop).toBe(true);
+    expect(strategy.timeout).toEqual(2000);
+    expect(strategy.timeoutLimit).toEqual(8000);
   });
 
   it("should construct a first connected strategy", function() {

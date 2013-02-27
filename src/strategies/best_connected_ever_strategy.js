@@ -10,17 +10,20 @@
    * @param {Array} strategies
    */
   function BestConnectedEverStrategy(strategies) {
-    Pusher.MultiStrategy.call(this, strategies);
+    this.strategies = strategies;
   }
   var prototype = BestConnectedEverStrategy.prototype;
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
+
+  prototype.isSupported = function() {
+    return Pusher.Util.any(this.strategies, Pusher.Util.method("isSupported"));
+  };
 
   prototype.connect = function(minPriority, callback) {
     if (!this.isSupported()) {
       return null;
     }
     return connect(
-      Pusher.MultiStrategy.filterUnsupported(this.strategies),
+      Pusher.Util.filter(this.strategies, Pusher.Util.method("isSupported")),
       minPriority,
       function(i, runners) {
         return function(error, connection) {
