@@ -80,7 +80,7 @@
       storage.pusherTransport = JSON.stringify({
         timestamp: Pusher.Util.now(),
         transport: transport,
-        latency: latency,
+        latency: latency
       });
     }
   }

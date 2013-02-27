@@ -34,7 +34,7 @@
       setTimeout(function() {
         // TODO raise a meaningful error
         callback("Too low priority");
-      }, 0)
+      }, 0);
       return;
     }
 
