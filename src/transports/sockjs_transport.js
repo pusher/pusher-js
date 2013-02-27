@@ -3,8 +3,8 @@
    *
    * @see AbstractTransport
    */
-  function SockJSTransport(name, key, options) {
-    Pusher.AbstractTransport.call(this, name, key, options);
+  function SockJSTransport(name, priority, key, options) {
+    Pusher.AbstractTransport.call(this, name, priority, key, options);
   }
   var prototype = SockJSTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -15,8 +15,8 @@
    * @param  {Object} options
    * @return {SockJSTransport}
    */
-  SockJSTransport.createConnection = function(name, key, options) {
-    return new SockJSTransport(name, key, options);
+  SockJSTransport.createConnection = function(name, priority, key, options) {
+    return new SockJSTransport(name, priority, key, options);
   };
 
   /** Assumes that SockJS is always supported.

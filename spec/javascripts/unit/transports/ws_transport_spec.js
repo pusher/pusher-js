@@ -7,7 +7,7 @@ describe("WSTransport", function() {
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.WSTransport("example", key, options);
+    return new Pusher.WSTransport("example", 3, key, options);
   }
 
   var _WebSocket;

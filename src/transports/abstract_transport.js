@@ -29,10 +29,11 @@
    * @param {String} key application key
    * @param {Object} options
    */
-  function AbstractTransport(name, key, options) {
+  function AbstractTransport(name, priority, key, options) {
     Pusher.EventsDispatcher.call(this);
 
     this.name = name;
+    this.priority = priority;
     this.key = key;
     this.state = "new";
     this.timeline = options.timeline;

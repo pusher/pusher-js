@@ -38,7 +38,7 @@
 
     var self = this;
     var connection = this.transport.createConnection(
-      this.name, this.options.key, this.options
+      this.name, this.priority, this.options.key, this.options
     );
 
     var onInitialized = function() {

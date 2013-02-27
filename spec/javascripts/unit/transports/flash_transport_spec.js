@@ -7,7 +7,7 @@ describe("FlashTransport", function() {
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.FlashTransport("f", key, options);
+    return new Pusher.FlashTransport("f", 2, key, options);
   }
 
   var _WebSocket;

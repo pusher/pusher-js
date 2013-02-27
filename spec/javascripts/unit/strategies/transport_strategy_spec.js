@@ -52,7 +52,7 @@ describe("TransportStrategy", function() {
 
       strategy.connect(0, this.callback);
       expect(this.transportClass.createConnection)
-        .toHaveBeenCalledWith("name", "asdf", options);
+        .toHaveBeenCalledWith("name", 1, "asdf", options);
     });
 
     it("should emit open on success", function() {

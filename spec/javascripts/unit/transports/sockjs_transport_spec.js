@@ -7,7 +7,7 @@ describe("SockJSTransport", function() {
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.SockJSTransport("test", key, options);
+    return new Pusher.SockJSTransport("test", 1, key, options);
   }
 
   var _SockJS;

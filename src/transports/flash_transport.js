@@ -3,8 +3,8 @@
    *
    * @see AbstractTransport
    */
-  function FlashTransport(name, key, options) {
-    Pusher.AbstractTransport.call(this, name, key, options);
+  function FlashTransport(name, priority, key, options) {
+    Pusher.AbstractTransport.call(this, name, priority, key, options);
   }
   var prototype = FlashTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -15,8 +15,8 @@
    * @param  {Object} options
    * @return {FlashTransport}
    */
-  FlashTransport.createConnection = function(name, key, options) {
-    return new FlashTransport(name, key, options);
+  FlashTransport.createConnection = function(name, priority, key, options) {
+    return new FlashTransport(name, priority, key, options);
   };
 
   /** Checks whether Flash is supported in the browser.
