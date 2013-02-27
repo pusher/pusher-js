@@ -97,7 +97,9 @@ describe("TransportStrategy", function() {
         return this.callback.calls.length > 0;
       }, "callback to be called", 100);
       runs(function() {
-        expect(this.callback).toHaveBeenCalledWith("Too low priority");
+        expect(this.callback).toHaveBeenCalledWith(
+          jasmine.any(Pusher.Errors.TransportPriorityTooLow)
+        );
       });
     });
   });

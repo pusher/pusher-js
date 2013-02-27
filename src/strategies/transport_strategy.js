@@ -32,10 +32,12 @@
   prototype.connect = function(minPriority, callback) {
     if (this.priority < minPriority) {
       setTimeout(function() {
-        // TODO raise a meaningful error
-        callback("Too low priority");
+        callback(new Pusher.Errors.TransportPriorityTooLow());
       }, 0);
-      return;
+      return {
+        abort: function() {},
+        forceMinPriority: function() {}
+      };
     }
 
     var self = this;
