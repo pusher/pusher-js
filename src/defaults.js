@@ -38,9 +38,9 @@
         timeoutLimit: 60000
       }],
 
-      [":def_transport", "ws", "ws", 1, ":ws_hosts"],
+      [":def_transport", "ws", "ws", 3, ":ws_hosts"],
       [":def_transport", "flash", "flash", 2, ":ws_hosts"],
-      [":def_transport", "sockjs", "sockjs", 3, ":sockjs_hosts"],
+      [":def_transport", "sockjs", "sockjs", 1, ":sockjs_hosts"],
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
