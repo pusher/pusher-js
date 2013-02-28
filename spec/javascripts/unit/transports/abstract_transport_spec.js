@@ -11,7 +11,9 @@ describe("AbstractTransport", function() {
   }
 
   beforeEach(function() {
-    this.socket = {};
+    this.socket = {
+      send: jasmine.createSpy("send")
+    };
     this.timeline = Pusher.Mocks.getTimeline();
     this.timeline.generateUniqueID.andReturn(667);
     this.transport = getTransport("foo", {
