@@ -92,7 +92,8 @@
    */
   prototype.onOpen = function() {
     this.socket.send(JSON.stringify({
-      path: Pusher.AbstractTransport.prototype.getPath.call(this)
+      path: Pusher.AbstractTransport.prototype.getPath.call(this) +
+        Pusher.AbstractTransport.prototype.getQueryString.call(this)
     }));
     this.changeState("open");
     this.socket.onopen = undefined;
