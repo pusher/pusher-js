@@ -53,7 +53,7 @@ namespace :acf do
     raise "provide a version number" unless ARGV[1].to_s =~ /^version=(.*)?/
     version = $1
     acf = Acf.new(config[:s3][:cf_distribution_id], config[:s3][:access_key_id], config[:s3][:secret_access_key])
-    files = %w(pusher.js pusher.min.js WebSocketMain.swf flashfallback.js flashfallback.min.js)
+    files = %w(pusher.js pusher.min.js WebSocketMain.swf flashfallback.js flashfallback.min.js sockjs.js sockjs.min.js)
     p acf.invalidate(*files.map{|f| "/#{version}/#{f}"})
   end
 
