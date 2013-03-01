@@ -59,7 +59,8 @@
     } else {
       cdn = this.options.cdn_https;
     }
-    return cdn + "/" + this.options.version;
+    // make sure there are no double slashes
+    return cdn.replace(/\/*$/, "") + "/" + this.options.version;
   };
 
   function handleScriptLoaded(elem, callback) {

@@ -67,6 +67,19 @@ describe("DependencyLoader", function() {
     }, "load callback to get called", 100);
   });
 
+  it("should strip trailing slashes from the CDN url", function() {
+    loader = new Pusher.DependencyLoader({
+      cdn_http: "http://example.com/",
+      cdn_https: "https://example.com/",
+      version: "6.6.6",
+      suffix: "-test"
+    });
+    loader.load("resource", onLoaded);
+    expect(script.setAttribute).toHaveBeenCalledWith(
+      "src", "http://example.com/6.6.6/resource-test.js"
+    );
+  });
+
   describe("on IE < 9", function() {
     beforeEach(function() {
       document.addEventListener = undefined;
