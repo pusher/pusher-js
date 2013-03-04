@@ -30,7 +30,6 @@ bundle 'pusher.js' do
   file 'strategies/cached_strategy.js'
   file 'strategies/delayed_strategy.js'
   file 'strategies/first_connected_strategy.js'
-  file 'strategies/if_strategy.js'
   file 'strategies/sequential_strategy.js'
   file 'strategies/transport_strategy.js'
 

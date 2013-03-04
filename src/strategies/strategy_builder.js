@@ -80,7 +80,7 @@
     }),
 
     "if": returnWithOriginalContext(function(_, test, trueBranch, falseBranch) {
-      return new Pusher.IfStrategy(test, trueBranch, falseBranch);
+      return test() ? trueBranch : falseBranch;
     }),
 
     is_supported: returnWithOriginalContext(function(_, strategy) {
