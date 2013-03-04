@@ -9,6 +9,7 @@
     this.strategy = strategy;
     this.transports = transports;
     this.ttl = options.ttl || 1800*1000;
+    this.timeline = options.timeline;
   }
   var prototype = CachedStrategy.prototype;
 
@@ -23,6 +24,7 @@
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
       var transport = this.transports[info.transport];
       if (transport && transport.isSupported()) {
+        this.timeline.info({ cached: true });
         strategies.push(new Pusher.SequentialStrategy([transport], {
           timeout: info.latency * 2,
           failFast: true
