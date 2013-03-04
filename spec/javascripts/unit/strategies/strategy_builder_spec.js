@@ -65,11 +65,6 @@ describe("StrategyBuilder", function() {
     expect(strategy).toEqual(jasmine.any(Pusher.BestConnectedEverStrategy));
   });
 
-  it("should create the default strategy", function() {
-    var strategy = Pusher.StrategyBuilder.build(Pusher.getDefaultStrategy());
-    expect(strategy).toEqual(jasmine.any(Pusher.CachedStrategy));
-  });
-
   it("should throw an error on unsupported transport", function() {
     expect(function() {
       Pusher.StrategyBuilder.build([
