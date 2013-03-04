@@ -1,5 +1,5 @@
 describe("CachedStrategy", function() {
-  var substrategy, transports;
+  var substrategy, transports, timeline;
   var strategy;
   var callback;
 
@@ -8,7 +8,11 @@ describe("CachedStrategy", function() {
     transports = {
       test: Pusher.Mocks.getStrategy(true)
     };
-    strategy = new Pusher.CachedStrategy(substrategy, transports, {});
+    timeline = Pusher.Mocks.getTimeline();
+
+    strategy = new Pusher.CachedStrategy(substrategy, transports, {
+      timeline: timeline
+    });
     callback = jasmine.createSpy("callback");
 
     jasmine.Clock.useMock();
@@ -37,6 +41,11 @@ describe("CachedStrategy", function() {
     });
 
     describe("without cached transport", function() {
+      it("should not report anything to timeline", function() {
+        strategy.connect(0, callback);
+        expect(timeline.info).not.toHaveBeenCalled();
+      });
+
       it("should try the substrategy immediately when cache is empty", function() {
         strategy.connect(0, callback);
         expect(substrategy.connect).toHaveBeenCalled();
@@ -129,6 +138,11 @@ describe("CachedStrategy", function() {
       it("should try the cached strategy first", function() {
         strategy.connect(0, callback);
         expect(transports.test.connect).toHaveBeenCalled();
+      });
+
+      it("should report to timeline when using cached strategy", function() {
+        strategy.connect(0, callback);
+        expect(timeline.info).toHaveBeenCalledWith({ cached: true });
       });
 
       it("should abort the cached transport and not call the substrategy", function() {
