@@ -186,9 +186,7 @@ describe("Pusher", function() {
 
         expect(Pusher.StrategyBuilder.build)
           .toHaveBeenCalledWith(
-            Pusher.Util.extend(
-              {}, Pusher.getDefaultStrategy(), { encrypted: true }
-            )
+            Pusher.getDefaultStrategy(), { encrypted: true }
           );
       });
 
@@ -196,9 +194,7 @@ describe("Pusher", function() {
         managerOptions.getStrategy({ encrypted: true });
         expect(Pusher.StrategyBuilder.build)
           .toHaveBeenCalledWith(
-            Pusher.Util.extend(
-              {}, Pusher.getDefaultStrategy(), { encrypted: true }
-            )
+            Pusher.getDefaultStrategy(), { encrypted: true }
           );
       });
     });

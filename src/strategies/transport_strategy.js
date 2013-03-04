@@ -1,16 +1,18 @@
 ;(function() {
   /** Provides a strategy interface for transports.
    *
+   * @param {String} name
+   * @param {Number} priority
    * @param {Class} transport
-   * @param {Object} options options to pass to the transport
+   * @param {Object} options
    */
-  function TransportStrategy(transport, options) {
+  function TransportStrategy(name, priority, transport, options) {
+    this.name = name;
+    this.priority = priority;
     this.transport = transport;
     this.options = options || {};
   }
   var prototype = TransportStrategy.prototype;
-
-  prototype.name = "transport";
 
   /** Returns whether the transport is supported in the browser.
    *
@@ -22,22 +24,25 @@
     });
   };
 
-  /** Returns an object with strategy's options
-   *
-   * @returns {Object}
-   */
-  prototype.getOptions = function() {
-    return this.options;
-  };
-
   /** Launches a connection attempt and returns a strategy runner.
    *
    * @param  {Function} callback
    * @return {Object} strategy runner
    */
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
+    if (this.priority < minPriority) {
+      setTimeout(function() {
+        callback(new Pusher.Errors.TransportPriorityTooLow());
+      }, 0);
+      return {
+        abort: function() {},
+        forceMinPriority: function() {}
+      };
+    }
+
+    var self = this;
     var connection = this.transport.createConnection(
-      this.options.key, this.options
+      this.name, this.priority, this.options.key, this.options
     );
 
     var onInitialized = function() {
@@ -79,6 +84,15 @@
         }
         unbindListeners();
         connection.close();
+      },
+      forceMinPriority: function(p) {
+        if (connection.state === "open") {
+          return;
+        }
+        if (self.priority < p) {
+          // TODO close connection in a nicer way
+          connection.close();
+        }
       }
     };
   };

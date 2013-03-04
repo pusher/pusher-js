@@ -77,14 +77,18 @@
       var strategy = new Pusher.EventsDispatcher();
 
       strategy._abort = jasmine.createSpy();
+      strategy._forceMinPriority = jasmine.createSpy();
       strategy._callback = null;
 
       strategy.isSupported = jasmine.createSpy("isSupported")
         .andReturn(isSupported);
       strategy.connect = jasmine.createSpy("connect")
-        .andCallFake(function(callback) {
+        .andCallFake(function(minPriority, callback) {
           strategy._callback = callback;
-          return { abort: strategy._abort };
+          return {
+            abort: strategy._abort,
+            forceMinPriority: strategy._forceMinPriority
+          };
         });
 
       return strategy;

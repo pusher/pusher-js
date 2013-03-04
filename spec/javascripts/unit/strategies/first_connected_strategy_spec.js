@@ -1,88 +1,65 @@
 describe("FirstConnectedStrategy", function() {
+  var substrategy;
+  var callback;
+  var strategy;
+
   beforeEach(function() {
-    this.substrategies = Pusher.Mocks.getStrategies([true, true, true]);
-    this.strategy = new Pusher.FirstConnectedStrategy(this.substrategies);
+    substrategy = Pusher.Mocks.getStrategy(true);
+    strategy = new Pusher.FirstConnectedStrategy(substrategy);
+    state = {};
 
-    this.callback = jasmine.createSpy();
-  });
-
-  it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("first_connected");
+    callback = jasmine.createSpy();
   });
 
   describe("after calling isSupported", function() {
-    it("should return true when one of substrategies is supported", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, true]);
-      var strategy = new Pusher.FirstConnectedStrategy(substrategies);
+    it("should return true when the substrategy is supported", function() {
+      var substrategy = Pusher.Mocks.getStrategy(true);
+      var strategy = new Pusher.FirstConnectedStrategy(substrategy);
       expect(strategy.isSupported()).toBe(true);
     });
 
-    it("should return false when none of substrategies is supported", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, false]);
-      var strategy = new Pusher.FirstConnectedStrategy(substrategies);
+    it("should return false when the substrategy is not supported", function() {
+      var substrategy = Pusher.Mocks.getStrategy(false);
+      var strategy = new Pusher.FirstConnectedStrategy(substrategy);
       expect(strategy.isSupported()).toBe(false);
     });
   });
 
   describe("on connect", function() {
-    it("should succeed on first successful strategy and abort non-failed substrategies", function() {
-      this.strategy.connect(this.callback);
+    it("should succeed on first connection and abort the substrategy", function() {
+      strategy.connect(0, callback);
 
-      expect(this.substrategies[0].connect).toHaveBeenCalled();
-      expect(this.substrategies[1].connect).toHaveBeenCalled();
-      expect(this.substrategies[2].connect).toHaveBeenCalled();
+      expect(substrategy.connect)
+        .toHaveBeenCalledWith(0, jasmine.any(Function));
 
       var connection = {};
-      this.substrategies[0]._callback(true);
-      this.substrategies[1]._callback(null, connection);
+      substrategy._callback(null, connection);
 
-      expect(this.callback).toHaveBeenCalledWith(null, connection);
-
-      expect(this.substrategies[0]._abort).not.toHaveBeenCalled();
-      expect(this.substrategies[1]._abort).toHaveBeenCalled();
-      expect(this.substrategies[2]._abort).toHaveBeenCalled();
+      expect(callback).toHaveBeenCalledWith(null, connection);
+      expect(substrategy._abort).toHaveBeenCalled();
     });
 
-    it("should pass an error after all substrategies failed", function() {
-      this.strategy.connect(this.callback);
+    it("should pass an error when the substrategy fails", function() {
+      strategy.connect(0, callback);
 
-      this.substrategies[1]._callback(true);
-      expect(this.callback).not.toHaveBeenCalled();
-      this.substrategies[0]._callback(true);
-      expect(this.callback).not.toHaveBeenCalled();
-      this.substrategies[2]._callback(true);
-      expect(this.callback).toHaveBeenCalledWith(true);
-    });
-
-    it("should not connect when there are no supported substrategies", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, false]);
-      var strategy = new Pusher.FirstConnectedStrategy(substrategies);
-
-      expect(strategy.connect()).toBe(null);
-      expect(substrategies[0].connect).not.toHaveBeenCalled();
-      expect(substrategies[1].connect).not.toHaveBeenCalled();
+      substrategy._callback(true);
+      expect(callback).toHaveBeenCalledWith(true, undefined);
     });
   });
 
   describe("on abort", function() {
-    it("should abort all substrategies", function() {
-      var runner = this.strategy.connect();
+    it("should abort the substrategy", function() {
+      var runner = strategy.connect(0);
       runner.abort();
-
-      expect(this.substrategies[0]._abort).toHaveBeenCalled();
-      expect(this.substrategies[1]._abort).toHaveBeenCalled();
-      expect(this.substrategies[2]._abort).toHaveBeenCalled();
+      expect(substrategy._abort).toHaveBeenCalled();
     });
+  });
 
-    it("should not abort failed substrategies", function() {
-      var runner = this.strategy.connect();
-
-      this.substrategies[1]._callback(true);
-      runner.abort();
-
-      expect(this.substrategies[0]._abort).toHaveBeenCalled();
-      expect(this.substrategies[1]._abort).not.toHaveBeenCalled();
-      expect(this.substrategies[2]._abort).toHaveBeenCalled();
+  describe("on forceMinPriority", function() {
+    it("should force the priority on the substrategy", function() {
+      var runner = strategy.connect(0, this.callback);
+      runner.forceMinPriority(5);
+      expect(substrategy._forceMinPriority).toHaveBeenCalledWith(5);
     });
   });
 });

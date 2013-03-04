@@ -6,81 +6,72 @@ describe("BestConnectedEverStrategy", function() {
     this.callback = jasmine.createSpy();
   });
 
-  it("should expose its name", function() {
-    expect(this.strategy.name).toEqual("best_connected_ever");
-  });
-
   describe("on connect", function() {
-    it("should call back with the preferred transport and cancel worse ones", function() {
-      this.strategy.connect(this.callback);
+    beforeEach(function() {
+      this.strategy.connect(0, this.callback);
+    });
 
+    it("should call connect on all substrategies", function() {
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).toHaveBeenCalled();
       expect(this.substrategies[2].connect).toHaveBeenCalled();
-
-      var transport1 = Pusher.Mocks.getTransport();
-      this.substrategies[0]._callback(null, transport1);
-      expect(this.callback).toHaveBeenCalledWith(null, transport1);
-      expect(this.callback.calls.length).toEqual(1);
-
-      expect(this.substrategies[1]._abort).toHaveBeenCalled();
-      expect(this.substrategies[2]._abort).toHaveBeenCalled();
     });
 
-    it("should call back with connections in increasing priority", function() {
-      this.strategy.connect(this.callback);
+    describe("after establishing a successful connection", function() {
+      var transport1;
+      beforeEach(function() {
+        transport1 = Pusher.Mocks.getTransport();
+        transport1.priority = 7;
+        this.substrategies[0]._callback(null, transport1);
+      });
 
-      expect(this.substrategies[0].connect).toHaveBeenCalled();
-      expect(this.substrategies[1].connect).toHaveBeenCalled();
-      expect(this.substrategies[2].connect).toHaveBeenCalled();
+      it("should call back with first successful transport", function() {
+        expect(this.callback).toHaveBeenCalledWith(null, transport1);
+        expect(this.callback.calls.length).toEqual(1);
+      });
 
-      var transport1 = Pusher.Mocks.getTransport();
-      this.substrategies[1]._callback(null, transport1);
-      expect(this.callback).toHaveBeenCalledWith(null, transport1);
-      expect(this.callback.calls.length).toEqual(1);
+      it("should force min priorities on all substrategies", function() {
+        expect(this.substrategies[0]._forceMinPriority).toHaveBeenCalledWith(7);
+        expect(this.substrategies[1]._forceMinPriority).toHaveBeenCalledWith(7);
+        expect(this.substrategies[2]._forceMinPriority).toHaveBeenCalledWith(7);
+      });
 
-      expect(this.substrategies[0]._abort).not.toHaveBeenCalled();
-      expect(this.substrategies[1]._abort).not.toHaveBeenCalled();
-      expect(this.substrategies[2]._abort).toHaveBeenCalled();
-
-      var transport2 = Pusher.Mocks.getTransport();
-      this.substrategies[0]._callback(null, transport2);
-      expect(this.callback).toHaveBeenCalledWith(null, transport2);
-      expect(this.callback.calls.length).toEqual(2);
-
-      expect(this.substrategies[0]._abort).not.toHaveBeenCalled();
-      expect(this.substrategies[1]._abort).toHaveBeenCalled();
+      it("should call back again if another substrategy succeeds", function() {
+        var transport2 = Pusher.Mocks.getTransport();
+        transport2.priority = 19;
+        this.substrategies[2]._callback(null, transport2);
+        expect(this.callback).toHaveBeenCalledWith(null, transport2);
+        expect(this.callback.calls.length).toEqual(2);
+      });
     });
 
-    it("should pass an error after all substrategies failed", function() {
-      this.strategy.connect(this.callback);
+    describe("on substrategy errors", function() {
+      it("should pass an error after all substrategies failed", function() {
+        this.substrategies[1]._callback(true);
+        expect(this.callback).not.toHaveBeenCalled();
+        this.substrategies[0]._callback(true);
+        expect(this.callback).not.toHaveBeenCalled();
+        this.substrategies[2]._callback(true);
+        expect(this.callback).toHaveBeenCalledWith(true);
+      });
 
-      this.substrategies[1]._callback(true);
-      expect(this.callback).not.toHaveBeenCalled();
-      this.substrategies[0]._callback(true);
-      expect(this.callback).not.toHaveBeenCalled();
-      this.substrategies[2]._callback(true);
-      expect(this.callback).toHaveBeenCalledWith(true);
-    });
+      it("should not pass errors after one substrategy succeeded", function() {
+        var transport = Pusher.Mocks.getTransport();
+        this.substrategies[0]._callback(null, transport);
+        expect(this.callback).toHaveBeenCalledWith(null, transport);
+        expect(this.callback.calls.length).toEqual(1);
 
-    it("should pass errors after one substrategy succeeded", function() {
-      this.strategy.connect(this.callback);
-
-      var transport = Pusher.Mocks.getTransport();
-      this.substrategies[0]._callback(null, transport);
-      expect(this.callback).toHaveBeenCalledWith(null, transport);
-      expect(this.callback.calls.length).toEqual(1);
-
-      this.substrategies[1]._callback(true);
-      expect(this.callback.calls.length).toEqual(1);
-      this.substrategies[2]._callback(true);
-      expect(this.callback.calls.length).toEqual(1);
+        this.substrategies[1]._callback(true);
+        expect(this.callback.calls.length).toEqual(1);
+        this.substrategies[2]._callback(true);
+        expect(this.callback.calls.length).toEqual(1);
+      });
     });
   });
 
   describe("on abort", function() {
     it("should abort non-failed substrategies", function() {
-      var runner = this.strategy.connect(this.callback);
+      var runner = this.strategy.connect(0, this.callback);
 
       this.substrategies[1]._callback(true);
       this.substrategies[2]._callback(null, {});
@@ -89,6 +80,16 @@ describe("BestConnectedEverStrategy", function() {
       expect(this.substrategies[0]._abort).toHaveBeenCalled();
       expect(this.substrategies[1]._abort).not.toHaveBeenCalled();
       expect(this.substrategies[2]._abort).toHaveBeenCalled();
+    });
+  });
+
+  describe("on forceMinPriority", function() {
+    it("should force the priority on all substrategies", function() {
+      var runner = this.strategy.connect(0, this.callback);
+      runner.forceMinPriority(991);
+      expect(this.substrategies[0]._forceMinPriority).toHaveBeenCalledWith(991);
+      expect(this.substrategies[1]._forceMinPriority).toHaveBeenCalledWith(991);
+      expect(this.substrategies[2]._forceMinPriority).toHaveBeenCalledWith(991);
     });
   });
 });

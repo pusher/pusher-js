@@ -23,24 +23,29 @@
    *
    * Options:
    * - encrypted - whether connection should use ssl
-   * - entryptedPort - port to connect to when encrypted
-   * - unencryptedPort - port to connect to when not encrypted
-   * - host - hostname to connect to
+   * - hostEncrypted - host to connect to when connection is encrypted
+   * - hostUnencrypted - host to connect to when connection is not encrypted
    *
    * @param {String} key application key
    * @param {Object} options
    */
-  function AbstractTransport(key, options) {
+  function AbstractTransport(name, priority, key, options) {
     Pusher.EventsDispatcher.call(this);
 
+    this.name = name;
+    this.priority = priority;
     this.key = key;
-    this.options = options;
     this.state = "new";
     this.timeline = options.timeline;
     this.id = this.timeline.generateUniqueID();
+
+    this.options = {
+      encrypted: Boolean(options.encrypted),
+      hostUnencrypted: options.hostUnencrypted,
+      hostEncrypted: options.hostEncrypted
+    };
   }
   var prototype = AbstractTransport.prototype;
-
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   /** Checks whether the transport is supported in the browser.
@@ -181,14 +186,13 @@
 
   /** @protected */
   prototype.getBaseURL = function() {
-    var port;
+    var host;
     if (this.options.encrypted) {
-      port = this.options.encryptedPort;
+      host = this.options.hostEncrypted;
     } else {
-      port = this.options.unencryptedPort;
+      host = this.options.hostUnencrypted;
     }
-
-    return this.getScheme() + "://" + this.options.host + ':' + port;
+    return this.getScheme() + "://" + host;
   };
 
   /** @protected */

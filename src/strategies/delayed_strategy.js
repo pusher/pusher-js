@@ -8,37 +8,46 @@
    * @param {Object} options
    */
   function DelayedStrategy(strategy, options) {
-    Pusher.MultiStrategy.call(this, [strategy], { delay: options.delay });
+    this.strategy = strategy;
+    this.options = { delay: options.delay };
   }
   var prototype = DelayedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
+  prototype.isSupported = function() {
+    return this.strategy.isSupported();
+  };
 
-  prototype.name = "delayed";
-
-  /** @see TransportStrategy.prototype.connect */
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
     if (!this.isSupported()) {
       return null;
     }
 
-    var self = this;
-    var abort = function() {
-      clearTimeout(timer);
-      timer = null;
-    };
+    var strategy = this.strategy;
+    var runner;
     var timer = setTimeout(function() {
       if (timer === null) {
         // hack for misbehaving clearTimeout in IE < 9
         return;
       }
       timer = null;
-      abort = self.strategies[0].connect(callback).abort;
+      runner = strategy.connect(minPriority, callback);
     }, this.options.delay);
 
     return {
       abort: function() {
-        abort();
+        if (timer) {
+          clearTimeout(timer);
+          timer = null;
+        }
+        if (runner) {
+          runner.abort();
+        }
+      },
+      forceMinPriority: function(p) {
+        minPriority = p;
+        if (runner) {
+          runner.forceMinPriority(p);
+        }
       }
     };
   };

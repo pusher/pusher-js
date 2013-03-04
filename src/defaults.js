@@ -23,56 +23,42 @@
   Pusher.unavailable_timeout = 10000;
 
   Pusher.getDefaultStrategy = function() {
-    return {
-      type: "first_supported",
-      host: Pusher.host,
-      unencryptedPort: Pusher.ws_port,
-      encryptedPort: Pusher.wss_port,
-      loop: true,
-      timeout: 15000,
-      timeoutLimit: 60000,
-      children: [
-        { type: "first_supported",
-          children: [
-            { type: "all_supported",
-              children: [
-                { type: "first_supported",
-                  children: [
-                    { type: "sequential",
-                      children: [{ type: "transport", transport: "ws" }]
-                    },
-                    { type: "sequential",
-                      children: [{ type: "transport", transport: "flash" }]
-                    }
-                  ]
-                },
-                { type: "delayed",
-                  delay: 2000,
-                  child: {
-                    type: "sequential",
-                    children: [{
-                      type: "transport",
-                      transport: "sockjs",
-                      host: Pusher.sockjs_host,
-                      unencryptedPort: Pusher.sockjs_http_port,
-                      encryptedPort: Pusher.sockjs_https_port
-                    }]
-                  }
-                }
+    return [
+      [":def", "ws_hosts", {
+        hostUnencrypted: Pusher.host + ":" + Pusher.ws_port,
+        hostEncrypted: Pusher.host + ":" + Pusher.wss_port
+      }],
+      [":def", "sockjs_hosts", {
+        hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
+        hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+      }],
+      [":def", "timeouts", {
+        loop: true,
+        timeout: 15000,
+        timeoutLimit: 60000
+      }],
+
+      [":def_transport", "ws", "ws", 3, ":ws_hosts"],
+      [":def_transport", "flash", "flash", 2, ":ws_hosts"],
+      [":def_transport", "sockjs", "sockjs", 1, ":sockjs_hosts"],
+      [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
+      [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
+      [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
+
+      [":def", "strategy",
+        [":cached", 1800000,
+          [":first_connected",
+            [":if", [":is_supported", ":ws"], [
+                ":best_connected_ever", ":ws_loop", [":delayed", 2000, [":sockjs_loop"]]
+              ], [":if", [":is_supported", ":flash"], [
+                ":best_connected_ever", ":flash_loop", [":delayed", 2000, [":sockjs_loop"]]
+              ], [
+                ":sockjs_loop"
               ]
-            },
-            { type: "sequential",
-              children: [{
-                type: "transport",
-                transport: "sockjs",
-                host: Pusher.sockjs_host,
-                unencryptedPort: Pusher.sockjs_http_port,
-                encryptedPort: Pusher.sockjs_https_port
-              }]
-            }
+            ]]
           ]
-        }
+        ]
       ]
-    };
+    ];
   };
 }).call(this);

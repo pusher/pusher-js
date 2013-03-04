@@ -3,12 +3,11 @@ describe("SockJSTransport", function() {
     key = key || "foo";
     options = Pusher.Util.extend({
       encrypted: false,
-      host: "example.com",
-      unencryptedPort: 12345,
-      encryptedPort: 54321
+      hostUnencrypted: "example.com:12345",
+      hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.SockJSTransport(key, options);
+    return new Pusher.SockJSTransport("test", 1, key, options);
   }
 
   var _SockJS;
@@ -30,7 +29,7 @@ describe("SockJSTransport", function() {
   });
 
   it("should expose its name", function() {
-    expect(this.transport.name).toEqual("sockjs");
+    expect(this.transport.name).toEqual("test");
   });
 
   it("should always be supported", function() {
@@ -77,7 +76,7 @@ describe("SockJSTransport", function() {
       this.transport.initialize();
       expect(this.timeline.info).toHaveBeenCalledWith({
         cid: 1,
-        transport: "sockjs"
+        transport: "test"
       });
     });
 
@@ -90,7 +89,7 @@ describe("SockJSTransport", function() {
 
       expect(this.timeline.info).toHaveBeenCalledWith({
         cid: 1,
-        transport: "sockjss"
+        transport: "tests"
       });
     });
   });

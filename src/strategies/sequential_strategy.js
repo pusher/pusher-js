@@ -6,29 +6,30 @@
    * - timeout - initial timeout for a single substrategy
    * - timeoutLimit - maximum timeout
    *
-   * @param {Strategy} substrategy
+   * @param {Strategy[]} strategies
    * @param {Object} options
    */
   function SequentialStrategy(strategies, options) {
-    Pusher.MultiStrategy.call(this, strategies, {
-      loop: options.loop,
-      timeout: options.timeout,
-      timeoutLimit: options.timeoutLimit
-    });
+    this.strategies = strategies;
+    this.loop = Boolean(options.loop);
+    this.failFast = Boolean(options.failFast);
+    this.timeout = options.timeout;
+    this.timeoutLimit = options.timeoutLimit;
   }
   var prototype = SequentialStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
+  prototype.isSupported = function() {
+    return Pusher.Util.any(this.strategies, Pusher.Util.method("isSupported"));
+  };
 
-  prototype.name = "seq";
-
-  /** @see TransportStrategy.prototype.connect */
-  prototype.connect = function(callback) {
+  prototype.connect = function(minPriority, callback) {
     var self = this;
 
-    var strategies = Pusher.MultiStrategy.filterUnsupported(this.strategies);
+    var strategies = Pusher.Util.filter(
+      this.strategies, Pusher.Util.method("isSupported")
+    );
     var current = 0;
-    var timeout = this.options.timeout;
+    var timeout = this.timeout;
     var runner = null;
 
     var tryNextStrategy = function(error, connection) {
@@ -36,19 +37,22 @@
         callback(null, connection);
       } else {
         current = current + 1;
-        if (self.options.loop) {
+        if (self.loop) {
           current = current % strategies.length;
         }
 
         if (current < strategies.length) {
           if (timeout) {
             timeout = timeout * 2;
-            if (self.options.timeoutLimit) {
-              timeout = Math.min(timeout, self.options.timeoutLimit);
+            if (self.timeoutLimit) {
+              timeout = Math.min(timeout, self.timeoutLimit);
             }
           }
           runner = self.tryStrategy(
-            strategies[current], timeout, tryNextStrategy
+            strategies[current],
+            minPriority,
+            { timeout: timeout, failFast: self.failFast },
+            tryNextStrategy
           );
         } else {
           callback(true);
@@ -56,22 +60,33 @@
       }
     };
 
-    runner = this.tryStrategy(strategies[current], timeout, tryNextStrategy);
+    runner = this.tryStrategy(
+      strategies[current],
+      minPriority,
+      { timeout: timeout, failFast: this.failFast },
+      tryNextStrategy
+    );
 
     return {
       abort: function() {
         runner.abort();
+      },
+      forceMinPriority: function(p) {
+        minPriority = p;
+        if (runner) {
+          runner.forceMinPriority(p);
+        }
       }
     };
   };
 
   /** @private */
-  prototype.tryStrategy = function(strategy, timeoutLength, callback) {
+  prototype.tryStrategy = function(strategy, minPriority, options, callback) {
     var timeout = null;
     var runner = null;
 
-    runner = strategy.connect(function(error, connection) {
-      if (error && timeout) {
+    runner = strategy.connect(minPriority, function(error, connection) {
+      if (error && timeout && !options.failFast) {
         // advance to the next strategy after the timeout
         return;
       }
@@ -82,13 +97,13 @@
       callback(error, connection);
     });
 
-    if (timeoutLength > 0) {
+    if (options.timeout > 0) {
       timeout = setTimeout(function() {
         if (timeout) {
           runner.abort();
           callback(true);
         }
-      }, timeoutLength);
+      }, options.timeout);
     }
 
     return {
@@ -98,6 +113,9 @@
           timeout = null;
         }
         runner.abort();
+      },
+      forceMinPriority: function(p) {
+        runner.forceMinPriority(p);
       }
     };
   };

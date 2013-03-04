@@ -1,41 +1,28 @@
 ;(function() {
-  /** Launches all substrategies at the same time and uses the first connected.
+  /** Launches the substrategy and terminates on the first open connection.
    *
-   * After establishing the connection, aborts all substrategies so that no
-   * other attempts are made later.
-   *
-   * @param {Array} strategies
+   * @param {Strategy} strategy
    */
-  function FirstConnectedStrategy(strategies) {
-    Pusher.MultiStrategy.call(this, strategies);
+  function FirstConnectedStrategy(strategy) {
+    this.strategy = strategy;
   }
   var prototype = FirstConnectedStrategy.prototype;
 
-  Pusher.Util.extend(prototype, Pusher.MultiStrategy.prototype);
+  prototype.isSupported = function() {
+    return this.strategy.isSupported();
+  };
 
-  prototype.name = "first_connected";
-
-  /** @see TransportStrategy.prototype.connect */
-  prototype.connect = function(callback) {
-    if (!this.isSupported()) {
-      return null;
-    }
-    return Pusher.ParallelStrategy.connect(
-      Pusher.MultiStrategy.filterUnsupported(this.strategies),
-      function(i, runners) {
-        return function(error, connection) {
-          runners[i].error = error;
-          if (error) {
-            if (Pusher.ParallelStrategy.allRunnersFailed(runners)) {
-              callback(true);
-            }
-            return;
-          }
-          Pusher.ParallelStrategy.abortRunners(runners);
-          callback(null, connection);
-        };
+  prototype.connect = function(minPriority, callback) {
+    var runner = this.strategy.connect(
+      minPriority,
+      function(error, connection) {
+        if (connection) {
+          runner.abort();
+        }
+        callback(error, connection);
       }
     );
+    return runner;
   };
 
   Pusher.FirstConnectedStrategy = FirstConnectedStrategy;

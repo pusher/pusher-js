@@ -3,12 +3,11 @@ describe("WSTransport", function() {
     key = key || "foo";
     options = Pusher.Util.extend({
       encrypted: false,
-      host: "example.com",
-      unencryptedPort: 12345,
-      encryptedPort: 54321
+      hostUnencrypted: "example.com:12345",
+      hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.WSTransport(key, options);
+    return new Pusher.WSTransport("example", 3, key, options);
   }
 
   var _WebSocket;
@@ -33,7 +32,7 @@ describe("WSTransport", function() {
   });
 
   it("should expose its name", function() {
-    expect(this.transport.name).toEqual("ws");
+    expect(this.transport.name).toEqual("example");
   });
 
   it("should not support ping", function() {

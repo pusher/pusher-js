@@ -98,14 +98,14 @@
     var self = this;
     var callback = function(error, transport) {
       if (error) {
-        self.runner = strategy.connect(callback);
+        self.runner = strategy.connect(0, callback);
       } else {
         // we don't support switching connections yet
         self.runner.abort();
         self.setConnection(self.wrapTransport(transport));
       }
     };
-    this.runner = strategy.connect(callback);
+    this.runner = strategy.connect(0, callback);
 
     this.setUnavailableTimer();
   };
