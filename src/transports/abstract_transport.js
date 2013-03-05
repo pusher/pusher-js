@@ -138,6 +138,10 @@
     }
   };
 
+  prototype.requestPing = function() {
+    this.emit("ping_request");
+  };
+
   /** @protected */
   prototype.onOpen = function() {
     this.changeState("open");
