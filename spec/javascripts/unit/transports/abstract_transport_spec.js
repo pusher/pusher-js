@@ -23,7 +23,7 @@ describe("AbstractTransport", function() {
     spyOn(this.transport, "createSocket").andReturn(this.socket);
   });
 
-  describe("on initialize", function() {
+  describe("#initialize", function() {
     it("should emit 'initialized' immediately", function() {
       var onInitialized = jasmine.createSpy("onInitialized");
       this.transport.bind("initialized", onInitialized);
@@ -63,7 +63,7 @@ describe("AbstractTransport", function() {
     });
   });
 
-  describe("on connect", function() {
+  describe("#connect", function() {
     beforeEach(function() {
       this.transport.initialize();
     });
@@ -139,33 +139,7 @@ describe("AbstractTransport", function() {
     });
   });
 
-  describe("after receiving a message", function() {
-    beforeEach(function() {
-      this.transport.initialize();
-      this.transport.connect();
-      this.socket.onopen();
-    });
-
-    it("should emit message event with received object", function() {
-      var onMessage = jasmine.createSpy("onMessage");
-      this.transport.bind("message", onMessage);
-
-      this.socket.onmessage("ugabuga");
-
-      expect(this.transport.state).toEqual("open");
-      expect(onMessage).toHaveBeenCalledWith("ugabuga");
-    });
-
-    it("should log the message with debug level", function() {
-      this.socket.onmessage({ data: "log this" });
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        message: "log this"
-      });
-    });
-  });
-
-  describe("on send", function() {
+  describe("#send", function() {
     beforeEach(function() {
       this.transport.initialize();
       this.transport.connect();
@@ -197,6 +171,60 @@ describe("AbstractTransport", function() {
         cid: 667,
         method: "send",
         data: "foobar"
+      });
+    });
+  });
+
+  describe("#close", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
+      this.socket.close = jasmine.createSpy("close");
+    });
+
+    it("should call close on the socket and emit a 'closed' event", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      this.transport.bind("closed", onClosed);
+
+      this.transport.close();
+      expect(this.socket.close).toHaveBeenCalled();
+
+      this.socket.onclose({ wasClean: true });
+      expect(onClosed).toHaveBeenCalledWith({ wasClean: true });
+    });
+
+    it("should log method call with debug level", function() {
+      this.transport.close();
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        method: "close"
+      });
+    });
+  });
+
+  describe("after receiving a message", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
+    });
+
+    it("should emit message event with received object", function() {
+      var onMessage = jasmine.createSpy("onMessage");
+      this.transport.bind("message", onMessage);
+
+      this.socket.onmessage("ugabuga");
+
+      expect(this.transport.state).toEqual("open");
+      expect(onMessage).toHaveBeenCalledWith("ugabuga");
+    });
+
+    it("should log the message with debug level", function() {
+      this.socket.onmessage({ data: "log this" });
+      expect(this.timeline.debug).toHaveBeenCalledWith({
+        cid: 667,
+        message: "log this"
       });
     });
   });
@@ -258,34 +286,6 @@ describe("AbstractTransport", function() {
       expect(this.timeline.error).toHaveBeenCalledWith({
         cid: 667,
         error: "function"
-      });
-    });
-  });
-
-  describe("on close", function() {
-    beforeEach(function() {
-      this.transport.initialize();
-      this.transport.connect();
-      this.socket.onopen();
-      this.socket.close = jasmine.createSpy("close");
-    });
-
-    it("should call close on the socket and emit a 'closed' event", function() {
-      var onClosed = jasmine.createSpy("onClosed");
-      this.transport.bind("closed", onClosed);
-
-      this.transport.close();
-      expect(this.socket.close).toHaveBeenCalled();
-
-      this.socket.onclose({ wasClean: true });
-      expect(onClosed).toHaveBeenCalledWith({ wasClean: true });
-    });
-
-    it("should log method call with debug level", function() {
-      this.transport.close();
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        method: "close"
       });
     });
   });
