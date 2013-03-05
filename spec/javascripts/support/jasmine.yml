@@ -7,7 +7,7 @@ src_files:
   - errors.js
   - dependency_loader.js
   - dependencies.js
-  - pusher_event_dispatcher.js
+  - events_dispatcher.js
   - net_info.js
 
   - pusher_channels.js
