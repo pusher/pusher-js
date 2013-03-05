@@ -195,6 +195,17 @@ describe("ProtocolWrapper", function() {
     });
   });
 
+  describe("after receiving 'ping_request' event", function() {
+    it("should emit 'ping_request' too", function() {
+      var onPingRequest = jasmine.createSpy("onPingRequest");
+      wrapper.bind("ping_request", onPingRequest);
+
+      transport.emit("ping_request");
+
+      expect(onPingRequest).toHaveBeenCalled();
+    });
+  });
+
   describe("after receiving a message", function() {
     it("should emit general messages", function() {
       var onMessage = jasmine.createSpy("onMessage");

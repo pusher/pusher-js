@@ -56,6 +56,7 @@
           transport.emit("initializing");
         });
       transport.connect = jasmine.createSpy("connect");
+      transport.requestPing = jasmine.createSpy("requestPing");
       transport.close = jasmine.createSpy("close");
       transport.state = undefined;
 

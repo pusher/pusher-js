@@ -78,6 +78,7 @@
           self.id = message.data.socket_id;
           self.transport.unbind("message", onMessageOpen);
           self.transport.bind("message", onMessageConnected);
+          self.transport.bind("ping_request", onPingRequest);
           self.emit("connected", self.id);
         } else if (message.event === 'pusher:error') {
           self.handleCloseCode(message.data.code, message.data.message);
@@ -104,12 +105,16 @@
         self.emit('message', message);
       }
     };
+    var onPingRequest = function() {
+      self.emit("ping_request");
+    };
     var onError = function(error) {
       self.emit("error", { type: "WebSocketError", error: error });
     };
     var onClosed = function() {
       self.transport.unbind("message", onMessageOpen);
       self.transport.unbind("message", onMessageConnected);
+      self.transport.unbind("ping_request", onPingRequest);
       self.transport.unbind("error", onError);
       self.transport.unbind("closed", onClosed);
       self.transport = null;
