@@ -277,8 +277,8 @@ describe("AbstractTransport", function() {
       this.transport.close();
       expect(this.socket.close).toHaveBeenCalled();
 
-      this.socket.onclose();
-      expect(onClosed).toHaveBeenCalled();
+      this.socket.onclose({ wasClean: true });
+      expect(onClosed).toHaveBeenCalledWith({ wasClean: true });
     });
 
     it("should log method call with debug level", function() {
