@@ -46,8 +46,9 @@
         timeline: context.timeline,
         disableFlash: context.disableFlash
       }, options);
+      var transportManager = new Pusher.TransportManager(transportClass);
       var transport = new Pusher.TransportStrategy(
-        name, priority, transportClass, transportOptions
+        name, priority, transportManager, transportOptions
       );
       var newContext = context.def(context, name, transport)[1];
       newContext.transports = context.transports || {};

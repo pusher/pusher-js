@@ -6,7 +6,7 @@ describe("StrategyBuilder", function() {
     ]);
 
     expect(strategy).toEqual(jasmine.any(Pusher.TransportStrategy));
-    expect(strategy.transport).toBe(Pusher.SockJSTransport);
+    expect(strategy.transport).toEqual(jasmine.any(Pusher.TransportManager));
     expect(strategy.options).toEqual({
       option: "value"
     });
@@ -36,11 +36,13 @@ describe("StrategyBuilder", function() {
     expect(strategy).toEqual(jasmine.any(Pusher.SequentialStrategy));
     expect(strategy.strategies[0])
       .toEqual(jasmine.any(Pusher.TransportStrategy));
+    expect(strategy.strategies[0].transport)
+      .toEqual(jasmine.any(Pusher.TransportManager));
 
-    expect(strategy.strategies[0].transport).toBe(Pusher.WSTransport);
     expect(strategy.strategies[1])
       .toEqual(jasmine.any(Pusher.TransportStrategy));
-    expect(strategy.strategies[1].transport).toBe(Pusher.SockJSTransport);
+    expect(strategy.strategies[1].transport)
+      .toEqual(jasmine.any(Pusher.TransportManager));
 
     expect(strategy.loop).toBe(true);
     expect(strategy.timeout).toEqual(2000);
