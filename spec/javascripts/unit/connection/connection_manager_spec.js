@@ -403,6 +403,18 @@ describe("ConnectionManager", function() {
     });
   });
 
+  describe("on ping request", function() {
+    it("should send a pusher:ping event", function() {
+      manager.connect();
+      strategy._callback(null, {});
+      connection.emit("connected", "666.999");
+
+      connection.emit("ping_request");
+      expect(connection.send_event)
+        .toHaveBeenCalledWith("pusher:ping", {}, undefined);
+    });
+  });
+
   describe("on network connection/disconnection", function() {
     it("should transition to unavailable before connecting and browser is offline", function() {
       Pusher.Network.isOnline.andReturn(false);
