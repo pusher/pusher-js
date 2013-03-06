@@ -59,9 +59,9 @@ describe("StrategyBuilder", function() {
 
   it("should construct a best connected ever strategy", function() {
     var strategy = Pusher.StrategyBuilder.build([
-      [":def_transport", "one", "ws", 1],
-      [":def_transport", "two", "flash", 2],
-      [":def_transport", "three", "sockjs", 3],
+      [":def_transport", "one", "ws", 1, {}],
+      [":def_transport", "two", "flash", 2, {}],
+      [":def_transport", "three", "sockjs", 3, {}],
       [":def", "strategy", [":best_connected_ever", ":one", ":two", ":three"]]
     ]);
     expect(strategy).toEqual(jasmine.any(Pusher.BestConnectedEverStrategy));
@@ -79,7 +79,7 @@ describe("StrategyBuilder", function() {
   it("should throw an error on unsupported strategy", function() {
     expect(function() {
       Pusher.StrategyBuilder.build([
-        [":def_transport", "one", "ws", 1],
+        [":def_transport", "one", "ws", 1, {}],
         [":def", "strategy", [":wut", ":one"]]
       ]);
     }).toThrow("Calling non-function :wut");

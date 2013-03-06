@@ -46,7 +46,9 @@
         timeline: context.timeline,
         disableFlash: context.disableFlash
       }, options);
-      var transportManager = new Pusher.TransportManager(transportClass, {});
+      var transportManager = new Pusher.TransportManager(transportClass, {
+        lives: options.lives || Infinity
+      });
       var transport = new Pusher.TransportStrategy(
         name, priority, transportManager, transportOptions
       );
