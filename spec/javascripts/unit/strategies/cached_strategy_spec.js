@@ -142,7 +142,10 @@ describe("CachedStrategy", function() {
 
       it("should report to timeline when using cached strategy", function() {
         strategy.connect(0, callback);
-        expect(timeline.info).toHaveBeenCalledWith({ cached: true });
+        expect(timeline.info).toHaveBeenCalledWith({
+          cached: true,
+          transport: "test"
+        });
       });
 
       it("should abort the cached transport and not call the substrategy", function() {
