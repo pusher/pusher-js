@@ -94,7 +94,7 @@
   // DSL interpreter
 
   function isSymbol(expression) {
-    return expression.length > 1 && expression[0] === ":";
+    return (typeof expression === "string") && expression.charAt(0) === ":";
   }
 
   function getSymbolValue(expression, context) {
@@ -129,7 +129,7 @@
           throw "Calling non-function " + expression[0];
         }
         var args = [Pusher.Util.extend({}, context)].concat(
-          expression.slice(1).map(function(arg) {
+          Pusher.Util.map(expression.slice(1), function(arg) {
             return evaluate(arg, Pusher.Util.extend({}, context))[0];
           })
         );
