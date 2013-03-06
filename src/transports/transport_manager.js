@@ -1,7 +1,9 @@
 ;(function() {
-  function TransportManager(transport) {
+  function TransportManager(transport, options) {
     this.transport = transport;
-    this.livesLeft = 2;
+    this.livesLeft = options.lives || Infinity;
+    this.minPingDelay = options.minPingDelay || 10000;
+    this.maxPingDelay = options.maxPingDelay || Pusher.activity_timeout;
     this.pingDelay = null;
   }
   var prototype = TransportManager.prototype;
@@ -43,9 +45,9 @@
       self.livesLeft--;
       if (openTimestamp) {
         var newInterval = Math.max(
-          (Pusher.Util.now() - openTimestamp) / 2, 10000
+          (Pusher.Util.now() - openTimestamp) / 2, self.minPingDelay
         );
-        if (newInterval < 60000) {
+        if (newInterval < self.maxPingDelay) {
           self.pingDelay = newInterval;
         }
       }
