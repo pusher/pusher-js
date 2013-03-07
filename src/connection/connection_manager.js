@@ -250,7 +250,7 @@
       self.connection = null;
 
       if (self.shouldRetry()) {
-        self.retryIn(0);
+        self.retryIn(1000);
       }
     };
 

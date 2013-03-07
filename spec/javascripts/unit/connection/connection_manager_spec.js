@@ -219,7 +219,7 @@ describe("ConnectionManager", function() {
   });
 
   describe("on lost connection", function() {
-    it("should transition to disconnected then to connecting", function() {
+    it("should transition to disconnected then to connecting after 1s", function() {
       manager.connect();
       strategy._callback(null, {});
 
@@ -231,7 +231,12 @@ describe("ConnectionManager", function() {
       manager.bind("disconnected", onDisconnected);
 
       connection.emit("closed");
-      jasmine.Clock.tick(0);
+
+      jasmine.Clock.tick(999);
+      expect(onDisconnected).not.toHaveBeenCalled();
+      expect(onConnecting).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
       expect(onDisconnected).toHaveBeenCalled();
       expect(onConnecting).toHaveBeenCalled();
     });
