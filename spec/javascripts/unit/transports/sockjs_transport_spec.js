@@ -95,6 +95,11 @@ describe("SockJSTransport", function() {
   });
 
   describe("on connect", function() {
+    beforeEach(function() {
+      spyOn(Pusher.Dependencies, "getPath")
+        .andReturn("http://example.com/6.6.6/sockjs.js");
+    });
+
     it("should create a SockJS connection", function() {
       this.transport.initialize();
       this.transport.connect();
@@ -102,11 +107,7 @@ describe("SockJSTransport", function() {
         .toHaveBeenCalledWith(
           "http://example.com:12345/pusher",
           null,
-          { protocols_whitelist: [
-              'xdr-streaming', 'xhr-streaming',
-              'xdr-polling', 'xhr-polling', 'jsonp-polling'
-            ]
-          }
+          { js_path: "http://example.com/6.6.6/sockjs.js" }
         );
     });
 
@@ -122,11 +123,7 @@ describe("SockJSTransport", function() {
         .toHaveBeenCalledWith(
           "https://example.com:54321/pusher",
           null,
-          { protocols_whitelist: [
-              'xdr-streaming', 'xhr-streaming',
-              'xdr-polling', 'xhr-polling', 'jsonp-polling'
-            ]
-          }
+          { js_path: "http://example.com/6.6.6/sockjs.js" }
         );
     });
 
