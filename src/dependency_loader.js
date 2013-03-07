@@ -37,9 +37,7 @@
       return;
     }
 
-    var path = this.getRoot() + '/' + name + this.options.suffix + '.js';
-
-    require(path, function() {
+    require(this.getPath(name), function() {
       for (var i = 0; i < self.loading[name].length; i++) {
         self.loading[name][i]();
       }
@@ -62,6 +60,15 @@
     // make sure there are no double slashes
     return cdn.replace(/\/*$/, "") + "/" + this.options.version;
   };
+
+  /** Returns a full path to a dependency file.
+   *
+   * @param {String} name
+   * @returns {String}
+   */
+  prototype.getPath = function(name) {
+    return this.getRoot() + '/' + name + this.options.suffix + '.js';
+  }
 
   function handleScriptLoaded(elem, callback) {
     if (Pusher.Util.getDocument().addEventListener) {
