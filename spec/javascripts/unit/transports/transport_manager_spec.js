@@ -47,7 +47,7 @@ describe("TransportManager", function() {
     });
   });
 
-  describe("after two opened connections died", function() {
+  describe("after two opened connections died after less than 2*maxPingDelay", function() {
     it("#isSupported should return false if the transport had two lives", function() {
       var manager = new Pusher.TransportManager(transportClass, { lives: 2 });
 
@@ -106,13 +106,18 @@ describe("TransportManager", function() {
 
     beforeEach(function() {
       manager = new Pusher.TransportManager(transportClass, {
-        maxPingDelay: 50000
+        maxPingDelay: 50000,
+        lives: 1
       });
       connection = manager.createConnection("x", 1, "a", {});
       Pusher.Util.now.andReturn(1);
       connection.emit("open");
       Pusher.Util.now.andReturn(100002);
       connection.emit("closed", { wasClean: false });
+    });
+
+    it("#isSupported should return true if the transport had one life", function() {
+      expect(manager.isSupported()).toBe(true);
     });
 
     it("should not send activity checks on next connection", function() {

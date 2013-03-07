@@ -42,13 +42,11 @@
         return;
       }
 
-      self.livesLeft--;
       if (openTimestamp) {
-        var newInterval = Math.max(
-          (Pusher.Util.now() - openTimestamp) / 2, self.minPingDelay
-        );
-        if (newInterval < self.maxPingDelay) {
-          self.pingDelay = newInterval;
+        var lifespan = Pusher.Util.now() - openTimestamp;
+        if (lifespan < 2 * self.maxPingDelay) {
+          self.livesLeft--;
+          self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
         }
       }
     };
