@@ -26,13 +26,19 @@ describe("DependencyLoader", function() {
   describe("#getPath", function() {
     it("should return correct path when using HTTP", function() {
       document.location.protocol = "http:";
-      expect(loader.getPath("something", onLoaded))
+      expect(loader.getPath("something"))
         .toEqual("http://example.com/6.6.6/something-test.js");
+    });
+
+    it("should return correct path when using HTTP, but encrypted is requested", function() {
+      document.location.protocol = "http:";
+      expect(loader.getPath("something", { encrypted: true }))
+        .toEqual("https://example.com/6.6.6/something-test.js");
     });
 
     it("should return correct path when using HTTPS", function() {
       document.location.protocol = "https:";
-      expect(loader.getPath("something_else", onLoaded))
+      expect(loader.getPath("something_else"))
         .toEqual("https://example.com/6.6.6/something_else-test.js");
     });
   });

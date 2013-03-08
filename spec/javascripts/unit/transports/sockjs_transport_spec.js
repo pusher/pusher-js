@@ -96,8 +96,13 @@ describe("SockJSTransport", function() {
 
   describe("on connect", function() {
     beforeEach(function() {
-      spyOn(Pusher.Dependencies, "getPath")
-        .andReturn("http://example.com/6.6.6/sockjs.js");
+      spyOn(Pusher.Dependencies, "getPath").andCallFake(function(_, options){
+        if (options && options.encrypted) {
+          return "https://example.com/6.6.6/sockjs.js";
+        } else {
+          return "http://example.com/6.6.6/sockjs.js";
+        }
+      });
     });
 
     it("should create a SockJS connection", function() {
@@ -123,7 +128,7 @@ describe("SockJSTransport", function() {
         .toHaveBeenCalledWith(
           "https://example.com:54321/pusher",
           null,
-          { js_path: "http://example.com/6.6.6/sockjs.js" }
+          { js_path: "https://example.com/6.6.6/sockjs.js" }
         );
     });
 

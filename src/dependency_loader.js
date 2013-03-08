@@ -50,12 +50,13 @@
    *
    * @returns {String}
    */
-  prototype.getRoot = function() {
+  prototype.getRoot = function(options) {
     var cdn;
-    if (Pusher.Util.getDocumentLocation().protocol === "http:") {
-      cdn = this.options.cdn_http;
-    } else {
+    var protocol = Pusher.Util.getDocumentLocation().protocol;
+    if ((options && options.encrypted) || protocol === "https:") {
       cdn = this.options.cdn_https;
+    } else {
+      cdn = this.options.cdn_http;
     }
     // make sure there are no double slashes
     return cdn.replace(/\/*$/, "") + "/" + this.options.version;
@@ -66,9 +67,9 @@
    * @param {String} name
    * @returns {String}
    */
-  prototype.getPath = function(name) {
-    return this.getRoot() + '/' + name + this.options.suffix + '.js';
-  }
+  prototype.getPath = function(name, options) {
+    return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
+  };
 
   function handleScriptLoaded(elem, callback) {
     if (Pusher.Util.getDocument().addEventListener) {
