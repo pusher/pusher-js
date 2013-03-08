@@ -37,9 +37,7 @@
       return;
     }
 
-    var path = this.getRoot() + '/' + name + this.options.suffix + '.js';
-
-    require(path, function() {
+    require(this.getPath(name), function() {
       for (var i = 0; i < self.loading[name].length; i++) {
         self.loading[name][i]();
       }
@@ -52,15 +50,25 @@
    *
    * @returns {String}
    */
-  prototype.getRoot = function() {
+  prototype.getRoot = function(options) {
     var cdn;
-    if (Pusher.Util.getDocumentLocation().protocol === "http:") {
-      cdn = this.options.cdn_http;
-    } else {
+    var protocol = Pusher.Util.getDocumentLocation().protocol;
+    if ((options && options.encrypted) || protocol === "https:") {
       cdn = this.options.cdn_https;
+    } else {
+      cdn = this.options.cdn_http;
     }
     // make sure there are no double slashes
     return cdn.replace(/\/*$/, "") + "/" + this.options.version;
+  };
+
+  /** Returns a full path to a dependency file.
+   *
+   * @param {String} name
+   * @returns {String}
+   */
+  prototype.getPath = function(name, options) {
+    return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
   };
 
   function handleScriptLoaded(elem, callback) {
