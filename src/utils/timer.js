@@ -1,4 +1,9 @@
 ;(function() {
+  /** Cross-browser compatible timer abstraction.
+   *
+   * @param {Number} delay
+   * @param {Function} callback
+   */
   function Timer(delay, callback) {
     var self = this;
 
@@ -11,10 +16,15 @@
   }
   var prototype = Timer.prototype;
 
+  /** Returns whether the timer is still running.
+   *
+   * @return {Boolean}
+   */
   prototype.isRunning = function() {
     return this.timeout !== null;
   };
 
+  /** Aborts a timer when it's running. */
   prototype.ensureAborted = function() {
     if (this.timeout) {
       clearTimeout(this.timeout);
