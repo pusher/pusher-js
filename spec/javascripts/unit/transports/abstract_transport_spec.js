@@ -204,15 +204,12 @@ describe("AbstractTransport", function() {
   });
 
   describe("#requestPing", function() {
-    beforeEach(function() {
-      this.transport.initialize();
-      this.transport.connect();
-      this.socket.onopen();
-    });
-
     it("should emit 'ping_request'", function() {
       var onPingRequest = jasmine.createSpy("onPingRequest");
       this.transport.bind("ping_request", onPingRequest);
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
 
       this.transport.requestPing();
 
