@@ -134,7 +134,7 @@ describe("AbstractTransport", function() {
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
         method: "connect",
-        url: "ws://example.com:12345/app/foo?protocol=5&client=js&version=<VERSION>"
+        url: "ws://example.com:12345/app/foo?protocol=6&client=js&version=<VERSION>"
       });
     });
   });
