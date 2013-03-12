@@ -18,10 +18,6 @@
   };
 
   prototype.connect = function(minPriority, callback) {
-    if (!this.isSupported()) {
-      return null;
-    }
-
     var strategy = this.strategy;
     var runner;
     var timer = setTimeout(function() {

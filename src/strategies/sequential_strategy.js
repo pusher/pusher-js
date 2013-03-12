@@ -25,9 +25,7 @@
   prototype.connect = function(minPriority, callback) {
     var self = this;
 
-    var strategies = Pusher.Util.filter(
-      this.strategies, Pusher.Util.method("isSupported")
-    );
+    var strategies = this.strategies;
     var current = 0;
     var timeout = this.timeout;
     var runner = null;

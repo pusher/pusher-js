@@ -23,7 +23,7 @@
     var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
       var transport = this.transports[info.transport];
-      if (transport && transport.isSupported()) {
+      if (transport) {
         this.timeline.info({ cached: true, transport: info.transport });
         strategies.push(new Pusher.SequentialStrategy([transport], {
           timeout: info.latency * 2,

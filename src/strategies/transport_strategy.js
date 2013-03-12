@@ -30,14 +30,10 @@
    * @return {Object} strategy runner
    */
   prototype.connect = function(minPriority, callback) {
-    if (this.priority < minPriority) {
-      setTimeout(function() {
-        callback(new Pusher.Errors.TransportPriorityTooLow());
-      }, 0);
-      return {
-        abort: function() {},
-        forceMinPriority: function() {}
-      };
+    if (!this.transport.isSupported()) {
+      return failAttempt(new Pusher.Errors.UnsupportedStrategy(), callback);
+    } else if (this.priority < minPriority) {
+      return failAttempt(new Pusher.Errors.TransportPriorityTooLow(), callback);
     }
 
     var self = this;
@@ -96,6 +92,16 @@
       }
     };
   };
+
+  function failAttempt(error, callback) {
+    setTimeout(function() {
+      callback(error);
+    }, 0);
+    return {
+      abort: function() {},
+      forceMinPriority: function() {}
+    };
+  }
 
   Pusher.TransportStrategy = TransportStrategy;
 }).call(this);
