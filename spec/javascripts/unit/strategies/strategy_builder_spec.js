@@ -67,6 +67,21 @@ describe("StrategyBuilder", function() {
     expect(strategy).toEqual(jasmine.any(Pusher.BestConnectedEverStrategy));
   });
 
+  it("should construct an if strategy with isSupported call", function() {
+    var strategy = Pusher.StrategyBuilder.build([
+      [":def_transport", "ws", "ws", 1, {}],
+      [":def_transport", "sockjs", "sockjs", 2, {}],
+      [":def", "strategy",
+        [":if", [":is_supported", ":ws"], [
+          ":ws"
+        ], [
+          ":sockjs"
+        ]]
+      ]
+    ]);
+    expect(strategy).toEqual(jasmine.any(Pusher.IfStrategy));
+  });
+
   it("should throw an error on unsupported transport", function() {
     expect(function() {
       Pusher.StrategyBuilder.build([

@@ -23,6 +23,7 @@ src_files:
   - strategies/cached_strategy.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js
+  - strategies/if_strategy.js
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
 
