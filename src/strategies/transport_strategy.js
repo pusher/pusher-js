@@ -94,9 +94,9 @@
   };
 
   function failAttempt(error, callback) {
-    setTimeout(function() {
+    new Pusher.Timer(0, function() {
       callback(error);
-    }, 0);
+    });
     return {
       abort: function() {},
       forceMinPriority: function() {}

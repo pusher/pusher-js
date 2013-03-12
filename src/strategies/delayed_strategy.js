@@ -20,21 +20,13 @@
   prototype.connect = function(minPriority, callback) {
     var strategy = this.strategy;
     var runner;
-    var timer = setTimeout(function() {
-      if (timer === null) {
-        // hack for misbehaving clearTimeout in IE < 9
-        return;
-      }
-      timer = null;
+    var timer = new Pusher.Timer(this.options.delay, function() {
       runner = strategy.connect(minPriority, callback);
-    }, this.options.delay);
+    });
 
     return {
       abort: function() {
-        if (timer) {
-          clearTimeout(timer);
-          timer = null;
-        }
+        timer.ensureAborted();
         if (runner) {
           runner.abort();
         }

@@ -80,35 +80,31 @@
 
   /** @private */
   prototype.tryStrategy = function(strategy, minPriority, options, callback) {
-    var timeout = null;
+    var timer = null;
     var runner = null;
 
     runner = strategy.connect(minPriority, function(error, connection) {
-      if (error && timeout && !options.failFast) {
+      if (error && timer && timer.isRunning() && !options.failFast) {
         // advance to the next strategy after the timeout
         return;
       }
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
+      if (timer) {
+        timer.ensureAborted();
       }
       callback(error, connection);
     });
 
     if (options.timeout > 0) {
-      timeout = setTimeout(function() {
-        if (timeout) {
-          runner.abort();
-          callback(true);
-        }
-      }, options.timeout);
+      timer = new Pusher.Timer(options.timeout, function() {
+        runner.abort();
+        callback(true);
+      });
     }
 
     return {
       abort: function() {
-        if (timeout) {
-          clearTimeout(timeout);
-          timeout = null;
+        if (timer) {
+          timer.ensureAborted();
         }
         runner.abort();
       },
