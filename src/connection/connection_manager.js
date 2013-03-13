@@ -237,6 +237,9 @@
     var onPing = function() {
       self.send_event('pusher:pong', {});
     };
+    var onPingRequest = function() {
+      self.send_event('pusher:ping', {});
+    };
     var onError = function(error) {
       // just emit error to user - socket will already be closed by browser
       self.emit("error", { type: "WebSocketError", error: error });
@@ -245,6 +248,7 @@
       connection.unbind("connected", onConnected);
       connection.unbind("message", onMessage);
       connection.unbind("ping", onPing);
+      connection.unbind("ping_request", onPingRequest);
       connection.unbind("error", onError);
       connection.unbind("closed", onClosed);
       self.connection = null;
@@ -272,6 +276,7 @@
     connection.bind("connected", onConnected);
     connection.bind("message", onMessage);
     connection.bind("ping", onPing);
+    connection.bind("ping_request", onPingRequest);
     connection.bind("error", onError);
     connection.bind("closed", onClosed);
 

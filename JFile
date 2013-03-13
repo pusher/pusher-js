@@ -15,9 +15,11 @@ bundle 'pusher.js' do
   file 'util.js'
   file 'defaults.js'
   file 'errors.js'
-  file 'pusher_event_dispatcher.js'
+  file 'events_dispatcher.js'
   file 'dependency_loader.js'
   file 'dependencies.js'
+
+  file 'utils/timer.js'
 
   file 'base64.js'
   file 'jsonp/jsonp_request.js'
@@ -30,6 +32,7 @@ bundle 'pusher.js' do
   file 'strategies/cached_strategy.js'
   file 'strategies/delayed_strategy.js'
   file 'strategies/first_connected_strategy.js'
+  file 'strategies/if_strategy.js'
   file 'strategies/sequential_strategy.js'
   file 'strategies/transport_strategy.js'
 
@@ -37,6 +40,7 @@ bundle 'pusher.js' do
   file 'transports/flash_transport.js'
   file 'transports/sockjs_transport.js'
   file 'transports/ws_transport.js'
+  file 'transports/transport_manager.js'
 
   file 'strategies/strategy_builder.js'
 

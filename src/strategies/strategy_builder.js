@@ -46,8 +46,11 @@
         timeline: context.timeline,
         disableFlash: context.disableFlash
       }, options);
+      var transportManager = new Pusher.TransportManager(transportClass, {
+        lives: options.lives || Infinity
+      });
       var transport = new Pusher.TransportStrategy(
-        name, priority, transportClass, transportOptions
+        name, priority, transportManager, transportOptions
       );
       var newContext = context.def(context, name, transport)[1];
       newContext.transports = context.transports || {};
@@ -81,7 +84,7 @@
     }),
 
     "if": returnWithOriginalContext(function(_, test, trueBranch, falseBranch) {
-      return test() ? trueBranch : falseBranch;
+      return new Pusher.IfStrategy(test, trueBranch, falseBranch);
     }),
 
     is_supported: returnWithOriginalContext(function(_, strategy) {

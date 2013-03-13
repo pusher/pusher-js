@@ -7,8 +7,10 @@ src_files:
   - errors.js
   - dependency_loader.js
   - dependencies.js
-  - pusher_event_dispatcher.js
+  - events_dispatcher.js
   - net_info.js
+
+  - utils/timer.js
 
   - pusher_channels.js
 
@@ -23,6 +25,7 @@ src_files:
   - strategies/cached_strategy.js
   - strategies/delayed_strategy.js
   - strategies/first_connected_strategy.js
+  - strategies/if_strategy.js
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
 
@@ -30,6 +33,7 @@ src_files:
   - transports/flash_transport.js
   - transports/sockjs_transport.js
   - transports/ws_transport.js
+  - transports/transport_manager.js
 
   - strategies/strategy_builder.js
 

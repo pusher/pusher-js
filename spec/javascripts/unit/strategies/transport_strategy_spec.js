@@ -102,6 +102,21 @@ describe("TransportStrategy", function() {
         );
       });
     });
+
+    it("should call back with an error if transport is not supported", function() {
+      this.transportClass.isSupported.andReturn(false);
+      runs(function() {
+        this.strategy.connect(0, this.callback);
+      });
+      waitsFor(function() {
+        return this.callback.calls.length > 0;
+      }, "callback to be called", 100);
+      runs(function() {
+        expect(this.callback).toHaveBeenCalledWith(
+          jasmine.any(Pusher.Errors.UnsupportedStrategy)
+        );
+      });
+    });
   });
 
   describe("on abort", function() {

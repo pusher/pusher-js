@@ -32,7 +32,7 @@ describe("DelayedStrategy", function() {
       expect(this.substrategy.connect).not.toHaveBeenCalled();
       jasmine.Clock.tick(99);
       expect(this.substrategy.connect).not.toHaveBeenCalled();
-      jasmine.Clock.tick(100);
+      jasmine.Clock.tick(1);
       expect(this.substrategy.connect).toHaveBeenCalled();
 
       var connection = {};

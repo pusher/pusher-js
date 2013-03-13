@@ -6,7 +6,7 @@ describe("StrategyBuilder", function() {
     ]);
 
     expect(strategy).toEqual(jasmine.any(Pusher.TransportStrategy));
-    expect(strategy.transport).toBe(Pusher.SockJSTransport);
+    expect(strategy.transport).toEqual(jasmine.any(Pusher.TransportManager));
     expect(strategy.options).toEqual({
       option: "value"
     });
@@ -36,11 +36,13 @@ describe("StrategyBuilder", function() {
     expect(strategy).toEqual(jasmine.any(Pusher.SequentialStrategy));
     expect(strategy.strategies[0])
       .toEqual(jasmine.any(Pusher.TransportStrategy));
+    expect(strategy.strategies[0].transport)
+      .toEqual(jasmine.any(Pusher.TransportManager));
 
-    expect(strategy.strategies[0].transport).toBe(Pusher.WSTransport);
     expect(strategy.strategies[1])
       .toEqual(jasmine.any(Pusher.TransportStrategy));
-    expect(strategy.strategies[1].transport).toBe(Pusher.SockJSTransport);
+    expect(strategy.strategies[1].transport)
+      .toEqual(jasmine.any(Pusher.TransportManager));
 
     expect(strategy.loop).toBe(true);
     expect(strategy.timeout).toEqual(2000);
@@ -57,12 +59,27 @@ describe("StrategyBuilder", function() {
 
   it("should construct a best connected ever strategy", function() {
     var strategy = Pusher.StrategyBuilder.build([
-      [":def_transport", "one", "ws", 1],
-      [":def_transport", "two", "flash", 2],
-      [":def_transport", "three", "sockjs", 3],
+      [":def_transport", "one", "ws", 1, {}],
+      [":def_transport", "two", "flash", 2, {}],
+      [":def_transport", "three", "sockjs", 3, {}],
       [":def", "strategy", [":best_connected_ever", ":one", ":two", ":three"]]
     ]);
     expect(strategy).toEqual(jasmine.any(Pusher.BestConnectedEverStrategy));
+  });
+
+  it("should construct an if strategy with isSupported call", function() {
+    var strategy = Pusher.StrategyBuilder.build([
+      [":def_transport", "ws", "ws", 1, {}],
+      [":def_transport", "sockjs", "sockjs", 2, {}],
+      [":def", "strategy",
+        [":if", [":is_supported", ":ws"], [
+          ":ws"
+        ], [
+          ":sockjs"
+        ]]
+      ]
+    ]);
+    expect(strategy).toEqual(jasmine.any(Pusher.IfStrategy));
   });
 
   it("should throw an error on unsupported transport", function() {
@@ -77,7 +94,7 @@ describe("StrategyBuilder", function() {
   it("should throw an error on unsupported strategy", function() {
     expect(function() {
       Pusher.StrategyBuilder.build([
-        [":def_transport", "one", "ws", 1],
+        [":def_transport", "one", "ws", 1, {}],
         [":def", "strategy", [":wut", ":one"]]
       ]);
     }).toThrow("Calling non-function :wut");

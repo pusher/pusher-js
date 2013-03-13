@@ -1,12 +1,6 @@
 ;(function() {
   /** Launches all substrategies and emits prioritized connected transports.
    *
-   * Substrategies passed as the only argument should be ordered starting from
-   * the most preferred one and ending with the least prioritized. After
-   * substrategy X connects, substrategies Y > X are aborted, since they are
-   * considered worse. Substrategies Y <= X are not aborted and can still emit
-   * new connections.
-   *
    * @param {Array} strategies
    */
   function BestConnectedEverStrategy(strategies) {
@@ -19,28 +13,21 @@
   };
 
   prototype.connect = function(minPriority, callback) {
-    if (!this.isSupported()) {
-      return null;
-    }
-    return connect(
-      Pusher.Util.filter(this.strategies, Pusher.Util.method("isSupported")),
-      minPriority,
-      function(i, runners) {
-        return function(error, connection) {
-          runners[i].error = error;
-          if (error) {
-            if (allRunnersFailed(runners)) {
-              callback(true);
-            }
-            return;
+    return connect(this.strategies, minPriority, function(i, runners) {
+      return function(error, connection) {
+        runners[i].error = error;
+        if (error) {
+          if (allRunnersFailed(runners)) {
+            callback(true);
           }
-          Pusher.Util.apply(runners, function(runner) {
-            runner.forceMinPriority(connection.priority);
-          });
-          callback(null, connection);
-        };
-      }
-    );
+          return;
+        }
+        Pusher.Util.apply(runners, function(runner) {
+          runner.forceMinPriority(connection.priority);
+        });
+        callback(null, connection);
+      };
+    });
   };
 
   /** Connects to all strategies in parallel.

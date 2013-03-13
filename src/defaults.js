@@ -24,11 +24,12 @@
 
   Pusher.getDefaultStrategy = function() {
     return [
-      [":def", "ws_hosts", {
+      [":def", "ws_options", {
         hostUnencrypted: Pusher.host + ":" + Pusher.ws_port,
-        hostEncrypted: Pusher.host + ":" + Pusher.wss_port
+        hostEncrypted: Pusher.host + ":" + Pusher.wss_port,
+        lives: 2
       }],
-      [":def", "sockjs_hosts", {
+      [":def", "sockjs_options", {
         hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
         hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
       }],
@@ -38,9 +39,9 @@
         timeoutLimit: 60000
       }],
 
-      [":def_transport", "ws", "ws", 3, ":ws_hosts"],
-      [":def_transport", "flash", "flash", 2, ":ws_hosts"],
-      [":def_transport", "sockjs", "sockjs", 1, ":sockjs_hosts"],
+      [":def_transport", "ws", "ws", 3, ":ws_options"],
+      [":def_transport", "flash", "flash", 2, ":ws_options"],
+      [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
