@@ -46,7 +46,7 @@ describe("Timer", function() {
   describe("#ensureAborted", function() {
     it("should abort the timer before execution", function() {
       timer.ensureAborted();
-      jasmine.Clock.tick(123456789);
+      jasmine.Clock.tick(1000000);
       expect(callback).not.toHaveBeenCalled();
     });
 
