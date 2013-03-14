@@ -33,6 +33,8 @@ src_files:
   - transports/flash_transport.js
   - transports/sockjs_transport.js
   - transports/ws_transport.js
+
+  - transports/assistant_to_the_transport_manager.js
   - transports/transport_manager.js
 
   - strategies/strategy_builder.js

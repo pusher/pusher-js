@@ -63,6 +63,22 @@
       return transport;
     },
 
+    getTransportManager: function(alive) {
+      return {
+        isAlive: jasmine.createSpy("isAlive").andReturn(alive !== false),
+        reportDeath: jasmine.createSpy("reportDeath")
+      };
+    },
+
+    getAssistantToTheTransportManager: function(transport) {
+      return {
+        createConnection: jasmine.createSpy("createConnection")
+          .andReturn(transport || Pusher.Mocks.getTransport()),
+        isSupported: jasmine.createSpy("isSupported")
+          .andReturn(true)
+      };
+    },
+
     getTransportClass: function(supported, transport) {
       var klass = {};
 
