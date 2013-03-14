@@ -1,5 +1,6 @@
 ;(function() {
   Pusher.VERSION = '<VERSION>';
+  Pusher.PROTOCOL = 6;
 
   // WS connection parameters
   Pusher.host = 'ws.pusherapp.com';

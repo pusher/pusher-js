@@ -80,8 +80,11 @@
           self.transport.bind("message", onMessageConnected);
           self.transport.bind("ping_request", onPingRequest);
           self.emit("connected", self.id);
-        } else if (message.event === 'pusher:error') {
+        } else if (message.event === "pusher:error") {
+          // From protocol 6 close codes are sent only once, so this only
+          // happens when connection does not support close codes
           self.handleCloseCode(message.data.code, message.data.message);
+          self.transport.close();
         }
       }
     };
@@ -111,7 +114,10 @@
     var onError = function(error) {
       self.emit("error", { type: "WebSocketError", error: error });
     };
-    var onClosed = function() {
+    var onClosed = function(error) {
+      if (error && error.code) {
+        self.handleCloseCode(error.code, error.reason);
+      }
       self.transport.unbind("message", onMessageOpen);
       self.transport.unbind("message", onMessageConnected);
       self.transport.unbind("ping_request", onPingRequest);
@@ -155,7 +161,19 @@
       'error', { type: 'PusherError', data: { code: code, message: message } }
     );
 
-    if (code === 4000) {
+    // See:
+    // 1. https://developer.mozilla.org/en-US/docs/WebSockets/WebSockets_reference/CloseEvent
+    // 2. http://pusher.com/docs/pusher_protocol
+    if (code < 4000) {
+      // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
+      //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
+      // ignore 1007...3999
+      // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
+      //        1004 CLOSE_TOO_LARGE
+      if (code >= 1002 && code <= 1004) {
+        this.emit("backoff");
+      }
+    } else if (code === 4000) {
       this.emit("ssl_only");
     } else if (code < 4100) {
       this.emit("refused");
@@ -167,7 +185,6 @@
       // unknown error
       this.emit("refused");
     }
-    this.transport.close();
   };
 
   Pusher.ProtocolWrapper = ProtocolWrapper;
