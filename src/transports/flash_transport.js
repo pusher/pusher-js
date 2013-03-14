@@ -67,7 +67,7 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    return new WebSocket(url);
+    return new FlashWebSocket(url);
   };
 
   /** @protected */

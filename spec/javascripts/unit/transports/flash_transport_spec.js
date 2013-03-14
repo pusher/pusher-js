@@ -10,7 +10,7 @@ describe("FlashTransport", function() {
     return new Pusher.FlashTransport("f", 2, key, options);
   }
 
-  var _WebSocket;
+  var _FlashWebSocket;
 
   beforeEach(function() {
     this.socket = {};
@@ -20,12 +20,12 @@ describe("FlashTransport", function() {
 
     Pusher.Dependencies.loaded.flashfallback = true;
 
-    _WebSocket = window.WebSocket;
-    window.WebSocket = jasmine.createSpy("WebSocket").andReturn(this.socket);
+    _FlashWebSocket = window.FlashWebSocket;
+    window.FlashWebSocket = jasmine.createSpy("FlashWebSocket").andReturn(this.socket);
   });
 
   afterEach(function() {
-    window.WebSocket = _WebSocket;
+    window.FlashWebSocket = _FlashWebSocket;
   });
 
   it("should expose its name", function() {
@@ -146,10 +146,10 @@ describe("FlashTransport", function() {
   });
 
   describe("on connect", function() {
-    it("should create a WebSocket with correct URL", function() {
+    it("should create a FlashWebSocket with correct URL", function() {
       this.transport.initialize();
       this.transport.connect();
-      expect(window.WebSocket)
+      expect(window.FlashWebSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
           "?protocol=5&client=js&version=<VERSION>&flash=true"
