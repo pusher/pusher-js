@@ -27,8 +27,7 @@
     return [
       [":def", "ws_options", {
         hostUnencrypted: Pusher.host + ":" + Pusher.ws_port,
-        hostEncrypted: Pusher.host + ":" + Pusher.wss_port,
-        lives: 2
+        hostEncrypted: Pusher.host + ":" + Pusher.wss_port
       }],
       [":def", "sockjs_options", {
         hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
@@ -40,8 +39,9 @@
         timeoutLimit: 60000
       }],
 
-      [":def_transport", "ws", "ws", 3, ":ws_options"],
-      [":def_transport", "flash", "flash", 2, ":ws_options"],
+      [":def", "ws_manager", [":transport_manager", { lives: 2 }]],
+      [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
+      [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],

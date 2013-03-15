@@ -35,7 +35,7 @@
       return [undefined, context];
     },
 
-    def_transport: function(context, name, type, priority, options) {
+    def_transport: function(context, name, type, priority, options, manager) {
       var transportClass = transports[type];
       if (!transportClass) {
         throw new Pusher.Errors.UnsupportedTransport(type);
@@ -46,17 +46,21 @@
         timeline: context.timeline,
         disableFlash: context.disableFlash
       }, options);
-      var transportManager = new Pusher.TransportManager(transportClass, {
-        lives: options.lives || Infinity
-      });
+      if (manager) {
+        transportClass = manager.getAssistant(transportClass);
+      }
       var transport = new Pusher.TransportStrategy(
-        name, priority, transportManager, transportOptions
+        name, priority, transportClass, transportOptions
       );
       var newContext = context.def(context, name, transport)[1];
       newContext.transports = context.transports || {};
       newContext.transports[name] = transport;
       return [undefined, newContext];
     },
+
+    transport_manager: returnWithOriginalContext(function(_, options) {
+      return new Pusher.TransportManager(options);
+    }),
 
     sequential: returnWithOriginalContext(function(_, options) {
       var strategies = Array.prototype.slice.call(arguments, 2);

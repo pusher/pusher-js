@@ -40,6 +40,8 @@ bundle 'pusher.js' do
   file 'transports/flash_transport.js'
   file 'transports/sockjs_transport.js'
   file 'transports/ws_transport.js'
+
+  file 'transports/assistant_to_the_transport_manager.js'
   file 'transports/transport_manager.js'
 
   file 'strategies/strategy_builder.js'
