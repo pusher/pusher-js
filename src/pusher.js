@@ -21,7 +21,8 @@
         features: Pusher.Util.getClientFeatures(),
         params: self.options.timelineParams || {},
         limit: 25,
-        level: Pusher.Timeline.INFO
+        level: Pusher.Timeline.INFO,
+        version: Pusher.VERSION
       });
     };
     var getTimelineSender = function(timeline, options) {

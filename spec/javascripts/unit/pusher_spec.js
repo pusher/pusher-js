@@ -218,6 +218,11 @@ describe("Pusher", function() {
           .toEqual(["foo", "bar"]);
       });
 
+      it("should pass the version number to the timeline", function() {
+        expect(managerOptions.getTimeline().options.version)
+          .toEqual(Pusher.VERSION);
+      });
+
       it("should pass per-connection timeline params", function() {
         pusher = new Pusher("foo", { timelineParams: { horse: true } });
         pusher.connect();
