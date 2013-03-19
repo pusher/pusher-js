@@ -2,7 +2,12 @@
 
 This library is an open source client that allows Javascript clients to connect to the [Pusher webservice](http://pusherapp.com/). It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
 
-We have included with this library the source code for the websocket-js library with it own licensing.
+We have included the source code for following libraries:
+
+* websocket-js
+* sockjs-client 
+
+They both include their own licences.
 
 ## Usage overview
 
@@ -36,9 +41,6 @@ A websocket (or Flash Fallback) connection is established by providing your API 
     var socket = new Pusher(API_KEY);
 
 This returns a socket object which can then be used to subscribe to channels.
-A channel name, or selection of channel names can be supplied at this point for auto-subscription:
-
-    var socket = new Pusher(API_KEY, channel_name);
 
 ### Socket IDs
 
@@ -74,7 +76,8 @@ Events can be bound to at 2 levels, the global, and per channel. They take a ver
 
 You can attach behaviour to these events regardless of the channel the event is broadcast to. The following is an example of an app that binds to new comments from any channel:
 
-    var socket = new Pusher('MY_API_KEY', 'my-channel');
+    var socket = new Pusher('MY_API_KEY');
+    var my_channel = socket.subscribe('my-channel');
     socket.bind('new-comment',
       function(data) {
         // add comment into page
@@ -130,11 +133,11 @@ If you wish to host the javascript on your own server you need to change [:js][:
 Define the version number in JFile (should be in the format 1.2.3).
 
     rake build
-    
+
 That writes source and minified versions of each bundle declared in the JFile into versioned directories. For example if the JFile says
 
     version '1.7.1'
-    
+
 Then rake build will put copies of the files in ./dist/1.7.1/ and ./dist/1.7/
 
 However for a prerelease
@@ -145,10 +148,52 @@ It will only write to the full, suffixed directory ./dist/1.7.2-pre
 
 This is so prereleases don't overwrite the previous stable release.
 
+### Clean builds
+
+Building everything from scratch is useful when you update submodules, which need compiling. If you want to perform a clean build, run:
+
+    bin/build
+
+This will clean web-socket-js and sockjs-client submodules, check out last committed revisions, rebuild Flash fallback files and then run JBundle. Don't run this command if you have uncommitted changes in any of submodules, since it might overwrite them.
+
 ## Testing
 
-To run the tests first start the testing server by running `rake test` then visit <http://localhost:4567/>. The server posts to the production Pusher API using the environment variable `PUSHER_URL` in the form of:
+### Jasmine
 
-    http://<PUSHER_KEY>:<PUSHER_SECRET>@api.pusherapp.com/apps/<PUSHER_APP_ID>
+There are several ways to run jasmine tests. Please make sure you run bundler before running any of following commands.
 
-The tests link to a development version of the combined Pusher Javascript file <http://localhost:4567/pusher.js> allowing you to modify files in `src`.
+    bundle install
+
+#### Run tests manually in a browser
+
+First, start the jasmine and JSONP integration servers:
+
+    bin/jasmine
+
+Then open any browser and navigate to <http://localhost:8888/>.
+
+#### Run headless tests
+
+Running headless tests is very convenient for development, especially when using guard. Make sure you have PhantomJS installed - you can use `brew install phantomjs` on OS X. Start jasmine and guard:
+
+    bin/guard
+
+Tests will be run automatically in the terminal. Guard watches JS files and specs and re-runs aproppriate tests whenever you save any changes. Press enter to re-run all tests.
+
+There's also a JSHint watch, which will validate JS files on save.
+
+#### Run testacular
+
+Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install testacular npm module
+
+    npm install -g testacular
+
+Then start the server:
+
+    bin/testacular
+
+All configured browsers will be automatically opened and will run all tests. Testacular also re-executes specs on file changes. After you close the server, browsers will get shut down too.
+
+### Old framework
+
+There are still some tests in the old framework, though they will be removed in the future. Open `test/sane/index.html` and click run to execute the suite.

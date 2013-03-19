@@ -1,4 +1,3 @@
-# A sample Gemfile
 source "http://rubygems.org"
 
 group :development do
@@ -8,4 +7,11 @@ group :development do
   gem 'pusher'
   gem 'aws-s3'
   gem 'httparty'
+  gem 'jasmine'
+  # jasmine guard integration
+  gem 'tilt'
+  gem 'rb-fsevent'
+  gem 'guard'
+  gem 'guard-jasmine'
+  gem 'guard-jshint-node'
 end

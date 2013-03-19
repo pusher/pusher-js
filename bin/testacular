@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+
+require "rubygems"
+require "bundler/setup"
+
+debug = ARGV.any? { |arg| arg == "--debug" }
+params = !debug ? " > /dev/null 2>&1" : ""
+
+commands = [
+  "ruby spec/jsonp/server.rb -p 8889 #{params}",
+  "testacular start spec/testacular/config.js"
+]
+
+pids = commands.map { |cmd|
+  spawn(cmd)
+}
+begin
+  Process.waitall
+rescue Interrupt => e
+  pids.each { |pid| Process.kill("INT", pid) }
+  Process.waitall
+end

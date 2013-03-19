@@ -1,0 +1,43 @@
+src_dir: src
+
+src_files:
+  - pusher.js
+  - util.js
+  - defaults.js
+  - errors.js
+  - dependency_loader.js
+  - dependencies.js
+  - events_dispatcher.js
+  - net_info.js
+
+  - utils/timer.js
+
+  - pusher_channels.js
+
+  - base64.js
+  - jsonp/jsonp_request.js
+  - jsonp/jsonp_receiver.js
+
+  - timeline/timeline.js
+  - timeline/timeline_sender.js
+
+  - strategies/best_connected_ever_strategy.js
+  - strategies/cached_strategy.js
+  - strategies/delayed_strategy.js
+  - strategies/first_connected_strategy.js
+  - strategies/if_strategy.js
+  - strategies/sequential_strategy.js
+  - strategies/transport_strategy.js
+
+  - transports/abstract_transport.js
+  - transports/flash_transport.js
+  - transports/sockjs_transport.js
+  - transports/ws_transport.js
+
+  - transports/assistant_to_the_transport_manager.js
+  - transports/transport_manager.js
+
+  - strategies/strategy_builder.js
+
+  - connection/protocol_wrapper.js
+  - connection/connection_manager.js

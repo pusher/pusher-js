@@ -7,18 +7,51 @@ target_dir './dist'
 
 src_dir './src'
 
-version '1.12.7'
+version '2.0.0'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
-  file 'pusher_event_dispatcher.js'
-  file 'pusher_machine.js'
+  file 'util.js'
+  file 'defaults.js'
+  file 'errors.js'
+  file 'events_dispatcher.js'
+  file 'dependency_loader.js'
+  file 'dependencies.js'
+
+  file 'utils/timer.js'
+
+  file 'base64.js'
+  file 'jsonp/jsonp_request.js'
+  file 'jsonp/jsonp_receiver.js'
+
+  file 'timeline/timeline.js'
+  file 'timeline/timeline_sender.js'
+
+  file 'strategies/best_connected_ever_strategy.js'
+  file 'strategies/cached_strategy.js'
+  file 'strategies/delayed_strategy.js'
+  file 'strategies/first_connected_strategy.js'
+  file 'strategies/if_strategy.js'
+  file 'strategies/sequential_strategy.js'
+  file 'strategies/transport_strategy.js'
+
+  file 'transports/abstract_transport.js'
+  file 'transports/flash_transport.js'
+  file 'transports/sockjs_transport.js'
+  file 'transports/ws_transport.js'
+
+  file 'transports/assistant_to_the_transport_manager.js'
+  file 'transports/transport_manager.js'
+
+  file 'strategies/strategy_builder.js'
+
+  file 'connection/protocol_wrapper.js'
+  file 'connection/connection_manager.js'
+
   file 'net_info.js'
-  file 'pusher_connection.js'
   file 'pusher_channels.js'
   file 'pusher_authorizer.js'
-  file 'dependencies.js'
 end
 
 bundle 'flashfallback.js' do
