@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.0 (2013-03-19)
+
+[CHANGED] Completely redesigned connection strategy
+
+[CHANGED] HTTP fallbacks (built using SockJS) are now used if WebSockets and Flash transports both fail to connect (previously only used if neither WebSockets nor Flash were supported)
+
+[NEW] Connection metrics are now submitted to Pusher's stats service
+
+[NEW] Added disableFlash boolean option to Pusher constructor
+
+[CHANGED] Updated web-socket-js and sockjs-client libraries
+
+[FIXED] Improved HTTP fallback reliability
+
 ## 1.12.5 (2012-10-31)
 
 [CHANGED] Improved connection timeout strategy.
