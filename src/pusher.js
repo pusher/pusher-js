@@ -81,6 +81,12 @@
 
     if (Pusher.isReady) self.connect();
   }
+  if ( typeof module === "object" && module && typeof module.exports === "object" ) {
+    exports = module.exports = Pusher;
+  } else {
+    this.Pusher = Pusher;
+  }
+
   var prototype = Pusher.prototype;
 
   Pusher.instances = [];
