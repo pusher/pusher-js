@@ -39,6 +39,12 @@ describe("AssistantToTheTransportManager", function() {
       transportManager.isAlive.andReturn(false);
       expect(assistant.isSupported()).toBe(false);
     });
+
+    it("should pass the environment to the transport", function() {
+      assistant.isSupported({ disableFlash: true });
+      expect(transportClass.isSupported)
+        .toHaveBeenCalledWith({ disableFlash: true });
+    });
   });
 
   describe("#createConnection", function() {
