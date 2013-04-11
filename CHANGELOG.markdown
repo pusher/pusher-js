@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.1 (2013-04-11)
+
+[FIXED] Issues with disabling Flash transport
+
+[FIXED] Error while checking for Flash support in some environments
+
+[FIXED] Race condition on disconnections and retries
+
+[FIXED] Reporting errors when connection was closed correctly
+
 ## 2.0.0 (2013-03-19)
 
 [CHANGED] Completely redesigned connection strategy

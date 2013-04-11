@@ -34,6 +34,8 @@
     this.encrypted = !!options.encrypted;
     this.timeline = this.options.getTimeline();
 
+    this.connectionCallbacks = this.buildCallbacks();
+
     var self = this;
 
     Pusher.Network.bind("online", function() {
@@ -149,7 +151,7 @@
     // we're in disconnected state, so closing will not cause reconnecting
     if (this.connection) {
       this.connection.close();
-      this.connection = null;
+      this.abandonConnection();
     }
   };
 
@@ -219,73 +221,67 @@
   };
 
   /** @private */
-  prototype.setConnection = function(connection) {
-    this.connection = connection;
-
+  prototype.buildCallbacks = function() {
     var self = this;
-    var onConnected = function(id) {
-      self.clearUnavailableTimer();
-      self.socket_id = id;
-      self.updateState("connected");
-      self.resetActivityCheck();
-    };
-    var onMessage = function(message) {
-      // includes pong messages from server
-      self.resetActivityCheck();
-      self.emit('message', message);
-    };
-    var onPing = function() {
-      self.send_event('pusher:pong', {});
-    };
-    var onPingRequest = function() {
-      self.send_event('pusher:ping', {});
-    };
-    var onError = function(error) {
-      // just emit error to user - socket will already be closed by browser
-      self.emit("error", { type: "WebSocketError", error: error });
-    };
-    var onClosed = function() {
-      connection.unbind("connected", onConnected);
-      connection.unbind("message", onMessage);
-      connection.unbind("ping", onPing);
-      connection.unbind("ping_request", onPingRequest);
-      connection.unbind("error", onError);
-      connection.unbind("closed", onClosed);
-      self.connection = null;
-
-      if (self.shouldRetry()) {
+    return {
+      connected: function(id) {
+        self.clearUnavailableTimer();
+        self.socket_id = id;
+        self.updateState("connected");
+        self.resetActivityCheck();
+      },
+      message: function(message) {
+        // includes pong messages from server
+        self.resetActivityCheck();
+        self.emit('message', message);
+      },
+      ping: function() {
+        self.send_event('pusher:pong', {});
+      },
+      ping_request: function() {
+        self.send_event('pusher:ping', {});
+      },
+      error: function(error) {
+        // just emit error to user - socket will already be closed by browser
+        self.emit("error", { type: "WebSocketError", error: error });
+      },
+      closed: function() {
+        self.abandonConnection();
+        if (self.shouldRetry()) {
+          self.retryIn(1000);
+        }
+      },
+      ssl_only: function() {
+        self.encrypted = true;
+        self.retryIn(0);
+      },
+      refused: function() {
+        self.disconnect();
+      },
+      backoff: function() {
         self.retryIn(1000);
+      },
+      retry: function() {
+        self.retryIn(0);
       }
     };
+  };
 
-    // handling close conditions
-    var onSSLOnly = function() {
-      self.encrypted = true;
-      self.retryIn(0);
-    };
-    var onRefused = function() {
-      self.disconnect();
-    };
-    var onBackoff = function() {
-      self.retryIn(1000);
-    };
-    var onRetry = function() {
-      self.retryIn(0);
-    };
-
-    connection.bind("connected", onConnected);
-    connection.bind("message", onMessage);
-    connection.bind("ping", onPing);
-    connection.bind("ping_request", onPingRequest);
-    connection.bind("error", onError);
-    connection.bind("closed", onClosed);
-
-    connection.bind("ssl_only", onSSLOnly);
-    connection.bind("refused", onRefused);
-    connection.bind("backoff", onBackoff);
-    connection.bind("retry", onRetry);
-
+  /** @private */
+  prototype.setConnection = function(connection) {
+    this.connection = connection;
+    for (var event in this.connectionCallbacks) {
+      this.connection.bind(event, this.connectionCallbacks[event]);
+    }
     this.resetActivityCheck();
+  };
+
+  /** @private */
+  prototype.abandonConnection = function() {
+    for (var event in this.connectionCallbacks) {
+      this.connection.unbind(event, this.connectionCallbacks[event]);
+    }
+    this.connection = null;
   };
 
   /** @private */
