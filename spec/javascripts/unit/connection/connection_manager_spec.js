@@ -216,6 +216,18 @@ describe("ConnectionManager", function() {
       expect(connection.send).not.toHaveBeenCalled();
       expect(connection.send_event).not.toHaveBeenCalled();
     });
+
+    it("should stop emitting received messages", function() {
+      var onMessage = jasmine.createSpy("onMessage");
+      manager.bind("message", onMessage);
+
+      manager.connect();
+      strategy._callback(null, {});
+      manager.disconnect();
+
+      connection.emit("message", {});
+      expect(onMessage).not.toHaveBeenCalled();
+    });
   });
 
   describe("on lost connection", function() {
