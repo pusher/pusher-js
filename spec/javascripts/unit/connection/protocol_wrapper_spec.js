@@ -242,6 +242,30 @@ describe("ProtocolWrapper", function() {
       expect(onClosed.calls.length).toEqual(1);
     });
 
+    it("should not emit an error after receiving close code 1000", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 1000,
+        reason: "normal"
+      });
+
+      expect(onError).not.toHaveBeenCalled();
+    });
+
+    it("should not emit an error after receiving close code 1001", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 1001,
+        reason: "going away"
+      });
+
+      expect(onError).not.toHaveBeenCalled();
+    });
+
     it("should emit 'backoff' when receiving close code 1002", function() {
       var onConnected = jasmine.createSpy("onConnected");
       var onBackoff = jasmine.createSpy("onBackoff");
@@ -255,6 +279,24 @@ describe("ProtocolWrapper", function() {
 
       expect(onConnected).not.toHaveBeenCalled();
       expect(onBackoff).toHaveBeenCalled();
+    });
+
+    it("should emit an error after receiving close code 1002", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 1002,
+        reason: "protocol error"
+      });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "PusherError",
+        data: {
+          code: 1002,
+          message: "protocol error"
+        }
+      });
     });
 
     it("should emit 'ssl_only' when receiving close code 4000", function() {
@@ -272,6 +314,24 @@ describe("ProtocolWrapper", function() {
       expect(onClosed.calls.length).toEqual(1);
     });
 
+    it("should emit an error after receiving close code 4000", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 4000,
+        reason: "SSL only"
+      });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "PusherError",
+        data: {
+          code: 4000,
+          message: "SSL only"
+        }
+      });
+    });
+
     it("should emit 'refused' when receiving 4001-4099 close code", function() {
       var onConnected = jasmine.createSpy("onConnected");
       var onRefused = jasmine.createSpy("onRefused");
@@ -285,6 +345,24 @@ describe("ProtocolWrapper", function() {
 
       expect(onConnected).not.toHaveBeenCalled();
       expect(onRefused).toHaveBeenCalled();
+    });
+
+    it("should emit an error after receiving close code 4001-4099", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 4096,
+        reason: "refused"
+      });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "PusherError",
+        data: {
+          code: 4096,
+          message: "refused"
+        }
+      });
     });
 
     it("should emit 'backoff' when receiving 4100-4199 close code", function() {
@@ -302,6 +380,24 @@ describe("ProtocolWrapper", function() {
       expect(onBackoff).toHaveBeenCalled();
     });
 
+    it("should emit an error after receiving close code 4100-4199", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 4111,
+        reason: "backoff"
+      });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "PusherError",
+        data: {
+          code: 4111,
+          message: "backoff"
+        }
+      });
+    });
+
     it("should emit 'retry' when receiving 4200-4299 close code", function() {
       var onConnected = jasmine.createSpy("onConnected");
       var onRetry = jasmine.createSpy("onRetry");
@@ -317,6 +413,24 @@ describe("ProtocolWrapper", function() {
       expect(onRetry).toHaveBeenCalled();
     });
 
+    it("should emit an error after receiving close code 4200-4299", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 4234,
+        reason: "retry"
+      });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "PusherError",
+        data: {
+          code: 4234,
+          message: "retry"
+        }
+      });
+    });
+
     it("should emit 'refused' when receiving unknown close code", function() {
       var onConnected = jasmine.createSpy("onConnected");
       var onRefused = jasmine.createSpy("onRefused");
@@ -330,6 +444,24 @@ describe("ProtocolWrapper", function() {
 
       expect(onConnected).not.toHaveBeenCalled();
       expect(onRefused).toHaveBeenCalled();
+    });
+
+    it("should emit an error after receiving unknown close code", function() {
+      var onError = jasmine.createSpy("onError");
+      wrapper.bind("error", onError);
+
+      transport.emit("closed", {
+        code: 4301,
+        reason: "weird"
+      });
+
+      expect(onError).toHaveBeenCalledWith({
+        type: "PusherError",
+        data: {
+          code: 4301,
+          message: "weird"
+        }
+      });
     });
   });
 });
