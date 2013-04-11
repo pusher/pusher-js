@@ -149,7 +149,7 @@
     // we're in disconnected state, so closing will not cause reconnecting
     if (this.connection) {
       this.connection.close();
-      this.connection = null;
+      this.abandonConnection();
     }
   };
 
@@ -220,9 +220,22 @@
 
   /** @private */
   prototype.setConnection = function(connection) {
+    var self = this;
+
     this.connection = connection;
 
-    var self = this;
+    this.abandonConnection = function() {
+      connection.unbind("connected", onConnected);
+      connection.unbind("message", onMessage);
+      connection.unbind("ping", onPing);
+      connection.unbind("ping_request", onPingRequest);
+      connection.unbind("error", onError);
+      connection.unbind("closed", onClosed);
+
+      self.connection = null;
+      self.abandonConnection = null;
+    };
+
     var onConnected = function(id) {
       self.clearUnavailableTimer();
       self.socket_id = id;
@@ -245,14 +258,7 @@
       self.emit("error", { type: "WebSocketError", error: error });
     };
     var onClosed = function() {
-      connection.unbind("connected", onConnected);
-      connection.unbind("message", onMessage);
-      connection.unbind("ping", onPing);
-      connection.unbind("ping_request", onPingRequest);
-      connection.unbind("error", onError);
-      connection.unbind("closed", onClosed);
-      self.connection = null;
-
+      self.abandonConnection();
       if (self.shouldRetry()) {
         self.retryIn(1000);
       }
