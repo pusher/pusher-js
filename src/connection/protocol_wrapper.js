@@ -157,10 +157,7 @@
 
   /** @private */
   prototype.handleCloseCode = function(code, message) {
-    this.emit(
-      'error', { type: 'PusherError', data: { code: code, message: message } }
-    );
-
+    var shouldReport = true;
     // See:
     // 1. https://developer.mozilla.org/en-US/docs/WebSockets/WebSockets_reference/CloseEvent
     // 2. http://pusher.com/docs/pusher_protocol
@@ -170,6 +167,9 @@
       // ignore 1007...3999
       // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
       //        1004 CLOSE_TOO_LARGE
+      if (code === 1000 || code === 1001) {
+        shouldReport = false;
+      }
       if (code >= 1002 && code <= 1004) {
         this.emit("backoff");
       }
@@ -184,6 +184,12 @@
     } else {
       // unknown error
       this.emit("refused");
+    }
+
+    if (shouldReport) {
+      this.emit(
+        'error', { type: 'PusherError', data: { code: code, message: message } }
+      );
     }
   };
 
