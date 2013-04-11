@@ -36,59 +36,135 @@ describe("FlashTransport", function() {
     expect(this.transport.supportsPing()).toBe(false);
   });
 
-  it("should be supported only if Flash is present", function() {
-    var _navigator = navigator;
-    var _mimeTypes = navigator.mimeTypes;
-
-    // workaround for IE to skip navigator tests
-    if (navigator.__defineGetter__) {
-
-      // For browsers with navigator object
-
-      navigator = {};
-
-      navigator.__defineGetter__("mimeTypes", function() {
-        return { "application/x-shockwave-flash": {} };
-      });
-      expect(Pusher.FlashTransport.isSupported()).toBe(true);
-
-      expect(Pusher.FlashTransport.isSupported({
-        disableFlash: true
-      })).toBe(false);
-
-      navigator.__defineGetter__("mimeTypes", function() {
-        return {};
-      });
-      expect(Pusher.FlashTransport.isSupported()).toBe(false);
+  describe("on non-IE browsers", function() {
+    // make sure we can mock navigator
+    if (!window.navigator.__defineGetter__) {
+      return;
     }
 
-    // IE compatibility
+    var _navigator, _mimeTypes, _ActiveXObject;
 
-    var _ActiveXObject = window.ActiveXObject;
-    window.ActiveXObject = jasmine.createSpy("ActiveXObject");
-
-    expect(Pusher.FlashTransport.isSupported()).toBe(true);
-    expect(window.ActiveXObject)
-      .toHaveBeenCalledWith("ShockwaveFlash.ShockwaveFlash");
-
-    expect(Pusher.FlashTransport.isSupported({
-      disableFlash: true
-    })).toBe(false);
-
-    window.ActiveXObject.andCallFake(function() {
-      throw new Error("Automation server can't create object");
+    beforeEach(function() {
+      _navigator = window.navigator;
+      _mimeTypes = window.navigator.mimeTypes;
+      _ActiveXObject = window.ActiveXObject;
     });
-    expect(Pusher.FlashTransport.isSupported()).toBe(false);
 
-    window.ActiveXObject = _ActiveXObject;
-
-    // restore navigator for non-IE browsers
-    if (navigator.__defineGetter__) {
-      navigator.__defineGetter__("mimeTypes", function() {
+    afterEach(function() {
+      window.ActiveXObject = _ActiveXObject;
+      window.navigator.__defineGetter__("mimeTypes", function() {
         return _mimeTypes;
       });
-      navigator = _navigator;
-    }
+      window.navigator = _navigator;
+    });
+
+    describe("supporting Flash", function() {
+      beforeEach(function() {
+        window.navigator = {};
+        window.navigator.__defineGetter__("mimeTypes", function() {
+          return { "application/x-shockwave-flash": {} };
+        });
+        window.ActiveXObject = undefined;
+      });
+
+      it("should be supported", function() {
+        expect(Pusher.FlashTransport.isSupported()).toBe(true);
+
+        window.navigator.__defineGetter__("mimeTypes", function() {
+          return {};
+        });
+        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+      });
+
+      it("should not be supported when disableFlash flag is passed", function() {
+        expect(Pusher.FlashTransport.isSupported({
+          disableFlash: true
+        })).toBe(false);
+      });
+    });
+
+    describe("not supporting Flash", function() {
+      beforeEach(function() {
+        window.navigator = {};
+        window.navigator.__defineGetter__("mimeTypes", function() {
+          return {};
+        });
+      });
+
+      it("should not be supported", function() {
+        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+      });
+    });
+
+    describe("not exposing mimeTypes", function() {
+      beforeEach(function() {
+        window.navigator = {};
+        window.navigator.__defineGetter__("mimeTypes", function() {
+          return null;
+        });
+      });
+
+      it("should not be supported", function() {
+        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+      });
+    });
+  });
+
+  describe("on IE", function() {
+    var _navigator, _mimeTypes, _ActiveXObject;
+
+    beforeEach(function() {
+      _navigator = window.navigator;
+      _mimeTypes = window.navigator.mimeTypes;
+      _ActiveXObject = window.ActiveXObject;
+
+      // mock navigator if we can, other browsers should pass this test too
+      if (window.navigator.__defineGetter__) {
+        window.navigator = {};
+        window.navigator.__defineGetter__("mimeTypes", function() {
+          return {};
+        });
+      }
+    });
+
+    afterEach(function() {
+      if (window.navigator.__defineGetter__) {
+        window.navigator.__defineGetter__("mimeTypes", function() {
+          return _mimeTypes;
+        });
+        window.navigator = _navigator;
+      }
+      window.ActiveXObject = _ActiveXObject;
+    });
+
+    describe("supporting Flash", function() {
+      beforeEach(function() {
+        window.ActiveXObject = jasmine.createSpy("ActiveXObject");
+      });
+
+      it("should be supported", function() {
+        expect(Pusher.FlashTransport.isSupported()).toBe(true);
+      });
+
+      it("should not be supported when disableFlash flag is passed", function() {
+        expect(Pusher.FlashTransport.isSupported({
+          disableFlash: true
+        })).toBe(false);
+      });
+    });
+
+    describe("not supporting Flash", function() {
+      beforeEach(function() {
+        window.ActiveXObject = jasmine.createSpy("ActiveXObject");
+        window.ActiveXObject.andCallFake(function() {
+          throw new Error("Automation server can't create object");
+        });
+      });
+
+      it("should not be supported", function() {
+        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+      });
+    });
   });
 
   describe("on initialize", function() {

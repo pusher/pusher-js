@@ -35,7 +35,11 @@
     try {
       return !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {
-      return navigator.mimeTypes["application/x-shockwave-flash"] !== undefined;
+      return Boolean(
+        navigator &&
+        navigator.mimeTypes &&
+        navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
+      );
     }
   };
 
