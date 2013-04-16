@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2 (2013-04-16)
+
+[FIXED] WebSockets not being disabled after rapid, unclean disconnections
+
 ## 2.0.1 (2013-04-11)
 
 [FIXED] Issues with disabling Flash transport
