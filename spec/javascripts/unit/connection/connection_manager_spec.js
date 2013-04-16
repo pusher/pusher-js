@@ -22,8 +22,6 @@ describe("ConnectionManager", function() {
       unavailableTimeout: 1234
     };
     manager = new Pusher.ConnectionManager("foo", managerOptions);
-    manager.wrapTransport = jasmine.createSpy("wrapTransport")
-      .andReturn(connection);
   });
 
   describe("on construction", function() {
@@ -91,8 +89,6 @@ describe("ConnectionManager", function() {
           .andReturn(timelineSender)
       });
       var manager = new Pusher.ConnectionManager("foo", options);
-      manager.wrapTransport = jasmine.createSpy("wrapTransport")
-        .andReturn(connection);
 
       timeline.isEmpty.andReturn(false);
       manager.connect();
@@ -112,7 +108,7 @@ describe("ConnectionManager", function() {
       manager.bind("connected", onConnected);
 
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
 
       expect(onConnected).not.toHaveBeenCalled();
       connection.emit("connected", "123.456");
@@ -125,7 +121,7 @@ describe("ConnectionManager", function() {
       manager.connect();
       expect(strategy._abort).not.toHaveBeenCalled();
 
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       expect(strategy._abort).toHaveBeenCalled();
     });
 
@@ -141,7 +137,7 @@ describe("ConnectionManager", function() {
 
     it("should not try to connect again", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
 
       expect(strategy.connect.calls.length).toEqual(1);
       manager.connect();
@@ -154,21 +150,19 @@ describe("ConnectionManager", function() {
           .andReturn(timelineSender)
       });
       var manager = new Pusher.ConnectionManager("foo", options);
-      manager.wrapTransport = jasmine.createSpy("wrapTransport")
-        .andReturn(connection);
 
       expect(timelineSender.send).not.toHaveBeenCalled();
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected");
       expect(timelineSender.send).toHaveBeenCalled();
     });
   });
 
   describe("on send", function() {
-    it("should pass data to the transport", function() {
+    it("should pass data to the connection", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "123.456");
       expect(manager.send("howdy")).toBe(true);
 
@@ -193,7 +187,7 @@ describe("ConnectionManager", function() {
 
     it("should close connection", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       manager.disconnect();
 
       expect(connection.close).toHaveBeenCalled();
@@ -208,7 +202,7 @@ describe("ConnectionManager", function() {
 
     it("should clear the unavailable timer and activity check", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       manager.disconnect();
 
       jasmine.Clock.tick(10000);
@@ -222,7 +216,7 @@ describe("ConnectionManager", function() {
       manager.bind("message", onMessage);
 
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       manager.disconnect();
 
       connection.emit("message", {});
@@ -233,7 +227,7 @@ describe("ConnectionManager", function() {
   describe("on lost connection", function() {
     it("should transition to disconnected then to connecting after 1s", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
 
       var onConnecting = jasmine.createSpy("onConnecting");
       var onDisconnected = jasmine.createSpy("onDisconnected")
@@ -255,7 +249,7 @@ describe("ConnectionManager", function() {
 
     it("should clean up activity timer and abort strategy", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected");
       expect(strategy._abort).toHaveBeenCalled();
 
@@ -272,7 +266,7 @@ describe("ConnectionManager", function() {
       var encryptedStrategy = Pusher.Mocks.getStrategy(true);
 
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
 
       managerOptions.getStrategy.andReturn(encryptedStrategy);
       connection.emit("ssl_only");
@@ -293,7 +287,7 @@ describe("ConnectionManager", function() {
 
     it("should disconnect after receiving 'refused' event", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("refused");
 
       expect(manager.state).toEqual("disconnected");
@@ -301,7 +295,7 @@ describe("ConnectionManager", function() {
 
     it("should reconnect immediately after receiving 'retry' event", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("retry");
 
       jasmine.Clock.tick(0);
@@ -310,7 +304,7 @@ describe("ConnectionManager", function() {
 
     it("should reconnect with a 1s delay after receiving 'backoff' event", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("backoff");
 
       jasmine.Clock.tick(999);
@@ -329,7 +323,7 @@ describe("ConnectionManager", function() {
 
       expect(strategy.connect.calls.length).toEqual(1);
 
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "123.456");
 
       expect(onConnected.calls.length).toEqual(1);
@@ -340,7 +334,7 @@ describe("ConnectionManager", function() {
 
       expect(strategy.connect.calls.length).toEqual(2);
 
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "666.999");
 
       expect(onConnected.calls.length).toEqual(2);
@@ -367,7 +361,7 @@ describe("ConnectionManager", function() {
   describe("on activity timeout", function() {
     it("should send a pusher:ping event", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "666.999");
 
       jasmine.Clock.tick(3455);
@@ -393,7 +387,7 @@ describe("ConnectionManager", function() {
 
     it("should close the connection after pong timeout", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "666.999");
 
       jasmine.Clock.tick(3456);
@@ -406,7 +400,7 @@ describe("ConnectionManager", function() {
   describe("on ping", function() {
     it("should reply with a pusher:pong event", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "666.999");
 
       connection.emit("ping");
@@ -418,7 +412,7 @@ describe("ConnectionManager", function() {
   describe("on ping request", function() {
     it("should send a pusher:ping event", function() {
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("connected", "666.999");
 
       connection.emit("ping_request");
@@ -484,7 +478,7 @@ describe("ConnectionManager", function() {
       manager.bind("error", onError);
 
       manager.connect();
-      strategy._callback(null, {});
+      strategy._callback(null, connection);
       connection.emit("error", { boom: "boom" });
 
       expect(onError).toHaveBeenCalledWith({

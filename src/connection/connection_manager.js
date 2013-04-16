@@ -94,13 +94,13 @@
     );
 
     var self = this;
-    var callback = function(error, transport) {
+    var callback = function(error, connection) {
       if (error) {
         self.runner = self.strategy.connect(0, callback);
       } else {
         // we don't support switching connections yet
         self.runner.abort();
-        self.setConnection(self.wrapTransport(transport));
+        self.setConnection(connection);
       }
     };
     this.runner = this.strategy.connect(0, callback);
@@ -307,11 +307,6 @@
   /** @private */
   prototype.shouldRetry = function() {
     return this.state === "connecting" || this.state === "connected";
-  };
-
-  /** @private */
-  prototype.wrapTransport = function(transport) {
-    return new Pusher.ProtocolWrapper(transport);
   };
 
   Pusher.ConnectionManager = ConnectionManager;

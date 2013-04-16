@@ -122,6 +122,8 @@
     getConnection: function() {
       var connection = new Pusher.EventsDispatcher();
 
+      connection.initialize = jasmine.createSpy("initialize");
+      connection.connect = jasmine.createSpy("connect");
       connection.supportsPing = jasmine.createSpy("supportsPing")
         .andReturn(false);
       connection.send = jasmine.createSpy("send")
