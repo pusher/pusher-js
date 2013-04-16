@@ -37,9 +37,10 @@
     }
 
     var self = this;
-    var connection = this.transport.createConnection(
+    var transport = this.transport.createConnection(
       this.name, this.priority, this.options.key, this.options
     );
+    var connection = new Pusher.ProtocolWrapper(transport);
 
     var onInitialized = function() {
       connection.unbind("initialized", onInitialized);
@@ -55,7 +56,7 @@
     };
     var onClosed = function() {
       unbindListeners();
-      callback(new Pusher.Errors.TransportClosed(this.transport));
+      callback(new Pusher.Errors.TransportClosed(connection));
     };
 
     var unbindListeners = function() {
@@ -75,14 +76,14 @@
 
     return {
       abort: function() {
-        if (connection.state === "open") {
+        if (connection.state === "open" || connection.state === "connected") {
           return;
         }
         unbindListeners();
         connection.close();
       },
       forceMinPriority: function(p) {
-        if (connection.state === "open") {
+        if (connection.state === "open" || connection.state === "connected") {
           return;
         }
         if (self.priority < p) {
