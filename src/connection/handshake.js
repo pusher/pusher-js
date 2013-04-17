@@ -26,7 +26,7 @@
       var message;
 
       try {
-        message = Pusher.Protocol.parseMessage(m);
+        message = Pusher.Protocol.decodeMessage(m);
       } catch (e) {
         self.setResult("error", e);
         return;
