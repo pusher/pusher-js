@@ -1,4 +1,5 @@
-;(function() {
+;var Pusher;
+(function() {
   function Pusher(app_key, options) {
     var self = this;
 
@@ -76,6 +77,12 @@
 
     if (Pusher.isReady) self.connect();
   }
+  if (typeof module !== "undefined") {
+    module.exports = Pusher;
+  } else {
+    this.Pusher = Pusher;
+  }
+
   var prototype = Pusher.prototype;
 
   Pusher.instances = [];
