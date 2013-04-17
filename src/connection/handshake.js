@@ -1,12 +1,11 @@
 ;(function() {
-  function Handshake(transport) {
-    Pusher.EventsDispatcher.call(this);
+  function Handshake(transport, callback) {
     this.transport = transport;
+    this.callback = callback;
     this.setResult(undefined);
     this.bindListeners();
   }
   var prototype = Handshake.prototype;
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   prototype.process = function(handlers) {
     var handler = handlers[this.result.type];
@@ -48,14 +47,14 @@
       }
 
       unbindListeners();
-      self.emit("ready");
+      self.callback();
     };
     var onClosed = function(closeEvent) {
       var action = Pusher.Protocol.getCloseAction(closeEvent);
       var error = Pusher.Protocol.getCloseError(closeEvent);
-      self.setResult(action, error);
       unbindListeners();
-      self.emit("ready");
+      self.setResult(action, error);
+      self.callback();
     };
 
     self.transport.bind("message", onMessage);

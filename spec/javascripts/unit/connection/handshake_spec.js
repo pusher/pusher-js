@@ -1,14 +1,12 @@
 describe("Handshake", function() {
   var transport;
-  var onReady;
+  var callback;
   var handshake;
 
   beforeEach(function() {
     transport = Pusher.Mocks.getTransport();
-    handshake = new Pusher.Handshake(transport);
-
-    onReady = jasmine.createSpy("onReady");
-    handshake.bind("ready", onReady);
+    callback = jasmine.createSpy("callback");
+    handshake = new Pusher.Handshake(transport, callback);
   });
 
   describe("before receiving anything", function() {
@@ -40,8 +38,8 @@ describe("Handshake", function() {
       });
     });
 
-    it("should emit 'ready'", function() {
-      expect(onReady).toHaveBeenCalled();
+    it("should call back", function() {
+      expect(callback).toHaveBeenCalled();
     });
 
     it("should not call close on the transport", function() {
@@ -81,8 +79,8 @@ describe("Handshake", function() {
       });
     });
 
-    it("should emit 'ready'", function() {
-      expect(onReady).toHaveBeenCalled();
+    it("should call back", function() {
+      expect(callback).toHaveBeenCalled();
     });
 
     it("should call close on the transport", function() {
@@ -123,8 +121,8 @@ describe("Handshake", function() {
       });
     });
 
-    it("should emit 'ready'", function() {
-      expect(onReady).toHaveBeenCalled();
+    it("should call back", function() {
+      expect(callback).toHaveBeenCalled();
     });
 
     it("should not close the transport", function() {
