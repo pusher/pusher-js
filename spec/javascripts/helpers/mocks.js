@@ -121,12 +121,6 @@
       return strategies;
     },
 
-    getHandshake: function() {
-      return {
-        process: jasmine.createSpy("process")
-      };
-    },
-
     getConnection: function() {
       var connection = new Pusher.EventsDispatcher();
 

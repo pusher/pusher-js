@@ -14,7 +14,7 @@
 
   prototype.connect = function(minPriority, callback) {
     return connect(this.strategies, minPriority, function(i, runners) {
-      return function(error, connection) {
+      return function(error, handshake) {
         runners[i].error = error;
         if (error) {
           if (allRunnersFailed(runners)) {
@@ -23,9 +23,9 @@
           return;
         }
         Pusher.Util.apply(runners, function(runner) {
-          runner.forceMinPriority(connection.priority);
+          runner.forceMinPriority(handshake.transport.priority);
         });
-        callback(null, connection);
+        callback(null, handshake);
       };
     });
   };

@@ -35,8 +35,8 @@
     this.timeline = this.options.getTimeline();
 
     this.connectionCallbacks = this.buildConnectionCallbacks();
-    this.handshakeCallbacks = this.buildHandshakeCallbacks();
     this.errorCallbacks = this.buildErrorCallbacks();
+    this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 
     var self = this;
 
@@ -103,9 +103,7 @@
       } else {
         // we don't support switching connections yet
         self.runner.abort();
-        handshake.process(
-          Pusher.Util.extend({}, self.errorCallbacks, self.handshakeCallbacks)
-        );
+        self.handshakeCallbacks[handshake.action](handshake);
       }
     };
     self.runner = self.strategy.connect(0, callback);
@@ -259,16 +257,16 @@
   };
 
   /** @private */
-  prototype.buildHandshakeCallbacks = function() {
+  prototype.buildHandshakeCallbacks = function(errorCallbacks) {
     var self = this;
-    return {
-      connected: function(connection) {
+    return Pusher.Util.extend({}, errorCallbacks, {
+      connected: function(handshake) {
         self.clearUnavailableTimer();
-        self.setConnection(connection);
+        self.setConnection(handshake.connection);
         self.socket_id = self.connection.id;
         self.updateState("connected");
       }
-    };
+    });
   };
 
   /** @private */

@@ -48,10 +48,10 @@
       transport.connect();
     };
     var onOpen = function() {
-      var handshake = new Pusher.Handshake(transport, function() {
+      var handshake = new Pusher.Handshake(transport, function(result) {
         connected = true;
         unbindListeners();
-        callback(null, handshake);
+        callback(null, result);
       });
     };
     var onError = function(error) {

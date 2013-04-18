@@ -9,23 +9,6 @@ describe("Handshake", function() {
     handshake = new Pusher.Handshake(transport, callback);
   });
 
-  describe("before receiving anything", function() {
-    describe("#process", function() {
-      it("should call the 'undefined' handler", function() {
-        var onUndefined = jasmine.createSpy("onUndefined");
-        var onOther = jasmine.createSpy("onOther");
-
-        handshake.process({
-          undefined: onUndefined,
-          other: onOther
-        });
-
-        expect(onUndefined).toHaveBeenCalledWith();
-        expect(onOther).not.toHaveBeenCalled();
-      });
-    });
-  });
-
   describe("after receiving 'pusher:connection_established'", function() {
     beforeEach(function() {
       transport.emit("message", {
@@ -38,28 +21,17 @@ describe("Handshake", function() {
       });
     });
 
-    it("should call back", function() {
-      expect(callback).toHaveBeenCalled();
+    it("should call back with a connection", function() {
+      expect(callback).toHaveBeenCalledWith({
+        action: "connected",
+        transport: transport,
+        connection: jasmine.any(Pusher.Connection)
+      });
+      expect(callback.calls[0].args[0].connection.id).toEqual("123.456");
     });
 
     it("should not call close on the transport", function() {
       expect(transport.close).not.toHaveBeenCalled();
-    });
-
-    describe("#process", function() {
-      it("should call the 'connected' handler with a connection", function() {
-        var onConnected = jasmine.createSpy("onConnected");
-        var onOther = jasmine.createSpy("onOther");
-
-        handshake.process({
-          connected: onConnected,
-          other: onOther
-        });
-
-        expect(onConnected).toHaveBeenCalledWith(jasmine.any(Pusher.Connection));
-        expect(onOther).not.toHaveBeenCalled();
-        expect(onConnected.calls[0].args[0].id).toEqual("123.456");
-      });
     });
   });
 
@@ -79,8 +51,12 @@ describe("Handshake", function() {
       });
     });
 
-    it("should call back", function() {
-      expect(callback).toHaveBeenCalled();
+    it("should call back with correct action and error", function() {
+      expect(callback).toHaveBeenCalledWith({
+        action: "test",
+        transport: transport,
+        error: "err"
+      });
     });
 
     it("should call close on the transport", function() {
@@ -91,21 +67,6 @@ describe("Handshake", function() {
       expect(Pusher.Protocol.getCloseAction).toHaveBeenCalledWith({
         code: 4000,
         message: "SSL only"
-      });
-    });
-
-    describe("#process", function() {
-      it("should call correct handler with correct error", function() {
-        var onConnected = jasmine.createSpy("onConnected");
-        var onTest = jasmine.createSpy("onTest");
-
-        handshake.process({
-          connected: onConnected,
-          test: onTest
-        });
-
-        expect(onConnected).not.toHaveBeenCalled();
-        expect(onTest).toHaveBeenCalledWith("err");
       });
     });
   });
@@ -121,8 +82,11 @@ describe("Handshake", function() {
       });
     });
 
-    it("should call back", function() {
-      expect(callback).toHaveBeenCalled();
+    it("should call back with correct action and error", function() {
+      expect(callback).toHaveBeenCalledWith({
+        action: "boo",
+        transport: transport
+      });
     });
 
     it("should not close the transport", function() {
@@ -133,21 +97,6 @@ describe("Handshake", function() {
       expect(Pusher.Protocol.getCloseAction).toHaveBeenCalledWith({
         code: 4321,
         reason: "test"
-      });
-    });
-
-    describe("#process", function() {
-      it("should call correct handler with an undefined error", function() {
-        var onConnected = jasmine.createSpy("onConnected");
-        var onBoo = jasmine.createSpy("onBoo");
-
-        handshake.process({
-          connected: onConnected,
-          boo: onBoo
-        });
-
-        expect(onConnected).not.toHaveBeenCalled();
-        expect(onBoo).toHaveBeenCalledWith(undefined);
       });
     });
   });

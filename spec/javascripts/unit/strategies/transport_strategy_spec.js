@@ -7,7 +7,7 @@ describe("TransportStrategy", function() {
     transport = Pusher.Mocks.getTransport(true);
     transportClass = Pusher.Mocks.getTransportClass(true, transport);
 
-    handshake = Pusher.Mocks.getHandshake();
+    handshake = {};
     spyOn(Pusher, "Handshake").andCallFake(function(transport, callback) {
       handshake.transport = transport;
       handshake.callback = callback;
@@ -91,7 +91,7 @@ describe("TransportStrategy", function() {
       expect(callback).not.toHaveBeenCalled();
     });
 
-    it("should call back with a handshake after processing it successfully", function() {
+    it("should call back with a 'connected' action, the transport and a connection after processing it successfully", function() {
       strategy.connect(0, callback);
 
       transport.state = "initialized";
@@ -101,9 +101,14 @@ describe("TransportStrategy", function() {
       transport.state = "open";
       transport.emit("open");
 
-      handshake.callback();
+      var handshakeResult = {
+        action: "connected",
+        transport: transport,
+        connection: Pusher.Mocks.getConnection()
+      };
+      handshake.callback(handshakeResult);
 
-      expect(callback).toHaveBeenCalledWith(null, handshake);
+      expect(callback).toHaveBeenCalledWith(null, handshakeResult);
     });
 
     it("should call back with an error after getting an 'error' event", function() {

@@ -1,11 +1,10 @@
 describe("ConnectionManager", function() {
-  var handshake, connection, strategy, timeline, timelineSender;
+  var connection, strategy, timeline, timelineSender;
   var managerOptions, manager;
 
   beforeEach(function() {
     jasmine.Clock.useMock();
 
-    handshake = Pusher.Mocks.getHandshake();
     connection = Pusher.Mocks.getConnection();
     strategy = Pusher.Mocks.getStrategy(true);
     timeline = Pusher.Mocks.getTimeline();
@@ -155,6 +154,8 @@ describe("ConnectionManager", function() {
   });
 
   describe("on handshake", function() {
+    var handshake;
+
     beforeEach(function() {
       manager.connect();
     });
@@ -166,9 +167,7 @@ describe("ConnectionManager", function() {
         encryptedStrategy = Pusher.Mocks.getStrategy(true);
         managerOptions.getStrategy.andReturn(encryptedStrategy);
 
-        handshake.process = jasmine.createSpy("process").andCallFake(function(handlers) {
-          handlers.ssl_only("SSL ONLY");
-        });
+        handshake = { action: "ssl_only" };
         strategy._callback(null, handshake);
 
         jasmine.Clock.tick(0);
@@ -198,10 +197,10 @@ describe("ConnectionManager", function() {
     });
 
     describe("with 'refused' action", function() {
+      var handshake;
+
       beforeEach(function() {
-        handshake.process = jasmine.createSpy("process").andCallFake(function(handlers) {
-          handlers.refused("REFUSED");
-        });
+        handshake = { action: "refused" };
         strategy._callback(null, handshake);
       });
 
@@ -216,10 +215,10 @@ describe("ConnectionManager", function() {
     });
 
     describe("with 'retry' action", function() {
+      var handshake;
+
       beforeEach(function() {
-        handshake.process = jasmine.createSpy("process").andCallFake(function(handlers) {
-          handlers.retry("RETRY");
-        });
+        handshake = { action: "retry" };
         strategy._callback(null, handshake);
       });
 
@@ -230,10 +229,10 @@ describe("ConnectionManager", function() {
     });
 
     describe("with 'backoff' action", function() {
+      var handshake;
+
       beforeEach(function() {
-        handshake.process = jasmine.createSpy("process").andCallFake(function(handlers) {
-          handlers.backoff("BACKOFF");
-        });
+        handshake = { action: "backoff" };
         strategy._callback(null, handshake);
       });
 
@@ -247,6 +246,7 @@ describe("ConnectionManager", function() {
   });
 
   describe("after establishing a connection", function() {
+    var handshake;
     var onConnected;
 
     beforeEach(function() {
@@ -254,10 +254,9 @@ describe("ConnectionManager", function() {
       manager.bind("connected", onConnected);
 
       manager.connect();
-      handshake.process = jasmine.createSpy("process").andCallFake(function(handlers) {
-        connection.id = "123.456";
-        handlers.connected(connection);
-      });
+
+      connection.id = "123.456";
+      handshake = { action: "connected", connection: connection };
       strategy._callback(null, handshake);
     });
 
