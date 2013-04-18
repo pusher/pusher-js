@@ -34,7 +34,9 @@
     this.encrypted = !!options.encrypted;
     this.timeline = this.options.getTimeline();
 
-    this.connectionCallbacks = this.buildCallbacks();
+    this.connectionCallbacks = this.buildConnectionCallbacks();
+    this.handshakeCallbacks = this.buildHandshakeCallbacks();
+    this.errorCallbacks = this.buildErrorCallbacks();
 
     var self = this;
 
@@ -70,42 +72,45 @@
    * to find events emitted on connection attempts.
    */
   prototype.connect = function() {
-    if (this.connection) {
+    var self = this;
+
+    if (self.connection) {
       return;
     }
-    if (this.state === "connecting") {
+    if (self.state === "connecting") {
       return;
     }
 
-    if (!this.strategy.isSupported()) {
-      this.updateState("failed");
+    if (!self.strategy.isSupported()) {
+      self.updateState("failed");
       return;
     }
     if (Pusher.Network.isOnline() === false) {
-      this.updateState("unavailable");
+      self.updateState("unavailable");
       return;
     }
 
-    this.updateState("connecting");
-    this.timelineSender = this.options.getTimelineSender(
-      this.timeline,
-      { encrypted: this.encrypted },
-      this
+    self.updateState("connecting");
+    self.timelineSender = self.options.getTimelineSender(
+      self.timeline,
+      { encrypted: self.encrypted },
+      self
     );
 
-    var self = this;
-    var callback = function(error, connection) {
+    var callback = function(error, handshake) {
       if (error) {
         self.runner = self.strategy.connect(0, callback);
       } else {
         // we don't support switching connections yet
         self.runner.abort();
-        self.setConnection(connection);
+        handshake.process(
+          Pusher.Util.extend({}, self.errorCallbacks, self.handshakeCallbacks)
+        );
       }
     };
-    this.runner = this.strategy.connect(0, callback);
+    self.runner = self.strategy.connect(0, callback);
 
-    this.setUnavailableTimer();
+    self.setUnavailableTimer();
   };
 
   /** Sends raw data.
@@ -226,15 +231,9 @@
   };
 
   /** @private */
-  prototype.buildCallbacks = function() {
+  prototype.buildConnectionCallbacks = function() {
     var self = this;
     return {
-      connected: function(id) {
-        self.clearUnavailableTimer();
-        self.socket_id = id;
-        self.updateState("connected");
-        self.resetActivityCheck();
-      },
       message: function(message) {
         // includes pong messages from server
         self.resetActivityCheck();
@@ -255,7 +254,27 @@
         if (self.shouldRetry()) {
           self.retryIn(1000);
         }
-      },
+      }
+    };
+  };
+
+  /** @private */
+  prototype.buildHandshakeCallbacks = function() {
+    var self = this;
+    return {
+      connected: function(connection) {
+        self.clearUnavailableTimer();
+        self.setConnection(connection);
+        self.socket_id = self.connection.id;
+        self.updateState("connected");
+      }
+    };
+  };
+
+  /** @private */
+  prototype.buildErrorCallbacks = function() {
+    var self = this;
+    return {
       ssl_only: function() {
         self.encrypted = true;
         self.updateStrategy();

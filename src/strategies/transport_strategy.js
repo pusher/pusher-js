@@ -37,18 +37,22 @@
     }
 
     var self = this;
+    var connected = false;
+
     var transport = this.transport.createConnection(
       this.name, this.priority, this.options.key, this.options
     );
-    var connection = new Pusher.ProtocolWrapper(transport);
 
     var onInitialized = function() {
-      connection.unbind("initialized", onInitialized);
-      connection.connect();
+      transport.unbind("initialized", onInitialized);
+      transport.connect();
     };
     var onOpen = function() {
-      unbindListeners();
-      callback(null, connection);
+      var handshake = new Pusher.Handshake(transport, function() {
+        connected = true;
+        unbindListeners();
+        callback(null, handshake);
+      });
     };
     var onError = function(error) {
       unbindListeners();
@@ -56,39 +60,39 @@
     };
     var onClosed = function() {
       unbindListeners();
-      callback(new Pusher.Errors.TransportClosed(connection));
+      callback(new Pusher.Errors.TransportClosed(transport));
     };
 
     var unbindListeners = function() {
-      connection.unbind("initialized", onInitialized);
-      connection.unbind("open", onOpen);
-      connection.unbind("error", onError);
-      connection.unbind("closed", onClosed);
+      transport.unbind("initialized", onInitialized);
+      transport.unbind("open", onOpen);
+      transport.unbind("error", onError);
+      transport.unbind("closed", onClosed);
     };
 
-    connection.bind("initialized", onInitialized);
-    connection.bind("open", onOpen);
-    connection.bind("error", onError);
-    connection.bind("closed", onClosed);
+    transport.bind("initialized", onInitialized);
+    transport.bind("open", onOpen);
+    transport.bind("error", onError);
+    transport.bind("closed", onClosed);
 
     // connect will be called automatically after initialization
-    connection.initialize();
+    transport.initialize();
 
     return {
       abort: function() {
-        if (connection.state === "open" || connection.state === "connected") {
+        if (connected) {
           return;
         }
         unbindListeners();
-        connection.close();
+        transport.close();
       },
       forceMinPriority: function(p) {
-        if (connection.state === "open" || connection.state === "connected") {
+        if (connected) {
           return;
         }
         if (self.priority < p) {
-          // TODO close connection in a nicer way
-          connection.close();
+          // TODO close transport in a nicer way
+          transport.close();
         }
       }
     };
