@@ -39,5 +39,7 @@ src_files:
 
   - strategies/strategy_builder.js
 
-  - connection/protocol_wrapper.js
+  - connection/protocol.js
+  - connection/connection.js
+  - connection/handshake.js
   - connection/connection_manager.js

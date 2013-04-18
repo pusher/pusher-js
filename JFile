@@ -46,7 +46,9 @@ bundle 'pusher.js' do
 
   file 'strategies/strategy_builder.js'
 
-  file 'connection/protocol_wrapper.js'
+  file 'connection/protocol.js'
+  file 'connection/connection.js'
+  file 'connection/handshake.js'
   file 'connection/connection_manager.js'
 
   file 'net_info.js'
