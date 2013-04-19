@@ -55,8 +55,6 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    // exclude iframe transports until we link to correct SockJS version
-    // inside the iframe
     return new SockJS(url, null, {
       js_path: Pusher.Dependencies.getPath("sockjs", {
         encrypted: this.options.encrypted
