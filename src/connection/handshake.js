@@ -1,4 +1,20 @@
 ;(function() {
+  /**
+   * Handles Pusher protocol handshakes for transports.
+   *
+   * Calls back with a result object after handshake is completed. Results
+   * always have two fields:
+   * - action - string describing action to be taken after the handshake
+   * - transport - the transport object passed to the constructor
+   *
+   * Different actions can set different additional properties on the result.
+   * In the case of 'connected' action, there will be a 'connection' property
+   * containing a Connection object for the transport. Other actions should
+   * carry an 'error' property.
+   *
+   * @param {AbstractTransport} transport
+   * @param {Function} callback
+   */
   function Handshake(transport, callback) {
     this.transport = transport;
     this.callback = callback;

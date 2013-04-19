@@ -8,10 +8,9 @@
    * - pong - on pong responses
    * - error - when the transport emits an error
    * - closed - after closing the transport
-   * - ssl_only - after trying to connect without ssl to a ssl-only app
-   * - retry - when closed connection should be retried immediately
-   * - backoff - when closed connection should be retried with a delay
-   * - refused - when closed connection should not be retried
+   *
+   * It also emits more events when connection closes with a code.
+   * See Protocol.getCloseAction to get more details.
    *
    * @param {Number} id
    * @param {AbstractTransport} transport
