@@ -166,41 +166,34 @@
   /** @private */
   prototype.retryIn = function(delay) {
     var self = this;
-    this.retryTimer = setTimeout(function() {
-      if (self.retryTimer === null) {
-        return;
-      }
-      self.retryTimer = null;
+    this.retryTimer = new Pusher.Timer(delay || 0, function() {
       self.disconnect();
       self.connect();
-    }, delay || 0);
+    });
   };
 
   /** @private */
   prototype.clearRetryTimer = function() {
     if (this.retryTimer) {
-      clearTimeout(this.retryTimer);
-      this.retryTimer = null;
+      this.retryTimer.ensureAborted();
     }
   };
 
   /** @private */
   prototype.setUnavailableTimer = function() {
     var self = this;
-    this.unavailableTimer = setTimeout(function() {
-      if (!self.unavailableTimer) {
-        return;
+    self.unavailableTimer = new Pusher.Timer(
+      self.options.unavailableTimeout,
+      function() {
+        self.updateState("unavailable");
       }
-      self.updateState("unavailable");
-      self.unavailableTimer = null;
-    }, this.options.unavailableTimeout);
+    );
   };
 
   /** @private */
   prototype.clearUnavailableTimer = function() {
     if (this.unavailableTimer) {
-      clearTimeout(this.unavailableTimer);
-      this.unavailableTimer = null;
+      this.unavailableTimer.ensureAborted();
     }
   };
 
@@ -210,21 +203,26 @@
     // send ping after inactivity
     if (!this.connection.supportsPing()) {
       var self = this;
-      this.activityTimer = setTimeout(function() {
-        self.send_event('pusher:ping', {});
-        // wait for pong response
-        self.activityTimer = setTimeout(function() {
-          self.connection.close();
-        }, (self.options.pongTimeout));
-      }, (this.options.activityTimeout));
+      self.activityTimer = new Pusher.Timer(
+        self.options.activityTimeout,
+        function() {
+          self.send_event('pusher:ping', {});
+          // wait for pong response
+          self.activityTimer = new Pusher.Timer(
+            self.options.pongTimeout,
+            function() {
+              self.connection.close();
+            }
+          );
+        }
+      );
     }
   };
 
   /** @private */
   prototype.stopActivityCheck = function() {
     if (this.activityTimer) {
-      clearTimeout(this.activityTimer);
-      this.activityTimer = null;
+      this.activityTimer.ensureAborted();
     }
   };
 
