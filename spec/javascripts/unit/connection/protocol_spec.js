@@ -191,7 +191,7 @@ describe("Protocol", function() {
           })
         });
       }).toThrow("Invalid handshake");
-    })
+    });
   });
 
   describe("#getCloseAction", function() {
