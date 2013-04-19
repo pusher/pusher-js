@@ -14,31 +14,22 @@
       self.transport.unbind("message", onMessage);
       self.transport.unbind("closed", onClosed);
     };
+
     var onMessage = function(m) {
       unbindListeners();
-
-      var message;
       try {
-        message = Pusher.Protocol.decodeMessage(m);
+        var result = Pusher.Protocol.processHandshake(m);
+        if (result.action === "connected") {
+          self.finish("connected", {
+            connection: new Pusher.Connection(result.id, self.transport)
+          });
+        } else {
+          self.finish(result.action, { error: result.error });
+          self.transport.close();
+        }
       } catch (e) {
         self.finish("error", { error: e });
-        return;
-      }
-
-      if (message.event === "pusher:connection_established") {
-        var id = message.data.socket_id;
-        self.finish("connected", {
-          connection: new Pusher.Connection(id, self.transport)
-        });
-      } else if (message.event === "pusher:error") {
-        // From protocol 6 close codes are sent only once, so this only
-        // happens when connection does not support close codes
-        var action = Pusher.Protocol.getCloseAction(message.data);
-        var error = Pusher.Protocol.getCloseError(message.data);
-        self.finish(action, { error: error });
         self.transport.close();
-      } else {
-        self.finish("error", {});
       }
     };
     var onClosed = function(closeEvent) {

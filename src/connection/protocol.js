@@ -9,6 +9,8 @@
           params.data = JSON.parse(params.data);
         } catch (e) {
           if (!(e instanceof SyntaxError)) {
+            // TODO looks like unreachable code
+            // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
             throw e;
           }
         }
@@ -21,6 +23,23 @@
 
   Protocol.encodeMessage = function(message) {
     return JSON.stringify(message);
+  };
+
+  Protocol.processHandshake = function(m) {
+    var message = this.decodeMessage(m);
+
+    if (message.event === "pusher:connection_established") {
+      return { action: "connected", id: message.data.socket_id };
+    } else if (message.event === "pusher:error") {
+      // From protocol 6 close codes are sent only once, so this only
+      // happens when connection does not support close codes
+      return {
+        action: this.getCloseAction(message.data),
+        error: this.getCloseError(message.data)
+      };
+    } else {
+      throw "Invalid handshake";
+    }
   };
 
   Protocol.getCloseAction = function(closeEvent) {

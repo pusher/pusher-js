@@ -76,6 +76,124 @@ describe("Protocol", function() {
     });
   });
 
+  describe("#processHandshake", function() {
+    it("should return 'connected' with an id after getting pusher:connection_established", function() {
+      var message = {
+        data: JSON.stringify({
+          event: "pusher:connection_established",
+          data: {
+            socket_id: "123.456"
+          }
+        })
+      };
+
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "connected",
+        id: "123.456"
+      });
+    });
+
+    function getErrorMessage(code, reason) {
+      return {
+        data: JSON.stringify({
+          event: "pusher:error",
+          data: {
+            code: code,
+            message: reason
+          }
+        })
+      };
+    }
+
+    it("should return 'ssl_only' for code 4000", function() {
+      var message = getErrorMessage(4000, "SSL ONLY!");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "ssl_only",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4000,
+            message: "SSL ONLY!"
+          }
+        }
+      });
+    });
+
+    it("should return 'refused' for codes 4001-4099", function() {
+      for (var code = 4001; code <= 4099; code++) {
+        var message = getErrorMessage(code, "refused-" + code);
+        expect(Pusher.Protocol.processHandshake(message)).toEqual({
+          action: "refused",
+          error: {
+            type: "PusherError",
+            data: {
+              code: code,
+              message: "refused-" + code
+            }
+          }
+        });
+      }
+    });
+
+    it("should return 'backoff' for codes 4100-4199", function() {
+      for (var code = 4100; code <= 4199; code++) {
+        var message = getErrorMessage(code, "backoff-" + code);
+        expect(Pusher.Protocol.processHandshake(message)).toEqual({
+          action: "backoff",
+          error: {
+            type: "PusherError",
+            data: {
+              code: code,
+              message: "backoff-" + code
+            }
+          }
+        });
+      }
+    });
+
+    it("should return 'retry' for codes 4200-4299", function() {
+      for (var code = 4200; code <= 4299; code++) {
+        var message = getErrorMessage(code, "retry-" + code);
+        expect(Pusher.Protocol.processHandshake(message)).toEqual({
+          action: "retry",
+          error: {
+            type: "PusherError",
+            data: {
+              code: code,
+              message: "retry-" + code
+            }
+          }
+        });
+      }
+    });
+
+    it("should return 'refused' for codes 4300-4999", function() {
+      for (var code = 4300; code <= 4999; code++) {
+        var message = getErrorMessage(code, "refused-" + code);
+        expect(Pusher.Protocol.processHandshake(message)).toEqual({
+          action: "refused",
+          error: {
+            type: "PusherError",
+            data: {
+              code: code,
+              message: "refused-" + code
+            }
+          }
+        });
+      }
+    });
+
+    it("should throw an exception on invalid handshake", function() {
+      expect(function() {
+        return Pusher.Protocol.processHandshake({
+          data: JSON.stringify({
+            event: "weird"
+          })
+        });
+      }).toThrow("Invalid handshake");
+    })
+  });
+
   describe("#getCloseAction", function() {
     it("should return null for codes 1000,1001", function() {
       for (var code = 1000; code <= 1001; code++) {

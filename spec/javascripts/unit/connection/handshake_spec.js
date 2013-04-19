@@ -6,19 +6,25 @@ describe("Handshake", function() {
   beforeEach(function() {
     transport = Pusher.Mocks.getTransport();
     callback = jasmine.createSpy("callback");
+    spyOn(Pusher.Protocol, "processHandshake");
+
     handshake = new Pusher.Handshake(transport, callback);
   });
 
-  describe("after receiving 'pusher:connection_established'", function() {
+  it("should use Protocol.processHandshake to process first received message", function() {
+    transport.emit("message", { data: "dummy" });
+    expect(Pusher.Protocol.processHandshake).toHaveBeenCalledWith({
+      data: "dummy"
+    });
+  });
+
+  describe("after a successful handshake", function() {
     beforeEach(function() {
-      transport.emit("message", {
-        data: JSON.stringify({
-          event: "pusher:connection_established",
-          data: {
-            socket_id: "123.456"
-          }
-        })
+      Pusher.Protocol.processHandshake.andReturn({
+        action: "connected",
+        id: "9.9"
       });
+      transport.emit("message", { data: "dummy" });
     });
 
     it("should call back with a connection", function() {
@@ -27,7 +33,7 @@ describe("Handshake", function() {
         transport: transport,
         connection: jasmine.any(Pusher.Connection)
       });
-      expect(callback.calls[0].args[0].connection.id).toEqual("123.456");
+      expect(callback.calls[0].args[0].connection.id).toEqual("9.9");
     });
 
     it("should not call close on the transport", function() {
@@ -35,43 +41,48 @@ describe("Handshake", function() {
     });
   });
 
-  describe("after receiving 'pusher:error'", function() {
+  describe("after a handshake with other action", function() {
     beforeEach(function() {
-      spyOn(Pusher.Protocol, "getCloseAction").andReturn("test");
-      spyOn(Pusher.Protocol, "getCloseError").andReturn("err");
-
-      transport.emit("message", {
-        data: JSON.stringify({
-          event: "pusher:error",
-          data: {
-            code: 4000,
-            message: "SSL only"
-          }
-        })
+      Pusher.Protocol.processHandshake.andReturn({
+        action: "boom",
+        error: "BOOM"
       });
+      transport.emit("message", { data: "dummy "});
     });
 
     it("should call back with correct action and error", function() {
       expect(callback).toHaveBeenCalledWith({
-        action: "test",
+        action: "boom",
         transport: transport,
-        error: "err"
+        error: "BOOM"
       });
     });
 
     it("should call close on the transport", function() {
       expect(transport.close).toHaveBeenCalled();
     });
+  });
 
-    it("should call protocol methods with correct arguments", function() {
-      expect(Pusher.Protocol.getCloseAction).toHaveBeenCalledWith({
-        code: 4000,
-        message: "SSL only"
+  describe("after a handshake raising an exception", function() {
+    beforeEach(function() {
+      Pusher.Protocol.processHandshake.andThrow("Invalid handshake");
+      transport.emit("message", { data: "dummy "});
+    });
+
+    it("should call back with an 'error' action", function() {
+      expect(callback).toHaveBeenCalledWith({
+        action: "error",
+        transport: transport,
+        error: "Invalid handshake"
       });
+    });
+
+    it("should call close on the transport", function() {
+      expect(transport.close).toHaveBeenCalled();
     });
   });
 
-  describe("after receiving a 'closed' event", function() {
+  describe("after receiving a 'closed' event from transport", function() {
     beforeEach(function() {
       spyOn(Pusher.Protocol, "getCloseAction").andReturn("boo");
       spyOn(Pusher.Protocol, "getCloseError");
