@@ -75,7 +75,7 @@ describe("CachedStrategy", function() {
       });
 
       describe("after connecting successfully", function() {
-        var connection;
+        var transport;
         var startTimestamp;
 
         beforeEach(function() {
@@ -85,15 +85,13 @@ describe("CachedStrategy", function() {
           strategy.connect(0, callback);
           Pusher.Util.now.andReturn(startTimestamp + 1000);
 
-          connection = {
-            name: "test",
-            options: { encrypted: false, "hostUnencrypted": "example.com" }
-          };
-          substrategy._callback(null, connection);
+          transport = Pusher.Mocks.getTransport(true);
+          transport.name = "test";
+          substrategy._callback(null, { transport: transport });
         });
 
-        it("should call back after connecting successfully", function() {
-          expect(callback).toHaveBeenCalledWith(null, connection);
+        it("should call back with the transport", function() {
+          expect(callback).toHaveBeenCalledWith(null, { transport: transport });
         });
 
         it("should cache the connected transport", function() {
@@ -164,6 +162,8 @@ describe("CachedStrategy", function() {
       });
 
       describe("after connecting successfully with cached transport", function() {
+        var transport;
+
         beforeEach(function() {
           startTimestamp = Pusher.Util.now();
           spyOn(Pusher.Util, "now").andReturn(startTimestamp);
@@ -171,12 +171,13 @@ describe("CachedStrategy", function() {
           strategy.connect(0, callback);
           Pusher.Util.now.andReturn(startTimestamp + 2000);
 
-          connection = { name: "test" };
-          transports.test._callback(null, connection);
+          transport = Pusher.Mocks.getTransport(true);
+          transport.name = "test";
+          transports.test._callback(null, { transport: transport });
         });
 
-        it("should call back with the connection", function() {
-          expect(callback).toHaveBeenCalledWith(null, connection);
+        it("should call back with the transport", function() {
+          expect(callback).toHaveBeenCalledWith(null, { transport: transport });
         });
 
         it("should not try the substrategy", function() {
@@ -258,16 +259,23 @@ describe("CachedStrategy", function() {
         });
 
         describe("and connecting successfully using the substrategy", function() {
+          var transport;
+
           beforeEach(function() {
             connection = {
               name: "test",
               options: { encrypted: true, "hostEncrypted": "example.net" }
             };
-            substrategy._callback(null, connection);
+
+            transport = Pusher.Mocks.getTransport(true);
+            transport.name = "test";
+            substrategy._callback(null, { transport: transport });
           });
 
           it("should call back with the connection", function() {
-            expect(callback).toHaveBeenCalledWith(null, connection);
+            expect(callback).toHaveBeenCalledWith(null, {
+              transport: transport
+            });
           });
 
           it("should cache the connected transport", function() {

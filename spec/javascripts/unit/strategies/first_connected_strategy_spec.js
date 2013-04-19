@@ -32,10 +32,10 @@ describe("FirstConnectedStrategy", function() {
       expect(substrategy.connect)
         .toHaveBeenCalledWith(0, jasmine.any(Function));
 
-      var connection = {};
-      substrategy._callback(null, connection);
+      var handshake = {};
+      substrategy._callback(null, handshake);
 
-      expect(callback).toHaveBeenCalledWith(null, connection);
+      expect(callback).toHaveBeenCalledWith(null, handshake);
       expect(substrategy._abort).toHaveBeenCalled();
     });
 

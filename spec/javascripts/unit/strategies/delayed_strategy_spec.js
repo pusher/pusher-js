@@ -35,10 +35,10 @@ describe("DelayedStrategy", function() {
       jasmine.Clock.tick(1);
       expect(this.substrategy.connect).toHaveBeenCalled();
 
-      var connection = {};
-      this.substrategy._callback(null, connection);
+      var handshake = {};
+      this.substrategy._callback(null, handshake);
 
-      expect(this.callback).toHaveBeenCalledWith(null, connection);
+      expect(this.callback).toHaveBeenCalledWith(null, handshake);
     });
 
     it("should pass an error when substrategy fails", function() {

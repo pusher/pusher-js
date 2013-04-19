@@ -56,6 +56,8 @@
           transport.emit("initializing");
         });
       transport.connect = jasmine.createSpy("connect");
+      transport.send = jasmine.createSpy("send")
+        .andReturn(true);
       transport.requestPing = jasmine.createSpy("requestPing");
       transport.close = jasmine.createSpy("close");
       transport.state = undefined;
@@ -122,6 +124,8 @@
     getConnection: function() {
       var connection = new Pusher.EventsDispatcher();
 
+      connection.initialize = jasmine.createSpy("initialize");
+      connection.connect = jasmine.createSpy("connect");
       connection.supportsPing = jasmine.createSpy("supportsPing")
         .andReturn(false);
       connection.send = jasmine.createSpy("send")

@@ -35,7 +35,7 @@
     var startTimestamp = Pusher.Util.now();
     var runner = strategies.pop().connect(
       minPriority,
-      function cb(error, connection) {
+      function cb(error, handshake) {
         if (error) {
           flushTransportInfo();
           if (strategies.length > 0) {
@@ -46,8 +46,8 @@
           }
         } else {
           var latency = Pusher.Util.now() - startTimestamp;
-          storeTransportInfo(connection.name, latency);
-          callback(null, connection);
+          storeTransportInfo(handshake.transport.name, latency);
+          callback(null, handshake);
         }
       }
     );

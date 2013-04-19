@@ -54,5 +54,13 @@ describe("Timer", function() {
       jasmine.Clock.tick(1000000);
       timer.ensureAborted();
     });
+
+    it("should stop callback from being called even if clearTimeout is broken", function() {
+      // IE has some edge-case with clearTimeout not working, let's simulate it
+      spyOn(window, "clearTimeout");
+      timer.ensureAborted();
+      jasmine.Clock.tick(1000000);
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 });

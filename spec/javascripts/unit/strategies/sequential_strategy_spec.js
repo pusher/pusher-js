@@ -28,10 +28,10 @@ describe("SequentialStrategy", function() {
       expect(this.substrategies[0].connect).toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
 
-      var connection = {};
-      this.substrategies[0]._callback(null, connection);
+      var handshake = {};
+      this.substrategies[0]._callback(null, handshake);
 
-      expect(this.callback).toHaveBeenCalledWith(null, connection);
+      expect(this.callback).toHaveBeenCalledWith(null, handshake);
       expect(this.substrategies[0]._abort).not.toHaveBeenCalled();
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
     });
