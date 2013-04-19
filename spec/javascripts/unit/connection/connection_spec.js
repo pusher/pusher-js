@@ -160,6 +160,15 @@ describe("Connection", function() {
       expect(onClosed).toHaveBeenCalled();
     });
 
+    it("should 'closed' even if close codes are not supported", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      connection.bind("closed", onClosed);
+
+      transport.emit("closed", {});
+
+      expect(onClosed).toHaveBeenCalled();
+    });
+
     it("should emit the action dispatched by protocol", function() {
       var onMockAction = jasmine.createSpy("onMockAction");
       connection.bind("mock_action", onMockAction);
@@ -200,6 +209,15 @@ describe("Connection", function() {
           message: "something"
         }
       });
+    });
+
+    it("should not emit 'error' if close codes are not supported", function() {
+      var onError = jasmine.createSpy("onError");
+      connection.bind("error", onError);
+
+      transport.emit("closed", {});
+
+      expect(onError).not.toHaveBeenCalled();
     });
 
     it("should not close the transport", function() {
