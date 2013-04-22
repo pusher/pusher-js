@@ -44,7 +44,8 @@
         key: context.key,
         encrypted: context.encrypted,
         timeline: context.timeline,
-        disableFlash: context.disableFlash
+        disableFlash: context.disableFlash,
+        ignoreNullOrigin: context.ignoreNullOrigin
       }, options);
       if (manager) {
         transportClass = manager.getAssistant(transportClass);

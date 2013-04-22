@@ -5,6 +5,7 @@
    */
   function SockJSTransport(name, priority, key, options) {
     Pusher.AbstractTransport.call(this, name, priority, key, options);
+    this.options.ignoreNullOrigin = options.ignoreNullOrigin;
   }
   var prototype = SockJSTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
@@ -57,8 +58,9 @@
   prototype.createSocket = function(url) {
     return new SockJS(url, null, {
       js_path: Pusher.Dependencies.getPath("sockjs", {
-        encrypted: this.options.encrypted
-      })
+        encrypted: this.options.encrypted,
+      }),
+      ignore_null_origin: this.options.ignoreNullOrigin
     });
   };
 
