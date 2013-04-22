@@ -132,6 +132,25 @@ describe("SockJSTransport", function() {
         );
     });
 
+    it("should pass 'ignore_null_origin' option to SockJS constructor", function() {
+      var transport = new getTransport("bar", {
+        encrypted: true,
+        timeline: this.timeline,
+        ignoreNullOrigin: true
+      });
+
+      transport.initialize();
+      transport.connect();
+      expect(window.SockJS)
+        .toHaveBeenCalledWith(
+          "https://example.com:54321/pusher",
+          null,
+          { js_path: "https://example.com/6.6.6/sockjs.js",
+            ignore_null_origin: true
+          }
+        );
+    });
+
     it("should send path after opening connection", function() {
       var openCallback = jasmine.createSpy("openCallback");
       this.transport.bind("open", openCallback);
