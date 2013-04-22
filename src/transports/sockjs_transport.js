@@ -58,7 +58,7 @@
   prototype.createSocket = function(url) {
     return new SockJS(url, null, {
       js_path: Pusher.Dependencies.getPath("sockjs", {
-        encrypted: this.options.encrypted,
+        encrypted: this.options.encrypted
       }),
       ignore_null_origin: this.options.ignoreNullOrigin
     });
