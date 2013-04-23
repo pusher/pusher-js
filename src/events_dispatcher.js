@@ -63,6 +63,9 @@
   CallbackRegistry.prototype.remove = function(eventName, callback) {
     if(this.get(eventName)) {
       var index = Pusher.Util.arrayIndexOf(this.get(eventName), callback);
+      if(index == -1){
+          return;
+      }
       var callbacksCopy = this._callbacks[this._prefix(eventName)].slice(0);
       callbacksCopy.splice(index, 1);
       this._callbacks[this._prefix(eventName)] = callbacksCopy;
