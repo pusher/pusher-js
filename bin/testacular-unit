@@ -7,8 +7,7 @@ debug = ARGV.any? { |arg| arg == "--debug" }
 params = !debug ? " > /dev/null 2>&1" : ""
 
 commands = [
-  "ruby spec/jsonp/server.rb -p 8889 #{params}",
-  "testacular start spec/testacular/config/all.js"
+  "testacular start spec/testacular/config/unit.js"
 ]
 
 pids = commands.map { |cmd|
