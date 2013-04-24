@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.3 (2013-04-24)
+
+[CHANGED] Transports are now considered working only after getting an initial message
+
+[NEW] Added `ignoreNullOrigin` flag to Pusher constructor to ignore null origin checks in SockJS for PhoneGap
+
+[FIXED] Exceptions in private browsing mode on (Mobile) Safari while caching transport info
+
+[FIXED] Unbinding callback that hasn't been bound caused removal of last registered callback
+
+[FIXED] Exceptions while closing connections in Safari
+
 ## 2.0.2 (2013-04-16)
 
 [FIXED] WebSockets not being disabled after rapid, unclean disconnections
