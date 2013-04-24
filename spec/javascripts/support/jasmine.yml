@@ -12,8 +12,6 @@ src_files:
 
   - utils/timer.js
 
-  - pusher_channels.js
-
   - base64.js
   - jsonp/jsonp_request.js
   - jsonp/jsonp_receiver.js
@@ -43,3 +41,6 @@ src_files:
   - connection/connection.js
   - connection/handshake.js
   - connection/connection_manager.js
+
+  - pusher_channels.js
+  - pusher_authorizer.js
