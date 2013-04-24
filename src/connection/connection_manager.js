@@ -299,6 +299,9 @@
 
   /** @private */
   prototype.abandonConnection = function() {
+    if (!this.connection) {
+      return;
+    }
     for (var event in this.connectionCallbacks) {
       this.connection.unbind(event, this.connectionCallbacks[event]);
     }
