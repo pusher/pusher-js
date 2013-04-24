@@ -92,7 +92,17 @@
       return false;
     }
 
-    this.socket = this.createSocket(url);
+    try {
+      this.socket = this.createSocket(url);
+    } catch (e) {
+      var self = this;
+      new Pusher.Timer(0, function() {
+        self.onError(e);
+        self.changeState("closed");
+      });
+      return false;
+    }
+
     this.bindListeners();
 
     Pusher.debug("Connecting", { transport: this.name, url: url });
