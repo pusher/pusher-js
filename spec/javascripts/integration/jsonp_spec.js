@@ -3,7 +3,7 @@ describe("JSONP", function() {
 
   beforeEach(function() {
     options = {
-      url: "http://localhost:8889/jsonp",
+      url: Pusher.Integration.API_URL + "/jsonp/echo",
       receiver: Pusher.JSONP,
       tagPrefix: "_pusher_jsonp_jasmine_"
     };
@@ -39,7 +39,7 @@ describe("JSONP", function() {
     });
     waitsFor(function() {
       return response;
-    }, "JSONP to respond", 2000);
+    }, "JSONP to respond", 5000);
     runs(function() {
       expect(response).toEqual({
         "session": "2289545",
@@ -72,7 +72,7 @@ describe("JSONP", function() {
     });
     waitsFor(function() {
       return responded;
-    }, "JSONP to respond", 2000);
+    }, "JSONP to respond", 5000);
     runs(function() {
       expect(document.getElementById("_pusher_jsonp_jasmine_1")).toBe(null);
       expect(document.getElementById("_pusher_jsonp_jasmine_1_error")).toBe(null);
@@ -81,7 +81,7 @@ describe("JSONP", function() {
 
   it("should fail on 404 response", function() {
     var options = {
-      url: "http://localhost:8889/404",
+      url: Pusher.Integration.API_URL + "/jsonp/404",
       receiver: Pusher.JSONP,
       tagPrefix: "_pusher_jsonp_jasmine_"
     };
@@ -96,13 +96,13 @@ describe("JSONP", function() {
     });
     waitsFor(function() {
       return responded;
-    }, "JSONP to fail", 2000);
+    }, "JSONP to fail", 5000);
   });
 
 
   it("should fail on 500 response", function() {
     var options = {
-      url: "http://localhost:8889/500",
+      url: Pusher.Integration.API_URL + "/jsonp/500",
       receiver: Pusher.JSONP,
       tagPrefix: "_pusher_jsonp_jasmine_"
     };
@@ -117,6 +117,6 @@ describe("JSONP", function() {
     });
     waitsFor(function() {
       return responded;
-    }, "JSONP to fail", 2000);
+    }, "JSONP to fail", 5000);
   });
 });
