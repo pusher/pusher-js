@@ -1,5 +1,6 @@
 describe("Pusher (integration)", function() {
-  var pusher, transport;
+  var transport;
+  var pusher;
 
   beforeEach(function() {
     function createConnection() {
@@ -41,6 +42,15 @@ describe("Pusher (integration)", function() {
     runs(function() {
       transport.state = "open";
       transport.emit("open");
+      transport.emit("message", {
+        data: JSON.stringify({
+          event: "pusher:connection_established",
+          data: {
+            socket_id: "1.1"
+          }
+        })
+      });
+
       new Pusher.Timer(100, function() {
         transport.emit("closed", {
           code: 1006,
@@ -62,6 +72,15 @@ describe("Pusher (integration)", function() {
     runs(function() {
       transport.state = "open";
       transport.emit("open");
+      transport.emit("message", {
+        data: JSON.stringify({
+          event: "pusher:connection_established",
+          data: {
+            socket_id: "1.2"
+          }
+        })
+      });
+
       new Pusher.Timer(100, function() {
         transport.emit("closed", {
           code: 1006,

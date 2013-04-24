@@ -15,11 +15,11 @@
   prototype.connect = function(minPriority, callback) {
     var runner = this.strategy.connect(
       minPriority,
-      function(error, connection) {
-        if (connection) {
+      function(error, handshake) {
+        if (handshake) {
           runner.abort();
         }
-        callback(error, connection);
+        callback(error, handshake);
       }
     );
     return runner;

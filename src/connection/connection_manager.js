@@ -34,7 +34,9 @@
     this.encrypted = !!options.encrypted;
     this.timeline = this.options.getTimeline();
 
-    this.connectionCallbacks = this.buildCallbacks();
+    this.connectionCallbacks = this.buildConnectionCallbacks();
+    this.errorCallbacks = this.buildErrorCallbacks();
+    this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 
     var self = this;
 
@@ -70,42 +72,43 @@
    * to find events emitted on connection attempts.
    */
   prototype.connect = function() {
-    if (this.connection) {
+    var self = this;
+
+    if (self.connection) {
       return;
     }
-    if (this.state === "connecting") {
+    if (self.state === "connecting") {
       return;
     }
 
-    if (!this.strategy.isSupported()) {
-      this.updateState("failed");
+    if (!self.strategy.isSupported()) {
+      self.updateState("failed");
       return;
     }
     if (Pusher.Network.isOnline() === false) {
-      this.updateState("unavailable");
+      self.updateState("unavailable");
       return;
     }
 
-    this.updateState("connecting");
-    this.timelineSender = this.options.getTimelineSender(
-      this.timeline,
-      { encrypted: this.encrypted },
-      this
+    self.updateState("connecting");
+    self.timelineSender = self.options.getTimelineSender(
+      self.timeline,
+      { encrypted: self.encrypted },
+      self
     );
 
-    var self = this;
-    var callback = function(error, transport) {
+    var callback = function(error, handshake) {
       if (error) {
         self.runner = self.strategy.connect(0, callback);
       } else {
         // we don't support switching connections yet
         self.runner.abort();
-        self.setConnection(self.wrapTransport(transport));
+        self.handshakeCallbacks[handshake.action](handshake);
       }
     };
-    this.runner = this.strategy.connect(0, callback);
+    self.runner = self.strategy.connect(0, callback);
 
-    this.setUnavailableTimer();
+    self.setUnavailableTimer();
   };
 
   /** Sends raw data.
@@ -163,41 +166,34 @@
   /** @private */
   prototype.retryIn = function(delay) {
     var self = this;
-    this.retryTimer = setTimeout(function() {
-      if (self.retryTimer === null) {
-        return;
-      }
-      self.retryTimer = null;
+    this.retryTimer = new Pusher.Timer(delay || 0, function() {
       self.disconnect();
       self.connect();
-    }, delay || 0);
+    });
   };
 
   /** @private */
   prototype.clearRetryTimer = function() {
     if (this.retryTimer) {
-      clearTimeout(this.retryTimer);
-      this.retryTimer = null;
+      this.retryTimer.ensureAborted();
     }
   };
 
   /** @private */
   prototype.setUnavailableTimer = function() {
     var self = this;
-    this.unavailableTimer = setTimeout(function() {
-      if (!self.unavailableTimer) {
-        return;
+    self.unavailableTimer = new Pusher.Timer(
+      self.options.unavailableTimeout,
+      function() {
+        self.updateState("unavailable");
       }
-      self.updateState("unavailable");
-      self.unavailableTimer = null;
-    }, this.options.unavailableTimeout);
+    );
   };
 
   /** @private */
   prototype.clearUnavailableTimer = function() {
     if (this.unavailableTimer) {
-      clearTimeout(this.unavailableTimer);
-      this.unavailableTimer = null;
+      this.unavailableTimer.ensureAborted();
     }
   };
 
@@ -207,34 +203,33 @@
     // send ping after inactivity
     if (!this.connection.supportsPing()) {
       var self = this;
-      this.activityTimer = setTimeout(function() {
-        self.send_event('pusher:ping', {});
-        // wait for pong response
-        self.activityTimer = setTimeout(function() {
-          self.connection.close();
-        }, (self.options.pongTimeout));
-      }, (this.options.activityTimeout));
+      self.activityTimer = new Pusher.Timer(
+        self.options.activityTimeout,
+        function() {
+          self.send_event('pusher:ping', {});
+          // wait for pong response
+          self.activityTimer = new Pusher.Timer(
+            self.options.pongTimeout,
+            function() {
+              self.connection.close();
+            }
+          );
+        }
+      );
     }
   };
 
   /** @private */
   prototype.stopActivityCheck = function() {
     if (this.activityTimer) {
-      clearTimeout(this.activityTimer);
-      this.activityTimer = null;
+      this.activityTimer.ensureAborted();
     }
   };
 
   /** @private */
-  prototype.buildCallbacks = function() {
+  prototype.buildConnectionCallbacks = function() {
     var self = this;
     return {
-      connected: function(id) {
-        self.clearUnavailableTimer();
-        self.socket_id = id;
-        self.updateState("connected");
-        self.resetActivityCheck();
-      },
       message: function(message) {
         // includes pong messages from server
         self.resetActivityCheck();
@@ -255,7 +250,27 @@
         if (self.shouldRetry()) {
           self.retryIn(1000);
         }
-      },
+      }
+    };
+  };
+
+  /** @private */
+  prototype.buildHandshakeCallbacks = function(errorCallbacks) {
+    var self = this;
+    return Pusher.Util.extend({}, errorCallbacks, {
+      connected: function(handshake) {
+        self.clearUnavailableTimer();
+        self.setConnection(handshake.connection);
+        self.socket_id = self.connection.id;
+        self.updateState("connected");
+      }
+    });
+  };
+
+  /** @private */
+  prototype.buildErrorCallbacks = function() {
+    var self = this;
+    return {
       ssl_only: function() {
         self.encrypted = true;
         self.updateStrategy();
@@ -284,6 +299,9 @@
 
   /** @private */
   prototype.abandonConnection = function() {
+    if (!this.connection) {
+      return;
+    }
     for (var event in this.connectionCallbacks) {
       this.connection.unbind(event, this.connectionCallbacks[event]);
     }
@@ -307,11 +325,6 @@
   /** @private */
   prototype.shouldRetry = function() {
     return this.state === "connecting" || this.state === "connected";
-  };
-
-  /** @private */
-  prototype.wrapTransport = function(transport) {
-    return new Pusher.ProtocolWrapper(transport);
   };
 
   Pusher.ConnectionManager = ConnectionManager;

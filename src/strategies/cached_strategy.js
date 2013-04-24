@@ -35,7 +35,7 @@
     var startTimestamp = Pusher.Util.now();
     var runner = strategies.pop().connect(
       minPriority,
-      function cb(error, connection) {
+      function cb(error, handshake) {
         if (error) {
           flushTransportInfo();
           if (strategies.length > 0) {
@@ -46,8 +46,8 @@
           }
         } else {
           var latency = Pusher.Util.now() - startTimestamp;
-          storeTransportInfo(connection.name, latency);
-          callback(null, connection);
+          storeTransportInfo(handshake.transport.name, latency);
+          callback(null, handshake);
         }
       }
     );
@@ -79,17 +79,21 @@
   function storeTransportInfo(transport, latency) {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
-      storage.pusherTransport = JSON.stringify({
-        timestamp: Pusher.Util.now(),
-        transport: transport,
-        latency: latency
-      });
+      try {
+        storage.pusherTransport = JSON.stringify({
+          timestamp: Pusher.Util.now(),
+          transport: transport,
+          latency: latency
+        });
+      } catch(e) {
+        // catch over quota exceptions raised by localStorage
+      }
     }
   }
 
   function flushTransportInfo() {
     var storage = Pusher.Util.getLocalStorage();
-    if (storage) {
+    if (storage && storage.pusherTransport) {
       delete storage.pusherTransport;
     }
   }

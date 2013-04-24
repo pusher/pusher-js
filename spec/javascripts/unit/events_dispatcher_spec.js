@@ -60,6 +60,17 @@ describe("EventsDispatcher", function() {
       expect(onEvent1.calls.length).toEqual(1);
       expect(onEvent2.calls.length).toEqual(2);
     });
+
+    it("should not remove the last callback if unbinding a function that was not bound", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var otherCallback = jasmine.createSpy("otherCallback");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.unbind("event", otherCallback);
+
+      dispatcher.emit("event");
+      expect(onEvent.calls.length).toEqual(1);
+    });
   });
 
   describe("#emit", function() {

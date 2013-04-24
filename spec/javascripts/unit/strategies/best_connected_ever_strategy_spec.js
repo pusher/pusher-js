@@ -17,16 +17,18 @@ describe("BestConnectedEverStrategy", function() {
       expect(this.substrategies[2].connect).toHaveBeenCalled();
     });
 
-    describe("after establishing a successful connection", function() {
+    describe("after establishing a connection", function() {
       var transport1;
       beforeEach(function() {
         transport1 = Pusher.Mocks.getTransport();
         transport1.priority = 7;
-        this.substrategies[0]._callback(null, transport1);
+        this.substrategies[0]._callback(null, { transport: transport1 });
       });
 
       it("should call back with first successful transport", function() {
-        expect(this.callback).toHaveBeenCalledWith(null, transport1);
+        expect(this.callback).toHaveBeenCalledWith(null, {
+          transport: transport1
+        });
         expect(this.callback.calls.length).toEqual(1);
       });
 
@@ -39,8 +41,12 @@ describe("BestConnectedEverStrategy", function() {
       it("should call back again if another substrategy succeeds", function() {
         var transport2 = Pusher.Mocks.getTransport();
         transport2.priority = 19;
-        this.substrategies[2]._callback(null, transport2);
-        expect(this.callback).toHaveBeenCalledWith(null, transport2);
+
+        this.substrategies[2]._callback(null, { transport: transport2 });
+
+        expect(this.callback).toHaveBeenCalledWith(null, {
+          transport: transport2
+        });
         expect(this.callback.calls.length).toEqual(2);
       });
     });
@@ -57,8 +63,7 @@ describe("BestConnectedEverStrategy", function() {
 
       it("should not pass errors after one substrategy succeeded", function() {
         var transport = Pusher.Mocks.getTransport();
-        this.substrategies[0]._callback(null, transport);
-        expect(this.callback).toHaveBeenCalledWith(null, transport);
+        this.substrategies[0]._callback(null, { transport: transport });
         expect(this.callback.calls.length).toEqual(1);
 
         this.substrategies[1]._callback(true);
@@ -72,9 +77,10 @@ describe("BestConnectedEverStrategy", function() {
   describe("on abort", function() {
     it("should abort non-failed substrategies", function() {
       var runner = this.strategy.connect(0, this.callback);
+      var transport = Pusher.Mocks.getTransport();
 
       this.substrategies[1]._callback(true);
-      this.substrategies[2]._callback(null, {});
+      this.substrategies[2]._callback(null, { transport: transport });
       runner.abort();
 
       expect(this.substrategies[0]._abort).toHaveBeenCalled();

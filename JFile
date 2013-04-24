@@ -7,7 +7,7 @@ target_dir './dist'
 
 src_dir './src'
 
-version '2.0.2'
+version '2.0.3'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
@@ -46,7 +46,9 @@ bundle 'pusher.js' do
 
   file 'strategies/strategy_builder.js'
 
-  file 'connection/protocol_wrapper.js'
+  file 'connection/protocol.js'
+  file 'connection/connection.js'
+  file 'connection/handshake.js'
   file 'connection/connection_manager.js'
 
   file 'net_info.js'

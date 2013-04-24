@@ -30,9 +30,9 @@
     var timeout = this.timeout;
     var runner = null;
 
-    var tryNextStrategy = function(error, connection) {
-      if (connection) {
-        callback(null, connection);
+    var tryNextStrategy = function(error, handshake) {
+      if (handshake) {
+        callback(null, handshake);
       } else {
         current = current + 1;
         if (self.loop) {
@@ -83,7 +83,7 @@
     var timer = null;
     var runner = null;
 
-    runner = strategy.connect(minPriority, function(error, connection) {
+    runner = strategy.connect(minPriority, function(error, handshake) {
       if (error && timer && timer.isRunning() && !options.failFast) {
         // advance to the next strategy after the timeout
         return;
@@ -91,7 +91,7 @@
       if (timer) {
         timer.ensureAborted();
       }
-      callback(error, connection);
+      callback(error, handshake);
     });
 
     if (options.timeout > 0) {

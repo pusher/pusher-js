@@ -33,7 +33,7 @@
       return false;
     }
     try {
-      return !!(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+      return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {
       return Boolean(
         navigator &&

@@ -53,9 +53,9 @@ describe("IfStrategy", function() {
       });
 
       it("should call back with a connection after the 'true' branch succeeds", function() {
-        var connection = {};
-        trueBranch._callback(null, connection);
-        expect(callback).toHaveBeenCalledWith(null, connection);
+        var handshake = {};
+        trueBranch._callback(null, handshake);
+        expect(callback).toHaveBeenCalledWith(null, handshake);
       });
 
       it("should call back with an error when the 'true' branch fails", function() {
@@ -127,9 +127,9 @@ describe("IfStrategy", function() {
       it("should call back with a connection after the 'false' branch succeeds", function() {
         strategy.connect(0, callback);
 
-        var connection = {};
-        falseBranch._callback(null, connection);
-        expect(callback).toHaveBeenCalledWith(null, connection);
+        var handshake = {};
+        falseBranch._callback(null, handshake);
+        expect(callback).toHaveBeenCalledWith(null, handshake);
       });
 
       it("should call back with an error when the 'false' branch fails", function() {

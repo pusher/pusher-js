@@ -49,7 +49,9 @@ files = [
 
   'src/strategies/strategy_builder.js',
 
-  'src/connection/protocol_wrapper.js',
+  'src/connection/protocol.js',
+  'src/connection/connection.js',
+  'src/connection/handshake.js',
   'src/connection/connection_manager.js',
 
   'spec/javascripts/helpers/mocks.js',

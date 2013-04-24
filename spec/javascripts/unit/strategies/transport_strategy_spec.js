@@ -1,21 +1,33 @@
 describe("TransportStrategy", function() {
+  var transport, transportClass, handshake;
+  var callback;
+  var strategy;
+
   beforeEach(function() {
-    this.transport = Pusher.Mocks.getTransport();
-    this.transportClass = Pusher.Mocks.getTransportClass(true, this.transport);
-    this.strategy = new Pusher.TransportStrategy(
-      "name", 1, this.transportClass, { key: "foo" }
+    transport = Pusher.Mocks.getTransport(true);
+    transportClass = Pusher.Mocks.getTransportClass(true, transport);
+
+    handshake = {};
+    spyOn(Pusher, "Handshake").andCallFake(function(transport, callback) {
+      handshake.transport = transport;
+      handshake.callback = callback;
+      return handshake;
+    });
+
+    strategy = new Pusher.TransportStrategy(
+      "name", 1, transportClass, { key: "foo" }
     );
 
-    this.callback = jasmine.createSpy("connectCallback");
+    callback = jasmine.createSpy("connectCallback");
   });
 
-  describe("after calling isSupported", function() {
+  describe("#isSupported", function() {
     it("should return true when transport is supported", function() {
-      var transport = Pusher.Mocks.getTransportClass(true);
-      var strategy = new Pusher.TransportStrategy("name", 1, transport);
+      var transportClass = Pusher.Mocks.getTransportClass(true);
+      var strategy = new Pusher.TransportStrategy("name", 1, transportClass);
 
       expect(strategy.isSupported()).toBe(true);
-      expect(transport.isSupported).toHaveBeenCalledWith({
+      expect(transportClass.isSupported).toHaveBeenCalledWith({
         disableFlash: false
       });
     });
@@ -28,153 +40,223 @@ describe("TransportStrategy", function() {
     });
 
     it("should pass the disableFlash flag to the transport", function() {
-      var transport = Pusher.Mocks.getTransportClass(true);
-      var strategy = new Pusher.TransportStrategy("name", 1, transport, {
+      var transportClass = Pusher.Mocks.getTransportClass(true);
+      var strategy = new Pusher.TransportStrategy("name", 1, transportClass, {
         disableFlash: true
       });
 
       strategy.isSupported();
-      expect(transport.isSupported).toHaveBeenCalledWith({
+      expect(transportClass.isSupported).toHaveBeenCalledWith({
         disableFlash: true
       });
     });
   });
 
-  describe("on connect", function() {
+  describe("#connect", function() {
     it("should pass key and options to the transport", function() {
       var options = {
         key: "asdf",
         foo: "bar"
       };
       var strategy = new Pusher.TransportStrategy(
-        "name", 1, this.transportClass, options
+        "name", 1, transportClass, options
       );
 
-      strategy.connect(0, this.callback);
-      expect(this.transportClass.createConnection)
+      strategy.connect(0, callback);
+      expect(transportClass.createConnection)
         .toHaveBeenCalledWith("name", 1, "asdf", options);
     });
 
-    it("should emit open on success", function() {
-      this.strategy.connect(0, this.callback);
-      expect(this.transport.initialize).toHaveBeenCalled();
-      expect(this.transport.connect).not.toHaveBeenCalled();
+    it("should call connect on the transport after initializing", function() {
+      strategy.connect(0, callback);
+      expect(transport.initialize).toHaveBeenCalled();
+      expect(transport.connect).not.toHaveBeenCalled();
 
-      this.transport.state = "initialized";
-      this.transport.emit("initialized");
-      expect(this.transport.connect).toHaveBeenCalled();
+      transport.state = "initialized";
+      transport.emit("initialized");
 
-      this.transport.state = "open";
-      this.transport.emit("open");
-      expect(this.callback).toHaveBeenCalledWith(null, this.transport);
+      expect(transport.connect).toHaveBeenCalled();
     });
 
-    it("should emit error on a connection error", function() {
-      this.strategy.connect(0, this.callback);
-      this.transport.state = "initialized";
-      this.transport.emit("initialized");
+    it("should not call back before processing a handshake", function() {
+      strategy.connect(0, callback);
 
-      this.transport.emit("error", 123);
-      expect(this.callback).toHaveBeenCalledWith(123);
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
+      transport.state = "open";
+      transport.emit("open");
+
+      expect(callback).not.toHaveBeenCalled();
     });
 
-    it("should emit error on connection closed", function() {
-      this.strategy.connect(0, this.callback);
-      this.transport.state = "initialized";
-      this.transport.emit("initialized");
+    it("should call back with a 'connected' action, the transport and a connection after processing it successfully", function() {
+      strategy.connect(0, callback);
 
-      this.transport.state = "closed";
-      this.transport.emit("closed");
-      expect(this.callback)
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
+      transport.state = "open";
+      transport.emit("open");
+
+      var handshakeResult = {
+        action: "connected",
+        transport: transport,
+        connection: Pusher.Mocks.getConnection()
+      };
+      handshake.callback(handshakeResult);
+
+      expect(callback).toHaveBeenCalledWith(null, handshakeResult);
+    });
+
+    it("should call back with an error after getting an 'error' event", function() {
+      strategy.connect(0, callback);
+
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.emit("error", {
+        type: "WebSocketError",
+        error: 123
+      });
+
+      expect(callback).toHaveBeenCalledWith({
+        type: "WebSocketError",
+        error: 123
+      });
+    });
+
+    it("should call back with an error when transport closes prematurely", function() {
+      strategy.connect(0, callback);
+
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "closed";
+      transport.emit("closed");
+
+      expect(callback)
         .toHaveBeenCalledWith(jasmine.any(Pusher.Errors.TransportClosed));
     });
 
     it("should call back with an error if transport's priority is too low", function() {
       runs(function() {
-        this.strategy.connect(2, this.callback);
+        strategy.connect(2, callback);
       });
       waitsFor(function() {
-        return this.callback.calls.length > 0;
+        return callback.calls.length > 0;
       }, "callback to be called", 100);
       runs(function() {
-        expect(this.callback).toHaveBeenCalledWith(
+        expect(callback).toHaveBeenCalledWith(
           jasmine.any(Pusher.Errors.TransportPriorityTooLow)
         );
       });
     });
 
     it("should call back with an error if transport is not supported", function() {
-      this.transportClass.isSupported.andReturn(false);
+      transportClass.isSupported.andReturn(false);
       runs(function() {
-        this.strategy.connect(0, this.callback);
+        strategy.connect(0, callback);
       });
       waitsFor(function() {
-        return this.callback.calls.length > 0;
+        return callback.calls.length > 0;
       }, "callback to be called", 100);
       runs(function() {
-        expect(this.callback).toHaveBeenCalledWith(
+        expect(callback).toHaveBeenCalledWith(
           jasmine.any(Pusher.Errors.UnsupportedStrategy)
         );
       });
     });
   });
 
-  describe("on abort", function() {
-    it("should close unestablished connection", function() {
-      var runner = this.strategy.connect(0, this.callback);
+  describe("runner.abort", function() {
+    it("should close transport in 'connecting' state", function() {
+      var runner = strategy.connect(0, callback);
 
-      this.transport.state = "initialized";
-      this.transport.emit("initialized");
-      this.transport.state = "connecting";
-      this.transport.emit("connecting");
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
 
       runner.abort();
 
-      expect(this.transport.close).toHaveBeenCalled();
+      expect(transport.close).toHaveBeenCalled();
     });
 
-    it("should not close open connections", function() {
-      var runner = this.strategy.connect(0, this.callback);
+    it("should close transport before processing a handshake", function() {
+      var runner = strategy.connect(0, callback);
 
-      this.transport.state = "initialized";
-      this.transport.emit("initialized");
-      this.transport.state = "connecting";
-      this.transport.emit("connecting");
-      this.transport.state = "open";
-      this.transport.emit("open");
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
+      transport.state = "open";
+      transport.emit("open");
 
       runner.abort();
 
-      expect(this.transport.close).not.toHaveBeenCalled();
+      expect(transport.close).toHaveBeenCalled();
+    });
+
+    it("should not close transport after processing a handshake", function() {
+      var runner = strategy.connect(0, callback);
+
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
+      transport.state = "open";
+      transport.emit("open");
+      handshake.callback();
+
+      runner.abort();
+
+      expect(transport.close).not.toHaveBeenCalled();
     });
   });
 
-  describe("on forceMinPriority", function() {
-    it("should close the connection if transport's priority is too low", function() {
-      var runner = this.strategy.connect(0, this.callback);
+  describe("runner.forceMinPriority", function() {
+    it("should close the transport if transport's priority is too low", function() {
+      var runner = strategy.connect(0, callback);
       runner.forceMinPriority(5);
-      expect(this.transport.close).toHaveBeenCalled();
+      expect(transport.close).toHaveBeenCalled();
     });
 
-    it("should not close the connection if transport's priority is high enough", function() {
-      var runner = this.strategy.connect(0, this.callback);
+    it("should not close the transport if transport's priority is high enough", function() {
+      var runner = strategy.connect(0, callback);
       runner.forceMinPriority(1);
-      expect(this.transport.close).not.toHaveBeenCalled();
+      expect(transport.close).not.toHaveBeenCalled();
     });
 
-    it("should not close the connection if it's in 'open' state", function() {
-      var runner = this.strategy.connect(0, this.callback);
+    it("should close the transport with too low priority before processing a handshake", function() {
+      var runner = strategy.connect(0, callback);
 
-      this.transport.state = "initialized";
-      this.transport.emit("initialized");
-      this.transport.state = "connecting";
-      this.transport.emit("connecting");
-      this.transport.state = "open";
-      this.transport.emit("open");
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
+      transport.state = "open";
+      transport.emit("open");
 
       runner.forceMinPriority(5);
 
-      expect(this.transport.close).not.toHaveBeenCalled();
+      expect(transport.close).toHaveBeenCalled();
+    });
+
+    it("should not close the transport with too low priority after processing a handshake", function() {
+      var runner = strategy.connect(0, callback);
+
+      transport.state = "initialized";
+      transport.emit("initialized");
+      transport.state = "connecting";
+      transport.emit("connecting");
+      transport.state = "open";
+      transport.emit("open");
+      handshake.callback();
+
+      runner.forceMinPriority(5);
+
+      expect(transport.close).not.toHaveBeenCalled();
     });
   });
 });
