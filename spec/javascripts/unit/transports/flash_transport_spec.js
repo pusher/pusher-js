@@ -11,6 +11,7 @@ describe("FlashTransport", function() {
   }
 
   var _FlashWebSocket;
+  var _Dependencies;
 
   beforeEach(function() {
     this.socket = {};
@@ -18,7 +19,11 @@ describe("FlashTransport", function() {
     this.timeline.generateUniqueID.andReturn(1);
     this.transport = getTransport("foo", { timeline: this.timeline });
 
-    Pusher.Dependencies.loaded.flashfallback = true;
+    _Dependencies = Pusher.Dependencies;
+    Pusher.Dependencies = Pusher.Mocks.getDependencies();
+    Pusher.Dependencies.load.andCallFake(function(name, callback) {
+      callback();
+    });
 
     _FlashWebSocket = window.FlashWebSocket;
     window.FlashWebSocket = jasmine.createSpy("FlashWebSocket").andReturn(this.socket);
@@ -26,6 +31,7 @@ describe("FlashTransport", function() {
 
   afterEach(function() {
     window.FlashWebSocket = _FlashWebSocket;
+    Pusher.Dependencies = _Dependencies;
   });
 
   it("should expose its name", function() {
@@ -175,7 +181,7 @@ describe("FlashTransport", function() {
       this.transport.bind("initializing", onInitializing);
 
       var onDependencyLoaded = null;
-      spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
+      Pusher.Dependencies.load.andCallFake(function(name, c) {
         expect(name).toEqual("flashfallback");
         onDependencyLoaded = c;
       });
@@ -218,6 +224,16 @@ describe("FlashTransport", function() {
         cid: 1,
         transport: "fs"
       });
+    });
+
+    it("should set the WEB_SOCKET_SWF_LOCATION global", function() {
+      Pusher.Dependencies.getRoot.andReturn("http://example.com/1.2.3");
+      window.WEB_SOCKET_SWF_LOCATION = null;
+
+      this.transport.initialize();
+
+      expect(window.WEB_SOCKET_SWF_LOCATION)
+        .toEqual("http://example.com/1.2.3/WebSocketMain.swf");
     });
   });
 
