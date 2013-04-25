@@ -13,6 +13,7 @@ commands = [
 pids = commands.map { |cmd|
   spawn(cmd)
 }
+
 begin
   Process.waitall
 rescue Interrupt => e

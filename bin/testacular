@@ -7,13 +7,14 @@ debug = ARGV.any? { |arg| arg == "--debug" }
 params = !debug ? " > /dev/null 2>&1" : ""
 
 commands = [
-  "ruby spec/jsonp/server.rb -p 8889 #{params}",
+  "bundle exec jbundle server #{params}",
   "testacular start spec/testacular/config/all.js"
 ]
 
 pids = commands.map { |cmd|
   spawn(cmd)
 }
+
 begin
   Process.waitall
 rescue Interrupt => e
