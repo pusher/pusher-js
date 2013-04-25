@@ -3,9 +3,18 @@
 require "rubygems"
 require "bundler/setup"
 
-pids = ["rake jasmine", "ruby spec/jsonp/server.rb -p 8889"].map { |cmd|
+debug = ARGV.any? { |arg| arg == "--debug" }
+params = !debug ? " > /dev/null 2>&1" : ""
+
+commands = [
+  "bundle exec jbundle server #{params}",
+  "rake jasmine"
+]
+
+pids = commands.map { |cmd|
   spawn(cmd)
 }
+
 begin
   Process.waitall
 rescue Interrupt => e

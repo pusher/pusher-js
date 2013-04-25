@@ -119,68 +119,116 @@ describe("Protocol", function() {
       });
     });
 
-    it("should return 'refused' for codes 4001-4099", function() {
-      for (var code = 4001; code <= 4099; code++) {
-        var message = getErrorMessage(code, "refused-" + code);
-        expect(Pusher.Protocol.processHandshake(message)).toEqual({
-          action: "refused",
-          error: {
-            type: "PusherError",
-            data: {
-              code: code,
-              message: "refused-" + code
-            }
+    it("should return 'refused' for code 4001", function() {
+      var message = getErrorMessage(4001, "REFUSED 4001");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "refused",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4001,
+            message: "REFUSED 4001"
           }
-        });
-      }
+        }
+      });
     });
 
-    it("should return 'backoff' for codes 4100-4199", function() {
-      for (var code = 4100; code <= 4199; code++) {
-        var message = getErrorMessage(code, "backoff-" + code);
-        expect(Pusher.Protocol.processHandshake(message)).toEqual({
-          action: "backoff",
-          error: {
-            type: "PusherError",
-            data: {
-              code: code,
-              message: "backoff-" + code
-            }
+    it("should return 'refused' for code 4099", function() {
+      var message = getErrorMessage(4099, "REFUSED 4099");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "refused",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4099,
+            message: "REFUSED 4099"
           }
-        });
-      }
+        }
+      });
     });
 
-    it("should return 'retry' for codes 4200-4299", function() {
-      for (var code = 4200; code <= 4299; code++) {
-        var message = getErrorMessage(code, "retry-" + code);
-        expect(Pusher.Protocol.processHandshake(message)).toEqual({
-          action: "retry",
-          error: {
-            type: "PusherError",
-            data: {
-              code: code,
-              message: "retry-" + code
-            }
+    it("should return 'backoff' for code 4100", function() {
+      var message = getErrorMessage(4100, "BACKOFF 4100");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "backoff",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4100,
+            message: "BACKOFF 4100"
           }
-        });
-      }
+        }
+      });
     });
 
-    it("should return 'refused' for codes 4300-4999", function() {
-      for (var code = 4300; code <= 4999; code++) {
-        var message = getErrorMessage(code, "refused-" + code);
-        expect(Pusher.Protocol.processHandshake(message)).toEqual({
-          action: "refused",
-          error: {
-            type: "PusherError",
-            data: {
-              code: code,
-              message: "refused-" + code
-            }
+    it("should return 'backoff' for code 4199", function() {
+      var message = getErrorMessage(4199, "BACKOFF 4199");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "backoff",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4199,
+            message: "BACKOFF 4199"
           }
-        });
-      }
+        }
+      });
+    });
+
+    it("should return 'retry' for code 4200", function() {
+      var message = getErrorMessage(4200, "RETRY 4200");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "retry",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4200,
+            message: "RETRY 4200"
+          }
+        }
+      });
+    });
+
+    it("should return 'retry' for code 4299", function() {
+      var message = getErrorMessage(4299, "RETRY 4299");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "retry",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4299,
+            message: "RETRY 4299"
+          }
+        }
+      });
+    });
+
+    it("should return 'refused' for code 4300", function() {
+      var message = getErrorMessage(4300, "REFUSED 4300");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "refused",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4300,
+            message: "REFUSED 4300"
+          }
+        }
+      });
+    });
+
+    it("should return 'refused' for code 4399", function() {
+      var message = getErrorMessage(4399, "REFUSED 4399");
+      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+        action: "refused",
+        error: {
+          type: "PusherError",
+          data: {
+            code: 4399,
+            message: "REFUSED 4399"
+          }
+        }
+      });
     });
 
     it("should throw an exception on invalid handshake", function() {
@@ -195,97 +243,141 @@ describe("Protocol", function() {
   });
 
   describe("#getCloseAction", function() {
-    it("should return null for codes 1000,1001", function() {
-      for (var code = 1000; code <= 1001; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toBe(null);
-      }
+    it("should return null for code 1000", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 1000 })).toBe(null);
     });
 
-    it("should return 'backoff' for codes 1002-1004", function() {
-      for (var code = 1002; code <= 1004; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toEqual("backoff");
-      }
+    it("should return null for code 1001", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 1001 })).toBe(null);
     });
 
-    it("should return null for codes 1005-3999", function() {
-      for (var code = 1005; code <= 3999; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toBe(null);
-      }
+    it("should return 'backoff' for code 1002", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 1002 })).toBe("backoff");
+    });
+
+    it("should return 'backoff' for code 1003", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 1003 })).toBe("backoff");
+    });
+
+    it("should return 'backoff' for code 1004", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 1004 })).toBe("backoff");
+    });
+
+    it("should return null for code 1005", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 1005 })).toBe(null);
+    });
+
+    it("should return null for code 3999", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 3999 })).toBe(null);
     });
 
     it("should return 'ssl_only' for code 4000", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4000 }))
-        .toEqual("ssl_only");
+      expect(Pusher.Protocol.getCloseAction({ code: 4000 })).toEqual("ssl_only");
     });
 
-    it("should return 'refused' for codes 4001-4099", function() {
-      for (var code = 4001; code <= 4099; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toEqual("refused");
-      }
+    it("should return 'refused' for code 4001", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4001 })).toBe("refused");
     });
 
-    it("should return 'backoff' for codes 4100-4199", function() {
-      for (var code = 4100; code <= 4199; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toEqual("backoff");
-      }
+    it("should return 'refused' for code 4099", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4099 })).toBe("refused");
     });
 
-    it("should return 'retry' for codes 4200-4299", function() {
-      for (var code = 4200; code <= 4299; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toEqual("retry");
-      }
+    it("should return 'backoff' for code 4100", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4100 })).toBe("backoff");
     });
 
-    it("should return 'refused' for codes 4300-4999", function() {
-      for (var code = 4300; code <= 4999; code++) {
-        expect(Pusher.Protocol.getCloseAction({ code: code }))
-          .toEqual("refused");
-      }
+    it("should return 'backoff' for code 4199", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4199 })).toBe("backoff");
+    });
+
+    it("should return 'retry' for code 4200", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4200 })).toBe("retry");
+    });
+
+    it("should return 'retry' for code 4299", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4299 })).toBe("retry");
+    });
+
+    it("should return 'retry' for code 4200", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4200 })).toBe("retry");
+    });
+
+    it("should return 'retry' for code 4299", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4299 })).toBe("retry");
+    });
+
+    it("should return 'refused' for code 4300", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4300 })).toBe("refused");
+    });
+
+    it("should return 'refused' for code 4399", function() {
+      expect(Pusher.Protocol.getCloseAction({ code: 4399 })).toBe("refused");
     });
   });
 
   describe("#getCloseError", function() {
-    it("should return null for codes 1000,1001", function() {
-      for (var code = 1000; code <= 1001; code++) {
-        expect(Pusher.Protocol.getCloseError({ code: code, reason: "no" }))
+    it("should return null for code 1000", function() {
+      expect(Pusher.Protocol.getCloseError({ code: 1000, reason: "no" }))
           .toBe(null);
-      }
     });
 
-    it("should return an error using 'reason' field for codes 1002-4999", function() {
-      for (var code = 1002; code <= 4999; code++) {
-        expect(Pusher.Protocol.getCloseError({
-          code: code,
-          reason: "c" + code
-        })).toEqual({
-          type: "PusherError",
-          data: {
-            code: code,
-            message: "c" + code
-          }
-        });
-      }
+    it("should return null for code 1001", function() {
+      expect(Pusher.Protocol.getCloseError({ code: 1001, reason: "no" }))
+          .toBe(null);
     });
 
-    it("should return an error using 'message' field for codes 1002-4999", function() {
-      for (var code = 1002; code <= 4999; code++) {
-        expect(Pusher.Protocol.getCloseError({
-          code: code,
-          message: "c" + code
-        })).toEqual({
-          type: "PusherError",
-          data: {
-            code: code,
-            message: "c" + code
-          }
-        });
-      }
+    it("should return an error using 'reason' field for code 1002", function() {
+      expect(Pusher.Protocol.getCloseError({
+        code: 1002,
+        reason: "foo"
+      })).toEqual({
+        type: "PusherError",
+        data: {
+          code: 1002,
+          message: "foo"
+        }
+      });
+    });
+
+    it("should return an error using 'reason' field for code 4999", function() {
+      expect(Pusher.Protocol.getCloseError({
+        code: 4999,
+        reason: "bar"
+      })).toEqual({
+        type: "PusherError",
+        data: {
+          code: 4999,
+          message: "bar"
+        }
+      });
+    });
+
+    it("should return an error using 'message' field for code 1002", function() {
+      expect(Pusher.Protocol.getCloseError({
+        code: 1002,
+        message: "foo"
+      })).toEqual({
+        type: "PusherError",
+        data: {
+          code: 1002,
+          message: "foo"
+        }
+      });
+    });
+
+
+    it("should return an error using 'message' field for code 4999", function() {
+      expect(Pusher.Protocol.getCloseError({
+        code: 4999,
+        message: "bar"
+      })).toEqual({
+        type: "PusherError",
+        data: {
+          code: 4999,
+          message: "bar"
+        }
+      });
     });
   });
 });

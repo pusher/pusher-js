@@ -4,7 +4,7 @@ describe("JSONPRequest", function() {
 
     this.receiver = new Pusher.JSONPReceiver();
     this.options = {
-      url: "http://localhost:8889/jsonp",
+      url: "http://example.com/jsonp",
       receiver: this.receiver,
       receiverName: "mock",
       tagPrefix: "_pusher_jsonp_jasmine_"
@@ -30,7 +30,7 @@ describe("JSONPRequest", function() {
       );
 
       expect(Pusher.JSONPRequest).toHaveBeenCalledWith({
-        url: "http://localhost:8889/jsonp",
+        url: "http://example.com/jsonp",
         receiver: "mock",
         tagPrefix: "_pusher_jsonp_jasmine_"
       });

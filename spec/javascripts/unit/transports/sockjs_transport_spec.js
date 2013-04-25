@@ -11,6 +11,7 @@ describe("SockJSTransport", function() {
   }
 
   var _SockJS;
+  var _Dependencies;
 
   beforeEach(function() {
     this.socket = {};
@@ -18,7 +19,11 @@ describe("SockJSTransport", function() {
     this.timeline.generateUniqueID.andReturn(1);
     this.transport = getTransport("foo", { timeline: this.timeline });
 
-    Pusher.Dependencies.loaded.sockjs = true;
+    _Dependencies = Pusher.Dependencies;
+    Pusher.Dependencies = Pusher.Mocks.getDependencies();
+    Pusher.Dependencies.load.andCallFake(function(name, callback) {
+      callback();
+    });
 
     _SockJS = window.SockJS;
     window.SockJS = jasmine.createSpy("SockJS").andReturn(this.socket);
@@ -26,6 +31,7 @@ describe("SockJSTransport", function() {
 
   afterEach(function() {
     window.SockJS = _SockJS;
+    Pusher.Dependencies = _Dependencies;
   });
 
   it("should expose its name", function() {
@@ -48,7 +54,7 @@ describe("SockJSTransport", function() {
       this.transport.bind("initializing", onInitializing);
 
       var onDependencyLoaded = null;
-      spyOn(Pusher.Dependencies, "load").andCallFake(function(name, c) {
+      Pusher.Dependencies.load.andCallFake(function(name, c) {
         expect(name).toEqual("sockjs");
         onDependencyLoaded = c;
       });
@@ -96,7 +102,7 @@ describe("SockJSTransport", function() {
 
   describe("on connect", function() {
     beforeEach(function() {
-      spyOn(Pusher.Dependencies, "getPath").andCallFake(function(_, options){
+      Pusher.Dependencies.getPath.andCallFake(function(_, options){
         if (options && options.encrypted) {
           return "https://example.com/6.6.6/sockjs.js";
         } else {
