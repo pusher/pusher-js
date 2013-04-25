@@ -51,7 +51,7 @@
     var onClosed = function(closeEvent) {
       unbindListeners();
 
-      var action = Pusher.Protocol.getCloseAction(closeEvent);
+      var action = Pusher.Protocol.getCloseAction(closeEvent) || "backoff";
       var error = Pusher.Protocol.getCloseError(closeEvent);
       self.finish(action, { error: error });
     };
