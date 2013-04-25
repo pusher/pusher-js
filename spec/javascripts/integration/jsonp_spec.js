@@ -1,4 +1,4 @@
-describe("JSONP", function() {
+describeIntegration("JSONP", function() {
   var options;
 
   beforeEach(function() {
