@@ -5,7 +5,7 @@ This library is an open source client that allows Javascript clients to connect 
 We have included the source code for following libraries:
 
 * websocket-js
-* sockjs-client 
+* sockjs-client
 
 They both include their own licences.
 
@@ -160,7 +160,16 @@ This will clean web-socket-js and sockjs-client submodules, check out last commi
 
 ### Jasmine
 
-There are several ways to run jasmine tests. Please make sure you run bundler before running any of following commands.
+Jasmine test suite contains two types of tests:
+
+1. unit tests,
+2. integration tests.
+
+Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
+
+There are several ways to run jasmine tests. All commands mentioned below also start a JBundle server, which is required for integration tests.
+
+Please make sure you run bundler before running any of following commands.
 
     bundle install
 
@@ -170,7 +179,7 @@ First, start the jasmine and JSONP integration servers:
 
     bin/jasmine
 
-Then open any browser and navigate to <http://localhost:8888/>.
+Then open any browser and navigate to <http://localhost:8888/> - it will run both unit and integration tests.
 
 #### Run headless tests
 
@@ -180,6 +189,8 @@ Running headless tests is very convenient for development, especially when using
 
 Tests will be run automatically in the terminal. Guard watches JS files and specs and re-runs aproppriate tests whenever you save any changes. Press enter to re-run all tests.
 
+Guard runs only unit tests - partially because PhantomJS does not support WebSockets, partially for convenience.
+
 There's also a JSHint watch, which will validate JS files on save.
 
 #### Run testacular
@@ -188,11 +199,13 @@ Testacular also runs tests automatically, but it uses actual browsers to execute
 
     npm install -g testacular
 
-Then start the server:
+Then start the server, run one of following commands:
 
-    bin/testacular
+    bin/testacular-unit           # runs only unit tests
+    bin/testacular-integration    # runs only integration tests
+    bin/testacular                # runs both unit and integration tests
 
-All configured browsers will be automatically opened and will run all tests. Testacular also re-executes specs on file changes. After you close the server, browsers will get shut down too.
+All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
 
 ### Old framework
 
