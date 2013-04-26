@@ -12,4 +12,5 @@ group :development do
   gem 'guard'
   gem 'guard-jasmine'
   gem 'guard-jshint-node'
+  gem 'ruby-hmac'
 end
