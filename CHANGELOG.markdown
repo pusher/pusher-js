@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4 (2013-04-26)
+
+[FIXED] Exception when WebSocket was closed uncleanly immediately after opening
+
+[FIXED] Removed SockJS exception when receiving a handshake after closing the connection
+
 ## 2.0.3 (2013-04-24)
 
 [CHANGED] Transports are now considered working only after getting an initial message

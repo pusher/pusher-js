@@ -83,31 +83,53 @@ describe("Handshake", function() {
   });
 
   describe("after receiving a 'closed' event from transport", function() {
-    beforeEach(function() {
-      spyOn(Pusher.Protocol, "getCloseAction").andReturn("boo");
-      spyOn(Pusher.Protocol, "getCloseError");
+    describe("with defined action", function() {
+      beforeEach(function() {
+        spyOn(Pusher.Protocol, "getCloseAction").andReturn("boo");
+        spyOn(Pusher.Protocol, "getCloseError");
 
-      transport.emit("closed", {
-        code: 4321,
-        reason: "test"
+        transport.emit("closed", {
+          code: 4321,
+          reason: "test"
+        });
+      });
+
+      it("should call back with correct action and error", function() {
+        expect(callback).toHaveBeenCalledWith({
+          action: "boo",
+          transport: transport
+        });
+      });
+
+      it("should not close the transport", function() {
+        expect(transport.close).not.toHaveBeenCalled();
+      });
+
+      it("should call protocol methods with correct arguments", function() {
+        expect(Pusher.Protocol.getCloseAction).toHaveBeenCalledWith({
+          code: 4321,
+          reason: "test"
+        });
       });
     });
 
-    it("should call back with correct action and error", function() {
-      expect(callback).toHaveBeenCalledWith({
-        action: "boo",
-        transport: transport
+    describe("with null action", function() {
+      beforeEach(function() {
+        spyOn(Pusher.Protocol, "getCloseAction").andReturn(null);
+        spyOn(Pusher.Protocol, "getCloseError").andReturn("???");
+
+        transport.emit("closed", {
+          code: 4321,
+          reason: "???"
+        });
       });
-    });
 
-    it("should not close the transport", function() {
-      expect(transport.close).not.toHaveBeenCalled();
-    });
-
-    it("should call protocol methods with correct arguments", function() {
-      expect(Pusher.Protocol.getCloseAction).toHaveBeenCalledWith({
-        code: 4321,
-        reason: "test"
+      it("should call back with 'backoff' action and error", function() {
+        expect(callback).toHaveBeenCalledWith({
+          action: "backoff",
+          error: "???",
+          transport: transport
+        });
       });
     });
   });
