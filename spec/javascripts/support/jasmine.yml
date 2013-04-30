@@ -42,5 +42,10 @@ src_files:
   - connection/handshake.js
   - connection/connection_manager.js
 
-  - pusher_channels.js
+  - channels/members.js
+  - channels/channel.js
+  - channels/private_channel.js
+  - channels/presence_channel.js
+  - channels/channels.js
+
   - pusher_authorizer.js

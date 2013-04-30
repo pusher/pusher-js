@@ -52,7 +52,13 @@ bundle 'pusher.js' do
   file 'connection/connection_manager.js'
 
   file 'net_info.js'
-  file 'pusher_channels.js'
+
+  file 'channels/members.js'
+  file 'channels/channel.js'
+  file 'channels/private_channel.js'
+  file 'channels/presence_channel.js'
+  file 'channels/channels.js'
+
   file 'pusher_authorizer.js'
 end
 
