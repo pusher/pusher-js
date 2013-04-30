@@ -154,12 +154,28 @@
       return manager;
     },
 
+    getPusher: function() {
+      var pusher = new Pusher.EventsDispatcher();
+      pusher.send_event = jasmine.createSpy("send_event");
+      return pusher;
+    },
+
     getChannel: function(name) {
       var channel = new Pusher.EventsDispatcher();
       channel.name = name;
       channel.authorize = jasmine.createSpy("authorize");
       channel.disconnect = jasmine.createSpy("disconnect");
+      channel.handleEvent = jasmine.createSpy("handleEvent");
       return channel;
+    },
+
+    getAuthorizer: function() {
+      var authorizer = {};
+      authorizer._callback = null;
+      authorizer.authorize = jasmine.createSpy("authorize").andCallFake(function(_, callback) {
+        authorizer._callback = callback;
+      });
+      return authorizer;
     }
   };
 }).call(this);
