@@ -43,7 +43,7 @@ describe("Pusher", function() {
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(strategy);
     spyOn(Pusher, "ConnectionManager").andReturn(manager);
-    spyOn(Pusher.Channel, "factory").andCallFake(function(name, _) {
+    spyOn(Pusher, "Channel").andCallFake(function(name, _) {
       return Pusher.Mocks.getChannel(name);
     });
     spyOn(Pusher.JSONPRequest, "send");
@@ -323,13 +323,12 @@ describe("Pusher", function() {
         expectValidSubscriptions(manager, { "xxx" : channel });
       });
 
-      it("should emit pusher:subscription_error after auth error", function() {
+      it("should pass pusher:subscription_error event after auth error", function() {
         var channel = pusher.subscribe("wrong");
-        var onSubscriptionError = jasmine.createSpy("onSubscriptionError");
 
-        channel.bind("pusher:subscription_error", onSubscriptionError);
         channel.authorize.calls[0].args[2](true, "ERROR");
-        expect(onSubscriptionError).toHaveBeenCalledWith("ERROR");
+        expect(channel.handleEvent)
+          .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
       });
     });
 
@@ -346,17 +345,16 @@ describe("Pusher", function() {
   });
 
   describe("on message", function() {
-    it("should publish events to their channels", function() {
+    it("should pass events to their channels", function() {
       var channel = pusher.subscribe("chan");
-      var onEvent = jasmine.createSpy("onEvent");
-      channel.bind("event", onEvent);
 
       manager.emit("message", {
         channel: "chan",
         event: "event",
         data: { key: "value" }
       });
-      expect(onEvent).toHaveBeenCalledWith({ key: "value" });
+      expect(channel.handleEvent)
+        .toHaveBeenCalledWith("event", { key: "value" });
     });
 
     it("should not publish events to other channels", function() {
