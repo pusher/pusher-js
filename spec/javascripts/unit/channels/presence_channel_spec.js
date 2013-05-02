@@ -280,14 +280,14 @@ describe("PresenceChannel", function() {
           });
 
           expect(members.count).toEqual(2);
-        })
+        });
 
         it("should not emit pusher:member_removed if removed member didn't exist", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:member_removed", callback);
 
           channel.handleEvent("pusher_internal:member_removed", {
-            user_id: "C",
+            user_id: "C"
           });
 
           expect(callback).not.toHaveBeenCalled();

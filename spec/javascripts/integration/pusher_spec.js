@@ -458,7 +458,7 @@ describeIntegration("Pusher", function() {
           .toEqual(member2);
       });
     });
-  };
+  }
 
   function buildIntegrationTests(encrypted) {
     describe("with encrypted=" + encrypted, function() {
