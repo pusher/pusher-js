@@ -115,7 +115,9 @@
     };
 
     channel.bind('pusher_internal:authorized', function(authorizedData) {
-      channelData = JSON.parse(authorizedData.channel_data);
+      if(authorizedData.channel_data) {
+        channelData = JSON.parse(authorizedData.channel_data);
+      }
       channel.bind("pusher_internal:subscription_succeeded", subscriptionSucceeded);
     });
 
