@@ -392,9 +392,9 @@ describeIntegration("Pusher", function() {
 
         subscribe(pusher, channelName, function(c) {
           channel1 = c;
-          subscribe(pusher2, channelName, function(c) {
-            channel2 = c;
-          });
+        });
+        subscribe(pusher2, channelName, function(c) {
+          channel2 = c;
         });
 
         var eventName = "client-test";
