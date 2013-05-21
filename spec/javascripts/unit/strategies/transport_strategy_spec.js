@@ -7,10 +7,8 @@ describe("TransportStrategy", function() {
     transport = Pusher.Mocks.getTransport(true);
     transportClass = Pusher.Mocks.getTransportClass(true, transport);
 
-    handshake = {};
     spyOn(Pusher, "Handshake").andCallFake(function(transport, callback) {
-      handshake.transport = transport;
-      handshake.callback = callback;
+      handshake = Pusher.Mocks.getHandshake(transport, callback);
       return handshake;
     });
 
@@ -106,7 +104,7 @@ describe("TransportStrategy", function() {
         transport: transport,
         connection: Pusher.Mocks.getConnection()
       };
-      handshake.callback(handshakeResult);
+      handshake._callback(handshakeResult);
 
       expect(callback).toHaveBeenCalledWith(null, handshakeResult);
     });
@@ -183,7 +181,7 @@ describe("TransportStrategy", function() {
       expect(transport.close).toHaveBeenCalled();
     });
 
-    it("should close transport before processing a handshake", function() {
+    it("should close handshake before processing a it", function() {
       var runner = strategy.connect(0, callback);
 
       transport.state = "initialized";
@@ -195,7 +193,7 @@ describe("TransportStrategy", function() {
 
       runner.abort();
 
-      expect(transport.close).toHaveBeenCalled();
+      expect(handshake.close).toHaveBeenCalled();
     });
 
     it("should not close transport after processing a handshake", function() {
@@ -207,7 +205,7 @@ describe("TransportStrategy", function() {
       transport.emit("connecting");
       transport.state = "open";
       transport.emit("open");
-      handshake.callback();
+      handshake._callback();
 
       runner.abort();
 
@@ -228,7 +226,7 @@ describe("TransportStrategy", function() {
       expect(transport.close).not.toHaveBeenCalled();
     });
 
-    it("should close the transport with too low priority before processing a handshake", function() {
+    it("should close the handshake with too low priority before processing it", function() {
       var runner = strategy.connect(0, callback);
 
       transport.state = "initialized";
@@ -240,7 +238,7 @@ describe("TransportStrategy", function() {
 
       runner.forceMinPriority(5);
 
-      expect(transport.close).toHaveBeenCalled();
+      expect(handshake.close).toHaveBeenCalled();
     });
 
     it("should not close the transport with too low priority after processing a handshake", function() {
@@ -252,7 +250,7 @@ describe("TransportStrategy", function() {
       transport.emit("connecting");
       transport.state = "open";
       transport.emit("open");
-      handshake.callback();
+      handshake._callback();
 
       runner.forceMinPriority(5);
 
