@@ -22,17 +22,18 @@
   }
   var prototype = Handshake.prototype;
 
+  prototype.close = function() {
+    this.unbindListeners();
+    this.transport.close();
+  };
+
   /** @private */
   prototype.bindListeners = function() {
     var self = this;
 
-    var unbindListeners = function() {
-      self.transport.unbind("message", onMessage);
-      self.transport.unbind("closed", onClosed);
-    };
+    self.onMessage = function(m) {
+      self.unbindListeners();
 
-    var onMessage = function(m) {
-      unbindListeners();
       try {
         var result = Pusher.Protocol.processHandshake(m);
         if (result.action === "connected") {
@@ -48,16 +49,23 @@
         self.transport.close();
       }
     };
-    var onClosed = function(closeEvent) {
-      unbindListeners();
+
+    self.onClosed = function(closeEvent) {
+      self.unbindListeners();
 
       var action = Pusher.Protocol.getCloseAction(closeEvent) || "backoff";
       var error = Pusher.Protocol.getCloseError(closeEvent);
       self.finish(action, { error: error });
     };
 
-    self.transport.bind("message", onMessage);
-    self.transport.bind("closed", onClosed);
+    self.transport.bind("message", self.onMessage);
+    self.transport.bind("closed", self.onClosed);
+  };
+
+  /** @private */
+  prototype.unbindListeners = function() {
+    this.transport.unbind("message", this.onMessage);
+    this.transport.unbind("closed", this.onClosed);
   };
 
   /** @private */

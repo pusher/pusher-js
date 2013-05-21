@@ -42,13 +42,14 @@
     var transport = this.transport.createConnection(
       this.name, this.priority, this.options.key, this.options
     );
+    var handshake = null;
 
     var onInitialized = function() {
       transport.unbind("initialized", onInitialized);
       transport.connect();
     };
     var onOpen = function() {
-      var handshake = new Pusher.Handshake(transport, function(result) {
+      handshake = new Pusher.Handshake(transport, function(result) {
         connected = true;
         unbindListeners();
         callback(null, result);
@@ -84,15 +85,22 @@
           return;
         }
         unbindListeners();
-        transport.close();
+        if (handshake) {
+          handshake.close();
+        } else {
+          transport.close();
+        }
       },
       forceMinPriority: function(p) {
         if (connected) {
           return;
         }
         if (self.priority < p) {
-          // TODO close transport in a nicer way
-          transport.close();
+          if (handshake) {
+            handshake.close();
+          } else {
+            transport.close();
+          }
         }
       }
     };

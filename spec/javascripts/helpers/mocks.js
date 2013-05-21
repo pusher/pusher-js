@@ -100,6 +100,15 @@
       return klass;
     },
 
+    getHandshake: function(transport, callback) {
+      return {
+        close: jasmine.createSpy("close"),
+
+        _transport: transport,
+        _callback: callback
+      };
+    },
+
     getStrategy: function(isSupported) {
       var strategy = new Pusher.EventsDispatcher();
 
