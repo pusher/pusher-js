@@ -91,13 +91,16 @@
   };
 
   Pusher.warn = function() {
-    if (window.console && window.console.warn) {
-      window.console.warn(Pusher.Util.stringify.apply(this, arguments));
-    } else {
-      if (!Pusher.log) {
-        return;
+    var message = Pusher.Util.stringify.apply(this, arguments);
+    if (window.console) {
+      if (window.console.warn) {
+        window.console.warn(message);
+      } else if (window.console.log) {
+        window.console.log(message);
       }
-      Pusher.log(Pusher.Util.stringify.apply(this, arguments));
+    }
+    if (Pusher.log) {
+      Pusher.log(message);
     }
   };
 
