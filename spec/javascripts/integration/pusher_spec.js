@@ -1,26 +1,14 @@
 describe("Pusher (semi-integration)", function() {
-  var transport;
   var pusher;
 
   beforeEach(function() {
-    function createConnection() {
-      transport = Pusher.Mocks.getTransport(true);
-      return transport;
-    }
-
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
     spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
     spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
 
-    spyOn(Pusher.WSTransport, "createConnection").andCallFake(createConnection);
-    spyOn(Pusher.FlashTransport, "createConnection").andCallFake(createConnection);
-    spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createConnection);
-
     spyOn(Pusher.Util, "getLocalStorage").andReturn({});
-
-    pusher = new Pusher("foobar");
   });
 
   afterEach(function() {
@@ -28,7 +16,18 @@ describe("Pusher (semi-integration)", function() {
   });
 
   it("should fall back to SockJS after two broken connections", function() {
+    var transport;
+
+    function createConnection() {
+      transport = Pusher.Mocks.getTransport(true);
+      return transport;
+    }
+
+    spyOn(Pusher.WSTransport, "createConnection").andCallFake(createConnection);
+    spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createConnection);
+
     runs(function() {
+      pusher = new Pusher("foobar");
       pusher.connect();
     });
     waitsFor(function() {
@@ -81,6 +80,84 @@ describe("Pusher (semi-integration)", function() {
     runs(function() {
       expect(Pusher.WSTransport.createConnection.calls.length).toEqual(2);
       pusher.disconnect();
+    });
+  });
+
+  it("should not close established SockJS connection when WebSocket is stuck in handshake", function() {
+    var wsTransport, sockjsTransport;
+
+    function createWSConnection() {
+      wsTransport = Pusher.Mocks.getTransport(true);
+      return wsTransport;
+    }
+    function createSockJSConnection() {
+      sockjsTransport = Pusher.Mocks.getTransport(true);
+      return sockjsTransport;
+    }
+
+    spyOn(Pusher.WSTransport, "createConnection").andCallFake(createWSConnection);
+    spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
+
+    runs(function() {
+      pusher = new Pusher("foobar");
+      pusher.connect();
+    });
+    waitsFor(function() {
+      return Pusher.WSTransport.createConnection.calls.length === 1;
+    }, "WS connection to be created", 500);
+    runs(function() {
+      wsTransport.state = "initialized";
+      wsTransport.emit("initialized");
+    });
+    waitsFor(function() {
+      return wsTransport.connect.calls.length === 1;
+    }, "connect on WS to be called", 500);
+    runs(function() {
+      wsTransport.state = "open";
+      wsTransport.emit("open");
+      // start handshake, but don't do anything
+    });
+    waitsFor(function() {
+      return Pusher.SockJSTransport.createConnection.calls.length === 1;
+    }, "SockJS connection to be created", 3000);
+    runs(function() {
+      sockjsTransport.state = "initialized";
+      sockjsTransport.emit("initialized");
+    });
+    waitsFor(function() {
+      return sockjsTransport.connect.calls.length === 1;
+    }, "connect on SockJS to be called", 500);
+    runs(function() {
+      sockjsTransport.state = "open";
+      sockjsTransport.emit("open");
+      sockjsTransport.emit("message", {
+        data: JSON.stringify({
+          event: "pusher:connection_established",
+          data: {
+            socket_id: "123.456"
+          }
+        })
+      });
+    });
+    waitsFor(function() {
+      return wsTransport.close.calls.length === 1;
+    }, "close on WS to be called", 500);
+
+    var timer;
+    runs(function() {
+      // this caused a connection to be retried after 1s
+      wsTransport.emit("closed", {
+        code: 1000,
+        wasClean: true,
+        reason: "clean"
+      });
+      timer = new Pusher.Timer(2000, function() {});
+    });
+    waitsFor(function() {
+      return !timer.isRunning();
+    }, "timer to be called", 2500);
+    runs(function() {
+      expect(sockjsTransport.close).not.toHaveBeenCalled();
     });
   });
 });
