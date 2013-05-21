@@ -270,21 +270,31 @@
   /** @private */
   prototype.buildErrorCallbacks = function() {
     var self = this;
+
+    function withErrorEmitted(callback) {
+      return function(result) {
+        if (result.error) {
+          self.emit("error", { type: "WebSocketError", error: result.error });
+        }
+        callback(result);
+      };
+    }
+
     return {
-      ssl_only: function() {
+      ssl_only: withErrorEmitted(function() {
         self.encrypted = true;
         self.updateStrategy();
         self.retryIn(0);
-      },
-      refused: function() {
+      }),
+      refused: withErrorEmitted(function() {
         self.disconnect();
-      },
-      backoff: function() {
+      }),
+      backoff: withErrorEmitted(function() {
         self.retryIn(1000);
-      },
-      retry: function() {
+      }),
+      retry: withErrorEmitted(function() {
         self.retryIn(0);
-      }
+      })
     };
   };
 
