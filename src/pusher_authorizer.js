@@ -8,8 +8,8 @@
 
   Pusher.Channel.Authorizer.prototype = {
     composeQuery: function(socketId) {
-      var query = '&socket_id=' + encodeURIComponent(socketId)
-        + '&channel_name=' + encodeURIComponent(this.channel.name);
+      var query = '&socket_id=' + encodeURIComponent(socketId) +
+        '&channel_name=' + encodeURIComponent(this.channel.name);
 
       for(var i in this.authOptions.params) {
         query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
@@ -23,6 +23,7 @@
     }
   };
 
+  var nextAuthCallbackID = 1;
 
   Pusher.auth_callbacks = {};
   Pusher.authorizers = {
@@ -38,7 +39,7 @@
       xhr.open("POST", Pusher.channel_auth_endpoint, true);
 
       // add request headers
-      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       for(var headerName in this.authOptions.headers) {
         xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
       }
@@ -74,17 +75,23 @@
         Pusher.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
       }
 
+      var callbackName;
+      do {
+        callbackName = this.channel_name + "_" + nextAuthCallbackID;
+        nextAuthCallbackID++;
+      } while (Pusher.auth_callbacks[callbackName]);
+
       var script = document.createElement("script");
       // Hacked wrapper.
-      Pusher.auth_callbacks[this.channel.name] = function(data) {
+      Pusher.auth_callbacks[callbackName] = function(data) {
         callback(false, data);
       };
 
-      var callback_name = "Pusher.auth_callbacks['" + this.channel.name + "']";
-      script.src = Pusher.channel_auth_endpoint
-        + '?callback='
-        + encodeURIComponent(callback_name)
-        + this.composeQuery(socketId);
+      var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
+      script.src = Pusher.channel_auth_endpoint +
+        '?callback=' +
+        encodeURIComponent(callback_name) +
+        this.composeQuery(socketId);
 
       var head = document.getElementsByTagName("head")[0] || document.documentElement;
       head.insertBefore( script, head.firstChild );
