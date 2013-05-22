@@ -75,11 +75,8 @@
         Pusher.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
       }
 
-      var callbackName;
-      do {
-        callbackName = this.channel_name + "_" + nextAuthCallbackID;
-        nextAuthCallbackID++;
-      } while (Pusher.auth_callbacks[callbackName]);
+      var callbackName = nextAuthCallbackID.toString();
+      nextAuthCallbackID++;
 
       var script = document.createElement("script");
       // Hacked wrapper.
