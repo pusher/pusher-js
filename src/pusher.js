@@ -20,7 +20,7 @@
       return new Pusher.Timeline(self.key, self.sessionID, {
         features: Pusher.Util.getClientFeatures(),
         params: self.options.timelineParams || {},
-        limit: 25,
+        limit: 50,
         level: Pusher.Timeline.INFO,
         version: Pusher.VERSION
       });
