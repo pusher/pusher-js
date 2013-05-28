@@ -94,7 +94,11 @@
   function flushTransportInfo() {
     var storage = Pusher.Util.getLocalStorage();
     if (storage && storage.pusherTransport) {
-      delete storage.pusherTransport;
+      try {
+        delete storage.pusherTransport;
+      } catch(e) {
+        storage.pusherTransport = undefined;
+      }
     }
   }
 
