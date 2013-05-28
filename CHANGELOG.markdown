@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.5 (2013-05-28)
+
+[FIXED] Working connections being closed when a parallel handshake failed in a specific way
+
+[CHANGED] Warnings are always sent to Pusher.log if it's available
+
+[FIXED] Handshake errors not being emitted
+
+[FIXED] Authorizing two connections simultaneously to the same channel using JSONP
+
+[CHANGED] Sending more detailed connection logs
+
 ## 2.0.4 (2013-04-26)
 
 [FIXED] Exception when WebSocket was closed uncleanly immediately after opening

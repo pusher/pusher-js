@@ -41,11 +41,13 @@
     var self = this;
 
     Pusher.Network.bind("online", function() {
+      self.timeline.info({ netinfo: "online" });
       if (self.state === "unavailable") {
         self.connect();
       }
     });
     Pusher.Network.bind("offline", function() {
+      self.timeline.info({ netinfo: "offline" });
       if (self.shouldRetry()) {
         self.disconnect();
         self.updateState("unavailable");
@@ -166,7 +168,8 @@
   /** @private */
   prototype.retryIn = function(delay) {
     var self = this;
-    this.retryTimer = new Pusher.Timer(delay || 0, function() {
+    self.timeline.info({ action: "retry", delay: delay });
+    self.retryTimer = new Pusher.Timer(delay || 0, function() {
       self.disconnect();
       self.connect();
     });
@@ -270,21 +273,31 @@
   /** @private */
   prototype.buildErrorCallbacks = function() {
     var self = this;
+
+    function withErrorEmitted(callback) {
+      return function(result) {
+        if (result.error) {
+          self.emit("error", { type: "WebSocketError", error: result.error });
+        }
+        callback(result);
+      };
+    }
+
     return {
-      ssl_only: function() {
+      ssl_only: withErrorEmitted(function() {
         self.encrypted = true;
         self.updateStrategy();
         self.retryIn(0);
-      },
-      refused: function() {
+      }),
+      refused: withErrorEmitted(function() {
         self.disconnect();
-      },
-      backoff: function() {
+      }),
+      backoff: withErrorEmitted(function() {
         self.retryIn(1000);
-      },
-      retry: function() {
+      }),
+      retry: withErrorEmitted(function() {
         self.retryIn(0);
-      }
+      })
     };
   };
 
@@ -317,6 +330,7 @@
     if (previousState !== newState) {
       Pusher.debug('State changed', previousState + ' -> ' + newState);
 
+      this.timeline.info({ state: newState });
       this.emit('state_change', { previous: previousState, current: newState });
       this.emit(newState, data);
     }
