@@ -53,6 +53,7 @@
     if (channel) {
       message.channel = channel;
     }
+    Pusher.debug('Event sent', message);
     return this.send(Pusher.Protocol.encodeMessage(message));
   };
 
