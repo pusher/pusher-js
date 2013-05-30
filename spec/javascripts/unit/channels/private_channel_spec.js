@@ -81,11 +81,6 @@ describe("PrivateChannel", function() {
     });
 
     describe("on pusher_internal:subscription_succeded", function() {
-      it("should set #subscribed to true", function() {
-        channel.handleEvent("pusher_internal:subscription_succeeded");
-        expect(channel.subscribed).toEqual(true);
-      });
-
       it("should emit pusher:subscription_succeded", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
@@ -93,6 +88,13 @@ describe("PrivateChannel", function() {
         channel.handleEvent("pusher_internal:subscription_succeeded", "123");
 
         expect(callback).toHaveBeenCalledWith("123");
+      });
+
+      it("should set #subscribed to true", function() {
+        channel.bind(function() {
+          expect(channel.subscribed).toEqual(true);
+        });
+        channel.handleEvent("pusher_internal:subscription_succeeded");
       });
     });
 

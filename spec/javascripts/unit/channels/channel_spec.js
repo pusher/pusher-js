@@ -59,11 +59,6 @@ describe("Channel", function() {
     });
 
     describe("on pusher_internal:subscription_succeded", function() {
-      it("should set #subscribed to true", function() {
-        channel.handleEvent("pusher_internal:subscription_succeeded");
-        expect(channel.subscribed).toEqual(true);
-      });
-
       it("should emit pusher:subscription_succeded", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
@@ -71,6 +66,13 @@ describe("Channel", function() {
         channel.handleEvent("pusher_internal:subscription_succeeded", "123");
 
         expect(callback).toHaveBeenCalledWith("123");
+      });
+
+      it("should set #subscribed to true", function() {
+        channel.bind(function() {
+          expect(channel.subscribed).toEqual(true);
+        });
+        channel.handleEvent("pusher_internal:subscription_succeeded");
       });
     });
 
@@ -82,6 +84,15 @@ describe("Channel", function() {
         channel.handleEvent("something", 9);
 
         expect(callback).toHaveBeenCalledWith(9);
+      });
+
+      it("should emit the event even if it's named like JS built-in", function() {
+        var callback = jasmine.createSpy("callback");
+        channel.bind("toString", callback);
+
+        channel.handleEvent("toString", "works");
+
+        expect(callback).toHaveBeenCalledWith("works");
       });
     });
   });

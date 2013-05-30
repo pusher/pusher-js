@@ -9,7 +9,11 @@ describe("PresenceChannel", function() {
 
   describe("after construction", function() {
     it("#subscribed should be false", function() {
-      expect(channel.subscribed).toEqual(false);
+      expect(channel.subscribed).toBe(false);
+    });
+
+    it("#me should be undefined", function() {
+      expect(channel.me).toBe(undefined);
     });
   });
 
@@ -114,16 +118,6 @@ describe("PresenceChannel", function() {
       });
 
       describe("on pusher_internal:subscription_succeded", function() {
-        it("should set #subscribed to true", function() {
-          channel.handleEvent("pusher_internal:subscription_succeeded", {
-            presence: {
-              hash: {},
-              count: 0
-            }
-          });
-          expect(channel.subscribed).toEqual(true);
-        });
-
         it("should emit pusher:subscription_succeded with members", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:subscription_succeeded", callback);
@@ -136,6 +130,18 @@ describe("PresenceChannel", function() {
           });
 
           expect(callback).toHaveBeenCalledWith(jasmine.any(Pusher.Members));
+        });
+
+        it("should set #subscribed to true", function() {
+          channel.bind(function() {
+            expect(channel.subscribed).toEqual(true);
+          });
+          channel.handleEvent("pusher_internal:subscription_succeeded", {
+            presence: {
+              hash: {},
+              count: 0
+            }
+          });
         });
       });
 
