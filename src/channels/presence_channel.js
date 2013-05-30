@@ -22,6 +22,15 @@
     var self = this;
     _super.call(self, socketId, options, function(error, authData) {
       if (!error) {
+        if (authData.channel_data === undefined) {
+          Pusher.warn(
+            "Invalid auth response for channel '" +
+            self.name +
+            "', expected 'channel_data' field"
+          );
+          callback("Invalid auth response");
+          return;
+        }
         var channelData = JSON.parse(authData.channel_data);
         self.members.setMyID(channelData.user_id);
       }
