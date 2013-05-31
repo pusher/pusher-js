@@ -15,6 +15,18 @@ describe("PresenceChannel", function() {
     it("#me should be undefined", function() {
       expect(channel.me).toBe(undefined);
     });
+
+    it("#members should be created", function() {
+      expect(channel.members).toEqual(jasmine.any(Pusher.Members));
+    });
+
+    it("#members should be empty", function() {
+      expect(channel.members.count).toEqual(0);
+
+      var callback = jasmine.createSpy("callback");
+      channel.members.each(callback);
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 
   describe("#authorize", function() {
@@ -77,19 +89,6 @@ describe("PresenceChannel", function() {
     it("should return false if connection didn't send the event", function() {
       pusher.send_event.andReturn(false);
       expect(channel.trigger("t", {})).toBe(false);
-    });
-  });
-
-  describe("#disconnect", function() {
-    it("should set subscribed to false", function() {
-      channel.handleEvent("pusher_internal:subscription_succeeded", {
-        presence: {
-          hash: {},
-          count: 0
-        }
-      });
-      channel.disconnect();
-      expect(channel.subscribed).toEqual(false);
     });
   });
 
@@ -194,7 +193,7 @@ describe("PresenceChannel", function() {
         expect(members.count).toEqual(3);
       });
 
-      it("should expose 'my' data", function() {
+      it("#me should contain correct data", function() {
         expect(members.me).toEqual({ id: "U", info: "me" });
       });
 
@@ -208,7 +207,7 @@ describe("PresenceChannel", function() {
           expect(members.get("C")).toEqual({ id: "C", info: "user C"});
         });
 
-        it("should increment member count", function() {
+        it("should increment member count after adding a new member", function() {
           channel.handleEvent("pusher_internal:member_added", {
             user_id: "C",
             user_info: "user C"
@@ -238,7 +237,7 @@ describe("PresenceChannel", function() {
           expect(members.get("B")).toEqual({ id: "B", info: "updated B"});
         });
 
-        it("should not increment member count", function() {
+        it("should not increment member count after updating a member", function() {
           channel.handleEvent("pusher_internal:member_added", {
             user_id: "B",
             user_info: "updated B"
@@ -280,7 +279,7 @@ describe("PresenceChannel", function() {
           expect(callback).toHaveBeenCalledWith({ id: "B", info: "user B" });
         });
 
-        it("should decrement member count", function() {
+        it("should decrement member count after removing a member", function() {
           channel.handleEvent("pusher_internal:member_removed", {
             user_id: "B"
           });
@@ -296,6 +295,40 @@ describe("PresenceChannel", function() {
             user_id: "C"
           });
 
+          expect(callback).not.toHaveBeenCalled();
+        });
+
+        it("should not decrement member count if member was not removed", function() {
+          channel.handleEvent("pusher_internal:member_removed", {
+            user_id: "C"
+          });
+
+          expect(members.count).toEqual(3);
+        });
+      });
+
+      describe("and disconnecting", function() {
+        beforeEach(function() {
+          channel.disconnect();
+        });
+
+        it("#subscribed should be false", function() {
+          expect(channel.subscribed).toBe(false);
+        });
+
+        it("#me should be undefined", function() {
+          expect(channel.me).toBe(undefined);
+        });
+
+        it("#members should be the same object", function() {
+          expect(channel.members).toBe(members);
+        });
+
+        it("#members should be empty", function() {
+          expect(channel.members.count).toEqual(0);
+
+          var callback = jasmine.createSpy("callback");
+          channel.members.each(callback);
           expect(callback).not.toHaveBeenCalled();
         });
       });
