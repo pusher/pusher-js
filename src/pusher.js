@@ -38,7 +38,7 @@
       }
       return new Pusher.TimelineSender(timeline, {
         encrypted: self.isEncrypted() || !!options.encrypted,
-        host: self.config.stats_host,
+        host: self.config.statsHost,
         path: "/timeline"
       });
     };
@@ -49,9 +49,9 @@
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
           getTimelineSender: getTimelineSender,
-          activityTimeout: this.config.activity_timeout,
-          pongTimeout: this.config.pong_timeout,
-          unavailableTimeout: this.config.unavailable_timeout
+          activityTimeout: this.config.activityTimeout,
+          pongTimeout: this.config.pongTimeout,
+          unavailableTimeout: this.config.unavailableTimeout
         },
         this.config,
         { encrypted: this.isEncrypted() }

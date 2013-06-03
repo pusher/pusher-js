@@ -25,38 +25,38 @@
 
   Pusher.getGlobalConfig = function() {
     return {
-      ws_host: Pusher.host,
-      ws_port: Pusher.ws_port,
-      wss_port: Pusher.wss_port,
-      sockjs_http_host: Pusher.sockjs_host,
-      sockjs_http_port: Pusher.sockjs_http_port,
-      sockjs_https_port: Pusher.sockjs_https_port,
-      sockjs_path: Pusher.sockjs_path,
-      stats_host: Pusher.stats_host,
-      auth_endpoint: Pusher.channel_auth_endpoint,
-      auth_transport: Pusher.channel_auth_transport,
-      activity_timeout: Pusher.activity_timeout,
-      pong_timeout: Pusher.pong_timeout,
-      unavailable_timeout: Pusher.unavailable_timeout
+      wsHost: Pusher.host,
+      wsPort: Pusher.ws_port,
+      wssPort: Pusher.wss_port,
+      httpHost: Pusher.sockjs_host,
+      httpPort: Pusher.sockjs_http_port,
+      httpsPort: Pusher.sockjs_https_port,
+      httpPath: Pusher.sockjs_path,
+      statsHost: Pusher.stats_host,
+      authEndpoint: Pusher.channel_auth_endpoint,
+      authTransport: Pusher.channel_auth_transport,
+      activityTimeout: Pusher.activity_timeout,
+      pongTimeout: Pusher.pong_timeout,
+      unavailableTimeout: Pusher.unavailable_timeout
     };
   };
 
   Pusher.getClusterConfig = function(clusterName) {
     return {
-      ws_host: "ws-" + clusterName + ".pusher.com",
-      sockjs_host: "sockjs-" + clusterName + ".pusher.com",
+      wsHost: "ws-" + clusterName + ".pusher.com",
+      httpHost: "sockjs-" + clusterName + ".pusher.com"
     };
   };
 
   Pusher.getDefaultStrategy = function(config) {
     return [
       [":def", "ws_options", {
-        hostUnencrypted: config.ws_host + ":" + config.ws_port,
-        hostEncrypted: config.ws_host + ":" + config.wss_port
+        hostUnencrypted: config.wsHost + ":" + config.wsPort,
+        hostEncrypted: config.wsHost + ":" + config.wssPort
       }],
       [":def", "sockjs_options", {
-        hostUnencrypted: config.sockjs_http_host + ":" + config.sockjs_http_port,
-        hostEncrypted: config.sockjs_http_host + ":" + config.sockjs_https_port
+        hostUnencrypted: config.httpHost + ":" + config.httpPort,
+        hostEncrypted: config.httpHost + ":" + config.httpsPort
       }],
       [":def", "timeouts", {
         loop: true,
@@ -67,7 +67,7 @@
       [":def", "ws_manager", [":transport_manager", {
         lives: 2,
         minPingDelay: 10000,
-        maxPingDelay: config.activity_timeout
+        maxPingDelay: config.activityTimeout
       }]],
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],

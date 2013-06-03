@@ -1,7 +1,7 @@
 ;(function() {
   Pusher.Channel.Authorizer = function(channel, options) {
     this.channel = channel;
-    this.type = options.auth_transport;
+    this.type = options.authTransport;
 
     this.options = options;
     this.authOptions = (options || {}).auth || {};
@@ -37,7 +37,7 @@
         xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
       }
 
-      xhr.open("POST", self.options.auth_endpoint, true);
+      xhr.open("POST", self.options.authEndpoint, true);
 
       // add request headers
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -86,7 +86,7 @@
       };
 
       var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
-      script.src = this.options.auth_endpoint +
+      script.src = this.options.authEndpoint +
         '?callback=' +
         encodeURIComponent(callback_name) +
         this.composeQuery(socketId);
