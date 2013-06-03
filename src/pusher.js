@@ -59,7 +59,7 @@
       if (params.channel) {
         var channel = self.channel(params.channel);
         if (channel) {
-          channel.emit(params.event, params.data);
+          channel.handleEvent(params.event, params.data);
         }
       }
       // Emit globaly [deprecated]
@@ -152,7 +152,7 @@
         this.options,
         function(err, data) {
           if (err) {
-            channel.emit('pusher:subscription_error', data);
+            channel.handleEvent('pusher:subscription_error', data);
           } else {
             self.send_event('pusher:subscribe', {
               channel: channel_name,
