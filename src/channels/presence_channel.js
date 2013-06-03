@@ -14,13 +14,12 @@
   /** Authenticates the connection as a member of the channel.
    *
    * @param  {String} socketId
-   * @param  {Object} options authorizer options
    * @param  {Function} callback
    */
-  prototype.authorize = function(socketId, options, callback) {
+  prototype.authorize = function(socketId, callback) {
     var _super = Pusher.PrivateChannel.prototype.authorize;
     var self = this;
-    _super.call(self, socketId, options, function(error, authData) {
+    _super.call(self, socketId, function(error, authData) {
       if (!error) {
         if (authData.channel_data === undefined) {
           Pusher.warn(

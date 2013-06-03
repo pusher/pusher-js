@@ -154,7 +154,7 @@
     var channel = this.channels.add(channel_name, this);
 
     if (this.connection.state === 'connected') {
-      channel.authorize(this.connection.socket_id, {}, function(err, data) {
+      channel.authorize(this.connection.socket_id, function(err, data) {
         if (err) {
           channel.handleEvent('pusher:subscription_error', data);
         } else {

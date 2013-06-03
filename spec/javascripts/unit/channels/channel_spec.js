@@ -16,7 +16,7 @@ describe("Channel", function() {
   describe("#authorize", function() {
     it("should call back with false, {} immediately", function() {
       var callback = jasmine.createSpy("callback");
-      channel.authorize("1.1", {}, callback);
+      channel.authorize("1.1", callback);
       expect(callback).toHaveBeenCalledWith(false, {});
     });
   });

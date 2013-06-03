@@ -8,20 +8,18 @@ describe("Pusher", function() {
       channel = channels[channelName];
       expect(channel.authorize).toHaveBeenCalledWith(
         manager.socket_id,
-        jasmine.any(Object),
         jasmine.any(Function)
       );
     }
 
     for (channelName in channels) {
       channel = channels[channelName];
-      channel.authorize.calls[0].args[2](null, {
+      channel.authorize.calls[0].args[1](null, {
         auth: { auth: channelName },
         channel_data: { data: channelName }
       });
       expect(channel.authorize).toHaveBeenCalledWith(
         manager.socket_id,
-        jasmine.any(Object),
         jasmine.any(Function)
       );
       expect(manager.send_event).toHaveBeenCalledWith(
@@ -342,7 +340,7 @@ describe("Pusher", function() {
       it("should pass pusher:subscription_error event after auth error", function() {
         var channel = pusher.subscribe("wrong");
 
-        channel.authorize.calls[0].args[2](true, "ERROR");
+        channel.authorize.calls[0].args[1](true, "ERROR");
         expect(channel.handleEvent)
           .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
       });
