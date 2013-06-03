@@ -14,6 +14,7 @@ bundle 'pusher.js' do
   file 'pusher.js'
   file 'util.js'
   file 'defaults.js'
+  file 'config.js'
   file 'errors.js'
   file 'events_dispatcher.js'
   file 'dependency_loader.js'
