@@ -2,8 +2,8 @@
   function AssistantToTheTransportManager(manager, transport, options) {
     this.manager = manager;
     this.transport = transport;
-    this.minPingDelay = options.minPingDelay || 10000;
-    this.maxPingDelay = options.maxPingDelay || Pusher.activity_timeout;
+    this.minPingDelay = options.minPingDelay;
+    this.maxPingDelay = options.maxPingDelay;
     this.pingDelay = null;
   }
   var prototype = AssistantToTheTransportManager.prototype;

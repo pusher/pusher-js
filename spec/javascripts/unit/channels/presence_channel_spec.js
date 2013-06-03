@@ -3,7 +3,7 @@ describe("PresenceChannel", function() {
   var channel;
 
   beforeEach(function() {
-    pusher = Pusher.Mocks.getPusher();
+    pusher = Pusher.Mocks.getPusher(Pusher.getGlobalConfig());
     channel = new Pusher.PresenceChannel("presence-test", pusher);
   });
 
@@ -43,8 +43,7 @@ describe("PresenceChannel", function() {
       expect(Pusher.Channel.Authorizer)
         .toHaveBeenCalledWith(
           channel,
-          Pusher.channel_auth_transport,
-          { x: "y" }
+          Pusher.Util.extend(Pusher.getGlobalConfig(), { x: "y" })
         );
     });
 

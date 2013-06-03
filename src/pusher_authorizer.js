@@ -1,8 +1,9 @@
 ;(function() {
-  Pusher.Channel.Authorizer = function(channel, type, options) {
+  Pusher.Channel.Authorizer = function(channel, options) {
     this.channel = channel;
-    this.type = type;
+    this.type = options.auth_transport;
 
+    this.options = options;
     this.authOptions = (options || {}).auth || {};
   };
 
@@ -36,7 +37,7 @@
         xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
       }
 
-      xhr.open("POST", Pusher.channel_auth_endpoint, true);
+      xhr.open("POST", self.options.auth_endpoint, true);
 
       // add request headers
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -85,7 +86,7 @@
       };
 
       var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
-      script.src = Pusher.channel_auth_endpoint +
+      script.src = this.options.auth_endpoint +
         '?callback=' +
         encodeURIComponent(callback_name) +
         this.composeQuery(socketId);

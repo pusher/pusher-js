@@ -163,8 +163,9 @@
       return manager;
     },
 
-    getPusher: function() {
+    getPusher: function(options) {
       var pusher = new Pusher.EventsDispatcher();
+      pusher.options = options;
       pusher.send_event = jasmine.createSpy("send_event");
       return pusher;
     },

@@ -1,9 +1,16 @@
 ;(function() {
   function Pusher(app_key, options) {
+    options = options || {};
+
     var self = this;
 
-    this.options = options || {};
     this.key = app_key;
+    this.options = Pusher.Util.extend(
+      Pusher.getGlobalConfig(),
+      options.cluster ? Pusher.getClusterConfig(options.cluster) : {},
+      options
+    );
+
     this.channels = new Pusher.Channels();
     this.global_emitter = new Pusher.EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
@@ -12,7 +19,7 @@
 
     var getStrategy = function(options) {
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(),
+        Pusher.getDefaultStrategy(self.options),
         Pusher.Util.extend({}, self.options, options)
       );
     };
@@ -31,7 +38,7 @@
       }
       return new Pusher.TimelineSender(timeline, {
         encrypted: self.isEncrypted() || !!options.encrypted,
-        host: Pusher.stats_host,
+        host: self.options.stats_host,
         path: "/timeline"
       });
     };
@@ -42,9 +49,9 @@
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
           getTimelineSender: getTimelineSender,
-          activityTimeout: Pusher.activity_timeout,
-          pongTimeout: Pusher.pong_timeout,
-          unavailableTimeout: Pusher.unavailable_timeout
+          activityTimeout: this.options.activity_timeout,
+          pongTimeout: this.options.pong_timeout,
+          unavailableTimeout: this.options.unavailable_timeout
         },
         this.options,
         { encrypted: this.isEncrypted() }
@@ -147,21 +154,17 @@
     var channel = this.channels.add(channel_name, this);
 
     if (this.connection.state === 'connected') {
-      channel.authorize(
-        this.connection.socket_id,
-        this.options,
-        function(err, data) {
-          if (err) {
-            channel.handleEvent('pusher:subscription_error', data);
-          } else {
-            self.send_event('pusher:subscribe', {
-              channel: channel_name,
-              auth: data.auth,
-              channel_data: data.channel_data
-            });
-          }
+      channel.authorize(this.connection.socket_id, {}, function(err, data) {
+        if (err) {
+          channel.handleEvent('pusher:subscription_error', data);
+        } else {
+          self.send_event('pusher:subscribe', {
+            channel: channel_name,
+            auth: data.auth,
+            channel_data: data.channel_data
+          });
         }
-      );
+      });
     }
     return channel;
   };
