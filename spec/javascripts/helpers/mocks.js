@@ -163,9 +163,9 @@
       return manager;
     },
 
-    getPusher: function(options) {
+    getPusher: function(config) {
       var pusher = new Pusher.EventsDispatcher();
-      pusher.options = options;
+      pusher.config = config;
       pusher.send_event = jasmine.createSpy("send_event");
       return pusher;
     },

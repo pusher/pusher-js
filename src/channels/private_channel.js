@@ -18,7 +18,7 @@
    */
   prototype.authorize = function(socketId, options, callback) {
     var authorizer = new Pusher.Channel.Authorizer(
-      this, Pusher.Util.extend({}, this.pusher.options, options)
+      this, Pusher.Util.extend({}, this.pusher.config, options)
     );
     return authorizer.authorize(socketId, callback);
   };

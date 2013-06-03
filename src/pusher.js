@@ -5,7 +5,7 @@
     var self = this;
 
     this.key = app_key;
-    this.options = Pusher.Util.extend(
+    this.config = Pusher.Util.extend(
       Pusher.getGlobalConfig(),
       options.cluster ? Pusher.getClusterConfig(options.cluster) : {},
       options
@@ -19,26 +19,26 @@
 
     var getStrategy = function(options) {
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(self.options),
-        Pusher.Util.extend({}, self.options, options)
+        Pusher.getDefaultStrategy(self.config),
+        Pusher.Util.extend({}, self.config, options)
       );
     };
     var getTimeline = function() {
       return new Pusher.Timeline(self.key, self.sessionID, {
         features: Pusher.Util.getClientFeatures(),
-        params: self.options.timelineParams || {},
+        params: self.config.timelineParams || {},
         limit: 50,
         level: Pusher.Timeline.INFO,
         version: Pusher.VERSION
       });
     };
     var getTimelineSender = function(timeline, options) {
-      if (self.options.disableStats) {
+      if (self.config.disableStats) {
         return null;
       }
       return new Pusher.TimelineSender(timeline, {
         encrypted: self.isEncrypted() || !!options.encrypted,
-        host: self.options.stats_host,
+        host: self.config.stats_host,
         path: "/timeline"
       });
     };
@@ -49,11 +49,11 @@
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
           getTimelineSender: getTimelineSender,
-          activityTimeout: this.options.activity_timeout,
-          pongTimeout: this.options.pong_timeout,
-          unavailableTimeout: this.options.unavailable_timeout
+          activityTimeout: this.config.activity_timeout,
+          pongTimeout: this.config.pong_timeout,
+          unavailableTimeout: this.config.unavailable_timeout
         },
-        this.options,
+        this.config,
         { encrypted: this.isEncrypted() }
       )
     );
@@ -186,7 +186,7 @@
     if (Pusher.Util.getDocumentLocation().protocol === "https:") {
       return true;
     } else {
-      return !!this.options.encrypted;
+      return !!this.config.encrypted;
     }
   };
 
