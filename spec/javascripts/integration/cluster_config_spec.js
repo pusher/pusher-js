@@ -41,7 +41,7 @@ describeIntegration("Cluster Configuration", function() {
       });
 
       it("should open a connection to the 'eu' cluster", function() {
-        pusher = new Pusher("1ab338ce9bb5d03e75ad", {
+        pusher = new Pusher("4d31fbea7080e3b4bf6d", {
           authTransport: 'jsonp',
           authEndpoint: Pusher.Integration.API_EU_URL + "/auth",
           cluster: "eu",
