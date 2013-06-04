@@ -42,7 +42,7 @@
       [":def", "ws_manager", [":transport_manager", {
         lives: 2,
         minPingDelay: 10000,
-        maxPingDelay: config.activityTimeout
+        maxPingDelay: config.activity_timeout
       }]],
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],

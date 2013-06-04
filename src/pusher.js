@@ -49,9 +49,9 @@
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
           getTimelineSender: getTimelineSender,
-          activityTimeout: this.config.activityTimeout,
-          pongTimeout: this.config.pongTimeout,
-          unavailableTimeout: this.config.unavailableTimeout
+          activityTimeout: this.config.activity_timeout,
+          pongTimeout: this.config.pong_timeout,
+          unavailableTimeout: this.config.unavailable_timeout
         },
         this.config,
         { encrypted: this.isEncrypted() }
