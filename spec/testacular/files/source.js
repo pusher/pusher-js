@@ -2,6 +2,7 @@ module.exports = [
   'src/pusher.js',
   'src/util.js',
   'src/defaults.js',
+  'src/config.js',
   'src/errors.js',
   'src/dependency_loader.js',
   'src/dependencies.js',

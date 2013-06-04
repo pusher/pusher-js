@@ -13,13 +13,10 @@
   /** Authorizes the connection to use the channel.
    *
    * @param  {String} socketId
-   * @param  {Object} options authorizer options
    * @param  {Function} callback
    */
-  prototype.authorize = function(socketId, options, callback) {
-    var authorizer = new Pusher.Channel.Authorizer(
-      this, Pusher.channel_auth_transport, options
-    );
+  prototype.authorize = function(socketId, callback) {
+    var authorizer = new Pusher.Channel.Authorizer(this, this.pusher.config);
     return authorizer.authorize(socketId, callback);
   };
 

@@ -1,167 +1,3 @@
-describe("Pusher (semi-integration)", function() {
-  var pusher;
-
-  beforeEach(function() {
-    spyOn(Pusher.Network, "isOnline").andReturn(true);
-
-    spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-    spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
-    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
-
-    spyOn(Pusher.Util, "getLocalStorage").andReturn({});
-  });
-
-  afterEach(function() {
-    pusher.disconnect();
-  });
-
-  it("should fall back to SockJS after two broken connections", function() {
-    var transport;
-
-    function createConnection() {
-      transport = Pusher.Mocks.getTransport(true);
-      return transport;
-    }
-
-    spyOn(Pusher.WSTransport, "createConnection").andCallFake(createConnection);
-    spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createConnection);
-
-    runs(function() {
-      pusher = new Pusher("foobar");
-      pusher.connect();
-    });
-    waitsFor(function() {
-      return Pusher.WSTransport.createConnection.calls.length === 1;
-    }, "WS connection to be created", 500);
-    runs(function() {
-      transport.state = "initialized";
-      transport.emit("initialized");
-    });
-    waitsFor(function() {
-      return transport.connect.calls.length === 1;
-    }, "connect to be called", 500);
-    runs(function() {
-      transport.state = "open";
-      transport.emit("open");
-
-      new Pusher.Timer(100, function() {
-        transport.emit("closed", {
-          code: 1006,
-          reason: "KABOOM!",
-          wasClean: false
-        });
-      });
-    });
-    waitsFor(function() {
-      return Pusher.WSTransport.createConnection.calls.length === 2;
-    }, "WS connection to be created", 1500);
-    runs(function() {
-      transport.state = "initialized";
-      transport.emit("initialized");
-    });
-    waitsFor(function() {
-      return transport.connect.calls.length === 1;
-    }, "connect to be called", 500);
-    runs(function() {
-      transport.state = "open";
-      transport.emit("open");
-
-      new Pusher.Timer(100, function() {
-        transport.emit("closed", {
-          code: 1006,
-          reason: "KABOOM! AGAIN!",
-          wasClean: false
-        });
-      });
-    });
-    waitsFor(function() {
-      return Pusher.SockJSTransport.createConnection.calls.length === 1;
-    }, "SockJS connection to be created", 1500);
-    runs(function() {
-      expect(Pusher.WSTransport.createConnection.calls.length).toEqual(2);
-      pusher.disconnect();
-    });
-  });
-
-  it("should not close established SockJS connection when WebSocket is stuck in handshake", function() {
-    var wsTransport, sockjsTransport;
-
-    function createWSConnection() {
-      wsTransport = Pusher.Mocks.getTransport(true);
-      return wsTransport;
-    }
-    function createSockJSConnection() {
-      sockjsTransport = Pusher.Mocks.getTransport(true);
-      return sockjsTransport;
-    }
-
-    spyOn(Pusher.WSTransport, "createConnection").andCallFake(createWSConnection);
-    spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
-
-    runs(function() {
-      pusher = new Pusher("foobar");
-      pusher.connect();
-    });
-    waitsFor(function() {
-      return Pusher.WSTransport.createConnection.calls.length === 1;
-    }, "WS connection to be created", 500);
-    runs(function() {
-      wsTransport.state = "initialized";
-      wsTransport.emit("initialized");
-    });
-    waitsFor(function() {
-      return wsTransport.connect.calls.length === 1;
-    }, "connect on WS to be called", 500);
-    runs(function() {
-      wsTransport.state = "open";
-      wsTransport.emit("open");
-      // start handshake, but don't do anything
-    });
-    waitsFor(function() {
-      return Pusher.SockJSTransport.createConnection.calls.length === 1;
-    }, "SockJS connection to be created", 3000);
-    runs(function() {
-      sockjsTransport.state = "initialized";
-      sockjsTransport.emit("initialized");
-    });
-    waitsFor(function() {
-      return sockjsTransport.connect.calls.length === 1;
-    }, "connect on SockJS to be called", 500);
-    runs(function() {
-      sockjsTransport.state = "open";
-      sockjsTransport.emit("open");
-      sockjsTransport.emit("message", {
-        data: JSON.stringify({
-          event: "pusher:connection_established",
-          data: {
-            socket_id: "123.456"
-          }
-        })
-      });
-    });
-    waitsFor(function() {
-      return wsTransport.close.calls.length === 1;
-    }, "close on WS to be called", 500);
-
-    var timer;
-    runs(function() {
-      // this caused a connection to be retried after 1s
-      wsTransport.emit("closed", {
-        code: 1000,
-        wasClean: true,
-        reason: "clean"
-      });
-      timer = new Pusher.Timer(2000, function() {});
-    });
-    waitsFor(function() {
-      return !timer.isRunning();
-    }, "timer to be called", 2500);
-    runs(function() {
-      expect(sockjsTransport.close).not.toHaveBeenCalled();
-    });
-  });
-});
-
 describeIntegration("Pusher", function() {
   // Integration tests in Jasmine need to have setup and teardown phases as
   // separate specs to make sure we share connections between actual specs.
@@ -169,10 +5,6 @@ describeIntegration("Pusher", function() {
   //
   // Ideally, we'd have a separate connection per spec, but this introduces
   // significant delays and triggers security mechanisms in some browsers.
-
-  function generatePseudoRandomName(prefix) {
-    return prefix + "_" + Pusher.Util.now() + "_" + Math.floor(Math.random() * 1000000);
-  }
 
   function subscribe(pusher, channelName, callback) {
     var channel = pusher.subscribe(channelName);
@@ -182,22 +14,10 @@ describeIntegration("Pusher", function() {
     return channel;
   }
 
-  function sendAPIMessage(channelName, eventName, data) {
-    Pusher.JSONPRequest.send({
-      data: {
-        channel: channelName,
-        event: eventName,
-        data: data
-      },
-      url: Pusher.Integration.API_URL + "/send",
-      receiver: Pusher.JSONP
-    }, function() {});
-  }
-
   function buildPublicChannelTests(getPusher, prefix) {
     it("should subscribe and receive a message sent via REST API", function() {
       var pusher = getPusher();
-      var channelName = generatePseudoRandomName((prefix || "") + "integration");
+      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
 
       var onSubscribed = jasmine.createSpy("onSubscribed");
       var channel = subscribe(pusher, channelName, onSubscribed);
@@ -213,7 +33,12 @@ describeIntegration("Pusher", function() {
         channel.bind(eventName, function(message) {
           received = message;
         });
-        sendAPIMessage(channelName, eventName, data);
+        Pusher.Integration.sendAPIMessage({
+          url: Pusher.Integration.API_URL + "/send",
+          channel: channelName,
+          event: eventName,
+          data: data
+        });
       });
       waitsFor(function() {
         return received !== null;
@@ -226,7 +51,7 @@ describeIntegration("Pusher", function() {
 
     it("should not receive messages after unsubscribing", function() {
       var pusher = getPusher();
-      var channelName = generatePseudoRandomName((prefix || "") + "integration");
+      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
 
       var onSubscribed = jasmine.createSpy("onSubscribed");
       var channel = subscribe(pusher, channelName, onSubscribed);
@@ -243,7 +68,12 @@ describeIntegration("Pusher", function() {
           received = message;
         });
         pusher.unsubscribe(channelName);
-        sendAPIMessage(channelName, eventName, {});
+        Pusher.Integration.sendAPIMessage({
+          url: Pusher.Integration.API_URL + "/send",
+          channel: channelName,
+          event: eventName,
+          data: {}
+        });
         timer = new Pusher.Timer(3000, function() {});
       });
       waitsFor(function() {
@@ -260,7 +90,7 @@ describeIntegration("Pusher", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
 
-      var channelName = generatePseudoRandomName((prefix || "") + "integration_client_events");
+      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration_client_events");
 
       var channel1, channel2;
       var onSubscribed1 = jasmine.createSpy("onSubscribed1");
@@ -295,7 +125,7 @@ describeIntegration("Pusher", function() {
     it("should not receive a client event sent by itself", function() {
       var pusher = getPusher1();
 
-      var channelName = generatePseudoRandomName((prefix || "") + "integration_client_events");
+      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration_client_events");
       var onSubscribed = jasmine.createSpy("onSubscribed");
 
       var eventName = "client-test";
@@ -324,7 +154,7 @@ describeIntegration("Pusher", function() {
   function buildPresenceChannelTests(getPusher1, getPusher2) {
     it("should get connection's member data", function() {
       var pusher = getPusher1();
-      var channelName = generatePseudoRandomName("presence-integration_me");
+      var channelName = Pusher.Integration.getRandomName("presence-integration_me");
 
       var members = null;
       subscribe(pusher, channelName, function(channel, ms) {
@@ -348,7 +178,7 @@ describeIntegration("Pusher", function() {
     it("should receive a member added event", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = generatePseudoRandomName("presence-integration_member_added");
+      var channelName = Pusher.Integration.getRandomName("presence-integration_member_added");
 
       var member = null;
       subscribe(pusher1, channelName, function(channel) {
@@ -380,7 +210,7 @@ describeIntegration("Pusher", function() {
     it("should receive a member removed event", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = generatePseudoRandomName("presence-integration_member_removed");
+      var channelName = Pusher.Integration.getRandomName("presence-integration_member_removed");
 
       var member = null;
       subscribe(pusher2, channelName, function(channel) {
@@ -414,7 +244,7 @@ describeIntegration("Pusher", function() {
     it("should maintain correct members count", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = generatePseudoRandomName("presence-integration_member_count");
+      var channelName = Pusher.Integration.getRandomName("presence-integration_member_count");
 
       var channel1, channel2;
 
@@ -460,7 +290,7 @@ describeIntegration("Pusher", function() {
     it("should maintain correct members data", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = generatePseudoRandomName("presence-integration_member_count");
+      var channelName = Pusher.Integration.getRandomName("presence-integration_member_count");
 
       var channel1, channel2;
 
@@ -578,7 +408,7 @@ describeIntegration("Pusher", function() {
       });
 
       describe("with a private channel", function() {
-        var channelName = generatePseudoRandomName("private-integration");
+        var channelName = Pusher.Integration.getRandomName("private-integration");
         var channel1, channel2;
 
         buildPublicChannelTests(

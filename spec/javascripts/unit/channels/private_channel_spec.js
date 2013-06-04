@@ -3,7 +3,7 @@ describe("PrivateChannel", function() {
   var channel;
 
   beforeEach(function() {
-    pusher = Pusher.Mocks.getPusher();
+    pusher = Pusher.Mocks.getPusher({ foo: "bar" });
     channel = new Pusher.PrivateChannel("private-test", pusher);
   });
 
@@ -22,19 +22,17 @@ describe("PrivateChannel", function() {
     });
 
     it("should create and call an authorizer", function() {
-      channel.authorize("1.23", { x: "y" }, function() {});
+      channel.authorize("1.23", function() {});
       expect(Pusher.Channel.Authorizer.calls.length).toEqual(1);
-      expect(Pusher.Channel.Authorizer)
-        .toHaveBeenCalledWith(
-          channel,
-          Pusher.channel_auth_transport,
-          { x: "y" }
-        );
+      expect(Pusher.Channel.Authorizer).toHaveBeenCalledWith(
+        channel,
+        { foo: "bar" }
+      );
     });
 
     it("should call back with authorization data", function() {
       var callback = jasmine.createSpy("callback");
-      channel.authorize("1.23", { x: "y" }, callback);
+      channel.authorize("1.23", callback);
 
       expect(callback).not.toHaveBeenCalled();
       authorizer._callback(false, { foo: "bar" });

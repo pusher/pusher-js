@@ -3,7 +3,7 @@ describe("PresenceChannel", function() {
   var channel;
 
   beforeEach(function() {
-    pusher = Pusher.Mocks.getPusher();
+    pusher = Pusher.Mocks.getPusher({ foo: "bar" });
     channel = new Pusher.PresenceChannel("presence-test", pusher);
   });
 
@@ -38,19 +38,17 @@ describe("PresenceChannel", function() {
     });
 
     it("should create and call an authorizer", function() {
-      channel.authorize("1.23", { x: "y" }, function() {});
+      channel.authorize("1.23", function() {});
       expect(Pusher.Channel.Authorizer.calls.length).toEqual(1);
-      expect(Pusher.Channel.Authorizer)
-        .toHaveBeenCalledWith(
-          channel,
-          Pusher.channel_auth_transport,
-          { x: "y" }
-        );
+      expect(Pusher.Channel.Authorizer).toHaveBeenCalledWith(
+        channel,
+        { foo: "bar" }
+      );
     });
 
     it("should call back on success with authorization data", function() {
       var callback = jasmine.createSpy("callback");
-      channel.authorize("1.23", { x: "y" }, callback);
+      channel.authorize("1.23", callback);
 
       expect(callback).not.toHaveBeenCalled();
       authorizer._callback(false, {
@@ -66,7 +64,7 @@ describe("PresenceChannel", function() {
 
     it("should call back on failure", function() {
       var callback = jasmine.createSpy("callback");
-      channel.authorize("1.23", { x: "y" }, callback);
+      channel.authorize("1.23", callback);
 
       authorizer._callback("error!");
 
@@ -98,7 +96,7 @@ describe("PresenceChannel", function() {
     beforeEach(function() {
       authorizer = Pusher.Mocks.getAuthorizer();
       spyOn(Pusher.Channel, "Authorizer").andReturn(authorizer);
-      channel.authorize("1.23", { x: "y" }, function() {});
+      channel.authorize("1.23", function() {});
       authorizer._callback(false, {
         foo: "bar",
         channel_data: JSON.stringify({ user_id: "U" })

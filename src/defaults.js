@@ -23,15 +23,15 @@
   Pusher.pong_timeout = 30000;
   Pusher.unavailable_timeout = 10000;
 
-  Pusher.getDefaultStrategy = function() {
+  Pusher.getDefaultStrategy = function(config) {
     return [
       [":def", "ws_options", {
-        hostUnencrypted: Pusher.host + ":" + Pusher.ws_port,
-        hostEncrypted: Pusher.host + ":" + Pusher.wss_port
+        hostUnencrypted: config.wsHost + ":" + config.wsPort,
+        hostEncrypted: config.wsHost + ":" + config.wssPort
       }],
       [":def", "sockjs_options", {
-        hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
-        hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+        hostUnencrypted: config.httpHost + ":" + config.httpPort,
+        hostEncrypted: config.httpHost + ":" + config.httpsPort
       }],
       [":def", "timeouts", {
         loop: true,
@@ -39,7 +39,12 @@
         timeoutLimit: 60000
       }],
 
-      [":def", "ws_manager", [":transport_manager", { lives: 2 }]],
+      [":def", "ws_manager", [":transport_manager", {
+        lives: 2,
+        minPingDelay: 10000,
+        maxPingDelay: config.activity_timeout
+      }]],
+
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],

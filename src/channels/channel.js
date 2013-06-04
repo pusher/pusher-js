@@ -24,7 +24,7 @@
    *
    * @param {Function} callback
    */
-  prototype.authorize = function(socketId, options, callback) {
+  prototype.authorize = function(socketId, callback) {
     return callback(false, {});
   };
 

@@ -6,18 +6,22 @@ describe("Pusher", function() {
     var channel, channelName;
     for (channelName in channels) {
       channel = channels[channelName];
-      expect(channel.authorize)
-        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function));
+      expect(channel.authorize).toHaveBeenCalledWith(
+        manager.socket_id,
+        jasmine.any(Function)
+      );
     }
 
     for (channelName in channels) {
       channel = channels[channelName];
-      channel.authorize.calls[0].args[2](null, {
+      channel.authorize.calls[0].args[1](null, {
         auth: { auth: channelName },
         channel_data: { data: channelName }
       });
-      expect(channel.authorize)
-        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function));
+      expect(channel.authorize).toHaveBeenCalledWith(
+        manager.socket_id,
+        jasmine.any(Function)
+      );
       expect(manager.send_event).toHaveBeenCalledWith(
         "pusher:subscribe",
         { channel: channel.name,
@@ -184,18 +188,28 @@ describe("Pusher", function() {
         managerOptions = Pusher.ConnectionManager.calls[1].args[1];
         managerOptions.getStrategy();
 
-        expect(Pusher.StrategyBuilder.build)
-          .toHaveBeenCalledWith(
-            Pusher.getDefaultStrategy(), { encrypted: true }
-          );
+        var config = Pusher.Util.extend(
+          Pusher.getGlobalConfig(),
+          { encrypted: true }
+        );
+
+        expect(Pusher.StrategyBuilder.build).toHaveBeenCalledWith(
+          Pusher.getDefaultStrategy(config),
+          config
+        );
       });
 
       it("should pass options to the strategy builder", function() {
+        var config = Pusher.Util.extend(
+          Pusher.getGlobalConfig(),
+          { encrypted: true }
+        );
+
         managerOptions.getStrategy({ encrypted: true });
-        expect(Pusher.StrategyBuilder.build)
-          .toHaveBeenCalledWith(
-            Pusher.getDefaultStrategy(), { encrypted: true }
-          );
+        expect(Pusher.StrategyBuilder.build).toHaveBeenCalledWith(
+          Pusher.getDefaultStrategy(config),
+          config
+        );
       });
     });
 
@@ -326,7 +340,7 @@ describe("Pusher", function() {
       it("should pass pusher:subscription_error event after auth error", function() {
         var channel = pusher.subscribe("wrong");
 
-        channel.authorize.calls[0].args[2](true, "ERROR");
+        channel.authorize.calls[0].args[1](true, "ERROR");
         expect(channel.handleEvent)
           .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
       });

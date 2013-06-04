@@ -4,6 +4,7 @@ src_files:
   - pusher.js
   - util.js
   - defaults.js
+  - config.js
   - errors.js
   - dependency_loader.js
   - dependencies.js
