@@ -49,5 +49,5 @@ module.exports = [
   'src/channels/presence_channel.js',
   'src/channels/channels.js',
 
-  'src/pusher_authorizer.js',
+  'src/pusher_authorizer.js'
 ];
