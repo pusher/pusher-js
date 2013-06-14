@@ -15,7 +15,9 @@ describeIntegration("Cluster Configuration", function() {
       var _Dependencies;
 
       beforeEach(function() {
-        if (!options.ws) {
+        if (options.ws) {
+          spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
+        } else {
           spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
           spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
         }
