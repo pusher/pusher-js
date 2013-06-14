@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.0 (2013-06-14)
+
+[NEW] Added support for clusters
+
+[CHANGED] All configuration options can be passed to the Pusher constructor
+
+[DEPRECATED] Global configuration options should not be used anymore
+
 ## 2.0.5 (2013-05-28)
 
 [FIXED] Working connections being closed when a parallel handshake failed in a specific way
