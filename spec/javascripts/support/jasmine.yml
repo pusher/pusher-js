@@ -4,6 +4,7 @@ src_files:
   - pusher.js
   - util.js
   - defaults.js
+  - config.js
   - errors.js
   - dependency_loader.js
   - dependencies.js
@@ -42,5 +43,10 @@ src_files:
   - connection/handshake.js
   - connection/connection_manager.js
 
-  - pusher_channels.js
+  - channels/members.js
+  - channels/channel.js
+  - channels/private_channel.js
+  - channels/presence_channel.js
+  - channels/channels.js
+
   - pusher_authorizer.js

@@ -71,7 +71,7 @@
 
   /** @protected */
   prototype.getPath = function() {
-    return "/pusher";
+    return this.options.httpPath || "/pusher";
   };
 
   /** @protected */

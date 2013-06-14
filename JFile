@@ -7,13 +7,14 @@ target_dir './dist'
 
 src_dir './src'
 
-version '2.0.5'
+version '2.1.0'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
   file 'util.js'
   file 'defaults.js'
+  file 'config.js'
   file 'errors.js'
   file 'events_dispatcher.js'
   file 'dependency_loader.js'
@@ -52,7 +53,13 @@ bundle 'pusher.js' do
   file 'connection/connection_manager.js'
 
   file 'net_info.js'
-  file 'pusher_channels.js'
+
+  file 'channels/members.js'
+  file 'channels/channel.js'
+  file 'channels/private_channel.js'
+  file 'channels/presence_channel.js'
+  file 'channels/channels.js'
+
   file 'pusher_authorizer.js'
 end
 

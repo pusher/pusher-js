@@ -2,36 +2,37 @@
   Pusher.VERSION = '<VERSION>';
   Pusher.PROTOCOL = 6;
 
-  // WS connection parameters
+  // DEPRECATED: WS connection parameters
   Pusher.host = 'ws.pusherapp.com';
   Pusher.ws_port = 80;
   Pusher.wss_port = 443;
-  // SockJS fallback parameters
+  // DEPRECATED: SockJS fallback parameters
   Pusher.sockjs_host = 'sockjs.pusher.com';
   Pusher.sockjs_http_port = 80;
   Pusher.sockjs_https_port = 443;
   Pusher.sockjs_path = "/pusher";
-  // Stats
+  // DEPRECATED: Stats
   Pusher.stats_host = 'stats.pusher.com';
-  // Other settings
+  // DEPRECATED: Other settings
   Pusher.channel_auth_endpoint = '/pusher/auth';
-  Pusher.cdn_http = '<CDN_HTTP>';
-  Pusher.cdn_https = '<CDN_HTTPS>';
-  Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
   Pusher.channel_auth_transport = 'ajax';
   Pusher.activity_timeout = 120000;
   Pusher.pong_timeout = 30000;
   Pusher.unavailable_timeout = 10000;
+  // CDN configuration
+  Pusher.cdn_http = '<CDN_HTTP>';
+  Pusher.cdn_https = '<CDN_HTTPS>';
+  Pusher.dependency_suffix = '<DEPENDENCY_SUFFIX>';
 
-  Pusher.getDefaultStrategy = function() {
+  Pusher.getDefaultStrategy = function(config) {
     return [
       [":def", "ws_options", {
-        hostUnencrypted: Pusher.host + ":" + Pusher.ws_port,
-        hostEncrypted: Pusher.host + ":" + Pusher.wss_port
+        hostUnencrypted: config.wsHost + ":" + config.wsPort,
+        hostEncrypted: config.wsHost + ":" + config.wssPort
       }],
       [":def", "sockjs_options", {
-        hostUnencrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_http_port,
-        hostEncrypted: Pusher.sockjs_host + ":" + Pusher.sockjs_https_port
+        hostUnencrypted: config.httpHost + ":" + config.httpPort,
+        hostEncrypted: config.httpHost + ":" + config.httpsPort
       }],
       [":def", "timeouts", {
         loop: true,
@@ -39,7 +40,12 @@
         timeoutLimit: 60000
       }],
 
-      [":def", "ws_manager", [":transport_manager", { lives: 2 }]],
+      [":def", "ws_manager", [":transport_manager", {
+        lives: 2,
+        minPingDelay: 10000,
+        maxPingDelay: config.activity_timeout
+      }]],
+
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],

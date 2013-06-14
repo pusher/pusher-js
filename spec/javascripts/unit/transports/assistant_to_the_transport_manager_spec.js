@@ -11,21 +11,27 @@ describe("AssistantToTheTransportManager", function() {
     transportClass = Pusher.Mocks.getTransportClass(true, transport);
 
     assistant = new Pusher.AssistantToTheTransportManager(
-      transportManager, transportClass, {}
+      transportManager,
+      transportClass,
+      { minPingDelay: 10000, maxPingDelay: 120000 }
     );
   });
 
   describe("#isSupported", function() {
     it("should return true when transport is supported", function() {
       var assistant = new Pusher.AssistantToTheTransportManager(
-        transportManager, Pusher.Mocks.getTransportClass(true), {}
+        transportManager,
+        Pusher.Mocks.getTransportClass(true),
+        { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       expect(assistant.isSupported()).toBe(true);
     });
 
     it("should return false when transport is not supported", function() {
       var assistant = new Pusher.AssistantToTheTransportManager(
-        transportManager, Pusher.Mocks.getTransportClass(false), {}
+        transportManager,
+        Pusher.Mocks.getTransportClass(false),
+        { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       expect(assistant.isSupported()).toBe(false);
     });
@@ -66,7 +72,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       assistant = new Pusher.AssistantToTheTransportManager(
-        transportManager, transportClass, { maxPingDelay: 100000 }
+        transportManager,
+        transportClass,
+        { minPingDelay: 10000, maxPingDelay: 100000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
       Pusher.Util.now.andReturn(1);
@@ -107,7 +115,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       assistant = new Pusher.AssistantToTheTransportManager(
-        transportManager, transportClass, { maxPingDelay: 50000, lives: 1 }
+        transportManager,
+        transportClass,
+        { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
       Pusher.Util.now.andReturn(1);
@@ -134,7 +144,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       assistant = new Pusher.AssistantToTheTransportManager(
-        transportManager, transportClass, { minPingDelay: 20000 }
+        transportManager,
+        transportClass,
+        { minPingDelay: 20000, maxPingDelay: 100000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
       Pusher.Util.now.andReturn(1);

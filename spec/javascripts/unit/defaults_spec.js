@@ -9,12 +9,11 @@ describe("Default", function() {
           spyOn(Pusher.FlashTransport, "isSupported").andReturn(true);
         }
         var strategy = Pusher.StrategyBuilder.build(
-          Pusher.getDefaultStrategy()
+          Pusher.getDefaultStrategy(Pusher.getGlobalConfig())
         );
         expect(strategy.isSupported()).toBe(true);
       });
     }
-
 
     for (var ws = 0; ws <= 1; ws++) {
       for (var flash = 0; flash <= 1; flash++) {

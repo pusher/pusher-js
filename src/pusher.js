@@ -1,9 +1,16 @@
 ;(function() {
   function Pusher(app_key, options) {
+    options = options || {};
+
     var self = this;
 
-    this.options = options || {};
     this.key = app_key;
+    this.config = Pusher.Util.extend(
+      Pusher.getGlobalConfig(),
+      options.cluster ? Pusher.getClusterConfig(options.cluster) : {},
+      options
+    );
+
     this.channels = new Pusher.Channels();
     this.global_emitter = new Pusher.EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
@@ -12,26 +19,26 @@
 
     var getStrategy = function(options) {
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(),
-        Pusher.Util.extend({}, self.options, options)
+        Pusher.getDefaultStrategy(self.config),
+        Pusher.Util.extend({}, self.config, options)
       );
     };
     var getTimeline = function() {
       return new Pusher.Timeline(self.key, self.sessionID, {
         features: Pusher.Util.getClientFeatures(),
-        params: self.options.timelineParams || {},
+        params: self.config.timelineParams || {},
         limit: 50,
         level: Pusher.Timeline.INFO,
         version: Pusher.VERSION
       });
     };
     var getTimelineSender = function(timeline, options) {
-      if (self.options.disableStats) {
+      if (self.config.disableStats) {
         return null;
       }
       return new Pusher.TimelineSender(timeline, {
         encrypted: self.isEncrypted() || !!options.encrypted,
-        host: Pusher.stats_host,
+        host: self.config.statsHost,
         path: "/timeline"
       });
     };
@@ -42,11 +49,11 @@
         { getStrategy: getStrategy,
           getTimeline: getTimeline,
           getTimelineSender: getTimelineSender,
-          activityTimeout: Pusher.activity_timeout,
-          pongTimeout: Pusher.pong_timeout,
-          unavailableTimeout: Pusher.unavailable_timeout
+          activityTimeout: this.config.activity_timeout,
+          pongTimeout: this.config.pong_timeout,
+          unavailableTimeout: this.config.unavailable_timeout
         },
-        this.options,
+        this.config,
         { encrypted: this.isEncrypted() }
       )
     );
@@ -59,7 +66,7 @@
       if (params.channel) {
         var channel = self.channel(params.channel);
         if (channel) {
-          channel.emit(params.event, params.data);
+          channel.handleEvent(params.event, params.data);
         }
       }
       // Emit globaly [deprecated]
@@ -147,21 +154,17 @@
     var channel = this.channels.add(channel_name, this);
 
     if (this.connection.state === 'connected') {
-      channel.authorize(
-        this.connection.socket_id,
-        this.options,
-        function(err, data) {
-          if (err) {
-            channel.emit('pusher:subscription_error', data);
-          } else {
-            self.send_event('pusher:subscribe', {
-              channel: channel_name,
-              auth: data.auth,
-              channel_data: data.channel_data
-            });
-          }
+      channel.authorize(this.connection.socket_id, function(err, data) {
+        if (err) {
+          channel.handleEvent('pusher:subscription_error', data);
+        } else {
+          self.send_event('pusher:subscribe', {
+            channel: channel_name,
+            auth: data.auth,
+            channel_data: data.channel_data
+          });
         }
-      );
+      });
     }
     return channel;
   };
@@ -183,7 +186,7 @@
     if (Pusher.Util.getDocumentLocation().protocol === "https:") {
       return true;
     } else {
-      return !!this.options.encrypted;
+      return !!this.config.encrypted;
     }
   };
 

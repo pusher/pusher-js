@@ -6,18 +6,22 @@ describe("Pusher", function() {
     var channel, channelName;
     for (channelName in channels) {
       channel = channels[channelName];
-      expect(channel.authorize)
-        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function));
+      expect(channel.authorize).toHaveBeenCalledWith(
+        manager.socket_id,
+        jasmine.any(Function)
+      );
     }
 
     for (channelName in channels) {
       channel = channels[channelName];
-      channel.authorize.calls[0].args[2](null, {
+      channel.authorize.calls[0].args[1](null, {
         auth: { auth: channelName },
         channel_data: { data: channelName }
       });
-      expect(channel.authorize)
-        .toHaveBeenCalledWith(manager.socket_id, {}, jasmine.any(Function));
+      expect(channel.authorize).toHaveBeenCalledWith(
+        manager.socket_id,
+        jasmine.any(Function)
+      );
       expect(manager.send_event).toHaveBeenCalledWith(
         "pusher:subscribe",
         { channel: channel.name,
@@ -43,7 +47,7 @@ describe("Pusher", function() {
 
     spyOn(Pusher.StrategyBuilder, "build").andReturn(strategy);
     spyOn(Pusher, "ConnectionManager").andReturn(manager);
-    spyOn(Pusher.Channel, "factory").andCallFake(function(name, _) {
+    spyOn(Pusher, "Channel").andCallFake(function(name, _) {
       return Pusher.Mocks.getChannel(name);
     });
     spyOn(Pusher.JSONPRequest, "send");
@@ -184,18 +188,28 @@ describe("Pusher", function() {
         managerOptions = Pusher.ConnectionManager.calls[1].args[1];
         managerOptions.getStrategy();
 
-        expect(Pusher.StrategyBuilder.build)
-          .toHaveBeenCalledWith(
-            Pusher.getDefaultStrategy(), { encrypted: true }
-          );
+        var config = Pusher.Util.extend(
+          Pusher.getGlobalConfig(),
+          { encrypted: true }
+        );
+
+        expect(Pusher.StrategyBuilder.build).toHaveBeenCalledWith(
+          Pusher.getDefaultStrategy(config),
+          config
+        );
       });
 
       it("should pass options to the strategy builder", function() {
+        var config = Pusher.Util.extend(
+          Pusher.getGlobalConfig(),
+          { encrypted: true }
+        );
+
         managerOptions.getStrategy({ encrypted: true });
-        expect(Pusher.StrategyBuilder.build)
-          .toHaveBeenCalledWith(
-            Pusher.getDefaultStrategy(), { encrypted: true }
-          );
+        expect(Pusher.StrategyBuilder.build).toHaveBeenCalledWith(
+          Pusher.getDefaultStrategy(config),
+          config
+        );
       });
     });
 
@@ -323,13 +337,12 @@ describe("Pusher", function() {
         expectValidSubscriptions(manager, { "xxx" : channel });
       });
 
-      it("should emit pusher:subscription_error after auth error", function() {
+      it("should pass pusher:subscription_error event after auth error", function() {
         var channel = pusher.subscribe("wrong");
-        var onSubscriptionError = jasmine.createSpy("onSubscriptionError");
 
-        channel.bind("pusher:subscription_error", onSubscriptionError);
-        channel.authorize.calls[0].args[2](true, "ERROR");
-        expect(onSubscriptionError).toHaveBeenCalledWith("ERROR");
+        channel.authorize.calls[0].args[1](true, "ERROR");
+        expect(channel.handleEvent)
+          .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
       });
     });
 
@@ -346,17 +359,16 @@ describe("Pusher", function() {
   });
 
   describe("on message", function() {
-    it("should publish events to their channels", function() {
+    it("should pass events to their channels", function() {
       var channel = pusher.subscribe("chan");
-      var onEvent = jasmine.createSpy("onEvent");
-      channel.bind("event", onEvent);
 
       manager.emit("message", {
         channel: "chan",
         event: "event",
         data: { key: "value" }
       });
-      expect(onEvent).toHaveBeenCalledWith({ key: "value" });
+      expect(channel.handleEvent)
+        .toHaveBeenCalledWith("event", { key: "value" });
     });
 
     it("should not publish events to other channels", function() {
