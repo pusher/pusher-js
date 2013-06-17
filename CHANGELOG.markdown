@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.6 (2013-06-17)
+
+[FIXED] SockJS issues on some versions of Opera
+
 ## 2.0.5 (2013-05-28)
 
 [FIXED] Working connections being closed when a parallel handshake failed in a specific way
