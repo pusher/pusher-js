@@ -11,8 +11,6 @@ module.exports = [
 
   'src/utils/timer.js',
 
-  'src/pusher_channels.js',
-
   'src/base64.js',
   'src/jsonp/jsonp_request.js',
   'src/jsonp/jsonp_receiver.js',
