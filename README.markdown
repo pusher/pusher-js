@@ -4,7 +4,7 @@ This library is an open source client that allows Javascript clients to connect 
 
 We have included the source code for following libraries:
 
-* websocket-js
+* web-socket-js
 * sockjs-client
 
 They both include their own licences.
@@ -24,15 +24,48 @@ The following topics are covered:
 
 ## Configuration
 
-There are a number of variables which can be set for the Pusher client. For most users, there is little need to change these.
+There are a number of configuration parameters which can be set for the Pusher client, which can be passed as an object to the Pusher constructor, i.e.:
 
-### `Pusher.host`
+    var pusher = new Pusher(API_KEY, {
+        authEndpoint: "http://example.com/pusher/auth"
+    });
 
-This can be changed to point to alternative Pusher URLs (used internally for our staging server).
+For most users, there is little need to change these. See [client API guide](http://pusher.com/docs/client_api_guide/client_connect) for more details.
 
-### `Pusher.auth_url`
+#### `encrypted` (Boolean)
+
+Forces the connection to use encrypted transports.
+
+#### `authEndpoint` (String)
 
 Endpoint on your server that will return the authentication signature needed for private channels.
+
+#### `authTransport` (String)
+
+Defines how the authentication endpoint, defined using authEndpoint, will be called. There are two options available: `ajax` and `jsonp`.
+
+#### `cluster` (String)
+
+Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
+
+    // will connect to the 'eu' cluster
+    var pusher = new Pusher(API_KEY, { cluster: "eu" });
+
+#### `disableFlash` (Boolean)
+
+Disables Flash, leaving only WebSockets and HTTP fallback.
+
+#### `disableStats` (Boolean)
+
+Disables stats collection, so that connection metrics are not submitted to Pusher’s servers.
+
+#### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
+
+These can be changed to point to alternative Pusher URLs (used internally for our staging server).
+
+#### `ignoreNullOrigin` (Boolean)
+
+Ignores null origin checks for HTTP fallbacks. Use with care, it should be disabled only if necessary (i.e. PhoneGap).
 
 ## Connection
 
