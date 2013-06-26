@@ -280,7 +280,11 @@
     },
 
     getLocalStorage: function() {
-      return window.localStorage;
+      try {
+        return window.localStorage;
+      } catch (e) {
+        return undefined;
+      }
     },
 
     getClientFeatures: function() {
