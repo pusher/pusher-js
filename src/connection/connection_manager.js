@@ -169,6 +169,9 @@
   prototype.retryIn = function(delay) {
     var self = this;
     self.timeline.info({ action: "retry", delay: delay });
+    if (delay > 0) {
+      self.emit("connecting_in", Math.round(delay / 1000));
+    }
     self.retryTimer = new Pusher.Timer(delay || 0, function() {
       self.disconnect();
       self.connect();
