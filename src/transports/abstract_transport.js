@@ -168,7 +168,15 @@
 
   /** @protected */
   prototype.onClose = function(closeEvent) {
-    this.changeState("closed", closeEvent);
+    if (closeEvent) {
+      this.changeState("closed", {
+        code: closeEvent.code,
+        reason: closeEvent.reason,
+        wasClean: closeEvent.wasClean
+      });
+    } else {
+      this.changeState("closed");
+    }
     this.socket = undefined;
   };
 
