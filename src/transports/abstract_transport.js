@@ -161,9 +161,7 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.timeline.error(this.buildTimelineMessage({
-      error: getErrorDetails(error)
-    }));
+    this.timeline.error(this.buildTimelineMessage({}));
   };
 
   /** @protected */
@@ -247,22 +245,6 @@
   prototype.buildTimelineMessage = function(message) {
     return Pusher.Util.extend({ cid: this.id }, message);
   };
-
-  function getErrorDetails(error) {
-    if (typeof error === "string") {
-      return error;
-    }
-    if (typeof error === "object") {
-      return Pusher.Util.mapObject(error, function(value) {
-        var valueType = typeof value;
-        if (valueType === "object" || valueType == "function") {
-          return valueType;
-        }
-        return value;
-      });
-    }
-    return typeof error;
-  }
 
   Pusher.AbstractTransport = AbstractTransport;
 }).call(this);

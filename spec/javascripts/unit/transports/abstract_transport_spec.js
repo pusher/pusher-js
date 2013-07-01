@@ -292,40 +292,9 @@ describe("AbstractTransport", function() {
       expect(onClosed.calls.length).toEqual(1);
     });
 
-    it("should log an error string to timeline", function() {
+    it("should log an error without details to timeline", function() {
       this.socket.onerror("error message");
-      expect(this.timeline.error).toHaveBeenCalledWith({
-        cid: 667,
-        error: "error message"
-      });
-    });
-
-    it("should log an error object to timeline", function() {
-      this.socket.onerror({
-        name: "doom",
-        number: 1,
-        bool: true,
-        o: { nope: true },
-        f: function() {}
-      });
-      expect(this.timeline.error).toHaveBeenCalledWith({
-        cid: 667,
-        error: {
-          name: "doom",
-          number: 1,
-          bool: true,
-          o: "object",
-          f: "function"
-        }
-      });
-    });
-
-    it("should log type of an error if it's not a string or object", function() {
-      this.socket.onerror(function() {});
-      expect(this.timeline.error).toHaveBeenCalledWith({
-        cid: 667,
-        error: "function"
-      });
+      expect(this.timeline.error).toHaveBeenCalledWith({ cid: 667 });
     });
   });
 
