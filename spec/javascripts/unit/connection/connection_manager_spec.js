@@ -252,6 +252,24 @@ describe("ConnectionManager", function() {
         expect(onConnectingIn).toHaveBeenCalledWith(1);
       });
     });
+
+    describe("with 'error' action", function() {
+      var handshake;
+      var onConnectingIn;
+
+      beforeEach(function() {
+        handshake = { action: "error", error: "boom" };
+        strategy._callback(null, handshake);
+      });
+
+      it("should log the error to the timeline", function() {
+        expect(timeline.error).toHaveBeenCalledWith({ handshakeError: "boom" });
+      });
+
+      it("should not abort the strategy", function() {
+        expect(strategy._abort).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe("after establishing a connection", function() {

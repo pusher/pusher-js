@@ -103,9 +103,13 @@
       if (error) {
         self.runner = self.strategy.connect(0, callback);
       } else {
-        // we don't support switching connections yet
-        self.runner.abort();
-        self.handshakeCallbacks[handshake.action](handshake);
+        if (handshake.action === "error") {
+          self.timeline.error({ handshakeError: handshake.error });
+        } else {
+          // we don't support switching connections yet
+          self.runner.abort();
+          self.handshakeCallbacks[handshake.action](handshake);
+        }
       }
     };
     self.runner = self.strategy.connect(0, callback);
