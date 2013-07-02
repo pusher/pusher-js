@@ -249,58 +249,52 @@ describe("AbstractTransport", function() {
       this.transport.connect();
     });
 
-    it("should emit error and closed events", function() {
+    it("should emit errors", function() {
       var onError = jasmine.createSpy("onError");
-      var onClosed = jasmine.createSpy("onClosed");
       this.transport.bind("error", onError);
-      this.transport.bind("closed", onClosed);
 
       this.socket.onerror("We're doomed");
-      this.socket.onclose();
 
       expect(onError).toHaveBeenCalledWith({
         type: "WebSocketError",
         error: "We're doomed"
       });
       expect(onError.calls.length).toEqual(1);
+    })
+
+    it("should emit a closed event with correct params", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      this.transport.bind("closed", onClosed);
+
+      this.socket.onclose({
+        code: 1234,
+        reason: "testing",
+        wasClean: true,
+        foo: "bar"
+      });
+
+      expect(onClosed).toHaveBeenCalledWith({
+        code: 1234,
+        reason: "testing",
+        wasClean: true
+      });
       expect(onClosed.calls.length).toEqual(1);
       expect(this.transport.state).toEqual("closed");
     });
 
-    it("should log an error string to timeline", function() {
+    it("should emit a closed events without params when no details were provided", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      this.transport.bind("closed", onClosed);
+
+      this.socket.onclose();
+
+      expect(onClosed).toHaveBeenCalledWith(undefined);
+      expect(onClosed.calls.length).toEqual(1);
+    });
+
+    it("should log an error without details to timeline", function() {
       this.socket.onerror("error message");
-      expect(this.timeline.error).toHaveBeenCalledWith({
-        cid: 667,
-        error: "error message"
-      });
-    });
-
-    it("should log an error object to timeline", function() {
-      this.socket.onerror({
-        name: "doom",
-        number: 1,
-        bool: true,
-        o: { nope: true },
-        f: function() {}
-      });
-      expect(this.timeline.error).toHaveBeenCalledWith({
-        cid: 667,
-        error: {
-          name: "doom",
-          number: 1,
-          bool: true,
-          o: "object",
-          f: "function"
-        }
-      });
-    });
-
-    it("should log type of an error if it's not a string or object", function() {
-      this.socket.onerror(function() {});
-      expect(this.timeline.error).toHaveBeenCalledWith({
-        cid: 667,
-        error: "function"
-      });
+      expect(this.timeline.error).toHaveBeenCalledWith({ cid: 667 });
     });
   });
 
