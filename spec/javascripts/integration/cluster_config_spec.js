@@ -97,8 +97,10 @@ describeIntegration("Cluster Configuration", function() {
     });
   }
 
-  describeClusterTest({ ws: true, encrypted: false});
-  describeClusterTest({ ws: true, encrypted: true});
+  if (Pusher.WSTransport.isSupported() || Pusher.FlashTransport.isSupported()) {
+    describeClusterTest({ ws: true, encrypted: false});
+    describeClusterTest({ ws: true, encrypted: true});
+  }
   describeClusterTest({ ws: false, encrypted: false});
   describeClusterTest({ ws: false, encrypted: true});
 });
