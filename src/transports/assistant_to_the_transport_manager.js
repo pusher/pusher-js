@@ -38,11 +38,11 @@
         pingTimer = null;
       }
 
-      if (closeEvent.wasClean) {
-        return;
-      }
-
-      if (openTimestamp) {
+      if (closeEvent.code === 1002 || closeEvent.code === 1003) {
+        // we don't want to use transports not obeying the protocol
+        self.manager.reportDeath();
+      } else if (!closeEvent.wasClean && openTimestamp) {
+        // report deaths only for short-living transport
         var lifespan = Pusher.Util.now() - openTimestamp;
         if (lifespan < 2 * self.maxPingDelay) {
           self.manager.reportDeath();
