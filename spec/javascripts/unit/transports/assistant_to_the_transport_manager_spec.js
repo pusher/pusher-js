@@ -66,6 +66,38 @@ describe("AssistantToTheTransportManager", function() {
     });
   });
 
+  describe("after an opened connection closed with a protocol error (code 1002)", function() {
+    var connection;
+
+    beforeEach(function() {
+      connection = assistant.createConnection("x", 1, "a", {});
+      Pusher.Util.now.andReturn(1);
+      connection.emit("open");
+      Pusher.Util.now.andReturn(100001);
+      connection.emit("closed", { wasClean: true, code: 1002 });
+    });
+
+    it("should report its death to the manager", function() {
+      expect(transportManager.reportDeath).toHaveBeenCalled();
+    });
+  });
+
+  describe("after an opened connection closed with a unsupported error (code 1003)", function() {
+    var connection;
+
+    beforeEach(function() {
+      connection = assistant.createConnection("x", 1, "a", {});
+      Pusher.Util.now.andReturn(1);
+      connection.emit("open");
+      Pusher.Util.now.andReturn(100001);
+      connection.emit("closed", { wasClean: true, code: 1003 });
+    });
+
+    it("should report its death to the manager", function() {
+      expect(transportManager.reportDeath).toHaveBeenCalled();
+    });
+  });
+
   describe("after an opened connection died after less than 2*maxPingDelay", function() {
     var connection;
     var assistant;
