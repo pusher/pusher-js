@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.7 (2013-07-08)
+
+[FIXED] Disable transports that raise protocol errors
+
+[FIXED] Keep trying all transports if a handshake raises an error
+
+[CHANGED] Send less verbose error and closed event logs to stats
+
+[FIXED] Add missing `connecting_in` event
+
+[FIXED] Catch exceptions raised when accessing `window.localStorage` in some environments
+
 ## 2.0.6 (2013-06-17)
 
 [FIXED] SockJS issues on some versions of Opera
