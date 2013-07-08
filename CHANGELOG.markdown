@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.1.1 (2013-07-08)
+
+[FIXED] Disable transports that raise protocol errors
+
+[FIXED] Keep trying all transports if a handshake raises an error
+
+[CHANGED] Send less verbose error and closed event logs to stats
+
+[FIXED] Add missing `connecting_in` event
+
+[FIXED] Catch exceptions raised when accessing `window.localStorage` in some environments
+
 ## 2.1.0 (2013-06-17)
 
 [NEW] Added support for clusters
