@@ -230,9 +230,13 @@ describe("ConnectionManager", function() {
 
     describe("with 'backoff' action", function() {
       var handshake;
+      var onConnectingIn;
 
       beforeEach(function() {
         handshake = { action: "backoff" };
+        onConnectingIn = jasmine.createSpy("onConnectingIn");
+
+        manager.bind("connecting_in", onConnectingIn);
         strategy._callback(null, handshake);
       });
 
@@ -241,6 +245,29 @@ describe("ConnectionManager", function() {
         expect(strategy.connect.calls.length).toEqual(1);
         jasmine.Clock.tick(1);
         expect(strategy.connect.calls.length).toEqual(2);
+      });
+
+      it("should emit 'connecting_in' event", function() {
+        expect(onConnectingIn.calls.length).toEqual(1);
+        expect(onConnectingIn).toHaveBeenCalledWith(1);
+      });
+    });
+
+    describe("with 'error' action", function() {
+      var handshake;
+      var onConnectingIn;
+
+      beforeEach(function() {
+        handshake = { action: "error", error: "boom" };
+        strategy._callback(null, handshake);
+      });
+
+      it("should log the error to the timeline", function() {
+        expect(timeline.error).toHaveBeenCalledWith({ handshakeError: "boom" });
+      });
+
+      it("should not abort the strategy", function() {
+        expect(strategy._abort).not.toHaveBeenCalled();
       });
     });
   });

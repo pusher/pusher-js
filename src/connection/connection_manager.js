@@ -103,9 +103,13 @@
       if (error) {
         self.runner = self.strategy.connect(0, callback);
       } else {
-        // we don't support switching connections yet
-        self.runner.abort();
-        self.handshakeCallbacks[handshake.action](handshake);
+        if (handshake.action === "error") {
+          self.timeline.error({ handshakeError: handshake.error });
+        } else {
+          // we don't support switching connections yet
+          self.runner.abort();
+          self.handshakeCallbacks[handshake.action](handshake);
+        }
       }
     };
     self.runner = self.strategy.connect(0, callback);
@@ -169,6 +173,9 @@
   prototype.retryIn = function(delay) {
     var self = this;
     self.timeline.info({ action: "retry", delay: delay });
+    if (delay > 0) {
+      self.emit("connecting_in", Math.round(delay / 1000));
+    }
     self.retryTimer = new Pusher.Timer(delay || 0, function() {
       self.disconnect();
       self.connect();
