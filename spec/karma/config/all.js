@@ -9,6 +9,7 @@ basePath = '../../../';
 // list of files / patterns to load in the browser
 files = [JASMINE, JASMINE_ADAPTER]
   .concat(require(__dirname + "/../files/source"))
+  .concat(require(__dirname + "/../files/unit_tests"))
   .concat(require(__dirname + "/../files/integration_tests"));
 
 
@@ -20,7 +21,7 @@ exclude = [
 
 
 preprocessors = {
-  '**/src/**/*.js': 'coverage'
+  // '**/src/**/*.js': 'coverage'
 };
 
 
@@ -64,7 +65,7 @@ autoWatch = true;
 // - Safari (only Mac)
 // - PhantomJS
 // - IE (only Windows)
-browsers = ['Chrome', 'ChromeCanary', 'Firefox', 'Opera', 'Safari'];
+browsers = ['Chrome', 'Firefox', 'Opera', 'Safari'];
 
 
 // If browser does not capture in given timeout [ms], kill it

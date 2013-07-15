@@ -226,17 +226,17 @@ Guard runs only unit tests - partially because PhantomJS does not support WebSoc
 
 There's also a JSHint watch, which will validate JS files on save.
 
-#### Run testacular
+#### Run karma
 
-Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install testacular npm module
+Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install karma npm module
 
-    npm install -g testacular
+    npm install -g karma
 
 Then start the server, run one of following commands:
 
-    bin/testacular-unit           # runs only unit tests
-    bin/testacular-integration    # runs only integration tests
-    bin/testacular                # runs both unit and integration tests
+    bin/karma-unit           # runs only unit tests
+    bin/karma-integration    # runs only integration tests
+    bin/karma                # runs both unit and integration tests
 
 All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
 
