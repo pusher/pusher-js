@@ -8,7 +8,7 @@ params = !debug ? " > /dev/null 2>&1" : ""
 
 commands = [
   "bundle exec jbundle server #{params}",
-  "testacular start spec/testacular/config/integration.js"
+  "karma start spec/karma/config/all.js"
 ]
 
 pids = commands.map { |cmd|
