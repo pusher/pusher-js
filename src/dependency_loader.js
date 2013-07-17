@@ -26,24 +26,22 @@
 
     if (this.loaded[name]) {
       callback();
-      return;
-    }
+    } else if (this.loading[name] && this.loading[name].length > 0) {
+      this.loading[name].push(callback);
+    } else {
+      this.loading[name] = [callback];
 
-    if (!this.loading[name]) {
-      this.loading[name] = [];
-    }
-    this.loading[name].push(callback);
-    if (this.loading[name].length > 1) {
-      return;
-    }
+      require(this.getPath(name), function() {
+        self.loaded[name] = true;
 
-    require(this.getPath(name), function() {
-      for (var i = 0; i < self.loading[name].length; i++) {
-        self.loading[name][i]();
-      }
-      delete self.loading[name];
-      self.loaded[name] = true;
-    });
+        if (self.loading[name]) {
+          for (var i = 0; i < self.loading[name].length; i++) {
+            self.loading[name][i]();
+          }
+          delete self.loading[name];
+        }
+      });
+    }
   };
 
   /** Returns a root URL for pusher-js CDN.
