@@ -16,7 +16,16 @@
       return {
         setAttribute: jasmine.createSpy("setAttribute"),
         addEventListener: jasmine.createSpy("addEventListener"),
+        insertBefore: jasmine.createSpy("insertBefore"),
         appendChild: jasmine.createSpy("appendChild")
+      };
+    },
+
+    getXHR: function() {
+      return {
+        open: jasmine.createSpy("open"),
+        send: jasmine.createSpy("send"),
+        setRequestHeader: jasmine.createSpy("setRequestHeader")
       };
     },
 

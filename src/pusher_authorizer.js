@@ -79,6 +79,7 @@
       var callbackName = nextAuthCallbackID.toString();
       nextAuthCallbackID++;
 
+      var document = Pusher.Util.getDocument();
       var script = document.createElement("script");
       // Hacked wrapper.
       Pusher.auth_callbacks[callbackName] = function(data) {
