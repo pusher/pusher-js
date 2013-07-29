@@ -1,5 +1,6 @@
 ;(function() {
   function Pusher(app_key, options) {
+    checkAppKey(app_key);
     options = options || {};
 
     var self = this;
@@ -15,7 +16,6 @@
     this.global_emitter = new Pusher.EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
-    checkAppKey(this.key);
     this.timeline = new Pusher.Timeline(this.key, this.sessionID, {
       features: Pusher.Util.getClientFeatures(),
       params: this.config.timelineParams || {},
@@ -66,7 +66,9 @@
         }
       }
       // Emit globaly [deprecated]
-      if (!internal) self.global_emitter.emit(params.event, params.data);
+      if (!internal) {
+        self.global_emitter.emit(params.event, params.data);
+      }
     });
     this.connection.bind('disconnected', function() {
       self.channels.disconnect();
@@ -183,7 +185,7 @@
     if (Pusher.Util.getDocumentLocation().protocol === "https:") {
       return true;
     } else {
-      return !!this.config.encrypted;
+      return Boolean(this.config.encrypted);
     }
   };
 
