@@ -11,7 +11,8 @@ describe("AbstractTransport", function() {
 
   beforeEach(function() {
     this.socket = {
-      send: jasmine.createSpy("send")
+      send: jasmine.createSpy("send"),
+      close: jasmine.createSpy("close")
     };
     this.timeline = Pusher.Mocks.getTimeline();
     this.timeline.generateUniqueID.andReturn(667);
@@ -164,6 +165,20 @@ describe("AbstractTransport", function() {
       });
     });
 
+    it("should not crash when socket is closed before next tick (will log to console only)", function() {
+      var timer;
+      runs(function() {
+        this.transport.send("foobar")
+
+        this.transport.close();
+        this.socket.onclose({ wasClean: true });
+
+        timer = new Pusher.Timer(100, function() {});
+      });
+      waitsFor(function () {
+        return !timer.isRunning();
+      }, "timer to run", 200);
+    });
 
     it("should log method call with debug level", function() {
       this.transport.send("foobar");
@@ -180,7 +195,6 @@ describe("AbstractTransport", function() {
       this.transport.initialize();
       this.transport.connect();
       this.socket.onopen();
-      this.socket.close = jasmine.createSpy("close");
     });
 
     it("should call close on the socket and emit a 'closed' event", function() {
