@@ -189,6 +189,8 @@
       channel.authorize = jasmine.createSpy("authorize");
       channel.disconnect = jasmine.createSpy("disconnect");
       channel.handleEvent = jasmine.createSpy("handleEvent");
+      channel.subscribe = jasmine.createSpy("subscribe");
+      channel.unsubscribe = jasmine.createSpy("unsubscribe");
       return channel;
     },
 

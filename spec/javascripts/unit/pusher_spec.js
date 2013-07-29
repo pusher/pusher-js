@@ -1,37 +1,6 @@
 describe("Pusher", function() {
   var _isReady, _instances;
 
-  function expectValidSubscriptions(manager, channels) {
-    var channel, channelName;
-    for (channelName in channels) {
-      channel = channels[channelName];
-      expect(channel.authorize).toHaveBeenCalledWith(
-        manager.socket_id,
-        jasmine.any(Function)
-      );
-    }
-
-    for (channelName in channels) {
-      channel = channels[channelName];
-      channel.authorize.calls[0].args[1](null, {
-        auth: { auth: channelName },
-        channel_data: { data: channelName }
-      });
-      expect(channel.authorize).toHaveBeenCalledWith(
-        manager.socket_id,
-        jasmine.any(Function)
-      );
-      expect(manager.send_event).toHaveBeenCalledWith(
-        "pusher:subscribe",
-        { channel: channel.name,
-          auth: { auth: channelName },
-          channel_data: { data: channelName }
-        },
-        undefined
-      );
-    }
-  }
-
   beforeEach(function() {
     _instances = Pusher.instances;
     _isReady = Pusher.isReady;
@@ -248,66 +217,60 @@ describe("Pusher", function() {
     });
   });
 
-  describe("on connected", function() {
+  describe("after connecting", function() {
+    beforeEach(function() {
+      pusher = new Pusher("foo", { disableStats: true });
+      pusher.connect();
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
+    });
+
     it("should subscribe to all channels", function() {
+      var pusher = new Pusher("foo", { disableStats: true });
+
       var subscribedChannels = {
         "channel1": pusher.subscribe("channel1"),
         "channel2": pusher.subscribe("channel2")
       };
 
-      expect(subscribedChannels.channel1.authorize).not.toHaveBeenCalled();
-      expect(subscribedChannels.channel2.authorize).not.toHaveBeenCalled();
+      expect(subscribedChannels.channel1.subscribe).not.toHaveBeenCalled();
+      expect(subscribedChannels.channel2.subscribe).not.toHaveBeenCalled();
 
       pusher.connect();
-      manager.state = "connected";
-      manager.emit("connected");
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
 
-      expectValidSubscriptions(manager, subscribedChannels);
-    });
-  });
-
-  describe("after connected", function() {
-    beforeEach(function() {
-      pusher.connect();
-      manager.state = "connected";
-      manager.emit("connected");
+      expect(subscribedChannels.channel1.subscribe).toHaveBeenCalled();
+      expect(subscribedChannels.channel2.subscribe).toHaveBeenCalled();
     });
 
-    it("should send events to connection manager", function() {
+    it("should send events via the connection manager", function() {
       pusher.send_event("event", { key: "value" }, "channel");
-      expect(manager.send_event)
-        .toHaveBeenCalledWith("event", { key: "value" }, "channel");
+      expect(pusher.connection.send_event).toHaveBeenCalledWith(
+        "event", { key: "value" }, "channel"
+      );
     });
 
-    describe("on subscribe", function() {
+    describe("#subscribe", function() {
       it("should return the same channel object for subsequent calls", function() {
         var channel = pusher.subscribe("xxx");
         expect(channel.name).toEqual("xxx");
         expect(pusher.subscribe("xxx")).toBe(channel);
       });
 
-      it("should authorize and send a subscribe event", function() {
+      it("should subscribe the channel", function() {
         var channel = pusher.subscribe("xxx");
-        expectValidSubscriptions(manager, { "xxx" : channel });
-      });
-
-      it("should pass pusher:subscription_error event after auth error", function() {
-        var channel = pusher.subscribe("wrong");
-
-        channel.authorize.calls[0].args[1](true, "ERROR");
-        expect(channel.handleEvent)
-          .toHaveBeenCalledWith("pusher:subscription_error", "ERROR");
+        expect(channel.subscribe).toHaveBeenCalled();
       });
     });
 
-    describe("on unsubscribe", function() {
-      it("should send a unsubscribe event", function() {
-        pusher.subscribe("yyy");
-        pusher.unsubscribe("yyy");
+    describe("#unsubscribe", function() {
+      it("should unsubscribe the channel", function() {
+        var channel = pusher.subscribe("yyy");
+        expect(channel.unsubscribe).not.toHaveBeenCalled();
 
-        expect(manager.send_event).toHaveBeenCalledWith(
-          "pusher:unsubscribe", { channel: "yyy" }, undefined
-        );
+        pusher.unsubscribe("yyy");
+        expect(channel.unsubscribe).toHaveBeenCalled();
       });
     });
   });

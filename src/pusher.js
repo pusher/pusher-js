@@ -161,31 +161,17 @@
   };
 
   prototype.subscribe = function(channel_name) {
-    var self = this;
     var channel = this.channels.add(channel_name, this);
-
     if (this.connection.state === 'connected') {
-      channel.authorize(this.connection.socket_id, function(err, data) {
-        if (err) {
-          channel.handleEvent('pusher:subscription_error', data);
-        } else {
-          self.send_event('pusher:subscribe', {
-            channel: channel_name,
-            auth: data.auth,
-            channel_data: data.channel_data
-          });
-        }
-      });
+      channel.subscribe();
     }
     return channel;
   };
 
   prototype.unsubscribe = function(channel_name) {
-    this.channels.remove(channel_name);
+    var channel = this.channels.remove(channel_name);
     if (this.connection.state === 'connected') {
-      this.send_event('pusher:unsubscribe', {
-        channel: channel_name
-      });
+      channel.unsubscribe();
     }
   };
 

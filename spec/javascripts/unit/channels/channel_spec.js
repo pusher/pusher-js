@@ -96,4 +96,64 @@ describe("Channel", function() {
       });
     });
   });
+
+  describe("#subscribe", function() {
+    beforeEach(function() {
+      pusher.connection = {
+        socket_id: "9.37"
+      };
+      channel.authorize = jasmine.createSpy("authorize");
+    });
+
+    it("should authorize the connection first", function() {
+      expect(channel.authorize.calls.length).toEqual(0);
+      channel.subscribe();
+
+      expect(channel.authorize.calls.length).toEqual(1);
+      expect(channel.authorize).toHaveBeenCalledWith(
+        "9.37", jasmine.any(Function)
+      );
+    });
+
+    it("should send a pusher:subscribe message on successful authorization", function() {
+      expect(pusher.send_event).not.toHaveBeenCalled();
+
+      channel.subscribe();
+      var authorizeCallback = channel.authorize.calls[0].args[1];
+      authorizeCallback(false, {
+        auth: "one",
+        channel_data: "two"
+      });
+
+      expect(pusher.send_event).toHaveBeenCalledWith(
+        "pusher:subscribe",
+        { auth: "one", channel_data: "two", channel: "test" }
+      );
+    });
+
+    it("should emit pusher:subscription_error event on unsuccessful authorization", function() {
+      var onSubscriptionError = jasmine.createSpy("onSubscriptionError");
+      channel.bind("pusher:subscription_error", onSubscriptionError);
+
+      channel.subscribe();
+      var authorizeCallback = channel.authorize.calls[0].args[1];
+      authorizeCallback(true, { error: "test error" });
+
+      expect(onSubscriptionError).toHaveBeenCalledWith(
+        { error: "test error" }
+      );
+      expect(pusher.send_event).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("#unsubscribe", function() {
+    it("should send a pusher:unsubscribe message", function() {
+      expect(pusher.send_event).not.toHaveBeenCalled();
+      channel.unsubscribe();
+
+      expect(pusher.send_event).toHaveBeenCalledWith(
+        "pusher:unsubscribe", { channel: "test" }
+      );
+    });
+  });
 });
