@@ -1,5 +1,5 @@
 describe("ConnectionManager", function() {
-  var connection, strategy, timeline, timelineSender;
+  var connection, strategy, timeline;
   var managerOptions, manager;
 
   beforeEach(function() {
@@ -8,15 +8,12 @@ describe("ConnectionManager", function() {
     connection = Pusher.Mocks.getConnection();
     strategy = Pusher.Mocks.getStrategy(true);
     timeline = Pusher.Mocks.getTimeline();
-    timelineSender = Pusher.Mocks.getTimelineSender();
 
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     managerOptions = {
       getStrategy: jasmine.createSpy("getStrategy").andReturn(strategy),
-      getTimeline: jasmine.createSpy("getTimeline").andReturn(timeline),
-      getTimelineSender: jasmine.createSpy("getTimelineSender")
-        .andReturn(timelineSender),
+      timeline: timeline,
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
@@ -31,9 +28,7 @@ describe("ConnectionManager", function() {
           expect(options.timeline).toBe(timeline);
           return strategy;
         },
-        getTimeline: function(options) {
-          return timeline;
-        },
+        timeline: timeline,
         activityTimeout: 3456,
         pongTimeout: 2345,
         unavailableTimeout: 1234
@@ -50,16 +45,6 @@ describe("ConnectionManager", function() {
       manager.connect();
       expect(manager.options.getStrategy.calls[0].args[0].key)
         .toEqual("foo");
-    });
-
-    it("should pass whether connection is encrypted to timeline", function() {
-      var options = Pusher.Util.extend({}, managerOptions, {
-        encrypted: true
-      });
-      var manager = new Pusher.ConnectionManager("foo", options);
-      manager.connect();
-      expect(options.getTimelineSender)
-        .toHaveBeenCalledWith(timeline, { encrypted: true }, manager);
     });
 
     it("should initialize strategy and try to connect", function() {
@@ -81,24 +66,6 @@ describe("ConnectionManager", function() {
         previous: "initialized",
         current: "connecting"
       });
-    });
-
-    it("should start sending timeline every minute when sender is supplied", function() {
-      var options = Pusher.Util.extend({}, managerOptions, {
-        getTimelineSender: jasmine.createSpy("getTimelineSender")
-          .andReturn(timelineSender)
-      });
-      var manager = new Pusher.ConnectionManager("foo", options);
-
-      timeline.isEmpty.andReturn(false);
-      manager.connect();
-
-      jasmine.Clock.tick(59999);
-      expect(timelineSender.send.calls.length).toEqual(0);
-      jasmine.Clock.tick(1);
-      expect(timelineSender.send.calls.length).toEqual(1);
-      jasmine.Clock.tick(60000);
-      expect(timelineSender.send.calls.length).toEqual(2);
     });
   });
 
@@ -171,11 +138,6 @@ describe("ConnectionManager", function() {
         strategy._callback(null, handshake);
 
         jasmine.Clock.tick(0);
-      });
-
-      it("should build an encrypted timeline sender", function() {
-        expect(managerOptions.getTimelineSender)
-          .toHaveBeenCalledWith(timeline, { encrypted: true }, manager);
       });
 
       it("should build an encrypted strategy", function() {
@@ -309,10 +271,6 @@ describe("ConnectionManager", function() {
       expect(strategy.connect.calls.length).toEqual(1);
       manager.connect();
       expect(strategy.connect.calls.length).toEqual(1);
-    });
-
-    it("should send timeline when sender is supplied", function() {
-      expect(timelineSender.send).toHaveBeenCalled();
     });
 
     describe("#send", function() {
