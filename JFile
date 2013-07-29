@@ -21,6 +21,7 @@ bundle 'pusher.js' do
   file 'dependencies.js'
 
   file 'utils/timer.js'
+  file 'utils/periodic_timer.js'
 
   file 'base64.js'
   file 'jsonp/jsonp_request.js'
