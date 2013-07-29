@@ -22,17 +22,28 @@ describe("ConnectionManager", function() {
   });
 
   describe("on construction", function() {
+    it("should construct a strategy", function() {
+      expect(manager.options.getStrategy.calls.length).toEqual(1);
+    });
+
+    it("should pass the key to the strategy builder", function() {
+      expect(manager.options.getStrategy.calls[0].args[0].key).toEqual("foo");
+    });
+
     it("should pass a timeline to the strategy builder", function() {
+      var getStrategy = jasmine.createSpy("getStrategy").andCallFake(function(options) {
+        expect(options.timeline).toBe(timeline);
+        return strategy;
+      });
+
       new Pusher.ConnectionManager("foo", {
-        getStrategy: function(options) {
-          expect(options.timeline).toBe(timeline);
-          return strategy;
-        },
+        getStrategy: getStrategy,
         timeline: timeline,
         activityTimeout: 3456,
         pongTimeout: 2345,
         unavailableTimeout: 1234
       });
+      expect(getStrategy).toHaveBeenCalled();
     });
 
     it("should transition to initialized state", function() {
@@ -41,13 +52,12 @@ describe("ConnectionManager", function() {
   });
 
   describe("#connect", function() {
-    it("should pass the key to the strategy builder", function() {
+    it("should not re-build the strategy", function() {
       manager.connect();
-      expect(manager.options.getStrategy.calls[0].args[0].key)
-        .toEqual("foo");
+      expect(managerOptions.getStrategy.calls.length).toEqual(1);
     });
 
-    it("should initialize strategy and try to connect", function() {
+    it("should try to connect using the strategy", function() {
       manager.connect();
       expect(strategy.connect).toHaveBeenCalled();
     });
@@ -90,7 +100,7 @@ describe("ConnectionManager", function() {
         expect(onDisconnected).toHaveBeenCalled();
       });
 
-      it("should abort connection attempt", function() {
+      it("should abort an unfinished connection attempt", function() {
         manager.connect();
         manager.disconnect();
 
@@ -101,7 +111,7 @@ describe("ConnectionManager", function() {
         manager.disconnect();
 
         jasmine.Clock.tick(10000);
-        // if unavailable timer worked, it would transition into 'unavailable'
+        // if unavailable timer had worked, it would have transitioned into 'unavailable'
         expect(manager.state).toEqual("disconnected");
       });
     });
@@ -136,11 +146,10 @@ describe("ConnectionManager", function() {
 
         handshake = { action: "ssl_only" };
         strategy._callback(null, handshake);
-
-        jasmine.Clock.tick(0);
       });
 
       it("should build an encrypted strategy", function() {
+        expect(managerOptions.getStrategy.calls.length).toEqual(2);
         expect(managerOptions.getStrategy).toHaveBeenCalledWith({
           key: "foo",
           encrypted: true,
@@ -149,6 +158,8 @@ describe("ConnectionManager", function() {
       });
 
       it("should connect using the encrypted strategy", function() {
+        // connection is retried with a zero delay
+        jasmine.Clock.tick(0);
         expect(encryptedStrategy.connect).toHaveBeenCalled();
         expect(manager.state).toEqual("connecting");
       });
@@ -300,7 +311,7 @@ describe("ConnectionManager", function() {
         manager.disconnect();
 
         jasmine.Clock.tick(10000);
-        // if activity check worked, it would send a ping message
+        // if activity check had worked, it would have sent a ping message
         expect(connection.send).not.toHaveBeenCalled();
         expect(connection.send_event).not.toHaveBeenCalled();
       });
@@ -347,7 +358,7 @@ describe("ConnectionManager", function() {
 
       it("should clean up the activity check", function() {
         jasmine.Clock.tick(10000);
-        // if activity check worked, it would send a ping message
+        // if activity check had worked, it would have sent a ping message
         expect(connection.send).not.toHaveBeenCalled();
         expect(connection.send_event).not.toHaveBeenCalled();
       });
@@ -355,11 +366,13 @@ describe("ConnectionManager", function() {
 
     describe("while reconnecting", function() {
       it("should re-use the strategy", function() {
+        expect(managerOptions.getStrategy.calls.length).toEqual(1);
         expect(strategy.connect.calls.length).toEqual(1);
 
         manager.disconnect();
         manager.connect();
 
+        expect(managerOptions.getStrategy.calls.length).toEqual(1);
         expect(strategy.connect.calls.length).toEqual(2);
       });
     });
