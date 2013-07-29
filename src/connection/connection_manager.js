@@ -147,6 +147,10 @@
     }
   };
 
+  prototype.isEncrypted = function() {
+    return this.encrypted;
+  };
+
   /** @private */
   prototype.updateStrategy = function() {
     this.strategy = this.options.getStrategy({

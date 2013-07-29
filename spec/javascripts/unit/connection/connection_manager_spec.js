@@ -51,6 +51,19 @@ describe("ConnectionManager", function() {
     });
   });
 
+  describe("#isEncrypted", function() {
+    it("should return false if the manager has been created with encrypted=false", function() {
+      expect(manager.isEncrypted()).toEqual(false);
+    });
+
+    it("should return true if the manager has been created with encrypted=true", function() {
+      var manager = new Pusher.ConnectionManager(
+        "foo", Pusher.Util.extend(managerOptions, { encrypted: true })
+      );
+      expect(manager.isEncrypted()).toEqual(true);
+    });
+  });
+
   describe("#connect", function() {
     it("should not re-build the strategy", function() {
       manager.connect();
@@ -166,6 +179,10 @@ describe("ConnectionManager", function() {
 
       it("should transition to 'connecting'", function() {
         expect(manager.state).toEqual("connecting");
+      });
+
+      it("#isEncrypted should return true", function() {
+        expect(manager.isEncrypted()).toEqual(true);
       });
     });
 
