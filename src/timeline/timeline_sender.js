@@ -5,26 +5,25 @@
   }
   var prototype = TimelineSender.prototype;
 
-  prototype.send = function(callback) {
+  prototype.send = function(encrypted, callback) {
     if (this.timeline.isEmpty()) {
       return;
     }
 
     var options = this.options;
-    var scheme = "http" + (this.isEncrypted() ? "s" : "") + "://";
+    var scheme = "http" + (encrypted ? "s" : "") + "://";
 
     var sendJSONP = function(data, callback) {
-      return Pusher.JSONPRequest.send({
+      var params = {
         data: data,
         url: scheme + options.host + options.path,
         receiver: Pusher.JSONP
-      }, callback);
+      };
+      return Pusher.JSONPRequest.send(params, function(error, result) {
+        callback(error, result);
+      });
     };
     this.timeline.send(sendJSONP, callback);
-  };
-
-  prototype.isEncrypted = function() {
-    return !!this.options.encrypted;
   };
 
   Pusher.TimelineSender = TimelineSender;
