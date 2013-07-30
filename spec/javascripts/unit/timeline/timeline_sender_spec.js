@@ -74,5 +74,21 @@ describe("TimelineSender", function() {
       sender.send(false, onSend);
       expect(Pusher.JSONPRequest.send).not.toHaveBeenCalled();
     });
+
+    it("should use returned hostname for subsequent requests", function() {
+      sender.send(false);
+
+      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
+      jsonpCallback(null, { host: "returned.example.com" });
+
+      sender.send(false);
+      expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
+        { data: { "events": [1, 2, 3] },
+          url: "http://returned.example.com/timeline",
+          receiver: Pusher.JSONP
+        },
+        jasmine.any(Function)
+      );
+    });
   });
 });
