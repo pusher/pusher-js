@@ -272,6 +272,7 @@
         self.clearUnavailableTimer();
         self.setConnection(handshake.connection);
         self.socket_id = self.connection.id;
+        self.timeline.info({ socket_id: self.socket_id });
         self.updateState("connected");
       }
     });
