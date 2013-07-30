@@ -10,20 +10,25 @@
       return;
     }
 
-    var options = this.options;
+    var self = this;
     var scheme = "http" + (encrypted ? "s" : "") + "://";
 
     var sendJSONP = function(data, callback) {
       var params = {
         data: data,
-        url: scheme + options.host + options.path,
+        url: scheme + (self.host || self.options.host) + self.options.path,
         receiver: Pusher.JSONP
       };
       return Pusher.JSONPRequest.send(params, function(error, result) {
-        callback(error, result);
+        if (result.host) {
+          self.host = result.host;
+        }
+        if (callback) {
+          callback(error, result);
+        }
       });
     };
-    this.timeline.send(sendJSONP, callback);
+    self.timeline.send(sendJSONP, callback);
   };
 
   Pusher.TimelineSender = TimelineSender;
