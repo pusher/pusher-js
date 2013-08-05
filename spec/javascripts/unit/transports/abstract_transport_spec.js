@@ -177,7 +177,7 @@ describe("AbstractTransport", function() {
       });
       waitsFor(function () {
         return !timer.isRunning();
-      }, "timer to run", 200);
+      }, "timer to run", 500);
     });
 
     it("should log method call with debug level", function() {
