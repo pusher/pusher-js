@@ -1,5 +1,5 @@
 describe("ConnectionManager", function() {
-  var connection, strategy, timeline, timelineSender;
+  var connection, strategy, timeline;
   var managerOptions, manager;
 
   beforeEach(function() {
@@ -8,15 +8,12 @@ describe("ConnectionManager", function() {
     connection = Pusher.Mocks.getConnection();
     strategy = Pusher.Mocks.getStrategy(true);
     timeline = Pusher.Mocks.getTimeline();
-    timelineSender = Pusher.Mocks.getTimelineSender();
 
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     managerOptions = {
       getStrategy: jasmine.createSpy("getStrategy").andReturn(strategy),
-      getTimeline: jasmine.createSpy("getTimeline").andReturn(timeline),
-      getTimelineSender: jasmine.createSpy("getTimelineSender")
-        .andReturn(timelineSender),
+      timeline: timeline,
       activityTimeout: 3456,
       pongTimeout: 2345,
       unavailableTimeout: 1234
@@ -25,19 +22,28 @@ describe("ConnectionManager", function() {
   });
 
   describe("on construction", function() {
+    it("should construct a strategy", function() {
+      expect(manager.options.getStrategy.calls.length).toEqual(1);
+    });
+
+    it("should pass the key to the strategy builder", function() {
+      expect(manager.options.getStrategy.calls[0].args[0].key).toEqual("foo");
+    });
+
     it("should pass a timeline to the strategy builder", function() {
+      var getStrategy = jasmine.createSpy("getStrategy").andCallFake(function(options) {
+        expect(options.timeline).toBe(timeline);
+        return strategy;
+      });
+
       new Pusher.ConnectionManager("foo", {
-        getStrategy: function(options) {
-          expect(options.timeline).toBe(timeline);
-          return strategy;
-        },
-        getTimeline: function(options) {
-          return timeline;
-        },
+        getStrategy: getStrategy,
+        timeline: timeline,
         activityTimeout: 3456,
         pongTimeout: 2345,
         unavailableTimeout: 1234
       });
+      expect(getStrategy).toHaveBeenCalled();
     });
 
     it("should transition to initialized state", function() {
@@ -45,24 +51,26 @@ describe("ConnectionManager", function() {
     });
   });
 
+  describe("#isEncrypted", function() {
+    it("should return false if the manager has been created with encrypted=false", function() {
+      expect(manager.isEncrypted()).toEqual(false);
+    });
+
+    it("should return true if the manager has been created with encrypted=true", function() {
+      var manager = new Pusher.ConnectionManager(
+        "foo", Pusher.Util.extend(managerOptions, { encrypted: true })
+      );
+      expect(manager.isEncrypted()).toEqual(true);
+    });
+  });
+
   describe("#connect", function() {
-    it("should pass the key to the strategy builder", function() {
+    it("should not re-build the strategy", function() {
       manager.connect();
-      expect(manager.options.getStrategy.calls[0].args[0].key)
-        .toEqual("foo");
+      expect(managerOptions.getStrategy.calls.length).toEqual(1);
     });
 
-    it("should pass whether connection is encrypted to timeline", function() {
-      var options = Pusher.Util.extend({}, managerOptions, {
-        encrypted: true
-      });
-      var manager = new Pusher.ConnectionManager("foo", options);
-      manager.connect();
-      expect(options.getTimelineSender)
-        .toHaveBeenCalledWith(timeline, { encrypted: true }, manager);
-    });
-
-    it("should initialize strategy and try to connect", function() {
+    it("should try to connect using the strategy", function() {
       manager.connect();
       expect(strategy.connect).toHaveBeenCalled();
     });
@@ -81,24 +89,6 @@ describe("ConnectionManager", function() {
         previous: "initialized",
         current: "connecting"
       });
-    });
-
-    it("should start sending timeline every minute when sender is supplied", function() {
-      var options = Pusher.Util.extend({}, managerOptions, {
-        getTimelineSender: jasmine.createSpy("getTimelineSender")
-          .andReturn(timelineSender)
-      });
-      var manager = new Pusher.ConnectionManager("foo", options);
-
-      timeline.isEmpty.andReturn(false);
-      manager.connect();
-
-      jasmine.Clock.tick(59999);
-      expect(timelineSender.send.calls.length).toEqual(0);
-      jasmine.Clock.tick(1);
-      expect(timelineSender.send.calls.length).toEqual(1);
-      jasmine.Clock.tick(60000);
-      expect(timelineSender.send.calls.length).toEqual(2);
     });
   });
 
@@ -123,7 +113,7 @@ describe("ConnectionManager", function() {
         expect(onDisconnected).toHaveBeenCalled();
       });
 
-      it("should abort connection attempt", function() {
+      it("should abort an unfinished connection attempt", function() {
         manager.connect();
         manager.disconnect();
 
@@ -134,7 +124,7 @@ describe("ConnectionManager", function() {
         manager.disconnect();
 
         jasmine.Clock.tick(10000);
-        // if unavailable timer worked, it would transition into 'unavailable'
+        // if unavailable timer had worked, it would have transitioned into 'unavailable'
         expect(manager.state).toEqual("disconnected");
       });
     });
@@ -169,16 +159,10 @@ describe("ConnectionManager", function() {
 
         handshake = { action: "ssl_only" };
         strategy._callback(null, handshake);
-
-        jasmine.Clock.tick(0);
-      });
-
-      it("should build an encrypted timeline sender", function() {
-        expect(managerOptions.getTimelineSender)
-          .toHaveBeenCalledWith(timeline, { encrypted: true }, manager);
       });
 
       it("should build an encrypted strategy", function() {
+        expect(managerOptions.getStrategy.calls.length).toEqual(2);
         expect(managerOptions.getStrategy).toHaveBeenCalledWith({
           key: "foo",
           encrypted: true,
@@ -187,12 +171,18 @@ describe("ConnectionManager", function() {
       });
 
       it("should connect using the encrypted strategy", function() {
+        // connection is retried with a zero delay
+        jasmine.Clock.tick(0);
         expect(encryptedStrategy.connect).toHaveBeenCalled();
         expect(manager.state).toEqual("connecting");
       });
 
       it("should transition to 'connecting'", function() {
         expect(manager.state).toEqual("connecting");
+      });
+
+      it("#isEncrypted should return true", function() {
+        expect(manager.isEncrypted()).toEqual(true);
       });
     });
 
@@ -311,10 +301,6 @@ describe("ConnectionManager", function() {
       expect(strategy.connect.calls.length).toEqual(1);
     });
 
-    it("should send timeline when sender is supplied", function() {
-      expect(timelineSender.send).toHaveBeenCalled();
-    });
-
     describe("#send", function() {
       it("should pass data to the connection", function() {
         expect(manager.send("howdy")).toBe(true);
@@ -342,7 +328,7 @@ describe("ConnectionManager", function() {
         manager.disconnect();
 
         jasmine.Clock.tick(10000);
-        // if activity check worked, it would send a ping message
+        // if activity check had worked, it would have sent a ping message
         expect(connection.send).not.toHaveBeenCalled();
         expect(connection.send_event).not.toHaveBeenCalled();
       });
@@ -389,7 +375,7 @@ describe("ConnectionManager", function() {
 
       it("should clean up the activity check", function() {
         jasmine.Clock.tick(10000);
-        // if activity check worked, it would send a ping message
+        // if activity check had worked, it would have sent a ping message
         expect(connection.send).not.toHaveBeenCalled();
         expect(connection.send_event).not.toHaveBeenCalled();
       });
@@ -397,11 +383,13 @@ describe("ConnectionManager", function() {
 
     describe("while reconnecting", function() {
       it("should re-use the strategy", function() {
+        expect(managerOptions.getStrategy.calls.length).toEqual(1);
         expect(strategy.connect.calls.length).toEqual(1);
 
         manager.disconnect();
         manager.connect();
 
+        expect(managerOptions.getStrategy.calls.length).toEqual(1);
         expect(strategy.connect.calls.length).toEqual(2);
       });
     });

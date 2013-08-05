@@ -18,15 +18,6 @@ describe("TimelineSender", function() {
   });
 
   describe("on construction", function() {
-    it("should be unencrypted by default", function() {
-      expect(sender.isEncrypted()).toBe(false);
-    });
-
-    it("should be encrypted when encrypted options is passed", function() {
-      sender = new Pusher.TimelineSender(timeline, { encrypted: true });
-      expect(sender.isEncrypted()).toBe(true);
-    });
-
     it("should expose options", function() {
       sender = new Pusher.TimelineSender(timeline, {
         host: "localhost",
@@ -41,7 +32,7 @@ describe("TimelineSender", function() {
 
   describe("on send", function() {
     it("should send a non-empty timeline", function() {
-      sender.send(onSend);
+      sender.send(false, onSend);
 
       expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
         { data: { "events": [1, 2, 3] },
@@ -53,7 +44,7 @@ describe("TimelineSender", function() {
     });
 
     it("should call back after a successful JSONP request", function() {
-      sender.send(onSend);
+      sender.send(false, onSend);
 
       expect(onSend).not.toHaveBeenCalled();
       var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
@@ -67,7 +58,7 @@ describe("TimelineSender", function() {
         host: "example.com",
         path: "/timeline"
       });
-      sender.send(onSend);
+      sender.send(true, onSend);
 
       expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
         { data: { "events": [1, 2, 3] },
@@ -80,8 +71,24 @@ describe("TimelineSender", function() {
 
     it("should not send an empty timeline", function() {
       timeline.isEmpty.andReturn(true);
-      sender.send(onSend);
+      sender.send(false, onSend);
       expect(Pusher.JSONPRequest.send).not.toHaveBeenCalled();
+    });
+
+    it("should use returned hostname for subsequent requests", function() {
+      sender.send(false);
+
+      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
+      jsonpCallback(null, { host: "returned.example.com" });
+
+      sender.send(false);
+      expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
+        { data: { "events": [1, 2, 3] },
+          url: "http://returned.example.com/timeline",
+          receiver: Pusher.JSONP
+        },
+        jasmine.any(Function)
+      );
     });
   });
 });

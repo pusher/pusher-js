@@ -10,6 +10,7 @@ module.exports = [
   'src/net_info.js',
 
   'src/utils/timer.js',
+  'src/utils/periodic_timer.js',
 
   'src/base64.js',
   'src/jsonp/jsonp_request.js',

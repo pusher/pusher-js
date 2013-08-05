@@ -32,7 +32,9 @@
    * @param {String} name
    */
   prototype.remove = function(name) {
+    var channel = this.channels[name];
     delete this.channels[name];
+    return channel;
   };
 
   /** Proxies disconnection signal to all channels. */
