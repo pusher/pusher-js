@@ -22,7 +22,7 @@ describe("Timer", function() {
   });
 
   it("should execute the callback exactly once", function() {
-    jasmine.Clock.tick(1000000);
+    jasmine.Clock.tick(1000);
     expect(callback.calls.length).toEqual(1);
   });
 
@@ -46,12 +46,12 @@ describe("Timer", function() {
   describe("#ensureAborted", function() {
     it("should abort the timer before execution", function() {
       timer.ensureAborted();
-      jasmine.Clock.tick(1000000);
+      jasmine.Clock.tick(1000);
       expect(callback).not.toHaveBeenCalled();
     });
 
     it("should play nice after execution", function() {
-      jasmine.Clock.tick(1000000);
+      jasmine.Clock.tick(1000);
       timer.ensureAborted();
     });
 
@@ -59,7 +59,7 @@ describe("Timer", function() {
       // IE has some edge-case with clearTimeout not working, let's simulate it
       spyOn(window, "clearTimeout");
       timer.ensureAborted();
-      jasmine.Clock.tick(1000000);
+      jasmine.Clock.tick(1000);
       expect(callback).not.toHaveBeenCalled();
     });
   });
