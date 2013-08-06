@@ -80,7 +80,7 @@ describe("AbstractTransport", function() {
     });
 
     it("should create an encrypted connection", function() {
-      var transport = new getTransport("bar", {
+      var transport = getTransport("bar", {
         timeline: this.timeline,
         encrypted: true
       });
@@ -168,7 +168,7 @@ describe("AbstractTransport", function() {
     it("should not crash when socket is closed before next tick (will log to console only)", function() {
       var timer;
       runs(function() {
-        this.transport.send("foobar")
+        this.transport.send("foobar");
 
         this.transport.close();
         this.socket.onclose({ wasClean: true });
@@ -274,7 +274,7 @@ describe("AbstractTransport", function() {
         error: "We're doomed"
       });
       expect(onError.calls.length).toEqual(1);
-    })
+    });
 
     it("should emit a closed event with correct params", function() {
       var onClosed = jasmine.createSpy("onClosed");

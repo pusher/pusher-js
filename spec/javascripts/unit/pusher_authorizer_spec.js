@@ -24,6 +24,17 @@ describe("Authorizer", function() {
 });
 
 describe("AJAX Authorizer", function() {
+  var xhr;
+
+  beforeEach(function() {
+    xhr = new Pusher.Mocks.getXHR();
+    if (window.XMLHttpRequest) {
+      spyOn(window, "XMLHttpRequest").andReturn(xhr);
+    } else {
+      spyOn(window, "ActiveXObject").andReturn(xhr);
+    }
+  });
+
   it("should pass headers in the request", function() {
     var headers = { "foo": "bar", "n": 42 };
     var authorizer = new Pusher.Channel.Authorizer(
@@ -34,10 +45,6 @@ describe("AJAX Authorizer", function() {
         }
       }
     );
-
-    var xhr = new Pusher.Mocks.getXHR();
-    spyOn(window, "XMLHttpRequest").andReturn(xhr);
-
     authorizer.authorize("1.23", function() {});
 
     expect(xhr.setRequestHeader.calls.length).toEqual(3);
@@ -58,10 +65,6 @@ describe("AJAX Authorizer", function() {
         }
       }
     );
-
-    var xhr = new Pusher.Mocks.getXHR();
-    spyOn(window, "XMLHttpRequest").andReturn(xhr);
-
     authorizer.authorize("1.23", function() {});
 
     expect(xhr.send.calls.length).toEqual(1);
@@ -79,12 +82,15 @@ describe("AJAX Authorizer", function() {
     var data = { foo: "bar", number: 1}
     var dataJSON = JSON.stringify(data);
 
-    var xhr = new Pusher.Mocks.getXHR();
-    spyOn(window, "XMLHttpRequest").andReturn(xhr);
-
     var callback = jasmine.createSpy("callback");
     authorizer.authorize("1.23", callback);
-    expect(window.XMLHttpRequest.calls.length).toEqual(1);
+
+    if (window.XMLHttpRequest) {
+      expect(window.XMLHttpRequest.calls.length).toEqual(1);
+    } else {
+      expect(window.ActiveXObject.calls.length).toEqual(1);
+      expect(window.ActiveXObject).toHaveBeenCalledWith("Microsoft.XMLHTTP");
+    }
 
     xhr.readyState = 4;
     xhr.status = 200;
@@ -100,14 +106,17 @@ describe("AJAX Authorizer", function() {
       { name: "chan" },
       { authTransport: "ajax" }
     );
-
     var invalidJSON = 'INVALID { "something": "something"}';
-    var xhr = new Pusher.Mocks.getXHR();
-    spyOn(window, "XMLHttpRequest").andReturn(xhr);
-
     var callback = jasmine.createSpy("callback");
+
     authorizer.authorize("1.23", callback);
-    expect(window.XMLHttpRequest.calls.length).toEqual(1);
+
+    if (window.XMLHttpRequest) {
+      expect(window.XMLHttpRequest.calls.length).toEqual(1);
+    } else {
+      expect(window.ActiveXObject.calls.length).toEqual(1);
+      expect(window.ActiveXObject).toHaveBeenCalledWith("Microsoft.XMLHTTP");
+    }
 
     xhr.readyState = 4;
     xhr.status = 200;
