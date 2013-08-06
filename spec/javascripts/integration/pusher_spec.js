@@ -392,12 +392,18 @@ describeIntegration("Pusher", function() {
           pusher1 = new Pusher("7324d55a5eeb8f554761", {
             encrypted: encrypted
           });
+          waitsFor(function() {
+            return pusher1.connection.state === "connected";
+          }, "connection to be established", 20000);
         });
 
         it("should open second connection", function() {
           pusher2 = new Pusher("7324d55a5eeb8f554761", {
             encrypted: encrypted
           });
+          waitsFor(function() {
+            return pusher2.connection.state === "connected";
+          }, "connection to be established", 20000);
         });
       });
 

@@ -49,6 +49,9 @@ describeIntegration("Cluster Configuration", function() {
           cluster: "eu",
           encrypted: options.encrypted
         });
+        waitsFor(function() {
+          return pusher.connection.state === "connected";
+        }, "connection to be established", 20000);
       });
 
       it("should subscribe and receive a message sent via REST API", function() {
