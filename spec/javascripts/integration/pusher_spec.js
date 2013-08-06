@@ -200,6 +200,9 @@ describeIntegration("Pusher", function() {
         pusher = new Pusher("7324d55a5eeb8f554761", {
           encrypted: encrypted
         });
+        waitsFor(function() {
+          return pusher.connection.state === "connected";
+        }, "connection to be established", 20000);
       });
 
       function subscribe(pusher, channelName, callback) {
@@ -319,6 +322,9 @@ describeIntegration("Pusher", function() {
         pusher2 = new Pusher("7324d55a5eeb8f554761", {
           encrypted: encrypted
         });
+        waitsFor(function() {
+          return pusher2.connection.state === "connected";
+        }, "connection to be established", 20000);
       });
 
       it("should receive a member added event", function() {
