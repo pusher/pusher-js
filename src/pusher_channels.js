@@ -25,7 +25,7 @@
 
     disconnect: function () {
       for(var channel_name in this.channels){
-        this.channels[channel_name].disconnect()
+        this.channels[channel_name].disconnect();
       }
     }
   };
@@ -155,7 +155,7 @@
         return {
           id: user_id,
           info: this._members_map[user_id]
-        }
+        };
       } else { // have never heard of this user
         return null;
       }
@@ -169,7 +169,7 @@
     } else if (channel_name.indexOf('presence-') === 0) {
       Pusher.Util.extend(channel, Pusher.Channel.PrivateChannel);
       Pusher.Util.extend(channel, Pusher.Channel.PresenceChannel);
-    };
+    }
     channel.init();
     return channel;
   };
