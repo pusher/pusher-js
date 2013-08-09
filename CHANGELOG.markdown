@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.8 (2013-08-09)
+
+[FIXED] Race condition in SockJS heartbeats
+
+[FIXED] Exception in dependency loader when a file happens to be loaded twice
+
+[CHANGED] Improved metric reporting
+
 ## 2.0.7 (2013-07-08)
 
 [FIXED] Disable transports that raise protocol errors
