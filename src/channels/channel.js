@@ -54,5 +54,29 @@
     }
   };
 
+  /** Sends a subscription request. For internal use only. */
+  prototype.subscribe = function() {
+    var self = this;
+
+    self.authorize(self.pusher.connection.socket_id, function(error, data) {
+      if (error) {
+        self.handleEvent('pusher:subscription_error', data);
+      } else {
+        self.pusher.send_event('pusher:subscribe', {
+          auth: data.auth,
+          channel_data: data.channel_data,
+          channel: self.name
+        });
+      }
+    });
+  };
+
+  /** Sends an unsubscription request. For internal use only. */
+  prototype.unsubscribe = function() {
+    this.pusher.send_event('pusher:unsubscribe', {
+      channel: this.name
+    });
+  };
+
   Pusher.Channel = Channel;
 }).call(this);

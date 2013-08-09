@@ -32,7 +32,7 @@
     this.state = "initialized";
     this.connection = null;
     this.encrypted = !!options.encrypted;
-    this.timeline = this.options.getTimeline();
+    this.timeline = this.options.timeline;
 
     this.connectionCallbacks = this.buildConnectionCallbacks();
     this.errorCallbacks = this.buildErrorCallbacks();
@@ -53,14 +53,6 @@
         self.updateState("unavailable");
       }
     });
-
-    var sendTimeline = function() {
-      if (self.timelineSender) {
-        self.timelineSender.send(function() {});
-      }
-    };
-    this.bind("connected", sendTimeline);
-    setInterval(sendTimeline, 60000);
 
     this.updateStrategy();
   }
@@ -93,11 +85,6 @@
     }
 
     self.updateState("connecting");
-    self.timelineSender = self.options.getTimelineSender(
-      self.timeline,
-      { encrypted: self.encrypted },
-      self
-    );
 
     var callback = function(error, handshake) {
       if (error) {
@@ -158,6 +145,10 @@
       this.connection.close();
       this.abandonConnection();
     }
+  };
+
+  prototype.isEncrypted = function() {
+    return this.encrypted;
   };
 
   /** @private */
@@ -221,6 +212,7 @@
           self.activityTimer = new Pusher.Timer(
             self.options.pongTimeout,
             function() {
+              self.timeline.error({ pong_timed_out: self.options.pongTimeout });
               self.connection.close();
             }
           );
@@ -272,6 +264,7 @@
         self.clearUnavailableTimer();
         self.setConnection(handshake.connection);
         self.socket_id = self.connection.id;
+        self.timeline.info({ socket_id: self.socket_id });
         self.updateState("connected");
       }
     });

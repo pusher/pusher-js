@@ -66,7 +66,9 @@
       if (!error) {
         self.sent++;
       }
-      callback(error, result);
+      if (callback) {
+        callback(error, result);
+      }
     });
 
     return true;

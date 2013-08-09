@@ -16,7 +16,16 @@
       return {
         setAttribute: jasmine.createSpy("setAttribute"),
         addEventListener: jasmine.createSpy("addEventListener"),
+        insertBefore: jasmine.createSpy("insertBefore"),
         appendChild: jasmine.createSpy("appendChild")
+      };
+    },
+
+    getXHR: function() {
+      return {
+        open: jasmine.createSpy("open"),
+        send: jasmine.createSpy("send"),
+        setRequestHeader: jasmine.createSpy("setRequestHeader")
       };
     },
 
@@ -47,10 +56,13 @@
     },
 
     getTimelineSender: function() {
-      return {
+      var sender = {
         isEncrypted: jasmine.createSpy("isEncrypted"),
         send: jasmine.createSpy("send")
       };
+      sender.getEncrypted = jasmine.createSpy("getEncrypted").andReturn(sender);
+
+      return sender;
     },
 
     getTransport: function() {
@@ -160,6 +172,7 @@
       manager.connect = jasmine.createSpy("connect");
       manager.disconnect = jasmine.createSpy("disconnect");
       manager.send_event = jasmine.createSpy("send_event");
+      manager.isEncrypted = jasmine.createSpy("isEncrypted").andReturn(false);
       return manager;
     },
 
@@ -176,6 +189,8 @@
       channel.authorize = jasmine.createSpy("authorize");
       channel.disconnect = jasmine.createSpy("disconnect");
       channel.handleEvent = jasmine.createSpy("handleEvent");
+      channel.subscribe = jasmine.createSpy("subscribe");
+      channel.unsubscribe = jasmine.createSpy("unsubscribe");
       return channel;
     },
 
