@@ -9,6 +9,7 @@ module.exports = [
   'src/net_info.js',
 
   'src/utils/timer.js',
+  'src/utils/periodic_timer.js',
 
   'src/pusher_channels.js',
 

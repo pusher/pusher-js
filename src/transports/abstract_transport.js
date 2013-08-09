@@ -140,7 +140,9 @@
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
       var self = this;
       setTimeout(function() {
-        self.socket.send(data);
+        if (self.socket) {
+          self.socket.send(data);
+        }
       }, 0);
       return true;
     } else {

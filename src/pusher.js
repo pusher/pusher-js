@@ -9,6 +9,19 @@
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
     checkAppKey(this.key);
+    this.timeline = new Pusher.Timeline(this.key, this.sessionID, {
+      features: Pusher.Util.getClientFeatures(),
+      params: self.options.timelineParams || {},
+      limit: 50,
+      level: Pusher.Timeline.INFO,
+      version: Pusher.VERSION
+    });
+    if (!self.options.disableStats) {
+      this.timelineSender = new Pusher.TimelineSender(this.timeline, {
+        host: Pusher.stats_host,
+        path: "/timeline"
+      });
+    }
 
     var getStrategy = function(options) {
       return Pusher.StrategyBuilder.build(
@@ -16,32 +29,12 @@
         Pusher.Util.extend({}, self.options, options)
       );
     };
-    var getTimeline = function() {
-      return new Pusher.Timeline(self.key, self.sessionID, {
-        features: Pusher.Util.getClientFeatures(),
-        params: self.options.timelineParams || {},
-        limit: 50,
-        level: Pusher.Timeline.INFO,
-        version: Pusher.VERSION
-      });
-    };
-    var getTimelineSender = function(timeline, options) {
-      if (self.options.disableStats) {
-        return null;
-      }
-      return new Pusher.TimelineSender(timeline, {
-        encrypted: self.isEncrypted() || !!options.encrypted,
-        host: Pusher.stats_host,
-        path: "/timeline"
-      });
-    };
 
     this.connection = new Pusher.ConnectionManager(
       this.key,
       Pusher.Util.extend(
         { getStrategy: getStrategy,
-          getTimeline: getTimeline,
-          getTimelineSender: getTimelineSender,
+          timeline: this.timeline,
           activityTimeout: Pusher.activity_timeout,
           pongTimeout: Pusher.pong_timeout,
           unavailableTimeout: Pusher.unavailable_timeout
@@ -53,6 +46,9 @@
 
     this.connection.bind('connected', function() {
       self.subscribeAll();
+      if (self.timelineSender) {
+        self.timelineSender.send(self.connection.isEncrypted());
+      }
     });
     this.connection.bind('message', function(params) {
       var internal = (params.event.indexOf('pusher_internal:') === 0);
@@ -117,10 +113,25 @@
 
   prototype.connect = function() {
     this.connection.connect();
+
+    if (this.timelineSender) {
+      if (!this.timelineSenderTimer) {
+        var encrypted = this.connection.isEncrypted();
+        var timelineSender = this.timelineSender;
+        this.timelineSenderTimer = new Pusher.PeriodicTimer(60000, function() {
+          timelineSender.send(encrypted);
+        });
+      }
+    }
   };
 
   prototype.disconnect = function() {
     this.connection.disconnect();
+
+    if (this.timelineSenderTimer) {
+      this.timelineSenderTimer.ensureAborted();
+      this.timelineSenderTimer = null;
+    }
   };
 
   prototype.bind = function(event_name, callback) {

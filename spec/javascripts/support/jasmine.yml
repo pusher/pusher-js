@@ -11,6 +11,7 @@ src_files:
   - net_info.js
 
   - utils/timer.js
+  - utils/periodic_timer.js
 
   - base64.js
   - jsonp/jsonp_request.js
