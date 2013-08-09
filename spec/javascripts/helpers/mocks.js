@@ -20,6 +20,14 @@
       };
     },
 
+    getXHR: function() {
+      return {
+        open: jasmine.createSpy("open"),
+        send: jasmine.createSpy("send"),
+        setRequestHeader: jasmine.createSpy("setRequestHeader")
+      };
+    },
+
     getDependencies: function() {
       return {
         load: jasmine.createSpy("load"),
