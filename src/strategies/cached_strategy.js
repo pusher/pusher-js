@@ -73,7 +73,9 @@
         if (info) {
           return JSON.parse(info);
         }
-      } catch (e) {}
+      } catch (e) {
+        flushTransportInfo();
+      }
     }
     return null;
   }
