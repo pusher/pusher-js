@@ -68,10 +68,12 @@
   function fetchTransportInfo() {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
-      var info = storage.pusherTransport;
-      if (info) {
-        return JSON.parse(storage.pusherTransport);
-      }
+      try {
+        var info = storage.pusherTransport;
+        if (info) {
+          return JSON.parse(info);
+        }
+      } catch (e) {}
     }
     return null;
   }
@@ -85,7 +87,7 @@
           transport: transport,
           latency: latency
         });
-      } catch(e) {
+      } catch (e) {
         // catch over quota exceptions raised by localStorage
       }
     }
@@ -96,7 +98,7 @@
     if (storage && storage.pusherTransport) {
       try {
         delete storage.pusherTransport;
-      } catch(e) {
+      } catch (e) {
         storage.pusherTransport = undefined;
       }
     }
