@@ -52,6 +52,15 @@ describe("TimelineSender", function() {
       expect(onSend).toHaveBeenCalled();
     });
 
+    it("should call back after an unsuccessful JSONP request", function() {
+      sender.send(false, onSend);
+
+      expect(onSend).not.toHaveBeenCalled();
+      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
+      jsonpCallback(true, undefined);
+      expect(onSend).toHaveBeenCalled();
+    });
+
     it("should send secure JSONP requests when encrypted", function() {
       sender = new Pusher.TimelineSender(timeline, {
         encrypted: true,
