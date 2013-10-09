@@ -4,5 +4,6 @@
   "description": "Pusher JavaScript library",
   "keywords": ["pusher", "client", "publish", "subscribe", "realtime", "websocket"],
   "licence": "MIT",
-  "authors": ["Pusher <support@pusher.com>"]
+  "authors": ["Pusher <support@pusher.com>"],
+  "main": "./dist/pusher.js"
 }
