@@ -11,6 +11,7 @@
 
   /** Error classes used throughout pusher-js library. */
   Pusher.Errors = {
+    BadEventName: buildExceptionClass("BadEventName"),
     UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
     UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy"),
     TransportPriorityTooLow: buildExceptionClass("TransportPriorityTooLow"),
