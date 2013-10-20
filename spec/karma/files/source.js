@@ -12,6 +12,8 @@ module.exports = [
   'src/utils/timer.js',
   'src/utils/periodic_timer.js',
 
+  'src/http/http_streamer.js',
+
   'src/base64.js',
   'src/jsonp/jsonp_request.js',
   'src/jsonp/jsonp_receiver.js',
@@ -29,6 +31,7 @@ module.exports = [
 
   'src/transports/abstract_transport.js',
   'src/transports/flash_transport.js',
+  'src/transports/http_streaming_transport.js',
   'src/transports/sockjs_transport.js',
   'src/transports/ws_transport.js',
 

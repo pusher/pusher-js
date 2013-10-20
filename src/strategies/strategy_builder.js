@@ -15,7 +15,8 @@
   var transports = {
     ws: Pusher.WSTransport,
     flash: Pusher.FlashTransport,
-    sockjs: Pusher.SockJSTransport
+    sockjs: Pusher.SockJSTransport,
+    http_streaming: Pusher.HTTPStreamingTransport
   };
 
   // DSL bindings

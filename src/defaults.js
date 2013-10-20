@@ -49,19 +49,28 @@
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
+      [":def_transport", "http_streaming", "http_streaming", 1, ":sockjs_options"],
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
+      [":def", "http_streaming_loop", [":sequential", ":timeouts", ":http_streaming"]],
+
+      [":def", "http_fallback_loop", [":if", [":is_supported", ":http_streaming"], [
+          ":best_connected_ever", ":http_streaming_loop", [":delayed", 8000, [":sockjs_loop"]]
+        ], [
+          ":sockjs_loop"
+        ]
+      ]],
 
       [":def", "strategy",
         [":cached", 1800000,
           [":first_connected",
             [":if", [":is_supported", ":ws"], [
-                ":best_connected_ever", ":ws_loop", [":delayed", 2000, [":sockjs_loop"]]
+                ":best_connected_ever", ":ws_loop", [":delayed", 2000, [":http_fallback_loop"]]
               ], [":if", [":is_supported", ":flash"], [
-                ":best_connected_ever", ":flash_loop", [":delayed", 2000, [":sockjs_loop"]]
+                ":best_connected_ever", ":flash_loop", [":delayed", 2000, [":http_fallback_loop"]]
               ], [
-                ":sockjs_loop"
+                ":http_fallback_loop"
               ]
             ]]
           ]
