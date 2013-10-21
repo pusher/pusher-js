@@ -38,6 +38,10 @@ describe("Timeline", function() {
   });
 
   describe("on send", function() {
+    beforeEach(function() {
+      spyOn(Pusher.Network, "isOnline").andReturn(true);
+    });
+
     it("should include key, session id, features, version and params", function() {
       var timeline = new Pusher.Timeline("foobar", 666, {
         features: ["x", "y", "z"],
@@ -147,6 +151,14 @@ describe("Timeline", function() {
         },
         jasmine.any(Function)
       );
+    });
+
+    it("should not send the timeline when offline", function() {
+      Pusher.Network.isOnline.andReturn(false);
+      timeline.log(Pusher.Timeline.INFO, {});
+
+      expect(timeline.send(sendJSONP, onSend)).toBe(false);
+      expect(sendJSONP).not.toHaveBeenCalled();
     });
   });
 });
