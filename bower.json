@@ -1,0 +1,8 @@
+{
+  "name": "pusher",
+  "location": "git://github.com/pusher/pusher-js.git",
+  "description": "Pusher JavaScript library",
+  "keywords": ["pusher", "client", "publish", "subscribe", "realtime", "websocket"],
+  "licence": "MIT",
+  "authors": ["Pusher <support@pusher.com>"]
+}

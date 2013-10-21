@@ -4,3 +4,5 @@
 *.DS_Store
 *.swp
 /dist
+!/dist/*.js
+!/dist/*.swf
