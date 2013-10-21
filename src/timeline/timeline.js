@@ -47,21 +47,25 @@
   prototype.send = function(sendJSONP, callback) {
     var self = this;
 
-    var data = {};
-    if (this.sent === 0) {
-      data = Pusher.Util.extend({
-        key: this.key,
-        features: this.options.features,
-        version: this.options.version
-      }, this.options.params || {});
+    if (Pusher.Network.isOnline() === false) {
+      return false;
     }
-    data.session = this.session;
-    data.timeline = this.events;
+
+    var data = {};
+    if (self.sent === 0) {
+      data = Pusher.Util.extend({
+        key: self.key,
+        features: self.options.features,
+        version: self.options.version
+      }, self.options.params || {});
+    }
+    data.session = self.session;
+    data.timeline = self.events;
     data = Pusher.Util.filterObject(data, function(v) {
       return v !== undefined;
     });
 
-    this.events = [];
+    self.events = [];
     sendJSONP(data, function(error, result) {
       if (!error) {
         self.sent++;

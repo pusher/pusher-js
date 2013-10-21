@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.1.3 (2013-10-21)
+
+[CHANGED] Updated the json2 library
+
+[FIXED] Catch exceptions when accessing localStorage and parsing its contents
+
+[FIXED] Flush transport cache if it's corrupted
+
+[FIXED] Stop raising exceptions when stats requests fail
+
+[CHANGED] Don't report stats when offline
+
+[CHANGED] Raise an error when trying to send a client event without the `client-` prefix
+
 ## 2.1.2 (2013-08-09)
 
 [FIXED] Race condition in SockJS heartbeats

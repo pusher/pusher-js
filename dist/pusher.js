@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.1.2
+ * Pusher JavaScript Library v2.1.3
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
@@ -509,7 +509,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.1.2';
+  Pusher.VERSION = '2.1.3';
   Pusher.PROTOCOL = 6;
 
   // DEPRECATED: WS connection parameters
@@ -622,6 +622,7 @@
 
   /** Error classes used throughout pusher-js library. */
   Pusher.Errors = {
+    BadEventName: buildExceptionClass("BadEventName"),
     UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
     UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy"),
     TransportPriorityTooLow: buildExceptionClass("TransportPriorityTooLow"),
@@ -1169,21 +1170,25 @@
   prototype.send = function(sendJSONP, callback) {
     var self = this;
 
-    var data = {};
-    if (this.sent === 0) {
-      data = Pusher.Util.extend({
-        key: this.key,
-        features: this.options.features,
-        version: this.options.version
-      }, this.options.params || {});
+    if (Pusher.Network.isOnline() === false) {
+      return false;
     }
-    data.session = this.session;
-    data.timeline = this.events;
+
+    var data = {};
+    if (self.sent === 0) {
+      data = Pusher.Util.extend({
+        key: self.key,
+        features: self.options.features,
+        version: self.options.version
+      }, self.options.params || {});
+    }
+    data.session = self.session;
+    data.timeline = self.events;
     data = Pusher.Util.filterObject(data, function(v) {
       return v !== undefined;
     });
 
-    this.events = [];
+    self.events = [];
     sendJSONP(data, function(error, result) {
       if (!error) {
         self.sent++;
@@ -1226,7 +1231,7 @@
         receiver: Pusher.JSONP
       };
       return Pusher.JSONPRequest.send(params, function(error, result) {
-        if (result.host) {
+        if (result && result.host) {
           self.host = result.host;
         }
         if (callback) {
@@ -1385,9 +1390,13 @@
   function fetchTransportInfo() {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
-      var info = storage.pusherTransport;
-      if (info) {
-        return JSON.parse(storage.pusherTransport);
+      try {
+        var info = storage.pusherTransport;
+        if (info) {
+          return JSON.parse(info);
+        }
+      } catch (e) {
+        flushTransportInfo();
       }
     }
     return null;
@@ -1402,7 +1411,7 @@
           transport: transport,
           latency: latency
         });
-      } catch(e) {
+      } catch (e) {
         // catch over quota exceptions raised by localStorage
       }
     }
@@ -1413,7 +1422,7 @@
     if (storage && storage.pusherTransport) {
       try {
         delete storage.pusherTransport;
-      } catch(e) {
+      } catch (e) {
         storage.pusherTransport = undefined;
       }
     }
@@ -3361,6 +3370,11 @@
 
   /** Triggers an event */
   prototype.trigger = function(event, data) {
+    if (event.indexOf("client-") !== 0) {
+      throw new Pusher.Errors.BadEventName(
+        "Event '" + event + "' does not start with 'client-'"
+      );
+    }
     return this.pusher.send_event(event, data, this.name);
   };
 

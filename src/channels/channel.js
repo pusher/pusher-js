@@ -30,6 +30,11 @@
 
   /** Triggers an event */
   prototype.trigger = function(event, data) {
+    if (event.indexOf("client-") !== 0) {
+      throw new Pusher.Errors.BadEventName(
+        "Event '" + event + "' does not start with 'client-'"
+      );
+    }
     return this.pusher.send_event(event, data, this.name);
   };
 

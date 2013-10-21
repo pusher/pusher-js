@@ -20,7 +20,7 @@
         receiver: Pusher.JSONP
       };
       return Pusher.JSONPRequest.send(params, function(error, result) {
-        if (result.host) {
+        if (result && result.host) {
           self.host = result.host;
         }
         if (callback) {

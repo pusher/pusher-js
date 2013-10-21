@@ -73,20 +73,26 @@ describe("PresenceChannel", function() {
   });
 
   describe("#trigger", function() {
+    it("should raise an exception if the event name does not start with client-", function() {
+      expect(function() {
+        channel.trigger("whatever", {});
+      }).toThrow(jasmine.any(Pusher.Errors.BadEventName));
+    });
+
     it("should call send_event on connection", function() {
-      channel.trigger("test_event", { k: "v" });
+      channel.trigger("client-test", { k: "v" });
       expect(pusher.send_event)
-        .toHaveBeenCalledWith("test_event", { k: "v" }, "presence-test");
+        .toHaveBeenCalledWith("client-test", { k: "v" }, "presence-test");
     });
 
     it("should return true if connection sent the event", function() {
       pusher.send_event.andReturn(true);
-      expect(channel.trigger("t", {})).toBe(true);
+      expect(channel.trigger("client-test", {})).toBe(true);
     });
 
     it("should return false if connection didn't send the event", function() {
       pusher.send_event.andReturn(false);
-      expect(channel.trigger("t", {})).toBe(false);
+      expect(channel.trigger("client-test", {})).toBe(false);
     });
   });
 
