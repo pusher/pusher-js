@@ -22,8 +22,9 @@
           }
           break;
         case 4:
+          // this happens only on errors, never after calling
           self.onFinish(self.xhr.status, self.xhr.responseText);
-          self.cleanUp(false);
+          self.onClose(1006, "Connection interrupted", false);
           break;
       }
     };
@@ -46,7 +47,7 @@
   };
 
   prototype.close = function(code, reason) {
-    this.cleanUp(true);
+    this.onClose(code, reason, true);
   };
 
   prototype.sendRaw = function(payload) {
@@ -72,6 +73,7 @@
       }
       this.xhr = null;
     }
+    this.stopActivityCheck();
     this.readyState = CLOSED;
   };
 
@@ -93,6 +95,10 @@
   };
 
   prototype.onInternalEvent = function(data) {
+    if (this.readyState === OPEN) {
+      this.resetActivityCheck();
+    }
+
     var type = data.slice(0, 1);
     var payload;
     switch(type) {
@@ -112,7 +118,7 @@
         break;
       case 'c':
         payload = JSON.parse(data.slice(1) || '[]');
-        this.onClose(payload[0], payload[1]);
+        this.onClose(payload[0], payload[1], true);
         break;
       case 'h':
         this.onHeartbeatRequest('send');
@@ -125,14 +131,14 @@
       if (options && options.hostname) {
         this.url = updateHostname(this.url, options.hostname);
       }
-
+      this.resetActivityCheck();
       this.readyState = OPEN;
 
       if (this.onopen) {
         this.onopen();
       }
     } else {
-      this.close(1006, "Server lost session");
+      this.onClose(1006, "Server lost session", true);
     }
   };
 
@@ -154,10 +160,14 @@
     }
   };
 
-  prototype.onClose = function(code, reason) {
-    this.cleanUp(false);
+  prototype.onClose = function(code, reason, wasClean) {
+    this.cleanUp(true);
     if (this.onclose) {
-      this.onclose(code, reason);
+      this.onclose({
+        code: code,
+        reason: reason,
+        wasClean: wasClean
+      });
     }
   };
 
@@ -171,6 +181,26 @@
     } else {
       // chunk is not finished yet, don't move the buffer pointer
       return null;
+    }
+  };
+
+  /** @private */
+  prototype.resetActivityCheck = function() {
+    var self = this;
+
+    self.stopActivityCheck();
+    self.activityTimer = new Pusher.Timer(30000, function() {
+      self.sendRaw('h');
+      self.activityTimer = new Pusher.Timer(15000, function() {
+        self.onClose(1006, "Did not receive a heartbeat response", false);
+      });
+    });
+  };
+
+  /** @private */
+  prototype.stopActivityCheck = function() {
+    if (this.activityTimer) {
+      this.activityTimer.ensureAborted();
     }
   };
 
