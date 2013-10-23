@@ -94,22 +94,24 @@
 
   prototype.onInternalEvent = function(data) {
     var type = data.slice(0, 1);
+    var payload;
     switch(type) {
       case 'o':
-        this.onOpen();
+        payload = JSON.parse(data.slice(1) || '{}');
+        this.onOpen(payload);
         break;
       case 'a':
-        var payload = JSON.parse(data.slice(1) || '[]');
+        payload = JSON.parse(data.slice(1) || '[]');
         for (var i = 0; i < payload.length; i++){
           this.onEvent(payload[i]);
         }
         break;
       case 'm':
-        var payload = JSON.parse(data.slice(1) || 'null');
+        payload = JSON.parse(data.slice(1) || 'null');
         this.onEvent(payload);
         break;
       case 'c':
-        var payload = JSON.parse(data.slice(1) || '[]');
+        payload = JSON.parse(data.slice(1) || '[]');
         this.onClose(payload[0], payload[1]);
         break;
       case 'h':
@@ -174,6 +176,11 @@
   function getUniqueURL(url) {
     var separator = (url.indexOf('?') === -1) ? "?" : "&";
     return url + separator + "t=" + (+new Date);
+  }
+
+  function updateHostname(url, hostname) {
+    var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
+    return urlParts[1] + hostname + urlParts[3];
   }
 
   function createXHR() {
