@@ -31,13 +31,13 @@
     try {
       self.xhr.open("POST", getUniqueURL(self.url + "/xhr_streaming"), true);
       self.xhr.send();
-    } catch(error) {
+    } catch (error) {
       setTimeout(function() {
         self.onError(error);
         self.cleanUp(false);
-      }, 0)
+      }, 0);
       return;
-    };
+    }
   }
   var prototype = HTTPStreamer.prototype;
 
@@ -120,9 +120,14 @@
     }
   };
 
-  prototype.onOpen = function() {
+  prototype.onOpen = function(options) {
     if (this.readyState === CONNECTING) {
+      if (options && options.hostname) {
+        this.url = updateHostname(this.url, options.hostname);
+      }
+
       this.readyState = OPEN;
+
       if (this.onopen) {
         this.onopen();
       }
@@ -175,7 +180,7 @@
 
   function getUniqueURL(url) {
     var separator = (url.indexOf('?') === -1) ? "?" : "&";
-    return url + separator + "t=" + (+new Date);
+    return url + separator + "t=" + (+new Date());
   }
 
   function updateHostname(url, hostname) {
@@ -197,7 +202,7 @@
       result.push(Math.floor(Math.random() * 32).toString(32));
     }
     return result.join('');
-  };
+  }
 
   Pusher.HTTPStreamer = HTTPStreamer;
 }).call(this);
