@@ -101,6 +101,16 @@ It is possible to access channels by name, through the `channel` function:
 
     channel = socket.channel('private-my-channel');
 
+It is possible to access all subscribed channels through the `allChannels` function:
+
+    var channels = socket.allChannels()
+    console.group('Pusher - subscribed to:')
+    for (var i = 0; i < channels.length; i++) {
+        var channel = channels[i];
+        console.log(channel.name);
+    }
+    console.groupEnd()
+
 ## Binding to events
 
 Events can be bound to at 2 levels, the global, and per channel. They take a very similar form to the way events are handled in jQuery.
