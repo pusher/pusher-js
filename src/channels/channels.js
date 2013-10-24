@@ -25,7 +25,7 @@
   prototype.all = function(name) {
     var channels = [];
     Pusher.Util.objectApply(this.channels, function(channel) {
-      channels.push(channel)
+      channels.push(channel);
     });
     return channels;
   };

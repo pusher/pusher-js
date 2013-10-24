@@ -103,13 +103,13 @@ It is possible to access channels by name, through the `channel` function:
 
 It is possible to access all subscribed channels through the `allChannels` function:
 
-    var channels = socket.allChannels()
-    console.group('Pusher - subscribed to:')
+    var channels = socket.allChannels();
+    console.group('Pusher - subscribed to:');
     for (var i = 0; i < channels.length; i++) {
         var channel = channels[i];
         console.log(channel.name);
     }
-    console.groupEnd()
+    console.groupEnd();
 
 ## Binding to events
 
