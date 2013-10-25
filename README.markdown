@@ -140,6 +140,35 @@ There are a number of events which are used internally, but can also be of use e
 * connection_established
 * subscribe
 
+## Self-serving JS and Flash files
+
+You can host JavaScript files yourself, but it's a bit more complicated than putting them somewhere and just linking `pusher.js` in the source of your website. Because pusher-js loads fallback files dynamically, the dependency loader must be configured correctly or it will be using `js.pusher.com`.
+
+First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 2.1.3 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URL's:
+
+    http://example.com/pusher-js/2.1.3/pusher.js
+    http://example.com/pusher-js/2.1.3/json2.js
+    http://example.com/pusher-js/2.1.3/flashfallback.js
+    http://example.com/pusher-js/2.1.3/WebSocketMain.swf
+    http://example.com/pusher-js/2.1.3/sockjs.js
+
+Minified files should have `.min` in names, as in the `dist` directory:
+
+    http://example.com/pusher-js/2.1.3/pusher.min.js
+    http://example.com/pusher-js/2.1.3/json2.min.js
+    http://example.com/pusher-js/2.1.3/flashfallback.min.js
+    http://example.com/pusher-js/2.1.3/WebSocketMain.swf
+    http://example.com/pusher-js/2.1.3/sockjs.min.js
+
+Then after loading `pusher.js`, but before connecting, you need to overwrite the dependency loader by executing following piece of code:
+
+    Pusher.Dependencies = new Pusher.DependencyLoader({
+      cdn_http: "http://example.com/pusher-js/",
+      cdn_https: "https://example.com/pusher-js/",
+      version: Pusher.VERSION,
+      suffix: Pusher.dependency_suffix
+    });
+
 ## Developing
 
 Use Bundler to install all development dependencies
