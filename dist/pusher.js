@@ -530,8 +530,8 @@
   Pusher.pong_timeout = 30000;
   Pusher.unavailable_timeout = 10000;
   // CDN configuration
-  Pusher.cdn_http = 'http://localhost:5555/';
-  Pusher.cdn_https = 'https://localhost:5555/';
+  Pusher.cdn_http = 'http://js.pusher.com/';
+  Pusher.cdn_https = 'https://d3dy5gmtp8yhk7.cloudfront.net/';
   Pusher.dependency_suffix = '';
 
   Pusher.getDefaultStrategy = function(config) {
