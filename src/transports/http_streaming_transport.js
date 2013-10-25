@@ -66,28 +66,7 @@
 
   /** @protected */
   prototype.getPath = function() {
-    return this.options.httpPath || "/pusher";
-  };
-
-  /** @protected */
-  prototype.getQueryString = function() {
-    return "";
-  };
-
-  /** Handles opening a SockJS connection to Pusher.
-   *
-   * Since SockJS does not handle custom paths, we send it immediately after
-   * establishing the connection.
-   *
-   * @protected
-   */
-  prototype.onOpen = function() {
-    this.socket.send(JSON.stringify({
-      path: Pusher.AbstractTransport.prototype.getPath.call(this) +
-        Pusher.AbstractTransport.prototype.getQueryString.call(this)
-    }));
-    this.changeState("open");
-    this.socket.onopen = undefined;
+    return (this.options.httpPath || "/pusher") + "/app/" + this.key;
   };
 
   Pusher.HTTPStreamingTransport = HTTPStreamingTransport;

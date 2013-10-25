@@ -8,7 +8,10 @@
   function HTTPStreamer(url) {
     var self = this;
 
-    self.url = getBaseURL(url);
+    self.url = url;
+    self.sessionComponent = randomNumber(1000) + "/" + randomString(8);
+    self.urlComponents = getURLComponents(self.url);
+
     self.readyState = CONNECTING;
 
     self.bufferPosition = 0;
@@ -30,7 +33,10 @@
     };
 
     try {
-      self.xhr.open("POST", getUniqueURL(self.url + "/xhr_streaming"), true);
+      var streamingURL = getUniqueURL(
+        getStreamingURL(self.urlComponents, self.sessionComponent)
+      );
+      self.xhr.open("POST", streamingURL, true);
       self.xhr.send();
     } catch (error) {
       setTimeout(function() {
@@ -54,7 +60,10 @@
     if (this.readyState === OPEN) {
       try {
         var xhr = createXHR();
-        xhr.open("POST", getUniqueURL(this.url + "/xhr_send"), true);
+        var sendURL = getUniqueURL(
+          getSendURL(this.urlComponents, this.sessionComponent)
+        );
+        xhr.open("POST", sendURL, true);
         xhr.send(payload);
         return true;
       } catch(e) {
@@ -204,8 +213,20 @@
     }
   };
 
-  function getBaseURL(url) {
-    return url + "/" + randomNumber(1000) + "/" + randomString(8);
+  function getURLComponents(url) {
+    var parts = /([^\?]*)\/*(\??.*)/.exec(url);
+    return {
+      base: parts[1],
+      queryString: parts[2]
+    };
+  }
+
+  function getStreamingURL(url, session) {
+    return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+  }
+
+  function getSendURL(url, session) {
+    return url.base + "/" + session + "/xhr_send";
   }
 
   function getUniqueURL(url) {
