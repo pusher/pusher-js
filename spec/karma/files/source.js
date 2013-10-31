@@ -32,7 +32,7 @@ module.exports = [
 
   'src/transports/abstract_transport.js',
   'src/transports/flash_transport.js',
-  'src/transports/http_streaming_transport.js',
+  'src/transports/xhr_streaming_transport.js',
   'src/transports/sockjs_transport.js',
   'src/transports/ws_transport.js',
 

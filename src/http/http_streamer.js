@@ -17,7 +17,6 @@
     );
 
     self.stream.bind("chunk", function(chunk) { self.onChunk(chunk); });
-    self.stream.bind("error", function(error) { self.onError(error); });
     self.stream.bind("finished", function(status) { self.onFinished(status); });
 
     try {

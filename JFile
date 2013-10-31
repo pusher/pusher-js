@@ -40,7 +40,7 @@ bundle 'pusher.js' do
 
   file 'transports/abstract_transport.js'
   file 'transports/flash_transport.js'
-  file 'transports/http_streaming_transport.js'
+  file 'transports/xhr_streaming_transport.js'
   file 'transports/sockjs_transport.js'
   file 'transports/ws_transport.js'
 
@@ -76,7 +76,7 @@ bundle 'sockjs.js' do
   file 'sockjs/sockjs.js'
 end
 
-bundle 'http_streamer.js' do
+bundle 'xhr_streamer.js' do
   file 'http/xhr_cors_request.js'
   file 'http/http_streamer.js'
 end

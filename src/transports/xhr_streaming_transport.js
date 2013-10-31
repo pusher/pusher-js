@@ -3,27 +3,27 @@
    *
    * @see AbstractTransport
    */
-  function HTTPStreamingTransport(name, priority, key, options) {
+  function XHRStreamingTransport(name, priority, key, options) {
     Pusher.AbstractTransport.call(this, name, priority, key, options);
   }
-  var prototype = HTTPStreamingTransport.prototype;
+  var prototype = XHRStreamingTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
-  /** Creates a new instance of HTTPStreamingTransport.
+  /** Creates a new instance of XHRStreamingTransport.
    *
    * @param  {String} key
    * @param  {Object} options
-   * @return {HTTPStreamingTransport}
+   * @return {XHRStreamingTransport}
    */
-  HTTPStreamingTransport.createConnection = function(name, priority, key, options) {
-    return new HTTPStreamingTransport(name, priority, key, options);
+  XHRStreamingTransport.createConnection = function(name, priority, key, options) {
+    return new XHRStreamingTransport(name, priority, key, options);
   };
 
   /** Checks whether the browser supports WebSockets in any form.
    *
    * @returns {Boolean} true if browser supports WebSockets
    */
-  HTTPStreamingTransport.isSupported = function() {
+  XHRStreamingTransport.isSupported = function() {
     if (window.XMLHttpRequest) {
       if ('withCredentials' in (new window.XMLHttpRequest())) {
         return true;
@@ -41,7 +41,7 @@
     this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
 
     this.changeState("initializing");
-    Pusher.Dependencies.load("http_streamer", function() {
+    Pusher.Dependencies.load("xhr_streamer", function() {
       self.changeState("initialized");
     });
   };
@@ -69,5 +69,5 @@
     return (this.options.httpPath || "/pusher") + "/app/" + this.key;
   };
 
-  Pusher.HTTPStreamingTransport = HTTPStreamingTransport;
+  Pusher.XHRStreamingTransport = XHRStreamingTransport;
 }).call(this);
