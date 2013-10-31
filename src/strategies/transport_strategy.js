@@ -31,7 +31,7 @@
    * @return {Object} strategy runner
    */
   prototype.connect = function(minPriority, callback) {
-    if (!this.transport.isSupported()) {
+    if (!this.isSupported()) {
       return failAttempt(new Pusher.Errors.UnsupportedStrategy(), callback);
     } else if (this.priority < minPriority) {
       return failAttempt(new Pusher.Errors.TransportPriorityTooLow(), callback);

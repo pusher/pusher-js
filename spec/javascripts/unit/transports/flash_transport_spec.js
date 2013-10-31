@@ -74,12 +74,12 @@ describe("FlashTransport", function() {
       });
 
       it("should be supported", function() {
-        expect(Pusher.FlashTransport.isSupported()).toBe(true);
+        expect(Pusher.FlashTransport.isSupported({})).toBe(true);
 
         window.navigator.__defineGetter__("mimeTypes", function() {
           return {};
         });
-        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+        expect(Pusher.FlashTransport.isSupported({})).toBe(false);
       });
 
       it("should not be supported when disableFlash flag is passed", function() {
@@ -98,7 +98,7 @@ describe("FlashTransport", function() {
       });
 
       it("should not be supported", function() {
-        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+        expect(Pusher.FlashTransport.isSupported({})).toBe(false);
       });
     });
 
@@ -111,7 +111,7 @@ describe("FlashTransport", function() {
       });
 
       it("should not be supported", function() {
-        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+        expect(Pusher.FlashTransport.isSupported({})).toBe(false);
       });
     });
   });
@@ -149,7 +149,7 @@ describe("FlashTransport", function() {
       });
 
       it("should be supported", function() {
-        expect(Pusher.FlashTransport.isSupported()).toBe(true);
+        expect(Pusher.FlashTransport.isSupported({})).toBe(true);
       });
 
       it("should not be supported when disableFlash flag is passed", function() {
@@ -168,7 +168,7 @@ describe("FlashTransport", function() {
       });
 
       it("should not be supported", function() {
-        expect(Pusher.FlashTransport.isSupported()).toBe(false);
+        expect(Pusher.FlashTransport.isSupported({})).toBe(false);
       });
     });
   });

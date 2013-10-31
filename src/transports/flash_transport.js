@@ -29,7 +29,7 @@
    * @returns {Boolean}
    */
   FlashTransport.isSupported = function(environment) {
-    if (environment && environment.disableFlash) {
+    if (environment.disableFlash) {
       return false;
     }
     try {

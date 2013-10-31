@@ -291,7 +291,7 @@
       return Pusher.Util.keys(
         Pusher.Util.filterObject(
           { "ws": Pusher.WSTransport, "flash": Pusher.FlashTransport },
-          function (t) { return t.isSupported(); }
+          function (t) { return t.isSupported({}); }
         )
       );
     }
