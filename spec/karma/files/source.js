@@ -12,6 +12,7 @@ module.exports = [
   'src/utils/timer.js',
   'src/utils/periodic_timer.js',
 
+  'src/http/xhr_cors_request.js',
   'src/http/http_streamer.js',
 
   'src/base64.js',

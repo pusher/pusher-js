@@ -25,6 +25,11 @@
     return this;
   };
 
+  prototype.unbind_all = function(eventName, callback) {
+    this.callbacks.remove(eventName, callback);
+    return this;
+  };
+
   prototype.emit = function(eventName, data) {
     var i;
 

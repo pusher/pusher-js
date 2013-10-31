@@ -8,40 +8,24 @@
   function HTTPStreamer(url) {
     var self = this;
 
-    self.url = url;
-    self.sessionComponent = randomNumber(1000) + "/" + randomString(8);
-    self.urlComponents = getURLComponents(self.url);
-
+    self.session = randomNumber(1000) + "/" + randomString(8);
+    self.location = getLocation(url);
     self.readyState = CONNECTING;
 
-    self.bufferPosition = 0;
-    self.xhr = createXHR();
+    self.stream = new Pusher.XHRCORSRequest(
+      getUniqueURL(getStreamingURL(self.location, self.session))
+    );
 
-    self.xhr.onreadystatechange = function() {
-      switch (self.xhr.readyState) {
-        case 3:
-          if (self.xhr.responseText && self.xhr.responseText.length > 0) {
-            self.onChunk(self.xhr.status, self.xhr.responseText);
-          }
-          break;
-        case 4:
-          // this happens only on errors, never after calling
-          self.onFinish(self.xhr.status, self.xhr.responseText);
-          self.onClose(1006, "Connection interrupted", false);
-          break;
-      }
-    };
+    self.stream.bind("chunk", function(chunk) { self.onChunk(chunk); });
+    self.stream.bind("error", function(error) { self.onError(error); });
+    self.stream.bind("finished", function(status) { self.onFinished(status); });
 
     try {
-      var streamingURL = getUniqueURL(
-        getStreamingURL(self.urlComponents, self.sessionComponent)
-      );
-      self.xhr.open("POST", streamingURL, true);
-      self.xhr.send();
+      self.stream.start();
     } catch (error) {
       setTimeout(function() {
         self.onError(error);
-        self.cleanUp(false);
+        self.onClose(1006, "Could not start streaming", false);
       }, 0);
       return;
     }
@@ -59,12 +43,9 @@
   prototype.sendRaw = function(payload) {
     if (this.readyState === OPEN) {
       try {
-        var xhr = createXHR();
-        var sendURL = getUniqueURL(
-          getSendURL(this.urlComponents, this.sessionComponent)
-        );
-        xhr.open("POST", sendURL, true);
-        xhr.send(payload);
+        new Pusher.XHRCORSRequest(
+          getUniqueURL(getSendURL(this.location, this.session))
+        ).start(payload);
         return true;
       } catch(e) {
         return false;
@@ -74,59 +55,37 @@
     }
   };
 
-  prototype.cleanUp = function(abort) {
-    if (this.xhr) {
-      this.xhr.onreadystatechange = function() {};
-      if (abort) {
-        this.xhr.abort();
-      }
-      this.xhr = null;
+  prototype.onFinished = function(status) {
+    this.close(1006, "Connection interrupted", false);
+  };
+
+  prototype.onChunk = function(chunk) {
+    if (chunk.status !== 200) {
+      return;
     }
-    this.stopActivityCheck();
-    this.readyState = CLOSED;
-  };
-
-  prototype.onChunk = function(status, data) {
-    if (status === 200) {
-      while (true) {
-        var event = this.advanceBuffer(data);
-        if (event) {
-          this.onInternalEvent(event);
-        } else {
-          break;
-        }
-      }
-    }
-  };
-
-  prototype.onFinish = function(status, data) {
-    this.onChunk(status, data);
-  };
-
-  prototype.onInternalEvent = function(data) {
     if (this.readyState === OPEN) {
       this.resetActivityCheck();
     }
 
-    var type = data.slice(0, 1);
     var payload;
+    var type = chunk.data.slice(0, 1);
     switch(type) {
       case 'o':
-        payload = JSON.parse(data.slice(1) || '{}');
+        payload = JSON.parse(chunk.data.slice(1) || '{}');
         this.onOpen(payload);
         break;
       case 'a':
-        payload = JSON.parse(data.slice(1) || '[]');
+        payload = JSON.parse(chunk.data.slice(1) || '[]');
         for (var i = 0; i < payload.length; i++){
           this.onEvent(payload[i]);
         }
         break;
       case 'm':
-        payload = JSON.parse(data.slice(1) || 'null');
-        this.onEvent(payload);
+        payload = JSON.parse(chunk.data.slice(1) || 'null');
+        this.onEvent();
         break;
       case 'c':
-        payload = JSON.parse(data.slice(1) || '[]');
+        payload = JSON.parse(chunk.data.slice(1) || '[]');
         this.onClose(payload[0], payload[1], true);
         break;
       case 'h':
@@ -138,7 +97,7 @@
   prototype.onOpen = function(options) {
     if (this.readyState === CONNECTING) {
       if (options && options.hostname) {
-        this.url = updateHostname(this.url, options.hostname);
+        this.location.base = replaceHost(this.location.base, options.hostname);
       }
       this.resetActivityCheck();
       this.readyState = OPEN;
@@ -170,26 +129,19 @@
   };
 
   prototype.onClose = function(code, reason, wasClean) {
-    this.cleanUp(true);
+    if (this.stream) {
+      this.stream.unbind_all();
+      this.stream.close();
+      this.stream = null;
+    }
+    this.stopActivityCheck();
+    this.readyState = CLOSED;
     if (this.onclose) {
       this.onclose({
         code: code,
         reason: reason,
         wasClean: wasClean
       });
-    }
-  };
-
-  prototype.advanceBuffer = function(buffer) {
-    var unreadData = buffer.slice(this.bufferPosition);
-    var endOfLinePosition = unreadData.indexOf("\n");
-
-    if (endOfLinePosition !== -1) {
-      this.bufferPosition += endOfLinePosition + 1;
-      return unreadData.slice(0, endOfLinePosition);
-    } else {
-      // chunk is not finished yet, don't move the buffer pointer
-      return null;
     }
   };
 
@@ -213,7 +165,7 @@
     }
   };
 
-  function getURLComponents(url) {
+  function getLocation(url) {
     var parts = /([^\?]*)\/*(\??.*)/.exec(url);
     return {
       base: parts[1],
@@ -234,13 +186,9 @@
     return url + separator + "t=" + (+new Date());
   }
 
-  function updateHostname(url, hostname) {
+  function replaceHost(url, hostname) {
     var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
     return urlParts[1] + hostname + urlParts[3];
-  }
-
-  function createXHR() {
-    return new window.XMLHttpRequest();
   }
 
   function randomNumber(max) {
