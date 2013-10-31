@@ -20,6 +20,7 @@
    */
   prototype.isSupported = function() {
     return this.transport.isSupported({
+      encrypted: this.options.encrypted,
       disableFlash: !!this.options.disableFlash
     });
   };

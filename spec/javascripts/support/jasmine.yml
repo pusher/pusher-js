@@ -14,6 +14,7 @@ src_files:
   - utils/timer.js
   - utils/periodic_timer.js
 
+  - http/xdr_request.js
   - http/xhr_cors_request.js
   - http/http_streamer.js
 
@@ -35,6 +36,7 @@ src_files:
   - transports/abstract_transport.js
   - transports/flash_transport.js
   - transports/xhr_streaming_transport.js
+  - transports/xdr_streaming_transport.js
   - transports/sockjs_transport.js
   - transports/ws_transport.js
 

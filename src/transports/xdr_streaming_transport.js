@@ -1,0 +1,47 @@
+;(function() {
+  /** WebSocket transport.
+   *
+   * @see AbstractTransport
+   */
+  function XDRStreamingTransport(name, priority, key, options) {
+    Pusher.XHRStreamingTransport.call(this, name, priority, key, options);
+  }
+  var prototype = XDRStreamingTransport.prototype;
+  Pusher.Util.extend(prototype, Pusher.XHRStreamingTransport.prototype);
+
+  /** Creates a new instance of XDRStreamingTransport.
+   *
+   * @param  {String} key
+   * @param  {Object} options
+   * @return {XDRStreamingTransport}
+   */
+  XDRStreamingTransport.createConnection = function(name, priority, key, options) {
+    return new XDRStreamingTransport(name, priority, key, options);
+  };
+
+  /** Checks whether the browser supports WebSockets in any form.
+   *
+   * @returns {Boolean} true if browser supports WebSockets
+   */
+  XDRStreamingTransport.isSupported = function(environment) {
+    var originProtocol = Pusher.Util.getDocumentLocation().protocol;
+    var requestedProtocol = environment.encrypted ? "https:" : "http:";
+    return window.XDomainRequest && originProtocol === requestedProtocol;
+  };
+
+  prototype.initialize = function() {
+    var self = this;
+
+    this.timeline.info(this.buildTimelineMessage({
+      transport: this.name + (this.options.encrypted ? "s" : "")
+    }));
+    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
+
+    this.changeState("initializing");
+    Pusher.Dependencies.load("xdr_streamer", function() {
+      self.changeState("initialized");
+    });
+  };
+
+  Pusher.XDRStreamingTransport = XDRStreamingTransport;
+}).call(this);

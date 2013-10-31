@@ -17,6 +17,7 @@
     flash: Pusher.FlashTransport,
     sockjs: Pusher.SockJSTransport,
     xhr_streaming: Pusher.XHRStreamingTransport,
+    xdr_streaming: Pusher.XDRStreamingTransport
   };
 
   // DSL bindings

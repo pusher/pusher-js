@@ -12,6 +12,7 @@ module.exports = [
   'src/utils/timer.js',
   'src/utils/periodic_timer.js',
 
+  'src/http/xdr_request.js',
   'src/http/xhr_cors_request.js',
   'src/http/http_streamer.js',
 
@@ -33,6 +34,7 @@ module.exports = [
   'src/transports/abstract_transport.js',
   'src/transports/flash_transport.js',
   'src/transports/xhr_streaming_transport.js',
+  'src/transports/xdr_streaming_transport.js',
   'src/transports/sockjs_transport.js',
   'src/transports/ws_transport.js',
 

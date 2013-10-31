@@ -41,6 +41,7 @@ bundle 'pusher.js' do
   file 'transports/abstract_transport.js'
   file 'transports/flash_transport.js'
   file 'transports/xhr_streaming_transport.js'
+  file 'transports/xdr_streaming_transport.js'
   file 'transports/sockjs_transport.js'
   file 'transports/ws_transport.js'
 
@@ -78,6 +79,11 @@ end
 
 bundle 'xhr_streamer.js' do
   file 'http/xhr_cors_request.js'
+  file 'http/http_streamer.js'
+end
+
+bundle 'xdr_streamer.js' do
+  file 'http/xdr_request.js'
   file 'http/http_streamer.js'
 end
 

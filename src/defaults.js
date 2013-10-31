@@ -50,18 +50,23 @@
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options"],
+      [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options"],
+
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
       [":def", "xhr_streaming_loop", [":sequential", ":timeouts", ":xhr_streaming"]],
+      [":def", "xdr_streaming_loop", [":sequential", ":timeouts", ":xdr_streaming"]],
 
       [":def", "http_fallback_loop",
         [":if", [":is_supported", ":xhr_streaming"], [
           ":best_connected_ever", ":xhr_streaming_loop", [":delayed", 8000, [":sockjs_loop"]]
+        ], [":if", [":is_supported", ":xdr_streaming"], [
+          ":best_connected_ever", ":xdr_streaming_loop", [":delayed", 8000, [":sockjs_loop"]]
         ], [
           ":sockjs_loop"
-        ]
-      ]],
+        ]]]
+      ],
 
       [":def", "strategy",
         [":cached", 1800000,
