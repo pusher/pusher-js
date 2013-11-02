@@ -14,8 +14,8 @@ src_files:
   - utils/timer.js
   - utils/periodic_timer.js
 
-  - http/xdr_request.js
-  - http/xhr_cors_request.js
+  - http/http_cors_request.js
+  - http/http_xdomain_request.js
   - http/http_streamer.js
 
   - base64.js

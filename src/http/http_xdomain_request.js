@@ -1,12 +1,12 @@
 ;(function() {
-  function XDRRequest(url) {
+  function HTTPXDomainRequest(url) {
     Pusher.EventsDispatcher.call(this);
 
     this.url = url;
     this.xdr = new window.XDomainRequest();
     this.position = 0;
   }
-  var prototype = XDRRequest.prototype;
+  var prototype = HTTPXDomainRequest.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   prototype.start = function(payload) {
@@ -71,5 +71,5 @@
     }
   };
 
-  Pusher.XDRRequest = XDRRequest;
+  Pusher.HTTPXDomainRequest = HTTPXDomainRequest;
 }).call(this);

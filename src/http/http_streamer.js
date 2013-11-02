@@ -12,7 +12,7 @@
     self.location = getLocation(url);
     self.readyState = CONNECTING;
 
-    var constructor = Pusher.XHRCORSRequest || Pusher.XDRRequest;
+    var constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
     self.stream = new constructor(
       getUniqueURL(getStreamingURL(self.location, self.session))
     );
@@ -43,7 +43,7 @@
   prototype.sendRaw = function(payload) {
     if (this.readyState === OPEN) {
       try {
-        var constructor = Pusher.XHRCORSRequest || Pusher.XDRRequest;
+        var constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
         new constructor(
           getUniqueURL(getSendURL(this.location, this.session))
         ).start(payload);

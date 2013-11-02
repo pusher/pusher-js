@@ -1,12 +1,12 @@
 ;(function() {
-  function XHRCORSRequest(url) {
+  function HTTPCORSRequest(url) {
     Pusher.EventsDispatcher.call(this);
 
     this.url = url;
     this.xhr = new window.XMLHttpRequest();
     this.position = 0;
   }
-  var prototype = XHRCORSRequest.prototype;
+  var prototype = HTTPCORSRequest.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   prototype.start = function(payload) {
@@ -73,5 +73,5 @@
     }
   };
 
-  Pusher.XHRCORSRequest = XHRCORSRequest;
+  Pusher.HTTPCORSRequest = HTTPCORSRequest;
 }).call(this);
