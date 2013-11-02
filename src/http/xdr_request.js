@@ -25,11 +25,20 @@
       self.close();
     };
 
+    self.unloader = function() {
+      self.close();
+    };
+    Pusher.Util.addWindowListener("unload", self.unloader);
+
     self.xdr.open("POST", self.url, true);
     self.xdr.send(payload);
   };
 
   prototype.close = function() {
+    if (this.unloader) {
+      Pusher.Util.removeWindowListener("unload", this.unloader);
+      this.unloader = null;
+    }
     if (this.xdr) {
       this.xdr.ontimeout = this.xdr.onerror = null;
       this.xdr.onprogress = this.xdr.onload = null;

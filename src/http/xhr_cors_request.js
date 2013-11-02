@@ -28,11 +28,20 @@
       }
     };
 
+    self.unloader = function() {
+      self.close();
+    };
+    Pusher.Util.addWindowListener("unload", self.unloader);
+
     self.xhr.open("POST", self.url, true);
     self.xhr.send(payload);
   };
 
   prototype.close = function() {
+    if (this.unloader) {
+      Pusher.Util.removeWindowListener("unload", this.unloader);
+      this.unloader = null;
+    }
     if (this.xhr) {
       this.xhr.onreadystatechange = null;
       this.xhr.abort();
