@@ -25,6 +25,7 @@
       return {
         open: jasmine.createSpy("open"),
         send: jasmine.createSpy("send"),
+        abort: jasmine.createSpy("abort"),
         setRequestHeader: jasmine.createSpy("setRequestHeader")
       };
     },
