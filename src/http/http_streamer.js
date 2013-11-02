@@ -14,7 +14,7 @@
 
     var constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
     self.stream = new constructor(
-      getUniqueURL(getStreamingURL(self.location, self.session))
+      "POST", getUniqueURL(getStreamingURL(self.location, self.session))
     );
 
     self.stream.bind("chunk", function(chunk) { self.onChunk(chunk); });
@@ -45,7 +45,7 @@
       try {
         var constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
         new constructor(
-          getUniqueURL(getSendURL(this.location, this.session))
+          "POST", getUniqueURL(getSendURL(this.location, this.session))
         ).start(payload);
         return true;
       } catch(e) {

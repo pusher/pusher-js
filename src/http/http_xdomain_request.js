@@ -1,7 +1,8 @@
 ;(function() {
-  function HTTPXDomainRequest(url) {
+  function HTTPXDomainRequest(method, url) {
     Pusher.EventsDispatcher.call(this);
 
+    this.method = method;
     this.url = url;
     this.xdr = new window.XDomainRequest();
     this.position = 0;
@@ -30,7 +31,7 @@
     };
     Pusher.Util.addWindowListener("unload", self.unloader);
 
-    self.xdr.open("POST", self.url, true);
+    self.xdr.open(self.method, self.url, true);
     self.xdr.send(payload);
   };
 

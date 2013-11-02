@@ -1,7 +1,8 @@
 ;(function() {
-  function HTTPCORSRequest(url) {
+  function HTTPCORSRequest(method, url) {
     Pusher.EventsDispatcher.call(this);
 
+    this.method = method;
     this.url = url;
     this.xhr = new window.XMLHttpRequest();
     this.position = 0;
@@ -33,7 +34,7 @@
     };
     Pusher.Util.addWindowListener("unload", self.unloader);
 
-    self.xhr.open("POST", self.url, true);
+    self.xhr.open(self.method, self.url, true);
     self.xhr.send(payload);
   };
 
