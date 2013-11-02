@@ -66,10 +66,11 @@
   };
 
   CallbackRegistry.prototype.remove = function(eventName, callback) {
-    if(this.get(eventName)) {
-      var index = Pusher.Util.arrayIndexOf(this.get(eventName), callback);
-      if (index !== -1){
-        var callbacksCopy = this._callbacks[this._prefix(eventName)].slice(0);
+    var callbacks = this.get(eventName);
+    if (callbacks) {
+      var index = arrayIndexOf(callbacks, callback);
+      if (index !== -1) {
+        var callbacksCopy = callbacks.slice(0);
         callbacksCopy.splice(index, 1);
         this._callbacks[this._prefix(eventName)] = callbacksCopy;
       }
@@ -79,6 +80,22 @@
   CallbackRegistry.prototype._prefix = function(eventName) {
     return "_" + eventName;
   };
+
+  function arrayIndexOf(array, item) {
+    var nativeIndexOf = Array.prototype.indexOf;
+    if (array === null) {
+      return -1;
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
+      return array.indexOf(item);
+    }
+    for (var i = 0, l = array.length; i < l; i++) {
+      if (array[i] === item) {
+        return i;
+      }
+    }
+    return -1;
+  }
 
   Pusher.EventsDispatcher = EventsDispatcher;
 }).call(this);

@@ -55,22 +55,6 @@
       return m.join(" : ");
     },
 
-    arrayIndexOf: function(array, item) { // MSIE doesn't have array.indexOf
-      var nativeIndexOf = Array.prototype.indexOf;
-      if (array === null) {
-        return -1;
-      }
-      if (nativeIndexOf && array.indexOf === nativeIndexOf) {
-        return array.indexOf(item);
-      }
-      for (var i = 0, l = array.length; i < l; i++) {
-        if (array[i] === item) {
-          return i;
-        }
-      }
-      return -1;
-    },
-
     keys: function(object) {
       var result = [];
       for (var key in object) {
@@ -271,6 +255,10 @@
       };
     },
 
+    getWindow: function() {
+      return window;
+    },
+
     getDocument: function() {
       return document;
     },
@@ -294,6 +282,24 @@
           function (t) { return t.isSupported({}); }
         )
       );
+    },
+
+    addWindowListener: function(event, listener) {
+      var _window = Pusher.Util.getWindow();
+      if (_window.addEventListener !== undefined) {
+        _window.addEventListener(event, listener, false);
+      } else {
+        _window.attachEvent("on" + event, listener);
+      }
+    },
+
+    removeWindowListener: function(event, listener) {
+      var _window = Pusher.Util.getWindow();
+      if (_window.addEventListener !== undefined) {
+        _window.removeEventListener(event, listener, false);
+      } else {
+        _window.detachEvent("on" + event, listener);
+      }
     }
   };
 }).call(this);
