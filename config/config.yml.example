@@ -1,7 +1,7 @@
 :development:
   :js:
     :host: foo
-    :cdn: 
+    :cdn:
       :http: http://localhost:5555/
       :https: http://localhost:5555/
 
