@@ -36,6 +36,20 @@ describe("HTTPXDomainRequest", function() {
         "unload", jasmine.any(Function)
       );
     });
+
+    it("should re-throw the exception raised by XDomainRequest#open", function() {
+      xdr.open.andThrow("open exception");
+      expect(function() {
+        request.start();
+      }).toThrow("open exception");
+    });
+
+    it("should re-throw the exception raised by XDomainRequest#send", function() {
+      xdr.send.andThrow("send exception");
+      expect(function() {
+        request.start();
+      }).toThrow("send exception");
+    });
   });
 
   describe("#close", function() {

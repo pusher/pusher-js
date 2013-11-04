@@ -5,7 +5,7 @@ describe("HTTPCORSRequest", function() {
   var request;
 
   beforeEach(function() {
-    window.XMLHttpRequest = jasmine.createSpy("XMLHttpRequest")
+    window.XMLHttpRequest = jasmine.createSpy("XMLHttpRequest");
     window.XMLHttpRequest.andCallFake(Pusher.Mocks.getXHR);
 
     spyOn(Pusher.Util, "addWindowListener");
@@ -35,6 +35,20 @@ describe("HTTPCORSRequest", function() {
       expect(Pusher.Util.addWindowListener).toHaveBeenCalledWith(
         "unload", jasmine.any(Function)
       );
+    });
+
+    it("should re-throw the exception raised by XMLHttpRequest#open", function() {
+      xhr.open.andThrow("open exception");
+      expect(function() {
+        request.start();
+      }).toThrow("open exception");
+    });
+
+    it("should re-throw the exception raised by XMLHttpRequest#send", function() {
+      xhr.send.andThrow("send exception");
+      expect(function() {
+        request.start();
+      }).toThrow("send exception");
     });
   });
 
