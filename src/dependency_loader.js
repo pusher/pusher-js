@@ -57,7 +57,8 @@
       cdn = this.options.cdn_http;
     }
     // make sure there are no double slashes
-    return cdn.replace(/\/*$/, "") + "/" + this.options.version;
+    // if version is specified, expect dependencies to be found in a folder matching that version, otherwise ignore
+    return cdn.replace(/\/*$/, "") + (this.options.version ? "/" + this.options.version : '');
   };
 
   /** Returns a full path to a dependency file.
