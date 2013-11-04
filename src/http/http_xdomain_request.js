@@ -13,8 +13,12 @@
   prototype.start = function(payload) {
     var self = this;
 
-    self.xdr.ontimeout = self.xdr.onerror = function() {
-      self.emit("finished", null);
+    self.xdr.ontimeout = function() {
+      self.emit("error", new Pusher.Errors.RequestTimedOut());
+      self.close();
+    };
+    self.xdr.onerror = function(e) {
+      self.emit("error", e);
       self.close();
     };
     self.xdr.onprogress = function() {
