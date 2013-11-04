@@ -177,9 +177,9 @@ Use Bundler to install all development dependencies
 
 NOTE: If you get this error:
 
-   NoMethodError: private method `open' called for Gem::Package:Class
-   An error occurred while installing rake (0.9.2.2), and Bundler cannot continue.
-   Make sure that `gem install rake -v '0.9.2.2'` succeeds before bundling.
+    NoMethodError: private method `open' called for Gem::Package:Class
+    An error occurred while installing rake (0.9.2.2), and Bundler cannot continue.
+    Make sure that `gem install rake -v '0.9.2.2'` succeeds before bundling.
 
 ...Just do this: `gem install bundler`, then try again.
 
