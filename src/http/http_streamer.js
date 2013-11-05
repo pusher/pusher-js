@@ -5,6 +5,8 @@
   var CLOSING = 2;
   var CLOSED = 3;
 
+  var autoIncrement = 1;
+
   function HTTPStreamer(url) {
     var self = this;
 
@@ -184,7 +186,7 @@
 
   function getUniqueURL(url) {
     var separator = (url.indexOf('?') === -1) ? "?" : "&";
-    return url + separator + "t=" + (+new Date());
+    return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
   }
 
   function replaceHost(url, hostname) {
