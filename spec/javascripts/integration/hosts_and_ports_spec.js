@@ -17,6 +17,8 @@ describeIntegration("Host/Port Configuration", function() {
     beforeEach(function() {
       spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
       spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
+      spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
       spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
 
       _WebSocket = window.WebSocket;
@@ -72,6 +74,8 @@ describeIntegration("Host/Port Configuration", function() {
     beforeEach(function() {
       spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
       spyOn(Pusher.FlashTransport, "isSupported").andReturn(true);
+      spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
       spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
 
       spyOn(Pusher.Dependencies, "load").andCallFake(function(file, callback) {
@@ -131,6 +135,8 @@ describeIntegration("Host/Port Configuration", function() {
     beforeEach(function() {
       spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
       spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
+      spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
       spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
 
       spyOn(Pusher.Dependencies, "load").andCallFake(function(file, callback) {
