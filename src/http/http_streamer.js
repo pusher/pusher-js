@@ -14,8 +14,8 @@
     self.location = getLocation(url);
     self.readyState = CONNECTING;
 
-    var constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
-    self.stream = new constructor(
+    var Constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
+    self.stream = new Constructor(
       "POST", getUniqueURL(getStreamingURL(self.location, self.session))
     );
 
@@ -45,8 +45,8 @@
   prototype.sendRaw = function(payload) {
     if (this.readyState === OPEN) {
       try {
-        var constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
-        new constructor(
+        var Constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
+        new Constructor(
           "POST", getUniqueURL(getSendURL(this.location, this.session))
         ).start(payload);
         return true;
@@ -85,14 +85,14 @@
         break;
       case 'm':
         payload = JSON.parse(chunk.data.slice(1) || 'null');
-        this.onEvent();
+        this.onEvent(payload);
+        break;
+      case 'h':
+        this.onHeartbeatRequest('send');
         break;
       case 'c':
         payload = JSON.parse(chunk.data.slice(1) || '[]');
         this.onClose(payload[0], payload[1], true);
-        break;
-      case 'h':
-        this.onHeartbeatRequest('send');
         break;
     }
   };
@@ -165,6 +165,7 @@
   prototype.stopActivityCheck = function() {
     if (this.activityTimer) {
       this.activityTimer.ensureAborted();
+      this.activityTimer = null;
     }
   };
 
