@@ -30,6 +30,15 @@
       };
     },
 
+    getHTTPRequest: function(method, url) {
+      var request = new Pusher.EventsDispatcher();
+      request.start = jasmine.createSpy("start");
+      request.close = jasmine.createSpy("close");
+      request.method = method;
+      request.url = url;
+      return request;
+    },
+
     getDependencies: function() {
       return {
         load: jasmine.createSpy("load"),
