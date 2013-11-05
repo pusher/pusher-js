@@ -1,6 +1,6 @@
 {
   "name": "pusher",
-  "version": "2.1.3",
+  "version": "infowrap2.1.3",
   "location": "git://github.com/pusher/pusher-js.git",
   "description": "Pusher JavaScript library",
   "keywords": ["pusher", "client", "publish", "subscribe", "realtime", "websocket"],
