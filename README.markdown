@@ -171,6 +171,10 @@ Then after loading `pusher.js`, but before connecting, you need to overwrite the
 
 ## Developing
 
+Ensure you have the submodules:
+
+    git submodule update --init
+
 Use Bundler to install all development dependencies
 
     bundle install
@@ -186,7 +190,7 @@ NOTE: If you get this error:
 
 and create a local config file
 
-    mv config/config.yml.example config/config.yml # and edit
+    cp config/config.yml.example config/config.yml # and edit
 
 Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
 
