@@ -51,9 +51,11 @@
       return false;
     }
 
-    var data = {};
+    var data = {
+      bundle: self.sent + 1
+    };
     if (self.sent === 0) {
-      data = Pusher.Util.extend({
+      Pusher.Util.extend(data, {
         key: self.key,
         features: self.options.features,
         version: self.options.version

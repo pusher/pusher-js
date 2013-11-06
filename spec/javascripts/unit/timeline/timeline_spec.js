@@ -54,7 +54,8 @@ describe("Timeline", function() {
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
       expect(sendJSONP).toHaveBeenCalledWith(
-        { key: "foobar",
+        { bundle: 1,
+          key: "foobar",
           session: 666,
           features: ["x", "y", "z"],
           version: "6.6.6",
@@ -80,7 +81,8 @@ describe("Timeline", function() {
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
       expect(sendJSONP).toHaveBeenCalledWith(
-        { key: "foo",
+        { bundle: 1,
+          key: "foo",
           session: 666,
           timeline: [
             { timestamp: 1000, level: 2, a: 1 },
@@ -112,7 +114,8 @@ describe("Timeline", function() {
       // first call
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
       expect(sendJSONP).toHaveBeenCalledWith(
-        { key: "foobar",
+        { bundle: 1,
+          key: "foobar",
           session: 666,
           features: ["x", "y", "z"],
           version: "6.6.6",
@@ -124,7 +127,8 @@ describe("Timeline", function() {
       // second call
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
       expect(sendJSONP).toHaveBeenCalledWith(
-        { session: 666,
+        { bundle: 2,
+          session: 666,
           timeline: []
         },
         jasmine.any(Function)
@@ -141,7 +145,8 @@ describe("Timeline", function() {
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
       expect(sendJSONP).toHaveBeenCalledWith(
-        { key: "bar",
+        { bundle: 1,
+          key: "bar",
           session: 123,
           timeline: [
             { timestamp: 123, level: 6, i: 2},
