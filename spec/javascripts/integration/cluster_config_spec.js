@@ -100,7 +100,7 @@ describeIntegration("Cluster Configuration", function() {
     });
   }
 
-  if (Pusher.WSTransport.isSupported() || Pusher.FlashTransport.isSupported()) {
+  if (Pusher.WSTransport.isSupported({}) || Pusher.FlashTransport.isSupported({})) {
     describeClusterTest({ ws: true, encrypted: false});
     describeClusterTest({ ws: true, encrypted: true});
   }
