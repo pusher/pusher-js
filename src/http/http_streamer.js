@@ -121,7 +121,7 @@
 
   prototype.onHeartbeatRequest = function() {
     if (this.readyState === OPEN) {
-      this.send("[]");
+      this.sendRaw("[]");
     }
   };
 

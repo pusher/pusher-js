@@ -298,7 +298,7 @@ describe("HTTPStreamer", function() {
             "\\/xhr_send\\?t=[0-9]+&n=[0-9]+$"
           )
         );
-        expect(JSON.parse(lastRequest.start.calls[0].args[0])).toEqual(["[]"]);
+        expect(JSON.parse(lastRequest.start.calls[0].args[0])).toEqual([]);
       });
     });
 
