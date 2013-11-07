@@ -168,6 +168,12 @@ Then after loading `pusher.js`, but before connecting, you need to overwrite the
       version: Pusher.VERSION,
       suffix: Pusher.dependency_suffix
     });
+    
+Alternatively, if you only need to support new browsers (http://caniuse.com/websockets), e.g. in a mobile application, you can use the following and skip all fallbacks:
+
+    Pusher.SockJSTransport.isSupported = function() { return false; };
+    var pusher = new Pusher('pusher-key-here', { disableFlash: true });
+
 
 ## Developing
 
