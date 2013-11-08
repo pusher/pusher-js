@@ -52,7 +52,9 @@
     }
 
     var data = {
-      bundle: self.sent + 1
+      session: self.session,
+      bundle: self.sent + 1,
+      timeline: self.events
     };
     if (self.sent === 0) {
       Pusher.Util.extend(data, {
@@ -62,8 +64,6 @@
         version: self.options.version
       }, self.options.params || {});
     }
-    data.session = self.session;
-    data.timeline = self.events;
     data = Pusher.Util.filterObject(data, function(v) {
       return v !== undefined;
     });
