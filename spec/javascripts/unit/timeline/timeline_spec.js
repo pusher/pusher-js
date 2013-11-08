@@ -58,6 +58,7 @@ describe("Timeline", function() {
           key: "foobar",
           session: 666,
           features: ["x", "y", "z"],
+          lib: "js",
           version: "6.6.6",
           x: 1,
           y: "2",
@@ -84,6 +85,7 @@ describe("Timeline", function() {
         { bundle: 1,
           key: "foo",
           session: 666,
+          lib: "js",
           timeline: [
             { timestamp: 1000, level: 2, a: 1 },
             { timestamp: 2000, level: 3, b: 2.2 },
@@ -118,6 +120,7 @@ describe("Timeline", function() {
           key: "foobar",
           session: 666,
           features: ["x", "y", "z"],
+          lib: "js",
           version: "6.6.6",
           timeline: []
         },
@@ -148,6 +151,7 @@ describe("Timeline", function() {
         { bundle: 1,
           key: "bar",
           session: 123,
+          lib: "js",
           timeline: [
             { timestamp: 123, level: 6, i: 2},
             { timestamp: 123, level: 6, i: 3},

@@ -58,6 +58,7 @@
       Pusher.Util.extend(data, {
         key: self.key,
         features: self.options.features,
+        lib: "js",
         version: self.options.version
       }, self.options.params || {});
     }
