@@ -19,7 +19,7 @@
       this.events.push(
         Pusher.Util.extend({}, event, {
           timestamp: Pusher.Util.now(),
-          level: level
+          level: (level !== Timeline.INFO ? level : undefined)
         })
       );
       if (this.options.limit && this.events.length > this.options.limit) {

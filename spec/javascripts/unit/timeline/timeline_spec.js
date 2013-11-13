@@ -89,7 +89,7 @@ describe("Timeline", function() {
           timeline: [
             { timestamp: 1000, level: 2, a: 1 },
             { timestamp: 2000, level: 3, b: 2.2 },
-            { timestamp: 100000, level: 6, foo: "bar" },
+            { timestamp: 100000, foo: "bar" },
             { timestamp: 100001, level: 7, debug: true }
           ]
         },
@@ -153,9 +153,9 @@ describe("Timeline", function() {
           session: 123,
           lib: "js",
           timeline: [
-            { timestamp: 123, level: 6, i: 2},
-            { timestamp: 123, level: 6, i: 3},
-            { timestamp: 123, level: 6, i: 4}
+            { timestamp: 123, i: 2},
+            { timestamp: 123, i: 3},
+            { timestamp: 123, i: 4}
           ]
         },
         jasmine.any(Function)
