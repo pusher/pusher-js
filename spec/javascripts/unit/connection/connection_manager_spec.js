@@ -36,7 +36,7 @@ describe("ConnectionManager", function() {
         return strategy;
       });
 
-      new Pusher.ConnectionManager("foo", {
+      var manager = new Pusher.ConnectionManager("foo", {
         getStrategy: getStrategy,
         timeline: timeline,
         activityTimeout: 3456,
@@ -457,14 +457,6 @@ describe("ConnectionManager", function() {
   });
 
   describe("on network connection/disconnection", function() {
-    it("should transition to unavailable before connecting and browser is offline", function() {
-      Pusher.Network.isOnline.andReturn(false);
-
-      manager.connect();
-      expect(manager.state).toEqual("unavailable");
-      expect(strategy.connect).not.toHaveBeenCalled();
-    });
-
     it("should transition to unavailable when connecting and browser goes offline", function() {
       manager.connect();
       expect(manager.state).toEqual("connecting");

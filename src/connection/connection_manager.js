@@ -79,10 +79,6 @@
       self.updateState("failed");
       return;
     }
-    if (Pusher.Network.isOnline() === false) {
-      self.updateState("unavailable");
-      return;
-    }
 
     self.updateState("connecting");
 
