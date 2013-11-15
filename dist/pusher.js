@@ -3632,6 +3632,7 @@
         xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
       }
 
+      var channel = this.channel;
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
           if (xhr.status == 200) {
@@ -3649,7 +3650,7 @@
             }
           } else {
             Pusher.warn("Couldn't get auth info from your webapp", xhr.status);
-            callback(true, xhr.status);
+            callback(true, {status: xhr.status, channel:channel});
           }
         }
       };
