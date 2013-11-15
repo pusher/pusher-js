@@ -42,16 +42,12 @@
 
     Pusher.Network.bind("online", function() {
       self.timeline.info({ netinfo: "online" });
-      if (self.state === "unavailable") {
-        self.connect();
+      if (self.state === "connecting" || self.state === "unavailable") {
+        self.retryIn(0);
       }
     });
     Pusher.Network.bind("offline", function() {
       self.timeline.info({ netinfo: "offline" });
-      if (self.shouldRetry()) {
-        self.disconnect();
-        self.updateState("unavailable");
-      }
     });
 
     this.updateStrategy();

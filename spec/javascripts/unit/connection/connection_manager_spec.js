@@ -456,35 +456,30 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("on network connection/disconnection", function() {
-    it("should transition to unavailable when connecting and browser goes offline", function() {
+  describe("on online event", function() {
+    it("should retry when in 'connecting' state", function() {
       manager.connect();
+      expect(strategy.connect.calls.length).toEqual(1);
+
+      Pusher.Network.emit("online");
+      expect(strategy.connect.calls.length).toEqual(1);
       expect(manager.state).toEqual("connecting");
 
-      Pusher.Network.isOnline.andReturn(false);
-      Pusher.Network.emit("offline");
-
-      expect(manager.state).toEqual("unavailable");
+      jasmine.Clock.tick(1);
+      expect(strategy.connect.calls.length).toEqual(2);
     });
 
-    it("should transition to unavailable when connected and browser goes offline", function() {
+    it("should retry when in 'unavailable' state", function() {
       manager.connect();
-      strategy.emit("open", {});
+      expect(strategy.connect.calls.length).toEqual(1);
 
-      Pusher.Network.isOnline.andReturn(false);
-      Pusher.Network.emit("offline");
-
+      jasmine.Clock.tick(1234);
+      expect(strategy.connect.calls.length).toEqual(1);
       expect(manager.state).toEqual("unavailable");
-    });
-
-    it("should try connecting when unavailable browser goes back online", function() {
-      Pusher.Network.isOnline.andReturn(false);
-      manager.connect();
-      Pusher.Network.isOnline.andReturn(true);
       Pusher.Network.emit("online");
 
-      expect(manager.state).toEqual("connecting");
-      expect(strategy.connect).toHaveBeenCalled();
+      jasmine.Clock.tick(1);
+      expect(strategy.connect.calls.length).toEqual(2);
     });
   });
 
