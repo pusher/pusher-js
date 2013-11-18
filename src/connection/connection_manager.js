@@ -205,7 +205,7 @@
             self.options.pongTimeout,
             function() {
               self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-              self.connection.close();
+              self.retryIn(0);
             }
           );
         }
