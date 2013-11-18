@@ -356,14 +356,6 @@ describe("ConnectionManager", function() {
         connection.emit("closed");
       });
 
-      it("should emit 'disconnected' after 1s", function() {
-        jasmine.Clock.tick(999);
-        expect(onDisconnected).not.toHaveBeenCalled();
-
-        jasmine.Clock.tick(1);
-        expect(onDisconnected).toHaveBeenCalled();
-      });
-
       it("should transition to 'connecting' after 1s", function() {
         jasmine.Clock.tick(999);
         expect(onConnecting).not.toHaveBeenCalled();

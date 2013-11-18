@@ -52,11 +52,14 @@ describeIntegration("Timeout Configuration", function() {
   it("should obey default activity and pong timeouts", function() {
     pusher = new Pusher("foobar");
     pusher.connect();
-    transport.state = "initialized";
-    transport.emit("initialized");
-    transport.state = "open";
-    transport.emit("open");
-    transport.emit("message", {
+
+    var firstTransport = transport;
+
+    firstTransport.state = "initialized";
+    firstTransport.emit("initialized");
+    firstTransport.state = "open";
+    firstTransport.emit("open");
+    firstTransport.emit("message", {
       data: JSON.stringify({
         event: "pusher:connection_established",
         data: {
@@ -67,14 +70,14 @@ describeIntegration("Timeout Configuration", function() {
 
     expect(pusher.connection.state).toEqual("connected");
     jasmine.Clock.tick(Pusher.activity_timeout - 1);
-    expect(transport.send).not.toHaveBeenCalled();
+    expect(firstTransport.send).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
-    expect(transport.send).toHaveBeenCalled();
+    expect(firstTransport.send).toHaveBeenCalled();
 
     jasmine.Clock.tick(Pusher.pong_timeout - 1);
-    expect(transport.close).not.toHaveBeenCalled();
+    expect(firstTransport.close).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
-    expect(transport.close).toHaveBeenCalled();
+    expect(firstTransport.close).toHaveBeenCalled();
   });
 
   it("should obey activity and pong timeouts passed as options", function() {
@@ -83,11 +86,14 @@ describeIntegration("Timeout Configuration", function() {
       pong_timeout: 2222
     });
     pusher.connect();
-    transport.state = "initialized";
-    transport.emit("initialized");
-    transport.state = "open";
-    transport.emit("open");
-    transport.emit("message", {
+
+    var firstTransport = transport;
+
+    firstTransport.state = "initialized";
+    firstTransport.emit("initialized");
+    firstTransport.state = "open";
+    firstTransport.emit("open");
+    firstTransport.emit("message", {
       data: JSON.stringify({
         event: "pusher:connection_established",
         data: {
@@ -98,13 +104,13 @@ describeIntegration("Timeout Configuration", function() {
 
     expect(pusher.connection.state).toEqual("connected");
     jasmine.Clock.tick(11110);
-    expect(transport.send).not.toHaveBeenCalled();
+    expect(firstTransport.send).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
-    expect(transport.send).toHaveBeenCalled();
+    expect(firstTransport.send).toHaveBeenCalled();
 
     jasmine.Clock.tick(2221);
-    expect(transport.close).not.toHaveBeenCalled();
+    expect(firstTransport.close).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
-    expect(transport.close).toHaveBeenCalled();
+    expect(firstTransport.close).toHaveBeenCalled();
   });
 });

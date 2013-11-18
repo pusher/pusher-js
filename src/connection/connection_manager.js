@@ -62,38 +62,16 @@
    * to find events emitted on connection attempts.
    */
   prototype.connect = function() {
-    var self = this;
-
-    if (self.connection) {
+    if (this.connection || this.runner) {
       return;
     }
-    if (self.state === "connecting") {
+    if (!this.strategy.isSupported()) {
+      this.updateState("failed");
       return;
     }
-
-    if (!self.strategy.isSupported()) {
-      self.updateState("failed");
-      return;
-    }
-
-    self.updateState("connecting");
-
-    var callback = function(error, handshake) {
-      if (error) {
-        self.runner = self.strategy.connect(0, callback);
-      } else {
-        if (handshake.action === "error") {
-          self.timeline.error({ handshakeError: handshake.error });
-        } else {
-          // we don't support switching connections yet
-          self.runner.abort();
-          self.handshakeCallbacks[handshake.action](handshake);
-        }
-      }
-    };
-    self.runner = self.strategy.connect(0, callback);
-
-    self.setUnavailableTimer();
+    this.updateState("connecting");
+    this.startConnecting();
+    this.setUnavailableTimer();
   };
 
   /** Sends raw data.
@@ -125,22 +103,50 @@
 
   /** Closes the connection. */
   prototype.disconnect = function() {
-    if (this.runner) {
-      this.runner.abort();
-    }
-    this.clearRetryTimer();
-    this.clearUnavailableTimer();
-    this.stopActivityCheck();
+    this.disconnectInternally();
     this.updateState("disconnected");
-    // we're in disconnected state, so closing will not cause reconnecting
-    if (this.connection) {
-      this.connection.close();
-      this.abandonConnection();
-    }
   };
 
   prototype.isEncrypted = function() {
     return this.encrypted;
+  };
+
+  /** @private */
+  prototype.startConnecting = function() {
+    var self = this;
+    var callback = function(error, handshake) {
+      if (error) {
+        self.runner = self.strategy.connect(0, callback);
+      } else {
+        if (handshake.action === "error") {
+          self.timeline.error({ handshakeError: handshake.error });
+        } else {
+          self.abortConnecting(); // we don't support switching connections yet
+          self.handshakeCallbacks[handshake.action](handshake);
+        }
+      }
+    };
+    self.runner = self.strategy.connect(0, callback);
+  };
+
+  /** @private */
+  prototype.abortConnecting = function() {
+    if (this.runner) {
+      this.runner.abort();
+      this.runner = null;
+    }
+  };
+
+  /** @private */
+  prototype.disconnectInternally = function() {
+    this.abortConnecting();
+    this.clearRetryTimer();
+    this.clearUnavailableTimer();
+    this.stopActivityCheck();
+    if (this.connection) {
+      var connection = this.abandonConnection();
+      connection.close();
+    }
   };
 
   /** @private */
@@ -160,7 +166,7 @@
       self.emit("connecting_in", Math.round(delay / 1000));
     }
     self.retryTimer = new Pusher.Timer(delay || 0, function() {
-      self.disconnect();
+      self.disconnectInternally();
       self.connect();
     });
   };
@@ -169,6 +175,7 @@
   prototype.clearRetryTimer = function() {
     if (this.retryTimer) {
       this.retryTimer.ensureAborted();
+      this.retryTimer = null;
     }
   };
 
@@ -310,18 +317,17 @@
     for (var event in this.connectionCallbacks) {
       this.connection.unbind(event, this.connectionCallbacks[event]);
     }
+    var connection = this.connection;
     this.connection = null;
+    return connection;
   };
 
   /** @private */
   prototype.updateState = function(newState, data) {
     var previousState = this.state;
-
     this.state = newState;
-    // Only emit when the state changes
     if (previousState !== newState) {
       Pusher.debug('State changed', previousState + ' -> ' + newState);
-
       this.timeline.info({ state: newState });
       this.emit('state_change', { previous: previousState, current: newState });
       this.emit(newState, data);
