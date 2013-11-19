@@ -2,6 +2,10 @@ src_dir: src
 
 src_files:
   - pusher.js
+
+  - utils/timer.js
+  - utils/periodic_timer.js
+
   - util.js
   - defaults.js
   - config.js
@@ -10,9 +14,6 @@ src_files:
   - dependencies.js
   - events_dispatcher.js
   - net_info.js
-
-  - utils/timer.js
-  - utils/periodic_timer.js
 
   - base64.js
   - jsonp/jsonp_request.js

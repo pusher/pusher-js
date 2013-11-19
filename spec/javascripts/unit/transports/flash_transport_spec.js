@@ -81,12 +81,6 @@ describe("FlashTransport", function() {
         });
         expect(Pusher.FlashTransport.isSupported()).toBe(false);
       });
-
-      it("should not be supported when disableFlash flag is passed", function() {
-        expect(Pusher.FlashTransport.isSupported({
-          disableFlash: true
-        })).toBe(false);
-      });
     });
 
     describe("not supporting Flash", function() {
@@ -150,12 +144,6 @@ describe("FlashTransport", function() {
 
       it("should be supported", function() {
         expect(Pusher.FlashTransport.isSupported()).toBe(true);
-      });
-
-      it("should not be supported when disableFlash flag is passed", function() {
-        expect(Pusher.FlashTransport.isSupported({
-          disableFlash: true
-        })).toBe(false);
       });
     });
 

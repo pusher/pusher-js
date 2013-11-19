@@ -8,6 +8,10 @@
       }
     },
 
+    defer: function(callback) {
+      return new Pusher.Timer(0, callback);
+    },
+
     /** Merges multiple objects into the target argument.
      *
      * For properties that are plain Objects, performs a deep-merge. For the

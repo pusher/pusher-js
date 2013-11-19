@@ -1,5 +1,9 @@
 module.exports = [
   'src/pusher.js',
+
+  'src/utils/timer.js',
+  'src/utils/periodic_timer.js',
+
   'src/util.js',
   'src/defaults.js',
   'src/config.js',
@@ -8,9 +12,6 @@ module.exports = [
   'src/dependencies.js',
   'src/events_dispatcher.js',
   'src/net_info.js',
-
-  'src/utils/timer.js',
-  'src/utils/periodic_timer.js',
 
   'src/base64.js',
   'src/jsonp/jsonp_request.js',
