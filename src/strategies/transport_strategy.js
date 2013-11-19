@@ -105,7 +105,7 @@
   };
 
   function failAttempt(error, callback) {
-    new Pusher.Timer(0, function() {
+    Pusher.Util.defer(function() {
       callback(error);
     });
     return {
