@@ -45,12 +45,17 @@
         minPingDelay: 10000,
         maxPingDelay: config.activity_timeout
       }]],
+      [":def", "streaming_manager", [":transport_manager", {
+        lives: 2,
+        minPingDelay: 10000,
+        maxPingDelay: config.activity_timeout
+      }]],
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
-      [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options"],
-      [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options"],
+      [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
+      [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
 
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
