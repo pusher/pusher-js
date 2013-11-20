@@ -59,7 +59,7 @@
   };
 
   prototype.onFinished = function(status) {
-    this.close(1006, "Connection interrupted", false);
+    this.onClose(1006, "Connection interrupted", false);
   };
 
   prototype.onChunk = function(chunk) {
