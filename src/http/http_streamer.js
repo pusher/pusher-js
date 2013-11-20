@@ -1,5 +1,4 @@
 ;(function() {
-
   var CONNECTING = 0;
   var OPEN = 1;
   var CLOSING = 2;
@@ -8,29 +7,10 @@
   var autoIncrement = 1;
 
   function HTTPStreamer(url) {
-    var self = this;
-
-    self.session = randomNumber(1000) + "/" + randomString(8);
-    self.location = getLocation(url);
-    self.readyState = CONNECTING;
-
-    var Constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
-    self.stream = new Constructor(
-      "POST", getUniqueURL(getStreamingURL(self.location, self.session))
-    );
-
-    self.stream.bind("chunk", function(chunk) { self.onChunk(chunk); });
-    self.stream.bind("finished", function(status) { self.onFinished(status); });
-
-    try {
-      self.stream.start();
-    } catch (error) {
-      setTimeout(function() {
-        self.onError(error);
-        self.onClose(1006, "Could not start streaming", false);
-      }, 0);
-      return;
-    }
+    this.session = randomNumber(1000) + "/" + randomString(8);
+    this.location = getLocation(url);
+    this.readyState = CONNECTING;
+    this.openStream();
   }
   var prototype = HTTPStreamer.prototype;
 
@@ -42,11 +22,12 @@
     this.onClose(code, reason, true);
   };
 
+  /** @private */
   prototype.sendRaw = function(payload) {
     if (this.readyState === OPEN) {
       try {
-        var Constructor = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
-        new Constructor(
+        var HTTPRequest = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
+        new HTTPRequest(
           "POST", getUniqueURL(getSendURL(this.location, this.session))
         ).start(payload);
         return true;
@@ -58,10 +39,12 @@
     }
   };
 
+  /** @private */
   prototype.onFinished = function(status) {
     this.onClose(1006, "Connection interrupted", false);
   };
 
+  /** @private */
   prototype.onChunk = function(chunk) {
     if (chunk.status !== 200) {
       return;
@@ -97,6 +80,7 @@
     }
   };
 
+  /** @private */
   prototype.onOpen = function(options) {
     if (this.readyState === CONNECTING) {
       if (options && options.hostname) {
@@ -113,31 +97,31 @@
     }
   };
 
+  /** @private */
   prototype.onEvent = function(event) {
     if (this.readyState === OPEN && this.onmessage) {
       this.onmessage({ data: event });
     }
   };
 
+  /** @private */
   prototype.onHeartbeatRequest = function() {
     if (this.readyState === OPEN) {
       this.sendRaw("[]");
     }
   };
 
+  /** @private */
   prototype.onError = function(error) {
     if (this.onerror) {
       this.onerror(error);
     }
   };
 
+  /** @private */
   prototype.onClose = function(code, reason, wasClean) {
-    if (this.stream) {
-      this.stream.unbind_all();
-      this.stream.close();
-      this.stream = null;
-    }
     this.stopActivityCheck();
+    this.closeStream();
     this.readyState = CLOSED;
     if (this.onclose) {
       this.onclose({
@@ -145,6 +129,49 @@
         reason: reason,
         wasClean: wasClean
       });
+    }
+  };
+
+  /** @private */
+  prototype.onBufferTooLong = function() {
+    this.closeStream();
+    this.openStream();
+  };
+
+  prototype.openStream = function() {
+    var self = this;
+    var HTTPRequest = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
+
+    self.stream = new HTTPRequest(
+      "POST", getUniqueURL(getStreamingURL(self.location, self.session))
+    );
+
+    self.stream.bind("chunk", function(chunk) {
+      self.onChunk(chunk);
+    });
+    self.stream.bind("finished", function(status) {
+      self.onFinished(status);
+    });
+    self.stream.bind("buffer_too_long", function(status) {
+      self.onBufferTooLong(status);
+    });
+
+    try {
+      self.stream.start();
+    } catch (error) {
+      setTimeout(function() {
+        self.onError(error);
+        self.onClose(1006, "Could not start streaming", false);
+      }, 0);
+      return;
+    }
+  };
+
+  prototype.closeStream = function() {
+    if (this.stream) {
+      this.stream.unbind_all();
+      this.stream.close();
+      this.stream = null;
     }
   };
 

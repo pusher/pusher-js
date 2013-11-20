@@ -1,4 +1,6 @@
 ;(function() {
+  var MAX_BUFFER_LENGTH = 256*1024;
+
   function HTTPXDomainRequest(method, url) {
     Pusher.EventsDispatcher.call(this);
 
@@ -61,6 +63,9 @@
         break;
       }
     }
+    if (this.isBufferTooLong(data)) {
+      this.emit("buffer_too_long");
+    }
   };
 
   prototype.advanceBuffer = function(buffer) {
@@ -74,6 +79,10 @@
       // chunk is not finished yet, don't move the buffer pointer
       return null;
     }
+  };
+
+  prototype.isBufferTooLong = function(buffer) {
+    return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
   };
 
   Pusher.HTTPXDomainRequest = HTTPXDomainRequest;

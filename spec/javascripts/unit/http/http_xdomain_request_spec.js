@@ -137,6 +137,40 @@ describe("HTTPXDomainRequest", function() {
 
       expect(onChunk).not.toHaveBeenCalled();
     });
+
+
+    it("should emit 'buffer_too_long' after 256KB", function() {
+      var onBufferTooLong = jasmine.createSpy("onBufferTooLong");
+      request.bind("buffer_too_long", onBufferTooLong);
+
+      var kilobyteChunk = new Array(1024).join("x"); // 1023B
+
+      xdr.responseText = new Array(256).join(kilobyteChunk + "\n"); // 255KB
+      xdr.onprogress();
+      expect(onBufferTooLong).not.toHaveBeenCalled();
+
+      xdr.responseText = xdr.responseText + kilobyteChunk + "x"; // 256KB
+      xdr.onprogress();
+      expect(onBufferTooLong).not.toHaveBeenCalled();
+
+      xdr.responseText = xdr.responseText + "\n"; // 256KB + 1B
+      xdr.onprogress();
+      expect(onBufferTooLong).toHaveBeenCalled();
+    });
+
+    it("should emit all chunks before 'buffer_too_long'", function() {
+      request.bind("buffer_too_long", function() {
+        request.unbind_all();
+      });
+
+      var kilobyteChunk = new Array(1024).join("x"); // 1023B
+
+      xdr.responseText = new Array(256).join(kilobyteChunk + "\n");
+      xdr.responseText = xdr.responseText + kilobyteChunk + "x" + "\n";
+      xdr.onprogress();
+
+      expect(onChunk.calls.length).toEqual(256);
+    });
   });
 
   describe("on request end", function() {

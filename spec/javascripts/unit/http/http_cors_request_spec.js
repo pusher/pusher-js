@@ -130,6 +130,44 @@ describe("HTTPCORSRequest", function() {
 
       expect(onChunk).not.toHaveBeenCalled();
     });
+
+    it("should emit 'buffer_too_long' after 256KB", function() {
+      var onBufferTooLong = jasmine.createSpy("onBufferTooLong");
+      request.bind("buffer_too_long", onBufferTooLong);
+
+      var kilobyteChunk = new Array(1024).join("x"); // 1023B
+
+      xhr.readyState = 3;
+      xhr.status = 200;
+      xhr.responseText = new Array(256).join(kilobyteChunk + "\n"); // 255KB
+
+      xhr.onreadystatechange();
+      expect(onBufferTooLong).not.toHaveBeenCalled();
+
+      xhr.responseText = xhr.responseText + kilobyteChunk + "x"; // 256KB
+      xhr.onreadystatechange();
+      expect(onBufferTooLong).not.toHaveBeenCalled();
+
+      xhr.responseText = xhr.responseText + "\n"; // 256KB + 1B
+      xhr.onreadystatechange();
+      expect(onBufferTooLong).toHaveBeenCalled();
+    });
+
+    it("should emit all chunks before 'buffer_too_long'", function() {
+      request.bind("buffer_too_long", function() {
+        request.unbind_all();
+      });
+
+      var kilobyteChunk = new Array(1024).join("x"); // 1023B
+
+      xhr.readyState = 3;
+      xhr.status = 200;
+      xhr.responseText = new Array(256).join(kilobyteChunk + "\n");
+      xhr.responseText = xhr.responseText + kilobyteChunk + "x" + "\n";
+      xhr.onreadystatechange();
+
+      expect(onChunk.calls.length).toEqual(256);
+    });
   });
 
   describe("on request end", function() {
