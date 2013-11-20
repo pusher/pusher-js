@@ -4,7 +4,7 @@ group :development do
   # uploader
   gem 'rake'
   gem 'jbundle', :git => "git@github.com:mloughran/jbundle.git"
-  gem 'aws-s3'
+  gem 'aws-s3', '~> 0.6.0'
   gem 'httparty'
   # testing
   gem 'jasmine', '~> 1.2.0'
