@@ -163,11 +163,9 @@
      */
     mapObject: function(object, f) {
       var result = {};
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          result[key] = f(object[key]);
-        }
-      }
+      Pusher.Util.objectApply(object, function(value, key) {
+        result[key] = f(value);
+      });
       return result;
     },
 
@@ -206,16 +204,12 @@
      * @param {Function} f
      */
     filterObject: function(object, test) {
-      test = test || function(value) { return !!value; };
-
       var result = {};
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          if (test(object[key], key, object, result)) {
-            result[key] = object[key];
-          }
+      Pusher.Util.objectApply(object, function(value, key) {
+        if ((test && test(value, key, object, result)) || Boolean(value)) {
+          result[key] = value;
         }
-      }
+      });
       return result;
     },
 
@@ -226,11 +220,9 @@
      */
     flatten: function(object) {
       var result = [];
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          result.push([key, object[key]]);
-        }
-      }
+      Pusher.Util.objectApply(object, function(value, key) {
+        result.push([key, value]);
+      });
       return result;
     },
 
