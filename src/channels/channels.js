@@ -20,14 +20,10 @@
 
   /** Returns a list of all channels
    *
-   * @return {Array} channels or an empty array
+   * @return {Array}
    */
   prototype.all = function(name) {
-    var channels = [];
-    Pusher.Util.objectApply(this.channels, function(channel) {
-      channels.push(channel);
-    });
-    return channels;
+    return Pusher.Util.values(this.channels);
   };
 
   /** Finds a channel by its name.
