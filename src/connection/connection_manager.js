@@ -264,8 +264,7 @@
         self.clearUnavailableTimer();
         self.setConnection(handshake.connection);
         self.socket_id = self.connection.id;
-        self.timeline.info({ socket_id: self.socket_id });
-        self.updateState("connected");
+        self.updateState("connected", { socket_id: self.socket_id });
       }
     });
   };
@@ -330,7 +329,7 @@
     if (previousState !== newState) {
       Pusher.debug('State changed', previousState + ' -> ' + newState);
 
-      this.timeline.info({ state: newState });
+      this.timeline.info({ state: newState, params: data });
       this.emit('state_change', { previous: previousState, current: newState });
       this.emit(newState, data);
     }

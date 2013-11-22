@@ -19,7 +19,7 @@
       this.events.push(
         Pusher.Util.extend({}, event, {
           timestamp: Pusher.Util.now(),
-          level: level
+          level: (level !== Timeline.INFO ? level : undefined)
         })
       );
       if (this.options.limit && this.events.length > this.options.limit) {
@@ -51,16 +51,19 @@
       return false;
     }
 
-    var data = {};
+    var data = {
+      session: self.session,
+      bundle: self.sent + 1,
+      timeline: self.events
+    };
     if (self.sent === 0) {
-      data = Pusher.Util.extend({
+      Pusher.Util.extend(data, {
         key: self.key,
         features: self.options.features,
+        lib: "js",
         version: self.options.version
       }, self.options.params || {});
     }
-    data.session = self.session;
-    data.timeline = self.events;
     data = Pusher.Util.filterObject(data, function(v) {
       return v !== undefined;
     });
