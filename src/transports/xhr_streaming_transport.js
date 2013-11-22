@@ -38,12 +38,25 @@
     this.timeline.info(this.buildTimelineMessage({
       transport: this.name + (this.options.encrypted ? "s" : "")
     }));
-    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
+    this.timeline.debug(this.buildTimelineMessage({
+      method: "initialize"
+    }));
 
     this.changeState("initializing");
     Pusher.Dependencies.load("xhr_streamer", function() {
       self.changeState("initialized");
     });
+  };
+
+  prototype.connect = function() {
+    if (Pusher.AbstractTransport.prototype.connect.call(this)) {
+      this.timeline.info(this.buildTimelineMessage({
+        sockjs_session_id: this.socket.session
+      }));
+      return true;
+    } else {
+      return false;
+    }
   };
 
   /** @protected */
