@@ -18,6 +18,18 @@
     return this.channels[name];
   };
 
+  /** Returns a list of all channels
+   *
+   * @return {Array} channels or an empty array
+   */
+  prototype.all = function(name) {
+    var channels = [];
+    Pusher.Util.objectApply(this.channels, function(channel) {
+      channels.push(channel);
+    });
+    return channels;
+  };
+
   /** Finds a channel by its name.
    *
    * @param {String} name
