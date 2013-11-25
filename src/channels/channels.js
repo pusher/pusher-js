@@ -18,6 +18,14 @@
     return this.channels[name];
   };
 
+  /** Returns a list of all channels
+   *
+   * @return {Array}
+   */
+  prototype.all = function(name) {
+    return Pusher.Util.values(this.channels);
+  };
+
   /** Finds a channel by its name.
    *
    * @param {String} name

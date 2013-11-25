@@ -36,7 +36,7 @@ describe("ConnectionManager", function() {
         return strategy;
       });
 
-      new Pusher.ConnectionManager("foo", {
+      var manager = new Pusher.ConnectionManager("foo", {
         getStrategy: getStrategy,
         timeline: timeline,
         activityTimeout: 3456,
@@ -356,14 +356,6 @@ describe("ConnectionManager", function() {
         connection.emit("closed");
       });
 
-      it("should emit 'disconnected' after 1s", function() {
-        jasmine.Clock.tick(999);
-        expect(onDisconnected).not.toHaveBeenCalled();
-
-        jasmine.Clock.tick(1);
-        expect(onDisconnected).toHaveBeenCalled();
-      });
-
       it("should transition to 'connecting' after 1s", function() {
         jasmine.Clock.tick(999);
         expect(onConnecting).not.toHaveBeenCalled();
@@ -456,43 +448,30 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("on network connection/disconnection", function() {
-    it("should transition to unavailable before connecting and browser is offline", function() {
-      Pusher.Network.isOnline.andReturn(false);
-
+  describe("on online event", function() {
+    it("should retry when in 'connecting' state", function() {
       manager.connect();
-      expect(manager.state).toEqual("unavailable");
-      expect(strategy.connect).not.toHaveBeenCalled();
-    });
+      expect(strategy.connect.calls.length).toEqual(1);
 
-    it("should transition to unavailable when connecting and browser goes offline", function() {
-      manager.connect();
+      Pusher.Network.emit("online");
+      expect(strategy.connect.calls.length).toEqual(1);
       expect(manager.state).toEqual("connecting");
 
-      Pusher.Network.isOnline.andReturn(false);
-      Pusher.Network.emit("offline");
-
-      expect(manager.state).toEqual("unavailable");
+      jasmine.Clock.tick(1);
+      expect(strategy.connect.calls.length).toEqual(2);
     });
 
-    it("should transition to unavailable when connected and browser goes offline", function() {
+    it("should retry when in 'unavailable' state", function() {
       manager.connect();
-      strategy.emit("open", {});
+      expect(strategy.connect.calls.length).toEqual(1);
 
-      Pusher.Network.isOnline.andReturn(false);
-      Pusher.Network.emit("offline");
-
+      jasmine.Clock.tick(1234);
+      expect(strategy.connect.calls.length).toEqual(1);
       expect(manager.state).toEqual("unavailable");
-    });
-
-    it("should try connecting when unavailable browser goes back online", function() {
-      Pusher.Network.isOnline.andReturn(false);
-      manager.connect();
-      Pusher.Network.isOnline.andReturn(true);
       Pusher.Network.emit("online");
 
-      expect(manager.state).toEqual("connecting");
-      expect(strategy.connect).toHaveBeenCalled();
+      jasmine.Clock.tick(1);
+      expect(strategy.connect.calls.length).toEqual(2);
     });
   });
 
