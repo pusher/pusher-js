@@ -13,8 +13,9 @@
    * - initialized - initial state, never transitioned to
    * - connecting - connection is being established
    * - connected - connection has been fully established
-   * - disconnected - on requested disconnection or before reconnecting
+   * - disconnected - on requested disconnection
    * - unavailable - after connection timeout or when there's no network
+   * - failed - when the connection strategy is not supported
    *
    * Options:
    * - unavailableTimeout - time to transition to unavailable state
