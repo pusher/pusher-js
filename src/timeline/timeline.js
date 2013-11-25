@@ -47,10 +47,6 @@
   prototype.send = function(sendJSONP, callback) {
     var self = this;
 
-    if (Pusher.Network.isOnline() === false) {
-      return false;
-    }
-
     var data = {
       session: self.session,
       bundle: self.sent + 1,
