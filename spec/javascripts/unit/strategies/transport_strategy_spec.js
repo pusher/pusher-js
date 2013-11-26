@@ -25,9 +25,6 @@ describe("TransportStrategy", function() {
       var strategy = new Pusher.TransportStrategy("name", 1, transportClass);
 
       expect(strategy.isSupported()).toBe(true);
-      expect(transportClass.isSupported).toHaveBeenCalledWith({
-        disableFlash: false
-      });
     });
 
     it("should return false when transport is not supported", function() {
@@ -35,18 +32,6 @@ describe("TransportStrategy", function() {
         "name", 1, Pusher.Mocks.getTransportClass(false)
       );
       expect(strategy.isSupported()).toBe(false);
-    });
-
-    it("should pass the disableFlash flag to the transport", function() {
-      var transportClass = Pusher.Mocks.getTransportClass(true);
-      var strategy = new Pusher.TransportStrategy("name", 1, transportClass, {
-        disableFlash: true
-      });
-
-      strategy.isSupported();
-      expect(transportClass.isSupported).toHaveBeenCalledWith({
-        disableFlash: true
-      });
     });
   });
 

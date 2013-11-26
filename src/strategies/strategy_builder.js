@@ -18,6 +18,23 @@
     sockjs: Pusher.SockJSTransport
   };
 
+  var UnsupportedStrategy = {
+    isSupported: function() {
+      return false;
+    },
+    connect: function(_, callback) {
+      var deferred = Pusher.Util.defer(function() {
+        callback(new Pusher.Errors.UnsupportedStrategy());
+      });
+      return {
+        abort: function() {
+          deferred.ensureAborted();
+        },
+        forceMinPriority: function() {}
+      };
+    }
+  };
+
   // DSL bindings
 
   function returnWithOriginalContext(f) {
@@ -40,19 +57,31 @@
       if (!transportClass) {
         throw new Pusher.Errors.UnsupportedTransport(type);
       }
-      var transportOptions = Pusher.Util.extend({}, {
-        key: context.key,
-        encrypted: context.encrypted,
-        timeline: context.timeline,
-        disableFlash: context.disableFlash,
-        ignoreNullOrigin: context.ignoreNullOrigin
-      }, options);
-      if (manager) {
-        transportClass = manager.getAssistant(transportClass);
+
+      var enabled =
+        (!context.enabledTransports ||
+          Pusher.Util.arrayIndexOf(context.enabledTransports, name) !== -1) &&
+        (!context.disabledTransports ||
+          Pusher.Util.arrayIndexOf(context.disabledTransports, name) === -1) &&
+        (name !== "flash" || context.disableFlash !== true);
+
+      var transport;
+      if (enabled) {
+        transport = new Pusher.TransportStrategy(
+          name,
+          priority,
+          manager ? manager.getAssistant(transportClass) : transportClass,
+          Pusher.Util.extend({
+            key: context.key,
+            encrypted: context.encrypted,
+            timeline: context.timeline,
+            ignoreNullOrigin: context.ignoreNullOrigin
+          }, options)
+        );
+      } else {
+        transport = UnsupportedStrategy;
       }
-      var transport = new Pusher.TransportStrategy(
-        name, priority, transportClass, transportOptions
-      );
+
       var newContext = context.def(context, name, transport)[1];
       newContext.transports = context.transports || {};
       newContext.transports[name] = transport;
