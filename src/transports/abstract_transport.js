@@ -96,7 +96,7 @@
       this.socket = this.createSocket(url);
     } catch (e) {
       var self = this;
-      new Pusher.Timer(0, function() {
+      Pusher.Util.defer(function() {
         self.onError(e);
         self.changeState("closed");
       });

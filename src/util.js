@@ -8,6 +8,10 @@
       }
     },
 
+    defer: function(callback) {
+      return new Pusher.Timer(0, callback);
+    },
+
     /** Merges multiple objects into the target argument.
      *
      * For properties that are plain Objects, performs a deep-merge. For the
@@ -71,32 +75,6 @@
       return -1;
     },
 
-    keys: function(object) {
-      var result = [];
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          result.push(key);
-        }
-      }
-      return result;
-    },
-
-    /** Applies a function f to all elements of an array.
-     *
-     * Function f gets 3 arguments passed:
-     * - element from the array
-     * - index of the element
-     * - reference to the array
-     *
-     * @param {Array} array
-     * @param {Function} f
-     */
-    apply: function(array, f) {
-      for (var i = 0; i < array.length; i++) {
-        f(array[i], i, array);
-      }
-    },
-
     /** Applies a function f to all properties of an object.
      *
      * Function f gets 3 arguments passed:
@@ -112,6 +90,48 @@
         if (Object.prototype.hasOwnProperty.call(object, key)) {
           f(object[key], key, object);
         }
+      }
+    },
+
+    /** Return a list of object's own property keys
+     *
+     * @param {Object} object
+     * @returns {Array}
+     */
+    keys: function(object) {
+      var keys = [];
+      Pusher.Util.objectApply(object, function(_, key) {
+        keys.push(key);
+      });
+      return keys;
+    },
+
+    /** Return a list of object's own property values
+     *
+     * @param {Object} object
+     * @returns {Array}
+     */
+    values: function(object) {
+      var values = [];
+      Pusher.Util.objectApply(object, function(value) {
+        values.push(value);
+      });
+      return values;
+    },
+
+    /** Applies a function f to all elements of an array.
+     *
+     * Function f gets 3 arguments passed:
+     * - element from the array
+     * - index of the element
+     * - reference to the array
+     *
+     * @param {Array} array
+     * @param {Function} f
+     */
+    apply: function(array, f) {
+      for (var i = 0; i < array.length; i++) {
+        f(array[i], i, array);
       }
     },
 
@@ -147,11 +167,9 @@
      */
     mapObject: function(object, f) {
       var result = {};
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          result[key] = f(object[key]);
-        }
-      }
+      Pusher.Util.objectApply(object, function(value, key) {
+        result[key] = f(value);
+      });
       return result;
     },
 
@@ -190,16 +208,12 @@
      * @param {Function} f
      */
     filterObject: function(object, test) {
-      test = test || function(value) { return !!value; };
-
       var result = {};
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          if (test(object[key], key, object, result)) {
-            result[key] = object[key];
-          }
+      Pusher.Util.objectApply(object, function(value, key) {
+        if ((test && test(value, key, object, result)) || Boolean(value)) {
+          result[key] = value;
         }
-      }
+      });
       return result;
     },
 
@@ -210,11 +224,9 @@
      */
     flatten: function(object) {
       var result = [];
-      for (var key in object) {
-        if (Object.prototype.hasOwnProperty.call(object, key)) {
-          result.push([key, object[key]]);
-        }
-      }
+      Pusher.Util.objectApply(object, function(value, key) {
+        result.push([key, value]);
+      });
       return result;
     },
 

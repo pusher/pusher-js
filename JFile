@@ -7,11 +7,15 @@ target_dir './dist'
 
 src_dir './src'
 
-version '2.1.3'
+version '2.1.4'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
+
+  file 'utils/timer.js'
+  file 'utils/periodic_timer.js'
+
   file 'util.js'
   file 'defaults.js'
   file 'config.js'
@@ -19,9 +23,6 @@ bundle 'pusher.js' do
   file 'events_dispatcher.js'
   file 'dependency_loader.js'
   file 'dependencies.js'
-
-  file 'utils/timer.js'
-  file 'utils/periodic_timer.js'
 
   file 'base64.js'
   file 'jsonp/jsonp_request.js'

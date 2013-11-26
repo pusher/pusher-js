@@ -83,6 +83,13 @@
     var timer = null;
     var runner = null;
 
+    if (options.timeout > 0) {
+      timer = new Pusher.Timer(options.timeout, function() {
+        runner.abort();
+        callback(true);
+      });
+    }
+
     runner = strategy.connect(minPriority, function(error, handshake) {
       if (error && timer && timer.isRunning() && !options.failFast) {
         // advance to the next strategy after the timeout
@@ -93,13 +100,6 @@
       }
       callback(error, handshake);
     });
-
-    if (options.timeout > 0) {
-      timer = new Pusher.Timer(options.timeout, function() {
-        runner.abort();
-        callback(true);
-      });
-    }
 
     return {
       abort: function() {

@@ -28,10 +28,7 @@
    * @param {Object} environment
    * @returns {Boolean}
    */
-  FlashTransport.isSupported = function(environment) {
-    if (environment && environment.disableFlash) {
-      return false;
-    }
+  FlashTransport.isSupported = function() {
     try {
       return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {
