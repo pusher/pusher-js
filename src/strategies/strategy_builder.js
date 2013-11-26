@@ -18,16 +18,18 @@
     sockjs: Pusher.SockJSTransport
   };
 
-  var UnsupportedTransport = {
+  var UnsupportedStrategy = {
     isSupported: function() {
       return false;
     },
     connect: function(_, callback) {
-      Pusher.Util.defer(function() {
+      var deferred = Pusher.Util.defer(function() {
         callback(new Pusher.Errors.UnsupportedStrategy());
       });
       return {
-        abort: function() {},
+        abort: function() {
+          deferred.ensureAborted();
+        },
         forceMinPriority: function() {}
       };
     }
@@ -77,7 +79,7 @@
           }, options)
         );
       } else {
-        transport = UnsupportedTransport;
+        transport = UnsupportedStrategy;
       }
 
       var newContext = context.def(context, name, transport)[1];
