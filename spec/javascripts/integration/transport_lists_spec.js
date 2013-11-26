@@ -35,6 +35,7 @@ describe("Transport lists", function() {
     expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
     expect(Pusher.FlashTransport.createConnection).toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    pusher.disconnect();
   });
 
   it("should not use any transports if the whitelist is empty", function() {
@@ -45,6 +46,7 @@ describe("Transport lists", function() {
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).not.toHaveBeenCalled();
+    pusher.disconnect();
   });
 
   it("should use only transports from the whitelist", function() {
@@ -55,6 +57,7 @@ describe("Transport lists", function() {
     expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
     expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    pusher.disconnect();
   });
 
   it("should not use transports from the blacklist", function() {
@@ -65,6 +68,7 @@ describe("Transport lists", function() {
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    pusher.disconnect();
   });
 
   it("should not use transports from the blacklist, even if they are on the whitelist", function() {
@@ -76,5 +80,6 @@ describe("Transport lists", function() {
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    pusher.disconnect();
   });
 });
