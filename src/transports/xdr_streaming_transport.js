@@ -37,7 +37,7 @@
     }));
 
     this.changeState("initializing");
-    Pusher.Dependencies.load("xdr_streamer", function() {
+    Pusher.Dependencies.load("xdr", function() {
       self.changeState("initialized");
     });
   };

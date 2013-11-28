@@ -40,7 +40,7 @@
     }));
 
     this.changeState("initializing");
-    Pusher.Dependencies.load("xhr_streamer", function() {
+    Pusher.Dependencies.load("xhr", function() {
       self.changeState("initialized");
     });
   };
