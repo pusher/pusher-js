@@ -53,7 +53,6 @@
     this.timeline.info(this.buildTimelineMessage({
       transport: this.name + (this.options.encrypted ? "s" : "")
     }));
-    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
     this.changeState("initializing");
 
     if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {

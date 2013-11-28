@@ -38,9 +38,6 @@
     this.timeline.info(this.buildTimelineMessage({
       transport: this.name + (this.options.encrypted ? "s" : "")
     }));
-    this.timeline.debug(this.buildTimelineMessage({
-      method: "initialize"
-    }));
 
     this.changeState("initializing");
     Pusher.Dependencies.load("xhr_streamer", function() {

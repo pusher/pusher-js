@@ -33,14 +33,6 @@ describe("AbstractTransport", function() {
       expect(onInitialized).toHaveBeenCalled();
     });
 
-    it("should log method call with debug level", function() {
-      this.transport.initialize();
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        method: "initialize"
-      });
-    });
-
     it("should log transport name with info level", function() {
       this.transport.initialize();
       expect(this.timeline.info).toHaveBeenCalledWith({
@@ -129,15 +121,6 @@ describe("AbstractTransport", function() {
       expect(this.transport.createSocket.calls.length).toEqual(1);
       expect(onConnecting).not.toHaveBeenCalled();
     });
-
-    it("should log method call with debug level", function() {
-      this.transport.connect();
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        method: "connect",
-        url: "ws://example.com:12345/app/foo?protocol=6&client=js&version=<VERSION>"
-      });
-    });
   });
 
   describe("#send", function() {
@@ -179,15 +162,6 @@ describe("AbstractTransport", function() {
         return !timer.isRunning();
       }, "timer to run", 500);
     });
-
-    it("should log method call with debug level", function() {
-      this.transport.send("foobar");
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        method: "send",
-        data: "foobar"
-      });
-    });
   });
 
   describe("#close", function() {
@@ -206,14 +180,6 @@ describe("AbstractTransport", function() {
 
       this.socket.onclose({ wasClean: true });
       expect(onClosed).toHaveBeenCalledWith({ wasClean: true });
-    });
-
-    it("should log method call with debug level", function() {
-      this.transport.close();
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        method: "close"
-      });
     });
   });
 
@@ -246,14 +212,6 @@ describe("AbstractTransport", function() {
 
       expect(this.transport.state).toEqual("open");
       expect(onMessage).toHaveBeenCalledWith("ugabuga");
-    });
-
-    it("should log the message with debug level", function() {
-      this.socket.onmessage({ data: "log this" });
-      expect(this.timeline.debug).toHaveBeenCalledWith({
-        cid: 667,
-        message: "log this"
-      });
     });
   });
 

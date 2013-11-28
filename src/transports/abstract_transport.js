@@ -72,8 +72,6 @@
     this.timeline.info(this.buildTimelineMessage({
       transport: this.name + (this.options.encrypted ? "s" : "")
     }));
-    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
-
     this.changeState("initialized");
   };
 
@@ -82,16 +80,11 @@
    * @returns {Boolean} false if transport is in invalid state
    */
   prototype.connect = function() {
-    var url = this.getURL(this.key, this.options);
-    this.timeline.debug(this.buildTimelineMessage({
-      method: "connect",
-      url: url
-    }));
-
     if (this.socket || this.state !== "initialized") {
       return false;
     }
 
+    var url = this.getURL(this.key, this.options);
     try {
       this.socket = this.createSocket(url);
     } catch (e) {
@@ -115,8 +108,6 @@
    * @return {Boolean} true if there was a connection to close
    */
   prototype.close = function() {
-    this.timeline.debug(this.buildTimelineMessage({ method: "close" }));
-
     if (this.socket) {
       this.socket.close();
       return true;
@@ -131,11 +122,6 @@
    * @return {Boolean} true only when in the "open" state
    */
   prototype.send = function(data) {
-    this.timeline.debug(this.buildTimelineMessage({
-      method: "send",
-      data: data
-    }));
-
     if (this.state === "open") {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
       var self = this;
@@ -182,7 +168,6 @@
 
   /** @protected */
   prototype.onMessage = function(message) {
-    this.timeline.debug(this.buildTimelineMessage({ message: message.data }));
     this.emit("message", message);
   };
 
