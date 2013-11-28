@@ -17,7 +17,9 @@
     flash: Pusher.FlashTransport,
     sockjs: Pusher.SockJSTransport,
     xhr_streaming: Pusher.XHRStreamingTransport,
-    xdr_streaming: Pusher.XDRStreamingTransport
+    xdr_streaming: Pusher.XDRStreamingTransport,
+    xhr_polling: Pusher.XHRPollingTransport,
+    xdr_polling: Pusher.XDRPollingTransport
   };
 
   var UnsupportedStrategy = {

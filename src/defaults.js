@@ -56,21 +56,42 @@
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
       [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
+      [":def_transport", "xhr_polling", "xhr_polling", 1, ":sockjs_options"],
+      [":def_transport", "xdr_polling", "xdr_polling", 1, ":sockjs_options"],
 
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
-      [":def", "xhr_streaming_loop", [":sequential", ":timeouts", ":xhr_streaming"]],
-      [":def", "xdr_streaming_loop", [":sequential", ":timeouts", ":xdr_streaming"]],
+
+      [":def", "streaming_loop", [":sequential", ":timeouts",
+        [":if", [":is_supported", ":xhr_streaming"],
+          ":xhr_streaming",
+          ":xdr_streaming"
+        ]
+      ]],
+      [":def", "polling_loop", [":sequential", ":timeouts",
+        [":if", [":is_supported", ":xhr_polling"],
+          ":xhr_polling",
+          ":xdr_polling"
+        ]
+      ]],
+
+      [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
+        ":best_connected_ever",
+          ":streaming_loop",
+          [":delayed", 4000, [":polling_loop"]]
+      ], [
+        ":polling_loop"
+      ]]],
 
       [":def", "http_fallback_loop",
-        [":if", [":is_supported", ":xhr_streaming"], [
-          ":best_connected_ever", ":xhr_streaming_loop", [":delayed", 8000, [":sockjs_loop"]]
-        ], [":if", [":is_supported", ":xdr_streaming"], [
-          ":best_connected_ever", ":xdr_streaming_loop", [":delayed", 8000, [":sockjs_loop"]]
+        [":if", [":is_supported", ":http_loop"], [
+          ":best_connected_ever",
+            ":http_loop",
+            [":delayed", 8000, [":sockjs_loop"]]
         ], [
           ":sockjs_loop"
-        ]]]
+        ]]
       ],
 
       [":def", "strategy",
