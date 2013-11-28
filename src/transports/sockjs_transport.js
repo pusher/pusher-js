@@ -10,6 +10,8 @@
   var prototype = SockJSTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
+  prototype.resource = "sockjs";
+
   /** Creates a new instance of SockJSTransport.
    *
    * @param  {String} key
@@ -26,23 +28,6 @@
    */
   SockJSTransport.isSupported = function() {
     return true;
-  };
-
-  /** Fetches sockjs dependency if needed.
-   *
-   * @see AbstractTransport.prototype.initialize
-   */
-  prototype.initialize = function() {
-    var self = this;
-
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-
-    this.changeState("initializing");
-    Pusher.Dependencies.load("sockjs", function() {
-      self.changeState("initialized");
-    });
   };
 
   /** Always returns true, since SockJS handles ping on its own.

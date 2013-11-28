@@ -9,6 +9,8 @@
   var prototype = XHRStreamingTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
+  prototype.resource = "xhr";
+
   /** Creates a new instance of XHRStreamingTransport.
    *
    * @param  {String} key
@@ -30,19 +32,6 @@
       }
     }
     return false;
-  };
-
-  prototype.initialize = function() {
-    var self = this;
-
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-
-    this.changeState("initializing");
-    Pusher.Dependencies.load("xhr", function() {
-      self.changeState("initialized");
-    });
   };
 
   /** @protected */

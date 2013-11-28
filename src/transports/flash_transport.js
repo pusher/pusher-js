@@ -9,6 +9,8 @@
   var prototype = FlashTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
 
+  prototype.resource = "flashfallback";
+
   /** Creates a new instance of FlashTransport.
    *
    * @param  {String} key
@@ -48,21 +50,12 @@
    * @see AbstractTransport.prototype.initialize
    */
   prototype.initialize = function() {
-    var self = this;
-
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-    this.changeState("initializing");
-
     if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
       window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
     }
-    window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
-      "/WebSocketMain.swf";
-    Pusher.Dependencies.load("flashfallback", function() {
-      self.changeState("initialized");
-    });
+    window.WEB_SOCKET_SWF_LOCATION =
+      Pusher.Dependencies.getRoot() + "/WebSocketMain.swf";
+    Pusher.AbstractTransport.prototype.initialize.call(this);
   };
 
   /** @protected */

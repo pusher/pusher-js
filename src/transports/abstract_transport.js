@@ -69,10 +69,20 @@
    * Fetches resources if needed and then transitions to initialized.
    */
   prototype.initialize = function() {
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
+    var self = this;
+
+    self.timeline.info(self.buildTimelineMessage({
+      transport: self.name + (self.options.encrypted ? "s" : "")
     }));
-    this.changeState("initialized");
+
+    if (self.resource) {
+      self.changeState("initializing");
+      Pusher.Dependencies.load(self.resource, function() {
+        self.changeState("initialized");
+      });
+    } else {
+      self.changeState("initialized");
+    }
   };
 
   /** Tries to establish a connection.

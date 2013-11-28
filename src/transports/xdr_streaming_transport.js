@@ -9,6 +9,8 @@
   var prototype = XDRStreamingTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.XHRStreamingTransport.prototype);
 
+  prototype.resource = "xdr";
+
   /** Creates a new instance of XDRStreamingTransport.
    *
    * @param  {String} key
@@ -27,19 +29,6 @@
     var originProtocol = Pusher.Util.getDocumentLocation().protocol;
     var requestedProtocol = environment.encrypted ? "https:" : "http:";
     return window.XDomainRequest && originProtocol === requestedProtocol;
-  };
-
-  prototype.initialize = function() {
-    var self = this;
-
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-
-    this.changeState("initializing");
-    Pusher.Dependencies.load("xdr", function() {
-      self.changeState("initialized");
-    });
   };
 
   Pusher.XDRStreamingTransport = XDRStreamingTransport;
