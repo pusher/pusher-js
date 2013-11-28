@@ -15,7 +15,9 @@ module.exports = [
 
   'src/http/http_cors_request.js',
   'src/http/http_xdomain_request.js',
-  'src/http/http_streamer.js',
+  'src/http/http_socket.js',
+  'src/http/http_streaming_socket.js',
+  'src/http/http_polling_socket.js',
 
   'src/base64.js',
   'src/jsonp/jsonp_request.js',

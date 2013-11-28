@@ -61,7 +61,7 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    return new Pusher.HTTPStreamer(url);
+    return new Pusher.HTTPStreamingSocket(url);
   };
 
   /** Always returns true, since HTTP streaming handles ping on its own.

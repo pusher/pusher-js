@@ -17,7 +17,9 @@ src_files:
 
   - http/http_cors_request.js
   - http/http_xdomain_request.js
-  - http/http_streamer.js
+  - http/http_socket.js
+  - http/http_streaming_socket.js
+  - http/http_polling_socket.js
 
   - base64.js
   - jsonp/jsonp_request.js

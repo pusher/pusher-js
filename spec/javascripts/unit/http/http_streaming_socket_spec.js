@@ -1,4 +1,4 @@
-describe("HTTPStreamer", function() {
+describe("HTTPStreamingSocket", function() {
   var _HTTPCORSRequest = Pusher.HTTPCORSRequest;
   var _HTTPXDomainRequest = Pusher.HTTPXDomainRequest;
 
@@ -14,7 +14,7 @@ describe("HTTPStreamer", function() {
     });
     jasmine.Clock.useMock();
 
-    streamer = new Pusher.HTTPStreamer("http://example.com/pusher");
+    streamer = new Pusher.HTTPStreamingSocket("http://example.com/pusher");
     stream = streamer.stream;
 
     onOpen = jasmine.createSpy("onOpen");
@@ -36,7 +36,7 @@ describe("HTTPStreamer", function() {
   it("should use HTTPCORSRequest if possible", function() {
     Pusher.HTTPXDomainRequest = undefined;
 
-    var streamer = new Pusher.HTTPStreamer("http://example.com");
+    var streamer = new Pusher.HTTPStreamingSocket("http://example.com");
     expect(Pusher.HTTPCORSRequest).toHaveBeenCalled();
 
     streamer.close();
@@ -46,14 +46,14 @@ describe("HTTPStreamer", function() {
     Pusher.HTTPCORSRequest = undefined;
     spyOn(Pusher, "HTTPXDomainRequest").andCallFake(Pusher.Mocks.getHTTPRequest);
 
-    var streamer = new Pusher.HTTPStreamer("http://example.com");
+    var streamer = new Pusher.HTTPStreamingSocket("http://example.com");
     expect(Pusher.HTTPXDomainRequest).toHaveBeenCalled();
 
     streamer.close();
   });
 
   it("should send a POST request to a correct URL", function() {
-    var streamer = new Pusher.HTTPStreamer("http://example.com/prefix?arg=val");
+    var streamer = new Pusher.HTTPStreamingSocket("http://example.com/prefix?arg=val");
     var stream = streamer.stream;
 
     expect(stream.method).toEqual("POST");
@@ -69,9 +69,9 @@ describe("HTTPStreamer", function() {
   });
 
   it("should start streaming from different URLs", function() {
-    var streamer1 = new Pusher.HTTPStreamer("http://example.com");
+    var streamer1 = new Pusher.HTTPStreamingSocket("http://example.com");
     var url1 = lastRequest.url;
-    var streamer2 = new Pusher.HTTPStreamer("http://example.com");
+    var streamer2 = new Pusher.HTTPStreamingSocket("http://example.com");
     var url2 = lastRequest.url;
 
     expect(url1).not.toEqual(url2);
@@ -93,7 +93,7 @@ describe("HTTPStreamer", function() {
       onError = jasmine.createSpy("onError");
       onClose = jasmine.createSpy("onClose");
 
-      streamer = new Pusher.HTTPStreamer("http://example.com");
+      streamer = new Pusher.HTTPStreamingSocket("http://example.com");
       streamer.onerror = onError;
       streamer.onclose = onClose;
 

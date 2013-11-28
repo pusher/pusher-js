@@ -1,18 +1,17 @@
 ;(function() {
   var CONNECTING = 0;
   var OPEN = 1;
-  var CLOSING = 2;
   var CLOSED = 3;
 
   var autoIncrement = 1;
 
-  function HTTPStreamer(url) {
+  function HTTPSocket(url) {
     this.session = randomNumber(1000) + "/" + randomString(8);
     this.location = getLocation(url);
     this.readyState = CONNECTING;
     this.openStream();
   }
-  var prototype = HTTPStreamer.prototype;
+  var prototype = HTTPSocket.prototype;
 
   prototype.send = function(payload) {
     return this.sendRaw(JSON.stringify([payload]));
@@ -37,11 +36,6 @@
     } else {
       return false;
     }
-  };
-
-  /** @private */
-  prototype.onFinished = function(status) {
-    this.onClose(1006, "Connection interrupted", false);
   };
 
   /** @private */
@@ -71,7 +65,7 @@
         this.onEvent(payload);
         break;
       case 'h':
-        this.onHeartbeatRequest('send');
+        this.onHeartbeat();
         break;
       case 'c':
         payload = JSON.parse(chunk.data.slice(1) || '[]');
@@ -105,13 +99,6 @@
   };
 
   /** @private */
-  prototype.onHeartbeatRequest = function() {
-    if (this.readyState === OPEN) {
-      this.sendRaw("[]");
-    }
-  };
-
-  /** @private */
   prototype.onError = function(error) {
     if (this.onerror) {
       this.onerror(error);
@@ -133,7 +120,7 @@
   };
 
   /** @private */
-  prototype.onBufferTooLong = function() {
+  prototype.reconnect = function() {
     this.closeStream();
     this.openStream();
   };
@@ -143,7 +130,7 @@
     var HTTPRequest = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
 
     self.stream = new HTTPRequest(
-      "POST", getUniqueURL(getStreamingURL(self.location, self.session))
+      "POST", getUniqueURL(self.getReceiveURL(self.location, self.session))
     );
 
     self.stream.bind("chunk", function(chunk) {
@@ -152,8 +139,8 @@
     self.stream.bind("finished", function(status) {
       self.onFinished(status);
     });
-    self.stream.bind("buffer_too_long", function(status) {
-      self.onBufferTooLong(status);
+    self.stream.bind("buffer_too_long", function() {
+      self.reconnect();
     });
 
     try {
@@ -204,10 +191,6 @@
     };
   }
 
-  function getStreamingURL(url, session) {
-    return url.base + "/" + session + "/xhr_streaming" + url.queryString;
-  }
-
   function getSendURL(url, session) {
     return url.base + "/" + session + "/xhr_send";
   }
@@ -229,10 +212,10 @@
   function randomString(length) {
     var result = [];
     for (var i = 0; i < length; i++) {
-      result.push(Math.floor(Math.random() * 32).toString(32));
+      result.push(randomNumber(32).toString(32));
     }
     return result.join('');
   }
 
-  Pusher.HTTPStreamer = HTTPStreamer;
+  Pusher.HTTPSocket = HTTPSocket;
 }).call(this);
