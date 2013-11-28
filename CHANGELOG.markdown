@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.1.4 (2013-11-26)
+
+[NEW] Added the `Pusher.prototype.allChannels` method
+
+[NEW] Implemented the `enabledTransports` option
+
+[NEW] Implemented the `disabledTransports` option
+
+[CHANGED] Connections are not closed anymore after receiving an offline event
+
+[CHANGED] Connections are still attempted, even if the browser indicates it's offline
+
+[CHANGED] When not connected, an online event will trigger a new connection attempt immediately
+
+[CHANGED] Updated the stats protocol
+
 ## 2.1.3 (2013-10-21)
 
 [CHANGED] Updated the json2 library

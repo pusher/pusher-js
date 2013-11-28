@@ -120,6 +120,10 @@
     return this.channels.find(name);
   };
 
+  prototype.allChannels = function() {
+    return this.channels.all();
+  };
+
   prototype.connect = function() {
     this.connection.connect();
 

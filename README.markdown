@@ -59,6 +59,26 @@ Disables Flash, leaving only WebSockets and HTTP fallback.
 
 Disables stats collection, so that connection metrics are not submitted to Pusher’s servers.
 
+#### `enabledTransports` (Array)
+
+Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `flash`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
+
+    // will only use WebSockets
+    var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
+
+#### `disabledTransports` (Array)
+
+Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `flash`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
+
+    // will use all transports except for flash
+    var pusher = new Pusher(API_KEY, { disabledTransports: ["flash"] });
+
+    // will only use WebSockets
+    var pusher = new Pusher(API_KEY, {
+      enabledTransports: ["ws", "flash"],
+      disabledTransports: ["flash"]
+    });
+
 #### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
 
 These can be changed to point to alternative Pusher URLs (used internally for our staging server).
@@ -100,6 +120,16 @@ Private channels are created in exactly the same way as normal channels, except 
 It is possible to access channels by name, through the `channel` function:
 
     channel = socket.channel('private-my-channel');
+
+It is possible to access all subscribed channels through the `allChannels` function:
+
+    var channels = socket.allChannels();
+    console.group('Pusher - subscribed to:');
+    for (var i = 0; i < channels.length; i++) {
+        var channel = channels[i];
+        console.log(channel.name);
+    }
+    console.groupEnd();
 
 ## Binding to events
 

@@ -20,8 +20,7 @@
    */
   prototype.isSupported = function() {
     return this.transport.isSupported({
-      encrypted: this.options.encrypted,
-      disableFlash: !!this.options.disableFlash
+      encrypted: this.options.encrypted
     });
   };
 
@@ -108,7 +107,7 @@
   };
 
   function failAttempt(error, callback) {
-    new Pusher.Timer(0, function() {
+    Pusher.Util.defer(function() {
       callback(error);
     });
     return {
