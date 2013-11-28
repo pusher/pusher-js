@@ -45,17 +45,6 @@
     });
   };
 
-  prototype.connect = function() {
-    if (Pusher.AbstractTransport.prototype.connect.call(this)) {
-      this.timeline.info(this.buildTimelineMessage({
-        sockjs_session_id: this.socket.session
-      }));
-      return true;
-    } else {
-      return false;
-    }
-  };
-
   /** @protected */
   prototype.createSocket = function(url) {
     return new Pusher.HTTPStreamingSocket(url);
