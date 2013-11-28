@@ -40,6 +40,8 @@ src_files:
   - transports/flash_transport.js
   - transports/xhr_streaming_transport.js
   - transports/xdr_streaming_transport.js
+  - transports/xhr_polling_transport.js
+  - transports/xdr_polling_transport.js
   - transports/sockjs_transport.js
   - transports/ws_transport.js
 

@@ -38,6 +38,8 @@ module.exports = [
   'src/transports/flash_transport.js',
   'src/transports/xhr_streaming_transport.js',
   'src/transports/xdr_streaming_transport.js',
+  'src/transports/xhr_polling_transport.js',
+  'src/transports/xdr_polling_transport.js',
   'src/transports/sockjs_transport.js',
   'src/transports/ws_transport.js',
 

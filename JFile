@@ -43,6 +43,8 @@ bundle 'pusher.js' do
   file 'transports/flash_transport.js'
   file 'transports/xhr_streaming_transport.js'
   file 'transports/xdr_streaming_transport.js'
+  file 'transports/xhr_polling_transport.js'
+  file 'transports/xdr_polling_transport.js'
   file 'transports/sockjs_transport.js'
   file 'transports/ws_transport.js'
 
