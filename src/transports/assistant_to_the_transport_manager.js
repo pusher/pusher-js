@@ -2,21 +2,22 @@
   function AssistantToTheTransportManager(manager, transport, options) {
     this.manager = manager;
     this.transport = transport;
-    this.minTimeout = options.minTimeout;
-    this.maxTimeout = options.maxTimeout;
-    this.activityTimeout = undefined;
+    this.minPingDelay = options.minPingDelay;
+    this.maxPingDelay = options.maxPingDelay;
+    this.pingDelay = undefined;
   }
   var prototype = AssistantToTheTransportManager.prototype;
 
   prototype.createConnection = function(name, priority, key, options) {
+    var self = this;
+
     var options = Pusher.Util.extend({}, options, {
-      activityTimeout: self.activityTimeout
+      activityTimeout: self.pingDelay
     });
-    var connection = this.transport.createConnection(
+    var connection = self.transport.createConnection(
       name, priority, key, options
     );
 
-    var self = this;
     var openTimestamp = null;
 
     var onOpen = function() {
@@ -33,9 +34,9 @@
       } else if (!closeEvent.wasClean && openTimestamp) {
         // report deaths only for short-living transport
         var lifespan = Pusher.Util.now() - openTimestamp;
-        if (lifespan < 2 * self.maxTimeout) {
+        if (lifespan < 2 * self.maxPingDelay) {
           self.manager.reportDeath();
-          self.activityTimeout = Math.max(lifespan / 2, self.minTimeout);
+          self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
         }
       }
     };

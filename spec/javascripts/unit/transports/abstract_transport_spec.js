@@ -24,6 +24,23 @@ describe("AbstractTransport", function() {
     spyOn(this.transport, "createSocket").andReturn(this.socket);
   });
 
+  describe("#activityTimeout", function() {
+    it("should be set to the value passed via options", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline,
+        activityTimeout: 654321
+      });
+      expect(transport.activityTimeout).toEqual(654321);
+    });
+
+    it("should be set to undefined if not passed via options", function() {
+      var transport = getTransport("xxx", {
+        timeline: this.timeline
+      });
+      expect(transport.activityTimeout).toBe(undefined);
+    });
+  });
+
   describe("#initialize", function() {
     it("should emit 'initialized' immediately", function() {
       var onInitialized = jasmine.createSpy("onInitialized");
@@ -214,20 +231,6 @@ describe("AbstractTransport", function() {
         cid: 667,
         method: "close"
       });
-    });
-  });
-
-  describe("#requestPing", function() {
-    it("should emit 'ping_request'", function() {
-      var onPingRequest = jasmine.createSpy("onPingRequest");
-      this.transport.bind("ping_request", onPingRequest);
-      this.transport.initialize();
-      this.transport.connect();
-      this.socket.onopen();
-
-      this.transport.requestPing();
-
-      expect(onPingRequest).toHaveBeenCalled();
     });
   });
 

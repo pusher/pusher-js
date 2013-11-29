@@ -20,6 +20,7 @@
 
     this.id = id;
     this.transport = transport;
+    this.activityTimeout = transport.activityTimeout;
     this.bindListeners();
   }
   var prototype = Connection.prototype;
@@ -95,9 +96,6 @@
         self.emit('message', message);
       }
     };
-    var onPingRequest = function() {
-      self.emit("ping_request");
-    };
     var onError = function(error) {
       self.emit("error", { type: "WebSocketError", error: error });
     };
@@ -115,12 +113,10 @@
     var unbindListeners = function() {
       self.transport.unbind("closed", onClosed);
       self.transport.unbind("error", onError);
-      self.transport.unbind("ping_request", onPingRequest);
       self.transport.unbind("message", onMessage);
     };
 
     self.transport.bind("message", onMessage);
-    self.transport.bind("ping_request", onPingRequest);
     self.transport.bind("error", onError);
     self.transport.bind("closed", onClosed);
   };

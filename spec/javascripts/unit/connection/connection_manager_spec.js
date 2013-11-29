@@ -438,14 +438,6 @@ describe("ConnectionManager", function() {
           .toHaveBeenCalledWith("pusher:pong", {}, undefined);
       });
     });
-
-    describe("on ping request", function() {
-      it("should send a pusher:ping event", function() {
-        connection.emit("ping_request");
-        expect(connection.send_event)
-          .toHaveBeenCalledWith("pusher:ping", {}, undefined);
-      });
-    });
   });
 
   describe("on online event", function() {
@@ -496,6 +488,45 @@ describe("ConnectionManager", function() {
 
       manager.connect();
       expect(onFailed).toHaveBeenCalled();
+    });
+  });
+
+  describe("with connection-specific activity timeouts", function() {
+    var handshake;
+    var onConnected;
+
+    beforeEach(function() {
+      manager.connect();
+      connection.id = "123.456";
+    });
+
+    it("should use the activity timeout value from the connection, if it's lower than the default", function() {
+      connection.activityTimeout = 2666;
+      handshake = { action: "connected", connection: connection };
+      strategy._callback(null, handshake);
+
+      jasmine.Clock.tick(2665);
+      expect(connection.send_event).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
+      expect(connection.send_event).toHaveBeenCalledWith(
+        "pusher:ping", {}, undefined
+      );
+    });
+
+
+    it("should use the default activity timeout value, if it's lower than the connection's value", function() {
+      connection.activityTimeout = 5555;
+      handshake = { action: "connected", connection: connection };
+      strategy._callback(null, handshake);
+
+      jasmine.Clock.tick(3455);
+      expect(connection.send_event).not.toHaveBeenCalled();
+
+      jasmine.Clock.tick(1);
+      expect(connection.send_event).toHaveBeenCalledWith(
+        "pusher:ping", {}, undefined
+      );
     });
   });
 });
