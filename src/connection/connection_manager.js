@@ -260,6 +260,7 @@
       connected: function(handshake) {
         self.activityTimeout = Math.min(
           self.options.activityTimeout,
+          handshake.activityTimeout,
           handshake.connection.activityTimeout || Infinity
         );
         self.clearUnavailableTimer();

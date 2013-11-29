@@ -38,7 +38,8 @@
         var result = Pusher.Protocol.processHandshake(m);
         if (result.action === "connected") {
           self.finish("connected", {
-            connection: new Pusher.Connection(result.id, self.transport)
+            connection: new Pusher.Connection(result.id, self.transport),
+            activityTimeout: result.activityTimeout
           });
         } else {
           self.finish(result.action, { error: result.error });
