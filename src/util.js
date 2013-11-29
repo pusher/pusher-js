@@ -328,6 +328,17 @@
       } else {
         _window.detachEvent("on" + event, listener);
       }
+    },
+
+    isXHRSupported: function() {
+      var xhr = window.XMLHttpRequest;
+      return xhr && xhr.withCredentials !== undefined;
+    },
+
+    isXDRSupported: function(encrypted) {
+      var originProtocol = Pusher.Util.getDocumentLocation().protocol;
+      var requestedProtocol = encrypted ? "https:" : "http:";
+      return window.XDomainRequest && originProtocol === requestedProtocol;
     }
   };
 }).call(this);

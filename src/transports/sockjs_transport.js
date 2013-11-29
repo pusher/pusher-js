@@ -4,11 +4,11 @@
    * @see AbstractTransport
    */
   function SockJSTransport(name, priority, key, options) {
-    Pusher.AbstractTransport.call(this, name, priority, key, options);
+    Pusher.AbstractHTTPTransport.call(this, name, priority, key, options);
     this.options.ignoreNullOrigin = options.ignoreNullOrigin;
   }
   var prototype = SockJSTransport.prototype;
-  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
+  Pusher.Util.extend(prototype, Pusher.AbstractHTTPTransport.prototype);
 
   prototype.resource = "sockjs";
 
@@ -30,14 +30,6 @@
     return true;
   };
 
-  /** Always returns true, since SockJS handles ping on its own.
-   *
-   * @returns {Boolean} always true
-   */
-  prototype.supportsPing = function() {
-    return true;
-  };
-
   /** @protected */
   prototype.createSocket = function(url) {
     return new SockJS(url, null, {
@@ -46,11 +38,6 @@
       }),
       ignore_null_origin: this.options.ignoreNullOrigin
     });
-  };
-
-  /** @protected */
-  prototype.getScheme = function() {
-    return this.options.encrypted ? "https" : "http";
   };
 
   /** @protected */

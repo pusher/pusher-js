@@ -41,6 +41,7 @@ bundle 'pusher.js' do
 
   file 'transports/abstract_transport.js'
   file 'transports/flash_transport.js'
+  file 'transports/abstract_http_transport.js'
   file 'transports/xhr_streaming_transport.js'
   file 'transports/xdr_streaming_transport.js'
   file 'transports/xhr_polling_transport.js'

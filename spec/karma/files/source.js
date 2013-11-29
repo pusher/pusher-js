@@ -36,6 +36,7 @@ module.exports = [
 
   'src/transports/abstract_transport.js',
   'src/transports/flash_transport.js',
+  'src/transports/abstract_http_transport.js',
   'src/transports/xhr_streaming_transport.js',
   'src/transports/xdr_streaming_transport.js',
   'src/transports/xhr_polling_transport.js',

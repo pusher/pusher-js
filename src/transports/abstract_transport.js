@@ -48,14 +48,6 @@
   var prototype = AbstractTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  /** Checks whether the transport is supported in the browser.
-   *
-   * @returns {Boolean}
-   */
-  AbstractTransport.isSupported = function() {
-    return false;
-  };
-
   /** Checks whether the transport handles ping/pong on itself.
    *
    * @return {Boolean}

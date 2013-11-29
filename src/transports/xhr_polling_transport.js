@@ -4,10 +4,10 @@
    * @see AbstractTransport
    */
   function XHRPollingTransport(name, priority, key, options) {
-    Pusher.AbstractTransport.call(this, name, priority, key, options);
+    Pusher.AbstractHTTPTransport.call(this, name, priority, key, options);
   }
   var prototype = XHRPollingTransport.prototype;
-  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
+  Pusher.Util.extend(prototype, Pusher.AbstractHTTPTransport.prototype);
 
   prototype.resource = "xhr";
 
@@ -26,35 +26,12 @@
    * @returns {Boolean} true if browser supports WebSockets
    */
   XHRPollingTransport.isSupported = function() {
-    if (window.XMLHttpRequest) {
-      if ('withCredentials' in (new window.XMLHttpRequest())) {
-        return true;
-      }
-    }
-    return false;
+    return Pusher.Util.isXHRSupported();
   };
 
   /** @protected */
   prototype.createSocket = function(url) {
     return new Pusher.HTTPPollingSocket(url);
-  };
-
-  /** Always returns true, since HTTP streaming handles ping on its own.
-   *
-   * @returns {Boolean} always true
-   */
-  prototype.supportsPing = function() {
-    return true;
-  };
-
-  /** @protected */
-  prototype.getScheme = function() {
-    return this.options.encrypted ? "https" : "http";
-  };
-
-  /** @protected */
-  prototype.getPath = function() {
-    return (this.options.httpPath || "/pusher") + "/app/" + this.key;
   };
 
   Pusher.XHRPollingTransport = XHRPollingTransport;

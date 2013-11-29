@@ -26,9 +26,7 @@
    * @returns {Boolean} true if browser supports WebSockets
    */
   XDRPollingTransport.isSupported = function(environment) {
-    var originProtocol = Pusher.Util.getDocumentLocation().protocol;
-    var requestedProtocol = environment.encrypted ? "https:" : "http:";
-    return window.XDomainRequest && originProtocol === requestedProtocol;
+    return Pusher.Util.isXDRSupported(environment.encrypted);
   };
 
   Pusher.XDRPollingTransport = XDRPollingTransport;

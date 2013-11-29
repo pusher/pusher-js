@@ -38,6 +38,7 @@ src_files:
 
   - transports/abstract_transport.js
   - transports/flash_transport.js
+  - transports/abstract_http_transport.js
   - transports/xhr_streaming_transport.js
   - transports/xdr_streaming_transport.js
   - transports/xhr_polling_transport.js
