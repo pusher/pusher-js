@@ -55,8 +55,8 @@
     return connection;
   };
 
-  prototype.isSupported = function() {
-    return this.manager.isAlive() && this.transport.isSupported();
+  prototype.isSupported = function(environment) {
+    return this.manager.isAlive() && this.transport.isSupported(environment);
   };
 
   Pusher.AssistantToTheTransportManager = AssistantToTheTransportManager;
