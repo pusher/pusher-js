@@ -331,8 +331,8 @@
     },
 
     isXHRSupported: function() {
-      var xhr = window.XMLHttpRequest;
-      return xhr && xhr.withCredentials !== undefined;
+      var XHR = window.XMLHttpRequest;
+      return XHR && (new XHR()).withCredentials !== undefined;
     },
 
     isXDRSupported: function(encrypted) {
