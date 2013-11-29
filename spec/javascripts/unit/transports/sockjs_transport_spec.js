@@ -169,7 +169,7 @@ describe("SockJSTransport", function() {
 
       expect(openCallback).toHaveBeenCalled();
       expect(this.socket.send).toHaveBeenCalledWith(JSON.stringify({
-        path: "/app/foo?protocol=6&client=js&version=<VERSION>"
+        path: "/app/foo?protocol=7&client=js&version=<VERSION>"
       }));
     });
   });

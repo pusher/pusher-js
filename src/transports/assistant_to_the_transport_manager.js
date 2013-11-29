@@ -2,41 +2,30 @@
   function AssistantToTheTransportManager(manager, transport, options) {
     this.manager = manager;
     this.transport = transport;
-    this.minPingDelay = options.minPingDelay;
-    this.maxPingDelay = options.maxPingDelay;
-    this.pingDelay = null;
+    this.minTimeout = options.minTimeout;
+    this.maxTimeout = options.maxTimeout;
+    this.activityTimeout = undefined;
   }
   var prototype = AssistantToTheTransportManager.prototype;
 
   prototype.createConnection = function(name, priority, key, options) {
+    var options = Pusher.Util.extend({}, options, {
+      activityTimeout: self.activityTimeout
+    });
     var connection = this.transport.createConnection(
       name, priority, key, options
     );
 
     var self = this;
     var openTimestamp = null;
-    var pingTimer = null;
 
     var onOpen = function() {
       connection.unbind("open", onOpen);
-
-      openTimestamp = Pusher.Util.now();
-      if (self.pingDelay) {
-        pingTimer = setInterval(function() {
-          if (pingTimer) {
-            connection.requestPing();
-          }
-        }, self.pingDelay);
-      }
-
       connection.bind("closed", onClosed);
+      openTimestamp = Pusher.Util.now();
     };
     var onClosed = function(closeEvent) {
       connection.unbind("closed", onClosed);
-      if (pingTimer) {
-        clearInterval(pingTimer);
-        pingTimer = null;
-      }
 
       if (closeEvent.code === 1002 || closeEvent.code === 1003) {
         // we don't want to use transports not obeying the protocol
@@ -44,9 +33,9 @@
       } else if (!closeEvent.wasClean && openTimestamp) {
         // report deaths only for short-living transport
         var lifespan = Pusher.Util.now() - openTimestamp;
-        if (lifespan < 2 * self.maxPingDelay) {
+        if (lifespan < 2 * self.maxTimeout) {
           self.manager.reportDeath();
-          self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
+          self.activityTimeout = Math.max(lifespan / 2, self.minTimeout);
         }
       }
     };

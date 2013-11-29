@@ -75,7 +75,7 @@ describe("AbstractTransport", function() {
       expect(this.transport.createSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
-          "?protocol=6&client=js&version=<VERSION>"
+          "?protocol=7&client=js&version=<VERSION>"
         );
     });
 
@@ -91,7 +91,7 @@ describe("AbstractTransport", function() {
       expect(transport.createSocket)
         .toHaveBeenCalledWith(
           "wss://example.com:54321/app/bar" +
-          "?protocol=6&client=js&version=<VERSION>"
+          "?protocol=7&client=js&version=<VERSION>"
         );
     });
 
@@ -135,7 +135,7 @@ describe("AbstractTransport", function() {
       expect(this.timeline.debug).toHaveBeenCalledWith({
         cid: 667,
         method: "connect",
-        url: "ws://example.com:12345/app/foo?protocol=6&client=js&version=<VERSION>"
+        url: "ws://example.com:12345/app/foo?protocol=7&client=js&version=<VERSION>"
       });
     });
   });
