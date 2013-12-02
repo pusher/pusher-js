@@ -11,8 +11,8 @@
   };
 
   /** @protected */
-  prototype.onFinished = function() {
-    this.onClose(1006, "Connection interrupted", false);
+  prototype.onFinished = function(status) {
+    this.onClose(1006, "Connection interrupted (" + status + ")", false);
   };
 
   /** @protected */

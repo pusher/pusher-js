@@ -15,7 +15,7 @@
     if (status === 200) {
       this.reconnect();
     } else {
-      this.onClose(1006, "Connection interrupted", false);
+      this.onClose(1006, "Connection interrupted (" + status + ")", false);
     }
   };
 
