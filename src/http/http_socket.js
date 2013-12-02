@@ -146,11 +146,10 @@
     try {
       self.stream.start();
     } catch (error) {
-      setTimeout(function() {
+      Pusher.Util.defer(function() {
         self.onError(error);
         self.onClose(1006, "Could not start streaming", false);
-      }, 0);
-      return;
+      });
     }
   };
 
