@@ -62,7 +62,7 @@
       return {
         action: "connected",
         id: message.data.socket_id,
-        activityTimeout: message.data.activity_timeout
+        activityTimeout: message.data.activity_timeout * 1000
       };
     } else if (message.event === "pusher:error") {
       // From protocol 6 close codes are sent only once, so this only
