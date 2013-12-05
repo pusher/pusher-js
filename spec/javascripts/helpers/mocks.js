@@ -30,6 +30,14 @@
       };
     },
 
+    getHTTPSocket: function() {
+      return {
+        sendRaw: jasmine.createSpy("sendRaw"),
+        onClose: jasmine.createSpy("onClose"),
+        reconnect: jasmine.createSpy("sendRaw")
+      };
+    },
+
     getHTTPRequest: function(method, url) {
       var request = new Pusher.EventsDispatcher();
       request.start = jasmine.createSpy("start");
