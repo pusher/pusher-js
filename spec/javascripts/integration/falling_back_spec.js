@@ -6,10 +6,12 @@ describeIntegration("Falling back", function() {
 
     spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
     spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
+    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
     // TODO fix these tests after updating the strategy
     spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
     spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
-    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
+    spyOn(Pusher.XDRPollingTransport, "isSupported").andReturn(false);
+    spyOn(Pusher.XHRPollingTransport, "isSupported").andReturn(false);
 
     spyOn(Pusher.Util, "getLocalStorage").andReturn({});
   });
