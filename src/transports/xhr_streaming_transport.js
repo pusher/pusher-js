@@ -31,7 +31,7 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    return new Pusher.HTTPStreamingSocket(url);
+    return Pusher.HTTP.getStreamingSocket(url);
   };
 
   Pusher.XHRStreamingTransport = XHRStreamingTransport;

@@ -1,35 +1,21 @@
 ;(function() {
   var MAX_BUFFER_LENGTH = 256*1024;
 
-  function HTTPCORSRequest(method, url) {
+  function HTTPRequest(hooks, method, url) {
     Pusher.EventsDispatcher.call(this);
 
+    this.hooks = hooks;
     this.method = method;
     this.url = url;
-    this.xhr = new window.XMLHttpRequest();
-    this.position = 0;
   }
-  var prototype = HTTPCORSRequest.prototype;
+  var prototype = HTTPRequest.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   prototype.start = function(payload) {
     var self = this;
 
-    self.xhr.onreadystatechange = function() {
-      switch (self.xhr.readyState) {
-        case 3:
-          if (self.xhr.responseText && self.xhr.responseText.length > 0) {
-            self.onChunk(self.xhr.status, self.xhr.responseText);
-          }
-          break;
-        case 4:
-          // this happens only on errors, never after calling close
-          self.onChunk(self.xhr.status, self.xhr.responseText);
-          self.emit("finished", self.xhr.status);
-          self.close();
-          break;
-      }
-    };
+    self.position = 0;
+    self.xhr = self.hooks.getRequest(self);
 
     self.unloader = function() {
       self.close();
@@ -46,8 +32,7 @@
       this.unloader = null;
     }
     if (this.xhr) {
-      this.xhr.onreadystatechange = null;
-      this.xhr.abort();
+      this.hooks.abortRequest(this.xhr);
       this.xhr = null;
     }
   };
@@ -83,5 +68,6 @@
     return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
   };
 
-  Pusher.HTTPCORSRequest = HTTPCORSRequest;
+  Pusher.HTTP = {};
+  Pusher.HTTP.Request = HTTPRequest;
 }).call(this);

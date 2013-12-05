@@ -15,7 +15,8 @@ src_files:
   - events_dispatcher.js
   - net_info.js
 
-  - http/http_cors_request.js
+  - http/http_request.js
+  - http/http_xhr_request.js
   - http/http_xdomain_request.js
   - http/http_socket.js
   - http/http_streaming_socket.js

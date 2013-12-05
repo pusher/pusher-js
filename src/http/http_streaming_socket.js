@@ -1,24 +1,20 @@
 ;(function() {
-  function HTTPStreamingSocket(url) {
-    Pusher.HTTPSocket.call(this, url);
-  }
-  var prototype = HTTPStreamingSocket.prototype;
-  Pusher.Util.extend(prototype, Pusher.HTTPSocket.prototype);
-
-  /** @protected */
-  prototype.getReceiveURL = function(url, session) {
-    return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+  var hooks = {
+    getReceiveURL: function(url, session) {
+      return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+    },
+    onHeartbeat: function(socket) {
+      socket.sendRaw("[]");
+    },
+    sendHeartbeat: function(socket) {
+      socket.sendRaw("h");
+    },
+    onFinished: function(socket, status) {
+      socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+    }
   };
 
-  /** @protected */
-  prototype.onFinished = function(status) {
-    this.onClose(1006, "Connection interrupted (" + status + ")", false);
+  Pusher.HTTP.getStreamingSocket = function(url) {
+    return new Pusher.HTTP.Socket(hooks, url);
   };
-
-  /** @protected */
-  prototype.onHeartbeat = function() {
-    this.sendRaw("[]");
-  };
-
-  Pusher.HTTPStreamingSocket = HTTPStreamingSocket;
 }).call(this);

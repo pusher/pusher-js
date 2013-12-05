@@ -31,7 +31,7 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    return new Pusher.HTTPPollingSocket(url);
+    return Pusher.HTTP.getPollingSocket(url);
   };
 
   Pusher.XHRPollingTransport = XHRPollingTransport;

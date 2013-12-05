@@ -82,13 +82,15 @@ bundle 'sockjs.js' do
 end
 
 bundle 'xhr.js' do
-  file 'http/http_cors_request.js'
+  file 'http/http_request.js'
+  file 'http/http_xhr_request.js'
   file 'http/http_socket.js'
   file 'http/http_streaming_socket.js'
   file 'http/http_polling_socket.js'
 end
 
 bundle 'xdr.js' do
+  file 'http/http_request.js'
   file 'http/http_xdomain_request.js'
   file 'http/http_socket.js'
   file 'http/http_streaming_socket.js'

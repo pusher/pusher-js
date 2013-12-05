@@ -13,7 +13,8 @@ module.exports = [
   'src/events_dispatcher.js',
   'src/net_info.js',
 
-  'src/http/http_cors_request.js',
+  'src/http/http_request.js',
+  'src/http/http_xhr_request.js',
   'src/http/http_xdomain_request.js',
   'src/http/http_socket.js',
   'src/http/http_streaming_socket.js',

@@ -5,7 +5,8 @@
 
   var autoIncrement = 1;
 
-  function HTTPSocket(url) {
+  function HTTPSocket(hooks, url) {
+    this.hooks = hooks;
     this.session = randomNumber(1000) + "/" + randomString(8);
     this.location = getLocation(url);
     this.readyState = CONNECTING;
@@ -21,12 +22,11 @@
     this.onClose(code, reason, true);
   };
 
-  /** @private */
+  /** For internal use only */
   prototype.sendRaw = function(payload) {
     if (this.readyState === OPEN) {
       try {
-        var HTTPRequest = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
-        new HTTPRequest(
+        createRequest(
           "POST", getUniqueURL(getSendURL(this.location, this.session))
         ).start(payload);
         return true;
@@ -35,6 +35,26 @@
       }
     } else {
       return false;
+    }
+  };
+
+  /** For internal use only */
+  prototype.reconnect = function() {
+    this.closeStream();
+    this.openStream();
+  };
+
+  /** For internal use only */
+  prototype.onClose = function(code, reason, wasClean) {
+    this.stopActivityCheck();
+    this.closeStream();
+    this.readyState = CLOSED;
+    if (this.onclose) {
+      this.onclose({
+        code: code,
+        reason: reason,
+        wasClean: wasClean
+      });
     }
   };
 
@@ -65,7 +85,7 @@
         this.onEvent(payload);
         break;
       case 'h':
-        this.onHeartbeat();
+        this.hooks.onHeartbeat(this);
         break;
       case 'c':
         payload = JSON.parse(chunk.data.slice(1) || '[]');
@@ -105,39 +125,19 @@
     }
   };
 
-  /** @private */
-  prototype.onClose = function(code, reason, wasClean) {
-    this.stopActivityCheck();
-    this.closeStream();
-    this.readyState = CLOSED;
-    if (this.onclose) {
-      this.onclose({
-        code: code,
-        reason: reason,
-        wasClean: wasClean
-      });
-    }
-  };
-
-  /** @private */
-  prototype.reconnect = function() {
-    this.closeStream();
-    this.openStream();
-  };
-
   prototype.openStream = function() {
     var self = this;
-    var HTTPRequest = Pusher.HTTPCORSRequest || Pusher.HTTPXDomainRequest;
 
-    self.stream = new HTTPRequest(
-      "POST", getUniqueURL(self.getReceiveURL(self.location, self.session))
+    self.stream = createRequest(
+      "POST",
+      getUniqueURL(self.hooks.getReceiveURL(self.location, self.session))
     );
 
     self.stream.bind("chunk", function(chunk) {
       self.onChunk(chunk);
     });
     self.stream.bind("finished", function(status) {
-      self.onFinished(status);
+      self.hooks.onFinished(self, status);
     });
     self.stream.bind("buffer_too_long", function() {
       self.reconnect();
@@ -167,7 +167,7 @@
 
     self.stopActivityCheck();
     self.activityTimer = new Pusher.Timer(30000, function() {
-      self.sendRaw('h');
+      self.hooks.sendHeartbeat(self);
       self.activityTimer = new Pusher.Timer(15000, function() {
         self.onClose(1006, "Did not receive a heartbeat response", false);
       });
@@ -216,5 +216,9 @@
     return result.join('');
   }
 
-  Pusher.HTTPSocket = HTTPSocket;
+  function createRequest(method, url) {
+    return (Pusher.HTTP.getXHR || Pusher.HTTP.getXDR)(method, url);
+  }
+
+  Pusher.HTTP.Socket = HTTPSocket;
 }).call(this);
