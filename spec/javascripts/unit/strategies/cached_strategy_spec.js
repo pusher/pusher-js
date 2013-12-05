@@ -142,7 +142,8 @@ describe("CachedStrategy", function() {
         strategy.connect(0, callback);
         expect(timeline.info).toHaveBeenCalledWith({
           cached: true,
-          transport: "test"
+          transport: "test",
+          latency: 1000
         });
       });
 
