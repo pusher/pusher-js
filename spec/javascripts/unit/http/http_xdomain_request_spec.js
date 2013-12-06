@@ -1,375 +1,214 @@
-describe("HTTPXDomainRequest", function() {
+describe("HTTP.getXDR", function() {
   var _XDomainRequest = window.XDomainRequest;
 
-  var xdr;
+  var hooks, method, url;
   var request;
 
   beforeEach(function() {
-    window.XDomainRequest = jasmine.createSpy("XDomainRequest");
-    window.XDomainRequest.andCallFake(Pusher.Mocks.getXHR);
+    window.XDomainRequest = jasmine.createSpy().andCallFake(
+      Pusher.Mocks.getXHR
+    );
 
-    spyOn(Pusher.Util, "addWindowListener");
-    spyOn(Pusher.Util, "removeWindowListener");
+    spyOn(Pusher.HTTP, "Request").andCallFake(function(h, m, u) {
+      hooks = h;
+      method = m;
+      url = u;
+      return Pusher.Mocks.getHTTPRequest(m, u);
+    });
 
-    request = new Pusher.HTTPXDomainRequest("GET", "http://example.com");
-    xdr = request.xdr;
+    request = Pusher.HTTP.getXDR("HEAD", "http://example.net");
   });
 
   afterEach(function() {
     window.XDomainRequest = _XDomainRequest;
   });
 
-  describe("#start", function() {
-    it("should open and send the request", function() {
-      request.start("test payload");
-
-      expect(xdr.open).toHaveBeenCalledWith(
-        "GET", "http://example.com", true
-      );
-      expect(xdr.send).toHaveBeenCalledWith("test payload");
-    });
-
-    it("should register an unloader", function() {
-      request.start("test payload");
-
-      expect(Pusher.Util.addWindowListener).toHaveBeenCalledWith(
-        "unload", jasmine.any(Function)
-      );
-    });
-
-    it("should re-throw the exception raised by XDomainRequest#open", function() {
-      xdr.open.andThrow("open exception");
-      expect(function() {
-        request.start();
-      }).toThrow("open exception");
-    });
-
-    it("should re-throw the exception raised by XDomainRequest#send", function() {
-      xdr.send.andThrow("send exception");
-      expect(function() {
-        request.start();
-      }).toThrow("send exception");
-    });
+  it("should pass the correct method to the request", function() {
+    expect(request.method).toEqual("HEAD");
   });
 
-  describe("#close", function() {
-    beforeEach(function() {
-      request.start();
-    });
-
-    it("should abort the request", function() {
-      request.close();
-      expect(xdr.abort).toHaveBeenCalled();
-    });
-
-    it("should remove the ontimeout listener", function() {
-      request.close();
-      expect(xdr.ontimeout).toBe(null);
-    });
-
-    it("should remove the onerror listener", function() {
-      request.close();
-      expect(xdr.onerror).toBe(null);
-    });
-
-    it("should remove the onprogress listener", function() {
-      request.close();
-      expect(xdr.onprogress).toBe(null);
-    });
-
-    it("should remove the onload listener", function() {
-      request.close();
-      expect(xdr.onload).toBe(null);
-    });
-
-    it("should unregister the unloader", function() {
-      var unloader = Pusher.Util.addWindowListener.calls[0].args[1];
-      request.close();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
-    });
+  it("should pass the correct URL to the request", function() {
+    expect(request.url).toEqual("http://example.net");
   });
 
-  describe("on received data", function() {
-    var onChunk;
+  describe("hooks", function() {
+    var xdr;
+    var socket;
 
     beforeEach(function() {
-      onChunk = jasmine.createSpy("onChunk");
-      request.bind("chunk", onChunk);
-      request.start();
+      socket = Pusher.Mocks.getHTTPSocket();
+      xdr = hooks.getRequest(socket);
     });
 
-    it("should emit the first chunk", function() {
-      xdr.responseText = "chunk1\n";
-      xdr.onprogress();
+    describe("request returned from #getRequest", function() {
+      describe("on XDR timeout", function() {
+        it("should close the socket", function() {
+          xdr.ontimeout();
+          expect(socket.close.calls.length).toEqual(1);
+        });
 
-      expect(onChunk).toHaveBeenCalledWith({ status: 200, data: "chunk1" });
-    });
+        it("should emit an RequestTimedOut error before closing the socket", function() {
+          var onError = jasmine.createSpy();
+          socket.bind("error", onError);
 
-    it("should emit two chunks received one after another", function() {
-      xdr.responseText = "c1\n";
-      xdr.onprogress();
+          socket.close.andCallFake(function() {
+            expect(onError.calls.length).toEqual(1);
+            expect(onError).toHaveBeenCalledWith(
+              jasmine.any(Pusher.Errors.RequestTimedOut)
+            );
+          });
 
-      expect(onChunk.calls.length).toEqual(1);
-      expect(onChunk).toHaveBeenCalledWith({ status: 200, data: "c1" });
-
-      xdr.responseText = "c1\nc2\n";
-      xdr.onprogress();
-
-      expect(onChunk.calls.length).toEqual(2);
-      expect(onChunk).toHaveBeenCalledWith({ status: 200, data: "c2" });
-    });
-
-    it("should emit all chunks send in one batch", function() {
-      xdr.responseText = "c1\nc2\nc3\n";
-      xdr.onprogress();
-
-      expect(onChunk.calls.length).toEqual(3);
-      expect(onChunk.calls[0].args[0]).toEqual({ status: 200, data: "c1" });
-      expect(onChunk.calls[1].args[0]).toEqual({ status: 200, data: "c2" });
-      expect(onChunk.calls[2].args[0]).toEqual({ status: 200, data: "c3" });
-    });
-
-    it("should not emit an unfinished chunk", function() {
-      xdr.responseText = "whatever";
-      xdr.onprogress();
-
-      expect(onChunk).not.toHaveBeenCalled();
-    });
-
-
-    it("should emit 'buffer_too_long' after 256KB", function() {
-      var onBufferTooLong = jasmine.createSpy("onBufferTooLong");
-      request.bind("buffer_too_long", onBufferTooLong);
-
-      var kilobyteChunk = new Array(1024).join("x"); // 1023B
-
-      xdr.responseText = new Array(256).join(kilobyteChunk + "\n"); // 255KB
-      xdr.onprogress();
-      expect(onBufferTooLong).not.toHaveBeenCalled();
-
-      xdr.responseText = xdr.responseText + kilobyteChunk + "x"; // 256KB
-      xdr.onprogress();
-      expect(onBufferTooLong).not.toHaveBeenCalled();
-
-      xdr.responseText = xdr.responseText + "\n"; // 256KB + 1B
-      xdr.onprogress();
-      expect(onBufferTooLong).toHaveBeenCalled();
-    });
-
-    it("should emit all chunks before 'buffer_too_long'", function() {
-      request.bind("buffer_too_long", function() {
-        request.unbind_all();
+          xdr.ontimeout();
+        });
       });
 
-      var kilobyteChunk = new Array(1024).join("x"); // 1023B
+      describe("on XDR error", function() {
+        it("should close the socket", function() {
+          xdr.onerror("test error");
+          expect(socket.close.calls.length).toEqual(1);
+        });
 
-      xdr.responseText = new Array(256).join(kilobyteChunk + "\n");
-      xdr.responseText = xdr.responseText + kilobyteChunk + "x" + "\n";
-      xdr.onprogress();
+        it("should emit the error before closing the socket", function() {
+          var onError = jasmine.createSpy();
+          socket.bind("error", onError);
 
-      expect(onChunk.calls.length).toEqual(256);
-    });
-  });
+          socket.close.andCallFake(function() {
+            expect(onError.calls.length).toEqual(1);
+            expect(onError).toHaveBeenCalledWith("test error");
+          });
 
-  describe("on request end", function() {
-    beforeEach(function() {
-      request.start();
-    });
-
-    it("should emit all chunks before the finished event", function() {
-      var onChunk = jasmine.createSpy("onChunk").andCallFake(function() {
-        expect(onFinished).not.toHaveBeenCalled();
+          xdr.onerror("test error");
+        });
       });
-      var onFinished = jasmine.createSpy("onFinished");
-      request.bind("finished", onFinished);
-      request.bind("chunk", onChunk);
 
-      xdr.responseText = "1\n2\n";
-      xdr.onload();
+      describe("on XDR progress", function() {
+        it("should not call socket.onChunk if there is no responseText", function() {
+          xdr.responseText = undefined;
 
-      expect(onChunk.calls[0].args[0]).toEqual({ status: 200, data: "1" });
-      expect(onChunk.calls[1].args[0]).toEqual({ status: 200, data: "2" });
+          xdr.onprogress();
+          expect(socket.onChunk).not.toHaveBeenCalled();
+        });
+
+        it("should not call socket.onChunk if responseText is an empty string", function() {
+          xdr.responseText = "";
+
+          xdr.onprogress();
+          expect(socket.onChunk).not.toHaveBeenCalled();
+        });
+
+        it("should call socket.onChunk if responseText is not empty", function() {
+          xdr.responseText = "asdf";
+
+          xdr.onprogress();
+          expect(socket.onChunk.calls.length).toEqual(1);
+          expect(socket.onChunk).toHaveBeenCalledWith(200, "asdf");
+        });
+
+        it("should always call socket.onChunk with the whole responseText", function() {
+          xdr.responseText = "asdf";
+
+          xdr.onprogress();
+          expect(socket.onChunk.calls.length).toEqual(1);
+          expect(socket.onChunk).toHaveBeenCalledWith(200, "asdf");
+
+          xdr.responseText = "asdfghjkl";
+          xdr.onprogress();
+          expect(socket.onChunk.calls.length).toEqual(2);
+          expect(socket.onChunk).toHaveBeenCalledWith(200, "asdfghjkl");
+        });
+      });
+
+      describe("on XDR load", function() {
+        it("should close the socket", function() {
+          xdr.responseText = "";
+
+          xdr.onload();
+          expect(socket.close.calls.length).toEqual(1);
+        });
+
+        it("should not call socket.onChunk if there is no responseText", function() {
+          xdr.responseText = undefined;
+
+          xdr.onload();
+          expect(socket.onChunk).not.toHaveBeenCalled();
+        });
+
+        it("should not call socket.onChunk if responseText is an empty string", function() {
+          xdr.responseText = "";
+
+          xdr.onload();
+          expect(socket.onChunk).not.toHaveBeenCalled();
+        });
+
+        it("should call socket.onChunk before closing if responseText is not empty", function() {
+          xdr.responseText = "12356890";
+
+          socket.close.andCallFake(function() {
+            expect(socket.onChunk.calls.length).toEqual(1);
+            expect(socket.onChunk).toHaveBeenCalledWith(200, "12356890");
+          });
+
+          xdr.onload();
+        });
+
+        it("should emit finished with status code 200 before closing", function() {
+          xdr.responseText = "";
+
+          var onFinished = jasmine.createSpy();
+          socket.bind("finished", onFinished);
+
+          socket.close.andCallFake(function() {
+            expect(onFinished.calls.length).toEqual(1);
+            expect(onFinished).toHaveBeenCalledWith(200);
+          });
+
+          xdr.onload();
+        });
+      });
     });
 
-    it("should abort the request", function() {
-      xdr.responseText = "";
-      xdr.onload();
-      expect(xdr.abort).toHaveBeenCalled();
-    });
+    describe("#abortRequest", function() {
+      it("should abort the passed request", function() {
+        expect(xdr.abort.calls.length).toEqual(0);
+        hooks.abortRequest(xdr);
+        expect(xdr.abort.calls.length).toEqual(1);
+      });
 
-    it("should remove the ontimeout listener", function() {
-      xdr.responseText = "";
-      xdr.onload();
-      expect(xdr.ontimeout).toBe(null);
-    });
+      it("should set the ontimeout listener to null before calling abort", function() {
+        xdr.ontimeout = function() {};
+        xdr.abort.andCallFake(function() {
+          expect(xdr.ontimeout).toBe(null);
+        });
 
-    it("should remove the onerror listener", function() {
-      xdr.responseText = "";
-      xdr.onload();
-      expect(xdr.onerror).toBe(null);
-    });
+        hooks.abortRequest(xdr);
+      });
 
-    it("should remove the onprogress listener", function() {
-      xdr.responseText = "";
-      xdr.onload();
-      expect(xdr.onprogress).toBe(null);
-    });
+      it("should set the onerror listener to null before calling abort", function() {
+        xdr.onerror = function() {};
+        xdr.abort.andCallFake(function() {
+          expect(xdr.onerror).toBe(null);
+        });
 
-    it("should remove the onload listener", function() {
-      xdr.responseText = "";
-      xdr.onload();
-      expect(xdr.onload).toBe(null);
-    });
+        hooks.abortRequest(xdr);
+      });
 
-    it("should unregister the unloader", function() {
-      var unloader = Pusher.Util.addWindowListener.calls[0].args[1];
+      it("should set the onprogress listener to null before calling abort", function() {
+        xdr.onprogress = function() {};
+        xdr.abort.andCallFake(function() {
+          expect(xdr.onprogress).toBe(null);
+        });
 
-      xdr.responseText = "";
-      xdr.onload();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
-    });
-  });
+        hooks.abortRequest(xdr);
+      });
 
-  describe("on timeout", function() {
-    beforeEach(function() {
-      request.start();
-    });
+      it("should set the onload listener to null before calling abort", function() {
+        xdr.onload = function() {};
+        xdr.abort.andCallFake(function() {
+          expect(xdr.onload).toBe(null);
+        });
 
-    it("should emit an error", function() {
-      var onError = jasmine.createSpy("onError");
-      request.bind("error", onError);
-
-      xdr.ontimeout();
-
-      expect(onError).toHaveBeenCalledWith(jasmine.any(Pusher.Errors.RequestTimedOut));
-    });
-
-    it("should remove the ontimeout listener", function() {
-      xdr.responseText = "";
-      xdr.ontimeout();
-      expect(xdr.ontimeout).toBe(null);
-    });
-
-    it("should remove the onerror listener", function() {
-      xdr.responseText = "";
-      xdr.ontimeout();
-      expect(xdr.onerror).toBe(null);
-    });
-
-    it("should remove the onprogress listener", function() {
-      xdr.responseText = "";
-      xdr.ontimeout();
-      expect(xdr.onprogress).toBe(null);
-    });
-
-    it("should remove the onload listener", function() {
-      xdr.responseText = "";
-      xdr.ontimeout();
-      expect(xdr.onload).toBe(null);
-    });
-
-    it("should unregister the unloader", function() {
-      var unloader = Pusher.Util.addWindowListener.calls[0].args[1];
-
-      xdr.responseText = "";
-      xdr.ontimeout();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
-    });
-  });
-
-  describe("on error", function() {
-    beforeEach(function() {
-      request.start();
-    });
-
-    it("should emit the error", function() {
-      var onError = jasmine.createSpy("onError");
-      request.bind("error", onError);
-
-      xdr.onerror("Test error");
-
-      expect(onError).toHaveBeenCalledWith("Test error");
-    });
-
-    it("should remove the ontimeout listener", function() {
-      xdr.responseText = "";
-      xdr.onerror("error");
-      expect(xdr.ontimeout).toBe(null);
-    });
-
-    it("should remove the onerror listener", function() {
-      xdr.responseText = "";
-      xdr.onerror("error");
-      expect(xdr.onerror).toBe(null);
-    });
-
-    it("should remove the onprogress listener", function() {
-      xdr.responseText = "";
-      xdr.onerror("error");
-      expect(xdr.onprogress).toBe(null);
-    });
-
-    it("should remove the onload listener", function() {
-      xdr.responseText = "";
-      xdr.onerror("error");
-      expect(xdr.onload).toBe(null);
-    });
-
-    it("should unregister the unloader", function() {
-      var unloader = Pusher.Util.addWindowListener.calls[0].args[1];
-
-      xdr.responseText = "";
-      xdr.onerror("error");
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
-    });
-  });
-
-  describe("on page unload", function() {
-    var unloader;
-
-    beforeEach(function() {
-      request.start("test payload");
-      unloader = Pusher.Util.addWindowListener.calls[0].args[1];
-    });
-
-    it("should abort the request", function() {
-      unloader();
-      expect(xdr.abort).toHaveBeenCalled();
-    });
-
-    it("should remove the ontimeout listener", function() {
-      unloader();
-      expect(xdr.ontimeout).toBe(null);
-    });
-
-    it("should remove the onerror listener", function() {
-      unloader();
-      expect(xdr.onerror).toBe(null);
-    });
-
-    it("should remove the onprogress listener", function() {
-      unloader();
-      expect(xdr.onprogress).toBe(null);
-    });
-
-    it("should remove the onload listener", function() {
-      unloader();
-      expect(xdr.onload).toBe(null);
-    });
-
-    it("should unregister the unloader", function() {
-      unloader();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
+        hooks.abortRequest(xdr);
+      });
     });
   });
 });

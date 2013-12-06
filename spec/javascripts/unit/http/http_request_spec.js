@@ -1,18 +1,25 @@
-describe("HTTPCORSRequest", function() {
+describe("HTTP.Request", function() {
   var _XMLHttpRequest = window.XMLHttpRequest;
 
   var xhr;
+  var hooks;
   var request;
 
+  var lastXHR;
+
   beforeEach(function() {
-    window.XMLHttpRequest = jasmine.createSpy("XMLHttpRequest");
-    window.XMLHttpRequest.andCallFake(Pusher.Mocks.getXHR);
+    hooks = {
+      getRequest: jasmine.createSpy().andCallFake(function() {
+        lastXHR = Pusher.Mocks.getXHR();
+        return lastXHR;
+      }),
+      abortRequest: jasmine.createSpy()
+    };
 
     spyOn(Pusher.Util, "addWindowListener");
     spyOn(Pusher.Util, "removeWindowListener");
 
-    request = new Pusher.HTTPCORSRequest("GET", "http://example.com");
-    xhr = request.xhr;
+    request = new Pusher.HTTP.Request(hooks, "GET", "http://example.com");
   });
 
   afterEach(function() {
@@ -20,13 +27,19 @@ describe("HTTPCORSRequest", function() {
   });
 
   describe("#start", function() {
+    it("should create a request using the getRequest hook", function() {
+      request.start("test");
+      expect(hooks.getRequest.calls.length).toEqual(1);
+      expect(hooks.getRequest).toHaveBeenCalledWith(request);
+    });
+
+
     it("should open and send the request", function() {
       request.start("test payload");
-
-      expect(xhr.open).toHaveBeenCalledWith(
+      expect(lastXHR.open).toHaveBeenCalledWith(
         "GET", "http://example.com", true
       );
-      expect(xhr.send).toHaveBeenCalledWith("test payload");
+      expect(lastXHR.send).toHaveBeenCalledWith("test payload");
     });
 
     it("should register an unloader", function() {
@@ -37,15 +50,23 @@ describe("HTTPCORSRequest", function() {
       );
     });
 
-    it("should re-throw the exception raised by XMLHttpRequest#open", function() {
-      xhr.open.andThrow("open exception");
+    it(" raised by XMLHttpRequest#open", function() {
+      hooks.getRequest = function() {
+        xhr = Pusher.Mocks.getXHR();
+        xhr.open.andThrow("open exception");
+        return xhr;
+      };
       expect(function() {
         request.start();
       }).toThrow("open exception");
     });
 
     it("should re-throw the exception raised by XMLHttpRequest#send", function() {
-      xhr.send.andThrow("send exception");
+      hooks.getRequest = function() {
+        xhr = Pusher.Mocks.getXHR();
+        xhr.send.andThrow("send exception");
+        return xhr;
+      };
       expect(function() {
         request.start();
       }).toThrow("send exception");
@@ -57,14 +78,10 @@ describe("HTTPCORSRequest", function() {
       request.start();
     });
 
-    it("should abort the request", function() {
+    it("should abort the request using the abortRequest hook", function() {
       request.close();
-      expect(xhr.abort).toHaveBeenCalled();
-    });
-
-    it("should remove the onreadystatechange listener", function() {
-      request.close();
-      expect(xhr.onreadystatechange).toBe(null);
+      expect(hooks.abortRequest.calls.length).toEqual(1);
+      expect(hooks.abortRequest).toHaveBeenCalledWith(lastXHR);
     });
 
     it("should unregister the unloader", function() {
@@ -76,7 +93,7 @@ describe("HTTPCORSRequest", function() {
     });
   });
 
-  describe("on received data", function() {
+  describe("on chunk", function() {
     var onChunk;
 
     beforeEach(function() {
@@ -86,36 +103,22 @@ describe("HTTPCORSRequest", function() {
     });
 
     it("should emit the first chunk", function() {
-      xhr.readyState = 3;
-      xhr.status = 200;
-      xhr.responseText = "chunk1\n";
-      xhr.onreadystatechange();
-
+      request.onChunk(200, "chunk1\n");
       expect(onChunk).toHaveBeenCalledWith({ status: 200, data: "chunk1" });
     });
 
     it("should emit two chunks received one after another", function() {
-      xhr.readyState = 3;
-      xhr.status = 201;
-      xhr.responseText = "c1\n";
-      xhr.onreadystatechange();
-
+      request.onChunk(201, "c1\n");
       expect(onChunk.calls.length).toEqual(1);
       expect(onChunk).toHaveBeenCalledWith({ status: 201, data: "c1" });
 
-      xhr.responseText = "c1\nc2\n";
-      xhr.onreadystatechange();
-
+      request.onChunk(201, "c1\nc2\n");
       expect(onChunk.calls.length).toEqual(2);
       expect(onChunk).toHaveBeenCalledWith({ status: 201, data: "c2" });
     });
 
     it("should emit all chunks send in one batch", function() {
-      xhr.readyState = 3;
-      xhr.status = 200;
-      xhr.responseText = "c1\nc2\nc3\n";
-      xhr.onreadystatechange();
-
+      request.onChunk(200, "c1\nc2\nc3\n");
       expect(onChunk.calls.length).toEqual(3);
       expect(onChunk.calls[0].args[0]).toEqual({ status: 200, data: "c1" });
       expect(onChunk.calls[1].args[0]).toEqual({ status: 200, data: "c2" });
@@ -123,11 +126,7 @@ describe("HTTPCORSRequest", function() {
     });
 
     it("should not emit an unfinished chunk", function() {
-      xhr.readyState = 3;
-      xhr.status = 200;
-      xhr.responseText = "whatever";
-      xhr.onreadystatechange();
-
+      request.onChunk(200, "whatever");
       expect(onChunk).not.toHaveBeenCalled();
     });
 
@@ -137,19 +136,16 @@ describe("HTTPCORSRequest", function() {
 
       var kilobyteChunk = new Array(1024).join("x"); // 1023B
 
-      xhr.readyState = 3;
-      xhr.status = 200;
-      xhr.responseText = new Array(256).join(kilobyteChunk + "\n"); // 255KB
-
-      xhr.onreadystatechange();
+      var response = new Array(256).join(kilobyteChunk + "\n");
+      request.onChunk(200, response); // 255KB
       expect(onBufferTooLong).not.toHaveBeenCalled();
 
-      xhr.responseText = xhr.responseText + kilobyteChunk + "x"; // 256KB
-      xhr.onreadystatechange();
+      response = response + kilobyteChunk + "x"; // 256KB
+      request.onChunk(200, response); // 255KB
       expect(onBufferTooLong).not.toHaveBeenCalled();
 
-      xhr.responseText = xhr.responseText + "\n"; // 256KB + 1B
-      xhr.onreadystatechange();
+      response = response + "\n"; // 256KB + 1B
+      request.onChunk(200, response); // 255KB
       expect(onBufferTooLong).toHaveBeenCalled();
     });
 
@@ -159,13 +155,10 @@ describe("HTTPCORSRequest", function() {
       });
 
       var kilobyteChunk = new Array(1024).join("x"); // 1023B
-
-      xhr.readyState = 3;
-      xhr.status = 200;
-      xhr.responseText = new Array(256).join(kilobyteChunk + "\n");
-      xhr.responseText = xhr.responseText + kilobyteChunk + "x" + "\n";
-      xhr.onreadystatechange();
-
+      request.onChunk(
+        200,
+        new Array(256).join(kilobyteChunk + "\n") + kilobyteChunk + "x" + "\n"
+      ); // 256KB + 1B
       expect(onChunk.calls.length).toEqual(256);
     });
   });
@@ -173,51 +166,6 @@ describe("HTTPCORSRequest", function() {
   describe("on request end", function() {
     beforeEach(function() {
       request.start();
-    });
-
-    it("should emit all chunks before the finished event", function() {
-      var onChunk = jasmine.createSpy("onChunk").andCallFake(function() {
-        expect(onFinished).not.toHaveBeenCalled();
-      });
-      var onFinished = jasmine.createSpy("onFinished");
-      request.bind("finished", onFinished);
-      request.bind("chunk", onChunk);
-
-      xhr.readyState = 4;
-      xhr.status = 200;
-      xhr.responseText = "1\n2\n";
-      xhr.onreadystatechange();
-
-      expect(onChunk.calls[0].args[0]).toEqual({ status: 200, data: "1" });
-      expect(onChunk.calls[1].args[0]).toEqual({ status: 200, data: "2" });
-    });
-
-    it("should abort the request", function() {
-      xhr.readyState = 4;
-      xhr.status = 200;
-      xhr.responseText = "";
-      xhr.onreadystatechange();
-      expect(xhr.abort).toHaveBeenCalled();
-    });
-
-    it("should remove the onreadystatechange listener", function() {
-      xhr.readyState = 4;
-      xhr.status = 200;
-      xhr.responseText = "";
-      xhr.onreadystatechange();
-      expect(xhr.onreadystatechange).toBe(null);
-    });
-
-    it("should unregister the unloader", function() {
-      var unloader = Pusher.Util.addWindowListener.calls[0].args[1];
-
-      xhr.readyState = 4;
-      xhr.status = 200;
-      xhr.responseText = "";
-      xhr.onreadystatechange();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
     });
   });
 
@@ -229,14 +177,10 @@ describe("HTTPCORSRequest", function() {
       unloader = Pusher.Util.addWindowListener.calls[0].args[1];
     });
 
-    it("should abort the request", function() {
+    it("should abort the request using the abortRequest hook", function() {
       unloader();
-      expect(xhr.abort).toHaveBeenCalled();
-    });
-
-    it("should remove the onreadystatechange listener", function() {
-      unloader();
-      expect(xhr.onreadystatechange).toBe(null);
+      expect(hooks.abortRequest.calls.length).toEqual(1);
+      expect(hooks.abortRequest).toHaveBeenCalledWith(lastXHR);
     });
 
     it("should unregister the unloader", function() {

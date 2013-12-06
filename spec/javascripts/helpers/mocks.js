@@ -31,11 +31,13 @@
     },
 
     getHTTPSocket: function() {
-      return {
-        sendRaw: jasmine.createSpy("sendRaw"),
-        onClose: jasmine.createSpy("onClose"),
-        reconnect: jasmine.createSpy("sendRaw")
-      };
+      var socket = new Pusher.EventsDispatcher();
+      socket.close = jasmine.createSpy("sendRaw");
+      socket.sendRaw = jasmine.createSpy("sendRaw");
+      socket.onChunk = jasmine.createSpy("onChunk");
+      socket.onClose = jasmine.createSpy("onClose");
+      socket.reconnect = jasmine.createSpy("sendRaw");
+      return socket;
     },
 
     getHTTPRequest: function(method, url) {
