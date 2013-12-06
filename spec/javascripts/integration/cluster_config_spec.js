@@ -1,4 +1,14 @@
 describeIntegration("Cluster Configuration", function() {
+  var TRANSPORTS = {
+    "ws": Pusher.WSTransport,
+    "flash": Pusher.FlashTransport,
+    "sockjs": Pusher.SockJSTransport,
+    "xhr_streaming": Pusher.XHRStreamingTransport,
+    "xhr_polling": Pusher.XHRPollingTransport,
+    "xdr_streaming": Pusher.XDRStreamingTransport,
+    "xdr_polling": Pusher.XDRPollingTransport
+  };
+
   function subscribe(pusher, channelName, callback) {
     var channel = pusher.subscribe(channelName);
     channel.bind("pusher:subscription_succeeded", function(param) {
@@ -10,17 +20,20 @@ describeIntegration("Cluster Configuration", function() {
   var pusher;
 
   function describeClusterTest(options) {
-    describe((options.ws ? "with" : "without") + " WebSockets/Flash, encrypted=" + options.encrypted, function() {
+    var environment = { encrypted: options.encrypted };
+    if (!TRANSPORTS[options.transport].isSupported(environment)) {
+      return;
+    }
+
+    describe("with " + options.transport + ", encrypted=" + options.encrypted, function() {
       var _VERSION, _channel_auth_transport, _channel_auth_endpoint;
       var _Dependencies;
 
       beforeEach(function() {
-        if (options.ws) {
-          spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
-        } else {
-          spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
-          spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
-        }
+        Pusher.Util.objectApply(TRANSPORTS, function(transport, name) {
+          spyOn(transport, "isSupported").andReturn(false);
+        });
+        TRANSPORTS[options.transport].isSupported.andReturn(true);
         spyOn(Pusher.Util, "getLocalStorage").andReturn({});
       });
 
@@ -100,10 +113,19 @@ describeIntegration("Cluster Configuration", function() {
     });
   }
 
-  if (Pusher.WSTransport.isSupported({}) || Pusher.FlashTransport.isSupported({})) {
-    describeClusterTest({ ws: true, encrypted: false});
-    describeClusterTest({ ws: true, encrypted: true});
-  }
-  describeClusterTest({ ws: false, encrypted: false});
-  describeClusterTest({ ws: false, encrypted: true});
+  describeClusterTest({ transport: "ws", encrypted: false});
+  describeClusterTest({ transport: "ws", encrypted: true});
+  describeClusterTest({ transport: "flash", encrypted: false});
+  // there's a problem with Flash policy file on EU when encrypted
+  // describeClusterTest({ transport: "flash", encrypted: true});
+  describeClusterTest({ transport: "sockjs", encrypted: false});
+  describeClusterTest({ transport: "sockjs", encrypted: true});
+  describeClusterTest({ transport: "xhr_streaming", encrypted: false});
+  describeClusterTest({ transport: "xhr_streaming", encrypted: true});
+  describeClusterTest({ transport: "xhr_polling", encrypted: false});
+  describeClusterTest({ transport: "xhr_polling", encrypted: true});
+  describeClusterTest({ transport: "xdr_streaming", encrypted: false});
+  describeClusterTest({ transport: "xdr_streaming", encrypted: true});
+  describeClusterTest({ transport: "xdr_polling", encrypted: false});
+  describeClusterTest({ transport: "xdr_polling", encrypted: true});
 });
