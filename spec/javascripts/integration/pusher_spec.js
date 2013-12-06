@@ -6,6 +6,16 @@ describeIntegration("Pusher", function() {
   // Ideally, we'd have a separate connection per spec, but this introduces
   // significant delays and triggers security mechanisms in some browsers.
 
+  var TRANSPORTS = {
+    "ws": Pusher.WSTransport,
+    "flash": Pusher.FlashTransport,
+    "sockjs": Pusher.SockJSTransport,
+    "xhr_streaming": Pusher.XHRStreamingTransport,
+    "xhr_polling": Pusher.XHRPollingTransport,
+    "xdr_streaming": Pusher.XDRStreamingTransport,
+    "xdr_polling": Pusher.XDRPollingTransport
+  };
+
   function subscribe(pusher, channelName, callback) {
     var channel = pusher.subscribe(channelName);
     channel.bind("pusher:subscription_succeeded", function(param) {
@@ -362,15 +372,20 @@ describeIntegration("Pusher", function() {
     });
   }
 
-  function buildIntegrationTests(encrypted) {
-    describe("with encrypted=" + encrypted, function() {
+  function buildIntegrationTests(transport, encrypted) {
+    var environment = { encrypted: encrypted };
+    if (transport && !TRANSPORTS[transport].isSupported(environment)) {
+      return;
+    }
+
+    describe("with " + (transport ? transport + ", " : "") + "encrypted=" + encrypted, function() {
       var _VERSION, _channel_auth_transport, _channel_auth_endpoint;
       var _Dependencies;
 
       var pusher1, pusher2;
 
       describe("setup", function() {
-        it("should prepare global config", function() {
+        it("should prepare the global config", function() {
           // TODO fix how versions work in unit tests
           _VERSION = Pusher.VERSION;
           _channel_auth_transport = Pusher.channel_auth_transport;
@@ -386,11 +401,19 @@ describeIntegration("Pusher", function() {
             version: Pusher.VERSION,
             suffix: ""
           });
+
+          if (transport) {
+            Pusher.Util.objectApply(TRANSPORTS, function(t, name) {
+              spyOn(t, "isSupported").andReturn(false);
+            });
+            TRANSPORTS[transport].isSupported.andReturn(true);
+          }
         });
 
         it("should open first connection", function() {
           pusher1 = new Pusher("7324d55a5eeb8f554761", {
-            encrypted: encrypted
+            encrypted: encrypted,
+            disableStats: true
           });
           waitsFor(function() {
             return pusher1.connection.state === "connected";
@@ -399,7 +422,8 @@ describeIntegration("Pusher", function() {
 
         it("should open second connection", function() {
           pusher2 = new Pusher("7324d55a5eeb8f554761", {
-            encrypted: encrypted
+            encrypted: encrypted,
+            disableStats: true
           });
           waitsFor(function() {
             return pusher2.connection.state === "connected";
@@ -461,6 +485,20 @@ describeIntegration("Pusher", function() {
     });
   }
 
-  buildIntegrationTests(false);
-  buildIntegrationTests(true);
+  buildIntegrationTests(null, false);
+  buildIntegrationTests(null, true);
+  buildIntegrationTests("ws", false);
+  buildIntegrationTests("ws", true);
+  buildIntegrationTests("flash", false);
+  buildIntegrationTests("flash", true);
+  buildIntegrationTests("sockjs", false);
+  buildIntegrationTests("sockjs", true);
+  buildIntegrationTests("xhr_streaming", false);
+  buildIntegrationTests("xhr_streaming", true);
+  buildIntegrationTests("xhr_polling", false);
+  buildIntegrationTests("xhr_polling", true);
+  buildIntegrationTests("xdr_streaming", false);
+  buildIntegrationTests("xdr_streaming", true);
+  buildIntegrationTests("xdr_polling", false);
+  buildIntegrationTests("xdr_polling", true);
 });
