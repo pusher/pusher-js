@@ -116,7 +116,7 @@ describeIntegration("Cluster Configuration", function() {
 
   describeClusterTest({ transport: "ws", encrypted: false});
   describeClusterTest({ transport: "ws", encrypted: true});
-  describeClusterTest({ transport: "flash", encrypted: false});
+  // describeClusterTest({ transport: "flash", encrypted: false});
   // there's a problem with Flash policy file on EU when encrypted
   // describeClusterTest({ transport: "flash", encrypted: true});
   describeClusterTest({ transport: "sockjs", encrypted: false});

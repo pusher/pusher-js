@@ -489,8 +489,8 @@ describeIntegration("Pusher", function() {
   buildIntegrationTests(null, true);
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
-  buildIntegrationTests("flash", false);
-  buildIntegrationTests("flash", true);
+  // buildIntegrationTests("flash", false);
+  // buildIntegrationTests("flash", true);
   buildIntegrationTests("sockjs", false);
   buildIntegrationTests("sockjs", true);
   buildIntegrationTests("xhr_streaming", false);
