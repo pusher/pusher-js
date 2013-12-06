@@ -60,7 +60,8 @@ describeIntegration("Cluster Configuration", function() {
           authTransport: 'jsonp',
           authEndpoint: Pusher.Integration.API_EU_URL + "/auth",
           cluster: "eu",
-          encrypted: options.encrypted
+          encrypted: options.encrypted,
+          disableStats: true
         });
         waitsFor(function() {
           return pusher.connection.state === "connected";
