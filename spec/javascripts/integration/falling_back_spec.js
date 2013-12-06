@@ -4,10 +4,9 @@ describeIntegration("Falling back", function() {
   beforeEach(function() {
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
-    spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
+    spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
     spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
-    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
-    // TODO fix these tests after updating the strategy
+    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
     spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
     spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
     spyOn(Pusher.XDRPollingTransport, "isSupported").andReturn(false);
@@ -20,7 +19,7 @@ describeIntegration("Falling back", function() {
     pusher.disconnect();
   });
 
-  it("should fall back to SockJS after two broken connections", function() {
+  it("should disable WebSockets after two broken connections", function() {
     var transport;
 
     function createConnection() {
@@ -28,9 +27,10 @@ describeIntegration("Falling back", function() {
       return transport;
     }
 
+    Pusher.WSTransport.isSupported.andReturn(true);
     spyOn(Pusher.WSTransport, "createConnection").andCallFake(createConnection);
-    spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createConnection);
 
+    var timer;
     runs(function() {
       pusher = new Pusher("foobar");
       pusher.connect();
@@ -71,7 +71,7 @@ describeIntegration("Falling back", function() {
       transport.state = "open";
       transport.emit("open");
 
-      new Pusher.Timer(100, function() {
+      timer = new Pusher.Timer(100, function() {
         transport.emit("closed", {
           code: 1006,
           reason: "KABOOM! AGAIN!",
@@ -80,8 +80,14 @@ describeIntegration("Falling back", function() {
       });
     });
     waitsFor(function() {
-      return Pusher.SockJSTransport.createConnection.calls.length === 1;
-    }, "SockJS connection to be created", 1500);
+      return !timer.isRunning();
+    }, "the transport to close", 200);
+    runs(function() {
+      timer = new Pusher.Timer(500, function() {});
+    });
+    waitsFor(function() {
+      return !timer.isRunning();
+    }, "a while", 600);
     runs(function() {
       expect(Pusher.WSTransport.createConnection.calls.length).toEqual(2);
       pusher.disconnect();
@@ -100,6 +106,8 @@ describeIntegration("Falling back", function() {
       return sockjsTransport;
     }
 
+    Pusher.WSTransport.isSupported.andReturn(true);
+    Pusher.SockJSTransport.isSupported.andReturn(true);
     spyOn(Pusher.WSTransport, "createConnection").andCallFake(createWSConnection);
     spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
 
