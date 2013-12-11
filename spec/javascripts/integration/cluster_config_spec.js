@@ -120,7 +120,10 @@ describeIntegration("Cluster Configuration", function() {
   // there's a problem with Flash policy file on EU when encrypted
   // describeClusterTest({ transport: "flash", encrypted: true});
   describeClusterTest({ transport: "sockjs", encrypted: false});
-  describeClusterTest({ transport: "sockjs", encrypted: true});
+  if (!Pusher.Util.isXDRSupported()) {
+    // SockJS fails in IE 9+, because the iframe links to an http resource
+    describeClusterTest({ transport: "sockjs", encrypted: true});
+  }
   describeClusterTest({ transport: "xhr_streaming", encrypted: false});
   describeClusterTest({ transport: "xhr_streaming", encrypted: true});
   describeClusterTest({ transport: "xhr_polling", encrypted: false});

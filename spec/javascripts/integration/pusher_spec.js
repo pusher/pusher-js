@@ -494,7 +494,10 @@ describeIntegration("Pusher", function() {
   // buildIntegrationTests("flash", false);
   // buildIntegrationTests("flash", true);
   buildIntegrationTests("sockjs", false);
-  buildIntegrationTests("sockjs", true);
+  if (!Pusher.Util.isXDRSupported()) {
+    // SockJS fails in IE 9+, because the iframe links to an http resource
+    buildIntegrationTests("sockjs", true);
+  }
   buildIntegrationTests("xhr_streaming", false);
   buildIntegrationTests("xhr_streaming", true);
   buildIntegrationTests("xhr_polling", false);
