@@ -15,6 +15,14 @@ describe("HTTP.Socket", function() {
       lastXHR = Pusher.Mocks.getHTTPRequest(method, url);
       return lastXHR;
     });
+    spyOn(Pusher.HTTP, "getXDR").andCallFake(function(method, url) {
+      lastXHR = Pusher.Mocks.getHTTPRequest(method, url);
+      return lastXHR;
+    });
+
+    spyOn(Pusher.Util, "isXHRSupported").andReturn(true);
+    spyOn(Pusher.Util, "isXDRSupported").andReturn(false);
+
     hooks = {
       getReceiveURL: jasmine.createSpy().andCallFake(function(url, session) {
         return url.base + "/" + session + url.queryString;
@@ -40,15 +48,18 @@ describe("HTTP.Socket", function() {
     Pusher.HTTP.getXDR = _getXDR;
   });
 
-  it("should use XHR if possible", function() {
+  it("should use XHR if it's supported", function() {
+    Pusher.Util.isXHRSupported.andReturn(true);
+    Pusher.Util.isXDRSupported.andReturn(false);
+
     var socket = new Pusher.HTTP.Socket(hooks, "http://example.com");
     expect(Pusher.HTTP.getXHR).toHaveBeenCalled();
     socket.close();
   });
 
-  it("should use XDR if HTTP.getXHR is not present", function() {
-    Pusher.HTTP.getXHR = undefined;
-    spyOn(Pusher.HTTP, "getXDR").andCallFake(Pusher.Mocks.getHTTPRequest);
+  it("should use XDR if it's supported", function() {
+    Pusher.Util.isXHRSupported.andReturn(false);
+    Pusher.Util.isXDRSupported.andReturn(true);
 
     var socket = new Pusher.HTTP.Socket(hooks, "http://example.com");
     expect(Pusher.HTTP.getXDR).toHaveBeenCalled();

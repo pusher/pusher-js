@@ -217,7 +217,13 @@
   }
 
   function createRequest(method, url) {
-    return (Pusher.HTTP.getXHR || Pusher.HTTP.getXDR)(method, url);
+    if (Pusher.Util.isXHRSupported()) {
+      return Pusher.HTTP.getXHR(method, url);
+    } else if (Pusher.Util.isXDRSupported(url.indexOf("https:") === 0)) {
+      return Pusher.HTTP.getXDR(method, url);
+    } else {
+      throw new "Cross-origin HTTP requests are not supported";
+    }
   }
 
   Pusher.HTTP.Socket = HTTPSocket;
