@@ -384,6 +384,15 @@ describeIntegration("Pusher", function() {
 
       var pusher1, pusher2;
 
+      beforeEach(function() {
+        if (transport) {
+          Pusher.Util.objectApply(TRANSPORTS, function(t, name) {
+            spyOn(t, "isSupported").andReturn(false);
+          });
+          TRANSPORTS[transport].isSupported.andReturn(true);
+        }
+      });
+
       describe("setup", function() {
         it("should prepare the global config", function() {
           // TODO fix how versions work in unit tests
@@ -401,13 +410,6 @@ describeIntegration("Pusher", function() {
             version: Pusher.VERSION,
             suffix: ""
           });
-
-          if (transport) {
-            Pusher.Util.objectApply(TRANSPORTS, function(t, name) {
-              spyOn(t, "isSupported").andReturn(false);
-            });
-            TRANSPORTS[transport].isSupported.andReturn(true);
-          }
         });
 
         it("should open first connection", function() {
