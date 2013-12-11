@@ -114,8 +114,11 @@ describeIntegration("Cluster Configuration", function() {
     });
   }
 
-  describeClusterTest({ transport: "ws", encrypted: false});
-  describeClusterTest({ transport: "ws", encrypted: true});
+  if (!/version\/5.*safari/i.test(navigator.userAgent)) {
+    // Safari 5 uses hixie-75/76, which is not supported on EU
+    describeClusterTest({ transport: "ws", encrypted: false});
+    describeClusterTest({ transport: "ws", encrypted: true});
+  }
   // describeClusterTest({ transport: "flash", encrypted: false});
   // there's a problem with Flash policy file on EU when encrypted
   // describeClusterTest({ transport: "flash", encrypted: true});
