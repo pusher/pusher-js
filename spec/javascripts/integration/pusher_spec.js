@@ -373,8 +373,7 @@ describeIntegration("Pusher", function() {
   }
 
   function buildIntegrationTests(transport, encrypted) {
-    var environment = { encrypted: encrypted };
-    if (transport && !TRANSPORTS[transport].isSupported(environment)) {
+    if (!TRANSPORTS[transport].isSupported({ encrypted: encrypted })) {
       return;
     }
 
@@ -385,12 +384,10 @@ describeIntegration("Pusher", function() {
       var pusher1, pusher2;
 
       beforeEach(function() {
-        if (transport) {
-          Pusher.Util.objectApply(TRANSPORTS, function(t, name) {
-            spyOn(t, "isSupported").andReturn(false);
-          });
-          TRANSPORTS[transport].isSupported.andReturn(true);
-        }
+        Pusher.Util.objectApply(TRANSPORTS, function(t, name) {
+          spyOn(t, "isSupported").andReturn(false);
+        });
+        TRANSPORTS[transport].isSupported.andReturn(true);
       });
 
       describe("setup", function() {
@@ -487,8 +484,6 @@ describeIntegration("Pusher", function() {
     });
   }
 
-  buildIntegrationTests(null, false);
-  buildIntegrationTests(null, true);
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
   // buildIntegrationTests("flash", false);
