@@ -2,7 +2,7 @@
   /**
    * Provides functions for handling Pusher protocol-specific messages.
    */
-  Protocol = {};
+  var Protocol = {};
 
   /**
    * Decodes a message in a Pusher format.
