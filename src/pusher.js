@@ -201,5 +201,7 @@
     }
   }
 
+  Pusher.HTTP = {};
+
   this.Pusher = Pusher;
 }).call(this);

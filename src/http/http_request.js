@@ -68,6 +68,5 @@
     return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
   };
 
-  Pusher.HTTP = {};
   Pusher.HTTP.Request = HTTPRequest;
 }).call(this);
