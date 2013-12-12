@@ -47,22 +47,15 @@
   prototype.send = function(sendJSONP, callback) {
     var self = this;
 
-    var data = {
+    var data = Pusher.Util.extend({
       session: self.session,
       bundle: self.sent + 1,
+      key: self.key,
+      lib: "js",
+      version: self.options.version,
+      features: self.options.features,
       timeline: self.events
-    };
-    if (self.sent === 0) {
-      Pusher.Util.extend(data, {
-        key: self.key,
-        features: self.options.features,
-        lib: "js",
-        version: self.options.version
-      }, self.options.params || {});
-    }
-    data = Pusher.Util.filterObject(data, function(v) {
-      return v !== undefined;
-    });
+    }, self.options.params);
 
     self.events = [];
     sendJSONP(data, function(error, result) {
