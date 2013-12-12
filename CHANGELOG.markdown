@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.1.5 (2013-12-16)
+
+[NEW] Server can suggest a lower activity timeout in the handshake
+
+[CHANGED] Updated the protocol to version 7
+
+[CHANGED] Transports are cached separately for encrypted connections
+
+[CHANGED] Updated the stats protocol
+
+[FIXED] Removed the `Protocol` variable leaking into the global scope
+
+[FIXED] Flash check was occasionally raising exceptions on old Firefox releases
+
 ## 2.1.4 (2013-11-26)
 
 [NEW] Added the `Pusher.prototype.allChannels` method
