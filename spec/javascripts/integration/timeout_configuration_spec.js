@@ -49,7 +49,7 @@ describeIntegration("Timeout Configuration", function() {
     expect(onUnavailable).toHaveBeenCalled();
   });
 
-  it("should obey default activity and pong timeouts", function() {
+  it("should obey the server's activity timeout and the default pong timeout", function() {
     pusher = new Pusher("foobar");
     pusher.connect();
 
@@ -63,13 +63,14 @@ describeIntegration("Timeout Configuration", function() {
       data: JSON.stringify({
         event: "pusher:connection_established",
         data: {
-          socket_id: "123.456"
+          socket_id: "123.456",
+          activity_timeout: 12
         }
       })
     });
 
     expect(pusher.connection.state).toEqual("connected");
-    jasmine.Clock.tick(Pusher.activity_timeout - 1);
+    jasmine.Clock.tick(12000 - 1);
     expect(firstTransport.send).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
     expect(firstTransport.send).toHaveBeenCalled();
@@ -80,9 +81,9 @@ describeIntegration("Timeout Configuration", function() {
     expect(firstTransport.close).toHaveBeenCalled();
   });
 
-  it("should obey activity and pong timeouts passed as options", function() {
+  it("should obey the activity timeout from the handshake if it's lower than one specified in options", function() {
     pusher = new Pusher("foobar", {
-      activity_timeout: 11111,
+      activity_timeout: 16000,
       pong_timeout: 2222
     });
     pusher.connect();
@@ -97,17 +98,74 @@ describeIntegration("Timeout Configuration", function() {
       data: JSON.stringify({
         event: "pusher:connection_established",
         data: {
-          socket_id: "123.456"
+          socket_id: "123.456",
+          activity_timeout: 15
         }
       })
     });
 
     expect(pusher.connection.state).toEqual("connected");
-    jasmine.Clock.tick(11110);
+    jasmine.Clock.tick(15000 - 1);
     expect(firstTransport.send).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
     expect(firstTransport.send).toHaveBeenCalled();
+  });
 
+  it("should obey the activity timeout specified in options if it's lower than one from the handshake", function() {
+    pusher = new Pusher("foobar", {
+      activity_timeout: 15555,
+      pong_timeout: 2222
+    });
+    pusher.connect();
+
+    var firstTransport = transport;
+
+    firstTransport.state = "initialized";
+    firstTransport.emit("initialized");
+    firstTransport.state = "open";
+    firstTransport.emit("open");
+    firstTransport.emit("message", {
+      data: JSON.stringify({
+        event: "pusher:connection_established",
+        data: {
+          socket_id: "123.456",
+          activity_timeout: 17
+        }
+      })
+    });
+
+    expect(pusher.connection.state).toEqual("connected");
+    jasmine.Clock.tick(15555 - 1);
+    expect(firstTransport.send).not.toHaveBeenCalled();
+    jasmine.Clock.tick(1);
+    expect(firstTransport.send).toHaveBeenCalled();
+  });
+
+  it("should obey the pong timeout passed in options", function() {
+    pusher = new Pusher("foobar", {
+      pong_timeout: 2222
+    });
+    pusher.connect();
+
+    var firstTransport = transport;
+
+    firstTransport.state = "initialized";
+    firstTransport.emit("initialized");
+    firstTransport.state = "open";
+    firstTransport.emit("open");
+    firstTransport.emit("message", {
+      data: JSON.stringify({
+        event: "pusher:connection_established",
+        data: {
+          socket_id: "123.456",
+          activity_timeout: 120
+        }
+      })
+    });
+
+    // first, send the ping
+    jasmine.Clock.tick(120000);
+    // wait for the pong timeout
     jasmine.Clock.tick(2221);
     expect(firstTransport.close).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
