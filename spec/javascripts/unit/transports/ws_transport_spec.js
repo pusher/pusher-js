@@ -67,7 +67,7 @@ describe("WSTransport", function() {
       expect(window.WebSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
-          "?protocol=6&client=js&version=<VERSION>&flash=false"
+          "?protocol=7&client=js&version=<VERSION>&flash=false"
         );
     });
 
@@ -79,7 +79,7 @@ describe("WSTransport", function() {
       expect(window.MozWebSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
-          "?protocol=6&client=js&version=<VERSION>&flash=false"
+          "?protocol=7&client=js&version=<VERSION>&flash=false"
         );
     });
   });

@@ -4,39 +4,29 @@
     this.transport = transport;
     this.minPingDelay = options.minPingDelay;
     this.maxPingDelay = options.maxPingDelay;
-    this.pingDelay = null;
+    this.pingDelay = undefined;
   }
   var prototype = AssistantToTheTransportManager.prototype;
 
   prototype.createConnection = function(name, priority, key, options) {
-    var connection = this.transport.createConnection(
+    var self = this;
+
+    var options = Pusher.Util.extend({}, options, {
+      activityTimeout: self.pingDelay
+    });
+    var connection = self.transport.createConnection(
       name, priority, key, options
     );
 
-    var self = this;
     var openTimestamp = null;
-    var pingTimer = null;
 
     var onOpen = function() {
       connection.unbind("open", onOpen);
-
-      openTimestamp = Pusher.Util.now();
-      if (self.pingDelay) {
-        pingTimer = setInterval(function() {
-          if (pingTimer) {
-            connection.requestPing();
-          }
-        }, self.pingDelay);
-      }
-
       connection.bind("closed", onClosed);
+      openTimestamp = Pusher.Util.now();
     };
     var onClosed = function(closeEvent) {
       connection.unbind("closed", onClosed);
-      if (pingTimer) {
-        clearInterval(pingTimer);
-        pingTimer = null;
-      }
 
       if (closeEvent.code === 1002 || closeEvent.code === 1003) {
         // we don't want to use transports not obeying the protocol
