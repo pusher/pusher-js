@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.10 (2013-12-16)
+
+[CHANGED] Transports are cached separately for encrypted connections
+
+[CHANGED] Updated the stats protocol
+
+[FIXED] Removed the `Protocol` variable leaking into the global scope
+
+[FIXED] Flash check was occasionally raising exceptions on old Firefox releases
+
 ## 2.0.9 (2013-10-21)
 
 [CHANGED] Updated the json2 library
