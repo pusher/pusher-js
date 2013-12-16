@@ -69,6 +69,7 @@
     });
 
     Pusher.instances.push(this);
+    this.timeline.info({ instances: Pusher.instances.length });
 
     if (Pusher.isReady) self.connect();
   }

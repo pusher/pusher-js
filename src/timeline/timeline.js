@@ -51,19 +51,15 @@
       return false;
     }
 
-    var data = {};
-    if (self.sent === 0) {
-      data = Pusher.Util.extend({
-        key: self.key,
-        features: self.options.features,
-        version: self.options.version
-      }, self.options.params || {});
-    }
-    data.session = self.session;
-    data.timeline = self.events;
-    data = Pusher.Util.filterObject(data, function(v) {
-      return v !== undefined;
-    });
+    var data = Pusher.Util.extend({
+      session: self.session,
+      bundle: self.sent + 1,
+      key: self.key,
+      lib: "js",
+      version: self.options.version,
+      features: self.options.features,
+      timeline: self.events
+    }, self.options.params);
 
     self.events = [];
     sendJSONP(data, function(error, result) {
