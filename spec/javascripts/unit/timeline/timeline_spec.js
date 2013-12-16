@@ -103,41 +103,6 @@ describe("Timeline", function() {
       expect(timeline.isEmpty()).toBe(true);
     });
 
-    it("should not send extra info in second request", function() {
-      var sendCallback = null;
-      sendJSONP.andCallFake(function(data, callback) {
-        sendCallback = callback;
-      });
-      var timeline = new Pusher.Timeline("foobar", 666, {
-        features: ["x", "y", "z"],
-        version: "6.6.6"
-      });
-
-      // first call
-      expect(timeline.send(sendJSONP, onSend)).toBe(true);
-      expect(sendJSONP).toHaveBeenCalledWith(
-        { bundle: 1,
-          key: "foobar",
-          session: 666,
-          features: ["x", "y", "z"],
-          lib: "js",
-          version: "6.6.6",
-          timeline: []
-        },
-        jasmine.any(Function)
-      );
-      sendCallback(null);
-      // second call
-      expect(timeline.send(sendJSONP, onSend)).toBe(true);
-      expect(sendJSONP).toHaveBeenCalledWith(
-        { bundle: 2,
-          session: 666,
-          timeline: []
-        },
-        jasmine.any(Function)
-      );
-    });
-
     it("should respect the size limit", function() {
       spyOn(Pusher.Util, "now").andReturn(123);
 

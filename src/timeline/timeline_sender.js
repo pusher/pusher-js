@@ -15,7 +15,9 @@
 
     var sendJSONP = function(data, callback) {
       var params = {
-        data: data,
+        data: Pusher.Util.filterObject(data, function(v) {
+          return v !== undefined;
+        }),
         url: scheme + (self.host || self.options.host) + self.options.path,
         receiver: Pusher.JSONP
       };

@@ -205,7 +205,7 @@
     if (!this.connection.supportsPing()) {
       var self = this;
       self.activityTimer = new Pusher.Timer(
-        self.options.activityTimeout,
+        self.activityTimeout,
         function() {
           self.send_event('pusher:ping', {});
           // wait for pong response
@@ -240,9 +240,6 @@
       ping: function() {
         self.send_event('pusher:pong', {});
       },
-      ping_request: function() {
-        self.send_event('pusher:ping', {});
-      },
       error: function(error) {
         // just emit error to user - socket will already be closed by browser
         self.emit("error", { type: "WebSocketError", error: error });
@@ -261,6 +258,11 @@
     var self = this;
     return Pusher.Util.extend({}, errorCallbacks, {
       connected: function(handshake) {
+        self.activityTimeout = Math.min(
+          self.options.activityTimeout,
+          handshake.activityTimeout,
+          handshake.connection.activityTimeout || Infinity
+        );
         self.clearUnavailableTimer();
         self.setConnection(handshake.connection);
         self.socket_id = self.connection.id;

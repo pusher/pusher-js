@@ -38,7 +38,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.WebSocket).toHaveBeenCalledWith(
-        "ws://ws.pusherapp.com:80/app/foobar?protocol=6&client=js&version=<VERSION>&flash=false"
+        "ws://ws.pusherapp.com:80/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
       );
     });
 
@@ -47,7 +47,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.WebSocket).toHaveBeenCalledWith(
-        "wss://ws.pusherapp.com:443/app/foobar?protocol=6&client=js&version=<VERSION>&flash=false"
+        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
       );
     });
 
@@ -56,7 +56,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.WebSocket).toHaveBeenCalledWith(
-        "ws://example.com:1999/app/foobar?protocol=6&client=js&version=<VERSION>&flash=false"
+        "ws://example.com:1999/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
       );
     });
 
@@ -65,7 +65,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.WebSocket).toHaveBeenCalledWith(
-        "wss://example.org:4444/app/foobar?protocol=6&client=js&version=<VERSION>&flash=false"
+        "wss://example.org:4444/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
       );
     });
   });
@@ -99,7 +99,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.FlashWebSocket).toHaveBeenCalledWith(
-        "ws://ws.pusherapp.com:80/app/foobar?protocol=6&client=js&version=<VERSION>&flash=true"
+        "ws://ws.pusherapp.com:80/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
       );
     });
 
@@ -108,7 +108,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.FlashWebSocket).toHaveBeenCalledWith(
-        "wss://ws.pusherapp.com:443/app/foobar?protocol=6&client=js&version=<VERSION>&flash=true"
+        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
       );
     });
 
@@ -117,7 +117,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.FlashWebSocket).toHaveBeenCalledWith(
-        "ws://example.com:1999/app/foobar?protocol=6&client=js&version=<VERSION>&flash=true"
+        "ws://example.com:1999/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
       );
     });
 
@@ -126,7 +126,7 @@ describeIntegration("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.FlashWebSocket).toHaveBeenCalledWith(
-        "wss://example.org:4444/app/foobar?protocol=6&client=js&version=<VERSION>&flash=true"
+        "wss://example.org:4444/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
       );
     });
   });

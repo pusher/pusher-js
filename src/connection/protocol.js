@@ -2,7 +2,7 @@
   /**
    * Provides functions for handling Pusher protocol-specific messages.
    */
-  Protocol = {};
+  var Protocol = {};
 
   /**
    * Decodes a message in a Pusher format.
@@ -59,7 +59,11 @@
     message = this.decodeMessage(message);
 
     if (message.event === "pusher:connection_established") {
-      return { action: "connected", id: message.data.socket_id };
+      return {
+        action: "connected",
+        id: message.data.socket_id,
+        activityTimeout: message.data.activity_timeout * 1000
+      };
     } else if (message.event === "pusher:error") {
       // From protocol 6 close codes are sent only once, so this only
       // happens when connection does not support close codes

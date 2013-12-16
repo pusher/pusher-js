@@ -34,11 +34,15 @@
     try {
       return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {
-      return Boolean(
-        navigator &&
-        navigator.mimeTypes &&
-        navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
-      );
+      try {
+        return Boolean(
+          navigator &&
+          navigator.mimeTypes &&
+          navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
+        );
+      } catch(e) {
+        return false;
+      }
     }
   };
 

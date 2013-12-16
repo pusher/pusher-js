@@ -224,7 +224,7 @@ describe("FlashTransport", function() {
       expect(window.FlashWebSocket)
         .toHaveBeenCalledWith(
           "ws://example.com:12345/app/foo" +
-          "?protocol=6&client=js&version=<VERSION>&flash=true"
+          "?protocol=7&client=js&version=<VERSION>&flash=true"
         );
     });
   });

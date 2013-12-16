@@ -1,6 +1,6 @@
 ;(function() {
   Pusher.VERSION = '<VERSION>';
-  Pusher.PROTOCOL = 6;
+  Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
   Pusher.host = 'ws.pusherapp.com';

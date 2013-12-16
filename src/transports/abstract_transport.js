@@ -37,6 +37,7 @@
     this.key = key;
     this.state = "new";
     this.timeline = options.timeline;
+    this.activityTimeout = options.activityTimeout;
     this.id = this.timeline.generateUniqueID();
 
     this.options = {
@@ -136,10 +137,6 @@
     } else {
       return false;
     }
-  };
-
-  prototype.requestPing = function() {
-    this.emit("ping_request");
   };
 
   /** @protected */
