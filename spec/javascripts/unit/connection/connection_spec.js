@@ -7,6 +7,21 @@ describe("Connection", function() {
     connection = new Pusher.Connection("111.22", transport);
   });
 
+  describe("#activityTimeout", function() {
+    it("should be set to undefined if the transport doesn't have a activityTimeout value", function() {
+      var transport = Pusher.Mocks.getTransport();
+      var connection = new Pusher.Connection("111.22", transport);
+      expect(connection.activityTimeout).toBe(undefined);
+    });
+
+    it("should be set to the transport's activityTimeout value", function() {
+      var transport = Pusher.Mocks.getTransport();
+      transport.activityTimeout = 123123;
+      var connection = new Pusher.Connection("111.22", transport);
+      expect(connection.activityTimeout).toEqual(123123);
+    });
+  });
+
   describe("#supportsPing", function() {
     it("should return true if transport supports ping", function() {
       transport.supportsPing.andReturn(true);
@@ -58,17 +73,6 @@ describe("Connection", function() {
     it("should call close on the transport", function() {
       connection.close();
       expect(transport.close).toHaveBeenCalled();
-    });
-  });
-
-  describe("after receiving 'ping_request' event", function() {
-    it("should emit 'ping_request' too", function() {
-      var onPingRequest = jasmine.createSpy("onPingRequest");
-      connection.bind("ping_request", onPingRequest);
-
-      transport.emit("ping_request");
-
-      expect(onPingRequest).toHaveBeenCalled();
     });
   });
 

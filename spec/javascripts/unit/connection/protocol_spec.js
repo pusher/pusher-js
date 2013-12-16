@@ -82,14 +82,16 @@ describe("Protocol", function() {
         data: JSON.stringify({
           event: "pusher:connection_established",
           data: {
-            socket_id: "123.456"
+            socket_id: "123.456",
+            activity_timeout: 30
           }
         })
       };
 
       expect(Pusher.Protocol.processHandshake(message)).toEqual({
         action: "connected",
-        id: "123.456"
+        id: "123.456",
+        activityTimeout: 30000
       });
     });
 
