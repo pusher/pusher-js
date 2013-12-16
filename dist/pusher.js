@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.1.4
+ * Pusher JavaScript Library v2.1.5
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
@@ -86,6 +86,7 @@
     });
 
     Pusher.instances.push(this);
+    this.timeline.info({ instances: Pusher.instances.length });
 
     if (Pusher.isReady) self.connect();
   }
@@ -598,8 +599,8 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.1.4';
-  Pusher.PROTOCOL = 6;
+  Pusher.VERSION = '2.1.5';
+  Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
   Pusher.host = 'ws.pusherapp.com';
@@ -1186,22 +1187,15 @@
   prototype.send = function(sendJSONP, callback) {
     var self = this;
 
-    var data = {
+    var data = Pusher.Util.extend({
       session: self.session,
       bundle: self.sent + 1,
+      key: self.key,
+      lib: "js",
+      version: self.options.version,
+      features: self.options.features,
       timeline: self.events
-    };
-    if (self.sent === 0) {
-      Pusher.Util.extend(data, {
-        key: self.key,
-        features: self.options.features,
-        lib: "js",
-        version: self.options.version
-      }, self.options.params || {});
-    }
-    data = Pusher.Util.filterObject(data, function(v) {
-      return v !== undefined;
-    });
+    }, self.options.params);
 
     self.events = [];
     sendJSONP(data, function(error, result) {
@@ -1241,7 +1235,9 @@
 
     var sendJSONP = function(data, callback) {
       var params = {
-        data: data,
+        data: Pusher.Util.filterObject(data, function(v) {
+          return v !== undefined;
+        }),
         url: scheme + (self.host || self.options.host) + self.options.path,
         receiver: Pusher.JSONP
       };
@@ -1346,6 +1342,7 @@
     this.strategy = strategy;
     this.transports = transports;
     this.ttl = options.ttl || 1800*1000;
+    this.encrypted = options.encrypted;
     this.timeline = options.timeline;
   }
   var prototype = CachedStrategy.prototype;
@@ -1355,7 +1352,8 @@
   };
 
   prototype.connect = function(minPriority, callback) {
-    var info = fetchTransportInfo();
+    var encrypted = this.encrypted;
+    var info = fetchTransportCache(encrypted);
 
     var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
@@ -1374,7 +1372,7 @@
       minPriority,
       function cb(error, handshake) {
         if (error) {
-          flushTransportInfo();
+          flushTransportCache(encrypted);
           if (strategies.length > 0) {
             startTimestamp = Pusher.Util.now();
             runner = strategies.pop().connect(minPriority, cb);
@@ -1382,8 +1380,11 @@
             callback(error);
           }
         } else {
-          var latency = Pusher.Util.now() - startTimestamp;
-          storeTransportInfo(handshake.transport.name, latency);
+          storeTransportCache(
+            encrypted,
+            handshake.transport.name,
+            Pusher.Util.now() - startTimestamp
+          );
           callback(null, handshake);
         }
       }
@@ -1402,26 +1403,30 @@
     };
   };
 
-  function fetchTransportInfo() {
+  function getTransportCacheKey(encrypted) {
+    return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
+  }
+
+  function fetchTransportCache(encrypted) {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
       try {
-        var info = storage.pusherTransport;
-        if (info) {
-          return JSON.parse(info);
+        var serializedCache = storage[getTransportCacheKey(encrypted)];
+        if (serializedCache) {
+          return JSON.parse(serializedCache);
         }
       } catch (e) {
-        flushTransportInfo();
+        flushTransportCache(encrypted);
       }
     }
     return null;
   }
 
-  function storeTransportInfo(transport, latency) {
+  function storeTransportCache(encrypted, transport, latency) {
     var storage = Pusher.Util.getLocalStorage();
     if (storage) {
       try {
-        storage.pusherTransport = JSON.stringify({
+        storage[getTransportCacheKey(encrypted)] = JSON.stringify({
           timestamp: Pusher.Util.now(),
           transport: transport,
           latency: latency
@@ -1432,13 +1437,13 @@
     }
   }
 
-  function flushTransportInfo() {
+  function flushTransportCache(encrypted) {
     var storage = Pusher.Util.getLocalStorage();
-    if (storage && storage.pusherTransport) {
+    if (storage) {
       try {
-        delete storage.pusherTransport;
+        delete storage[getTransportCacheKey(encrypted)];
       } catch (e) {
-        storage.pusherTransport = undefined;
+        // catch exceptions raised by localStorage
       }
     }
   }
@@ -1825,6 +1830,7 @@
     this.key = key;
     this.state = "new";
     this.timeline = options.timeline;
+    this.activityTimeout = options.activityTimeout;
     this.id = this.timeline.generateUniqueID();
 
     this.options = {
@@ -1936,10 +1942,6 @@
     } else {
       return false;
     }
-  };
-
-  prototype.requestPing = function() {
-    this.emit("ping_request");
   };
 
   /** @protected */
@@ -2073,11 +2075,15 @@
     try {
       return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
     } catch (e) {
-      return Boolean(
-        navigator &&
-        navigator.mimeTypes &&
-        navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
-      );
+      try {
+        return Boolean(
+          navigator &&
+          navigator.mimeTypes &&
+          navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
+        );
+      } catch(e) {
+        return false;
+      }
     }
   };
 
@@ -2271,39 +2277,29 @@
     this.transport = transport;
     this.minPingDelay = options.minPingDelay;
     this.maxPingDelay = options.maxPingDelay;
-    this.pingDelay = null;
+    this.pingDelay = undefined;
   }
   var prototype = AssistantToTheTransportManager.prototype;
 
   prototype.createConnection = function(name, priority, key, options) {
-    var connection = this.transport.createConnection(
+    var self = this;
+
+    var options = Pusher.Util.extend({}, options, {
+      activityTimeout: self.pingDelay
+    });
+    var connection = self.transport.createConnection(
       name, priority, key, options
     );
 
-    var self = this;
     var openTimestamp = null;
-    var pingTimer = null;
 
     var onOpen = function() {
       connection.unbind("open", onOpen);
-
-      openTimestamp = Pusher.Util.now();
-      if (self.pingDelay) {
-        pingTimer = setInterval(function() {
-          if (pingTimer) {
-            connection.requestPing();
-          }
-        }, self.pingDelay);
-      }
-
       connection.bind("closed", onClosed);
+      openTimestamp = Pusher.Util.now();
     };
     var onClosed = function(closeEvent) {
       connection.unbind("closed", onClosed);
-      if (pingTimer) {
-        clearInterval(pingTimer);
-        pingTimer = null;
-      }
 
       if (closeEvent.code === 1002 || closeEvent.code === 1003) {
         // we don't want to use transports not obeying the protocol
@@ -2554,7 +2550,7 @@
   /**
    * Provides functions for handling Pusher protocol-specific messages.
    */
-  Protocol = {};
+  var Protocol = {};
 
   /**
    * Decodes a message in a Pusher format.
@@ -2611,7 +2607,11 @@
     message = this.decodeMessage(message);
 
     if (message.event === "pusher:connection_established") {
-      return { action: "connected", id: message.data.socket_id };
+      return {
+        action: "connected",
+        id: message.data.socket_id,
+        activityTimeout: message.data.activity_timeout * 1000
+      };
     } else if (message.event === "pusher:error") {
       // From protocol 6 close codes are sent only once, so this only
       // happens when connection does not support close codes
@@ -2708,6 +2708,7 @@
 
     this.id = id;
     this.transport = transport;
+    this.activityTimeout = transport.activityTimeout;
     this.bindListeners();
   }
   var prototype = Connection.prototype;
@@ -2783,9 +2784,6 @@
         self.emit('message', message);
       }
     };
-    var onPingRequest = function() {
-      self.emit("ping_request");
-    };
     var onError = function(error) {
       self.emit("error", { type: "WebSocketError", error: error });
     };
@@ -2803,12 +2801,10 @@
     var unbindListeners = function() {
       self.transport.unbind("closed", onClosed);
       self.transport.unbind("error", onError);
-      self.transport.unbind("ping_request", onPingRequest);
       self.transport.unbind("message", onMessage);
     };
 
     self.transport.bind("message", onMessage);
-    self.transport.bind("ping_request", onPingRequest);
     self.transport.bind("error", onError);
     self.transport.bind("closed", onClosed);
   };
@@ -2868,7 +2864,8 @@
         var result = Pusher.Protocol.processHandshake(m);
         if (result.action === "connected") {
           self.finish("connected", {
-            connection: new Pusher.Connection(result.id, self.transport)
+            connection: new Pusher.Connection(result.id, self.transport),
+            activityTimeout: result.activityTimeout
           });
         } else {
           self.finish(result.action, { error: result.error });
@@ -3115,7 +3112,7 @@
     if (!this.connection.supportsPing()) {
       var self = this;
       self.activityTimer = new Pusher.Timer(
-        self.options.activityTimeout,
+        self.activityTimeout,
         function() {
           self.send_event('pusher:ping', {});
           // wait for pong response
@@ -3150,9 +3147,6 @@
       ping: function() {
         self.send_event('pusher:pong', {});
       },
-      ping_request: function() {
-        self.send_event('pusher:ping', {});
-      },
       error: function(error) {
         // just emit error to user - socket will already be closed by browser
         self.emit("error", { type: "WebSocketError", error: error });
@@ -3171,6 +3165,11 @@
     var self = this;
     return Pusher.Util.extend({}, errorCallbacks, {
       connected: function(handshake) {
+        self.activityTimeout = Math.min(
+          self.options.activityTimeout,
+          handshake.activityTimeout,
+          handshake.connection.activityTimeout || Infinity
+        );
         self.clearUnavailableTimer();
         self.setConnection(handshake.connection);
         self.socket_id = self.connection.id;
