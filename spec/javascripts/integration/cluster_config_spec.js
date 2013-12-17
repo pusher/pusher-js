@@ -26,33 +26,12 @@ describeIntegration("Cluster Configuration", function() {
     }
 
     describe("with " + options.transport + ", encrypted=" + options.encrypted, function() {
-      var _VERSION, _channel_auth_transport, _channel_auth_endpoint;
-      var _Dependencies;
-
       beforeEach(function() {
         Pusher.Util.objectApply(TRANSPORTS, function(transport, name) {
           spyOn(transport, "isSupported").andReturn(false);
         });
         TRANSPORTS[options.transport].isSupported.andReturn(true);
         spyOn(Pusher.Util, "getLocalStorage").andReturn({});
-      });
-
-      it("should prepare global config", function() {
-        // TODO fix how versions work in unit tests
-        _VERSION = Pusher.VERSION;
-        _channel_auth_transport = Pusher.channel_auth_transport;
-        _channel_auth_endpoint = Pusher.channel_auth_endpoint;
-        _Dependencies = Pusher.Dependencies;
-
-        Pusher.VERSION = "8.8.8";
-        Pusher.channel_auth_transport = "";
-        Pusher.channel_auth_endpoint = "";
-        Pusher.Dependencies = new Pusher.DependencyLoader({
-          cdn_http: Pusher.Integration.JS_HOST,
-          cdn_https: Pusher.Integration.JS_HOST,
-          version: Pusher.VERSION,
-          suffix: ""
-        });
       });
 
       it("should open a connection to the 'eu' cluster", function() {
@@ -104,15 +83,31 @@ describeIntegration("Cluster Configuration", function() {
       it("should disconnect the connection", function() {
         pusher.disconnect();
       });
-
-      it("should restore global config", function() {
-        Pusher.Dependencies = _Dependencies;
-        Pusher.channel_auth_endpoint = _channel_auth_endpoint;
-        Pusher.channel_auth_transport = _channel_auth_transport;
-        Pusher.VERSION = _VERSION;
-      });
     });
   }
+
+  var _VERSION;
+  var _channel_auth_transport;
+  var _channel_auth_endpoint;
+  var _Dependencies;
+
+  it("should prepare the global config", function() {
+    // TODO fix how versions work in unit tests
+    _VERSION = Pusher.VERSION;
+    _channel_auth_transport = Pusher.channel_auth_transport;
+    _channel_auth_endpoint = Pusher.channel_auth_endpoint;
+    _Dependencies = Pusher.Dependencies;
+
+    Pusher.VERSION = "8.8.8";
+    Pusher.channel_auth_transport = "";
+    Pusher.channel_auth_endpoint = "";
+    Pusher.Dependencies = new Pusher.DependencyLoader({
+      cdn_http: Pusher.Integration.JS_HOST,
+      cdn_https: Pusher.Integration.JS_HOST,
+      version: Pusher.VERSION,
+      suffix: ""
+    });
+  });
 
   if (!/version\/5.*safari/i.test(navigator.userAgent)) {
     // Safari 5 uses hixie-75/76, which is not supported on EU
@@ -122,17 +117,28 @@ describeIntegration("Cluster Configuration", function() {
   // describeClusterTest({ transport: "flash", encrypted: false});
   // there's a problem with Flash policy file on EU when encrypted
   // describeClusterTest({ transport: "flash", encrypted: true});
+
   describeClusterTest({ transport: "sockjs", encrypted: false});
   if (!Pusher.Util.isXDRSupported()) {
+    // TODO disable on Android
     // SockJS fails in IE 9+, because the iframe links to an http resource
     describeClusterTest({ transport: "sockjs", encrypted: true});
   }
-  describeClusterTest({ transport: "xhr_streaming", encrypted: false});
-  describeClusterTest({ transport: "xhr_streaming", encrypted: true});
-  describeClusterTest({ transport: "xhr_polling", encrypted: false});
-  describeClusterTest({ transport: "xhr_polling", encrypted: true});
+  if (!/Opera/.test(navigator.userAgent)) {
+    describeClusterTest({ transport: "xhr_streaming", encrypted: false});
+    describeClusterTest({ transport: "xhr_streaming", encrypted: true});
+    describeClusterTest({ transport: "xhr_polling", encrypted: false});
+    describeClusterTest({ transport: "xhr_polling", encrypted: true});
+  }
   describeClusterTest({ transport: "xdr_streaming", encrypted: false});
   describeClusterTest({ transport: "xdr_streaming", encrypted: true});
   describeClusterTest({ transport: "xdr_polling", encrypted: false});
   describeClusterTest({ transport: "xdr_polling", encrypted: true});
+
+  it("should restore the global config", function() {
+    Pusher.Dependencies = _Dependencies;
+    Pusher.channel_auth_endpoint = _channel_auth_endpoint;
+    Pusher.channel_auth_transport = _channel_auth_transport;
+    Pusher.VERSION = _VERSION;
+  });
 });

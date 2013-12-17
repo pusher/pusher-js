@@ -32,7 +32,7 @@ describeIntegration("Falling back", function() {
 
     var timer;
     runs(function() {
-      pusher = new Pusher("foobar");
+      pusher = new Pusher("foobar", { disableStats: true });
       pusher.connect();
     });
     waitsFor(function() {
@@ -49,7 +49,7 @@ describeIntegration("Falling back", function() {
       transport.state = "open";
       transport.emit("open");
 
-      new Pusher.Timer(100, function() {
+      var timer = new Pusher.Timer(100, function() {
         transport.emit("closed", {
           code: 1006,
           reason: "KABOOM!",
@@ -112,7 +112,7 @@ describeIntegration("Falling back", function() {
     spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
 
     runs(function() {
-      pusher = new Pusher("foobar");
+      pusher = new Pusher("foobar", { disableStats: true });
       pusher.connect();
     });
     waitsFor(function() {
