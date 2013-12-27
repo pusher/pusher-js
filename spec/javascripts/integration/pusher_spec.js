@@ -496,21 +496,27 @@ describeIntegration("Pusher", function() {
   buildIntegrationTests("ws", true);
   // buildIntegrationTests("flash", false);
   // buildIntegrationTests("flash", true);
-  buildIntegrationTests("sockjs", false);
-  if (!Pusher.Util.isXDRSupported()) {
-    // SockJS fails in IE 9+, because the iframe links to an http resource
-    buildIntegrationTests("sockjs", true);
-  }
-  if (!/Opera/.test(navigator.userAgent)) {
+
+  if (Pusher.Util.isXHRSupported() || Pusher.Util.isXDRSupported()) {
+    // CORS-compatible browsers
     buildIntegrationTests("xhr_streaming", false);
     buildIntegrationTests("xhr_streaming", true);
     buildIntegrationTests("xhr_polling", false);
     buildIntegrationTests("xhr_polling", true);
+    buildIntegrationTests("xdr_streaming", false);
+    buildIntegrationTests("xdr_streaming", true);
+    buildIntegrationTests("xdr_polling", false);
+    buildIntegrationTests("xdr_polling", true);
+    if (Pusher.Util.isXDRSupported(false)) {
+      // IE can fall back to SockJS if protocols don't match
+      // No SockJS encrypted tests due to the way JS files are served
+      buildIntegrationTests("sockjs", false);
+    }
+  } else {
+    // Browsers using SockJS
+    buildIntegrationTests("sockjs", false);
+    buildIntegrationTests("sockjs", true);
   }
-  buildIntegrationTests("xdr_streaming", false);
-  buildIntegrationTests("xdr_streaming", true);
-  buildIntegrationTests("xdr_polling", false);
-  buildIntegrationTests("xdr_polling", true);
 
   it("should restore the global config", function() {
     Pusher.Dependencies = _Dependencies;

@@ -118,22 +118,25 @@ describeIntegration("Cluster Configuration", function() {
   // there's a problem with Flash policy file on EU when encrypted
   // describeClusterTest({ transport: "flash", encrypted: true});
 
-  describeClusterTest({ transport: "sockjs", encrypted: false});
-  if (!Pusher.Util.isXDRSupported()) {
-    // TODO disable on Android
-    // SockJS fails in IE 9+, because the iframe links to an http resource
-    describeClusterTest({ transport: "sockjs", encrypted: true});
-  }
-  if (!/Opera/.test(navigator.userAgent)) {
+  if (Pusher.Util.isXHRSupported()) {
+    // CORS-compatible browsers
     describeClusterTest({ transport: "xhr_streaming", encrypted: false});
     describeClusterTest({ transport: "xhr_streaming", encrypted: true});
     describeClusterTest({ transport: "xhr_polling", encrypted: false});
     describeClusterTest({ transport: "xhr_polling", encrypted: true});
+  } else if (Pusher.Util.isXDRSupported(false)) {
+    describeClusterTest({ transport: "xdr_streaming", encrypted: false});
+    describeClusterTest({ transport: "xdr_streaming", encrypted: true});
+    describeClusterTest({ transport: "xdr_polling", encrypted: false});
+    describeClusterTest({ transport: "xdr_polling", encrypted: true});
+    // IE can fall back to SockJS if protocols don't match
+    // No SockJS encrypted tests due to the way JS files are served
+    describeClusterTest({ transport: "sockjs", encrypted: false});
+  } else {
+    // Browsers using SockJS
+    describeClusterTest({ transport: "sockjs", encrypted: false});
+    describeClusterTest({ transport: "sockjs", encrypted: true});
   }
-  describeClusterTest({ transport: "xdr_streaming", encrypted: false});
-  describeClusterTest({ transport: "xdr_streaming", encrypted: true});
-  describeClusterTest({ transport: "xdr_polling", encrypted: false});
-  describeClusterTest({ transport: "xdr_polling", encrypted: true});
 
   it("should restore the global config", function() {
     Pusher.Dependencies = _Dependencies;
