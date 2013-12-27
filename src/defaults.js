@@ -86,9 +86,7 @@
 
       [":def", "http_fallback_loop",
         [":if", [":is_supported", ":http_loop"], [
-          ":best_connected_ever",
-            ":http_loop",
-            [":delayed", 8000, [":sockjs_loop"]]
+          ":http_loop"
         ], [
           ":sockjs_loop"
         ]]
