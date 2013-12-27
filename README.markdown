@@ -87,6 +87,14 @@ These can be changed to point to alternative Pusher URLs (used internally for ou
 
 Ignores null origin checks for HTTP fallbacks. Use with care, it should be disabled only if necessary (i.e. PhoneGap).
 
+#### `activityTimeout` (Integer)
+
+After this time (in miliseconds) without any messages received from the server, a ping message will be sent to check if the connection is still working. Default value is is supplied by the server, low values will result in unnecessary traffic.
+
+#### `pongTimeout` (Integer)
+
+Time before the connection is terminated after sending a ping message. Default is 30000 (30s). Low values will cause false disconnections, if latency is high.
+
 ## Connection
 
 A websocket (or Flash Fallback) connection is established by providing your API key to the constructor function:
