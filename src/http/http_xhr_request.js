@@ -2,7 +2,7 @@
   var hooks = {
     getRequest: function(socket) {
       var xhr = new window.XMLHttpRequest();
-      xhr.onreadystatechange = function() {
+      xhr.onreadystatechange = xhr.onprogress = function() {
         switch (xhr.readyState) {
           case 3:
             if (xhr.responseText && xhr.responseText.length > 0) {
