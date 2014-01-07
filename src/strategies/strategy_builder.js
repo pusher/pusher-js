@@ -100,7 +100,8 @@
     cached: returnWithOriginalContext(function(context, ttl, strategy){
       return new Pusher.CachedStrategy(strategy, context.transports, {
         ttl: ttl,
-        timeline: context.timeline
+        timeline: context.timeline,
+        encrypted: context.encrypted
       });
     }),
 
