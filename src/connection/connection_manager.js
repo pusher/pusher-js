@@ -49,6 +49,9 @@
     });
     Pusher.Network.bind("offline", function() {
       self.timeline.info({ netinfo: "offline" });
+      if (self.state === "connected") {
+        self.sendActivityCheck();
+      }
     });
 
     this.updateStrategy();
@@ -199,25 +202,29 @@
   };
 
   /** @private */
+  prototype.sendActivityCheck = function() {
+    var self = this;
+    self.stopActivityCheck();
+    self.send_event('pusher:ping', {});
+    // wait for pong response
+    self.activityTimer = new Pusher.Timer(
+      self.options.pongTimeout,
+      function() {
+        self.timeline.error({ pong_timed_out: self.options.pongTimeout });
+        self.retryIn(0);
+      }
+    );
+  };
+
+  /** @private */
   prototype.resetActivityCheck = function() {
-    this.stopActivityCheck();
+    var self = this;
+    self.stopActivityCheck();
     // send ping after inactivity
-    if (!this.connection.supportsPing()) {
-      var self = this;
-      self.activityTimer = new Pusher.Timer(
-        self.activityTimeout,
-        function() {
-          self.send_event('pusher:ping', {});
-          // wait for pong response
-          self.activityTimer = new Pusher.Timer(
-            self.options.pongTimeout,
-            function() {
-              self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-              self.retryIn(0);
-            }
-          );
-        }
-      );
+    if (!self.connection.supportsPing()) {
+      self.activityTimer = new Pusher.Timer(self.activityTimeout, function() {
+        self.sendActivityCheck();
+      });
     }
   };
 
