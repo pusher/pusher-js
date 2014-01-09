@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1.6 (2013-01-09)
+
+[NEW] Ping on offline events to detect disconnections quicker
+
+[CHANGED] Added an exception when handshake does not contain the activity timeout
+
+[FIXED] Encrypted transports not being cached correctly
+
 ## 2.1.5 (2013-12-16)
 
 [NEW] Server can suggest a lower activity timeout in the handshake
