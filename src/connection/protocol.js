@@ -60,7 +60,7 @@
 
     if (message.event === "pusher:connection_established") {
       if (!message.data.activity_timeout) {
-        throw "No activity timeout specified in handshake"
+        throw "No activity timeout specified in handshake";
       }
       return {
         action: "connected",
