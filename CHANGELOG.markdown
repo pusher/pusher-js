@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.11 (2013-01-09)
+
+[FIXED] Encrypted transports not being cached correctly
+
 ## 2.0.10 (2013-12-16)
 
 [CHANGED] Transports are cached separately for encrypted connections

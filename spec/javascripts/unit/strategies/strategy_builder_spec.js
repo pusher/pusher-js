@@ -47,6 +47,16 @@ describe("StrategyBuilder", function() {
     expect(strategy.timeoutLimit).toEqual(8000);
   });
 
+  it("should construct a cached strategy", function() {
+    var strategy = Pusher.StrategyBuilder.build([
+      [":def_transport", "sub", "flash", 2, { disableFlash: true }],
+      [":def", "strategy", [":cached", 1234, ":sub"]]
+    ], { encrypted: true });
+    expect(strategy).toEqual(jasmine.any(Pusher.CachedStrategy));
+    expect(strategy.ttl).toEqual(1234);
+    expect(strategy.encrypted).toEqual(true);
+  });
+
   it("should construct a first connected strategy", function() {
     var strategy = Pusher.StrategyBuilder.build([
       [":def_transport", "sub", "flash", 2, { disableFlash: true }],
