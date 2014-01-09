@@ -438,8 +438,24 @@ describe("ConnectionManager", function() {
     describe("on ping", function() {
       it("should reply with a pusher:pong event", function() {
         connection.emit("ping");
-        expect(connection.send_event)
-          .toHaveBeenCalledWith("pusher:pong", {}, undefined);
+        expect(connection.send_event).toHaveBeenCalledWith(
+          "pusher:pong", {}, undefined
+        );
+      });
+    });
+
+    describe("on offline event", function() {
+      it("should send an activity check and disconnect after no pong response", function() {
+        Pusher.Network.emit("offline");
+        expect(connection.send_event).toHaveBeenCalledWith(
+          "pusher:ping", {}, undefined
+        );
+
+        jasmine.Clock.tick(2344);
+        expect(manager.state).toEqual("connected");
+
+        jasmine.Clock.tick(1);
+        expect(manager.state).toEqual("connecting");
       });
     });
   });

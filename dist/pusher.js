@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.1.5
+ * Pusher JavaScript Library v2.1.6
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
@@ -599,7 +599,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.1.5';
+  Pusher.VERSION = '2.1.6';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -2452,7 +2452,8 @@
     cached: returnWithOriginalContext(function(context, ttl, strategy){
       return new Pusher.CachedStrategy(strategy, context.transports, {
         ttl: ttl,
-        timeline: context.timeline
+        timeline: context.timeline,
+        encrypted: context.encrypted
       });
     }),
 
@@ -2607,6 +2608,9 @@
     message = this.decodeMessage(message);
 
     if (message.event === "pusher:connection_established") {
+      if (!message.data.activity_timeout) {
+        throw "No activity timeout specified in handshake";
+      }
       return {
         action: "connected",
         id: message.data.socket_id,
@@ -2956,6 +2960,9 @@
     });
     Pusher.Network.bind("offline", function() {
       self.timeline.info({ netinfo: "offline" });
+      if (self.state === "connected") {
+        self.sendActivityCheck();
+      }
     });
 
     this.updateStrategy();
@@ -3027,6 +3034,7 @@
         self.runner = self.strategy.connect(0, callback);
       } else {
         if (handshake.action === "error") {
+          self.emit("error", { type: "HandshakeError", error: handshake.error });
           self.timeline.error({ handshakeError: handshake.error });
         } else {
           self.abortConnecting(); // we don't support switching connections yet
@@ -3106,25 +3114,29 @@
   };
 
   /** @private */
+  prototype.sendActivityCheck = function() {
+    var self = this;
+    self.stopActivityCheck();
+    self.send_event('pusher:ping', {});
+    // wait for pong response
+    self.activityTimer = new Pusher.Timer(
+      self.options.pongTimeout,
+      function() {
+        self.timeline.error({ pong_timed_out: self.options.pongTimeout });
+        self.retryIn(0);
+      }
+    );
+  };
+
+  /** @private */
   prototype.resetActivityCheck = function() {
-    this.stopActivityCheck();
+    var self = this;
+    self.stopActivityCheck();
     // send ping after inactivity
-    if (!this.connection.supportsPing()) {
-      var self = this;
-      self.activityTimer = new Pusher.Timer(
-        self.activityTimeout,
-        function() {
-          self.send_event('pusher:ping', {});
-          // wait for pong response
-          self.activityTimer = new Pusher.Timer(
-            self.options.pongTimeout,
-            function() {
-              self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-              self.retryIn(0);
-            }
-          );
-        }
-      );
+    if (!self.connection.supportsPing()) {
+      self.activityTimer = new Pusher.Timer(self.activityTimeout, function() {
+        self.sendActivityCheck();
+      });
     }
   };
 

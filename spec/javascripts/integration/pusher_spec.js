@@ -326,6 +326,8 @@ describeIntegration("Pusher", function() {
         expect(channel1.members.get(pusher2.connection.socket_id))
           .toBe(null);
 
+        expect(channel1.members.me).toEqual(member1);
+
         channel1.bind("pusher:member_added", onMemberAdded);
         channel2 = subscribe(pusher2, channelName, onSubscribed2);
       });
@@ -337,6 +339,8 @@ describeIntegration("Pusher", function() {
           .toEqual(member1);
         expect(channel2.members.get(pusher2.connection.socket_id))
           .toEqual(member2);
+
+        expect(channel2.members.me).toEqual(member2);
       });
       waitsFor(function() {
         return onMemberAdded.calls.length > 0;
