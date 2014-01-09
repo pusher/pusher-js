@@ -123,6 +123,7 @@
         self.runner = self.strategy.connect(0, callback);
       } else {
         if (handshake.action === "error") {
+          self.emit("error", { type: "HandshakeError", error: handshake.error });
           self.timeline.error({ handshakeError: handshake.error });
         } else {
           self.abortConnecting(); // we don't support switching connections yet
