@@ -82,6 +82,7 @@ bundle 'sockjs.js' do
 end
 
 bundle 'xhr.js' do
+  license 'pusher-licence.js'
   file 'http/http_request.js'
   file 'http/http_xhr_request.js'
   file 'http/http_socket.js'
@@ -90,6 +91,7 @@ bundle 'xhr.js' do
 end
 
 bundle 'xdr.js' do
+  license 'pusher-licence.js'
   file 'http/http_request.js'
   file 'http/http_xdomain_request.js'
   file 'http/http_socket.js'
