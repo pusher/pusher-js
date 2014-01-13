@@ -3,6 +3,6 @@
 .bundle
 *.DS_Store
 *.swp
-/dist
+dist/*
 !/dist/*.js
 !/dist/*.swf
