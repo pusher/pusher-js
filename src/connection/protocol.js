@@ -59,6 +59,9 @@
     message = this.decodeMessage(message);
 
     if (message.event === "pusher:connection_established") {
+      if (!message.data.activity_timeout) {
+        throw "No activity timeout specified in handshake";
+      }
       return {
         action: "connected",
         id: message.data.socket_id,

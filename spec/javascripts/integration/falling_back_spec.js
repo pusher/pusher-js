@@ -147,7 +147,8 @@ describeIntegration("Falling back", function() {
         data: JSON.stringify({
           event: "pusher:connection_established",
           data: {
-            socket_id: "123.456"
+            socket_id: "123.456",
+            activity_timeout: 120
           }
         })
       });

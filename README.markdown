@@ -44,6 +44,17 @@ Endpoint on your server that will return the authentication signature needed for
 
 Defines how the authentication endpoint, defined using authEndpoint, will be called. There are two options available: `ajax` and `jsonp`.
 
+#### `auth` (Hash)
+
+Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
+
+    var pusher = new Pusher(API_KEY, {
+      auth: {
+        params: { foo: "bar" },
+        headers: { baz: "boo" }
+      }
+    });
+
 #### `cluster` (String)
 
 Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
@@ -86,6 +97,14 @@ These can be changed to point to alternative Pusher URLs (used internally for ou
 #### `ignoreNullOrigin` (Boolean)
 
 Ignores null origin checks for HTTP fallbacks. Use with care, it should be disabled only if necessary (i.e. PhoneGap).
+
+#### `activityTimeout` (Integer)
+
+After this time (in miliseconds) without any messages received from the server, a ping message will be sent to check if the connection is still working. Default value is is supplied by the server, low values will result in unnecessary traffic.
+
+#### `pongTimeout` (Integer)
+
+Time before the connection is terminated after sending a ping message. Default is 30000 (30s). Low values will cause false disconnections, if latency is high.
 
 ## Connection
 

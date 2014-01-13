@@ -233,6 +233,19 @@ describe("Protocol", function() {
       });
     });
 
+    it("should throw an exception when activity timeout is unspecified", function() {
+      expect(function() {
+        return Pusher.Protocol.processHandshake({
+          data: JSON.stringify({
+            event: "pusher:connection_established",
+            data: {
+              socket_id: "123.456"
+            }
+          })
+        });
+      }).toThrow("No activity timeout specified in handshake");
+    });
+
     it("should throw an exception on invalid handshake", function() {
       expect(function() {
         return Pusher.Protocol.processHandshake({
