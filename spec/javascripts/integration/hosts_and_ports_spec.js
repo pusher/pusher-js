@@ -42,12 +42,12 @@ describeIntegration("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to wss://ws.pusherapp.com:443 by default when encrypted", function() {
+    it("should connect to wss://wss.pusherapp.com:443 by default when encrypted", function() {
       pusher = new Pusher("foobar", { encrypted: true });
       pusher.connect();
 
       expect(window.WebSocket).toHaveBeenCalledWith(
-        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
+        "wss://wss.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
       );
     });
 
@@ -60,8 +60,8 @@ describeIntegration("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect using wsHost and wssPort when specified in options and encrypted", function() {
-      pusher = new Pusher("foobar", { wsHost: "example.org", wssPort: 4444, encrypted: true });
+    it("should connect using wssHost and wssPort when specified in options and encrypted", function() {
+      pusher = new Pusher("foobar", { wssHost: "example.org", wssPort: 4444, encrypted: true });
       pusher.connect();
 
       expect(window.WebSocket).toHaveBeenCalledWith(
@@ -103,12 +103,12 @@ describeIntegration("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to wss://ws.pusherapp.com:443 by default when encrypted", function() {
+    it("should connect to wss://wss.pusherapp.com:443 by default when encrypted", function() {
       pusher = new Pusher("foobar", { encrypted: true });
       pusher.connect();
 
       expect(window.FlashWebSocket).toHaveBeenCalledWith(
-        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
+        "wss://wss.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
       );
     });
 
@@ -121,8 +121,8 @@ describeIntegration("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect using wsHost and wssPort when specified in options and encrypted", function() {
-      pusher = new Pusher("foobar", { wsHost: "example.org", wssPort: 4444, encrypted: true });
+    it("should connect using wssHost and wssPort when specified in options and encrypted", function() {
+      pusher = new Pusher("foobar", { wssHost: "example.org", wssPort: 4444, encrypted: true });
       pusher.connect();
 
       expect(window.FlashWebSocket).toHaveBeenCalledWith(
@@ -170,12 +170,12 @@ describeIntegration("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to https://sockjs.pusher.com:443 by default when encrypted", function() {
+    it("should connect to https://sockjss.pusher.com:443 by default when encrypted", function() {
       pusher = new Pusher("foobar", { encrypted: true });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "https://sockjs.pusher.com:443/pusher",
+        "https://sockjss.pusher.com:443/pusher",
         null,
         { js_path: '<CDN_HTTPS>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
           ignore_null_origin: undefined
@@ -196,8 +196,8 @@ describeIntegration("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect using wsHost and wssPort when specified in options and encrypted", function() {
-      pusher = new Pusher("foobar", { httpHost: "example.org", httpsPort: 4444, encrypted: true });
+    it("should connect using httpsHost and httpsPort when specified in options and encrypted", function() {
+      pusher = new Pusher("foobar", { httpsHost: "example.org", httpsPort: 4444, encrypted: true });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(

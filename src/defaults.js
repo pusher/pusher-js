@@ -28,11 +28,11 @@
     return [
       [":def", "ws_options", {
         hostUnencrypted: config.wsHost + ":" + config.wsPort,
-        hostEncrypted: config.wsHost + ":" + config.wssPort
+        hostEncrypted: config.wssHost + ":" + config.wssPort
       }],
       [":def", "sockjs_options", {
         hostUnencrypted: config.httpHost + ":" + config.httpPort,
-        hostEncrypted: config.httpHost + ":" + config.httpsPort
+        hostEncrypted: config.httpsHost + ":" + config.httpsPort
       }],
       [":def", "timeouts", {
         loop: true,
