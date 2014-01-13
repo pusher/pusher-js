@@ -21,7 +21,7 @@
  * THE SOFTWARE.
  */
 
-/* SockJS client, version 0.3.4.65.g83db, http://sockjs.org, MIT License
+/* SockJS client, version 0.3.4.72.g5b91, http://sockjs.org, MIT License
 
 Copyright (c) 2011-2012 VMware, Inc.
 
@@ -218,6 +218,7 @@ EventEmitter.prototype.nuke = function() {
  */
 
 var random_string_chars = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+
 utils.random_string = function(length, max) {
     max = max || random_string_chars.length;
     var i, ret = [];
@@ -226,9 +227,11 @@ utils.random_string = function(length, max) {
     }
     return ret.join('');
 };
+
 utils.random_number = function(max) {
     return Math.floor(Math.random() * max);
 };
+
 utils.random_number_string = function(max) {
     var t = (''+(max - 1)).length;
     var p = Array(t+1).join('0');
@@ -258,18 +261,6 @@ utils.isSameOriginUrl = function(url_a, url_b) {
     if (!url_b) url_b = _window.location.href;
 
     return utils.getOrigin(url_a) === utils.getOrigin(url_b);
-};
-
-utils.getParentDomain = function(url) {
-    // ipv4 ip address
-    if (/^[0-9.]*$/.test(url)) return url;
-    // ipv6 ip address
-    if (/^\[/.test(url)) return url;
-    // no dots
-    if (!(/[.]/.test(url))) return url;
-
-    var parts = url.split('.').slice(1);
-    return parts.join('.');
 };
 
 utils.objectExtend = function(dst, src) {
@@ -473,15 +464,12 @@ utils.quote = function(string) {
     });
 }
 
-var _all_protocols = ['websocket',
-                      'xdr-streaming',
-                      'xhr-streaming',
-                      'iframe-eventsource',
-                      'iframe-htmlfile',
-                      'xdr-polling',
-                      'xhr-polling',
-                      'iframe-xhr-polling',
-                      'jsonp-polling'];
+var _all_protocols = [
+    'iframe-eventsource',
+    'iframe-htmlfile',
+    'iframe-xhr-polling',
+    'jsonp-polling'
+];
 
 utils.probeProtocols = function(url) {
     var probed = {};
@@ -494,64 +482,29 @@ utils.probeProtocols = function(url) {
     return probed;
 };
 
-utils.detectProtocols = function(probed, protocols_whitelist, info) {
-    var pe = {},
-        protocols = [];
-    if (!protocols_whitelist) protocols_whitelist = _all_protocols;
-    for(var i=0; i<protocols_whitelist.length; i++) {
+utils.detectProtocols = function(protocols_probed, protocols_whitelist, info) {
+    protocols_whitelist = protocols_whitelist || _all_protocols;
+
+    var protocols = [];
+    for (var i = 0; i < protocols_whitelist.length; i++) {
         var protocol = protocols_whitelist[i];
-        pe[protocol] = probed[protocol];
-    }
-    var maybe_push = function(protos) {
-        var proto = protos.shift();
-        if (pe[proto]) {
-            protocols.push(proto);
-        } else {
-            if (protos.length > 0) {
-                maybe_push(protos);
-            }
-        }
-    }
-
-    // 1. Websocket
-    if (info.websocket !== false) {
-        maybe_push(['websocket']);
-    }
-
-    // 2. Streaming
-    if (pe['xhr-streaming'] && !info.null_origin) {
-        protocols.push('xhr-streaming');
-    } else {
-        if (pe['xdr-streaming'] && !info.cookie_needed && !info.null_origin) {
-            protocols.push('xdr-streaming');
-        } else {
-            maybe_push(['iframe-eventsource',
-                        'iframe-htmlfile']);
-        }
-    }
-
-    // 3. Polling
-    if (pe['xhr-polling'] && !info.null_origin) {
-        protocols.push('xhr-polling');
-    } else {
-        if (pe['xdr-polling'] && !info.cookie_needed && !info.null_origin) {
-            protocols.push('xdr-polling');
-        } else {
-            maybe_push(['iframe-xhr-polling',
-                        'jsonp-polling']);
+        if (protocols_probed[protocol]) {
+            protocols.push(protocol);
         }
     }
     return protocols;
 }
 
 utils.defaultOptions = function(){
-    return {devel: false,
-            debug: false,
-            protocols_whitelist: [],
-            info: undefined,
-            rtt: undefined,
-            max_window_time: 4000,
-            init_window_size: 4096};
+    return {
+        devel: false,
+        debug: false,
+        protocols_whitelist: [],
+        info: undefined,
+        rtt: undefined,
+        max_window_time: 4000,
+        init_window_size: 4096
+    };
 }
 //         [*] End of lib/utils.js
 
@@ -565,30 +518,10 @@ utils.defaultOptions = function(){
  * ***** END LICENSE BLOCK *****
  */
 
-// May be used by htmlfile jsonp and transports.
-var MPrefix = '_sockjs_global';
-utils.createHook = function() {
-    var window_id = 'a' + utils.random_string(8);
-    if (!(MPrefix in _window)) {
-        var map = {};
-        _window[MPrefix] = function(window_id) {
-            if (!(window_id in map)) {
-                map[window_id] = {
-                    id: window_id,
-                    del: function() {delete map[window_id];}
-                };
-            }
-            return map[window_id];
-        }
-    }
-    return _window[MPrefix](window_id);
-};
-
-
-
 utils.attachMessage = function(listener) {
     utils.attachEvent('message', listener);
 };
+
 utils.attachEvent = function(event, listener) {
     if (typeof _window.addEventListener !== 'undefined') {
         _window.addEventListener(event, listener, false);
@@ -605,6 +538,7 @@ utils.attachEvent = function(event, listener) {
 utils.detachMessage = function(listener) {
     utils.detachEvent('message', listener);
 };
+
 utils.detachEvent = function(event, listener) {
     if (typeof _window.addEventListener !== 'undefined') {
         _window.removeEventListener(event, listener, false);
@@ -644,11 +578,11 @@ utils.unload_add = function(listener) {
     }
     return ref;
 };
+
 utils.unload_del = function(ref) {
     if (ref in on_unload)
         delete on_unload[ref];
 };
-
 
 utils.createIframe = function (iframe_url, error_callback) {
     var iframe = _document.createElement('iframe');
@@ -1114,7 +1048,7 @@ var SockJS = function(url, dep_protocols_whitelist, options) {
 // Inheritance
 SockJS.prototype = new REventTarget();
 
-SockJS.version = "0.3.4.65.g83db";
+SockJS.version = "0.3.4.72.g5b91";
 
 SockJS.CONNECTING = 0;
 SockJS.OPEN = 1;
@@ -1338,70 +1272,6 @@ SockJS.prototype._applyInfo = function(info, rtt, protocols_whitelist) {
     }
 };
 //         [*] End of lib/sockjs.js
-
-
-//         [*] Including lib/trans-websocket.js
-/*
- * ***** BEGIN LICENSE BLOCK *****
- * Copyright (c) 2011-2012 VMware, Inc.
- *
- * For the license see COPYING.
- * ***** END LICENSE BLOCK *****
- */
-
-var WebSocketTransport = SockJS.websocket = function(ri, trans_url) {
-    var that = this;
-    var url = trans_url + '/websocket';
-    if (url.slice(0, 5) === 'https') {
-        url = 'wss' + url.slice(5);
-    } else {
-        url = 'ws' + url.slice(4);
-    }
-    that.ri = ri;
-    that.url = url;
-    var Constructor = _window.WebSocket || _window.MozWebSocket;
-
-    that.ws = new Constructor(that.url);
-    that.ws.onmessage = function(e) {
-        that.ri._didMessage(e.data);
-    };
-    // Firefox has an interesting bug. If a websocket connection is
-    // created after onunload, it stays alive even when user
-    // navigates away from the page. In such situation let's lie -
-    // let's not open the ws connection at all. See:
-    // https://github.com/sockjs/sockjs-client/issues/28
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=696085
-    that.unload_ref = utils.unload_add(function(){that.ws.close()});
-    that.ws.onclose = function() {
-        that.ri._didMessage(utils.closeFrame(1006, "WebSocket connection broken"));
-    };
-};
-
-WebSocketTransport.prototype.doSend = function(data) {
-    this.ws.send('[' + data + ']');
-};
-
-WebSocketTransport.prototype.doCleanup = function() {
-    var that = this;
-    var ws = that.ws;
-    if (ws) {
-        ws.onmessage = ws.onclose = null;
-        ws.close();
-        utils.unload_del(that.unload_ref);
-        that.unload_ref = that.ri = that.ws = null;
-    }
-};
-
-WebSocketTransport.enabled = function() {
-    return !!(_window.WebSocket || _window.MozWebSocket);
-};
-
-// In theory, ws should require 1 round trip. But in chrome, this is
-// not very stable over SSL. Most likely a ws connection requires a
-// separate SSL connection, in which case 2 round trips are an
-// absolute minumum.
-WebSocketTransport.roundTrips = 2;
-//         [*] End of lib/trans-websocket.js
 
 
 //         [*] Including lib/trans-sender.js
@@ -1806,69 +1676,6 @@ AjaxBasedTransport.prototype.doCleanup = function() {
     }
     that.send_destructor();
 };
-
-// xhr-streaming
-var XhrStreamingTransport = SockJS['xhr-streaming'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr_streaming', XhrReceiver, utils.XHRCorsObject);
-};
-
-XhrStreamingTransport.prototype = new AjaxBasedTransport();
-
-XhrStreamingTransport.enabled = function() {
-    // Support for CORS Ajax aka Ajax2? Opera 12 claims CORS but
-    // doesn't do streaming.
-    return (_window.XMLHttpRequest &&
-            'withCredentials' in new XMLHttpRequest() &&
-            (!/opera/i.test(navigator.userAgent)));
-};
-XhrStreamingTransport.roundTrips = 2; // preflight, ajax
-
-// Safari gets confused when a streaming ajax request is started
-// before onload. This causes the load indicator to spin indefinetely.
-XhrStreamingTransport.need_body = true;
-
-
-// According to:
-//   http://stackoverflow.com/questions/1641507/detect-browser-support-for-cross-domain-xmlhttprequests
-//   http://hacks.mozilla.org/2009/07/cross-site-xmlhttprequest-with-cors/
-
-
-// xdr-streaming
-var XdrStreamingTransport = SockJS['xdr-streaming'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr_streaming', XhrReceiver, utils.XDRObject);
-};
-
-XdrStreamingTransport.prototype = new AjaxBasedTransport();
-
-XdrStreamingTransport.enabled = function(url) {
-    return utils.isXHRCorsCapable(url) === 2;
-};
-XdrStreamingTransport.roundTrips = 2; // preflight, ajax
-
-
-
-// xhr-polling
-var XhrPollingTransport = SockJS['xhr-polling'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr', XhrReceiver, utils.XHRCorsObject);
-};
-
-XhrPollingTransport.prototype = new AjaxBasedTransport();
-
-XhrPollingTransport.enabled = XhrStreamingTransport.enabled;
-XhrPollingTransport.roundTrips = 2; // preflight, ajax
-XhrPollingTransport.polling = true;
-
-
-// xdr-polling
-var XdrPollingTransport = SockJS['xdr-polling'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr', XhrReceiver, utils.XDRObject);
-};
-
-XdrPollingTransport.prototype = new AjaxBasedTransport();
-
-XdrPollingTransport.enabled = XdrStreamingTransport.enabled;
-XdrPollingTransport.roundTrips = 2; // preflight, ajax
-XdrPollingTransport.polling = true;
 //         [*] End of lib/trans-xhr.js
 
 
