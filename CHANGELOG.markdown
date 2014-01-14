@@ -1,5 +1,21 @@
 # Changelog
 
+## 2.2.0-rc1 (2014-01-14)
+
+[NEW] XHR streaming and polling transports were extracted from SockJS
+
+[NEW] Reduced the number of roundtrips required by HTTP streaming and polling transports for connecting from 3 to 1
+
+[NEW] Refactored the connection strategy to be faster and more reliable for clients using HTTP
+
+[NEW] Added new options - `wssHost` and `httpsHost` for encrypted connections
+
+[NEW] HTTP streaming and polling are now supported on Opera
+
+[CHANGED] Reduced the size of sockjs.js
+
+[FIXED] Issue with SockJS streaming not being able to reconnect
+
 ## 2.1.6 (2013-01-09)
 
 [NEW] Ping on offline events to detect disconnections quicker
