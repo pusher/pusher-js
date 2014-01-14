@@ -16,7 +16,7 @@
 
 [FIXED] Issue with SockJS streaming not being able to reconnect
 
-## 2.1.6 (2013-01-09)
+## 2.1.6 (2014-01-09)
 
 [NEW] Ping on offline events to detect disconnections quicker
 
