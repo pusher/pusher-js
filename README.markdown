@@ -218,6 +218,12 @@ Then after loading `pusher.js`, but before connecting, you need to overwrite the
       suffix: Pusher.dependency_suffix
     });
 
+## SockJS compatibility
+
+Most browsers have a limit of 6 simultaneous connections to a single domain, but Internet Explorer 6 and 7 have a limit of just 2. This means that you can only use a single Pusher connection in these browsers, because SockJS requires an HTTP connection for incoming data and another one for sending. Opening the second connection will break the first one as the client won't be able to respond to ping messages and get disconnected eventually.
+
+All other browsers work fine with two or three connections.
+
 ## Developing
 
 Use Bundler to install all development dependencies
