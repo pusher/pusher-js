@@ -333,8 +333,7 @@ describe("ConnectionManager", function() {
 
         jasmine.Clock.tick(10000);
         // if activity check had worked, it would have sent a ping message
-        expect(connection.send).not.toHaveBeenCalled();
-        expect(connection.send_event).not.toHaveBeenCalled();
+        expect(connection.ping).not.toHaveBeenCalled();
       });
 
       it("should stop emitting received messages", function() {
@@ -391,23 +390,17 @@ describe("ConnectionManager", function() {
     });
 
     describe("on activity timeout", function() {
-      it("should send a pusher:ping event", function() {
+      it("should send a ping", function() {
         jasmine.Clock.tick(3455);
-        expect(connection.send_event).not.toHaveBeenCalled();
+        expect(connection.ping).not.toHaveBeenCalled();
 
         jasmine.Clock.tick(1);
-        expect(connection.send_event)
-          .toHaveBeenCalledWith("pusher:ping", {}, undefined);
+        expect(connection.ping).toHaveBeenCalled();
 
         jasmine.Clock.tick(2344);
         expect(connection.close).not.toHaveBeenCalled();
 
-        connection.emit("pong");
-        connection.emit("message", {
-          event: "pusher:pong",
-          data: {}
-        });
-
+        connection.emit("activity");
         // pong received, connection should not get closed
         jasmine.Clock.tick(1000);
         expect(connection.close).not.toHaveBeenCalled();
@@ -447,15 +440,34 @@ describe("ConnectionManager", function() {
     describe("on offline event", function() {
       it("should send an activity check and disconnect after no pong response", function() {
         Pusher.Network.emit("offline");
-        expect(connection.send_event).toHaveBeenCalledWith(
-          "pusher:ping", {}, undefined
-        );
+        expect(connection.ping).toHaveBeenCalled();
 
         jasmine.Clock.tick(2344);
         expect(manager.state).toEqual("connected");
 
         jasmine.Clock.tick(1);
         expect(manager.state).toEqual("connecting");
+      });
+    });
+  });
+
+  describe("after establishing a connection which handles activity checks by iself", function() {
+    beforeEach(function() {
+      manager.connect();
+      connection.id = "123.456";
+      connection.handlesActivityChecks.andReturn(true);
+      strategy._callback(null, {
+        action: "connected",
+        connection: connection,
+        activityTimeout: 999999
+      });
+    });
+
+    describe("on activity timeout", function() {
+      it("should not send a ping or close a connection", function() {
+        jasmine.Clock.tick(10000);
+        expect(connection.ping).not.toHaveBeenCalled();
+        expect(connection.close).not.toHaveBeenCalled();
       });
     });
   });
@@ -533,9 +545,7 @@ describe("ConnectionManager", function() {
       expect(connection.send_event).not.toHaveBeenCalled();
 
       jasmine.Clock.tick(1);
-      expect(connection.send_event).toHaveBeenCalledWith(
-        "pusher:ping", {}, undefined
-      );
+      expect(connection.ping).toHaveBeenCalled();
     });
 
     it("should use the handshake activity timeout value, if it's the lowest", function() {
@@ -551,9 +561,7 @@ describe("ConnectionManager", function() {
       expect(connection.send_event).not.toHaveBeenCalled();
 
       jasmine.Clock.tick(1);
-      expect(connection.send_event).toHaveBeenCalledWith(
-        "pusher:ping", {}, undefined
-      );
+      expect(connection.ping).toHaveBeenCalled();
     });
 
     it("should use the default activity timeout value, if it's the lowest", function() {
@@ -569,9 +577,7 @@ describe("ConnectionManager", function() {
       expect(connection.send_event).not.toHaveBeenCalled();
 
       jasmine.Clock.tick(1);
-      expect(connection.send_event).toHaveBeenCalledWith(
-        "pusher:ping", {}, undefined
-      );
+      expect(connection.ping).toHaveBeenCalled();
     });
   });
 });

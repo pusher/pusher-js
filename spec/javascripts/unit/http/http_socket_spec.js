@@ -1,5 +1,5 @@
 describe("HTTP.Socket", function() {
-  var onOpen, onMessage, onClose;
+  var onOpen, onMessage, onActivity, onClose;
   var hooks;
 
   var lastXHR;
@@ -35,10 +35,12 @@ describe("HTTP.Socket", function() {
 
     onOpen = jasmine.createSpy("onOpen");
     onMessage = jasmine.createSpy("onMessage");
+    onActivity = jasmine.createSpy("onActivity");
     onClose = jasmine.createSpy("onClose");
 
     socket.onopen = onOpen;
     socket.onmessage = onMessage;
+    socket.onactivity = onActivity;
     socket.onclose = onClose;
   });
 
@@ -139,11 +141,13 @@ describe("HTTP.Socket", function() {
       jasmine.Clock.tick(1);
       expect(stream.close).toHaveBeenCalled();
     });
+  });
 
-    it("should stop the activity check", function() {
-      expect(Pusher.HTTP.getXHR.calls.length).toEqual(2);
-      jasmine.Clock.tick(100000);
-      expect(Pusher.HTTP.getXHR.calls.length).toEqual(2);
+  describe("#ping", function() {
+    it("should call the sendHeartbeat hook", function() {
+      expect(hooks.sendHeartbeat).not.toHaveBeenCalledWith(socket);
+      socket.ping();
+      expect(hooks.sendHeartbeat).toHaveBeenCalledWith(socket);
     });
   });
 
@@ -166,13 +170,6 @@ describe("HTTP.Socket", function() {
     it("should close the stream", function() {
       socket.close(2013, "test reason");
       expect(lastXHR.close).toHaveBeenCalled();
-    });
-
-    it("should stop the activity check", function() {
-      socket.close(2013, "test reason");
-      expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
-      jasmine.Clock.tick(100000);
-      expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
     });
   });
 
@@ -324,88 +321,13 @@ describe("HTTP.Socket", function() {
         lastXHR.emit("chunk", { status: 200, data: 'c[1234, "testing"]' });
         expect(lastXHR.close).toHaveBeenCalled();
       });
-
-      it("should stop the activity check", function() {
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
-        lastXHR.emit("chunk", { status: 200, data: 'c[1234, "testing"]' });
-        jasmine.Clock.tick(100000);
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
-      });
     });
 
-    describe("after 30s of inactivity", function() {
-      it("should send a heartbeat", function() {
-
-        expect(hooks.sendHeartbeat.calls.length).toEqual(0);
-        jasmine.Clock.tick(29999);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(0);
-        jasmine.Clock.tick(1);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(1);
-      });
-    });
-
-    describe("after a activity check response", function() {
-      it("should not close the connection", function() {
-        jasmine.Clock.tick(44999);
-        lastXHR.emit("chunk", { status: 200, data: "a[]" });
-        jasmine.Clock.tick(30000);
-      });
-
-      it("should delay the next activity check", function() {
-        jasmine.Clock.tick(44999);
-        lastXHR.emit("chunk", { status: 200, data: "a[]" });
-
-        jasmine.Clock.tick(29999);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(1);
-
-        jasmine.Clock.tick(1);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(2);
-      });
-    });
-
-    describe("after 45s of inactivity", function() {
-      it("should close the connection", function() {
-        jasmine.Clock.tick(44999);
-        expect(onClose).not.toHaveBeenCalled();
-
-        jasmine.Clock.tick(1);
-        expect(onClose).toHaveBeenCalledWith({
-          code: 1006,
-          reason: "Did not receive a heartbeat response",
-          wasClean: false
-        });
-      });
-
-      it("should unbind all listeners from the stream", function() {
-        spyOn(lastXHR, "unbind_all");
-        jasmine.Clock.tick(45000);
-        expect(lastXHR.unbind_all).toHaveBeenCalled();
-      });
-
-      it("should close the stream", function() {
-        jasmine.Clock.tick(45000);
-        expect(lastXHR.close).toHaveBeenCalled();
-      });
-
-      it("should stop the activity check", function() {
-        expect(hooks.sendHeartbeat.calls.length).toEqual(0);
-        jasmine.Clock.tick(30000);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(1);
-        jasmine.Clock.tick(100000);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(1);
-      });
-    });
-
-    describe("on any message", function() {
-      it("should delay the next activity check", function() {
-        jasmine.Clock.tick(10000);
+    describe("on any chunk", function() {
+      it("should call onactivity", function() {
+        expect(onActivity).not.toHaveBeenCalled();
         lastXHR.emit("chunk", { status: 200, data: "x" });
-
-        jasmine.Clock.tick(29999);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(0);
-
-        jasmine.Clock.tick(1);
-        expect(hooks.sendHeartbeat.calls.length).toEqual(1);
+        expect(onActivity).toHaveBeenCalled();
       });
     });
   });

@@ -181,6 +181,29 @@ describe("AbstractTransport", function() {
     });
   });
 
+  describe("#ping", function() {
+    beforeEach(function() {
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
+    });
+
+    it("should call ping on the socket, if it supports it", function() {
+      spyOn(this.transport, "supportsPing").andReturn(true);
+      this.socket.ping = jasmine.createSpy("ping");
+
+      expect(this.socket.ping).not.toHaveBeenCalled();
+      this.transport.ping();
+      expect(this.socket.ping).toHaveBeenCalled();
+    });
+
+    it("should not fail if socket does not support ping", function() {
+      spyOn(this.transport, "supportsPing").andReturn(false);
+
+      this.transport.ping();
+    });
+  });
+
   describe("#close", function() {
     beforeEach(function() {
       this.transport.initialize();
@@ -215,6 +238,23 @@ describe("AbstractTransport", function() {
 
       expect(this.transport.state).toEqual("open");
       expect(onMessage).toHaveBeenCalledWith("ugabuga");
+    });
+  });
+
+  describe("after receiving an activity event if the socket supports ping", function() {
+    beforeEach(function() {
+      spyOn(this.transport, "supportsPing").andReturn(true);
+      this.transport.initialize();
+      this.transport.connect();
+      this.socket.onopen();
+    });
+
+    it("should emit an 'activity' event", function() {
+      var onActivity = jasmine.createSpy("onActivity");
+      this.transport.bind("activity", onActivity);
+
+      this.socket.onactivity();
+      expect(onActivity).toHaveBeenCalled();
     });
   });
 

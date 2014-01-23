@@ -39,6 +39,10 @@ describe("WSTransport", function() {
     expect(this.transport.supportsPing()).toBe(false);
   });
 
+  it("should not handle activity checks", function() {
+    expect(this.transport.handlesActivityChecks()).toBe(false);
+  });
+
   it("should be supported in browsers with WebSocket implementation", function() {
     window.WebSocket = {};
     window.MozWebSocket = undefined;

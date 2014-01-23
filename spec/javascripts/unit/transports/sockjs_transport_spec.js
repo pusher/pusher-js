@@ -42,8 +42,12 @@ describe("SockJSTransport", function() {
     expect(Pusher.SockJSTransport.isSupported()).toBe(true);
   });
 
-  it("should support ping", function() {
-    expect(this.transport.supportsPing()).toBe(true);
+  it("should not support ping", function() {
+    expect(this.transport.supportsPing()).toBe(false);
+  });
+
+  it("should handle activity checks", function() {
+    expect(this.transport.handlesActivityChecks()).toBe(true);
   });
 
   describe("on initialize", function() {

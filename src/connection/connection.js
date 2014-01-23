@@ -26,12 +26,12 @@
   var prototype = Connection.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  /** Returns whether used transport handles ping/pong by itself
+  /** Returns whether used transport handles activity checks by itself
    *
-   * @returns {Boolean} true if ping is handled by the transport
+   * @returns {Boolean} true if activity checks are handled by the transport
    */
-  prototype.supportsPing = function() {
-    return this.transport.supportsPing();
+  prototype.handlesActivityChecks = function() {
+    return this.transport.handlesActivityChecks();
   };
 
   /** Sends raw data.
@@ -56,6 +56,19 @@
     }
     Pusher.debug('Event sent', message);
     return this.send(Pusher.Protocol.encodeMessage(message));
+  };
+
+  /** Sends a ping message to the server.
+   *
+   * Basing on the underlying transport, it might send either transport's
+   * protocol-specific ping or pusher:ping event.
+   */
+  prototype.ping = function() {
+    if (this.transport.supportsPing()) {
+      this.transport.ping();
+    } else {
+      this.send_event('pusher:ping', {});
+    }
   };
 
   /** Closes the connection. */
@@ -96,6 +109,9 @@
         self.emit('message', message);
       }
     };
+    var onActivity = function() {
+      self.emit("activity");
+    };
     var onError = function(error) {
       self.emit("error", { type: "WebSocketError", error: error });
     };
@@ -113,10 +129,12 @@
     var unbindListeners = function() {
       self.transport.unbind("closed", onClosed);
       self.transport.unbind("error", onError);
+      self.transport.unbind("activity", onActivity);
       self.transport.unbind("message", onMessage);
     };
 
     self.transport.bind("message", onMessage);
+    self.transport.bind("activity", onActivity);
     self.transport.bind("error", onError);
     self.transport.bind("closed", onClosed);
   };

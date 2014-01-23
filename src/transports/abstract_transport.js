@@ -49,7 +49,15 @@
   var prototype = AbstractTransport.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  /** Checks whether the transport handles ping/pong on itself.
+  /** Checks whether the transport handles activity checks by itself.
+   *
+   * @return {Boolean}
+   */
+  prototype.handlesActivityChecks = function() {
+    return false;
+  };
+
+  /** Checks whether the transport supports the ping/pong API.
    *
    * @return {Boolean}
    */
@@ -139,6 +147,13 @@
     }
   };
 
+  /** Sends a ping if the connection is open and transport supports it. */
+  prototype.ping = function(data) {
+    if (this.state === "open" && this.supportsPing()) {
+      this.socket.ping();
+    }
+  };
+
   /** @protected */
   prototype.onOpen = function() {
     this.changeState("open");
@@ -171,6 +186,11 @@
   };
 
   /** @protected */
+  prototype.onActivity = function() {
+    this.emit("activity");
+  };
+
+  /** @protected */
   prototype.bindListeners = function() {
     var self = this;
 
@@ -178,6 +198,10 @@
     this.socket.onerror = function(error) { self.onError(error); };
     this.socket.onclose = function(closeEvent) { self.onClose(closeEvent); };
     this.socket.onmessage = function(message) { self.onMessage(message); };
+
+    if (this.supportsPing()) {
+      this.socket.onactivity = function() { self.onActivity(); };
+    }
   };
 
   /** @protected */

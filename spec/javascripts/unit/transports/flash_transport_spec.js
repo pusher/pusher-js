@@ -42,6 +42,10 @@ describe("FlashTransport", function() {
     expect(this.transport.supportsPing()).toBe(false);
   });
 
+  it("should not handle activity checks", function() {
+    expect(this.transport.handlesActivityChecks()).toBe(false);
+  });
+
   describe("on non-IE browsers", function() {
     // make sure we can mock navigator
     if (!window.navigator.__defineGetter__) {

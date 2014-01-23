@@ -206,7 +206,7 @@
   prototype.sendActivityCheck = function() {
     var self = this;
     self.stopActivityCheck();
-    self.send_event('pusher:ping', {});
+    self.connection.ping();
     // wait for pong response
     self.activityTimer = new Pusher.Timer(
       self.options.pongTimeout,
@@ -222,7 +222,7 @@
     var self = this;
     self.stopActivityCheck();
     // send ping after inactivity
-    if (!self.connection.supportsPing()) {
+    if (!self.connection.handlesActivityChecks()) {
       self.activityTimer = new Pusher.Timer(self.activityTimeout, function() {
         self.sendActivityCheck();
       });
@@ -247,6 +247,9 @@
       },
       ping: function() {
         self.send_event('pusher:pong', {});
+      },
+      activity: function() {
+        self.resetActivityCheck();
       },
       error: function(error) {
         // just emit error to user - socket will already be closed by browser

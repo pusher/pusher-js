@@ -29,6 +29,14 @@
     return Pusher.Util.isXHRSupported();
   };
 
+  /** Always returns true as all XHR/XDR transports support the ping API.
+   *
+   * @returns {Boolean}
+   */
+  prototype.supportsPing = function() {
+    return true;
+  };
+
   /** @protected */
   prototype.createSocket = function(url) {
     return Pusher.HTTP.getPollingSocket(url);

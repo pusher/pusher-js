@@ -18,6 +18,10 @@
     return this.sendRaw(JSON.stringify([payload]));
   };
 
+  prototype.ping = function() {
+    this.hooks.sendHeartbeat(this);
+  };
+
   prototype.close = function(code, reason) {
     this.onClose(code, reason, true);
   };
@@ -46,7 +50,6 @@
 
   /** For internal use only */
   prototype.onClose = function(code, reason, wasClean) {
-    this.stopActivityCheck();
     this.closeStream();
     this.readyState = CLOSED;
     if (this.onclose) {
@@ -64,7 +67,7 @@
       return;
     }
     if (this.readyState === OPEN) {
-      this.resetActivityCheck();
+      this.onActivity();
     }
 
     var payload;
@@ -100,7 +103,6 @@
       if (options && options.hostname) {
         this.location.base = replaceHost(this.location.base, options.hostname);
       }
-      this.resetActivityCheck();
       this.readyState = OPEN;
 
       if (this.onopen) {
@@ -119,12 +121,20 @@
   };
 
   /** @private */
+  prototype.onActivity = function() {
+    if (this.onactivity) {
+      this.onactivity();
+    }
+  };
+
+  /** @private */
   prototype.onError = function(error) {
     if (this.onerror) {
       this.onerror(error);
     }
   };
 
+  /** @private */
   prototype.openStream = function() {
     var self = this;
 
@@ -153,32 +163,12 @@
     }
   };
 
+  /** @private */
   prototype.closeStream = function() {
     if (this.stream) {
       this.stream.unbind_all();
       this.stream.close();
       this.stream = null;
-    }
-  };
-
-  /** @private */
-  prototype.resetActivityCheck = function() {
-    var self = this;
-
-    self.stopActivityCheck();
-    self.activityTimer = new Pusher.Timer(30000, function() {
-      self.hooks.sendHeartbeat(self);
-      self.activityTimer = new Pusher.Timer(15000, function() {
-        self.onClose(1006, "Did not receive a heartbeat response", false);
-      });
-    });
-  };
-
-  /** @private */
-  prototype.stopActivityCheck = function() {
-    if (this.activityTimer) {
-      this.activityTimer.ensureAborted();
-      this.activityTimer = null;
     }
   };
 

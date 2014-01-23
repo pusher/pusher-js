@@ -30,6 +30,14 @@
     return true;
   };
 
+  /** Always returns true, since SockJS has its own heartbeat implementation
+   *
+   * @returns {Boolean} always true
+   */
+  prototype.handlesActivityChecks = function() {
+    return true;
+  };
+
   /** @protected */
   prototype.createSocket = function(url) {
     return new SockJS(url, null, {

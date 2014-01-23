@@ -22,15 +22,15 @@ describe("Connection", function() {
     });
   });
 
-  describe("#supportsPing", function() {
-    it("should return true if transport supports ping", function() {
-      transport.supportsPing.andReturn(true);
-      expect(connection.supportsPing()).toBe(true);
+  describe("#handlesActivityChecks", function() {
+    it("should return true if transport handles activity checks by itself", function() {
+      transport.handlesActivityChecks.andReturn(true);
+      expect(connection.handlesActivityChecks()).toBe(true);
     });
 
-    it("should return false if transport does not support ping", function() {
-      transport.supportsPing.andReturn(false);
-      expect(connection.supportsPing()).toBe(false);
+    it("should return false if transport does not handle activity checks by itself", function() {
+      transport.handlesActivityChecks.andReturn(false);
+      expect(connection.handlesActivityChecks()).toBe(false);
     });
   });
 
@@ -66,6 +66,27 @@ describe("Connection", function() {
         data: [1,2,3],
         channel: "chan"
       }));
+    });
+  });
+
+  describe("#ping", function() {
+    it("should call ping on the transport if it's supported", function() {
+      transport.supportsPing.andReturn(true);
+      connection.ping();
+      expect(transport.ping).toHaveBeenCalled();
+      expect(transport.send).not.toHaveBeenCalled();
+    });
+
+    it("should send a pusher:ping event if ping is not supported", function() {
+      transport.supportsPing.andReturn(false);
+      connection.ping();
+
+      expect(transport.ping).not.toHaveBeenCalled();
+      var pingEvent = JSON.parse(transport.send.calls[0].args[0]);
+      expect(pingEvent).toEqual({
+        event: "pusher:ping",
+        data: {}
+      });
     });
   });
 
@@ -151,6 +172,17 @@ describe("Connection", function() {
       expect(onMessage).not.toHaveBeenCalled();
       expect(error.type).toEqual("MessageParseError");
       expect(error.data).toEqual("this is not json");
+    });
+  });
+
+  describe("after receiving an activity event", function() {
+    it("should emit an activity event too", function() {
+      var onActivity = jasmine.createSpy("onActivity");
+      connection.bind("activity", onActivity);
+
+      expect(onActivity).not.toHaveBeenCalled();
+      transport.emit("activity");
+      expect(onActivity).toHaveBeenCalled();
     });
   });
 
