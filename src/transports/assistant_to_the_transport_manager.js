@@ -11,7 +11,7 @@
   prototype.createConnection = function(name, priority, key, options) {
     var self = this;
 
-    var options = Pusher.Util.extend({}, options, {
+    options = Pusher.Util.extend({}, options, {
       activityTimeout: self.pingDelay
     });
     var connection = self.transport.createConnection(

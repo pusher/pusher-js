@@ -35,19 +35,19 @@ describe("Pusher", function() {
   describe("app key validation", function() {
     it("should allow a hex key", function() {
       spyOn(Pusher, "warn");
-      new Pusher("1234567890abcdef");
+      var pusher = new Pusher("1234567890abcdef");
       expect(Pusher.warn).not.toHaveBeenCalled();
     });
 
     it("should warn on a null key", function() {
       spyOn(Pusher, "warn");
-      new Pusher(null);
+      var pusher = new Pusher(null);
       expect(Pusher.warn).toHaveBeenCalled();
     });
 
     it("should warn on an undefined key", function() {
       spyOn(Pusher, "warn");
-      new Pusher();
+      var pusher = new Pusher();
       expect(Pusher.warn).toHaveBeenCalled();
     });
   });

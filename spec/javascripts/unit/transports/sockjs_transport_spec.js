@@ -115,7 +115,7 @@ describe("SockJSTransport", function() {
     });
 
     it("should create an encrypted SockJS", function() {
-      var transport = new getTransport("bar", {
+      var transport = getTransport("bar", {
         encrypted: true,
         timeline: this.timeline
       });
@@ -131,7 +131,7 @@ describe("SockJSTransport", function() {
     });
 
     it("should pass 'ignore_null_origin' option to SockJS constructor", function() {
-      var transport = new getTransport("bar", {
+      var transport = getTransport("bar", {
         encrypted: true,
         timeline: this.timeline,
         ignoreNullOrigin: true

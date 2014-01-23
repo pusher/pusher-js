@@ -83,7 +83,7 @@ describe("DependencyLoader", function() {
     expect(onLoaded).not.toHaveBeenCalled();
 
     waitsFor(function() {
-      return onLoaded.calls.length == 1;
+      return onLoaded.calls.length === 1;
     }, "load callback to get called", 100);
   });
 
@@ -119,7 +119,7 @@ describe("DependencyLoader", function() {
       script.readyState = "loaded";
       script.attachEvent.calls[0].args[1]();
       waitsFor(function() {
-        return onLoaded.calls.length == 1;
+        return onLoaded.calls.length === 1;
       }, "load callback to get called", 100);
     });
 
@@ -130,7 +130,7 @@ describe("DependencyLoader", function() {
       script.readyState = "complete";
       script.attachEvent.calls[0].args[1]();
       waitsFor(function() {
-        return onLoaded.calls.length == 1;
+        return onLoaded.calls.length === 1;
       }, "load callback to get called", 100);
     });
   });
@@ -162,7 +162,7 @@ describe("DependencyLoader", function() {
           script.addEventListener.calls[0].args[1]();
 
           waitsFor(function() {
-            return onLoaded.calls.length == 1;
+            return onLoaded.calls.length === 1;
           }, "load callback to get called", 100);
           runs(function() {
             expect(onLoadedSecond.calls.length).toEqual(1);
@@ -207,7 +207,7 @@ describe("DependencyLoader", function() {
           secondScript.addEventListener.calls[0].args[1]();
 
           waitsFor(function() {
-            return onLoadedSecond.calls.length == 1;
+            return onLoadedSecond.calls.length === 1;
           }, "first load callback to get called", 100);
           runs(function() {
             expect(onLoaded).not.toHaveBeenCalled();
@@ -215,7 +215,7 @@ describe("DependencyLoader", function() {
             expect(onLoaded).not.toHaveBeenCalled();
           });
           waitsFor(function() {
-            return onLoaded.calls.length == 1;
+            return onLoaded.calls.length === 1;
           }, "second load callback to get called", 100);
         });
       });
@@ -227,7 +227,7 @@ describe("DependencyLoader", function() {
         script.addEventListener.calls[0].args[1]();
 
         waitsFor(function() {
-          return onLoaded.calls.length == 1;
+          return onLoaded.calls.length === 1;
         }, "load callback to get called", 100);
       });
 

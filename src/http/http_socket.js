@@ -222,7 +222,7 @@
     } else if (Pusher.Util.isXDRSupported(url.indexOf("https:") === 0)) {
       return Pusher.HTTP.getXDR(method, url);
     } else {
-      throw new "Cross-origin HTTP requests are not supported";
+      throw "Cross-origin HTTP requests are not supported";
     }
   }
 

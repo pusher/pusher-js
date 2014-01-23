@@ -29,8 +29,8 @@
 
   /** @protected */
   prototype.createSocket = function(url) {
-    var constructor = window.WebSocket || window.MozWebSocket;
-    return new constructor(url);
+    var Constructor = window.WebSocket || window.MozWebSocket;
+    return new Constructor(url);
   };
 
   /** @protected */

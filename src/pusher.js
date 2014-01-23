@@ -80,7 +80,9 @@
     Pusher.instances.push(this);
     this.timeline.info({ instances: Pusher.instances.length });
 
-    if (Pusher.isReady) self.connect();
+    if (Pusher.isReady) {
+      self.connect();
+    }
   }
   var prototype = Pusher.prototype;
 

@@ -33,14 +33,14 @@
   FlashTransport.isSupported = function() {
     try {
       return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
-    } catch (e) {
+    } catch (e1) {
       try {
         return Boolean(
           navigator &&
           navigator.mimeTypes &&
           navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
         );
-      } catch(e) {
+      } catch (e2) {
         return false;
       }
     }
