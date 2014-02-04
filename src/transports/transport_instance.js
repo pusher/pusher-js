@@ -1,14 +1,12 @@
-;(function() {
+(function() {
   /** Handles common logic for all transports.
    *
-   * Transport is a low-level connection object that wraps a connection method
+   * Transport connection is a low-level object that wraps a connection method
    * and exposes a simple evented interface for the connection state and
    * messaging. It does not implement Pusher-specific WebSocket protocol.
    *
    * Additionally, it fetches resources needed for transport to work and exposes
-   * an interface for querying transport support and its features.
-   *
-   * This is an abstract class, please do not instantiate it.
+   * an interface for querying transport features.
    *
    * States:
    * - new - initial state after constructing the object
@@ -29,24 +27,21 @@
    * @param {String} key application key
    * @param {Object} options
    */
-  function AbstractTransport(name, priority, key, options) {
+  function TransportConnection(hooks, name, priority, key, options) {
     Pusher.EventsDispatcher.call(this);
 
+    this.hooks = hooks;
     this.name = name;
     this.priority = priority;
     this.key = key;
+    this.options = options;
+
     this.state = "new";
     this.timeline = options.timeline;
     this.activityTimeout = options.activityTimeout;
     this.id = this.timeline.generateUniqueID();
-
-    this.options = {
-      encrypted: Boolean(options.encrypted),
-      hostUnencrypted: options.hostUnencrypted,
-      hostEncrypted: options.hostEncrypted
-    };
   }
-  var prototype = AbstractTransport.prototype;
+  var prototype = TransportConnection.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
   /** Checks whether the transport handles activity checks by itself.
@@ -54,7 +49,7 @@
    * @return {Boolean}
    */
   prototype.handlesActivityChecks = function() {
-    return false;
+    return Boolean(this.hooks.handlesActivityChecks);
   };
 
   /** Checks whether the transport supports the ping/pong API.
@@ -62,7 +57,7 @@
    * @return {Boolean}
    */
   prototype.supportsPing = function() {
-    return false;
+    return Boolean(this.hooks.supportsPing);
   };
 
   /** Initializes the transport.
@@ -76,9 +71,12 @@
       transport: self.name + (self.options.encrypted ? "s" : "")
     }));
 
-    if (self.resource) {
+    if (self.hooks.beforeInitialize) {
+      self.hooks.beforeInitialize();
+    }
+    if (self.hooks.file) {
       self.changeState("initializing");
-      Pusher.Dependencies.load(self.resource, function() {
+      Pusher.Dependencies.load(self.hooks.file, function() {
         self.changeState("initialized");
       });
     } else {
@@ -91,15 +89,16 @@
    * @returns {Boolean} false if transport is in invalid state
    */
   prototype.connect = function() {
-    if (this.socket || this.state !== "initialized") {
+    var self = this;
+
+    if (self.socket || self.state !== "initialized") {
       return false;
     }
 
-    var url = this.getURL(this.key, this.options);
+    var url = self.hooks.urls.getInitial(self.key, self.options);
     try {
-      this.socket = this.createSocket(url);
+      self.socket = self.hooks.getSocket(url, self.options);
     } catch (e) {
-      var self = this;
       Pusher.Util.defer(function() {
         self.onError(e);
         self.changeState("closed");
@@ -107,10 +106,10 @@
       return false;
     }
 
-    this.bindListeners();
+    self.bindListeners();
 
-    Pusher.debug("Connecting", { transport: this.name, url: url });
-    this.changeState("connecting");
+    Pusher.debug("Connecting", { transport: self.name, url: url });
+    self.changeState("connecting");
     return true;
   };
 
@@ -133,22 +132,23 @@
    * @return {Boolean} true only when in the "open" state
    */
   prototype.send = function(data) {
-    if (this.state === "open") {
+    var self = this;
+
+    if (self.state === "open") {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
-      var self = this;
-      setTimeout(function() {
+      Pusher.Util.defer(function() {
         if (self.socket) {
           self.socket.send(data);
         }
-      }, 0);
+      });
       return true;
     } else {
       return false;
     }
-  };
+  }
 
   /** Sends a ping if the connection is open and transport supports it. */
-  prototype.ping = function(data) {
+  prototype.ping = function() {
     if (this.state === "open" && this.supportsPing()) {
       this.socket.ping();
     }
@@ -163,7 +163,7 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.timeline.error(this.buildTimelineMessage({}));
+    this.timeline.error(this.buildTimelineMessage({})); // hmmm…
   };
 
   /** @protected */
@@ -194,51 +194,28 @@
   prototype.bindListeners = function() {
     var self = this;
 
-    this.socket.onopen = function() { self.onOpen(); };
-    this.socket.onerror = function(error) { self.onError(error); };
-    this.socket.onclose = function(closeEvent) { self.onClose(closeEvent); };
-    this.socket.onmessage = function(message) { self.onMessage(message); };
+    self.socket.onopen = function() {
+      if (self.hooks.onOpen) {
+        self.hooks.onOpen(
+          self, self.socket, self.hooks.urls.getPath(self.key, self.options)
+        );
+      } else {
+        self.onOpen();
+      }
+    };
+    self.socket.onerror = function(error) {
+      self.onError(error);
+    };
+    self.socket.onclose = function(closeEvent) {
+      self.onClose(closeEvent);
+    };
+    self.socket.onmessage = function(message) {
+      self.onMessage(message);
+    };
 
-    if (this.supportsPing()) {
-      this.socket.onactivity = function() { self.onActivity(); };
+    if (self.supportsPing()) {
+      self.socket.onactivity = function() { self.onActivity(); };
     }
-  };
-
-  /** @protected */
-  prototype.createSocket = function(url) {
-    return null;
-  };
-
-  /** @protected */
-  prototype.getScheme = function() {
-    return this.options.encrypted ? "wss" : "ws";
-  };
-
-  /** @protected */
-  prototype.getBaseURL = function() {
-    var host;
-    if (this.options.encrypted) {
-      host = this.options.hostEncrypted;
-    } else {
-      host = this.options.hostUnencrypted;
-    }
-    return this.getScheme() + "://" + host;
-  };
-
-  /** @protected */
-  prototype.getPath = function() {
-    return "/app/" + this.key;
-  };
-
-  /** @protected */
-  prototype.getQueryString = function() {
-    return "?protocol=" + Pusher.PROTOCOL +
-      "&client=js&version=" + Pusher.VERSION;
-  };
-
-  /** @protected */
-  prototype.getURL = function() {
-    return this.getBaseURL() + this.getPath() + this.getQueryString();
   };
 
   /** @protected */
@@ -256,5 +233,5 @@
     return Pusher.Util.extend({ cid: this.id }, message);
   };
 
-  Pusher.AbstractTransport = AbstractTransport;
+  Pusher.TransportConnection = TransportConnection;
 }).call(this);
