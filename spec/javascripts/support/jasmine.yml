@@ -37,15 +37,10 @@ src_files:
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
 
-  - transports/abstract_transport.js
-  - transports/flash_transport.js
-  - transports/abstract_http_transport.js
-  - transports/xhr_streaming_transport.js
-  - transports/xdr_streaming_transport.js
-  - transports/xhr_polling_transport.js
-  - transports/xdr_polling_transport.js
-  - transports/sockjs_transport.js
-  - transports/ws_transport.js
+  - transports/url_schemes.js
+  - transports/transport_connection.js
+  - transports/transport.js
+  - transports/transports.js
 
   - transports/assistant_to_the_transport_manager.js
   - transports/transport_manager.js

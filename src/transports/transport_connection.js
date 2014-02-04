@@ -145,7 +145,7 @@
     } else {
       return false;
     }
-  }
+  };
 
   /** Sends a ping if the connection is open and transport supports it. */
   prototype.ping = function() {
@@ -163,7 +163,7 @@
   /** @protected */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.timeline.error(this.buildTimelineMessage({})); // hmmm…
+    this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
   };
 
   /** @protected */

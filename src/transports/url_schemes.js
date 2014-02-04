@@ -28,7 +28,7 @@
     },
     sockjs: {
       getInitial: function(key, params) {
-        return getGenericURL("http", params, params.httpPath || "/pusher", "")
+        return getGenericURL("http", params, params.httpPath || "/pusher", "");
       },
       getPath: function(key, params) {
         return getGenericPath(key);
@@ -37,7 +37,7 @@
     http: {
       getInitial: function(key, params) {
         var path = (params.httpPath || "/pusher") + getGenericPath(key);
-        return getGenericURL("http", params, path)
+        return getGenericURL("http", params, path);
       }
     }
   };

@@ -30,6 +30,13 @@
       };
     },
 
+    getWebSocket: function() {
+      return {
+        send: jasmine.createSpy("send"),
+        close: jasmine.createSpy("close")
+      };
+    },
+
     getHTTPSocket: function() {
       var socket = new Pusher.EventsDispatcher();
       socket.close = jasmine.createSpy("close");
@@ -89,9 +96,9 @@
       var transport = new Pusher.EventsDispatcher();
 
       transport.handlesActivityChecks = jasmine.createSpy("handlesActivityChecks")
-        .andReturn(true);
+        .andReturn(false);
       transport.supportsPing = jasmine.createSpy("supportsPing")
-        .andReturn(true);
+        .andReturn(false);
       transport.initialize = jasmine.createSpy("initialize")
         .andCallFake(function() {
           transport.state = "initializing";
