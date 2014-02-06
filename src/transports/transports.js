@@ -1,6 +1,5 @@
 (function() {
   Pusher.WSTransport = new Pusher.Transport({
-    name: "ws",
     urls: Pusher.URLSchemes.ws,
     handlesActivityChecks: false,
     supportsPing: false,
@@ -16,7 +15,6 @@
   });
 
   Pusher.FlashTransport = new Pusher.Transport({
-    name: "flash",
     file: "flashfallback",
     urls: Pusher.URLSchemes.flash,
     handlesActivityChecks: false,
@@ -46,6 +44,30 @@
     },
     getSocket: function(url) {
       return new FlashWebSocket(url);
+    }
+  });
+
+  Pusher.SockJSTransport = new Pusher.Transport({
+    file: "sockjs",
+    urls: Pusher.URLSchemes.sockjs,
+    handlesActivityChecks: true,
+    supportsPing: false,
+
+    isSupported: function() {
+      return true;
+    },
+    getSocket: function(url, options) {
+      return new SockJS(url, null, {
+        js_path: Pusher.Dependencies.getPath("sockjs", {
+          encrypted: options.encrypted
+        }),
+        ignore_null_origin: options.ignoreNullOrigin
+      });
+    },
+    beforeOpen: function(socket, path) {
+      socket.send(JSON.stringify({
+        path: path
+      }));
     }
   });
 
@@ -82,58 +104,15 @@
   };
 
   Pusher.XHRStreamingTransport = new Pusher.Transport(
-    Pusher.Util.extend(
-      { name: "xhr_streaming" },
-      streamingConfiguration,
-      xhrConfiguration
-    )
+    Pusher.Util.extend({}, streamingConfiguration, xhrConfiguration)
   );
   Pusher.XDRStreamingTransport = new Pusher.Transport(
-    Pusher.Util.extend(
-      { name: "xdr_streaming" },
-      streamingConfiguration,
-      xdrConfiguration
-    )
+    Pusher.Util.extend({}, streamingConfiguration, xdrConfiguration)
   );
   Pusher.XHRPollingTransport = new Pusher.Transport(
-    Pusher.Util.extend(
-      { name: "xhr_polling" },
-      pollingConfiguration,
-      xhrConfiguration
-    )
+    Pusher.Util.extend({}, pollingConfiguration, xhrConfiguration)
   );
   Pusher.XDRPollingTransport = new Pusher.Transport(
-    Pusher.Util.extend(
-      { name: "xdr_polling" },
-      pollingConfiguration,
-      xdrConfiguration
-    )
+    Pusher.Util.extend({}, pollingConfiguration, xdrConfiguration)
   );
-
-  Pusher.SockJSTransport = new Pusher.Transport({
-    name: "sockjs",
-    file: "sockjs",
-    urls: Pusher.URLSchemes.sockjs,
-    handlesActivityChecks: true,
-    supportsPing: false,
-
-    isSupported: function() {
-      return true;
-    },
-    getSocket: function(url, options) {
-      return new SockJS(url, null, {
-        js_path: Pusher.Dependencies.getPath("sockjs", {
-          encrypted: options.encrypted
-        }),
-        ignore_null_origin: options.ignoreNullOrigin
-      });
-    },
-    onOpen: function(transport, socket, path) {
-      socket.send(JSON.stringify({
-        path: path
-      }));
-      transport.changeState("open");
-      socket.onopen = undefined;
-    }
-  });
 }).call(this);

@@ -156,6 +156,11 @@
 
   /** @protected */
   prototype.onOpen = function() {
+    if (this.hooks.beforeOpen) {
+      this.hooks.beforeOpen(
+        this.socket, this.hooks.urls.getPath(this.key, this.options)
+      );
+    }
     this.changeState("open");
     this.socket.onopen = undefined;
   };
@@ -195,13 +200,7 @@
     var self = this;
 
     self.socket.onopen = function() {
-      if (self.hooks.onOpen) {
-        self.hooks.onOpen(
-          self, self.socket, self.hooks.urls.getPath(self.key, self.options)
-        );
-      } else {
-        self.onOpen();
-      }
+      self.onOpen();
     };
     self.socket.onerror = function(error) {
       self.onError(error);
