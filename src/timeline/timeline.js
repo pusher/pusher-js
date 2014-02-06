@@ -15,12 +15,9 @@
   Timeline.DEBUG = 7;
 
   prototype.log = function(level, event) {
-    if (this.options.level === undefined || level <= this.options.level) {
+    if (level <= this.options.level) {
       this.events.push(
-        Pusher.Util.extend({}, event, {
-          timestamp: Pusher.Util.now(),
-          level: (level !== Timeline.INFO ? level : undefined)
-        })
+        Pusher.Util.extend({}, event, { timestamp: Pusher.Util.now() })
       );
       if (this.options.limit && this.events.length > this.options.limit) {
         this.events.shift();
