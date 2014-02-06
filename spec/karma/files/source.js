@@ -1,8 +1,7 @@
 module.exports = [
   'src/pusher.js',
 
-  'src/utils/timer.js',
-  'src/utils/periodic_timer.js',
+  'src/utils/timers.js',
 
   'src/util.js',
   'src/defaults.js',

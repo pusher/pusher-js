@@ -3,8 +3,7 @@ src_dir: src
 src_files:
   - pusher.js
 
-  - utils/timer.js
-  - utils/periodic_timer.js
+  - utils/timers.js
 
   - util.js
   - defaults.js

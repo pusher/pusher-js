@@ -13,8 +13,7 @@ bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
 
-  file 'utils/timer.js'
-  file 'utils/periodic_timer.js'
+  file 'utils/timers.js'
 
   file 'util.js'
   file 'defaults.js'
