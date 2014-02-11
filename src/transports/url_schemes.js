@@ -15,17 +15,21 @@
     return path + query;
   }
 
+  /** URL schemes for different transport types. */
   Pusher.URLSchemes = {
+    /** Standard WebSocket URL scheme. */
     ws: {
       getInitial: function(key, params) {
         return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
       }
     },
+    /** URL scheme for Flash. Same as WebSocket, but with a flash parameter. */
     flash: {
       getInitial: function(key, params) {
         return getGenericURL("ws", params, getGenericPath(key, "flash=true"));
       }
     },
+    /** SockJS URL scheme. Supplies the path separately from the initial URL. */
     sockjs: {
       getInitial: function(key, params) {
         return getGenericURL("http", params, params.httpPath || "/pusher", "");
@@ -34,6 +38,7 @@
         return getGenericPath(key);
       }
     },
+    /** URL scheme for HTTP transports. Basically, WS scheme with a prefix. */
     http: {
       getInitial: function(key, params) {
         var path = (params.httpPath || "/pusher") + getGenericPath(key);

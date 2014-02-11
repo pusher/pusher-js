@@ -1,4 +1,9 @@
 (function() {
+  /** WebSocket transport.
+   *
+   * Uses native WebSocket implementation, including MozWebSocket supported by
+   * earlier Firefox versions.
+   */
   Pusher.WSTransport = new Pusher.Transport({
     urls: Pusher.URLSchemes.ws,
     handlesActivityChecks: false,
@@ -14,6 +19,7 @@
     }
   });
 
+  /** Flash transport using the WebSocket protocol. */
   Pusher.FlashTransport = new Pusher.Transport({
     file: "flashfallback",
     urls: Pusher.URLSchemes.flash,
@@ -47,6 +53,7 @@
     }
   });
 
+  /** SockJS transport. */
   Pusher.SockJSTransport = new Pusher.Transport({
     file: "sockjs",
     urls: Pusher.URLSchemes.sockjs,
@@ -103,15 +110,19 @@
     }
   };
 
+  /** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
   Pusher.XHRStreamingTransport = new Pusher.Transport(
     Pusher.Util.extend({}, streamingConfiguration, xhrConfiguration)
   );
+  /** HTTP streaming transport using XDomainRequest (IE 8,9). */
   Pusher.XDRStreamingTransport = new Pusher.Transport(
     Pusher.Util.extend({}, streamingConfiguration, xdrConfiguration)
   );
+  /** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
   Pusher.XHRPollingTransport = new Pusher.Transport(
     Pusher.Util.extend({}, pollingConfiguration, xhrConfiguration)
   );
+  /** HTTP long-polling transport using XDomainRequest (IE 8,9). */
   Pusher.XDRPollingTransport = new Pusher.Transport(
     Pusher.Util.extend({}, pollingConfiguration, xdrConfiguration)
   );

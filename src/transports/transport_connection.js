@@ -1,5 +1,5 @@
 (function() {
-  /** Handles common logic for all transports.
+  /** Provides universal API for transport connections.
    *
    * Transport connection is a low-level object that wraps a connection method
    * and exposes a simple evented interface for the connection state and
@@ -154,7 +154,7 @@
     }
   };
 
-  /** @protected */
+  /** @private */
   prototype.onOpen = function() {
     if (this.hooks.beforeOpen) {
       this.hooks.beforeOpen(
@@ -165,13 +165,13 @@
     this.socket.onopen = undefined;
   };
 
-  /** @protected */
+  /** @private */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
     this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
   };
 
-  /** @protected */
+  /** @private */
   prototype.onClose = function(closeEvent) {
     if (closeEvent) {
       this.changeState("closed", {
@@ -185,17 +185,17 @@
     this.socket = undefined;
   };
 
-  /** @protected */
+  /** @private */
   prototype.onMessage = function(message) {
     this.emit("message", message);
   };
 
-  /** @protected */
+  /** @private */
   prototype.onActivity = function() {
     this.emit("activity");
   };
 
-  /** @protected */
+  /** @private */
   prototype.bindListeners = function() {
     var self = this;
 
@@ -217,7 +217,7 @@
     }
   };
 
-  /** @protected */
+  /** @private */
   prototype.changeState = function(state, params) {
     this.state = state;
     this.timeline.info(this.buildTimelineMessage({
@@ -227,7 +227,7 @@
     this.emit(state, params);
   };
 
-  /** @protected */
+  /** @private */
   prototype.buildTimelineMessage = function(message) {
     return Pusher.Util.extend({ cid: this.id }, message);
   };
