@@ -196,7 +196,6 @@ describe("Transports", function() {
       var _ActiveXObject = window.ActiveXObject;
 
       afterEach(function() {
-        window.navigator = _navigator;
         window.ActiveXObject = _ActiveXObject;
       });
 
@@ -205,6 +204,10 @@ describe("Transports", function() {
         if (!window.navigator.__defineGetter__) {
           return;
         }
+
+        afterEach(function() {
+          window.navigator = _navigator;
+        });
 
         it("should be supported, if application/x-shockwave-flash is in mime types", function() {
           window.navigator = {};
