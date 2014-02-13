@@ -76,8 +76,13 @@
     }
     if (self.hooks.file) {
       self.changeState("initializing");
-      Pusher.Dependencies.load(self.hooks.file, function() {
-        self.changeState("initialized");
+      Pusher.Dependencies.load(self.hooks.file, function(error) {
+        if (error) {
+          self.onError(error);
+          self.onClose();
+        } else {
+          self.changeState("initialized");
+        }
       });
     } else {
       self.changeState("initialized");

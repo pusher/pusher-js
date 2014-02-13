@@ -19,7 +19,7 @@
           return v !== undefined;
         }),
         url: scheme + (self.host || self.options.host) + self.options.path,
-        receiver: Pusher.JSONP
+        receivers: Pusher.JSONP
       };
       return Pusher.JSONPRequest.send(params, function(error, result) {
         if (result && result.host) {

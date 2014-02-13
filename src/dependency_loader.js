@@ -24,23 +24,29 @@
   prototype.load = function(name, callback) {
     var self = this;
 
-    if (this.loaded[name]) {
-      callback();
-    } else if (this.loading[name] && this.loading[name].length > 0) {
-      this.loading[name].push(callback);
+    if (self.loaded[name]) {
+      callback(null);
+    } else if (self.loading[name] && self.loading[name].length > 0) {
+      self.loading[name].push(callback);
     } else {
-      this.loading[name] = [callback];
+      self.loading[name] = [callback];
 
-      require(this.getPath(name), function() {
-        self.loaded[name] = true;
-
-        if (self.loading[name]) {
-          for (var i = 0; i < self.loading[name].length; i++) {
-            self.loading[name][i]();
+      require(
+        self.getPath(name),
+        self.options.receivers,
+        function(error) {
+          if (!error) {
+            self.loaded[name] = true;
           }
-          delete self.loading[name];
+
+          if (self.loading[name]) {
+            for (var i = 0; i < self.loading[name].length; i++) {
+              self.loading[name][i](error);
+            }
+            delete self.loading[name];
+          }
         }
-      });
+      );
     }
   };
 
@@ -69,33 +75,16 @@
     return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
   };
 
-  function handleScriptLoaded(elem, callback) {
-    if (Pusher.Util.getDocument().addEventListener) {
-      elem.addEventListener('load', callback, false);
-    } else {
-      elem.attachEvent('onreadystatechange', function () {
-        if (elem.readyState === 'loaded' || elem.readyState === 'complete') {
-          callback();
-        }
-      });
-    }
-  }
-
-  function require(src, callback) {
-    var document = Pusher.Util.getDocument();
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-
-    script.setAttribute('src', src);
-    script.setAttribute("type","text/javascript");
-    script.setAttribute('async', true);
-
-    handleScriptLoaded(script, function() {
-      // workaround for an Opera issue
-      setTimeout(callback, 0);
+  function require(src, receivers, callback) {
+    var receiver = receivers.create(function(error) {
+      if (error) {
+        request.cleanup();
+      }
+      receivers.remove(receiver);
+      callback(error);
     });
-
-    head.appendChild(script);
+    var request = new Pusher.ScriptRequest(src, receiver);
+    request.send();
   }
 
   Pusher.DependencyLoader = DependencyLoader;
