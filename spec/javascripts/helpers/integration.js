@@ -27,3 +27,8 @@ Pusher.Integration.sendAPIMessage = function(request) {
     receiver: request.receiver || Pusher.JSONP
   }, function() {});
 };
+
+Pusher.Integration.ScriptReceivers = new Pusher.ScriptReceiverFactory(
+  "_pusher_integration_script_receivers",
+  "Pusher.Integration.ScriptReceivers"
+);

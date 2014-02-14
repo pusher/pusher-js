@@ -25,6 +25,7 @@
     if (self.script.async === undefined && document.attachEvent &&
         /opera/i.test(navigator.userAgent)) {
       self.errorScript = document.createElement("script");
+      self.errorScript.id = self.receiver.id + "_error";
       self.errorScript.text = self.receiver.name + "(true);";
       self.script.async = self.errorScript.async = false;
     } else {
