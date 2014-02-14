@@ -24,7 +24,7 @@ module.exports = [
 
   'src/base64.js',
   'src/jsonp/jsonp_request.js',
-  'src/jsonp/jsonp_receiver.js',
+  'src/jsonp/jsonp.js',
 
   'src/timeline/timeline.js',
   'src/timeline/timeline_sender.js',
