@@ -6,11 +6,6 @@
     suffix: Pusher.dependency_suffix
   });
 
-  // Support Firefox versions which prefix WebSocket
-  if (!window.WebSocket && window.MozWebSocket) {
-    window.WebSocket = window.MozWebSocket;
-  }
-
   function initialize() {
     Pusher.ready();
   }
