@@ -9,15 +9,16 @@
   prototype.create = function(callback) {
     this.lastId++;
 
-    var id = this.prefix + this.lastId;
-    var name = this.name + "." + id;
+    var number = this.lastId;
+    var id = this.prefix + number;
+    var name = this.name + "[" + number + "]";
 
-    this[id] = callback;
-    return { id: id, name: name, callback: callback };
+    this[number] = callback;
+    return { number: number, id: id, name: name, callback: callback };
   };
 
   prototype.remove = function(receiver) {
-    delete this[receiver.id];
+    delete this[receiver.number];
   };
 
   Pusher.ScriptReceiverFactory = ScriptReceiverFactory;
