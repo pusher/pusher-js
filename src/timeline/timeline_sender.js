@@ -15,9 +15,6 @@
     var sendJSONP = function(data, callback) {
       var scheme = "http" + (encrypted ? "s" : "") + "://";
       var url = scheme + (self.host || self.options.host) + self.options.path;
-      var data = Pusher.Util.filterObject(data, function(v) {
-        return v !== undefined;
-      });
       var request = new Pusher.JSONPRequest(url, data);
 
       var receiver = Pusher.JSONP.create(function(error, result) {
