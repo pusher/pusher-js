@@ -65,7 +65,7 @@ describeIntegration("Cluster Configuration", function() {
             received = message;
           });
           Pusher.Integration.sendAPIMessage({
-            url: Pusher.Integration.API_EU_URL + "/send",
+            url: Pusher.Integration.API_EU_URL + "/v2/send",
             channel: channelName,
             event: eventName,
             data: data

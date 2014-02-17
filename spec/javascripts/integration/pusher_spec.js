@@ -51,7 +51,7 @@ describeIntegration("Pusher", function() {
           received = message;
         });
         Pusher.Integration.sendAPIMessage({
-          url: Pusher.Integration.API_URL + "/send",
+          url: Pusher.Integration.API_URL + "/v2/send",
           channel: channelName,
           event: eventName,
           data: data
@@ -492,7 +492,8 @@ describeIntegration("Pusher", function() {
       cdn_http: Pusher.Integration.JS_HOST,
       cdn_https: Pusher.Integration.JS_HOST,
       version: Pusher.VERSION,
-      suffix: ""
+      suffix: "",
+      receivers: Pusher.DependenciesReceivers
     });
   });
 

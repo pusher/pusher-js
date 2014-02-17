@@ -7,7 +7,7 @@ describeIntegration("ScriptRequest", function() {
     callback = jasmine.createSpy();
     receiver = Pusher.Integration.ScriptReceivers.create(callback);
     query = "receiver=" + receiver.name + "&param=test";
-    url = Pusher.Integration.API_URL + "/script_request/echo?" + query;
+    url = Pusher.Integration.API_URL + "/v2/script_request/echo?" + query;
     request = new Pusher.ScriptRequest(url);
   });
 
