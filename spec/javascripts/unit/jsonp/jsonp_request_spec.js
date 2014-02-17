@@ -1,4 +1,5 @@
 describe("JSONPRequest", function() {
+  var callback;
   var receiver;
   var scriptRequest;
 
@@ -7,7 +8,8 @@ describe("JSONPRequest", function() {
       scriptRequest = Pusher.Mocks.getScriptRequest();
       return scriptRequest;
     });
-    receiver = Pusher.Integration.ScriptReceivers.create(jasmine.createSpy());
+    callback = jasmine.createSpy();
+    receiver = Pusher.Integration.ScriptReceivers.create(callback);
   });
 
   describe("#send", function() {
@@ -24,9 +26,9 @@ describe("JSONPRequest", function() {
     it("should call back after the script request is completed", function() {
       var request = new Pusher.JSONPRequest("http://example.org", {});
       request.send(receiver);
-      expect(receiver.callback).not.toHaveBeenCalled();
+      expect(callback).not.toHaveBeenCalled();
       scriptRequest.send.calls[0].args[0].callback("first", "second");
-      expect(receiver.callback).toHaveBeenCalledWith("first", "second");
+      expect(callback).toHaveBeenCalledWith("first", "second");
     });
 
     it("should concatenate multiple keys correctly", function() {

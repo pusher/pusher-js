@@ -13,8 +13,16 @@
     var id = this.prefix + number;
     var name = this.name + "[" + number + "]";
 
-    this[number] = callback;
-    return { number: number, id: id, name: name, callback: callback };
+    var called = false;
+    var callbackWrapper = function() {
+      if (!called) {
+        callback.apply(null, arguments);
+        called = true;
+      }
+    };
+
+    this[number] = callbackWrapper;
+    return { number: number, id: id, name: name, callback: callbackWrapper };
   };
 
   prototype.remove = function(receiver) {
