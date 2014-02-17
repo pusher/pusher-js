@@ -8,12 +8,12 @@ describeIntegration("ScriptRequest", function() {
     receiver = Pusher.Integration.ScriptReceivers.create(callback);
     query = "receiver=" + receiver.name + "&param=test";
     url = Pusher.Integration.API_URL + "/script_request/echo?" + query;
-    request = new Pusher.ScriptRequest(url, receiver);
+    request = new Pusher.ScriptRequest(url);
   });
 
   it("should send a request and receive a correct response", function() {
     runs(function() {
-      request.send();
+      request.send(receiver);
     });
     waitsFor(function() {
       return callback.calls.length > 0;
@@ -29,12 +29,12 @@ describeIntegration("ScriptRequest", function() {
     var query = "receiver=" + receiver.name;
     var url = Pusher.Integration.API_URL + "/script_request/echo?" + query;
 
-    var request = new Pusher.ScriptRequest(url, receiver);
+    var request = new Pusher.ScriptRequest(url);
 
     runs(function() {
       expect(document.getElementById(receiver.id)).toBe(null);
       expect(document.getElementById(receiver.id + "_error")).toBe(null);
-      request.send();
+      request.send(receiver);
       // we don't test for the _error tag, because it's Opera-specific
       expect(document.getElementById(receiver.id)).not.toBe(null);
     });
@@ -51,10 +51,10 @@ describeIntegration("ScriptRequest", function() {
 
   it("should call back with an error on a 404 response", function() {
     var url = Pusher.Integration.API_URL + "/jsonp/404";
-    var request = new Pusher.ScriptRequest(url, receiver);
+    var request = new Pusher.ScriptRequest(url);
 
     runs(function() {
-      request.send();
+      request.send(receiver);
     });
     waitsFor(function() {
       return callback.calls.length > 0;
@@ -68,10 +68,10 @@ describeIntegration("ScriptRequest", function() {
 
   it("should call back with an error on a 500 response", function() {
     var url = Pusher.Integration.API_URL + "/jsonp/500";
-    var request = new Pusher.ScriptRequest(url, receiver);
+    var request = new Pusher.ScriptRequest(url);
 
     runs(function() {
-      request.send();
+      request.send(receiver);
     });
     waitsFor(function() {
       return callback.calls.length > 0;

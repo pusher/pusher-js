@@ -1,32 +1,31 @@
 (function() {
-  function ScriptRequest(src, receiver) {
+  function ScriptRequest(src) {
     this.src = src;
-    this.receiver = receiver;
   }
   var prototype = ScriptRequest.prototype;
 
-  prototype.send = function() {
+  prototype.send = function(receiver) {
     var self = this;
 
     self.script = document.createElement("script");
-    self.script.id = self.receiver.id;
+    self.script.id = receiver.id;
     self.script.src = self.src;
     self.script.type = "text/javascript";
     self.script.charset = "UTF-8";
 
     self.script.onerror = function() {
-      self.receiver.callback("Error loading script " + self.src);
+      receiver.callback("Error loading script " + self.src);
     };
     self.script.onload = function() {
-      self.receiver.callback(null);
+      receiver.callback(null);
     };
 
     // Opera<11.6 hack for missing onerror callback
     if (self.script.async === undefined && document.attachEvent &&
         /opera/i.test(navigator.userAgent)) {
       self.errorScript = document.createElement("script");
-      self.errorScript.id = self.receiver.id + "_error";
-      self.errorScript.text = self.receiver.name + "(true);";
+      self.errorScript.id = receiver.id + "_error";
+      self.errorScript.text = receiver.name + "(true);";
       self.script.async = self.errorScript.async = false;
     } else {
       self.script.async = true;
@@ -34,7 +33,7 @@
 
     self.script.onreadystatechange = function() {
       if (self.script && /loaded|complete/.test(self.script.readyState)) {
-        self.receiver.callback(null);
+        receiver.callback(null);
       }
     };
 
