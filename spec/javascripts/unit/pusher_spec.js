@@ -395,7 +395,7 @@ describe("Pusher", function() {
     it("should be sent to stats.pusher.com by default", function() {
       expect(Pusher.TimelineSender.calls.length).toEqual(1);
       expect(Pusher.TimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "stats.pusher.com", path: "/timeline" }
+        pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2" }
       );
     });
 
@@ -404,7 +404,7 @@ describe("Pusher", function() {
         statsHost: "example.com"
       });
       expect(Pusher.TimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "example.com", path: "/timeline" }
+        pusher.timeline, { host: "example.com", path: "/timeline/v2" }
       );
     });
 
