@@ -105,7 +105,8 @@ describeIntegration("Cluster Configuration", function() {
       cdn_http: Pusher.Integration.JS_HOST,
       cdn_https: Pusher.Integration.JS_HOST,
       version: Pusher.VERSION,
-      suffix: ""
+      suffix: "",
+      receivers: Pusher.DependenciesReceivers
     });
   });
 
