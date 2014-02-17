@@ -31,22 +31,25 @@
     } else {
       self.loading[name] = [callback];
 
-      require(
-        self.getPath(name),
-        self.options.receivers,
-        function(error) {
-          if (!error) {
-            self.loaded[name] = true;
-          }
+      var request = new Pusher.ScriptRequest(self.getPath(name));
+      var receiver = self.options.receivers.create(function(error) {
+        self.options.receivers.remove(receiver);
 
-          if (self.loading[name]) {
-            for (var i = 0; i < self.loading[name].length; i++) {
-              self.loading[name][i](error);
-            }
-            delete self.loading[name];
+        if (error) {
+          request.cleanup();
+        } else {
+          self.loaded[name] = true;
+        }
+
+        if (self.loading[name]) {
+          var callbacks = self.loading[name];
+          delete self.loading[name];
+          for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i](error);
           }
         }
-      );
+      });
+      request.send(receiver);
     }
   };
 
@@ -74,18 +77,6 @@
   prototype.getPath = function(name, options) {
     return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
   };
-
-  function require(src, receivers, callback) {
-    var receiver = receivers.create(function(error) {
-      if (error) {
-        request.cleanup();
-      }
-      receivers.remove(receiver);
-      callback(error);
-    });
-    var request = new Pusher.ScriptRequest(src, receiver);
-    request.send();
-  }
 
   Pusher.DependencyLoader = DependencyLoader;
 }).call(this);
