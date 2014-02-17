@@ -1,37 +1,26 @@
 (function() {
-  function JSONPRequest(options) {
-    this.options = options;
+  function JSONPRequest(url, data) {
+    this.url = url;
+    this.data = data;
   }
   var prototype = JSONPRequest.prototype;
 
-  JSONPRequest.send = function(options, callback) {
-    var request = new Pusher.JSONPRequest(options);
-    var receiver = options.receivers.create(function(error, result) {
-      options.receivers.remove(receiver);
-      request.cleanup();
-      callback(error, result);
-    });
-    request.send(options.data, receiver);
-    return request;
-  };
-
-  prototype.send = function(data, receiver) {
+  prototype.send = function(receiver) {
     if (this.request) {
       return;
     }
 
-    var params = Pusher.Util.filterObject(
-      Pusher.Util.extend({}, data, { receiver: receiver.name }),
-      function(value) { return value !== undefined;}
-    );
+    var params = Pusher.Util.filterObject(this.data, function(value) {
+      return value !== undefined;
+    });
     var query = Pusher.Util.map(
       Pusher.Util.flatten(encodeParamsObject(params)),
       Pusher.Util.method("join", "=")
     ).join("&");
-    var url = this.options.url + "/" + receiver.id + "?" + query;
+    var url = this.url + "/" + receiver.number + "?" + query;
 
-    this.request = new Pusher.ScriptRequest(url, receiver);
-    this.request.send();
+    this.request = new Pusher.ScriptRequest(url);
+    this.request.send(receiver);
   };
 
   prototype.cleanup = function() {

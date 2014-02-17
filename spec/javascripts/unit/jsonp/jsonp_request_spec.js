@@ -1,96 +1,123 @@
 describe("JSONPRequest", function() {
+  var receiver;
+  var scriptRequest;
+
   beforeEach(function() {
-    var self = this;
-
-    this.receiver = new Pusher.JSONPReceiver();
-    this.options = {
-      url: "http://example.com/jsonp",
-      receiver: this.receiver,
-      receiverName: "mock",
-      tagPrefix: "_pusher_jsonp_jasmine_"
-    };
-
-    this.request = undefined;
-    var send = Pusher.JSONPRequest.send;
-    spyOn(Pusher, "JSONPRequest").andCallFake(function(options) {
-      self.request = this;
-      this.send = jasmine.createSpy("send");
-      this.cleanup = jasmine.createSpy("cleanup");
+    spyOn(Pusher, "ScriptRequest").andCallFake(function() {
+      scriptRequest = Pusher.Mocks.getScriptRequest();
+      return scriptRequest;
     });
-    Pusher.JSONPRequest.send = send;
+    receiver = Pusher.Integration.ScriptReceivers.create(jasmine.createSpy());
   });
 
-  describe("on send", function() {
-    it("should send a JSONP request", function() {
-      Pusher.JSONPRequest.send(
-        Pusher.Util.extend(this.options, {
-          data: { a: 1 }
-        }),
-        function() {}
+  describe("#send", function() {
+    it("should send the script request to a correct URL", function() {
+      var request = new Pusher.JSONPRequest("http://example.com", {});
+      request.send(receiver);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.com/" + receiver.number + "?"
       );
+      expect(scriptRequest.send).toHaveBeenCalledWith(receiver);
+    });
 
-      expect(Pusher.JSONPRequest).toHaveBeenCalledWith({
-        url: "http://example.com/jsonp",
-        receiver: "mock",
-        tagPrefix: "_pusher_jsonp_jasmine_"
+    it("should call back after the script request is completed", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {});
+      request.send(receiver);
+      expect(receiver.callback).not.toHaveBeenCalled();
+      scriptRequest.send.calls[0].args[0].callback("first", "second");
+      expect(receiver.callback).toHaveBeenCalledWith("first", "second");
+    });
+
+    it("should concatenate multiple keys correctly", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {
+        a: 1,
+        b: 2,
+        c: 3
       });
-      expect(this.request.send)
-        .toHaveBeenCalledWith(1, {a: 1}, jasmine.any(Function));
+
+      request.send(receiver);
+      var url = Pusher.ScriptRequest.calls[0].args[0];
+      var queryString = url.match(/http:\/\/example.org\/[0-9]+\?(.*)$/)[1];
+      var queryStringPairs = queryString.split("&");
+      expect(queryStringPairs.length).toEqual(3);
+      expect(queryStringPairs).toContain("a=MQ%3D%3D");
+      expect(queryStringPairs).toContain("b=Mg%3D%3D");
+      expect(queryStringPairs).toContain("c=Mw%3D%3D");
     });
 
-    it("should call back after calling the receiver", function() {
-      var sendCallback = jasmine.createSpy("sendCallback");
-      Pusher.JSONPRequest.send(
-        Pusher.Util.extend(this.options, {
-          data: { a: 1 }
-        }),
-        sendCallback
-      );
+    it("should not include undefined values", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {
+        test: undefined,
+      });
 
-      expect(sendCallback).not.toHaveBeenCalled();
-      this.receiver.receive(1, "x", "y");
-      expect(sendCallback).toHaveBeenCalledWith("x", "y");
+      request.send(receiver);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.org/" + receiver.number + "?"
+      );
     });
 
-    it("should clean up after calling the receiver", function() {
-      Pusher.JSONPRequest.send(
-        Pusher.Util.extend(this.options, {
-          data: { a: 1 }
-        }),
-        function() {}
+    it("should encode string parameters correctly", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {
+        test: "foo foo",
+      });
+
+      request.send(receiver);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.org/" + receiver.number + "?test=Zm9vIGZvbw%3D%3D"
       );
-      this.receiver.receive(1, "x", "y");
-      expect(this.request.cleanup).toHaveBeenCalled();
+    });
+
+    it("should encode numers correctly", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {
+        something: 1111
+      });
+
+      request.send(receiver);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.org/" + receiver.number + "?something=MTExMQ%3D%3D"
+      );
+    });
+
+    it("should encode arrays correctly", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {
+        arrr: [1, 2, "string", 123.456]
+      });
+
+      request.send(receiver);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.org/" + receiver.number + "?arrr=WzEsMiwic3RyaW5nIiwxMjMuNDU2XQ%3D%3D"
+      );
+    });
+
+    it("should encode objects correctly", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {
+        obj: { key: "val", num: 123, fl: 666.999 }
+      });
+
+      request.send(receiver);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.org/" + receiver.number + "?obj=eyJrZXkiOiJ2YWwiLCJudW0iOjEyMywiZmwiOjY2Ni45OTl9"
+      );
+    });
+
+    it("should be idempotent", function() {
+      var request = new Pusher.JSONPRequest("http://example.org", {});
+      request.send(receiver);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      request.send(receiver);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
     });
   });
 
-  describe("on error", function() {
-    it("should call back with the error", function() {
-      var sendCallback = jasmine.createSpy("sendCallback");
-      Pusher.JSONPRequest.send(
-        Pusher.Util.extend(this.options, {
-          data: { a: 1 }
-        }),
-        sendCallback
-      );
-      this.request.send.calls[0].args[2]("boom");
-
-      expect(sendCallback).toHaveBeenCalledWith("boom", undefined);
-    });
-
-    it("should unregister from the receiver", function() {
-      spyOn(this.receiver, "unregister");
-
-      Pusher.JSONPRequest.send(
-        Pusher.Util.extend(this.options, {
-          data: { a: 1 }
-        }),
-        function() {}
-      );
-
-      this.request.send.calls[0].args[2]("boom");
-
-      expect(this.receiver.unregister).toHaveBeenCalledWith(1);
+  describe("#cleanup", function() {
+    it("should call cleanup on the script request", function() {
+      var request = new Pusher.JSONPRequest("http://example.com", {});
+      request.send(receiver);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      expect(scriptRequest.cleanup).not.toHaveBeenCalled();
+      request.cleanup();
+      expect(scriptRequest.cleanup).toHaveBeenCalled();
     });
   });
 });
