@@ -1,17 +1,19 @@
 describe("DependencyLoader", function() {
-  var document, head, script;
+  var doc;
+  var receivers;
+  var scriptRequest;
   var onLoaded;
   var loader;
 
   beforeEach(function() {
-    head = Pusher.Mocks.getDocumentElement();
-    script = Pusher.Mocks.getDocumentElement();
+    doc = Pusher.Mocks.getDocument();
+    doc.location.protocol = "http:";
 
-    document = Pusher.Mocks.getDocument();
-    document.getElementsByTagName.andReturn([head]);
-    document.createElement.andReturn(script);
-
-    spyOn(Pusher.Util, "getDocument").andReturn(document);
+    spyOn(Pusher.Util, "getDocument").andReturn(doc);
+    spyOn(Pusher, "ScriptRequest").andCallFake(function() {
+      scriptRequest = Pusher.Mocks.getScriptRequest();
+      return scriptRequest;
+    });
 
     onLoaded = jasmine.createSpy("onLoaded");
 
@@ -19,233 +21,213 @@ describe("DependencyLoader", function() {
       cdn_http: "http://example.com",
       cdn_https: "https://example.com",
       version: "6.6.6",
-      suffix: "-test"
+      suffix: "-test",
+      receivers: Pusher.Integration.ScriptReceivers
+    });
+  });
+
+  describe("#getRoot", function() {
+    it("should return correct URL when using HTTP", function() {
+      doc.location.protocol = "http:";
+      expect(loader.getRoot()).toEqual(
+        "http://example.com/6.6.6"
+      );
+    });
+
+    it("should return correct URL when using HTTP, but encrypted is requested", function() {
+      doc.location.protocol = "http:";
+      expect(loader.getRoot({ encrypted: true })).toEqual(
+        "https://example.com/6.6.6"
+      );
+    });
+
+    it("should return correct URL when using HTTPS", function() {
+      doc.location.protocol = "https:";
+      expect(loader.getRoot()).toEqual(
+        "https://example.com/6.6.6"
+      );
+    });
+
+    it("should strip trailing slashes from the CDN url", function() {
+      var loader = new Pusher.DependencyLoader({
+        cdn_http: "http://example.com/",
+        cdn_https: "https://example.com/",
+        version: "6.6.6",
+        suffix: "-test",
+        receivers: Pusher.Integration.ScriptReceivers
+      });
+      expect(loader.getRoot()).toEqual(
+        "http://example.com/6.6.6"
+      );
     });
   });
 
   describe("#getPath", function() {
-    it("should return correct path when using HTTP", function() {
-      document.location.protocol = "http:";
-      expect(loader.getPath("something"))
-        .toEqual("http://example.com/6.6.6/something-test.js");
+    it("should return correct URL when using HTTP", function() {
+      doc.location.protocol = "http:";
+      expect(loader.getPath("something")).toEqual(
+        "http://example.com/6.6.6/something-test.js"
+      );
     });
 
-    it("should return correct path when using HTTP, but encrypted is requested", function() {
-      document.location.protocol = "http:";
-      expect(loader.getPath("something", { encrypted: true }))
-        .toEqual("https://example.com/6.6.6/something-test.js");
+    it("should return correct URL when using HTTP, but encrypted is requested", function() {
+      doc.location.protocol = "http:";
+      expect(loader.getPath("something", { encrypted: true })).toEqual(
+        "https://example.com/6.6.6/something-test.js"
+      );
     });
 
-    it("should return correct path when using HTTPS", function() {
-      document.location.protocol = "https:";
-      expect(loader.getPath("something_else"))
-        .toEqual("https://example.com/6.6.6/something_else-test.js");
+    it("should return correct URL when using HTTPS", function() {
+      doc.location.protocol = "https:";
+      expect(loader.getPath("something_else")).toEqual(
+        "https://example.com/6.6.6/something_else-test.js"
+      );
+    });
+
+    it("should strip trailing slashes from the CDN url", function() {
+      var loader = new Pusher.DependencyLoader({
+        cdn_http: "http://example.com/",
+        cdn_https: "https://example.com/",
+        version: "6.6.6",
+        suffix: "-test",
+        receivers: Pusher.Integration.ScriptReceivers
+      });
+      expect(loader.getPath("something_else")).toEqual(
+        "http://example.com/6.6.6/something_else-test.js"
+      );
     });
   });
 
-  it("should create a head script tag for the resource", function() {
-    loader.load("resource", onLoaded);
-
-    expect(document.getElementsByTagName.calls.length).toEqual(1);
-    expect(document.getElementsByTagName).toHaveBeenCalledWith("head");
-    expect(document.createElement.calls.length).toEqual(1);
-    expect(document.createElement).toHaveBeenCalledWith("script");
-
-    expect(script.setAttribute).toHaveBeenCalledWith("type", "text/javascript");
-    expect(script.setAttribute).toHaveBeenCalledWith("async", true);
-    expect(script.setAttribute).toHaveBeenCalledWith(
-      "src", "http://example.com/6.6.6/resource-test.js"
-    );
-
-    expect(head.appendChild.calls.length).toEqual(1);
-    expect(head.appendChild).toHaveBeenCalledWith(script);
-  });
-
-  it("should use https CDN when served from https", function() {
-    document.location.protocol = "https:";
-    loader.load("something", onLoaded);
-
-    expect(script.setAttribute).toHaveBeenCalledWith(
-      "src", "https://example.com/6.6.6/something-test.js"
-    );
-  });
-
-  it("should call back after the resource has been loaded", function() {
-    loader.load("resource", onLoaded);
-
-    expect(script.addEventListener.calls.length).toEqual(1);
-    expect(script.addEventListener).toHaveBeenCalledWith(
-      "load", jasmine.any(Function), false
-    );
-
-    expect(onLoaded).not.toHaveBeenCalled();
-    script.addEventListener.calls[0].args[1]();
-    expect(onLoaded).not.toHaveBeenCalled();
-
-    waitsFor(function() {
-      return onLoaded.calls.length === 1;
-    }, "load callback to get called", 100);
-  });
-
-  it("should strip trailing slashes from the CDN url", function() {
-    loader = new Pusher.DependencyLoader({
-      cdn_http: "http://example.com/",
-      cdn_https: "https://example.com/",
-      version: "6.6.6",
-      suffix: "-test"
-    });
-    loader.load("resource", onLoaded);
-    expect(script.setAttribute).toHaveBeenCalledWith(
-      "src", "http://example.com/6.6.6/resource-test.js"
-    );
-  });
-
-  describe("on IE < 9", function() {
-    beforeEach(function() {
-      document.addEventListener = undefined;
-      script.addEventListener = undefined;
-      script.attachEvent = jasmine.createSpy("attachEvent");
-    });
-
-    it("should call back after the script ends up 'loaded' state", function() {
+  describe("#load", function() {
+    it("should send an unencrypted script request when served via http", function() {
+      doc.location.protocol = "http:";
       loader.load("resource", onLoaded);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.com/6.6.6/resource-test.js"
+      );
+    });
 
-      expect(script.attachEvent.calls.length).toEqual(1);
-      expect(script.attachEvent).toHaveBeenCalledWith(
-        "onreadystatechange", jasmine.any(Function)
+    it("should send an encrypted script request when served via https", function() {
+      doc.location.protocol = "https:";
+      loader.load("resource", onLoaded);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "https://example.com/6.6.6/resource-test.js"
+      );
+    });
+
+    it("should only send one script request per resource at a time", function() {
+      expect(Pusher.ScriptRequest.calls.length).toEqual(0);
+
+      loader.load("resource", function() {});
+      loader.load("resource", function() {});
+      loader.load("resource", function() {});
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.com/6.6.6/resource-test.js"
       );
 
-      expect(onLoaded).not.toHaveBeenCalled();
-      script.readyState = "loaded";
-      script.attachEvent.calls[0].args[1]();
-      waitsFor(function() {
-        return onLoaded.calls.length === 1;
-      }, "load callback to get called", 100);
+      loader.load("resource2", function() {});
+      expect(Pusher.ScriptRequest.calls.length).toEqual(2);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "http://example.com/6.6.6/resource2-test.js"
+      );
     });
 
-    it("should call back after the script ends up 'complete' state", function() {
+    it("should register a receiver", function() {
       loader.load("resource", onLoaded);
+      var receiver = scriptRequest.send.calls[0].args[0];
+      expect(Pusher.Integration.ScriptReceivers[receiver.number]).toBe(
+        receiver.callback
+      );
+    });
+
+    it("should call back without an error if the resource loaded successfully", function() {
+      loader.load("resource", onLoaded);
+      var receiver = scriptRequest.send.calls[0].args[0];
 
       expect(onLoaded).not.toHaveBeenCalled();
-      script.readyState = "complete";
-      script.attachEvent.calls[0].args[1]();
-      waitsFor(function() {
-        return onLoaded.calls.length === 1;
-      }, "load callback to get called", 100);
-    });
-  });
-
-  describe("on multiple load requests", function() {
-    var onLoadedSecond;
-
-    beforeEach(function() {
-      onLoadedSecond = jasmine.createSpy("onLoadedSecond");
+      receiver.callback(null);
+      expect(onLoaded).toHaveBeenCalledWith(null, jasmine.any(Function));
     });
 
-    describe("concurrently", function() {
-      describe("for the same resource", function() {
-        it("should create only one script tag", function() {
-          loader.load("resource", onLoaded);
-          loader.load("resource", onLoadedSecond);
+    it("should call back with an error if the resource failed to load", function() {
+      loader.load("resource", onLoaded);
+      var receiver = scriptRequest.send.calls[0].args[0];
 
-          expect(document.getElementsByTagName.calls.length).toEqual(1);
-          expect(document.createElement.calls.length).toEqual(1);
-          expect(head.appendChild.calls.length).toEqual(1);
-        });
-
-        it("should call both callbacks after resource has been loaded", function() {
-          loader.load("resource", onLoaded);
-          loader.load("resource", onLoadedSecond);
-
-          expect(onLoaded).not.toHaveBeenCalled();
-          expect(onLoadedSecond).not.toHaveBeenCalled();
-          script.addEventListener.calls[0].args[1]();
-
-          waitsFor(function() {
-            return onLoaded.calls.length === 1;
-          }, "load callback to get called", 100);
-          runs(function() {
-            expect(onLoadedSecond.calls.length).toEqual(1);
-          });
-        });
-      });
-
-      describe("for different resources", function() {
-        var secondScript;
-
-        beforeEach(function() {
-          secondScript = Pusher.Mocks.getDocumentElement();
-
-          var scripts = [script, secondScript];
-          document.createElement.andCallFake(function() {
-            return scripts.shift();
-          });
-        });
-
-        it("should create two script tags", function() {
-          loader.load("resource", onLoaded);
-          loader.load("second", onLoadedSecond);
-
-          expect(document.createElement.calls.length).toEqual(2);
-
-          expect(script.setAttribute).toHaveBeenCalledWith(
-            "src", "http://example.com/6.6.6/resource-test.js"
-          );
-          expect(secondScript.setAttribute).toHaveBeenCalledWith(
-            "src", "http://example.com/6.6.6/second-test.js"
-          );
-
-          expect(head.appendChild.calls.length).toEqual(2);
-        });
-
-        it("should call back for each loaded resource", function() {
-          loader.load("resource", onLoaded);
-          loader.load("second", onLoadedSecond);
-
-          expect(onLoaded).not.toHaveBeenCalled();
-          expect(onLoadedSecond).not.toHaveBeenCalled();
-          secondScript.addEventListener.calls[0].args[1]();
-
-          waitsFor(function() {
-            return onLoadedSecond.calls.length === 1;
-          }, "first load callback to get called", 100);
-          runs(function() {
-            expect(onLoaded).not.toHaveBeenCalled();
-            script.addEventListener.calls[0].args[1]();
-            expect(onLoaded).not.toHaveBeenCalled();
-          });
-          waitsFor(function() {
-            return onLoaded.calls.length === 1;
-          }, "second load callback to get called", 100);
-        });
-      });
+      expect(onLoaded).not.toHaveBeenCalled();
+      receiver.callback("too bad");
+      expect(onLoaded).toHaveBeenCalledWith("too bad", jasmine.any(Function));
     });
 
-    describe("subsequently for the same resource", function() {
+    it("should trigger all resource's callbacks", function() {
+      var onLoaded2 = jasmine.createSpy();
+      var onLoaded3 = jasmine.createSpy();
+      loader.load("resource", onLoaded);
+      loader.load("resource", onLoaded2);
+      var firstScriptRequest = scriptRequest;
+
+      loader.load("resource2", onLoaded3);
+
+      expect(onLoaded.calls.length).toEqual(0);
+      expect(onLoaded2.calls.length).toEqual(0);
+      expect(onLoaded3.calls.length).toEqual(0);
+
+      var firstReceiver = firstScriptRequest.send.calls[0].args[0];
+      firstReceiver.callback(null);
+
+      expect(onLoaded.calls.length).toEqual(1);
+      expect(onLoaded2.calls.length).toEqual(1);
+      expect(onLoaded3.calls.length).toEqual(0);
+
+      var secondReceiver = scriptRequest.send.calls[0].args[0];
+      secondReceiver.callback(null);
+
+      expect(onLoaded.calls.length).toEqual(1);
+      expect(onLoaded2.calls.length).toEqual(1);
+      expect(onLoaded3.calls.length).toEqual(1);
+    });
+
+    describe("after loading the resource", function() {
+      var receiver;
+
       beforeEach(function() {
         loader.load("resource", onLoaded);
-        script.addEventListener.calls[0].args[1]();
-
-        waitsFor(function() {
-          return onLoaded.calls.length === 1;
-        }, "load callback to get called", 100);
+        receiver = scriptRequest.send.calls[0].args[0];
+        receiver.callback(null);
       });
 
-      it("should not load the resource again", function() {
-        runs(function() {
-          loader.load("resource", onLoadedSecond);
-
-          expect(document.createElement.calls.length).toEqual(1);
-          expect(head.appendChild.calls.length).toEqual(1);
-          expect(onLoadedSecond).toHaveBeenCalled();
-        });
+      it("should remove the receiver", function() {
+        expect(Pusher.Integration.ScriptReceivers[receiver.number]).toBe(
+          undefined
+        );
       });
 
-      it("should call back immediately", function() {
-        runs(function() {
-          loader.load("resource", onLoadedSecond);
-          expect(onLoadedSecond).toHaveBeenCalled();
-        });
+      it("should not clean up the request when called back with true", function() {
+        var loadCallback = onLoaded.calls[0].args[1];
+        expect(scriptRequest.cleanup).not.toHaveBeenCalled();
+        loadCallback(true);
+        expect(scriptRequest.cleanup).not.toHaveBeenCalled();
+      });
+
+      it("should clean up the request when called back with false", function() {
+        var loadCallback = onLoaded.calls[0].args[1];
+        expect(scriptRequest.cleanup).not.toHaveBeenCalled();
+        loadCallback(false);
+        expect(scriptRequest.cleanup.calls.length).toEqual(1);
+      });
+
+      it("should not call old callbacks after loading the script", function() {
+        expect(onLoaded.calls.length).toEqual(1);
+
+        var onLoaded2 = jasmine.createSpy();
+        loader.load("resource", onLoaded2);
+        var receiver = scriptRequest.send.calls[0].args[0];
+        receiver.callback(null);
+
+        expect(onLoaded.calls.length).toEqual(1);
+        expect(onLoaded2.calls.length).toEqual(1);
       });
     });
   });

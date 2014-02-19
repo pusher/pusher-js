@@ -1,5 +1,12 @@
 ;(function() {
   Pusher.Mocks = {
+    getScriptRequest: function() {
+      return {
+        send: jasmine.createSpy("send"),
+        cleanup: jasmine.createSpy("cleanup")
+      };
+    },
+
     getDocument: function() {
       return {
         location: {

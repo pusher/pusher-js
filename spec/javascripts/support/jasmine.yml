@@ -9,10 +9,13 @@ src_files:
   - defaults.js
   - config.js
   - errors.js
+  - events_dispatcher.js
+
+  - dom/script_receiver_factory.js
+  - dom/script_request.js
+
   - dependency_loader.js
   - dependencies.js
-  - events_dispatcher.js
-  - net_info.js
 
   - http/http_request.js
   - http/http_xhr_request.js
@@ -23,7 +26,6 @@ src_files:
 
   - base64.js
   - jsonp/jsonp_request.js
-  - jsonp/jsonp_receiver.js
 
   - timeline/timeline.js
   - timeline/timeline_sender.js
@@ -50,6 +52,8 @@ src_files:
   - connection/connection.js
   - connection/handshake.js
   - connection/connection_manager.js
+
+  - net_info.js
 
   - channels/members.js
   - channels/channel.js

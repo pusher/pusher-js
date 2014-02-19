@@ -1,6 +1,11 @@
 ;(function() {
   /** Handles loading dependency files.
    *
+   * Dependency loaders don't remember whether a resource has been loaded or
+   * not. It is caller's responsibility to make sure the resource is not loaded
+   * twice. This is because it's impossible to detect resource loading status
+   * without knowing its content.
+   *
    * Options:
    * - cdn_http - url to HTTP CND
    * - cdn_https - url to HTTPS CDN
@@ -11,8 +16,8 @@
    */
   function DependencyLoader(options) {
     this.options = options;
+    this.receivers = options.receivers || Pusher.ScriptReceivers;
     this.loading = {};
-    this.loaded = {};
   }
   var prototype = DependencyLoader.prototype;
 
@@ -24,23 +29,30 @@
   prototype.load = function(name, callback) {
     var self = this;
 
-    if (this.loaded[name]) {
-      callback();
-    } else if (this.loading[name] && this.loading[name].length > 0) {
-      this.loading[name].push(callback);
+    if (self.loading[name] && self.loading[name].length > 0) {
+      self.loading[name].push(callback);
     } else {
-      this.loading[name] = [callback];
+      self.loading[name] = [callback];
 
-      require(this.getPath(name), function() {
-        self.loaded[name] = true;
+      var request = new Pusher.ScriptRequest(self.getPath(name));
+      var receiver = self.receivers.create(function(error) {
+        self.receivers.remove(receiver);
 
         if (self.loading[name]) {
-          for (var i = 0; i < self.loading[name].length; i++) {
-            self.loading[name][i]();
-          }
+          var callbacks = self.loading[name];
           delete self.loading[name];
+
+          var successCallback = function(wasSuccessful) {
+            if (!wasSuccessful) {
+              request.cleanup();
+            }
+          };
+          for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i](error, successCallback);
+          }
         }
       });
+      request.send(receiver);
     }
   };
 
@@ -68,35 +80,6 @@
   prototype.getPath = function(name, options) {
     return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
   };
-
-  function handleScriptLoaded(elem, callback) {
-    if (Pusher.Util.getDocument().addEventListener) {
-      elem.addEventListener('load', callback, false);
-    } else {
-      elem.attachEvent('onreadystatechange', function () {
-        if (elem.readyState === 'loaded' || elem.readyState === 'complete') {
-          callback();
-        }
-      });
-    }
-  }
-
-  function require(src, callback) {
-    var document = Pusher.Util.getDocument();
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-
-    script.setAttribute('src', src);
-    script.setAttribute("type","text/javascript");
-    script.setAttribute('async', true);
-
-    handleScriptLoaded(script, function() {
-      // workaround for an Opera issue
-      setTimeout(callback, 0);
-    });
-
-    head.appendChild(script);
-  }
 
   Pusher.DependencyLoader = DependencyLoader;
 }).call(this);

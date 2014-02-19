@@ -20,12 +20,15 @@ bundle 'pusher.js' do
   file 'config.js'
   file 'errors.js'
   file 'events_dispatcher.js'
+
+  file 'dom/script_receiver_factory.js'
+  file 'dom/script_request.js'
+
   file 'dependency_loader.js'
   file 'dependencies.js'
 
   file 'base64.js'
   file 'jsonp/jsonp_request.js'
-  file 'jsonp/jsonp_receiver.js'
 
   file 'timeline/timeline.js'
   file 'timeline/timeline_sender.js'

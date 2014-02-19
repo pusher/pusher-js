@@ -9,9 +9,11 @@
     handlesActivityChecks: false,
     supportsPing: false,
 
+    isInitialized: function() {
+      return Boolean(window.WebSocket || window.MozWebSocket);
+    },
     isSupported: function() {
-      return window.WebSocket !== undefined ||
-        window.MozWebSocket !== undefined;
+      return Boolean(window.WebSocket || window.MozWebSocket);
     },
     getSocket: function(url) {
       var Constructor = window.WebSocket || window.MozWebSocket;
@@ -49,6 +51,9 @@
       window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
         "/WebSocketMain.swf";
     },
+    isInitialized: function() {
+      return window.FlashWebSocket !== undefined;
+    },
     getSocket: function(url) {
       return new FlashWebSocket(url);
     }
@@ -63,6 +68,9 @@
 
     isSupported: function() {
       return true;
+    },
+    isInitialized: function() {
+      return window.SockJS !== undefined;
     },
     getSocket: function(url, options) {
       return new SockJS(url, null, {
@@ -82,7 +90,10 @@
   var httpConfiguration = {
     urls: Pusher.URLSchemes.http,
     handlesActivityChecks: false,
-    supportsPing: true
+    supportsPing: true,
+    isInitialized: function() {
+      return Boolean(Pusher.HTTP.Socket);
+    }
   };
 
   var streamingConfiguration = Pusher.Util.extend(

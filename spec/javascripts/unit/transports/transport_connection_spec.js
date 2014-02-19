@@ -32,6 +32,7 @@ describe("TransportConnection", function() {
     hooks = {
       urls: urls,
       supportsPing: false,
+      isInitialized: jasmine.createSpy().andReturn(true),
       getSocket: jasmine.createSpy().andReturn(socket)
     };
 
@@ -83,7 +84,20 @@ describe("TransportConnection", function() {
       });
     });
 
-    describe("if the transport doesn't have a resource file", function() {
+    describe("if the transport is initialized", function() {
+      var hooks;
+      var transport;
+
+      beforeEach(function() {
+        hooks = {
+          supportsPing: false,
+          isInitialized: jasmine.createSpy().andReturn(true)
+        };
+        transport = getTransport(hooks, "foo", {
+          timeline: timeline
+        });
+      });
+
       it("should transition to 'initialized' immediately", function() {
         var onInitialized = jasmine.createSpy("onInitialized");
         transport.bind("initialized", onInitialized);
@@ -95,6 +109,7 @@ describe("TransportConnection", function() {
 
       it("should call the beforeInitialize hook, if it's specified ", function() {
         var hooks = {
+          isInitialized: jasmine.createSpy().andReturn(true),
           beforeInitialize: jasmine.createSpy(),
           getSocket: jasmine.createSpy().andReturn(socket)
         };
@@ -107,15 +122,15 @@ describe("TransportConnection", function() {
       });
     });
 
-    describe("if the transport has a resource file", function() {
+    describe("if the transport is not initialized", function() {
       var hooks, transport;
 
       beforeEach(function() {
         hooks = {
           file: "test",
+          isInitialized: jasmine.createSpy().andReturn(false),
           getSocket: jasmine.createSpy().andReturn(socket)
         };
-
         transport = getTransport(hooks, "foo", {
           timeline: timeline
         });
@@ -133,6 +148,7 @@ describe("TransportConnection", function() {
       it("should call the beforeInitialize hook before loading the resource file ", function() {
         var hooks = {
           file: "test",
+          isInitialized: jasmine.createSpy().andReturn(false),
           beforeInitialize: jasmine.createSpy().andCallFake(function() {
             expect(Pusher.Dependencies.load).not.toHaveBeenCalled();
           }),
@@ -154,16 +170,56 @@ describe("TransportConnection", function() {
         );
       });
 
-      it("should transition to 'initialized' after loading the resource file", function() {
-        var onInitialized = jasmine.createSpy("onInitialized");
-        transport.bind("initialized", onInitialized);
+      describe("after loading the resource successfully", function() {
+        var onInitialized;
+        var loadCallback;
 
-        transport.initialize();
-        // fire the callback for the resource file load
-        Pusher.Dependencies.load.calls[0].args[1]();
+        beforeEach(function() {
+          onInitialized = jasmine.createSpy("onInitialized");
+          loadCallback = jasmine.createSpy("loadCallback");
+          transport.bind("initialized", onInitialized);
 
-        expect(onInitialized).toHaveBeenCalled();
-        expect(transport.state).toEqual("initialized");
+          transport.initialize();
+          // after loading the resource, isInitialized will return true
+          hooks.isInitialized.andReturn(true);
+          // fire the callback for the resource file load
+          Pusher.Dependencies.load.calls[0].args[1](null, loadCallback);
+        });
+
+        it("should transition to 'initialized'", function() {
+          expect(onInitialized).toHaveBeenCalled();
+          expect(transport.state).toEqual("initialized");
+        });
+
+        it("should call the load callback with true", function() {
+          expect(loadCallback).toHaveBeenCalledWith(true);
+        });
+      });
+
+      describe("after failing to load the resource", function() {
+        var onClosed;
+        var loadCallback;
+
+        beforeEach(function() {
+          onClosed = jasmine.createSpy("onClosed");
+          loadCallback = jasmine.createSpy("loadCallback");
+          transport.bind("closed", onClosed);
+
+          transport.initialize();
+          // after loading the resource, isInitialized will return true
+          hooks.isInitialized.andReturn(false);
+          // fire the callback for the resource file load
+          Pusher.Dependencies.load.calls[0].args[1](null, loadCallback);
+        });
+
+        it("should transition to 'closed'", function() {
+          expect(onClosed).toHaveBeenCalled();
+          expect(transport.state).toEqual("closed");
+        });
+
+        it("should call the load callback with false", function() {
+          expect(loadCallback).toHaveBeenCalledWith(false);
+        });
       });
     });
   });
@@ -333,6 +389,7 @@ describe("TransportConnection", function() {
       var hooks = {
         urls: urls,
         supportsPing: true,
+        isInitialized: jasmine.createSpy().andReturn(true),
         getSocket: jasmine.createSpy().andReturn(socket)
       };
       var transport = getTransport(hooks, "foo", {
@@ -353,6 +410,7 @@ describe("TransportConnection", function() {
       var hooks = {
         urls: urls,
         supportsPing: false,
+        isInitialized: jasmine.createSpy().andReturn(true),
         getSocket: jasmine.createSpy().andReturn(socket)
       };
       var transport = getTransport(hooks, "foo", {
@@ -415,6 +473,7 @@ describe("TransportConnection", function() {
       hooks = {
         urls: urls,
         supportsPing: true,
+        isInitialized: jasmine.createSpy().andReturn(true),
         getSocket: jasmine.createSpy().andReturn(socket)
       };
       transport = getTransport(hooks, "foo", {
