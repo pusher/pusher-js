@@ -192,7 +192,6 @@ describe("Transports", function() {
     });
 
     describe("isSupported hook", function() {
-      var _navigator = window.navigator;
       var _ActiveXObject = window.ActiveXObject;
 
       afterEach(function() {
@@ -200,77 +199,51 @@ describe("Transports", function() {
       });
 
       describe("on non-IE browsers", function() {
-        // make sure we can mock navigator
-        if (!window.navigator.__defineGetter__) {
-          return;
-        }
-
-        afterEach(function() {
-          window.navigator = _navigator;
+        beforeEach(function() {
+          window.ActiveXObject = undefined;
+          spyOn(Pusher.Util, "getNavigator");
         });
 
         it("should be supported, if application/x-shockwave-flash is in mime types", function() {
-          window.navigator = {};
-          window.navigator.__defineGetter__("mimeTypes", function() {
-            return { "application/x-shockwave-flash": {} };
+          Pusher.Util.getNavigator.andReturn({
+            mimeTypes: {
+              "application/x-shockwave-flash": {}
+            }
           });
-          window.ActiveXObject = undefined;
-
           expect(Pusher.FlashTransport.isSupported({})).toBe(true);
-
-          window.navigator.__defineGetter__("mimeTypes", function() {
-            return {};
-          });
-          expect(Pusher.FlashTransport.isSupported({})).toBe(false);
         });
 
         it("should not be supported if application/x-shockwave-flash is not in mime types", function() {
-          window.navigator = {};
-          window.navigator.__defineGetter__("mimeTypes", function() {
-            return { "whatever": {} };
+          Pusher.Util.getNavigator.andReturn({
+            mimeTypes: {
+              "whatever": {}
+            }
           });
-
           expect(Pusher.FlashTransport.isSupported({})).toBe(false);
         });
 
         it("should not be supported if mime types are not available", function() {
-          window.navigator = {};
-          window.navigator.__defineGetter__("mimeTypes", function() {
-            return null;
-          });
+          Pusher.Util.getNavigator.andReturn({});
+          expect(Pusher.FlashTransport.isSupported({})).toBe(false);
+        });
 
+        it("should not be supported if navigator is not available", function() {
+          Pusher.Util.getNavigator.andReturn(undefined);
           expect(Pusher.FlashTransport.isSupported({})).toBe(false);
         });
       });
 
       describe("on IE", function() {
         beforeEach(function() {
-          // mock navigator if we can, other browsers should pass this test too
-          if (window.navigator.__defineGetter__) {
-            window.navigator = {};
-            window.navigator.__defineGetter__("mimeTypes", function() {
-              return {};
-            });
-          }
-        });
-
-        afterEach(function() {
-          if (window.navigator.__defineGetter__) {
-            window.navigator.__defineGetter__("mimeTypes", function() {
-              return _mimeTypes;
-            });
-            window.navigator = _navigator;
-          }
-          window.ActiveXObject = _ActiveXObject;
+          window.ActiveXObject = jasmine.createSpy("ActiveXObject");
+          spyOn(Pusher.Util, "getNavigator").andReturn({});
         });
 
         it("should be supported if it's possible to instantiate ShockwaveFlash.ShockwaveFlash ActiveXObject", function() {
-          window.ActiveXObject = jasmine.createSpy("ActiveXObject");
           expect(Pusher.FlashTransport.isSupported({})).toBe(true);
         });
 
         it("should not be supported if instantiating ShockwaveFlash.ShockwaveFlash ActiveXObject throws an error", function() {
-          window.ActiveXObject = jasmine.createSpy("ActiveXObject");
           window.ActiveXObject.andCallFake(function() {
             throw new Error("Automation server can't create object");
           });

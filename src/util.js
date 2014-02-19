@@ -291,6 +291,10 @@
       return document;
     },
 
+    getNavigator: function() {
+      return navigator;
+    },
+
     getLocalStorage: function() {
       try {
         return window.localStorage;

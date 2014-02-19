@@ -31,10 +31,11 @@
         return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
       } catch (e1) {
         try {
+          var nav = Pusher.Util.getNavigator();
           return Boolean(
-            navigator &&
-            navigator.mimeTypes &&
-            navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
+            nav &&
+            nav.mimeTypes &&
+            nav.mimeTypes["application/x-shockwave-flash"] !== undefined
           );
         } catch (e2) {
           return false;
