@@ -525,32 +525,40 @@ describe("Transports", function() {
       describe("isSupported hook", function() {
         it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocumentLocation").andReturn({
-            protocol: "http:"
+          spyOn(Pusher.Util, "getDocument").andReturn({
+            location: {
+              protocol: "http:"
+            }
           });
           expect(Pusher[transport].hooks.isSupported({ encrypted: false })).toBe(true);
         });
 
         it("should return true if window.XDomainRequest exists, document protocol is https: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocumentLocation").andReturn({
-            protocol: "https:"
+          spyOn(Pusher.Util, "getDocument").andReturn({
+            location: {
+              protocol: "https:"
+            }
           });
           expect(Pusher[transport].hooks.isSupported({ encrypted: true })).toBe(true);
         });
 
         it("should return false if window.XDomainRequest exists, document protocol is http: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocumentLocation").andReturn({
-            protocol: "http:"
+          spyOn(Pusher.Util, "getDocument").andReturn({
+            location: {
+              protocol: "http:"
+            }
           });
           expect(Pusher[transport].hooks.isSupported({ encrypted: true })).toBe(false);
         });
 
         it("should return false if window.XDomainRequest exists, document protocol is https: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocumentLocation").andReturn({
-            protocol: "https:"
+          spyOn(Pusher.Util, "getDocument").andReturn({
+            location: {
+              protocol: "https:"
+            }
           });
           expect(Pusher[transport].hooks.isSupported({ encrypted: false })).toBe(false);
         });

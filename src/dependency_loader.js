@@ -50,7 +50,7 @@
    */
   prototype.getRoot = function(options) {
     var cdn;
-    var protocol = Pusher.Util.getDocumentLocation().protocol;
+    var protocol = Pusher.Util.getDocument().location.protocol;
     if ((options && options.encrypted) || protocol === "https:") {
       cdn = this.options.cdn_https;
     } else {

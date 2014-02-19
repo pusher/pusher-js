@@ -189,7 +189,7 @@
   };
 
   prototype.isEncrypted = function() {
-    if (Pusher.Util.getDocumentLocation().protocol === "https:") {
+    if (Pusher.Util.getDocument().location.protocol === "https:") {
       return true;
     } else {
       return Boolean(this.config.encrypted);

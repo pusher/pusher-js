@@ -22,8 +22,10 @@ describe("Pusher", function() {
     spyOn(Pusher, "Channel").andCallFake(function(name, _) {
       return Pusher.Mocks.getChannel(name);
     });
-    spyOn(Pusher.Util, "getDocumentLocation").andReturn({
-      protocol: "http:"
+    spyOn(Pusher.Util, "getDocument").andReturn({
+      location: {
+        protocol: "http:"
+      }
     });
   });
 
@@ -105,8 +107,10 @@ describe("Pusher", function() {
       });
 
       it("should be on when using https", function() {
-        Pusher.Util.getDocumentLocation.andReturn({
-          protocol: "https:"
+        Pusher.Util.getDocument.andReturn({
+          location: {
+            protocol: "https:"
+          }
         });
         expect(pusher.isEncrypted()).toBe(true);
       });
@@ -189,8 +193,10 @@ describe("Pusher", function() {
       });
 
       it("should be encrypted when using HTTPS", function() {
-        Pusher.Util.getDocumentLocation.andReturn({
-          protocol: "https:"
+        Pusher.Util.getDocument.andReturn({
+          location: {
+            protocol: "https:"
+          }
         });
         var pusher = new Pusher("foo", { encrypted: true });
         expect(pusher.connection.options.encrypted).toBe(true);

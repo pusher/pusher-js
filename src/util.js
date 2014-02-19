@@ -291,10 +291,6 @@
       return document;
     },
 
-    getDocumentLocation: function() {
-      return Pusher.Util.getDocument().location;
-    },
-
     getLocalStorage: function() {
       try {
         return window.localStorage;
@@ -337,7 +333,7 @@
 
     isXDRSupported: function(encrypted) {
       var protocol = encrypted ? "https:" : "http:";
-      var documentProtocol = Pusher.Util.getDocumentLocation().protocol;
+      var documentProtocol = Pusher.Util.getDocument().location.protocol;
       return Boolean(window.XDomainRequest) && documentProtocol === protocol;
     }
   };
