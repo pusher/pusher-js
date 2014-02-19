@@ -1,8 +1,7 @@
 describeIntegration("JSONP", function() {
-
   it("should send a request and receive a correct response", function() {
     var callback = jasmine.createSpy();
-    var receiver = Pusher.JSONP.create(callback);
+    var receiver = Pusher.ScriptReceivers.create(callback);
     var url = Pusher.Integration.API_URL + "/v2/jsonp/echo";
 
     runs(function() {
@@ -50,9 +49,9 @@ describeIntegration("JSONP", function() {
     });
   });
 
-  it("should fail on 404 response", function() {
+  it("should call back without a result on 404 response", function() {
     var callback = jasmine.createSpy();
-    var receiver = Pusher.JSONP.create(callback);
+    var receiver = Pusher.ScriptReceivers.create(callback);
     var url = Pusher.Integration.API_URL + "/jsonp/404";
 
     runs(function() {
@@ -64,13 +63,13 @@ describeIntegration("JSONP", function() {
     }, "JSONP to respond", 5000);
     runs(function() {
       expect(callback.calls.length).toEqual(1);
-      expect(callback).toHaveBeenCalledWith(jasmine.any(String));
+      expect(callback.calls[0].args[1]).toBe(undefined);
     });
   });
 
-  it("should fail on 500 response", function() {
+  it("should call back without a result on 500 response", function() {
     var callback = jasmine.createSpy();
-    var receiver = Pusher.JSONP.create(callback);
+    var receiver = Pusher.ScriptReceivers.create(callback);
     var url = Pusher.Integration.API_URL + "/jsonp/500";
 
     runs(function() {
@@ -82,7 +81,7 @@ describeIntegration("JSONP", function() {
     }, "JSONP to respond", 5000);
     runs(function() {
       expect(callback.calls.length).toEqual(1);
-      expect(callback).toHaveBeenCalledWith(jasmine.any(String));
+      expect(callback.calls[0].args[1]).toBe(undefined);
     });
   });
 });

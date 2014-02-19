@@ -74,18 +74,25 @@
     if (self.hooks.beforeInitialize) {
       self.hooks.beforeInitialize();
     }
-    if (self.hooks.file) {
+
+    if (self.hooks.isInitialized()) {
+      self.changeState("initialized");
+    } else if (self.hooks.file) {
       self.changeState("initializing");
-      Pusher.Dependencies.load(self.hooks.file, function(error) {
-        if (error) {
-          self.onError(error);
-          self.onClose();
-        } else {
+      Pusher.Dependencies.load(self.hooks.file, function(error, callback) {
+        if (self.hooks.isInitialized()) {
           self.changeState("initialized");
+          callback(true);
+        } else {
+          if (error) {
+            self.onError(error);
+          }
+          self.onClose();
+          callback(false);
         }
       });
     } else {
-      self.changeState("initialized");
+      self.onClose();
     }
   };
 

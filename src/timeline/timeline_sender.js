@@ -17,8 +17,8 @@
       var url = scheme + (self.host || self.options.host) + self.options.path;
       var request = new Pusher.JSONPRequest(url, data);
 
-      var receiver = Pusher.JSONP.create(function(error, result) {
-        Pusher.JSONP.remove(receiver);
+      var receiver = Pusher.ScriptReceivers.create(function(error, result) {
+        Pusher.ScriptReceivers.remove(receiver);
         request.cleanup();
 
         if (result && result.host) {

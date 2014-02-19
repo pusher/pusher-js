@@ -62,11 +62,11 @@ describe("TimelineSender", function() {
       );
     });
 
-    it("should register a receiver using Pusher.JSONP", function() {
+    it("should register a receiver using Pusher.ScriptReceivers", function() {
       sender.send(false, onSend);
 
       var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      expect(Pusher.JSONP[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
+      expect(Pusher.ScriptReceivers[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
     });
 
     it("should call back after a successful JSONP request", function() {
@@ -87,12 +87,12 @@ describe("TimelineSender", function() {
       expect(onSend).toHaveBeenCalledWith("ERROR!", undefined);
     });
 
-    it("should remove the receiver from Pusher.JSONP", function() {
+    it("should remove the receiver from Pusher.ScriptReceivers", function() {
       sender.send(false, onSend);
 
       var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
       jsonpReceiver.callback(null, {});
-      expect(Pusher.JSONP[jsonpReceiver.number]).toBe(undefined);
+      expect(Pusher.ScriptReceivers[jsonpReceiver.number]).toBe(undefined);
     });
 
     it("should clean up the JSONP request", function() {

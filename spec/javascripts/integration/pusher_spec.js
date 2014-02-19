@@ -86,7 +86,7 @@ describeIntegration("Pusher", function() {
         });
         pusher.unsubscribe(channelName);
         Pusher.Integration.sendAPIMessage({
-          url: Pusher.Integration.API_URL + "/send",
+          url: Pusher.Integration.API_URL + "/v2/send",
           channel: channelName,
           event: eventName,
           data: {}

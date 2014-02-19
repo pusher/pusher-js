@@ -19,6 +19,7 @@ describeIntegration("ScriptRequest", function() {
       return callback.calls.length > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
+      expect(callback.calls.length).toEqual(1);
       expect(callback).toHaveBeenCalledWith(null, { param: "test" });
     });
   });
@@ -27,7 +28,7 @@ describeIntegration("ScriptRequest", function() {
     var callback = jasmine.createSpy();
     var receiver = Pusher.Integration.ScriptReceivers.create(callback);
     var query = "receiver=" + receiver.name;
-    var url = Pusher.Integration.API_URL + "/script_request/echo?" + query;
+    var url = Pusher.Integration.API_URL + "/v2/script_request/echo?" + query;
 
     var request = new Pusher.ScriptRequest(url);
 
@@ -49,8 +50,8 @@ describeIntegration("ScriptRequest", function() {
     });
   });
 
-  it("should call back with an error on a 404 response", function() {
-    var url = Pusher.Integration.API_URL + "/jsonp/404";
+  it("should call back without result on a 404 response", function() {
+    var url = Pusher.Integration.API_URL + "/jsonp/404/" + receiver.number;
     var request = new Pusher.ScriptRequest(url);
 
     runs(function() {
@@ -60,14 +61,13 @@ describeIntegration("ScriptRequest", function() {
       return callback.calls.length > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
-      expect(callback).toHaveBeenCalledWith(
-        "Error loading script " + url
-      );
+      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls[0].args[1]).toBe(undefined);
     });
   });
 
-  it("should call back with an error on a 500 response", function() {
-    var url = Pusher.Integration.API_URL + "/jsonp/500";
+  it("should call back without result on a 500 response", function() {
+    var url = Pusher.Integration.API_URL + "/jsonp/500/" + receiver.number;
     var request = new Pusher.ScriptRequest(url);
 
     runs(function() {
@@ -77,9 +77,8 @@ describeIntegration("ScriptRequest", function() {
       return callback.calls.length > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
-      expect(callback).toHaveBeenCalledWith(
-        "Error loading script " + url
-      );
+      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls[0].args[1]).toBe(undefined);
     });
   });
 });

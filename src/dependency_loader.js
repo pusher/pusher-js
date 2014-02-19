@@ -11,8 +11,8 @@
    */
   function DependencyLoader(options) {
     this.options = options;
+    this.receivers = options.receivers || Pusher.ScriptReceivers;
     this.loading = {};
-    this.loaded = {};
   }
   var prototype = DependencyLoader.prototype;
 
@@ -24,28 +24,26 @@
   prototype.load = function(name, callback) {
     var self = this;
 
-    if (self.loaded[name]) {
-      callback(null);
-    } else if (self.loading[name] && self.loading[name].length > 0) {
+    if (self.loading[name] && self.loading[name].length > 0) {
       self.loading[name].push(callback);
     } else {
       self.loading[name] = [callback];
 
       var request = new Pusher.ScriptRequest(self.getPath(name));
-      var receiver = self.options.receivers.create(function(error) {
-        self.options.receivers.remove(receiver);
-
-        if (error) {
-          request.cleanup();
-        } else {
-          self.loaded[name] = true;
-        }
+      var receiver = self.receivers.create(function(error) {
+        self.receivers.remove(receiver);
 
         if (self.loading[name]) {
           var callbacks = self.loading[name];
           delete self.loading[name];
+
+          var successCallback = function(wasSuccessful) {
+            if (!wasSuccessful) {
+              request.cleanup();
+            }
+          };
           for (var i = 0; i < callbacks.length; i++) {
-            callbacks[i](error);
+            callbacks[i](error, successCallback);
           }
         }
       });

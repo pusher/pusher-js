@@ -26,7 +26,6 @@ src_files:
 
   - base64.js
   - jsonp/jsonp_request.js
-  - jsonp/jsonp.js
 
   - timeline/timeline.js
   - timeline/timeline_sender.js

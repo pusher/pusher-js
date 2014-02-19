@@ -30,4 +30,7 @@
   };
 
   Pusher.ScriptReceiverFactory = ScriptReceiverFactory;
+  Pusher.ScriptReceivers = new ScriptReceiverFactory(
+    "_pusher_script_", "Pusher.ScriptReceivers"
+  );
 }).call(this);
