@@ -498,24 +498,24 @@ describeIntegration("Pusher", function() {
 
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
+
   // buildIntegrationTests("flash", false);
   // buildIntegrationTests("flash", true);
 
-  if (Pusher.Util.isXHRSupported() || Pusher.Util.isXDRSupported()) {
+  if (Pusher.Util.isXHRSupported()) {
     // CORS-compatible browsers
     buildIntegrationTests("xhr_streaming", false);
     buildIntegrationTests("xhr_streaming", true);
     buildIntegrationTests("xhr_polling", false);
     buildIntegrationTests("xhr_polling", true);
+  } else if (Pusher.Util.isXDRSupported(false)) {
     buildIntegrationTests("xdr_streaming", false);
     buildIntegrationTests("xdr_streaming", true);
     buildIntegrationTests("xdr_polling", false);
     buildIntegrationTests("xdr_polling", true);
-    if (Pusher.Util.isXDRSupported(false)) {
-      // IE can fall back to SockJS if protocols don't match
-      // No SockJS encrypted tests due to the way JS files are served
-      buildIntegrationTests("sockjs", false);
-    }
+    // IE can fall back to SockJS if protocols don't match
+    // No SockJS encrypted tests due to the way JS files are served
+    buildIntegrationTests("sockjs", false);
   } else {
     // Browsers using SockJS
     buildIntegrationTests("sockjs", false);
