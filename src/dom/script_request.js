@@ -1,9 +1,22 @@
 (function() {
+  /** Sends a generic HTTP GET request using a script tag.
+   *
+   * By constructing URL in a specific way, it can be used for loading
+   * JavaScript resources or JSONP requests. It can notify about errors, but
+   * only in certain environments. Please take care of monitoring the state of
+   * the request yourself.
+   *
+   * @param {String} src
+   */
   function ScriptRequest(src) {
     this.src = src;
   }
   var prototype = ScriptRequest.prototype;
 
+  /** Sends the actual script request.
+   *
+   * @param {ScriptReceiver} receiver
+   */
   prototype.send = function(receiver) {
     var self = this;
     var errorString = "Error loading " + self.src;
@@ -48,6 +61,7 @@
     }
   };
 
+  /** Cleans up the DOM remains of the script request. */
   prototype.cleanup = function() {
     if (this.script) {
       this.script.onload = this.script.onerror = null;

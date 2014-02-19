@@ -1,6 +1,11 @@
 ;(function() {
   /** Handles loading dependency files.
    *
+   * Dependency loaders don't remember whether a resource has been loaded or
+   * not. It is caller's responsibility to make sure the resource is not loaded
+   * twice. This is because it's impossible to detect resource loading status
+   * without knowing its content.
+   *
    * Options:
    * - cdn_http - url to HTTP CND
    * - cdn_https - url to HTTPS CDN
