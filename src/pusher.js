@@ -26,7 +26,7 @@
     if (!this.config.disableStats) {
       this.timelineSender = new Pusher.TimelineSender(this.timeline, {
         host: this.config.statsHost,
-        path: "/timeline/v2"
+        path: "/timeline/v2/jsonp"
       });
     }
 
