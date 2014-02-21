@@ -9,8 +9,8 @@ module.exports = [
   'src/errors.js',
   'src/events_dispatcher.js',
 
-  'dom/script_receiver_factory.js',
-  'dom/script_request.js',
+  'src/dom/script_receiver_factory.js',
+  'src/dom/script_request.js',
 
   'src/dependency_loader.js',
   'src/dependencies.js',
