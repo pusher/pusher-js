@@ -32,7 +32,7 @@
           latency: info.latency
         });
         strategies.push(new Pusher.SequentialStrategy([transport], {
-          timeout: info.latency * 2,
+          timeout: info.latency * 2 + 1000,
           failFast: true
         }));
       }
