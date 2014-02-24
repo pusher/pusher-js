@@ -194,6 +194,7 @@
     } else {
       this.changeState("closed");
     }
+    this.unbindListeners();
     this.socket = undefined;
   };
 
@@ -226,6 +227,19 @@
 
     if (self.supportsPing()) {
       self.socket.onactivity = function() { self.onActivity(); };
+    }
+  };
+
+  /** @private */
+  prototype.unbindListeners = function() {
+    if (this.socket) {
+      this.socket.onopen = undefined;
+      this.socket.onerror = undefined;
+      this.socket.onclose = undefined;
+      this.socket.onmessage = undefined;
+      if (this.supportsPing()) {
+        this.socket.onactivity = undefined;
+      }
     }
   };
 
