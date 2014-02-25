@@ -1,5 +1,23 @@
 # Changelog
 
+## 2.2.0-rc2 (2014-02-25)
+
+[NEW] Dependency loader will retry fetching additional resources if they fail to load
+
+[CHANGED] Refactored internals to reduce main file size by over 1KB
+
+[CHANGED] Improved heartbeat handling for HTTP transports
+
+[CHANGED] Removed wssHost and httpsHost options, reverted to a single domain regardless of encryption
+
+[CHANGED] Added extra 1s to the cached transport timeout
+
+[CHANGED] Updated the stats protocol
+
+[FIXED] MozWebSocket is not assigned to WebSocket anymore
+
+[FIXED] Socket listeners are always unbound after closing the connection
+
 ## 2.2.0-rc1 (2014-01-14)
 
 [NEW] XHR streaming and polling transports were extracted from SockJS
