@@ -50,6 +50,7 @@
       key: self.key,
       lib: "js",
       version: self.options.version,
+      cluster: self.options.cluster,
       features: self.options.features,
       timeline: self.events
     }, self.options.params);

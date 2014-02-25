@@ -69,6 +69,14 @@ describe("Pusher", function() {
       expect(pusher.timeline.session).toEqual(pusher.sessionID);
     });
 
+    it("should pass the cluster name to the timeline", function() {
+      var pusher = new Pusher("foo");
+      expect(pusher.timeline.options.cluster).toBe(undefined);
+
+      pusher = new Pusher("foo", { cluster: "spec" });
+      expect(pusher.timeline.options.cluster).toEqual("spec");
+    });
+
     it("should pass a feature list to the timeline", function() {
       spyOn(Pusher.Util, "getClientFeatures").andReturn(["foo", "bar"]);
       var pusher = new Pusher("foo");

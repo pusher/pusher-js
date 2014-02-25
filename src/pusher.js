@@ -17,6 +17,7 @@
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
     this.timeline = new Pusher.Timeline(this.key, this.sessionID, {
+      cluster: this.config.cluster,
       features: Pusher.Util.getClientFeatures(),
       params: this.config.timelineParams || {},
       limit: 50,

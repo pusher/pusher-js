@@ -12,11 +12,13 @@ describe("Timeline", function() {
   it("should expose the key, session id and options", function() {
     var timeline = new Pusher.Timeline("foobar", 666, {
       level: Pusher.Timeline.INFO,
+      cluster: "test",
       features: ["x", "y", "z"]
     });
     expect(timeline.key).toEqual("foobar");
     expect(timeline.session).toEqual(666);
     expect(timeline.options.features).toEqual(["x", "y", "z"]);
+    expect(timeline.options.cluster).toEqual("test");
   });
 
   it("should initially be empty", function() {
@@ -45,9 +47,10 @@ describe("Timeline", function() {
       spyOn(Pusher.Network, "isOnline").andReturn(true);
     });
 
-    it("should include key, session id, features, version and params", function() {
+    it("should include key, session id, cluster, features, version and params", function() {
       var timeline = new Pusher.Timeline("foobar", 666, {
         level: Pusher.Timeline.INFO,
+        cluster: "test",
         features: ["x", "y", "z"],
         version: "6.6.6",
         params: {
@@ -61,6 +64,7 @@ describe("Timeline", function() {
         { bundle: 1,
           key: "foobar",
           session: 666,
+          cluster: "test",
           features: ["x", "y", "z"],
           lib: "js",
           version: "6.6.6",
