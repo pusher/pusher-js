@@ -291,8 +291,8 @@
       return document;
     },
 
-    getDocumentLocation: function() {
-      return Pusher.Util.getDocument().location;
+    getNavigator: function() {
+      return navigator;
     },
 
     getLocalStorage: function() {
@@ -332,13 +332,13 @@
 
     isXHRSupported: function() {
       var XHR = window.XMLHttpRequest;
-      return XHR && (new XHR()).withCredentials !== undefined;
+      return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
     },
 
     isXDRSupported: function(encrypted) {
-      var originProtocol = Pusher.Util.getDocumentLocation().protocol;
-      var requestedProtocol = encrypted ? "https:" : "http:";
-      return window.XDomainRequest && originProtocol === requestedProtocol;
+      var protocol = encrypted ? "https:" : "http:";
+      var documentProtocol = Pusher.Util.getDocument().location.protocol;
+      return Boolean(window.XDomainRequest) && documentProtocol === protocol;
     }
   };
 }).call(this);

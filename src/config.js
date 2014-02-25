@@ -3,11 +3,9 @@
     return {
       wsHost: Pusher.host,
       wsPort: Pusher.ws_port,
-      wssHost: "wss.pusherapp.com",
       wssPort: Pusher.wss_port,
       httpHost: Pusher.sockjs_host,
       httpPort: Pusher.sockjs_http_port,
-      httpsHost: "sockjss.pusher.com",
       httpsPort: Pusher.sockjs_https_port,
       httpPath: Pusher.sockjs_path,
       statsHost: Pusher.stats_host,
@@ -23,9 +21,7 @@
   Pusher.getClusterConfig = function(clusterName) {
     return {
       wsHost: "ws-" + clusterName + ".pusher.com",
-      wssHost: "wss-" + clusterName + ".pusher.com",
-      httpHost: "sockjs-" + clusterName + ".pusher.com",
-      httpsHost: "sockjss-" + clusterName + ".pusher.com"
+      httpHost: "sockjs-" + clusterName + ".pusher.com"
     };
   };
 }).call(this);

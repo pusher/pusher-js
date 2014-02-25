@@ -1,9 +1,20 @@
 :development:
   :js:
     :host: foo
-    :cdn: 
+    :cdn:
       :http: http://localhost:5555/
       :https: http://localhost:5555/
+
+:staging:
+  :js:
+    :cdn:
+      :http: http://js.staging.pusher.com/
+      :https: https://d14dz7d59i920.cloudfront.net/
+  :s3:
+    :cf_distribution_id: <YOUR AWS CLOUD FRONT DISTRIBUTION ID>
+    :bucket: com.pusher.staging.js
+    :access_key_id:
+    :secret_access_key:
 
 :production:
   :js:

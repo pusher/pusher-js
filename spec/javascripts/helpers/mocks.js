@@ -1,5 +1,12 @@
 ;(function() {
   Pusher.Mocks = {
+    getScriptRequest: function() {
+      return {
+        send: jasmine.createSpy("send"),
+        cleanup: jasmine.createSpy("cleanup")
+      };
+    },
+
     getDocument: function() {
       return {
         location: {
@@ -27,6 +34,13 @@
         send: jasmine.createSpy("send"),
         abort: jasmine.createSpy("abort"),
         setRequestHeader: jasmine.createSpy("setRequestHeader")
+      };
+    },
+
+    getWebSocket: function() {
+      return {
+        send: jasmine.createSpy("send"),
+        close: jasmine.createSpy("close")
       };
     },
 
@@ -89,9 +103,9 @@
       var transport = new Pusher.EventsDispatcher();
 
       transport.handlesActivityChecks = jasmine.createSpy("handlesActivityChecks")
-        .andReturn(true);
+        .andReturn(false);
       transport.supportsPing = jasmine.createSpy("supportsPing")
-        .andReturn(true);
+        .andReturn(false);
       transport.initialize = jasmine.createSpy("initialize")
         .andCallFake(function() {
           transport.state = "initializing";

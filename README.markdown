@@ -90,7 +90,7 @@ Specified which transports must not be used by Pusher to establish a connection.
       disabledTransports: ["flash"]
     });
 
-#### `wsHost`, `wsPort`, `wssHost`, `wssPort`, `httpHost`, `httpPort`, `httpsHost`, `httpsPort`
+#### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
 
 These can be changed to point to alternative Pusher URLs (used internally for our staging server).
 

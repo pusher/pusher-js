@@ -1,4 +1,5 @@
 describe("TimelineSender", function() {
+  var jsonpRequest;
   var timeline, onSend, sender;
 
   beforeEach(function() {
@@ -9,7 +10,11 @@ describe("TimelineSender", function() {
     });
 
     onSend = jasmine.createSpy("onSend");
-    spyOn(Pusher.JSONPRequest, "send");
+    spyOn(Pusher, "JSONPRequest").andCallFake(function() {
+      // JSONPRequest and ScriptRequest have compatible interfaces
+      jsonpRequest = Pusher.Mocks.getScriptRequest();
+      return jsonpRequest;
+    });
 
     sender = new Pusher.TimelineSender(timeline, {
       host: "example.com",
@@ -34,69 +39,87 @@ describe("TimelineSender", function() {
     it("should send a non-empty timeline", function() {
       sender.send(false, onSend);
 
-      expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
-        { data: { "events": [1, 2, 3] },
-          url: "http://example.com/timeline",
-          receiver: Pusher.JSONP
-        },
-        jasmine.any(Function)
+      expect(Pusher.JSONPRequest.calls.length).toEqual(1);
+      expect(Pusher.JSONPRequest).toHaveBeenCalledWith(
+        "http://example.com/timeline",
+        { "events": [1, 2, 3] }
       );
-    });
-
-    it("should call back after a successful JSONP request", function() {
-      sender.send(false, onSend);
-
-      expect(onSend).not.toHaveBeenCalled();
-      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
-      jsonpCallback(null, {});
-      expect(onSend).toHaveBeenCalled();
-    });
-
-    it("should call back after an unsuccessful JSONP request", function() {
-      sender.send(false, onSend);
-
-      expect(onSend).not.toHaveBeenCalled();
-      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
-      jsonpCallback(true, undefined);
-      expect(onSend).toHaveBeenCalled();
+      expect(jsonpRequest.send).toHaveBeenCalled();
     });
 
     it("should send secure JSONP requests when encrypted", function() {
-      sender = new Pusher.TimelineSender(timeline, {
+      var sender = new Pusher.TimelineSender(timeline, {
         encrypted: true,
         host: "example.com",
         path: "/timeline"
       });
       sender.send(true, onSend);
 
-      expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
-        { data: { "events": [1, 2, 3] },
-          url: "https://example.com/timeline",
-          receiver: Pusher.JSONP
-        },
-        jasmine.any(Function)
+      expect(Pusher.JSONPRequest.calls.length).toEqual(1);
+      expect(Pusher.JSONPRequest).toHaveBeenCalledWith(
+        "https://example.com/timeline",
+        { "events": [1, 2, 3] }
       );
+    });
+
+    it("should register a receiver using Pusher.ScriptReceivers", function() {
+      sender.send(false, onSend);
+
+      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      expect(Pusher.ScriptReceivers[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
+    });
+
+    it("should call back after a successful JSONP request", function() {
+      sender.send(false, onSend);
+
+      expect(onSend).not.toHaveBeenCalled();
+      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      jsonpReceiver.callback(null, { result: "ok" });
+      expect(onSend).toHaveBeenCalledWith(null, { result: "ok" });
+    });
+
+    it("should call back after an unsuccessful JSONP request", function() {
+      sender.send(false, onSend);
+
+      expect(onSend).not.toHaveBeenCalled();
+      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      jsonpReceiver.callback("ERROR!", undefined);
+      expect(onSend).toHaveBeenCalledWith("ERROR!", undefined);
+    });
+
+    it("should remove the receiver from Pusher.ScriptReceivers", function() {
+      sender.send(false, onSend);
+
+      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      jsonpReceiver.callback(null, {});
+      expect(Pusher.ScriptReceivers[jsonpReceiver.number]).toBe(undefined);
+    });
+
+    it("should clean up the JSONP request", function() {
+      sender.send(false, onSend);
+
+      expect(jsonpRequest.cleanup).not.toHaveBeenCalled();
+      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      jsonpReceiver.callback(null, {});
+      expect(jsonpRequest.cleanup).toHaveBeenCalled();
     });
 
     it("should not send an empty timeline", function() {
       timeline.isEmpty.andReturn(true);
       sender.send(false, onSend);
-      expect(Pusher.JSONPRequest.send).not.toHaveBeenCalled();
+      expect(Pusher.JSONPRequest).not.toHaveBeenCalled();
     });
 
     it("should use returned hostname for subsequent requests", function() {
       sender.send(false);
 
-      var jsonpCallback = Pusher.JSONPRequest.send.calls[0].args[1];
-      jsonpCallback(null, { host: "returned.example.com" });
+      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      jsonpReceiver.callback(null, { host: "returned.example.com" });
 
       sender.send(false);
-      expect(Pusher.JSONPRequest.send).toHaveBeenCalledWith(
-        { data: { "events": [1, 2, 3] },
-          url: "http://returned.example.com/timeline",
-          receiver: Pusher.JSONP
-        },
-        jasmine.any(Function)
+      expect(Pusher.JSONPRequest).toHaveBeenCalledWith(
+        "http://returned.example.com/timeline",
+        { "events": [1, 2, 3] }
       );
     });
   });

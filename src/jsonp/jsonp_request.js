@@ -1,96 +1,54 @@
 (function() {
-
-  function JSONPRequest(options) {
-    this.options = options;
+  /** Sends data via JSONP.
+   *
+   * Data is a key-value map. Its values are JSON-encoded and then passed
+   * through base64. Finally, keys and encoded values are appended to the query
+   * string.
+   *
+   * The class itself does not guarantee raising errors on failures, as it's not
+   * possible to support such feature on all browsers. Instead, JSONP endpoint
+   * should call back in a way that's easy to distinguish from browser calls,
+   * for example by passing a second argument to the receiver.
+   *
+   * @param {String} url
+   * @param {Object} data key-value map of data to be submitted
+   */
+  function JSONPRequest(url, data) {
+    this.url = url;
+    this.data = data;
   }
-
-  JSONPRequest.send = function(options, callback) {
-    var request = new Pusher.JSONPRequest({
-      url: options.url,
-      receiver: options.receiverName,
-      tagPrefix: options.tagPrefix
-    });
-    var id = options.receiver.register(function(error, result) {
-      request.cleanup();
-      callback(error, result);
-    });
-
-    return request.send(id, options.data, function(error) {
-      var callback = options.receiver.unregister(id);
-      if (callback) {
-        callback(error);
-      }
-    });
-  };
-
   var prototype = JSONPRequest.prototype;
 
-  prototype.send = function(id, data, callback) {
-    if (this.script) {
-      return false;
+  /** Sends the actual JSONP request.
+   *
+   * @param {ScriptReceiver} receiver
+   */
+  prototype.send = function(receiver) {
+    if (this.request) {
+      return;
     }
 
-    var tagPrefix = this.options.tagPrefix || "_pusher_jsonp_";
-
-    var params = Pusher.Util.extend(
-      {}, data, { receiver: this.options.receiver }
-    );
+    var params = Pusher.Util.filterObject(this.data, function(value) {
+      return value !== undefined;
+    });
     var query = Pusher.Util.map(
-      Pusher.Util.flatten(
-        encodeData(
-          Pusher.Util.filterObject(params, function(value) {
-            return value !== undefined;
-          })
-        )
-      ),
+      Pusher.Util.flatten(encodeParamsObject(params)),
       Pusher.Util.method("join", "=")
     ).join("&");
+    var url = this.url + "/" + receiver.number + "?" + query;
 
-    this.script = document.createElement("script");
-    this.script.id = tagPrefix + id;
-    this.script.src = this.options.url + "/" + id + "?" + query;
-    this.script.type = "text/javascript";
-    this.script.charset = "UTF-8";
-    this.script.onerror = this.script.onload = callback;
-
-    // Opera<11.6 hack for missing onerror callback
-    if (this.script.async === undefined && document.attachEvent) {
-      if (/opera/i.test(navigator.userAgent)) {
-        var receiverName = this.options.receiver || "Pusher.JSONP.receive";
-        this.errorScript = document.createElement("script");
-        this.errorScript.text = receiverName + "(" + id + ", true);";
-        this.script.async = this.errorScript.async = false;
-      }
-    }
-
-    var self = this;
-    this.script.onreadystatechange = function() {
-      if (self.script && /loaded|complete/.test(self.script.readyState)) {
-        callback(true);
-      }
-    };
-
-    var head = document.getElementsByTagName('head')[0];
-    head.insertBefore(this.script, head.firstChild);
-    if (this.errorScript) {
-      head.insertBefore(this.errorScript, this.script.nextSibling);
-    }
-
-    return true;
+    this.request = new Pusher.ScriptRequest(url);
+    this.request.send(receiver);
   };
 
+  /** Cleans up the DOM remains of the JSONP request. */
   prototype.cleanup = function() {
-    if (this.script && this.script.parentNode) {
-      this.script.parentNode.removeChild(this.script);
-      this.script = null;
-    }
-    if (this.errorScript && this.errorScript.parentNode) {
-      this.errorScript.parentNode.removeChild(this.errorScript);
-      this.errorScript = null;
+    if (this.request) {
+      this.request.cleanup();
     }
   };
 
-  function encodeData(data) {
+  function encodeParamsObject(data) {
     return Pusher.Util.mapObject(data, function(value) {
       if (typeof value === "object") {
         value = JSON.stringify(value);
@@ -100,5 +58,4 @@
   }
 
   Pusher.JSONPRequest = JSONPRequest;
-
 }).call(this);

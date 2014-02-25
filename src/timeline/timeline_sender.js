@@ -6,22 +6,21 @@
   var prototype = TimelineSender.prototype;
 
   prototype.send = function(encrypted, callback) {
-    if (this.timeline.isEmpty()) {
+    var self = this;
+
+    if (self.timeline.isEmpty()) {
       return;
     }
 
-    var self = this;
-    var scheme = "http" + (encrypted ? "s" : "") + "://";
-
     var sendJSONP = function(data, callback) {
-      var params = {
-        data: Pusher.Util.filterObject(data, function(v) {
-          return v !== undefined;
-        }),
-        url: scheme + (self.host || self.options.host) + self.options.path,
-        receiver: Pusher.JSONP
-      };
-      return Pusher.JSONPRequest.send(params, function(error, result) {
+      var scheme = "http" + (encrypted ? "s" : "") + "://";
+      var url = scheme + (self.host || self.options.host) + self.options.path;
+      var request = new Pusher.JSONPRequest(url, data);
+
+      var receiver = Pusher.ScriptReceivers.create(function(error, result) {
+        Pusher.ScriptReceivers.remove(receiver);
+        request.cleanup();
+
         if (result && result.host) {
           self.host = result.host;
         }
@@ -29,6 +28,7 @@
           callback(error, result);
         }
       });
+      request.send(receiver);
     };
     self.timeline.send(sendJSONP, callback);
   };

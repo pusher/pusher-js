@@ -7,26 +7,28 @@ target_dir './dist'
 
 src_dir './src'
 
-version '2.2.0-rc1'
+version '2.2.0-rc2'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
   file 'pusher.js'
 
-  file 'utils/timer.js'
-  file 'utils/periodic_timer.js'
+  file 'utils/timers.js'
 
   file 'util.js'
   file 'defaults.js'
   file 'config.js'
   file 'errors.js'
   file 'events_dispatcher.js'
+
+  file 'dom/script_receiver_factory.js'
+  file 'dom/script_request.js'
+
   file 'dependency_loader.js'
   file 'dependencies.js'
 
   file 'base64.js'
   file 'jsonp/jsonp_request.js'
-  file 'jsonp/jsonp_receiver.js'
 
   file 'timeline/timeline.js'
   file 'timeline/timeline_sender.js'
@@ -39,15 +41,10 @@ bundle 'pusher.js' do
   file 'strategies/sequential_strategy.js'
   file 'strategies/transport_strategy.js'
 
-  file 'transports/abstract_transport.js'
-  file 'transports/flash_transport.js'
-  file 'transports/abstract_http_transport.js'
-  file 'transports/xhr_streaming_transport.js'
-  file 'transports/xdr_streaming_transport.js'
-  file 'transports/xhr_polling_transport.js'
-  file 'transports/xdr_polling_transport.js'
-  file 'transports/sockjs_transport.js'
-  file 'transports/ws_transport.js'
+  file 'transports/url_schemes.js'
+  file 'transports/transport_connection.js'
+  file 'transports/transport.js'
+  file 'transports/transports.js'
 
   file 'transports/assistant_to_the_transport_manager.js'
   file 'transports/transport_manager.js'

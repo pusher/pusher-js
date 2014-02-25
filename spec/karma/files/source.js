@@ -1,17 +1,19 @@
 module.exports = [
   'src/pusher.js',
 
-  'src/utils/timer.js',
-  'src/utils/periodic_timer.js',
+  'src/utils/timers.js',
 
   'src/util.js',
   'src/defaults.js',
   'src/config.js',
   'src/errors.js',
+  'src/events_dispatcher.js',
+
+  'src/dom/script_receiver_factory.js',
+  'src/dom/script_request.js',
+
   'src/dependency_loader.js',
   'src/dependencies.js',
-  'src/events_dispatcher.js',
-  'src/net_info.js',
 
   'src/http/http_request.js',
   'src/http/http_xhr_request.js',
@@ -22,7 +24,6 @@ module.exports = [
 
   'src/base64.js',
   'src/jsonp/jsonp_request.js',
-  'src/jsonp/jsonp_receiver.js',
 
   'src/timeline/timeline.js',
   'src/timeline/timeline_sender.js',
@@ -35,15 +36,10 @@ module.exports = [
   'src/strategies/sequential_strategy.js',
   'src/strategies/transport_strategy.js',
 
-  'src/transports/abstract_transport.js',
-  'src/transports/flash_transport.js',
-  'src/transports/abstract_http_transport.js',
-  'src/transports/xhr_streaming_transport.js',
-  'src/transports/xdr_streaming_transport.js',
-  'src/transports/xhr_polling_transport.js',
-  'src/transports/xdr_polling_transport.js',
-  'src/transports/sockjs_transport.js',
-  'src/transports/ws_transport.js',
+  'src/transports/url_schemes.js',
+  'src/transports/transport_connection.js',
+  'src/transports/transport.js',
+  'src/transports/transports.js',
 
   'src/transports/assistant_to_the_transport_manager.js',
   'src/transports/transport_manager.js',
@@ -54,6 +50,8 @@ module.exports = [
   'src/connection/connection.js',
   'src/connection/handshake.js',
   'src/connection/connection_manager.js',
+
+  'src/net_info.js',
 
   'src/channels/members.js',
   'src/channels/channel.js',
