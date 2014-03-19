@@ -1,4 +1,12 @@
 ;(function() {
+  // We need to bind clear functions this way to avoid exceptions on IE8
+  function clearTimeout(timer) {
+    window.clearTimeout(timer);
+  }
+  function clearInterval(timer) {
+    window.clearInterval(timer);
+  }
+
   function GenericTimer(set, clear, delay, callback) {
     var self = this;
 
@@ -22,7 +30,8 @@
   /** Aborts a timer when it's running. */
   prototype.ensureAborted = function() {
     if (this.timer) {
-      this.clear.call(window, this.timer);
+      // Clear function is already bound
+      this.clear(this.timer);
       this.timer = null;
     }
   };
