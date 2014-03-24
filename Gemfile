@@ -3,7 +3,7 @@ source "http://rubygems.org"
 group :development do
   # uploader
   gem 'rake'
-  gem 'jbundle', :git => "git@github.com:mloughran/jbundle.git"
+  gem 'jbundle', :github => 'mloughran/jbundle'
   gem 'aws-s3', '~> 0.6.0'
   gem 'httparty'
   # testing
