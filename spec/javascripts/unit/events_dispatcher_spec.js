@@ -16,11 +16,34 @@ describe("EventsDispatcher", function() {
       expect(onEvent).toHaveBeenCalledWith("test");
       expect(onEvent.calls.length).toEqual(1);
     });
+
+    it("should add the same listener to a specific event several times", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.bind("event", onEvent);
+      dispatcher.emit("event", "test");
+
+      expect(onEvent).toHaveBeenCalledWith("test");
+      expect(onEvent.calls.length).toEqual(2);
+    });
+
+    it("should add the listener with different contexts", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.bind("event", onEvent, this);
+      dispatcher.bind("event", onEvent, {});
+      dispatcher.emit("event", "test");
+
+      expect(onEvent).toHaveBeenCalledWith("test");
+      expect(onEvent.calls.length).toEqual(3);
+    });
   });
 
   describe("#bind_all", function() {
     it("should add the listener to all events", function() {
-      var onAll = jasmine.createSpy("onEvent");
+      var onAll = jasmine.createSpy("onAll");
 
       dispatcher.bind_all(onAll);
       dispatcher.emit("event", "test");
@@ -69,6 +92,115 @@ describe("EventsDispatcher", function() {
       dispatcher.unbind("event", otherCallback);
 
       dispatcher.emit("event");
+      expect(onEvent.calls.length).toEqual(1);
+    });
+
+    it("should remove all listeners on omitted arguments", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.unbind();
+      dispatcher.emit("event");
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should remove listener if only event name is given", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.unbind("event");
+      dispatcher.emit("event");
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should remove listener with context if only event name is given", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var context = {};
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.unbind("event");
+      dispatcher.emit("event");
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should remove listener if only event name + context is given", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var context = {};
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.unbind("event", null, context);
+      dispatcher.emit("event");
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should remove listener if only callback is given", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.unbind(null , onEvent);
+      dispatcher.emit("event");
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should remove listener if only callback + context is given", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var context = {};
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.unbind(null , onEvent, context);
+      dispatcher.emit("event");
+
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+
+    it("should not remove listener on context mismatch", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var context = {};
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.unbind("event", onEvent, {});
+      dispatcher.emit("event");
+
+      expect(onEvent.calls.length).toEqual(1);
+    });
+
+    it("should not remove listener on event name mismatch", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var context = {};
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.unbind("boop", onEvent, {});
+      dispatcher.emit("event");
+
+      expect(onEvent.calls.length).toEqual(1);
+    });
+
+    it("should not remove listener on callback mismatch", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var otherCallback = jasmine.createSpy("otherCallback");
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.unbind("event", otherCallback);
+      dispatcher.emit("event");
+
+      expect(onEvent.calls.length).toEqual(1);
+    });
+
+    it("should not remove listener on callback or context mismatch", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var otherCallback = jasmine.createSpy("otherCallback");
+      var context = {};
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.unbind("event", otherCallback, context);
+      dispatcher.unbind("event", onEvent, {});
+      dispatcher.emit("event");
+
       expect(onEvent.calls.length).toEqual(1);
     });
   });
@@ -124,6 +256,31 @@ describe("EventsDispatcher", function() {
 
       expect(onEvent).not.toHaveBeenCalled();
       expect(failThrough).toHaveBeenCalledWith("event", "data");
+    });
+
+    it("should remove listener in the midst of it firing", function() {
+      var onEvent = jasmine.createSpy("onEvent").andCallFake(function(){
+        dispatcher.unbind("event", onEvent);
+      });
+
+      dispatcher.bind("event", onEvent);
+      dispatcher.emit("event");
+      dispatcher.emit("event");
+      dispatcher.emit("event");
+
+      expect(onEvent.calls.length).toEqual(1);
+    });
+
+    it("should call listener with provided context", function() {
+      var returnedContext, context = {};
+      var onEvent = jasmine.createSpy("onEvent").andCallFake(function(){
+        returnedContext = this;
+      });
+
+      dispatcher.bind("event", onEvent, context);
+      dispatcher.emit("event");
+
+      expect(returnedContext).toEqual(context);
     });
   });
 });
