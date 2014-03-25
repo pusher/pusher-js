@@ -129,9 +129,9 @@
      * @param {Array} array
      * @param {Function} f
      */
-    apply: function(array, f) {
+    apply: function(array, f, context) {
       for (var i = 0; i < array.length; i++) {
-        f(array[i], i, array);
+        f.call(context || window, array[i], i, array);
       }
     },
 
