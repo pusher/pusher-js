@@ -10,8 +10,8 @@
   }
   var prototype = EventsDispatcher.prototype;
 
-  prototype.bind = function(eventName, callback) {
-    this.callbacks.add(eventName, callback);
+  prototype.bind = function(eventName, callback, context) {
+    this.callbacks.add(eventName, callback, context);
     return this;
   };
 
@@ -20,8 +20,8 @@
     return this;
   };
 
-  prototype.unbind = function(eventName, callback) {
-    this.callbacks.remove(eventName, callback);
+  prototype.unbind = function(eventName, callback, context) {
+    this.callbacks.remove(eventName, callback, context);
     return this;
   };
 
@@ -40,7 +40,7 @@
     var callbacks = this.callbacks.get(eventName);
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i](data);
+        callbacks[i].fn.call(callbacks[i].context || undefined, data);
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);
@@ -59,20 +59,38 @@
     return this._callbacks[this._prefix(eventName)];
   };
 
-  CallbackRegistry.prototype.add = function(eventName, callback) {
+  CallbackRegistry.prototype.add = function(eventName, callback, context) {
     var prefixedEventName = this._prefix(eventName);
     this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
-    this._callbacks[prefixedEventName].push(callback);
+    this._callbacks[prefixedEventName].push({
+      fn: callback,
+      context: context
+    });
   };
 
-  CallbackRegistry.prototype.remove = function(eventName, callback) {
-    var callbacks = this.get(eventName);
-    if (callbacks) {
-      var index = arrayIndexOf(callbacks, callback);
-      if (index !== -1) {
-        var callbacksCopy = callbacks.slice(0);
-        callbacksCopy.splice(index, 1);
-        this._callbacks[this._prefix(eventName)] = callbacksCopy;
+  CallbackRegistry.prototype.remove = function(eventName, callback, context) {
+    var retain, cb, callbacks, names, i, l, j, k;
+
+    if (!eventName && !callback && !context) {
+      this._callbacks = {};
+      return;
+    }
+
+    names = eventName? [this._prefix(eventName)] : Pusher.Util.keys(this._callbacks);
+    for (i = 0, l = names.length; i < l; i++) {
+      eventName = names[i];
+      callbacks = this._callbacks[eventName];
+      if (callbacks) {
+        this._callbacks[eventName] = retain = [];
+        if (callback || context) {
+          for (j = 0, k = callbacks.length; j < k; j++) {
+            cb = callbacks[j];
+            if ((callback && callback !== cb.fn) || (context && context !== cb.context)) {
+              retain.push(cb);
+            }
+          }
+        }
+        if (!retain.length) delete this._callbacks[eventName];
       }
     }
   };

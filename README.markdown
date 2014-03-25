@@ -168,7 +168,7 @@ You can attach behaviour to these events regardless of the channel the event is 
 
 ### Per-channel events
 
-These are bound to a specific channel, and mean that you can reuse event names in different parts of you client application. The following might be an example of a stock tracking app where several channels are opened for different companies:
+These are bound to a specific channel, and mean that you can reuse event names in different parts of your client application. The following might be an example of a stock tracking app where several channels are opened for different companies:
 
     var socket = new Pusher('MY_API_KEY');
     var channel = socket.subscribe('APPL');
@@ -177,6 +177,27 @@ These are bound to a specific channel, and mean that you can reuse event names i
         // add new price into the APPL widget
       }
     );
+
+### Bind event handler with optional context
+
+It is possible to provide a third, optional parameter that is used as the `this` value when calling a handler:
+
+    var context = { title: 'Pusher' };
+    var handler = function(){
+      console.log('My name is ' + this.title);
+    };
+    channel.bind('new-comment', handler, context);
+
+### Unbind event handlers
+
+Remove previously-bound handlers from an object. Only handlers that match all of the provided arguments (`eventName`, `handler` or `context`) are removed:
+
+    channel.unbind('new-comment', handler); // removes just `handler` for the `new-comment` event
+    channel.unbind('new-comment'); // removes all handlers for the `new-comment` event
+    channel.unbind(null, handler); // removes `handler` for all events
+    channel.unbind(null, null, context); // removes all handlers for `context`
+    channel.unbind(); // removes all handlers on `channel`
+
 
 ### Binding to everything
 
@@ -323,7 +344,3 @@ Then start the server, run one of following commands:
     bin/karma                # runs both unit and integration tests
 
 All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
-
-### Old framework
-
-There are still some tests in the old framework, though they will be removed in the future. Open `test/sane/index.html` and click run to execute the suite.
