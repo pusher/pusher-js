@@ -265,6 +265,16 @@ In order to build the minified versions:
 
 If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
 
+## How to install Flash SDK
+
+Download [Flex 4 SDK](http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ - if it returns an swf file, open it in the browser and you'll be greeted by the downloader).
+
+Unzip the SDK and move it somewhere (e.g. `/usr/local/flex`, so that executables are in `/usr/local/flex/bin`) and add it to the path:
+
+    export PATH=/usr/local/flex/bin:$PATH
+
+Now scripts should be able to pick up all the tools needed to build Flash files.
+
 ## Building
 
 `./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
