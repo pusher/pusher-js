@@ -48,6 +48,10 @@
   }
 
   var globalContext = {
+    extend: function(context, first, second) {
+      return [Pusher.Util.extend({}, first, second), context];
+    },
+
     def: function(context, name, value) {
       if (context[name] !== undefined) {
         throw "Redefining symbol " + name;

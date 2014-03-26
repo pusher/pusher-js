@@ -112,7 +112,8 @@ describeIntegration("Falling back", function() {
     spyOn(Pusher.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
 
     runs(function() {
-      pusher = new Pusher("foobar", { disableStats: true });
+      // use encrypted connection, to force sockjs to be the primary fallback
+      pusher = new Pusher("foobar", { encrypted: true, disableStats: true });
       pusher.connect();
     });
     waitsFor(function() {

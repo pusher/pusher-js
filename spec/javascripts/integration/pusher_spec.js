@@ -505,8 +505,11 @@ describeIntegration("Pusher", function() {
 
   if (Pusher.Util.isXHRSupported()) {
     // CORS-compatible browsers
-    buildIntegrationTests("xhr_streaming", false);
-    buildIntegrationTests("xhr_streaming", true);
+    if (!/Android 2\./i.test(navigator.userAgent)) {
+      // Android 2.x does a lot of buffering, which kills streaming
+      buildIntegrationTests("xhr_streaming", false);
+      buildIntegrationTests("xhr_streaming", true);
+    }
     buildIntegrationTests("xhr_polling", false);
     buildIntegrationTests("xhr_polling", true);
   } else if (Pusher.Util.isXDRSupported(false)) {

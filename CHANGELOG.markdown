@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.0-rc3 (2014-03-26)
+
+[NEW] Added third argument to the bind method on event emitters to allow binding of context to callbacks
+
+[CHANGED] Changed the primary WebSocket fallback to WSS instead of HTTP
+
+[FIXED] Exception when aborting timers, which caused infinite connection loop on IE8
+
 ## 2.2.0-rc2 (2014-02-25)
 
 [NEW] Dependency loader will retry fetching additional resources if they fail to load

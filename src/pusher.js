@@ -32,9 +32,9 @@
     }
 
     var getStrategy = function(options) {
+      var config = Pusher.Util.extend({}, self.config, options);
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(self.config),
-        Pusher.Util.extend({}, self.config, options)
+        Pusher.getDefaultStrategy(config), config
       );
     };
 
