@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.2.0-rc2
+ * Pusher JavaScript Library v2.2.0-rc3
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
@@ -40,9 +40,9 @@
     }
 
     var getStrategy = function(options) {
+      var config = Pusher.Util.extend({}, self.config, options);
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(self.config),
-        Pusher.Util.extend({}, self.config, options)
+        Pusher.getDefaultStrategy(config), config
       );
     };
 
@@ -219,6 +219,14 @@
 }).call(this);
 
 ;(function() {
+  // We need to bind clear functions this way to avoid exceptions on IE8
+  function clearTimeout(timer) {
+    window.clearTimeout(timer);
+  }
+  function clearInterval(timer) {
+    window.clearInterval(timer);
+  }
+
   function GenericTimer(set, clear, delay, callback) {
     var self = this;
 
@@ -242,7 +250,8 @@
   /** Aborts a timer when it's running. */
   prototype.ensureAborted = function() {
     if (this.timer) {
-      this.clear.call(window, this.timer);
+      // Clear function is already bound
+      this.clear(this.timer);
       this.timer = null;
     }
   };
@@ -402,9 +411,9 @@
      * @param {Array} array
      * @param {Function} f
      */
-    apply: function(array, f) {
+    apply: function(array, f, context) {
       for (var i = 0; i < array.length; i++) {
-        f(array[i], i, array);
+        f.call(context || window, array[i], i, array);
       }
     },
 
@@ -617,7 +626,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.0-rc2';
+  Pusher.VERSION = '2.2.0-rc3';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -643,11 +652,30 @@
   Pusher.dependency_suffix = '';
 
   Pusher.getDefaultStrategy = function(config) {
+    var wsStrategy;
+    if (config.encrypted) {
+      wsStrategy = [
+        ":best_connected_ever",
+        ":ws_loop",
+        [":delayed", 2000, [":http_fallback_loop"]]
+      ];
+    } else {
+      wsStrategy = [
+        ":best_connected_ever",
+        ":ws_loop",
+        [":delayed", 2000, [":wss_loop"]],
+        [":delayed", 5000, [":http_fallback_loop"]]
+      ];
+    }
+
     return [
       [":def", "ws_options", {
         hostUnencrypted: config.wsHost + ":" + config.wsPort,
         hostEncrypted: config.wsHost + ":" + config.wssPort
       }],
+      [":def", "wss_options", [":extend", ":ws_options", {
+        encrypted: true
+      }]],
       [":def", "sockjs_options", {
         hostUnencrypted: config.httpHost + ":" + config.httpPort,
         hostEncrypted: config.httpHost + ":" + config.httpsPort
@@ -670,6 +698,7 @@
       }]],
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
+      [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
@@ -678,6 +707,7 @@
       [":def_transport", "xdr_polling", "xdr_polling", 1, ":sockjs_options"],
 
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
+      [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
 
@@ -713,14 +743,15 @@
       [":def", "strategy",
         [":cached", 1800000,
           [":first_connected",
-            [":if", [":is_supported", ":ws"], [
-                ":best_connected_ever", ":ws_loop", [":delayed", 2000, [":http_fallback_loop"]]
-              ], [":if", [":is_supported", ":flash"], [
-                ":best_connected_ever", ":flash_loop", [":delayed", 2000, [":http_fallback_loop"]]
-              ], [
-                ":http_fallback_loop"
-              ]
-            ]]
+            [":if", [":is_supported", ":ws"],
+              wsStrategy,
+            [":if", [":is_supported", ":flash"], [
+              ":best_connected_ever",
+              ":flash_loop",
+              [":delayed", 2000, [":http_fallback_loop"]]
+            ], [
+              ":http_fallback_loop"
+            ]]]
           ]
         ]
       ]
@@ -790,8 +821,8 @@
   }
   var prototype = EventsDispatcher.prototype;
 
-  prototype.bind = function(eventName, callback) {
-    this.callbacks.add(eventName, callback);
+  prototype.bind = function(eventName, callback, context) {
+    this.callbacks.add(eventName, callback, context);
     return this;
   };
 
@@ -800,8 +831,8 @@
     return this;
   };
 
-  prototype.unbind = function(eventName, callback) {
-    this.callbacks.remove(eventName, callback);
+  prototype.unbind = function(eventName, callback, context) {
+    this.callbacks.remove(eventName, callback, context);
     return this;
   };
 
@@ -820,7 +851,7 @@
     var callbacks = this.callbacks.get(eventName);
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i](data);
+        callbacks[i].fn.call(callbacks[i].context || window, data);
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);
@@ -835,46 +866,49 @@
     this._callbacks = {};
   }
 
-  CallbackRegistry.prototype.get = function(eventName) {
-    return this._callbacks[this._prefix(eventName)];
+  CallbackRegistry.prototype.get = function(name) {
+    return this._callbacks[prefix(name)];
   };
 
-  CallbackRegistry.prototype.add = function(eventName, callback) {
-    var prefixedEventName = this._prefix(eventName);
+  CallbackRegistry.prototype.add = function(name, callback, context) {
+    var prefixedEventName = prefix(name);
     this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
-    this._callbacks[prefixedEventName].push(callback);
+    this._callbacks[prefixedEventName].push({
+      fn: callback,
+      context: context
+    });
   };
 
-  CallbackRegistry.prototype.remove = function(eventName, callback) {
-    var callbacks = this.get(eventName);
-    if (callbacks) {
-      var index = arrayIndexOf(callbacks, callback);
-      if (index !== -1) {
-        var callbacksCopy = callbacks.slice(0);
-        callbacksCopy.splice(index, 1);
-        this._callbacks[this._prefix(eventName)] = callbacksCopy;
-      }
+  CallbackRegistry.prototype.remove = function(name, callback, context) {
+    if (!name && !callback && !context) {
+      this._callbacks = {};
+      return;
+    }
+
+    var names = name ? [prefix(name)] : Pusher.Util.keys(this._callbacks);
+
+    if (callback || context) {
+      Pusher.Util.apply(names, function(name) {
+        this._callbacks[name] = Pusher.Util.filter(
+          this._callbacks[name] || [],
+          function(binding) {
+            return (callback && callback !== binding.fn) ||
+                   (context && context !== binding.context);
+          }
+        );
+        if (this._callbacks[name].length === 0) {
+          delete this._callbacks[name];
+        }
+      }, this);
+    } else {
+      Pusher.Util.apply(names, function(name) {
+        delete this._callbacks[name];
+      }, this);
     }
   };
 
-  CallbackRegistry.prototype._prefix = function(eventName) {
-    return "_" + eventName;
-  };
-
-  function arrayIndexOf(array, item) {
-    var nativeIndexOf = Array.prototype.indexOf;
-    if (array === null) {
-      return -1;
-    }
-    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
-      return array.indexOf(item);
-    }
-    for (var i = 0, l = array.length; i < l; i++) {
-      if (array[i] === item) {
-        return i;
-      }
-    }
-    return -1;
+  function prefix(name) {
+    return "_" + name;
   }
 
   Pusher.EventsDispatcher = EventsDispatcher;
@@ -2603,6 +2637,10 @@
   }
 
   var globalContext = {
+    extend: function(context, first, second) {
+      return [Pusher.Util.extend({}, first, second), context];
+    },
+
     def: function(context, name, value) {
       if (context[name] !== undefined) {
         throw "Redefining symbol " + name;

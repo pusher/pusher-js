@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.2.0-rc2
+ * Pusher JavaScript Library v2.2.0-rc3
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
