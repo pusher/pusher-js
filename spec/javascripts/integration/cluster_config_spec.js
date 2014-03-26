@@ -121,8 +121,11 @@ describeIntegration("Cluster Configuration", function() {
 
   if (Pusher.Util.isXHRSupported()) {
     // CORS-compatible browsers
-    describeClusterTest({ transport: "xhr_streaming", encrypted: false});
-    describeClusterTest({ transport: "xhr_streaming", encrypted: true});
+    if (!/Android 2\./i.test(navigator.userAgent)) {
+      // Android 2.x does a lot of buffering, which kills streaming
+      describeClusterTest({ transport: "xhr_streaming", encrypted: false});
+      describeClusterTest({ transport: "xhr_streaming", encrypted: true});
+    }
     describeClusterTest({ transport: "xhr_polling", encrypted: false});
     describeClusterTest({ transport: "xhr_polling", encrypted: true});
   } else if (Pusher.Util.isXDRSupported(false)) {
