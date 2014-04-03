@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.0 (2014-04-14)
+
+No changes since 2.2.0-rc3, just changed the version number.
+
 ## 2.2.0-rc3 (2014-03-26)
 
 [NEW] Added third argument to the bind method on event emitters to allow binding of context to callbacks
