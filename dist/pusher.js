@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.2.0-rc3
+ * Pusher JavaScript Library v2.2.0
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
@@ -626,7 +626,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.0-rc3';
+  Pusher.VERSION = '2.2.0';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
