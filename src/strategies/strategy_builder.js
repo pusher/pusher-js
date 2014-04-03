@@ -15,7 +15,11 @@
   var transports = {
     ws: Pusher.WSTransport,
     flash: Pusher.FlashTransport,
-    sockjs: Pusher.SockJSTransport
+    sockjs: Pusher.SockJSTransport,
+    xhr_streaming: Pusher.XHRStreamingTransport,
+    xdr_streaming: Pusher.XDRStreamingTransport,
+    xhr_polling: Pusher.XHRPollingTransport,
+    xdr_polling: Pusher.XDRPollingTransport
   };
 
   var UnsupportedStrategy = {
@@ -44,6 +48,10 @@
   }
 
   var globalContext = {
+    extend: function(context, first, second) {
+      return [Pusher.Util.extend({}, first, second), context];
+    },
+
     def: function(context, name, value) {
       if (context[name] !== undefined) {
         throw "Redefining symbol " + name;

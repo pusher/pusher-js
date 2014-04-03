@@ -1,15 +1,14 @@
 ;(function() {
+  Pusher.DependenciesReceivers = new Pusher.ScriptReceiverFactory(
+    "_pusher_dependencies", "Pusher.DependenciesReceivers"
+  );
   Pusher.Dependencies = new Pusher.DependencyLoader({
     cdn_http: Pusher.cdn_http,
     cdn_https: Pusher.cdn_https,
     version: Pusher.VERSION,
-    suffix: Pusher.dependency_suffix
+    suffix: Pusher.dependency_suffix,
+    receivers: Pusher.DependenciesReceivers
   });
-
-  // Support Firefox versions which prefix WebSocket
-  if (!window.WebSocket && window.MozWebSocket) {
-    window.WebSocket = window.MozWebSocket;
-  }
 
   function initialize() {
     Pusher.ready();

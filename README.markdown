@@ -168,7 +168,7 @@ You can attach behaviour to these events regardless of the channel the event is 
 
 ### Per-channel events
 
-These are bound to a specific channel, and mean that you can reuse event names in different parts of you client application. The following might be an example of a stock tracking app where several channels are opened for different companies:
+These are bound to a specific channel, and mean that you can reuse event names in different parts of your client application. The following might be an example of a stock tracking app where several channels are opened for different companies:
 
     var socket = new Pusher('MY_API_KEY');
     var channel = socket.subscribe('APPL');
@@ -177,6 +177,27 @@ These are bound to a specific channel, and mean that you can reuse event names i
         // add new price into the APPL widget
       }
     );
+
+### Bind event handler with optional context
+
+It is possible to provide a third, optional parameter that is used as the `this` value when calling a handler:
+
+    var context = { title: 'Pusher' };
+    var handler = function(){
+      console.log('My name is ' + this.title);
+    };
+    channel.bind('new-comment', handler, context);
+
+### Unbind event handlers
+
+Remove previously-bound handlers from an object. Only handlers that match all of the provided arguments (`eventName`, `handler` or `context`) are removed:
+
+    channel.unbind('new-comment', handler); // removes just `handler` for the `new-comment` event
+    channel.unbind('new-comment'); // removes all handlers for the `new-comment` event
+    channel.unbind(null, handler); // removes `handler` for all events
+    channel.unbind(null, null, context); // removes all handlers for `context`
+    channel.unbind(); // removes all handlers on `channel`
+
 
 ### Binding to everything
 
@@ -218,6 +239,12 @@ Then after loading `pusher.js`, but before connecting, you need to overwrite the
       suffix: Pusher.dependency_suffix
     });
 
+## SockJS compatibility
+
+Most browsers have a limit of 6 simultaneous connections to a single domain, but Internet Explorer 6 and 7 have a limit of just 2. This means that you can only use a single Pusher connection in these browsers, because SockJS requires an HTTP connection for incoming data and another one for sending. Opening the second connection will break the first one as the client won't be able to respond to ping messages and get disconnected eventually.
+
+All other browsers work fine with two or three connections.
+
 ## Developing
 
 Use Bundler to install all development dependencies
@@ -237,6 +264,16 @@ In order to build the minified versions:
     ENVIRONMENT=development rake build
 
 If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
+
+## How to install Flash SDK
+
+Download [Flex 4 SDK](http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ - if it returns an swf file, open it in the browser and you'll be greeted by the downloader).
+
+Unzip the SDK and move it somewhere (e.g. `/usr/local/flex`, so that executables are in `/usr/local/flex/bin`) and add it to the path:
+
+    export PATH=/usr/local/flex/bin:$PATH
+
+Now scripts should be able to pick up all the tools needed to build Flash files.
 
 ## Building
 
@@ -317,7 +354,3 @@ Then start the server, run one of following commands:
     bin/karma                # runs both unit and integration tests
 
 All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
-
-### Old framework
-
-There are still some tests in the old framework, though they will be removed in the future. Open `test/sane/index.html` and click run to execute the suite.

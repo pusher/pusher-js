@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.1.6
+ * Pusher JavaScript Library v2.2.0
  * http://pusherapp.com/
  *
  * Copyright 2013, Pusher
@@ -25,6 +25,7 @@
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
     this.timeline = new Pusher.Timeline(this.key, this.sessionID, {
+      cluster: this.config.cluster,
       features: Pusher.Util.getClientFeatures(),
       params: this.config.timelineParams || {},
       limit: 50,
@@ -34,14 +35,14 @@
     if (!this.config.disableStats) {
       this.timelineSender = new Pusher.TimelineSender(this.timeline, {
         host: this.config.statsHost,
-        path: "/timeline"
+        path: "/timeline/v2/jsonp"
       });
     }
 
     var getStrategy = function(options) {
+      var config = Pusher.Util.extend({}, self.config, options);
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(self.config),
-        Pusher.Util.extend({}, self.config, options)
+        Pusher.getDefaultStrategy(config), config
       );
     };
 
@@ -88,7 +89,9 @@
     Pusher.instances.push(this);
     this.timeline.info({ instances: Pusher.instances.length });
 
-    if (Pusher.isReady) self.connect();
+    if (Pusher.isReady) {
+      self.connect();
+    }
   }
   var prototype = Pusher.prototype;
 
@@ -195,7 +198,7 @@
   };
 
   prototype.isEncrypted = function() {
-    if (Pusher.Util.getDocumentLocation().protocol === "https:") {
+    if (Pusher.Util.getDocument().location.protocol === "https:") {
       return true;
     } else {
       return Boolean(this.config.encrypted);
@@ -210,80 +213,71 @@
     }
   }
 
+  Pusher.HTTP = {};
+
   this.Pusher = Pusher;
 }).call(this);
 
 ;(function() {
-  /** Cross-browser compatible timer abstraction.
+  // We need to bind clear functions this way to avoid exceptions on IE8
+  function clearTimeout(timer) {
+    window.clearTimeout(timer);
+  }
+  function clearInterval(timer) {
+    window.clearInterval(timer);
+  }
+
+  function GenericTimer(set, clear, delay, callback) {
+    var self = this;
+
+    this.clear = clear;
+    this.timer = set(function() {
+      if (self.timer !== null) {
+        self.timer = callback(self.timer);
+      }
+    }, delay);
+  }
+  var prototype = GenericTimer.prototype;
+
+  /** Returns whether the timer is still running.
+   *
+   * @return {Boolean}
+   */
+  prototype.isRunning = function() {
+    return this.timer !== null;
+  };
+
+  /** Aborts a timer when it's running. */
+  prototype.ensureAborted = function() {
+    if (this.timer) {
+      // Clear function is already bound
+      this.clear(this.timer);
+      this.timer = null;
+    }
+  };
+
+  /** Cross-browser compatible one-off timer abstraction.
    *
    * @param {Number} delay
    * @param {Function} callback
    */
-  function Timer(delay, callback) {
-    var self = this;
-
-    this.timeout = setTimeout(function() {
-      if (self.timeout !== null) {
-        callback();
-        self.timeout = null;
-      }
-    }, delay);
-  }
-  var prototype = Timer.prototype;
-
-  /** Returns whether the timer is still running.
-   *
-   * @return {Boolean}
-   */
-  prototype.isRunning = function() {
-    return this.timeout !== null;
+  Pusher.Timer = function(delay, callback) {
+    return new GenericTimer(setTimeout, clearTimeout, delay, function(timer) {
+      callback();
+      return null;
+    });
   };
-
-  /** Aborts a timer when it's running. */
-  prototype.ensureAborted = function() {
-    if (this.timeout) {
-      clearTimeout(this.timeout);
-      this.timeout = null;
-    }
-  };
-
-  Pusher.Timer = Timer;
-}).call(this);
-
-;(function() {
   /** Cross-browser compatible periodic timer abstraction.
    *
-   * @param {Number} interval
+   * @param {Number} delay
    * @param {Function} callback
    */
-  function PeriodicTimer(interval, callback) {
-    var self = this;
-
-    this.interval = setInterval(function() {
-      if (self.interval !== null) {
-        callback();
-      }
-    }, interval);
-  }
-  var prototype = PeriodicTimer.prototype;
-
-  /** Returns whether the timer is still running.
-   *
-   * @return {Boolean}
-   */
-  prototype.isRunning = function() {
-    return this.interval !== null;
+  Pusher.PeriodicTimer = function(delay, callback) {
+    return new GenericTimer(setInterval, clearInterval, delay, function(timer) {
+      callback();
+      return timer;
+    });
   };
-
-  /** Aborts a timer when it's running. */
-  prototype.ensureAborted = function() {
-    if (this.interval) {
-      clearInterval(this.interval);
-      this.interval = null;
-    }
-  };
-
-  Pusher.PeriodicTimer = PeriodicTimer;
 }).call(this);
 
 ;(function() {
@@ -417,9 +411,9 @@
      * @param {Array} array
      * @param {Function} f
      */
-    apply: function(array, f) {
+    apply: function(array, f, context) {
       for (var i = 0; i < array.length; i++) {
-        f(array[i], i, array);
+        f.call(context || window, array[i], i, array);
       }
     },
 
@@ -571,12 +565,16 @@
       };
     },
 
+    getWindow: function() {
+      return window;
+    },
+
     getDocument: function() {
       return document;
     },
 
-    getDocumentLocation: function() {
-      return Pusher.Util.getDocument().location;
+    getNavigator: function() {
+      return navigator;
     },
 
     getLocalStorage: function() {
@@ -591,15 +589,44 @@
       return Pusher.Util.keys(
         Pusher.Util.filterObject(
           { "ws": Pusher.WSTransport, "flash": Pusher.FlashTransport },
-          function (t) { return t.isSupported(); }
+          function (t) { return t.isSupported({}); }
         )
       );
+    },
+
+    addWindowListener: function(event, listener) {
+      var _window = Pusher.Util.getWindow();
+      if (_window.addEventListener !== undefined) {
+        _window.addEventListener(event, listener, false);
+      } else {
+        _window.attachEvent("on" + event, listener);
+      }
+    },
+
+    removeWindowListener: function(event, listener) {
+      var _window = Pusher.Util.getWindow();
+      if (_window.addEventListener !== undefined) {
+        _window.removeEventListener(event, listener, false);
+      } else {
+        _window.detachEvent("on" + event, listener);
+      }
+    },
+
+    isXHRSupported: function() {
+      var XHR = window.XMLHttpRequest;
+      return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
+    },
+
+    isXDRSupported: function(encrypted) {
+      var protocol = encrypted ? "https:" : "http:";
+      var documentProtocol = Pusher.Util.getDocument().location.protocol;
+      return Boolean(window.XDomainRequest) && documentProtocol === protocol;
     }
   };
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.1.6';
+  Pusher.VERSION = '2.2.0';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -625,11 +652,30 @@
   Pusher.dependency_suffix = '';
 
   Pusher.getDefaultStrategy = function(config) {
+    var wsStrategy;
+    if (config.encrypted) {
+      wsStrategy = [
+        ":best_connected_ever",
+        ":ws_loop",
+        [":delayed", 2000, [":http_fallback_loop"]]
+      ];
+    } else {
+      wsStrategy = [
+        ":best_connected_ever",
+        ":ws_loop",
+        [":delayed", 2000, [":wss_loop"]],
+        [":delayed", 5000, [":http_fallback_loop"]]
+      ];
+    }
+
     return [
       [":def", "ws_options", {
         hostUnencrypted: config.wsHost + ":" + config.wsPort,
         hostEncrypted: config.wsHost + ":" + config.wssPort
       }],
+      [":def", "wss_options", [":extend", ":ws_options", {
+        encrypted: true
+      }]],
       [":def", "sockjs_options", {
         hostUnencrypted: config.httpHost + ":" + config.httpPort,
         hostEncrypted: config.httpHost + ":" + config.httpsPort
@@ -645,25 +691,67 @@
         minPingDelay: 10000,
         maxPingDelay: config.activity_timeout
       }]],
+      [":def", "streaming_manager", [":transport_manager", {
+        lives: 2,
+        minPingDelay: 10000,
+        maxPingDelay: config.activity_timeout
+      }]],
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
+      [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
       [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
+      [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
+      [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
+      [":def_transport", "xhr_polling", "xhr_polling", 1, ":sockjs_options"],
+      [":def_transport", "xdr_polling", "xdr_polling", 1, ":sockjs_options"],
+
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
+      [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
       [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
+
+      [":def", "streaming_loop", [":sequential", ":timeouts",
+        [":if", [":is_supported", ":xhr_streaming"],
+          ":xhr_streaming",
+          ":xdr_streaming"
+        ]
+      ]],
+      [":def", "polling_loop", [":sequential", ":timeouts",
+        [":if", [":is_supported", ":xhr_polling"],
+          ":xhr_polling",
+          ":xdr_polling"
+        ]
+      ]],
+
+      [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
+        ":best_connected_ever",
+          ":streaming_loop",
+          [":delayed", 4000, [":polling_loop"]]
+      ], [
+        ":polling_loop"
+      ]]],
+
+      [":def", "http_fallback_loop",
+        [":if", [":is_supported", ":http_loop"], [
+          ":http_loop"
+        ], [
+          ":sockjs_loop"
+        ]]
+      ],
 
       [":def", "strategy",
         [":cached", 1800000,
           [":first_connected",
-            [":if", [":is_supported", ":ws"], [
-                ":best_connected_ever", ":ws_loop", [":delayed", 2000, [":sockjs_loop"]]
-              ], [":if", [":is_supported", ":flash"], [
-                ":best_connected_ever", ":flash_loop", [":delayed", 2000, [":sockjs_loop"]]
-              ], [
-                ":sockjs_loop"
-              ]
-            ]]
+            [":if", [":is_supported", ":ws"],
+              wsStrategy,
+            [":if", [":is_supported", ":flash"], [
+              ":best_connected_ever",
+              ":flash_loop",
+              [":delayed", 2000, [":http_fallback_loop"]]
+            ], [
+              ":http_fallback_loop"
+            ]]]
           ]
         ]
       ]
@@ -701,22 +789,23 @@
 
 ;(function() {
   function buildExceptionClass(name) {
-    var klass = function(message) {
+    var constructor = function(message) {
       Error.call(this, message);
       this.name = name;
     };
-    Pusher.Util.extend(klass.prototype, Error.prototype);
+    Pusher.Util.extend(constructor.prototype, Error.prototype);
 
-    return klass;
+    return constructor;
   }
 
   /** Error classes used throughout pusher-js library. */
   Pusher.Errors = {
     BadEventName: buildExceptionClass("BadEventName"),
-    UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
-    UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy"),
+    RequestTimedOut: buildExceptionClass("RequestTimedOut"),
     TransportPriorityTooLow: buildExceptionClass("TransportPriorityTooLow"),
-    TransportClosed: buildExceptionClass("TransportClosed")
+    TransportClosed: buildExceptionClass("TransportClosed"),
+    UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
+    UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy")
   };
 }).call(this);
 
@@ -732,8 +821,8 @@
   }
   var prototype = EventsDispatcher.prototype;
 
-  prototype.bind = function(eventName, callback) {
-    this.callbacks.add(eventName, callback);
+  prototype.bind = function(eventName, callback, context) {
+    this.callbacks.add(eventName, callback, context);
     return this;
   };
 
@@ -742,7 +831,12 @@
     return this;
   };
 
-  prototype.unbind = function(eventName, callback) {
+  prototype.unbind = function(eventName, callback, context) {
+    this.callbacks.remove(eventName, callback, context);
+    return this;
+  };
+
+  prototype.unbind_all = function(eventName, callback) {
     this.callbacks.remove(eventName, callback);
     return this;
   };
@@ -757,7 +851,7 @@
     var callbacks = this.callbacks.get(eventName);
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i](data);
+        callbacks[i].fn.call(callbacks[i].context || window, data);
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);
@@ -772,36 +866,205 @@
     this._callbacks = {};
   }
 
-  CallbackRegistry.prototype.get = function(eventName) {
-    return this._callbacks[this._prefix(eventName)];
+  CallbackRegistry.prototype.get = function(name) {
+    return this._callbacks[prefix(name)];
   };
 
-  CallbackRegistry.prototype.add = function(eventName, callback) {
-    var prefixedEventName = this._prefix(eventName);
+  CallbackRegistry.prototype.add = function(name, callback, context) {
+    var prefixedEventName = prefix(name);
     this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
-    this._callbacks[prefixedEventName].push(callback);
+    this._callbacks[prefixedEventName].push({
+      fn: callback,
+      context: context
+    });
   };
 
-  CallbackRegistry.prototype.remove = function(eventName, callback) {
-    if(this.get(eventName)) {
-      var index = Pusher.Util.arrayIndexOf(this.get(eventName), callback);
-      if (index !== -1){
-        var callbacksCopy = this._callbacks[this._prefix(eventName)].slice(0);
-        callbacksCopy.splice(index, 1);
-        this._callbacks[this._prefix(eventName)] = callbacksCopy;
-      }
+  CallbackRegistry.prototype.remove = function(name, callback, context) {
+    if (!name && !callback && !context) {
+      this._callbacks = {};
+      return;
+    }
+
+    var names = name ? [prefix(name)] : Pusher.Util.keys(this._callbacks);
+
+    if (callback || context) {
+      Pusher.Util.apply(names, function(name) {
+        this._callbacks[name] = Pusher.Util.filter(
+          this._callbacks[name] || [],
+          function(binding) {
+            return (callback && callback !== binding.fn) ||
+                   (context && context !== binding.context);
+          }
+        );
+        if (this._callbacks[name].length === 0) {
+          delete this._callbacks[name];
+        }
+      }, this);
+    } else {
+      Pusher.Util.apply(names, function(name) {
+        delete this._callbacks[name];
+      }, this);
     }
   };
 
-  CallbackRegistry.prototype._prefix = function(eventName) {
-    return "_" + eventName;
-  };
+  function prefix(name) {
+    return "_" + name;
+  }
 
   Pusher.EventsDispatcher = EventsDispatcher;
 }).call(this);
 
+(function() {
+  /** Builds receivers for JSONP and Script requests.
+   *
+   * Each receiver is an object with following fields:
+   * - number - unique (for the factory instance), numerical id of the receiver
+   * - id - a string ID that can be used in DOM attributes
+   * - name - name of the function triggering the receiver
+   * - callback - callback function
+   *
+   * Receivers are triggered only once, on the first callback call.
+   *
+   * Receivers can be called by their name or by accessing factory object
+   * by the number key.
+   *
+   * @param {String} prefix the prefix used in ids
+   * @param {String} name the name of the object
+   */
+  function ScriptReceiverFactory(prefix, name) {
+    this.lastId = 0;
+    this.prefix = prefix;
+    this.name = name;
+  }
+  var prototype = ScriptReceiverFactory.prototype;
+
+  /** Creates a script receiver.
+   *
+   * @param {Function} callback
+   * @return {ScriptReceiver}
+   */
+  prototype.create = function(callback) {
+    this.lastId++;
+
+    var number = this.lastId;
+    var id = this.prefix + number;
+    var name = this.name + "[" + number + "]";
+
+    var called = false;
+    var callbackWrapper = function() {
+      if (!called) {
+        callback.apply(null, arguments);
+        called = true;
+      }
+    };
+
+    this[number] = callbackWrapper;
+    return { number: number, id: id, name: name, callback: callbackWrapper };
+  };
+
+  /** Removes the script receiver from the list.
+   *
+   * @param {ScriptReceiver} receiver
+   */
+  prototype.remove = function(receiver) {
+    delete this[receiver.number];
+  };
+
+  Pusher.ScriptReceiverFactory = ScriptReceiverFactory;
+  Pusher.ScriptReceivers = new ScriptReceiverFactory(
+    "_pusher_script_", "Pusher.ScriptReceivers"
+  );
+}).call(this);
+
+(function() {
+  /** Sends a generic HTTP GET request using a script tag.
+   *
+   * By constructing URL in a specific way, it can be used for loading
+   * JavaScript resources or JSONP requests. It can notify about errors, but
+   * only in certain environments. Please take care of monitoring the state of
+   * the request yourself.
+   *
+   * @param {String} src
+   */
+  function ScriptRequest(src) {
+    this.src = src;
+  }
+  var prototype = ScriptRequest.prototype;
+
+  /** Sends the actual script request.
+   *
+   * @param {ScriptReceiver} receiver
+   */
+  prototype.send = function(receiver) {
+    var self = this;
+    var errorString = "Error loading " + self.src;
+
+    self.script = document.createElement("script");
+    self.script.id = receiver.id;
+    self.script.src = self.src;
+    self.script.type = "text/javascript";
+    self.script.charset = "UTF-8";
+
+    if (self.script.addEventListener) {
+      self.script.onerror = function() {
+        receiver.callback(errorString);
+      };
+      self.script.onload = function() {
+        receiver.callback(null);
+      };
+    } else {
+      self.script.onreadystatechange = function() {
+        if (self.script.readyState === 'loaded' ||
+            self.script.readyState === 'complete') {
+          receiver.callback(null);
+        }
+      };
+    }
+
+    // Opera<11.6 hack for missing onerror callback
+    if (self.script.async === undefined && document.attachEvent &&
+        /opera/i.test(navigator.userAgent)) {
+      self.errorScript = document.createElement("script");
+      self.errorScript.id = receiver.id + "_error";
+      self.errorScript.text = receiver.name + "('" + errorString + "');";
+      self.script.async = self.errorScript.async = false;
+    } else {
+      self.script.async = true;
+    }
+
+    var head = document.getElementsByTagName('head')[0];
+    head.insertBefore(self.script, head.firstChild);
+    if (self.errorScript) {
+      head.insertBefore(self.errorScript, self.script.nextSibling);
+    }
+  };
+
+  /** Cleans up the DOM remains of the script request. */
+  prototype.cleanup = function() {
+    if (this.script) {
+      this.script.onload = this.script.onerror = null;
+      this.script.onreadystatechange = null;
+    }
+    if (this.script && this.script.parentNode) {
+      this.script.parentNode.removeChild(this.script);
+    }
+    if (this.errorScript && this.errorScript.parentNode) {
+      this.errorScript.parentNode.removeChild(this.errorScript);
+    }
+    this.script = null;
+    this.errorScript = null;
+  };
+
+  Pusher.ScriptRequest = ScriptRequest;
+}).call(this);
+
 ;(function() {
   /** Handles loading dependency files.
+   *
+   * Dependency loaders don't remember whether a resource has been loaded or
+   * not. It is caller's responsibility to make sure the resource is not loaded
+   * twice. This is because it's impossible to detect resource loading status
+   * without knowing its content.
    *
    * Options:
    * - cdn_http - url to HTTP CND
@@ -813,8 +1076,8 @@
    */
   function DependencyLoader(options) {
     this.options = options;
+    this.receivers = options.receivers || Pusher.ScriptReceivers;
     this.loading = {};
-    this.loaded = {};
   }
   var prototype = DependencyLoader.prototype;
 
@@ -826,23 +1089,30 @@
   prototype.load = function(name, callback) {
     var self = this;
 
-    if (this.loaded[name]) {
-      callback();
-    } else if (this.loading[name] && this.loading[name].length > 0) {
-      this.loading[name].push(callback);
+    if (self.loading[name] && self.loading[name].length > 0) {
+      self.loading[name].push(callback);
     } else {
-      this.loading[name] = [callback];
+      self.loading[name] = [callback];
 
-      require(this.getPath(name), function() {
-        self.loaded[name] = true;
+      var request = new Pusher.ScriptRequest(self.getPath(name));
+      var receiver = self.receivers.create(function(error) {
+        self.receivers.remove(receiver);
 
         if (self.loading[name]) {
-          for (var i = 0; i < self.loading[name].length; i++) {
-            self.loading[name][i]();
-          }
+          var callbacks = self.loading[name];
           delete self.loading[name];
+
+          var successCallback = function(wasSuccessful) {
+            if (!wasSuccessful) {
+              request.cleanup();
+            }
+          };
+          for (var i = 0; i < callbacks.length; i++) {
+            callbacks[i](error, successCallback);
+          }
         }
       });
+      request.send(receiver);
     }
   };
 
@@ -852,7 +1122,7 @@
    */
   prototype.getRoot = function(options) {
     var cdn;
-    var protocol = Pusher.Util.getDocumentLocation().protocol;
+    var protocol = Pusher.Util.getDocument().location.protocol;
     if ((options && options.encrypted) || protocol === "https:") {
       cdn = this.options.cdn_https;
     } else {
@@ -871,50 +1141,20 @@
     return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
   };
 
-  function handleScriptLoaded(elem, callback) {
-    if (Pusher.Util.getDocument().addEventListener) {
-      elem.addEventListener('load', callback, false);
-    } else {
-      elem.attachEvent('onreadystatechange', function () {
-        if (elem.readyState === 'loaded' || elem.readyState === 'complete') {
-          callback();
-        }
-      });
-    }
-  }
-
-  function require(src, callback) {
-    var document = Pusher.Util.getDocument();
-    var head = document.getElementsByTagName('head')[0];
-    var script = document.createElement('script');
-
-    script.setAttribute('src', src);
-    script.setAttribute("type","text/javascript");
-    script.setAttribute('async', true);
-
-    handleScriptLoaded(script, function() {
-      // workaround for an Opera issue
-      setTimeout(callback, 0);
-    });
-
-    head.appendChild(script);
-  }
-
   Pusher.DependencyLoader = DependencyLoader;
 }).call(this);
 
 ;(function() {
+  Pusher.DependenciesReceivers = new Pusher.ScriptReceiverFactory(
+    "_pusher_dependencies", "Pusher.DependenciesReceivers"
+  );
   Pusher.Dependencies = new Pusher.DependencyLoader({
     cdn_http: Pusher.cdn_http,
     cdn_https: Pusher.cdn_https,
     version: Pusher.VERSION,
-    suffix: Pusher.dependency_suffix
+    suffix: Pusher.dependency_suffix,
+    receivers: Pusher.DependenciesReceivers
   });
-
-  // Support Firefox versions which prefix WebSocket
-  if (!window.WebSocket && window.MozWebSocket) {
-    window.WebSocket = window.MozWebSocket;
-  }
 
   function initialize() {
     Pusher.ready();
@@ -996,98 +1236,56 @@
 }).call(this);
 
 (function() {
-
-  function JSONPRequest(options) {
-    this.options = options;
+  /** Sends data via JSONP.
+   *
+   * Data is a key-value map. Its values are JSON-encoded and then passed
+   * through base64. Finally, keys and encoded values are appended to the query
+   * string.
+   *
+   * The class itself does not guarantee raising errors on failures, as it's not
+   * possible to support such feature on all browsers. Instead, JSONP endpoint
+   * should call back in a way that's easy to distinguish from browser calls,
+   * for example by passing a second argument to the receiver.
+   *
+   * @param {String} url
+   * @param {Object} data key-value map of data to be submitted
+   */
+  function JSONPRequest(url, data) {
+    this.url = url;
+    this.data = data;
   }
-
-  JSONPRequest.send = function(options, callback) {
-    var request = new Pusher.JSONPRequest({
-      url: options.url,
-      receiver: options.receiverName,
-      tagPrefix: options.tagPrefix
-    });
-    var id = options.receiver.register(function(error, result) {
-      request.cleanup();
-      callback(error, result);
-    });
-
-    return request.send(id, options.data, function(error) {
-      var callback = options.receiver.unregister(id);
-      if (callback) {
-        callback(error);
-      }
-    });
-  };
-
   var prototype = JSONPRequest.prototype;
 
-  prototype.send = function(id, data, callback) {
-    if (this.script) {
-      return false;
+  /** Sends the actual JSONP request.
+   *
+   * @param {ScriptReceiver} receiver
+   */
+  prototype.send = function(receiver) {
+    if (this.request) {
+      return;
     }
 
-    var tagPrefix = this.options.tagPrefix || "_pusher_jsonp_";
-
-    var params = Pusher.Util.extend(
-      {}, data, { receiver: this.options.receiver }
-    );
+    var params = Pusher.Util.filterObject(this.data, function(value) {
+      return value !== undefined;
+    });
     var query = Pusher.Util.map(
-      Pusher.Util.flatten(
-        encodeData(
-          Pusher.Util.filterObject(params, function(value) {
-            return value !== undefined;
-          })
-        )
-      ),
+      Pusher.Util.flatten(encodeParamsObject(params)),
       Pusher.Util.method("join", "=")
     ).join("&");
+    var url = this.url + "/" + receiver.number + "?" + query;
 
-    this.script = document.createElement("script");
-    this.script.id = tagPrefix + id;
-    this.script.src = this.options.url + "/" + id + "?" + query;
-    this.script.type = "text/javascript";
-    this.script.charset = "UTF-8";
-    this.script.onerror = this.script.onload = callback;
-
-    // Opera<11.6 hack for missing onerror callback
-    if (this.script.async === undefined && document.attachEvent) {
-      if (/opera/i.test(navigator.userAgent)) {
-        var receiverName = this.options.receiver || "Pusher.JSONP.receive";
-        this.errorScript = document.createElement("script");
-        this.errorScript.text = receiverName + "(" + id + ", true);";
-        this.script.async = this.errorScript.async = false;
-      }
-    }
-
-    var self = this;
-    this.script.onreadystatechange = function() {
-      if (self.script && /loaded|complete/.test(self.script.readyState)) {
-        callback(true);
-      }
-    };
-
-    var head = document.getElementsByTagName('head')[0];
-    head.insertBefore(this.script, head.firstChild);
-    if (this.errorScript) {
-      head.insertBefore(this.errorScript, this.script.nextSibling);
-    }
-
-    return true;
+    this.request = new Pusher.ScriptRequest(url);
+    this.request.send(receiver);
   };
 
+  /** Cleans up the DOM remains of the JSONP request. */
   prototype.cleanup = function() {
-    if (this.script && this.script.parentNode) {
-      this.script.parentNode.removeChild(this.script);
-      this.script = null;
-    }
-    if (this.errorScript && this.errorScript.parentNode) {
-      this.errorScript.parentNode.removeChild(this.errorScript);
-      this.errorScript = null;
+    if (this.request) {
+      this.request.cleanup();
     }
   };
 
-  function encodeData(data) {
+  function encodeParamsObject(data) {
     return Pusher.Util.mapObject(data, function(value) {
       if (typeof value === "object") {
         value = JSON.stringify(value);
@@ -1097,45 +1295,6 @@
   }
 
   Pusher.JSONPRequest = JSONPRequest;
-
-}).call(this);
-
-(function() {
-
-  function JSONPReceiver() {
-    this.lastId = 0;
-    this.callbacks = {};
-  }
-
-  var prototype = JSONPReceiver.prototype;
-
-  prototype.register = function(callback) {
-    this.lastId++;
-    var id = this.lastId;
-    this.callbacks[id] = callback;
-    return id;
-  };
-
-  prototype.unregister = function(id) {
-    if (this.callbacks[id]) {
-      var callback = this.callbacks[id];
-      delete this.callbacks[id];
-      return callback;
-    } else {
-      return null;
-    }
-  };
-
-  prototype.receive = function(id, error, data) {
-    var callback = this.unregister(id);
-    if (callback) {
-      callback(error, data);
-    }
-  };
-
-  Pusher.JSONPReceiver = JSONPReceiver;
-  Pusher.JSONP = new JSONPReceiver();
-
 }).call(this);
 
 (function() {
@@ -1155,12 +1314,9 @@
   Timeline.DEBUG = 7;
 
   prototype.log = function(level, event) {
-    if (this.options.level === undefined || level <= this.options.level) {
+    if (level <= this.options.level) {
       this.events.push(
-        Pusher.Util.extend({}, event, {
-          timestamp: Pusher.Util.now(),
-          level: (level !== Timeline.INFO ? level : undefined)
-        })
+        Pusher.Util.extend({}, event, { timestamp: Pusher.Util.now() })
       );
       if (this.options.limit && this.events.length > this.options.limit) {
         this.events.shift();
@@ -1193,6 +1349,7 @@
       key: self.key,
       lib: "js",
       version: self.options.version,
+      cluster: self.options.cluster,
       features: self.options.features,
       timeline: self.events
     }, self.options.params);
@@ -1226,22 +1383,21 @@
   var prototype = TimelineSender.prototype;
 
   prototype.send = function(encrypted, callback) {
-    if (this.timeline.isEmpty()) {
+    var self = this;
+
+    if (self.timeline.isEmpty()) {
       return;
     }
 
-    var self = this;
-    var scheme = "http" + (encrypted ? "s" : "") + "://";
-
     var sendJSONP = function(data, callback) {
-      var params = {
-        data: Pusher.Util.filterObject(data, function(v) {
-          return v !== undefined;
-        }),
-        url: scheme + (self.host || self.options.host) + self.options.path,
-        receiver: Pusher.JSONP
-      };
-      return Pusher.JSONPRequest.send(params, function(error, result) {
+      var scheme = "http" + (encrypted ? "s" : "") + "://";
+      var url = scheme + (self.host || self.options.host) + self.options.path;
+      var request = new Pusher.JSONPRequest(url, data);
+
+      var receiver = Pusher.ScriptReceivers.create(function(error, result) {
+        Pusher.ScriptReceivers.remove(receiver);
+        request.cleanup();
+
         if (result && result.host) {
           self.host = result.host;
         }
@@ -1249,6 +1405,7 @@
           callback(error, result);
         }
       });
+      request.send(receiver);
     };
     self.timeline.send(sendJSONP, callback);
   };
@@ -1359,9 +1516,13 @@
     if (info && info.timestamp + this.ttl >= Pusher.Util.now()) {
       var transport = this.transports[info.transport];
       if (transport) {
-        this.timeline.info({ cached: true, transport: info.transport });
+        this.timeline.info({
+          cached: true,
+          transport: info.transport,
+          latency: info.latency
+        });
         strategies.push(new Pusher.SequentialStrategy([transport], {
-          timeout: info.latency * 2,
+          timeout: info.latency * 2 + 1000,
           failFast: true
         }));
       }
@@ -1693,7 +1854,9 @@
    * @returns {Boolean}
    */
   prototype.isSupported = function() {
-    return this.transport.isSupported();
+    return this.transport.isSupported({
+      encrypted: this.options.encrypted
+    });
   };
 
   /** Launches a connection attempt and returns a strategy runner.
@@ -1791,17 +1954,65 @@
   Pusher.TransportStrategy = TransportStrategy;
 }).call(this);
 
-;(function() {
-  /** Handles common logic for all transports.
+(function() {
+  function getGenericURL(baseScheme, params, path) {
+    var scheme = baseScheme + (params.encrypted ? "s" : "");
+    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
+    return scheme + "://" + host + path;
+  }
+
+  function getGenericPath(key, queryString) {
+    var path = "/app/" + key;
+    var query =
+      "?protocol=" + Pusher.PROTOCOL +
+      "&client=js" +
+      "&version=" + Pusher.VERSION +
+      (queryString ? ("&" + queryString) : "");
+    return path + query;
+  }
+
+  /** URL schemes for different transport types. */
+  Pusher.URLSchemes = {
+    /** Standard WebSocket URL scheme. */
+    ws: {
+      getInitial: function(key, params) {
+        return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
+      }
+    },
+    /** URL scheme for Flash. Same as WebSocket, but with a flash parameter. */
+    flash: {
+      getInitial: function(key, params) {
+        return getGenericURL("ws", params, getGenericPath(key, "flash=true"));
+      }
+    },
+    /** SockJS URL scheme. Supplies the path separately from the initial URL. */
+    sockjs: {
+      getInitial: function(key, params) {
+        return getGenericURL("http", params, params.httpPath || "/pusher", "");
+      },
+      getPath: function(key, params) {
+        return getGenericPath(key);
+      }
+    },
+    /** URL scheme for HTTP transports. Basically, WS scheme with a prefix. */
+    http: {
+      getInitial: function(key, params) {
+        var path = (params.httpPath || "/pusher") + getGenericPath(key);
+        return getGenericURL("http", params, path);
+      }
+    }
+  };
+}).call(this);
+
+(function() {
+  /** Provides universal API for transport connections.
    *
-   * Transport is a low-level connection object that wraps a connection method
+   * Transport connection is a low-level object that wraps a connection method
    * and exposes a simple evented interface for the connection state and
    * messaging. It does not implement Pusher-specific WebSocket protocol.
    *
    * Additionally, it fetches resources needed for transport to work and exposes
-   * an interface for querying transport support and its features.
-   *
-   * This is an abstract class, please do not instantiate it.
+   * an interface for querying transport features.
    *
    * States:
    * - new - initial state after constructing the object
@@ -1822,40 +2033,37 @@
    * @param {String} key application key
    * @param {Object} options
    */
-  function AbstractTransport(name, priority, key, options) {
+  function TransportConnection(hooks, name, priority, key, options) {
     Pusher.EventsDispatcher.call(this);
 
+    this.hooks = hooks;
     this.name = name;
     this.priority = priority;
     this.key = key;
+    this.options = options;
+
     this.state = "new";
     this.timeline = options.timeline;
     this.activityTimeout = options.activityTimeout;
     this.id = this.timeline.generateUniqueID();
-
-    this.options = {
-      encrypted: Boolean(options.encrypted),
-      hostUnencrypted: options.hostUnencrypted,
-      hostEncrypted: options.hostEncrypted
-    };
   }
-  var prototype = AbstractTransport.prototype;
+  var prototype = TransportConnection.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  /** Checks whether the transport is supported in the browser.
+  /** Checks whether the transport handles activity checks by itself.
    *
-   * @returns {Boolean}
+   * @return {Boolean}
    */
-  AbstractTransport.isSupported = function() {
-    return false;
+  prototype.handlesActivityChecks = function() {
+    return Boolean(this.hooks.handlesActivityChecks);
   };
 
-  /** Checks whether the transport handles ping/pong on itself.
+  /** Checks whether the transport supports the ping/pong API.
    *
    * @return {Boolean}
    */
   prototype.supportsPing = function() {
-    return false;
+    return Boolean(this.hooks.supportsPing);
   };
 
   /** Initializes the transport.
@@ -1863,12 +2071,35 @@
    * Fetches resources if needed and then transitions to initialized.
    */
   prototype.initialize = function() {
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
+    var self = this;
 
-    this.changeState("initialized");
+    self.timeline.info(self.buildTimelineMessage({
+      transport: self.name + (self.options.encrypted ? "s" : "")
+    }));
+
+    if (self.hooks.beforeInitialize) {
+      self.hooks.beforeInitialize();
+    }
+
+    if (self.hooks.isInitialized()) {
+      self.changeState("initialized");
+    } else if (self.hooks.file) {
+      self.changeState("initializing");
+      Pusher.Dependencies.load(self.hooks.file, function(error, callback) {
+        if (self.hooks.isInitialized()) {
+          self.changeState("initialized");
+          callback(true);
+        } else {
+          if (error) {
+            self.onError(error);
+          }
+          self.onClose();
+          callback(false);
+        }
+      });
+    } else {
+      self.onClose();
+    }
   };
 
   /** Tries to establish a connection.
@@ -1876,20 +2107,16 @@
    * @returns {Boolean} false if transport is in invalid state
    */
   prototype.connect = function() {
-    var url = this.getURL(this.key, this.options);
-    this.timeline.debug(this.buildTimelineMessage({
-      method: "connect",
-      url: url
-    }));
+    var self = this;
 
-    if (this.socket || this.state !== "initialized") {
+    if (self.socket || self.state !== "initialized") {
       return false;
     }
 
+    var url = self.hooks.urls.getInitial(self.key, self.options);
     try {
-      this.socket = this.createSocket(url);
+      self.socket = self.hooks.getSocket(url, self.options);
     } catch (e) {
-      var self = this;
       Pusher.Util.defer(function() {
         self.onError(e);
         self.changeState("closed");
@@ -1897,10 +2124,10 @@
       return false;
     }
 
-    this.bindListeners();
+    self.bindListeners();
 
-    Pusher.debug("Connecting", { transport: this.name, url: url });
-    this.changeState("connecting");
+    Pusher.debug("Connecting", { transport: self.name, url: url });
+    self.changeState("connecting");
     return true;
   };
 
@@ -1909,8 +2136,6 @@
    * @return {Boolean} true if there was a connection to close
    */
   prototype.close = function() {
-    this.timeline.debug(this.buildTimelineMessage({ method: "close" }));
-
     if (this.socket) {
       this.socket.close();
       return true;
@@ -1925,38 +2150,46 @@
    * @return {Boolean} true only when in the "open" state
    */
   prototype.send = function(data) {
-    this.timeline.debug(this.buildTimelineMessage({
-      method: "send",
-      data: data
-    }));
+    var self = this;
 
-    if (this.state === "open") {
+    if (self.state === "open") {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
-      var self = this;
-      setTimeout(function() {
+      Pusher.Util.defer(function() {
         if (self.socket) {
           self.socket.send(data);
         }
-      }, 0);
+      });
       return true;
     } else {
       return false;
     }
   };
 
-  /** @protected */
+  /** Sends a ping if the connection is open and transport supports it. */
+  prototype.ping = function() {
+    if (this.state === "open" && this.supportsPing()) {
+      this.socket.ping();
+    }
+  };
+
+  /** @private */
   prototype.onOpen = function() {
+    if (this.hooks.beforeOpen) {
+      this.hooks.beforeOpen(
+        this.socket, this.hooks.urls.getPath(this.key, this.options)
+      );
+    }
     this.changeState("open");
     this.socket.onopen = undefined;
   };
 
-  /** @protected */
+  /** @private */
   prototype.onError = function(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
-    this.timeline.error(this.buildTimelineMessage({}));
+    this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
   };
 
-  /** @protected */
+  /** @private */
   prototype.onClose = function(closeEvent) {
     if (closeEvent) {
       this.changeState("closed", {
@@ -1967,63 +2200,56 @@
     } else {
       this.changeState("closed");
     }
+    this.unbindListeners();
     this.socket = undefined;
   };
 
-  /** @protected */
+  /** @private */
   prototype.onMessage = function(message) {
-    this.timeline.debug(this.buildTimelineMessage({ message: message.data }));
     this.emit("message", message);
   };
 
-  /** @protected */
+  /** @private */
+  prototype.onActivity = function() {
+    this.emit("activity");
+  };
+
+  /** @private */
   prototype.bindListeners = function() {
     var self = this;
 
-    this.socket.onopen = function() { self.onOpen(); };
-    this.socket.onerror = function(error) { self.onError(error); };
-    this.socket.onclose = function(closeEvent) { self.onClose(closeEvent); };
-    this.socket.onmessage = function(message) { self.onMessage(message); };
-  };
+    self.socket.onopen = function() {
+      self.onOpen();
+    };
+    self.socket.onerror = function(error) {
+      self.onError(error);
+    };
+    self.socket.onclose = function(closeEvent) {
+      self.onClose(closeEvent);
+    };
+    self.socket.onmessage = function(message) {
+      self.onMessage(message);
+    };
 
-  /** @protected */
-  prototype.createSocket = function(url) {
-    return null;
-  };
-
-  /** @protected */
-  prototype.getScheme = function() {
-    return this.options.encrypted ? "wss" : "ws";
-  };
-
-  /** @protected */
-  prototype.getBaseURL = function() {
-    var host;
-    if (this.options.encrypted) {
-      host = this.options.hostEncrypted;
-    } else {
-      host = this.options.hostUnencrypted;
+    if (self.supportsPing()) {
+      self.socket.onactivity = function() { self.onActivity(); };
     }
-    return this.getScheme() + "://" + host;
   };
 
-  /** @protected */
-  prototype.getPath = function() {
-    return "/app/" + this.key;
+  /** @private */
+  prototype.unbindListeners = function() {
+    if (this.socket) {
+      this.socket.onopen = undefined;
+      this.socket.onerror = undefined;
+      this.socket.onclose = undefined;
+      this.socket.onmessage = undefined;
+      if (this.supportsPing()) {
+        this.socket.onactivity = undefined;
+      }
+    }
   };
 
-  /** @protected */
-  prototype.getQueryString = function() {
-    return "?protocol=" + Pusher.PROTOCOL +
-      "&client=js&version=" + Pusher.VERSION;
-  };
-
-  /** @protected */
-  prototype.getURL = function() {
-    return this.getBaseURL() + this.getPath() + this.getQueryString();
-  };
-
-  /** @protected */
+  /** @private */
   prototype.changeState = function(state, params) {
     this.state = state;
     this.timeline.info(this.buildTimelineMessage({
@@ -2033,245 +2259,219 @@
     this.emit(state, params);
   };
 
-  /** @protected */
+  /** @private */
   prototype.buildTimelineMessage = function(message) {
     return Pusher.Util.extend({ cid: this.id }, message);
   };
 
-  Pusher.AbstractTransport = AbstractTransport;
+  Pusher.TransportConnection = TransportConnection;
 }).call(this);
 
-;(function() {
-  /** Transport using Flash to emulate WebSockets.
+(function() {
+  /** Provides interface for transport connection instantiation.
    *
-   * @see AbstractTransport
+   * Takes transport-specific hooks as the only argument, which allow checking
+   * for transport support and creating its connections.
+   *
+   * Supported hooks:
+   * - file - the name of the file to be fetched during initialization
+   * - urls - URL scheme to be used by transport
+   * - handlesActivityCheck - true when the transport handles activity checks
+   * - supportsPing - true when the transport has a ping/activity API
+   * - isSupported - tells whether the transport is supported in the environment
+   * - getSocket - creates a WebSocket-compatible transport socket
+   *
+   * See transports.js for specific implementations.
+   *
+   * @param {Object} hooks object containing all needed transport hooks
    */
-  function FlashTransport(name, priority, key, options) {
-    Pusher.AbstractTransport.call(this, name, priority, key, options);
+  function Transport(hooks) {
+    this.hooks = hooks;
   }
-  var prototype = FlashTransport.prototype;
-  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
+  var prototype = Transport.prototype;
 
-  /** Creates a new instance of FlashTransport.
+  /** Returns whether the transport is supported in the environment.
    *
-   * @param  {String} key
-   * @param  {Object} options
-   * @return {FlashTransport}
+   * @param {Object} environment the environment details (encryption, settings)
+   * @returns {Boolean} true when the transport is supported
    */
-  FlashTransport.createConnection = function(name, priority, key, options) {
-    return new FlashTransport(name, priority, key, options);
+  prototype.isSupported = function(environment) {
+    return this.hooks.isSupported(environment);
   };
 
-  /** Checks whether Flash is supported in the browser.
+  /** Creates a transport connection.
    *
-   * It is possible to disable flash by passing an envrionment object with the
-   * disableFlash property set to true.
-   *
-   * @see AbstractTransport.isSupported
-   * @param {Object} environment
-   * @returns {Boolean}
+   * @param {String} name
+   * @param {Number} priority
+   * @param {String} key the application key
+   * @param {Object} options
+   * @returns {TransportConnection}
    */
-  FlashTransport.isSupported = function() {
-    try {
-      return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
-    } catch (e) {
-      try {
-        return Boolean(
-          navigator &&
-          navigator.mimeTypes &&
-          navigator.mimeTypes["application/x-shockwave-flash"] !== undefined
-        );
-      } catch(e) {
-        return false;
-      }
-    }
+  prototype.createConnection = function(name, priority, key, options) {
+    return new Pusher.TransportConnection(
+      this.hooks, name, priority, key, options
+    );
   };
 
-  /** Fetches flashfallback dependency if needed.
-   *
-   * Sets WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR to true (if not set before)
-   * and WEB_SOCKET_SWF_LOCATION to Pusher's cdn before loading Flash resources.
-   *
-   * @see AbstractTransport.prototype.initialize
-   */
-  prototype.initialize = function() {
-    var self = this;
-
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
-    this.changeState("initializing");
-
-    if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
-      window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-    }
-    window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
-      "/WebSocketMain.swf";
-    Pusher.Dependencies.load("flashfallback", function() {
-      self.changeState("initialized");
-    });
-  };
-
-  /** @protected */
-  prototype.createSocket = function(url) {
-    return new FlashWebSocket(url);
-  };
-
-  /** @protected */
-  prototype.getQueryString = function() {
-    return Pusher.AbstractTransport.prototype.getQueryString.call(this) +
-      "&flash=true";
-  };
-
-  Pusher.FlashTransport = FlashTransport;
+  Pusher.Transport = Transport;
 }).call(this);
 
-;(function() {
-  /** Fallback transport using SockJS.
-   *
-   * @see AbstractTransport
-   */
-  function SockJSTransport(name, priority, key, options) {
-    Pusher.AbstractTransport.call(this, name, priority, key, options);
-    this.options.ignoreNullOrigin = options.ignoreNullOrigin;
-  }
-  var prototype = SockJSTransport.prototype;
-  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
-
-  /** Creates a new instance of SockJSTransport.
-   *
-   * @param  {String} key
-   * @param  {Object} options
-   * @return {SockJSTransport}
-   */
-  SockJSTransport.createConnection = function(name, priority, key, options) {
-    return new SockJSTransport(name, priority, key, options);
-  };
-
-  /** Assumes that SockJS is always supported.
-   *
-   * @returns {Boolean} always true
-   */
-  SockJSTransport.isSupported = function() {
-    return true;
-  };
-
-  /** Fetches sockjs dependency if needed.
-   *
-   * @see AbstractTransport.prototype.initialize
-   */
-  prototype.initialize = function() {
-    var self = this;
-
-    this.timeline.info(this.buildTimelineMessage({
-      transport: this.name + (this.options.encrypted ? "s" : "")
-    }));
-    this.timeline.debug(this.buildTimelineMessage({ method: "initialize" }));
-
-    this.changeState("initializing");
-    Pusher.Dependencies.load("sockjs", function() {
-      self.changeState("initialized");
-    });
-  };
-
-  /** Always returns true, since SockJS handles ping on its own.
-   *
-   * @returns {Boolean} always true
-   */
-  prototype.supportsPing = function() {
-    return true;
-  };
-
-  /** @protected */
-  prototype.createSocket = function(url) {
-    return new SockJS(url, null, {
-      js_path: Pusher.Dependencies.getPath("sockjs", {
-        encrypted: this.options.encrypted
-      }),
-      ignore_null_origin: this.options.ignoreNullOrigin
-    });
-  };
-
-  /** @protected */
-  prototype.getScheme = function() {
-    return this.options.encrypted ? "https" : "http";
-  };
-
-  /** @protected */
-  prototype.getPath = function() {
-    return this.options.httpPath || "/pusher";
-  };
-
-  /** @protected */
-  prototype.getQueryString = function() {
-    return "";
-  };
-
-  /** Handles opening a SockJS connection to Pusher.
-   *
-   * Since SockJS does not handle custom paths, we send it immediately after
-   * establishing the connection.
-   *
-   * @protected
-   */
-  prototype.onOpen = function() {
-    this.socket.send(JSON.stringify({
-      path: Pusher.AbstractTransport.prototype.getPath.call(this) +
-        Pusher.AbstractTransport.prototype.getQueryString.call(this)
-    }));
-    this.changeState("open");
-    this.socket.onopen = undefined;
-  };
-
-  Pusher.SockJSTransport = SockJSTransport;
-}).call(this);
-
-;(function() {
+(function() {
   /** WebSocket transport.
    *
-   * @see AbstractTransport
+   * Uses native WebSocket implementation, including MozWebSocket supported by
+   * earlier Firefox versions.
    */
-  function WSTransport(name, priority, key, options) {
-    Pusher.AbstractTransport.call(this, name, priority, key, options);
-  }
-  var prototype = WSTransport.prototype;
-  Pusher.Util.extend(prototype, Pusher.AbstractTransport.prototype);
+  Pusher.WSTransport = new Pusher.Transport({
+    urls: Pusher.URLSchemes.ws,
+    handlesActivityChecks: false,
+    supportsPing: false,
 
-  /** Creates a new instance of WSTransport.
-   *
-   * @param  {String} key
-   * @param  {Object} options
-   * @return {WSTransport}
-   */
-  WSTransport.createConnection = function(name, priority, key, options) {
-    return new WSTransport(name, priority, key, options);
+    isInitialized: function() {
+      return Boolean(window.WebSocket || window.MozWebSocket);
+    },
+    isSupported: function() {
+      return Boolean(window.WebSocket || window.MozWebSocket);
+    },
+    getSocket: function(url) {
+      var Constructor = window.WebSocket || window.MozWebSocket;
+      return new Constructor(url);
+    }
+  });
+
+  /** Flash transport using the WebSocket protocol. */
+  Pusher.FlashTransport = new Pusher.Transport({
+    file: "flashfallback",
+    urls: Pusher.URLSchemes.flash,
+    handlesActivityChecks: false,
+    supportsPing: false,
+
+    isSupported: function() {
+      try {
+        return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
+      } catch (e1) {
+        try {
+          var nav = Pusher.Util.getNavigator();
+          return Boolean(
+            nav &&
+            nav.mimeTypes &&
+            nav.mimeTypes["application/x-shockwave-flash"] !== undefined
+          );
+        } catch (e2) {
+          return false;
+        }
+      }
+    },
+    beforeInitialize: function() {
+      if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
+        window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
+      }
+      window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
+        "/WebSocketMain.swf";
+    },
+    isInitialized: function() {
+      return window.FlashWebSocket !== undefined;
+    },
+    getSocket: function(url) {
+      return new FlashWebSocket(url);
+    }
+  });
+
+  /** SockJS transport. */
+  Pusher.SockJSTransport = new Pusher.Transport({
+    file: "sockjs",
+    urls: Pusher.URLSchemes.sockjs,
+    handlesActivityChecks: true,
+    supportsPing: false,
+
+    isSupported: function() {
+      return true;
+    },
+    isInitialized: function() {
+      return window.SockJS !== undefined;
+    },
+    getSocket: function(url, options) {
+      return new SockJS(url, null, {
+        js_path: Pusher.Dependencies.getPath("sockjs", {
+          encrypted: options.encrypted
+        }),
+        ignore_null_origin: options.ignoreNullOrigin
+      });
+    },
+    beforeOpen: function(socket, path) {
+      socket.send(JSON.stringify({
+        path: path
+      }));
+    }
+  });
+
+  var httpConfiguration = {
+    urls: Pusher.URLSchemes.http,
+    handlesActivityChecks: false,
+    supportsPing: true,
+    isInitialized: function() {
+      return Boolean(Pusher.HTTP.Socket);
+    }
   };
 
-  /** Checks whether the browser supports WebSockets in any form.
-   *
-   * @returns {Boolean} true if browser supports WebSockets
-   */
-  WSTransport.isSupported = function() {
-    return window.WebSocket !== undefined || window.MozWebSocket !== undefined;
+  var streamingConfiguration = Pusher.Util.extend(
+    { getSocket: function(url) {
+        return Pusher.HTTP.getStreamingSocket(url);
+      }
+    },
+    httpConfiguration
+  );
+  var pollingConfiguration = Pusher.Util.extend(
+    { getSocket: function(url) {
+        return Pusher.HTTP.getPollingSocket(url);
+      }
+    },
+    httpConfiguration
+  );
+
+  var xhrConfiguration = {
+    file: "xhr",
+    isSupported: Pusher.Util.isXHRSupported
+  };
+  var xdrConfiguration = {
+    file: "xdr",
+    isSupported: function(environment) {
+      return Pusher.Util.isXDRSupported(environment.encrypted);
+    }
   };
 
-  /** @protected */
-  prototype.createSocket = function(url) {
-    var constructor = window.WebSocket || window.MozWebSocket;
-    return new constructor(url);
-  };
-
-  /** @protected */
-  prototype.getQueryString = function() {
-    return Pusher.AbstractTransport.prototype.getQueryString.call(this) +
-      "&flash=false";
-  };
-
-  Pusher.WSTransport = WSTransport;
+  /** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
+  Pusher.XHRStreamingTransport = new Pusher.Transport(
+    Pusher.Util.extend({}, streamingConfiguration, xhrConfiguration)
+  );
+  /** HTTP streaming transport using XDomainRequest (IE 8,9). */
+  Pusher.XDRStreamingTransport = new Pusher.Transport(
+    Pusher.Util.extend({}, streamingConfiguration, xdrConfiguration)
+  );
+  /** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
+  Pusher.XHRPollingTransport = new Pusher.Transport(
+    Pusher.Util.extend({}, pollingConfiguration, xhrConfiguration)
+  );
+  /** HTTP long-polling transport using XDomainRequest (IE 8,9). */
+  Pusher.XDRPollingTransport = new Pusher.Transport(
+    Pusher.Util.extend({}, pollingConfiguration, xdrConfiguration)
+  );
 }).call(this);
 
 ;(function() {
+  /** Creates transport connections monitored by a transport manager.
+   *
+   * When a transport is closed, it might mean the environment does not support
+   * it. It's possible that messages get stuck in an intermediate buffer or
+   * proxies terminate inactive connections. To combat these problems,
+   * assistants monitor the connection lifetime, report unclean exits and
+   * adjust ping timeouts to keep the connection active. The decision to disable
+   * a transport is the manager's responsibility.
+   *
+   * @param {TransportManager} manager
+   * @param {TransportConnection} transport
+   * @param {Object} options
+   */
   function AssistantToTheTransportManager(manager, transport, options) {
     this.manager = manager;
     this.transport = transport;
@@ -2281,10 +2481,20 @@
   }
   var prototype = AssistantToTheTransportManager.prototype;
 
+  /** Creates a transport connection.
+   *
+   * This function has the same API as Transport#createConnection.
+   *
+   * @param {String} name
+   * @param {Number} priority
+   * @param {String} key the application key
+   * @param {Object} options
+   * @returns {TransportConnection}
+   */
   prototype.createConnection = function(name, priority, key, options) {
     var self = this;
 
-    var options = Pusher.Util.extend({}, options, {
+    options = Pusher.Util.extend({}, options, {
       activityTimeout: self.pingDelay
     });
     var connection = self.transport.createConnection(
@@ -2318,20 +2528,42 @@
     return connection;
   };
 
-  prototype.isSupported = function() {
-    return this.manager.isAlive() && this.transport.isSupported();
+  /** Returns whether the transport is supported in the environment.
+   *
+   * This function has the same API as Transport#isSupported. Might return false
+   * when the manager decides to kill the transport.
+   *
+   * @param {Object} environment the environment details (encryption, settings)
+   * @returns {Boolean} true when the transport is supported
+   */
+  prototype.isSupported = function(environment) {
+    return this.manager.isAlive() && this.transport.isSupported(environment);
   };
 
   Pusher.AssistantToTheTransportManager = AssistantToTheTransportManager;
 }).call(this);
 
 ;(function() {
+  /** Keeps track of the number of lives left for a transport.
+   *
+   * In the beginning of a session, transports may be assigned a number of
+   * lives. When an AssistantToTheTransportManager instance reports a transport
+   * connection closed uncleanly, the transport loses a life. When the number
+   * of lives drops to zero, the transport gets disabled by its manager.
+   *
+   * @param {Object} options
+   */
   function TransportManager(options) {
     this.options = options || {};
     this.livesLeft = this.options.lives || Infinity;
   }
   var prototype = TransportManager.prototype;
 
+  /** Creates a assistant for the transport.
+   *
+   * @param {Transport} transport
+   * @returns {AssistantToTheTransportManager}
+   */
   prototype.getAssistant = function(transport) {
     return new Pusher.AssistantToTheTransportManager(this, transport, {
       minPingDelay: this.options.minPingDelay,
@@ -2339,10 +2571,15 @@
     });
   };
 
+  /** Returns whether the transport has any lives left.
+   *
+   * @returns {Boolean}
+   */
   prototype.isAlive = function() {
     return this.livesLeft > 0;
   };
 
+  /** Takes one life from the transport. */
   prototype.reportDeath = function() {
     this.livesLeft -= 1;
   };
@@ -2367,7 +2604,11 @@
   var transports = {
     ws: Pusher.WSTransport,
     flash: Pusher.FlashTransport,
-    sockjs: Pusher.SockJSTransport
+    sockjs: Pusher.SockJSTransport,
+    xhr_streaming: Pusher.XHRStreamingTransport,
+    xdr_streaming: Pusher.XDRStreamingTransport,
+    xhr_polling: Pusher.XHRPollingTransport,
+    xdr_polling: Pusher.XDRPollingTransport
   };
 
   var UnsupportedStrategy = {
@@ -2396,6 +2637,10 @@
   }
 
   var globalContext = {
+    extend: function(context, first, second) {
+      return [Pusher.Util.extend({}, first, second), context];
+    },
+
     def: function(context, name, value) {
       if (context[name] !== undefined) {
         throw "Redefining symbol " + name;
@@ -2718,12 +2963,12 @@
   var prototype = Connection.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  /** Returns whether used transport handles ping/pong by itself
+  /** Returns whether used transport handles activity checks by itself
    *
-   * @returns {Boolean} true if ping is handled by the transport
+   * @returns {Boolean} true if activity checks are handled by the transport
    */
-  prototype.supportsPing = function() {
-    return this.transport.supportsPing();
+  prototype.handlesActivityChecks = function() {
+    return this.transport.handlesActivityChecks();
   };
 
   /** Sends raw data.
@@ -2750,6 +2995,19 @@
     return this.send(Pusher.Protocol.encodeMessage(message));
   };
 
+  /** Sends a ping message to the server.
+   *
+   * Basing on the underlying transport, it might send either transport's
+   * protocol-specific ping or pusher:ping event.
+   */
+  prototype.ping = function() {
+    if (this.transport.supportsPing()) {
+      this.transport.ping();
+    } else {
+      this.send_event('pusher:ping', {});
+    }
+  };
+
   /** Closes the connection. */
   prototype.close = function() {
     this.transport.close();
@@ -2759,58 +3017,63 @@
   prototype.bindListeners = function() {
     var self = this;
 
-    var onMessage = function(m) {
-      var message;
-      try {
-        message = Pusher.Protocol.decodeMessage(m);
-      } catch(e) {
-        self.emit('error', {
-          type: 'MessageParseError',
-          error: e,
-          data: m.data
-        });
-      }
-
-      if (message !== undefined) {
-        Pusher.debug('Event recd', message);
-
-        switch (message.event) {
-          case 'pusher:error':
-            self.emit('error', { type: 'PusherError', data: message.data });
-            break;
-          case 'pusher:ping':
-            self.emit("ping");
-            break;
-          case 'pusher:pong':
-            self.emit("pong");
-            break;
+    var listeners = {
+      message: function(m) {
+        var message;
+        try {
+          message = Pusher.Protocol.decodeMessage(m);
+        } catch(e) {
+          self.emit('error', {
+            type: 'MessageParseError',
+            error: e,
+            data: m.data
+          });
         }
-        self.emit('message', message);
-      }
-    };
-    var onError = function(error) {
-      self.emit("error", { type: "WebSocketError", error: error });
-    };
-    var onClosed = function(closeEvent) {
-      unbindListeners();
 
-      if (closeEvent && closeEvent.code) {
-        self.handleCloseEvent(closeEvent);
-      }
+        if (message !== undefined) {
+          Pusher.debug('Event recd', message);
 
-      self.transport = null;
-      self.emit("closed");
+          switch (message.event) {
+            case 'pusher:error':
+              self.emit('error', { type: 'PusherError', data: message.data });
+              break;
+            case 'pusher:ping':
+              self.emit("ping");
+              break;
+            case 'pusher:pong':
+              self.emit("pong");
+              break;
+          }
+          self.emit('message', message);
+        }
+      },
+      activity: function() {
+        self.emit("activity");
+      },
+      error: function(error) {
+        self.emit("error", { type: "WebSocketError", error: error });
+      },
+      closed: function(closeEvent) {
+        unbindListeners();
+
+        if (closeEvent && closeEvent.code) {
+          self.handleCloseEvent(closeEvent);
+        }
+
+        self.transport = null;
+        self.emit("closed");
+      }
     };
 
     var unbindListeners = function() {
-      self.transport.unbind("closed", onClosed);
-      self.transport.unbind("error", onError);
-      self.transport.unbind("message", onMessage);
+      Pusher.Util.objectApply(listeners, function(listener, event) {
+        self.transport.unbind(event, listener);
+      });
     };
 
-    self.transport.bind("message", onMessage);
-    self.transport.bind("error", onError);
-    self.transport.bind("closed", onClosed);
+    Pusher.Util.objectApply(listeners, function(listener, event) {
+      self.transport.bind(event, listener);
+    });
   };
 
   /** @private */
@@ -3117,7 +3380,7 @@
   prototype.sendActivityCheck = function() {
     var self = this;
     self.stopActivityCheck();
-    self.send_event('pusher:ping', {});
+    self.connection.ping();
     // wait for pong response
     self.activityTimer = new Pusher.Timer(
       self.options.pongTimeout,
@@ -3133,7 +3396,7 @@
     var self = this;
     self.stopActivityCheck();
     // send ping after inactivity
-    if (!self.connection.supportsPing()) {
+    if (!self.connection.handlesActivityChecks()) {
       self.activityTimer = new Pusher.Timer(self.activityTimeout, function() {
         self.sendActivityCheck();
       });
@@ -3158,6 +3421,9 @@
       },
       ping: function() {
         self.send_event('pusher:pong', {});
+      },
+      activity: function() {
+        self.resetActivityCheck();
       },
       error: function(error) {
         // just emit error to user - socket will already be closed by browser
@@ -3689,8 +3955,8 @@
       }
 
       xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4) {
-          if (xhr.status == 200) {
+        if (xhr.readyState === 4) {
+          if (xhr.status === 200) {
             var data, parsed = false;
 
             try {

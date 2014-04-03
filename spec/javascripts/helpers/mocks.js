@@ -1,5 +1,12 @@
 ;(function() {
   Pusher.Mocks = {
+    getScriptRequest: function() {
+      return {
+        send: jasmine.createSpy("send"),
+        cleanup: jasmine.createSpy("cleanup")
+      };
+    },
+
     getDocument: function() {
       return {
         location: {
@@ -25,8 +32,35 @@
       return {
         open: jasmine.createSpy("open"),
         send: jasmine.createSpy("send"),
+        abort: jasmine.createSpy("abort"),
         setRequestHeader: jasmine.createSpy("setRequestHeader")
       };
+    },
+
+    getWebSocket: function() {
+      return {
+        send: jasmine.createSpy("send"),
+        close: jasmine.createSpy("close")
+      };
+    },
+
+    getHTTPSocket: function() {
+      var socket = new Pusher.EventsDispatcher();
+      socket.close = jasmine.createSpy("close");
+      socket.sendRaw = jasmine.createSpy("sendRaw");
+      socket.onChunk = jasmine.createSpy("onChunk");
+      socket.onClose = jasmine.createSpy("onClose");
+      socket.reconnect = jasmine.createSpy("sendRaw");
+      return socket;
+    },
+
+    getHTTPRequest: function(method, url) {
+      var request = new Pusher.EventsDispatcher();
+      request.start = jasmine.createSpy("start");
+      request.close = jasmine.createSpy("close");
+      request.method = method;
+      request.url = url;
+      return request;
     },
 
     getDependencies: function() {
@@ -68,8 +102,10 @@
     getTransport: function() {
       var transport = new Pusher.EventsDispatcher();
 
+      transport.handlesActivityChecks = jasmine.createSpy("handlesActivityChecks")
+        .andReturn(false);
       transport.supportsPing = jasmine.createSpy("supportsPing")
-        .andReturn(true);
+        .andReturn(false);
       transport.initialize = jasmine.createSpy("initialize")
         .andCallFake(function() {
           transport.state = "initializing";
@@ -78,7 +114,7 @@
       transport.connect = jasmine.createSpy("connect");
       transport.send = jasmine.createSpy("send")
         .andReturn(true);
-      transport.requestPing = jasmine.createSpy("requestPing");
+      transport.ping = jasmine.createSpy("ping");
       transport.close = jasmine.createSpy("close");
       transport.state = undefined;
 
@@ -155,9 +191,13 @@
 
       connection.initialize = jasmine.createSpy("initialize");
       connection.connect = jasmine.createSpy("connect");
+      connection.handlesActivityChecks = jasmine.createSpy("handlesActivityChecks")
+        .andReturn(false);
       connection.supportsPing = jasmine.createSpy("supportsPing")
         .andReturn(false);
       connection.send = jasmine.createSpy("send")
+        .andReturn(true);
+      connection.ping = jasmine.createSpy("ping")
         .andReturn(true);
       connection.send_event = jasmine.createSpy("send_event")
         .andReturn(true);

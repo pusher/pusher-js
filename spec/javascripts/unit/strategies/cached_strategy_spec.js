@@ -178,7 +178,8 @@ describe("CachedStrategy", function() {
           strategy.connect(0, callback);
           expect(timeline.info).toHaveBeenCalledWith({
             cached: true,
-            transport: "test"
+            transport: "test",
+            latency: 1000
           });
         });
 
@@ -231,15 +232,15 @@ describe("CachedStrategy", function() {
           });
         });
 
-        describe("after double the cached latency", function() {
+        describe("after double the cached latency + 1s", function() {
           beforeEach(function() {
             startTimestamp = Pusher.Util.now();
             spyOn(Pusher.Util, "now").andReturn(startTimestamp);
 
             strategy.connect(0, callback);
 
-            Pusher.Util.now.andReturn(startTimestamp + 4001);
-            jasmine.Clock.tick(4001);
+            Pusher.Util.now.andReturn(startTimestamp + 3000);
+            jasmine.Clock.tick(3000);
           });
 
           it("should abort the cached strategy", function() {

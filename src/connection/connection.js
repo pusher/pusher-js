@@ -26,12 +26,12 @@
   var prototype = Connection.prototype;
   Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
 
-  /** Returns whether used transport handles ping/pong by itself
+  /** Returns whether used transport handles activity checks by itself
    *
-   * @returns {Boolean} true if ping is handled by the transport
+   * @returns {Boolean} true if activity checks are handled by the transport
    */
-  prototype.supportsPing = function() {
-    return this.transport.supportsPing();
+  prototype.handlesActivityChecks = function() {
+    return this.transport.handlesActivityChecks();
   };
 
   /** Sends raw data.
@@ -58,6 +58,19 @@
     return this.send(Pusher.Protocol.encodeMessage(message));
   };
 
+  /** Sends a ping message to the server.
+   *
+   * Basing on the underlying transport, it might send either transport's
+   * protocol-specific ping or pusher:ping event.
+   */
+  prototype.ping = function() {
+    if (this.transport.supportsPing()) {
+      this.transport.ping();
+    } else {
+      this.send_event('pusher:ping', {});
+    }
+  };
+
   /** Closes the connection. */
   prototype.close = function() {
     this.transport.close();
@@ -67,58 +80,63 @@
   prototype.bindListeners = function() {
     var self = this;
 
-    var onMessage = function(m) {
-      var message;
-      try {
-        message = Pusher.Protocol.decodeMessage(m);
-      } catch(e) {
-        self.emit('error', {
-          type: 'MessageParseError',
-          error: e,
-          data: m.data
-        });
-      }
-
-      if (message !== undefined) {
-        Pusher.debug('Event recd', message);
-
-        switch (message.event) {
-          case 'pusher:error':
-            self.emit('error', { type: 'PusherError', data: message.data });
-            break;
-          case 'pusher:ping':
-            self.emit("ping");
-            break;
-          case 'pusher:pong':
-            self.emit("pong");
-            break;
+    var listeners = {
+      message: function(m) {
+        var message;
+        try {
+          message = Pusher.Protocol.decodeMessage(m);
+        } catch(e) {
+          self.emit('error', {
+            type: 'MessageParseError',
+            error: e,
+            data: m.data
+          });
         }
-        self.emit('message', message);
-      }
-    };
-    var onError = function(error) {
-      self.emit("error", { type: "WebSocketError", error: error });
-    };
-    var onClosed = function(closeEvent) {
-      unbindListeners();
 
-      if (closeEvent && closeEvent.code) {
-        self.handleCloseEvent(closeEvent);
-      }
+        if (message !== undefined) {
+          Pusher.debug('Event recd', message);
 
-      self.transport = null;
-      self.emit("closed");
+          switch (message.event) {
+            case 'pusher:error':
+              self.emit('error', { type: 'PusherError', data: message.data });
+              break;
+            case 'pusher:ping':
+              self.emit("ping");
+              break;
+            case 'pusher:pong':
+              self.emit("pong");
+              break;
+          }
+          self.emit('message', message);
+        }
+      },
+      activity: function() {
+        self.emit("activity");
+      },
+      error: function(error) {
+        self.emit("error", { type: "WebSocketError", error: error });
+      },
+      closed: function(closeEvent) {
+        unbindListeners();
+
+        if (closeEvent && closeEvent.code) {
+          self.handleCloseEvent(closeEvent);
+        }
+
+        self.transport = null;
+        self.emit("closed");
+      }
     };
 
     var unbindListeners = function() {
-      self.transport.unbind("closed", onClosed);
-      self.transport.unbind("error", onError);
-      self.transport.unbind("message", onMessage);
+      Pusher.Util.objectApply(listeners, function(listener, event) {
+        self.transport.unbind(event, listener);
+      });
     };
 
-    self.transport.bind("message", onMessage);
-    self.transport.bind("error", onError);
-    self.transport.bind("closed", onClosed);
+    Pusher.Util.objectApply(listeners, function(listener, event) {
+      self.transport.bind(event, listener);
+    });
   };
 
   /** @private */

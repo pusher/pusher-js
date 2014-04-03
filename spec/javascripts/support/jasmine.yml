@@ -3,21 +3,29 @@ src_dir: src
 src_files:
   - pusher.js
 
-  - utils/timer.js
-  - utils/periodic_timer.js
+  - utils/timers.js
 
   - util.js
   - defaults.js
   - config.js
   - errors.js
+  - events_dispatcher.js
+
+  - dom/script_receiver_factory.js
+  - dom/script_request.js
+
   - dependency_loader.js
   - dependencies.js
-  - events_dispatcher.js
-  - net_info.js
+
+  - http/http_request.js
+  - http/http_xhr_request.js
+  - http/http_xdomain_request.js
+  - http/http_socket.js
+  - http/http_streaming_socket.js
+  - http/http_polling_socket.js
 
   - base64.js
   - jsonp/jsonp_request.js
-  - jsonp/jsonp_receiver.js
 
   - timeline/timeline.js
   - timeline/timeline_sender.js
@@ -30,10 +38,10 @@ src_files:
   - strategies/sequential_strategy.js
   - strategies/transport_strategy.js
 
-  - transports/abstract_transport.js
-  - transports/flash_transport.js
-  - transports/sockjs_transport.js
-  - transports/ws_transport.js
+  - transports/url_schemes.js
+  - transports/transport_connection.js
+  - transports/transport.js
+  - transports/transports.js
 
   - transports/assistant_to_the_transport_manager.js
   - transports/transport_manager.js
@@ -44,6 +52,8 @@ src_files:
   - connection/connection.js
   - connection/handshake.js
   - connection/connection_manager.js
+
+  - net_info.js
 
   - channels/members.js
   - channels/channel.js

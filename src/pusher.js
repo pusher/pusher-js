@@ -17,6 +17,7 @@
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
     this.timeline = new Pusher.Timeline(this.key, this.sessionID, {
+      cluster: this.config.cluster,
       features: Pusher.Util.getClientFeatures(),
       params: this.config.timelineParams || {},
       limit: 50,
@@ -26,14 +27,14 @@
     if (!this.config.disableStats) {
       this.timelineSender = new Pusher.TimelineSender(this.timeline, {
         host: this.config.statsHost,
-        path: "/timeline"
+        path: "/timeline/v2/jsonp"
       });
     }
 
     var getStrategy = function(options) {
+      var config = Pusher.Util.extend({}, self.config, options);
       return Pusher.StrategyBuilder.build(
-        Pusher.getDefaultStrategy(self.config),
-        Pusher.Util.extend({}, self.config, options)
+        Pusher.getDefaultStrategy(config), config
       );
     };
 
@@ -80,7 +81,9 @@
     Pusher.instances.push(this);
     this.timeline.info({ instances: Pusher.instances.length });
 
-    if (Pusher.isReady) self.connect();
+    if (Pusher.isReady) {
+      self.connect();
+    }
   }
   var prototype = Pusher.prototype;
 
@@ -187,7 +190,7 @@
   };
 
   prototype.isEncrypted = function() {
-    if (Pusher.Util.getDocumentLocation().protocol === "https:") {
+    if (Pusher.Util.getDocument().location.protocol === "https:") {
       return true;
     } else {
       return Boolean(this.config.encrypted);
@@ -201,6 +204,8 @@
       );
     }
   }
+
+  Pusher.HTTP = {};
 
   this.Pusher = Pusher;
 }).call(this);

@@ -79,7 +79,7 @@ describe("AJAX Authorizer", function() {
       { authTransport: "ajax" }
     );
 
-    var data = { foo: "bar", number: 1}
+    var data = { foo: "bar", number: 1};
     var dataJSON = JSON.stringify(data);
 
     var callback = jasmine.createSpy("callback");

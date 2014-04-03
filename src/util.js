@@ -129,9 +129,9 @@
      * @param {Array} array
      * @param {Function} f
      */
-    apply: function(array, f) {
+    apply: function(array, f, context) {
       for (var i = 0; i < array.length; i++) {
-        f(array[i], i, array);
+        f.call(context || window, array[i], i, array);
       }
     },
 
@@ -283,12 +283,16 @@
       };
     },
 
+    getWindow: function() {
+      return window;
+    },
+
     getDocument: function() {
       return document;
     },
 
-    getDocumentLocation: function() {
-      return Pusher.Util.getDocument().location;
+    getNavigator: function() {
+      return navigator;
     },
 
     getLocalStorage: function() {
@@ -303,9 +307,38 @@
       return Pusher.Util.keys(
         Pusher.Util.filterObject(
           { "ws": Pusher.WSTransport, "flash": Pusher.FlashTransport },
-          function (t) { return t.isSupported(); }
+          function (t) { return t.isSupported({}); }
         )
       );
+    },
+
+    addWindowListener: function(event, listener) {
+      var _window = Pusher.Util.getWindow();
+      if (_window.addEventListener !== undefined) {
+        _window.addEventListener(event, listener, false);
+      } else {
+        _window.attachEvent("on" + event, listener);
+      }
+    },
+
+    removeWindowListener: function(event, listener) {
+      var _window = Pusher.Util.getWindow();
+      if (_window.addEventListener !== undefined) {
+        _window.removeEventListener(event, listener, false);
+      } else {
+        _window.detachEvent("on" + event, listener);
+      }
+    },
+
+    isXHRSupported: function() {
+      var XHR = window.XMLHttpRequest;
+      return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
+    },
+
+    isXDRSupported: function(encrypted) {
+      var protocol = encrypted ? "https:" : "http:";
+      var documentProtocol = Pusher.Util.getDocument().location.protocol;
+      return Boolean(window.XDomainRequest) && documentProtocol === protocol;
     }
   };
 }).call(this);

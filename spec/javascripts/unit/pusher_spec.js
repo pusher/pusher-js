@@ -22,8 +22,10 @@ describe("Pusher", function() {
     spyOn(Pusher, "Channel").andCallFake(function(name, _) {
       return Pusher.Mocks.getChannel(name);
     });
-    spyOn(Pusher.Util, "getDocumentLocation").andReturn({
-      protocol: "http:"
+    spyOn(Pusher.Util, "getDocument").andReturn({
+      location: {
+        protocol: "http:"
+      }
     });
   });
 
@@ -35,19 +37,19 @@ describe("Pusher", function() {
   describe("app key validation", function() {
     it("should allow a hex key", function() {
       spyOn(Pusher, "warn");
-      new Pusher("1234567890abcdef");
+      var pusher = new Pusher("1234567890abcdef");
       expect(Pusher.warn).not.toHaveBeenCalled();
     });
 
     it("should warn on a null key", function() {
       spyOn(Pusher, "warn");
-      new Pusher(null);
+      var pusher = new Pusher(null);
       expect(Pusher.warn).toHaveBeenCalled();
     });
 
     it("should warn on an undefined key", function() {
       spyOn(Pusher, "warn");
-      new Pusher();
+      var pusher = new Pusher();
       expect(Pusher.warn).toHaveBeenCalled();
     });
   });
@@ -65,6 +67,14 @@ describe("Pusher", function() {
 
     it("should create a timeline with a session id", function() {
       expect(pusher.timeline.session).toEqual(pusher.sessionID);
+    });
+
+    it("should pass the cluster name to the timeline", function() {
+      var pusher = new Pusher("foo");
+      expect(pusher.timeline.options.cluster).toBe(undefined);
+
+      pusher = new Pusher("foo", { cluster: "spec" });
+      expect(pusher.timeline.options.cluster).toEqual("spec");
     });
 
     it("should pass a feature list to the timeline", function() {
@@ -105,8 +115,10 @@ describe("Pusher", function() {
       });
 
       it("should be on when using https", function() {
-        Pusher.Util.getDocumentLocation.andReturn({
-          protocol: "https:"
+        Pusher.Util.getDocument.andReturn({
+          location: {
+            protocol: "https:"
+          }
         });
         expect(pusher.isEncrypted()).toBe(true);
       });
@@ -189,8 +201,10 @@ describe("Pusher", function() {
       });
 
       it("should be encrypted when using HTTPS", function() {
-        Pusher.Util.getDocumentLocation.andReturn({
-          protocol: "https:"
+        Pusher.Util.getDocument.andReturn({
+          location: {
+            protocol: "https:"
+          }
         });
         var pusher = new Pusher("foo", { encrypted: true });
         expect(pusher.connection.options.encrypted).toBe(true);
@@ -395,7 +409,7 @@ describe("Pusher", function() {
     it("should be sent to stats.pusher.com by default", function() {
       expect(Pusher.TimelineSender.calls.length).toEqual(1);
       expect(Pusher.TimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "stats.pusher.com", path: "/timeline" }
+        pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/jsonp" }
       );
     });
 
@@ -404,7 +418,7 @@ describe("Pusher", function() {
         statsHost: "example.com"
       });
       expect(Pusher.TimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "example.com", path: "/timeline" }
+        pusher.timeline, { host: "example.com", path: "/timeline/v2/jsonp" }
       );
     });
 

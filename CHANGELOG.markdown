@@ -1,5 +1,51 @@
 # Changelog
 
+## 2.2.0 (2014-04-14)
+
+No changes since 2.2.0-rc3, just changed the version number.
+
+## 2.2.0-rc3 (2014-03-26)
+
+[NEW] Added third argument to the bind method on event emitters to allow binding of context to callbacks
+
+[CHANGED] Changed the primary WebSocket fallback to WSS instead of HTTP
+
+[FIXED] Exception when aborting timers, which caused infinite connection loop on IE8
+
+## 2.2.0-rc2 (2014-02-25)
+
+[NEW] Dependency loader will retry fetching additional resources if they fail to load
+
+[CHANGED] Refactored internals to reduce main file size by over 1KB
+
+[CHANGED] Improved heartbeat handling for HTTP transports
+
+[CHANGED] Removed wssHost and httpsHost options, reverted to a single domain regardless of encryption
+
+[CHANGED] Added extra 1s to the cached transport timeout
+
+[CHANGED] Updated the stats protocol
+
+[FIXED] MozWebSocket is not assigned to WebSocket anymore
+
+[FIXED] Socket listeners are always unbound after closing the connection
+
+## 2.2.0-rc1 (2014-01-14)
+
+[NEW] XHR streaming and polling transports were extracted from SockJS
+
+[NEW] Reduced the number of roundtrips required by HTTP streaming and polling transports for connecting from 3 to 1
+
+[NEW] Refactored the connection strategy to be faster and more reliable for clients using HTTP
+
+[NEW] Added new options - `wssHost` and `httpsHost` for encrypted connections
+
+[NEW] HTTP streaming and polling are now supported on Opera
+
+[CHANGED] Reduced the size of sockjs.js
+
+[FIXED] Issue with SockJS streaming not being able to reconnect
+
 ## 2.1.6 (2014-01-09)
 
 [NEW] Ping on offline events to detect disconnections quicker

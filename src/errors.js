@@ -1,20 +1,21 @@
 ;(function() {
   function buildExceptionClass(name) {
-    var klass = function(message) {
+    var constructor = function(message) {
       Error.call(this, message);
       this.name = name;
     };
-    Pusher.Util.extend(klass.prototype, Error.prototype);
+    Pusher.Util.extend(constructor.prototype, Error.prototype);
 
-    return klass;
+    return constructor;
   }
 
   /** Error classes used throughout pusher-js library. */
   Pusher.Errors = {
     BadEventName: buildExceptionClass("BadEventName"),
-    UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
-    UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy"),
+    RequestTimedOut: buildExceptionClass("RequestTimedOut"),
     TransportPriorityTooLow: buildExceptionClass("TransportPriorityTooLow"),
-    TransportClosed: buildExceptionClass("TransportClosed")
+    TransportClosed: buildExceptionClass("TransportClosed"),
+    UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
+    UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy")
   };
 }).call(this);

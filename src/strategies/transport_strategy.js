@@ -19,7 +19,9 @@
    * @returns {Boolean}
    */
   prototype.isSupported = function() {
-    return this.transport.isSupported();
+    return this.transport.isSupported({
+      encrypted: this.options.encrypted
+    });
   };
 
   /** Launches a connection attempt and returns a strategy runner.
