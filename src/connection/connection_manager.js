@@ -256,6 +256,7 @@
         self.emit("error", { type: "WebSocketError", error: error });
       },
       closed: function() {
+        self.stopActivityCheck();
         self.abandonConnection();
         if (self.shouldRetry()) {
           self.retryIn(1000);
