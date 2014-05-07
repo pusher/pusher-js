@@ -49,7 +49,7 @@
     });
     Pusher.Network.bind("offline", function() {
       self.timeline.info({ netinfo: "offline" });
-      if (self.state === "connected") {
+      if (self.connection) {
         self.sendActivityCheck();
       }
     });
