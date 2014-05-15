@@ -147,7 +147,6 @@
     this.abortConnecting();
     this.clearRetryTimer();
     this.clearUnavailableTimer();
-    this.stopActivityCheck();
     if (this.connection) {
       var connection = this.abandonConnection();
       connection.close();
@@ -256,7 +255,6 @@
         self.emit("error", { type: "WebSocketError", error: error });
       },
       closed: function() {
-        self.stopActivityCheck();
         self.abandonConnection();
         if (self.shouldRetry()) {
           self.retryIn(1000);
@@ -328,6 +326,7 @@
     if (!this.connection) {
       return;
     }
+    this.stopActivityCheck();
     for (var event in this.connectionCallbacks) {
       this.connection.unbind(event, this.connectionCallbacks[event]);
     }
