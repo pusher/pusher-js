@@ -276,7 +276,7 @@ describe("ConnectionManager", function() {
       handshake = {
         action: "connected",
         connection: connection,
-        activityTimeout: 999999
+        activityTimeout: 500
       };
       strategy._callback(null, handshake);
     });
@@ -371,8 +371,7 @@ describe("ConnectionManager", function() {
       it("should clean up the activity check", function() {
         jasmine.Clock.tick(10000);
         // if activity check had worked, it would have sent a ping message
-        expect(connection.send).not.toHaveBeenCalled();
-        expect(connection.send_event).not.toHaveBeenCalled();
+        expect(connection.ping).not.toHaveBeenCalled();
       });
     });
 
@@ -391,13 +390,13 @@ describe("ConnectionManager", function() {
 
     describe("on activity timeout", function() {
       it("should send a ping", function() {
-        jasmine.Clock.tick(3455);
+        jasmine.Clock.tick(499);
         expect(connection.ping).not.toHaveBeenCalled();
 
         jasmine.Clock.tick(1);
         expect(connection.ping).toHaveBeenCalled();
 
-        jasmine.Clock.tick(2344);
+        jasmine.Clock.tick(999);
         expect(connection.close).not.toHaveBeenCalled();
 
         connection.emit("activity");
@@ -407,7 +406,7 @@ describe("ConnectionManager", function() {
       });
 
       it("should close the connection after pong timeout", function() {
-        jasmine.Clock.tick(3456);
+        jasmine.Clock.tick(500);
         expect(connection.close).not.toHaveBeenCalled();
         jasmine.Clock.tick(2345);
         expect(connection.close).toHaveBeenCalled();
