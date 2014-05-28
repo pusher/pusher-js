@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1 (2014-05-28)
+
+[FIXED] Exception triggered by ping being sent when disconnected
+
 ## 2.2.0 (2014-04-14)
 
 No changes since 2.2.0-rc3, just changed the version number.

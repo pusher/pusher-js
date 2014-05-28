@@ -49,7 +49,7 @@
     });
     Pusher.Network.bind("offline", function() {
       self.timeline.info({ netinfo: "offline" });
-      if (self.state === "connected") {
+      if (self.connection) {
         self.sendActivityCheck();
       }
     });
@@ -147,7 +147,6 @@
     this.abortConnecting();
     this.clearRetryTimer();
     this.clearUnavailableTimer();
-    this.stopActivityCheck();
     if (this.connection) {
       var connection = this.abandonConnection();
       connection.close();
@@ -327,6 +326,7 @@
     if (!this.connection) {
       return;
     }
+    this.stopActivityCheck();
     for (var event in this.connectionCallbacks) {
       this.connection.unbind(event, this.connectionCallbacks[event]);
     }
