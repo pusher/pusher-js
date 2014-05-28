@@ -1,8 +1,8 @@
 /*!
- * Pusher JavaScript Library v2.2.0
- * http://pusherapp.com/
+ * Pusher JavaScript Library v2.2.1
+ * http://pusher.com/
  *
- * Copyright 2013, Pusher
+ * Copyright 2014, Pusher
  * Released under the MIT licence.
  */
 
@@ -626,7 +626,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.0';
+  Pusher.VERSION = '2.2.1';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -3223,7 +3223,7 @@
     });
     Pusher.Network.bind("offline", function() {
       self.timeline.info({ netinfo: "offline" });
-      if (self.state === "connected") {
+      if (self.connection) {
         self.sendActivityCheck();
       }
     });
@@ -3321,7 +3321,6 @@
     this.abortConnecting();
     this.clearRetryTimer();
     this.clearUnavailableTimer();
-    this.stopActivityCheck();
     if (this.connection) {
       var connection = this.abandonConnection();
       connection.close();
@@ -3501,6 +3500,7 @@
     if (!this.connection) {
       return;
     }
+    this.stopActivityCheck();
     for (var event in this.connectionCallbacks) {
       this.connection.unbind(event, this.connectionCallbacks[event]);
     }

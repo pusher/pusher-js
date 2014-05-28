@@ -1,8 +1,8 @@
 /*!
- * Pusher JavaScript Library v2.2.0
- * http://pusherapp.com/
+ * Pusher JavaScript Library v2.2.1
+ * http://pusher.com/
  *
- * Copyright 2013, Pusher
+ * Copyright 2014, Pusher
  * Released under the MIT licence.
  */
 
