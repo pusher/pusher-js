@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.2.1
+ * Pusher JavaScript Library v2.2.2
  * http://pusher.com/
  *
  * Copyright 2014, Pusher
@@ -626,7 +626,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.1';
+  Pusher.VERSION = '2.2.2';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -648,7 +648,7 @@
   Pusher.unavailable_timeout = 10000;
   // CDN configuration
   Pusher.cdn_http = 'http://js.pusher.com/';
-  Pusher.cdn_https = 'https://d3dy5gmtp8yhk7.cloudfront.net/';
+  Pusher.cdn_https = 'https://js.pusher.com/';
   Pusher.dependency_suffix = '';
 
   Pusher.getDefaultStrategy = function(config) {
