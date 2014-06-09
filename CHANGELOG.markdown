@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.2 (2014-06-09)
+
+[CHANGED] Updated the HTTPS CDN URL to `https://js.pusher.com`
+
 ## 2.2.1 (2014-05-28)
 
 [FIXED] Exception triggered by ping being sent when disconnected
