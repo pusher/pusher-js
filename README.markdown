@@ -203,6 +203,10 @@ Remove previously-bound handlers from an object. Only handlers that match all of
 
 It is possible to bind to all events at either the global or channel level by using the method `bind_all`. This is used for debugging, but may have other utilities.
 
+## Batching auth requests (aka multi-auth)
+
+Currently, pusher-js itself does not support authenticating multiple channels in one HTTP request. However, thanks to @dirkbonhomme you can use the [pusher-js-auth](https://github.com/dirkbonhomme/pusher-js-auth) plugin that buffers subscription requests and sends auth requests to your endpoint in batches.
+
 ## Default events
 
 There are a number of events which are used internally, but can also be of use elsewhere:
