@@ -51,7 +51,8 @@
       }]],
       [":def", "sockjs_options", {
         hostUnencrypted: config.httpHost + ":" + config.httpPort,
-        hostEncrypted: config.httpHost + ":" + config.httpsPort
+        hostEncrypted: config.httpHost + ":" + config.httpsPort,
+        httpPath: config.httpPath
       }],
       [":def", "timeouts", {
         loop: true,
