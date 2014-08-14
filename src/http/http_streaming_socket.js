@@ -7,7 +7,7 @@
       socket.sendRaw("[]");
     },
     sendHeartbeat: function(socket) {
-      socket.sendRaw("h");
+      socket.sendRaw("[]");
     },
     onFinished: function(socket, status) {
       socket.onClose(1006, "Connection interrupted (" + status + ")", false);

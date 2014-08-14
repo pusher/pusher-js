@@ -36,9 +36,9 @@ describe("HTTP.getStreamingSocket", function() {
       expect(socket.sendRaw.calls.length).toEqual(1);
     });
 
-    it("#sendHeartbeat should send an 'h' frame", function() {
+    it("#sendHeartbeat should send an '[]' frame", function() {
       hooks.sendHeartbeat(socket);
-      expect(socket.sendRaw).toHaveBeenCalledWith("h");
+      expect(socket.sendRaw).toHaveBeenCalledWith("[]");
       expect(socket.sendRaw.calls.length).toEqual(1);
     });
 

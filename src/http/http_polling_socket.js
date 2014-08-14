@@ -7,7 +7,7 @@
       // next HTTP request will reset server's activity timer
     },
     sendHeartbeat: function(socket) {
-      socket.sendRaw("h");
+      socket.sendRaw("[]");
     },
     onFinished: function(socket, status) {
       if (status === 200) {
