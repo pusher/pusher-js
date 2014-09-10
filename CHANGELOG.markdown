@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.2.3 (2014-09-10)
+
+[FIXED] Wrong encoding of HTTP heartbeats
+
+[FIXED] Missing httpPath parameter for sockjs transport
+
+[FIXED] Auth query strings no longer start with `&`
+
 ## 2.2.2 (2014-06-09)
 
 [CHANGED] Updated the HTTPS CDN URL to `https://js.pusher.com`
