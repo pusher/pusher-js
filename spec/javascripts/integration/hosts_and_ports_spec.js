@@ -208,5 +208,18 @@ describeIntegration("Host/Port Configuration", function() {
         }
       );
     });
+
+    it("should connect using httpPath when specified in options", function() {
+      pusher = new Pusher("foobar", { httpPath: "/test" });
+      pusher.connect();
+
+      expect(window.SockJS).toHaveBeenCalledWith(
+        "http://sockjs.pusher.com:80/test",
+        null,
+        { js_path: '<CDN_HTTP>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
+          ignore_null_origin: undefined
+        }
+      );
+    });
   });
 });
