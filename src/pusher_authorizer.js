@@ -9,7 +9,7 @@
 
   Pusher.Channel.Authorizer.prototype = {
     composeQuery: function(socketId) {
-      var query = '&socket_id=' + encodeURIComponent(socketId) +
+      var query = 'socket_id=' + encodeURIComponent(socketId) +
         '&channel_name=' + encodeURIComponent(this.channel.name);
 
       for(var i in this.authOptions.params) {
@@ -90,6 +90,7 @@
       script.src = this.options.authEndpoint +
         '?callback=' +
         encodeURIComponent(callback_name) +
+        '&' +
         this.composeQuery(socketId);
 
       var head = document.getElementsByTagName("head")[0] || document.documentElement;
