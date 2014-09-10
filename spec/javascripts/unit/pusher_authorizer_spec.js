@@ -4,7 +4,7 @@ describe("Authorizer", function() {
       var authorizer = new Pusher.Channel.Authorizer({ name: "chan" }, {});
 
       expect(authorizer.composeQuery("1.1"))
-        .toEqual("&socket_id=1.1&channel_name=chan");
+        .toEqual("socket_id=1.1&channel_name=chan");
     });
 
     it("should add query params specified in options object", function(test) {
@@ -17,7 +17,7 @@ describe("Authorizer", function() {
       );
 
       expect(authorizer.composeQuery("1.1"))
-        .toEqual("&socket_id=1.1&channel_name=chan&a=1&b=2");
+        .toEqual("socket_id=1.1&channel_name=chan&a=1&b=2");
     });
   });
 
@@ -69,7 +69,7 @@ describe("AJAX Authorizer", function() {
 
     expect(xhr.send.calls.length).toEqual(1);
     expect(xhr.send).toHaveBeenCalledWith(
-      "&socket_id=1.23&channel_name=chan&a=1&b=2"
+      "socket_id=1.23&channel_name=chan&a=1&b=2"
     );
   });
 
