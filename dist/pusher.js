@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.2.2
+ * Pusher JavaScript Library v2.2.3
  * http://pusher.com/
  *
  * Copyright 2014, Pusher
@@ -626,7 +626,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.2';
+  Pusher.VERSION = '2.2.3';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -678,7 +678,8 @@
       }]],
       [":def", "sockjs_options", {
         hostUnencrypted: config.httpHost + ":" + config.httpPort,
-        hostEncrypted: config.httpHost + ":" + config.httpsPort
+        hostEncrypted: config.httpHost + ":" + config.httpsPort,
+        httpPath: config.httpPath
       }],
       [":def", "timeouts", {
         loop: true,
@@ -3918,7 +3919,7 @@
 
   Pusher.Channel.Authorizer.prototype = {
     composeQuery: function(socketId) {
-      var query = '&socket_id=' + encodeURIComponent(socketId) +
+      var query = 'socket_id=' + encodeURIComponent(socketId) +
         '&channel_name=' + encodeURIComponent(this.channel.name);
 
       for(var i in this.authOptions.params) {
@@ -3999,6 +4000,7 @@
       script.src = this.options.authEndpoint +
         '?callback=' +
         encodeURIComponent(callback_name) +
+        '&' +
         this.composeQuery(socketId);
 
       var head = document.getElementsByTagName("head")[0] || document.documentElement;
