@@ -31,7 +31,9 @@
     ajax: function(socketId, callback){
       var self = this, xhr;
 
-      if (Pusher.XHR) {
+      if (Pusher.buildXHR) {
+        xhr = Pusher.buildXHR();
+      } else if (Pusher.XHR) {
         xhr = new Pusher.XHR();
       } else {
         xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
