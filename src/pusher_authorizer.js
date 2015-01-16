@@ -41,6 +41,9 @@
 
       // add request headers
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      if (self.options.csrf) {
+          xhr.setRequestHeader('X-CSRF-Token', self.options.csrf);
+      }
       for(var headerName in this.authOptions.headers) {
         xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
       }
