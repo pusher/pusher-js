@@ -8,7 +8,6 @@ module.exports = function(config) {
       .concat(require(__dirname + "/../files/integration_tests")),
     exclude: [
       'src/sockjs/**/*',
-      'src/web-socket-js/**/*'
     ],
 
     preprocessors: {

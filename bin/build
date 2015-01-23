@@ -1,16 +1,6 @@
 #!/bin/bash
 
-cd src/web-socket-js
-rm WebSocketMain.swf WebSocketMainInsecure.swf WebSocketMainInsecure.zip
-cd -
-
-git submodule update
-cd src/web-socket-js/flash-src
-./build.sh
-cd ..
-unzip WebSocketMainInsecure.zip
-
-cd ../sockjs
+pushd src/sockjs
 make
-cd ../..
+popd
 bundle exec jbundle

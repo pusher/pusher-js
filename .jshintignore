@@ -1,4 +1,3 @@
 src/base64.js
 src/json2.js
 src/sockjs/**
-src/web-socket-js/**

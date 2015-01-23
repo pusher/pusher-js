@@ -67,12 +67,6 @@ bundle 'pusher.js' do
   file 'pusher_authorizer.js'
 end
 
-bundle 'flashfallback.js' do
-  license 'web-socket-js-licence.js'
-  file 'web-socket-js/swfobject.js'
-  file 'web-socket-js/web_socket.js'
-end
-
 bundle 'sockjs.js' do
   license 'sockjs-licence.js'
   file 'sockjs/sockjs.js'
@@ -97,9 +91,6 @@ bundle 'xdr.js' do
 end
 
 file 'json2.js'
-
-# Just copy this file across
-file 'web-socket-js/WebSocketMainInsecure.swf' => 'WebSocketMain.swf'
 
 # Runs for every bundle and license source.
 filter do |src, config|

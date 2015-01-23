@@ -1,6 +1,3 @@
-[submodule "src/web-socket-js"]
-	path = src/web-socket-js
-	url = git://github.com/pusher/web-socket-js.git
 [submodule "src/sockjs"]
 	path = src/sockjs
 	url = git://github.com/pusher/sockjs-client.git

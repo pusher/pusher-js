@@ -7,7 +7,7 @@ describeIntegration("JSONP", function() {
     runs(function() {
       var request = new Pusher.JSONPRequest(url, {
         "session": 2289545,
-        "features": ["ws", "flash", "sockjs"],
+        "features": ["ws", "sockjs"],
         "version": "1.13.0",
         "t0": 1355850357911,
         "timeline": [
@@ -31,7 +31,7 @@ describeIntegration("JSONP", function() {
       expect(callback.calls.length).toEqual(1);
       expect(callback).toHaveBeenCalledWith(null, {
         "session": "2289545",
-        "features": ["ws", "flash", "sockjs"],
+        "features": ["ws", "sockjs"],
         "version": "1.13.0",
         "t0": "1355850357911",
         "timeline": [

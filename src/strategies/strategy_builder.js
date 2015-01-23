@@ -14,7 +14,6 @@
 
   var transports = {
     ws: Pusher.WSTransport,
-    flash: Pusher.FlashTransport,
     sockjs: Pusher.SockJSTransport,
     xhr_streaming: Pusher.XHRStreamingTransport,
     xdr_streaming: Pusher.XDRStreamingTransport,
@@ -70,8 +69,7 @@
         (!context.enabledTransports ||
           Pusher.Util.arrayIndexOf(context.enabledTransports, name) !== -1) &&
         (!context.disabledTransports ||
-          Pusher.Util.arrayIndexOf(context.disabledTransports, name) === -1) &&
-        (name !== "flash" || context.disableFlash !== true);
+          Pusher.Util.arrayIndexOf(context.disabledTransports, name) === -1);
 
       var transport;
       if (enabled) {

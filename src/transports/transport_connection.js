@@ -71,10 +71,6 @@
       transport: self.name + (self.options.encrypted ? "s" : "")
     }));
 
-    if (self.hooks.beforeInitialize) {
-      self.hooks.beforeInitialize.call(self);
-    }
-
     if (self.hooks.isInitialized()) {
       self.changeState("initialized");
     } else if (self.hooks.file) {

@@ -23,12 +23,6 @@
         return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
       }
     },
-    /** URL scheme for Flash. Same as WebSocket, but with a flash parameter. */
-    flash: {
-      getInitial: function(key, params) {
-        return getGenericURL("ws", params, getGenericPath(key, "flash=true"));
-      }
-    },
     /** SockJS URL scheme. Supplies the path separately from the initial URL. */
     sockjs: {
       getInitial: function(key, params) {

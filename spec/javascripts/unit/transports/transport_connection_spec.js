@@ -107,21 +107,6 @@ describe("TransportConnection", function() {
         expect(transport.state).toEqual("initialized");
       });
 
-      it("should call the beforeInitialize hook, if it's specified ", function() {
-        var hooks = {
-          isInitialized: jasmine.createSpy().andReturn(true),
-          beforeInitialize: jasmine.createSpy().andCallFake(function() {
-            expect(this).toBe(transport);
-          }),
-          getSocket: jasmine.createSpy().andReturn(socket)
-        };
-
-        var transport = getTransport(hooks, "foo", {
-          timeline: timeline
-        });
-        transport.initialize();
-        expect(hooks.beforeInitialize.calls.length).toEqual(1);
-      });
     });
 
     describe("if the transport is not initialized", function() {
@@ -147,23 +132,6 @@ describe("TransportConnection", function() {
         expect(transport.state).toEqual("initializing");
       });
 
-      it("should call the beforeInitialize hook before loading the resource file ", function() {
-        var hooks = {
-          file: "test",
-          isInitialized: jasmine.createSpy().andReturn(false),
-          beforeInitialize: jasmine.createSpy().andCallFake(function() {
-            expect(Pusher.Dependencies.load).not.toHaveBeenCalled();
-          }),
-          getSocket: jasmine.createSpy().andReturn(socket)
-        };
-
-        var transport = getTransport(hooks, "foo", {
-          timeline: timeline
-        });
-        transport.initialize();
-        expect(hooks.beforeInitialize.calls.length).toEqual(1);
-      });
-
       it("should load the resource file (encrypted=false)", function() {
         transport.initialize();
         expect(Pusher.Dependencies.load.calls.length).toEqual(1);
@@ -177,6 +145,7 @@ describe("TransportConnection", function() {
           encrypted: true,
           timeline: timeline
         });
+
         transport.initialize();
         expect(Pusher.Dependencies.load.calls.length).toEqual(1);
         expect(Pusher.Dependencies.load).toHaveBeenCalledWith(

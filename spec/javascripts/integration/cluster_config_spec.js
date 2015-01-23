@@ -1,7 +1,6 @@
 describeIntegration("Cluster Configuration", function() {
   var TRANSPORTS = {
     "ws": Pusher.WSTransport,
-    "flash": Pusher.FlashTransport,
     "sockjs": Pusher.SockJSTransport,
     "xhr_streaming": Pusher.XHRStreamingTransport,
     "xhr_polling": Pusher.XHRPollingTransport,
@@ -115,9 +114,6 @@ describeIntegration("Cluster Configuration", function() {
     describeClusterTest({ transport: "ws", encrypted: false});
     describeClusterTest({ transport: "ws", encrypted: true});
   }
-  // describeClusterTest({ transport: "flash", encrypted: false});
-  // there's a problem with Flash policy file on EU when encrypted
-  // describeClusterTest({ transport: "flash", encrypted: true});
 
   if (Pusher.Util.isXHRSupported()) {
     // CORS-compatible browsers

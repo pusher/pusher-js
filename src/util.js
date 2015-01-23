@@ -291,10 +291,6 @@
       return document;
     },
 
-    getNavigator: function() {
-      return navigator;
-    },
-
     getLocalStorage: function() {
       try {
         return window.localStorage;
@@ -306,7 +302,7 @@
     getClientFeatures: function() {
       return Pusher.Util.keys(
         Pusher.Util.filterObject(
-          { "ws": Pusher.WSTransport, "flash": Pusher.FlashTransport },
+          { "ws": Pusher.WSTransport },
           function (t) { return t.isSupported({}); }
         )
       );

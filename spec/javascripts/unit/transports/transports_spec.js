@@ -54,10 +54,6 @@ describe("Transports", function() {
       expect(Pusher.WSTransport.hooks.supportsPing).toBe(false);
     });
 
-    it("should not have a beforeInitialize hook", function() {
-      expect(Pusher.WSTransport.hooks.beforeInitialize).toBe(undefined);
-    });
-
     it("should not have a beforeOpen hook", function() {
       expect(Pusher.WSTransport.hooks.beforeOpen).toBe(undefined);
     });
@@ -114,187 +110,6 @@ describe("Transports", function() {
     });
   });
 
-  describe("FlashTransport", function() {
-    var _FlashWebSocket = window.FlashWebSocket;
-
-    afterEach(function() {
-      window.FlashWebSocket = _FlashWebSocket;
-    });
-
-    it("should have a 'flashfallback' resource file", function() {
-      expect(Pusher.FlashTransport.hooks.file).toEqual("flashfallback");
-    });
-
-    it("should generate correct unencrypted URLs", function() {
-      var url = Pusher.FlashTransport.hooks.urls.getInitial("foobar", {
-        encrypted: false,
-        hostUnencrypted: "example.com:4444"
-      });
-      expect(url).toEqual(
-        "ws://example.com:4444/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
-      );
-    });
-
-    it("should generate correct encrypted URLs", function() {
-      var url = Pusher.FlashTransport.hooks.urls.getInitial("foobar", {
-        encrypted: true,
-        hostEncrypted: "example.com:4321"
-      });
-      expect(url).toEqual(
-        "wss://example.com:4321/app/foobar?protocol=7&client=js&version=<VERSION>&flash=true"
-      );
-    });
-
-    it("should not expose the URL path generator", function() {
-      expect(Pusher.FlashTransport.hooks.urls.getPath).toBe(undefined);
-    });
-
-    it("should not handle activity checks", function() {
-      expect(Pusher.FlashTransport.hooks.handlesActivityChecks).toBe(false);
-    });
-
-    it("should not support ping", function() {
-      expect(Pusher.FlashTransport.hooks.supportsPing).toBe(false);
-    });
-
-    it("should not have a beforeOpen hook", function() {
-      expect(Pusher.FlashTransport.hooks.beforeOpen).toBe(undefined);
-    });
-
-    describe("beforeInitialize hook", function() {
-      var context;
-      var _WEB_SOCKET_SWF_LOCATION = window.WEB_SOCKET_SWF_LOCATION;
-      var _WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR;
-
-      beforeEach(function() {
-        context = {
-          options: {
-            encrypted: false
-          }
-        };
-      });
-
-      afterEach(function() {
-        window.WEB_SOCKET_SWF_LOCATION = _WEB_SOCKET_SWF_LOCATION;
-        window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = _WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR;
-      });
-
-      it("should set window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR to true if it's undefined", function() {
-        window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = undefined;
-        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
-        expect(window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR).toBe(true);
-      });
-
-      it("should not set window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR if it's defined", function() {
-        window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = 'whatever';
-        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
-        expect(window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR).toBe('whatever');
-      });
-
-      it("should set window.WEB_SOCKET_SWF_LOCATION (encrypted=false)", function() {
-        Pusher.Dependencies.getRoot.andReturn("http://example.com/1.2.3");
-        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
-        expect(Pusher.Dependencies.getRoot).toHaveBeenCalledWith(
-          { encrypted: false }
-        );
-        expect(window.WEB_SOCKET_SWF_LOCATION).toEqual(
-          "http://example.com/1.2.3/WebSocketMain.swf"
-        );
-      });
-
-      it("should set window.WEB_SOCKET_SWF_LOCATION (encrypted=true)", function() {
-        var context = {
-          options: {
-            encrypted: true
-          }
-        };
-        Pusher.Dependencies.getRoot.andReturn("https://example.com/1.2.3");
-        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
-        expect(Pusher.Dependencies.getRoot).toHaveBeenCalledWith(
-          { encrypted: true }
-        );
-        expect(window.WEB_SOCKET_SWF_LOCATION).toEqual(
-          "https://example.com/1.2.3/WebSocketMain.swf"
-        );
-      });
-    });
-
-    describe("isSupported hook", function() {
-      var _ActiveXObject = window.ActiveXObject;
-
-      afterEach(function() {
-        window.ActiveXObject = _ActiveXObject;
-      });
-
-      describe("on non-IE browsers", function() {
-        beforeEach(function() {
-          window.ActiveXObject = undefined;
-          spyOn(Pusher.Util, "getNavigator");
-        });
-
-        it("should be supported, if application/x-shockwave-flash is in mime types", function() {
-          Pusher.Util.getNavigator.andReturn({
-            mimeTypes: {
-              "application/x-shockwave-flash": {}
-            }
-          });
-          expect(Pusher.FlashTransport.isSupported({})).toBe(true);
-        });
-
-        it("should not be supported if application/x-shockwave-flash is not in mime types", function() {
-          Pusher.Util.getNavigator.andReturn({
-            mimeTypes: {
-              "whatever": {}
-            }
-          });
-          expect(Pusher.FlashTransport.isSupported({})).toBe(false);
-        });
-
-        it("should not be supported if mime types are not available", function() {
-          Pusher.Util.getNavigator.andReturn({});
-          expect(Pusher.FlashTransport.isSupported({})).toBe(false);
-        });
-
-        it("should not be supported if navigator is not available", function() {
-          Pusher.Util.getNavigator.andReturn(undefined);
-          expect(Pusher.FlashTransport.isSupported({})).toBe(false);
-        });
-      });
-
-      describe("on IE", function() {
-        beforeEach(function() {
-          window.ActiveXObject = jasmine.createSpy("ActiveXObject");
-          spyOn(Pusher.Util, "getNavigator").andReturn({});
-        });
-
-        it("should be supported if it's possible to instantiate ShockwaveFlash.ShockwaveFlash ActiveXObject", function() {
-          expect(Pusher.FlashTransport.isSupported({})).toBe(true);
-        });
-
-        it("should not be supported if instantiating ShockwaveFlash.ShockwaveFlash ActiveXObject throws an error", function() {
-          window.ActiveXObject.andCallFake(function() {
-            throw new Error("Automation server can't create object");
-          });
-          expect(Pusher.FlashTransport.isSupported({})).toBe(false);
-        });
-      });
-    });
-
-    describe("getSocket hook", function() {
-      it("should return a new FlashWebSocket object", function() {
-        window.FlashWebSocket = jasmine.createSpy().andCallFake(function(url) {
-          this.url = url;
-        });
-
-        var socket = Pusher.FlashTransport.hooks.getSocket("flashtest");
-        expect(window.FlashWebSocket.calls.length).toEqual(1);
-        expect(window.FlashWebSocket).toHaveBeenCalledWith("flashtest");
-        expect(socket).toEqual(jasmine.any(window.FlashWebSocket));
-        expect(socket.url).toEqual("flashtest");
-      });
-    });
-  });
-
   describe("SockJSTransport", function() {
     var _SockJS = window.SockJS;
 
@@ -333,10 +148,6 @@ describe("Transports", function() {
 
     it("should not support ping", function() {
       expect(Pusher.SockJSTransport.hooks.supportsPing).toBe(false);
-    });
-
-    it("should not have a beforeInitialize hook", function() {
-      expect(Pusher.WSTransport.hooks.beforeInitialize).toBe(undefined);
     });
 
     describe("beforeOpen hook", function() {
@@ -464,10 +275,6 @@ describe("Transports", function() {
 
       it("should support ping", function() {
         expect(Pusher[transport].hooks.supportsPing).toBe(true);
-      });
-
-      it("should not have a beforeInitialize hook", function() {
-        expect(Pusher.WSTransport.hooks.beforeInitialize).toBe(undefined);
       });
 
       it("should not have a beforeOpen hook", function() {

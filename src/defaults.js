@@ -73,7 +73,6 @@
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
       [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-      [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
       [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
@@ -82,7 +81,6 @@
 
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
-      [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
 
       [":def", "streaming_loop", [":sequential", ":timeouts",
@@ -119,13 +117,8 @@
           [":first_connected",
             [":if", [":is_supported", ":ws"],
               wsStrategy,
-            [":if", [":is_supported", ":flash"], [
-              ":best_connected_ever",
-              ":flash_loop",
-              [":delayed", 2000, [":http_fallback_loop"]]
-            ], [
               ":http_fallback_loop"
-            ]]]
+            ]
           ]
         ]
       ]

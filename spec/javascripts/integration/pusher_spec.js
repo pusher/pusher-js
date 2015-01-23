@@ -15,7 +15,6 @@ describeIntegration("Pusher", function() {
 
   var TRANSPORTS = {
     "ws": Pusher.WSTransport,
-    "flash": Pusher.FlashTransport,
     "sockjs": Pusher.SockJSTransport,
     "xhr_streaming": Pusher.XHRStreamingTransport,
     "xhr_polling": Pusher.XHRPollingTransport,
@@ -517,9 +516,6 @@ describeIntegration("Pusher", function() {
 
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
-
-  // buildIntegrationTests("flash", false);
-  // buildIntegrationTests("flash", true);
 
   if (Pusher.Util.isXHRSupported()) {
     // CORS-compatible browsers

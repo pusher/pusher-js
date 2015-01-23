@@ -3,12 +3,12 @@ describe("Transport lists", function() {
 
   beforeEach(function() {
     spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-    spyOn(Pusher.FlashTransport, "isSupported").andReturn(true);
+    spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(true);
     spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
 
     spyOn(Pusher.WSTransport, "createConnection")
       .andCallFake(Pusher.Mocks.getTransport);
-    spyOn(Pusher.FlashTransport, "createConnection")
+    spyOn(Pusher.XHRStreamingTransport, "createConnection")
       .andCallFake(Pusher.Mocks.getTransport);
     spyOn(Pusher.SockJSTransport, "createConnection")
       .andCallFake(Pusher.Mocks.getTransport);
@@ -16,7 +16,7 @@ describe("Transport lists", function() {
     spyOn(Pusher, "getDefaultStrategy").andCallFake(function() {
       return [
         [":def_transport", "a", "ws", 1, {}],
-        [":def_transport", "b", "flash", 2, {}],
+        [":def_transport", "b", "xhr_streaming", 2, {}],
         [":def_transport", "c", "sockjs", 3, {}],
         [":def", "strategy", [":best_connected_ever", ":a", ":b", ":c"]]
       ];
@@ -33,7 +33,7 @@ describe("Transport lists", function() {
   it("should use all transports if the whitelist is not specified", function() {
     var pusher = new Pusher("asdf", { disableStats: true });
     expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
-    expect(Pusher.FlashTransport.createConnection).toHaveBeenCalled();
+    expect(Pusher.XHRStreamingTransport.createConnection).toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
@@ -44,7 +44,7 @@ describe("Transport lists", function() {
       enabledTransports: []
     });
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
+    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).not.toHaveBeenCalled();
     pusher.disconnect();
   });
@@ -55,7 +55,7 @@ describe("Transport lists", function() {
       enabledTransports: ["a", "c"]
     });
     expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
-    expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
+    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
@@ -66,7 +66,7 @@ describe("Transport lists", function() {
       disabledTransports: ["a", "b"]
     });
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
+    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
@@ -78,7 +78,7 @@ describe("Transport lists", function() {
       disabledTransports: ["b"]
     });
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.FlashTransport.createConnection).not.toHaveBeenCalled();
+    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
