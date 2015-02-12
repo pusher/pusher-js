@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.4 (2015-02-13)
+
+[FIXED] Dependency loader not using HTTPS for encrypted connections on pages loaded via HTTP
+
 ## 2.2.3 (2014-09-10)
 
 [FIXED] Wrong encoding of HTTP heartbeats
