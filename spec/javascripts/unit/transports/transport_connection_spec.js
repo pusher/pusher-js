@@ -110,7 +110,9 @@ describe("TransportConnection", function() {
       it("should call the beforeInitialize hook, if it's specified ", function() {
         var hooks = {
           isInitialized: jasmine.createSpy().andReturn(true),
-          beforeInitialize: jasmine.createSpy(),
+          beforeInitialize: jasmine.createSpy().andCallFake(function() {
+            expect(this).toBe(transport);
+          }),
           getSocket: jasmine.createSpy().andReturn(socket)
         };
 
@@ -162,11 +164,23 @@ describe("TransportConnection", function() {
         expect(hooks.beforeInitialize.calls.length).toEqual(1);
       });
 
-      it("should load the resource file", function() {
+      it("should load the resource file (encrypted=false)", function() {
         transport.initialize();
         expect(Pusher.Dependencies.load.calls.length).toEqual(1);
         expect(Pusher.Dependencies.load).toHaveBeenCalledWith(
-          "test", jasmine.any(Function)
+          "test", { encrypted: false }, jasmine.any(Function)
+        );
+      });
+
+      it("should load the resource file (encrypted=true)", function() {
+        var transport = getTransport(hooks, "foo", {
+          encrypted: true,
+          timeline: timeline
+        });
+        transport.initialize();
+        expect(Pusher.Dependencies.load.calls.length).toEqual(1);
+        expect(Pusher.Dependencies.load).toHaveBeenCalledWith(
+          "test", { encrypted: true }, jasmine.any(Function)
         );
       });
 
@@ -183,7 +197,7 @@ describe("TransportConnection", function() {
           // after loading the resource, isInitialized will return true
           hooks.isInitialized.andReturn(true);
           // fire the callback for the resource file load
-          Pusher.Dependencies.load.calls[0].args[1](null, loadCallback);
+          Pusher.Dependencies.load.calls[0].args[2](null, loadCallback);
         });
 
         it("should transition to 'initialized'", function() {
@@ -209,7 +223,7 @@ describe("TransportConnection", function() {
           // after loading the resource, isInitialized will return true
           hooks.isInitialized.andReturn(false);
           // fire the callback for the resource file load
-          Pusher.Dependencies.load.calls[0].args[1](null, loadCallback);
+          Pusher.Dependencies.load.calls[0].args[2](null, loadCallback);
         });
 
         it("should transition to 'closed'", function() {

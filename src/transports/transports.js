@@ -48,7 +48,8 @@
       if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
         window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
       }
-      window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
+      window.WEB_SOCKET_SWF_LOCATION =
+        Pusher.Dependencies.getRoot({ encrypted: this.options.encrypted }) +
         "/WebSocketMain.swf";
     },
     isInitialized: function() {
