@@ -162,8 +162,17 @@ describe("Transports", function() {
     });
 
     describe("beforeInitialize hook", function() {
+      var context;
       var _WEB_SOCKET_SWF_LOCATION = window.WEB_SOCKET_SWF_LOCATION;
       var _WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR;
+
+      beforeEach(function() {
+        context = {
+          options: {
+            encrypted: false
+          }
+        };
+      });
 
       afterEach(function() {
         window.WEB_SOCKET_SWF_LOCATION = _WEB_SOCKET_SWF_LOCATION;
@@ -172,21 +181,40 @@ describe("Transports", function() {
 
       it("should set window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR to true if it's undefined", function() {
         window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = undefined;
-        Pusher.FlashTransport.hooks.beforeInitialize();
+        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
         expect(window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR).toBe(true);
       });
 
       it("should not set window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR if it's defined", function() {
         window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = 'whatever';
-        Pusher.FlashTransport.hooks.beforeInitialize();
+        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
         expect(window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR).toBe('whatever');
       });
 
-      it("should set window.WEB_SOCKET_SWF_LOCATION", function() {
+      it("should set window.WEB_SOCKET_SWF_LOCATION (encrypted=false)", function() {
         Pusher.Dependencies.getRoot.andReturn("http://example.com/1.2.3");
-        Pusher.FlashTransport.hooks.beforeInitialize();
+        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
+        expect(Pusher.Dependencies.getRoot).toHaveBeenCalledWith(
+          { encrypted: false }
+        );
         expect(window.WEB_SOCKET_SWF_LOCATION).toEqual(
           "http://example.com/1.2.3/WebSocketMain.swf"
+        );
+      });
+
+      it("should set window.WEB_SOCKET_SWF_LOCATION (encrypted=true)", function() {
+        var context = {
+          options: {
+            encrypted: true
+          }
+        };
+        Pusher.Dependencies.getRoot.andReturn("https://example.com/1.2.3");
+        Pusher.FlashTransport.hooks.beforeInitialize.call(context);
+        expect(Pusher.Dependencies.getRoot).toHaveBeenCalledWith(
+          { encrypted: true }
+        );
+        expect(window.WEB_SOCKET_SWF_LOCATION).toEqual(
+          "https://example.com/1.2.3/WebSocketMain.swf"
         );
       });
     });

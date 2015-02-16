@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v2.2.3
+ * Pusher JavaScript Library v2.2.4
  * http://pusher.com/
  *
  * Copyright 2014, Pusher
@@ -626,7 +626,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.3';
+  Pusher.VERSION = '2.2.4';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -1087,7 +1087,7 @@
    * @param  {String} name
    * @param  {Function} callback
    */
-  prototype.load = function(name, callback) {
+  prototype.load = function(name, options, callback) {
     var self = this;
 
     if (self.loading[name] && self.loading[name].length > 0) {
@@ -1095,7 +1095,7 @@
     } else {
       self.loading[name] = [callback];
 
-      var request = new Pusher.ScriptRequest(self.getPath(name));
+      var request = new Pusher.ScriptRequest(self.getPath(name, options));
       var receiver = self.receivers.create(function(error) {
         self.receivers.remove(receiver);
 
@@ -1177,7 +1177,7 @@
   }
 
   if (!window.JSON) {
-    Pusher.Dependencies.load("json2", initializeOnDocumentBody);
+    Pusher.Dependencies.load("json2", {}, initializeOnDocumentBody);
   } else {
     initializeOnDocumentBody();
   }
@@ -2079,25 +2079,29 @@
     }));
 
     if (self.hooks.beforeInitialize) {
-      self.hooks.beforeInitialize();
+      self.hooks.beforeInitialize.call(self);
     }
 
     if (self.hooks.isInitialized()) {
       self.changeState("initialized");
     } else if (self.hooks.file) {
       self.changeState("initializing");
-      Pusher.Dependencies.load(self.hooks.file, function(error, callback) {
-        if (self.hooks.isInitialized()) {
-          self.changeState("initialized");
-          callback(true);
-        } else {
-          if (error) {
-            self.onError(error);
+      Pusher.Dependencies.load(
+        self.hooks.file,
+        { encrypted: self.options.encrypted },
+        function(error, callback) {
+          if (self.hooks.isInitialized()) {
+            self.changeState("initialized");
+            callback(true);
+          } else {
+            if (error) {
+              self.onError(error);
+            }
+            self.onClose();
+            callback(false);
           }
-          self.onClose();
-          callback(false);
         }
-      });
+      );
     } else {
       self.onClose();
     }
@@ -2367,7 +2371,8 @@
       if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
         window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
       }
-      window.WEB_SOCKET_SWF_LOCATION = Pusher.Dependencies.getRoot() +
+      window.WEB_SOCKET_SWF_LOCATION =
+        Pusher.Dependencies.getRoot({ encrypted: this.options.encrypted }) +
         "/WebSocketMain.swf";
     },
     isInitialized: function() {

@@ -72,25 +72,29 @@
     }));
 
     if (self.hooks.beforeInitialize) {
-      self.hooks.beforeInitialize();
+      self.hooks.beforeInitialize.call(self);
     }
 
     if (self.hooks.isInitialized()) {
       self.changeState("initialized");
     } else if (self.hooks.file) {
       self.changeState("initializing");
-      Pusher.Dependencies.load(self.hooks.file, function(error, callback) {
-        if (self.hooks.isInitialized()) {
-          self.changeState("initialized");
-          callback(true);
-        } else {
-          if (error) {
-            self.onError(error);
+      Pusher.Dependencies.load(
+        self.hooks.file,
+        { encrypted: self.options.encrypted },
+        function(error, callback) {
+          if (self.hooks.isInitialized()) {
+            self.changeState("initialized");
+            callback(true);
+          } else {
+            if (error) {
+              self.onError(error);
+            }
+            self.onClose();
+            callback(false);
           }
-          self.onClose();
-          callback(false);
         }
-      });
+      );
     } else {
       self.onClose();
     }

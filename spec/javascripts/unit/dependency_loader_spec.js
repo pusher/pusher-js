@@ -101,7 +101,7 @@ describe("DependencyLoader", function() {
   describe("#load", function() {
     it("should send an unencrypted script request when served via http", function() {
       doc.location.protocol = "http:";
-      loader.load("resource", onLoaded);
+      loader.load("resource", {}, onLoaded);
       expect(Pusher.ScriptRequest.calls.length).toEqual(1);
       expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource-test.js"
@@ -110,7 +110,16 @@ describe("DependencyLoader", function() {
 
     it("should send an encrypted script request when served via https", function() {
       doc.location.protocol = "https:";
-      loader.load("resource", onLoaded);
+      loader.load("resource", {}, onLoaded);
+      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
+      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+        "https://example.com/6.6.6/resource-test.js"
+      );
+    });
+
+    it("should send an encrypted script request when served via http, but passed encrypted via options", function() {
+      doc.location.protocol = "http:";
+      loader.load("resource", { encrypted: true }, onLoaded);
       expect(Pusher.ScriptRequest.calls.length).toEqual(1);
       expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
         "https://example.com/6.6.6/resource-test.js"
@@ -120,15 +129,15 @@ describe("DependencyLoader", function() {
     it("should only send one script request per resource at a time", function() {
       expect(Pusher.ScriptRequest.calls.length).toEqual(0);
 
-      loader.load("resource", function() {});
-      loader.load("resource", function() {});
-      loader.load("resource", function() {});
+      loader.load("resource", {}, function() {});
+      loader.load("resource", {}, function() {});
+      loader.load("resource", {}, function() {});
       expect(Pusher.ScriptRequest.calls.length).toEqual(1);
       expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource-test.js"
       );
 
-      loader.load("resource2", function() {});
+      loader.load("resource2", {}, function() {});
       expect(Pusher.ScriptRequest.calls.length).toEqual(2);
       expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource2-test.js"
@@ -136,7 +145,7 @@ describe("DependencyLoader", function() {
     });
 
     it("should register a receiver", function() {
-      loader.load("resource", onLoaded);
+      loader.load("resource", {}, onLoaded);
       var receiver = scriptRequest.send.calls[0].args[0];
       expect(Pusher.Integration.ScriptReceivers[receiver.number]).toBe(
         receiver.callback
@@ -144,7 +153,7 @@ describe("DependencyLoader", function() {
     });
 
     it("should call back without an error if the resource loaded successfully", function() {
-      loader.load("resource", onLoaded);
+      loader.load("resource", {}, onLoaded);
       var receiver = scriptRequest.send.calls[0].args[0];
 
       expect(onLoaded).not.toHaveBeenCalled();
@@ -153,7 +162,7 @@ describe("DependencyLoader", function() {
     });
 
     it("should call back with an error if the resource failed to load", function() {
-      loader.load("resource", onLoaded);
+      loader.load("resource", {}, onLoaded);
       var receiver = scriptRequest.send.calls[0].args[0];
 
       expect(onLoaded).not.toHaveBeenCalled();
@@ -164,11 +173,11 @@ describe("DependencyLoader", function() {
     it("should trigger all resource's callbacks", function() {
       var onLoaded2 = jasmine.createSpy();
       var onLoaded3 = jasmine.createSpy();
-      loader.load("resource", onLoaded);
-      loader.load("resource", onLoaded2);
+      loader.load("resource", {}, onLoaded);
+      loader.load("resource", {}, onLoaded2);
       var firstScriptRequest = scriptRequest;
 
-      loader.load("resource2", onLoaded3);
+      loader.load("resource2", {}, onLoaded3);
 
       expect(onLoaded.calls.length).toEqual(0);
       expect(onLoaded2.calls.length).toEqual(0);
@@ -193,7 +202,7 @@ describe("DependencyLoader", function() {
       var receiver;
 
       beforeEach(function() {
-        loader.load("resource", onLoaded);
+        loader.load("resource", {}, onLoaded);
         receiver = scriptRequest.send.calls[0].args[0];
         receiver.callback(null);
       });
@@ -222,7 +231,7 @@ describe("DependencyLoader", function() {
         expect(onLoaded.calls.length).toEqual(1);
 
         var onLoaded2 = jasmine.createSpy();
-        loader.load("resource", onLoaded2);
+        loader.load("resource", {}, onLoaded2);
         var receiver = scriptRequest.send.calls[0].args[0];
         receiver.callback(null);
 

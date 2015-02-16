@@ -30,7 +30,7 @@
   }
 
   if (!window.JSON) {
-    Pusher.Dependencies.load("json2", initializeOnDocumentBody);
+    Pusher.Dependencies.load("json2", {}, initializeOnDocumentBody);
   } else {
     initializeOnDocumentBody();
   }

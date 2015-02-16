@@ -26,7 +26,7 @@
    * @param  {String} name
    * @param  {Function} callback
    */
-  prototype.load = function(name, callback) {
+  prototype.load = function(name, options, callback) {
     var self = this;
 
     if (self.loading[name] && self.loading[name].length > 0) {
@@ -34,7 +34,7 @@
     } else {
       self.loading[name] = [callback];
 
-      var request = new Pusher.ScriptRequest(self.getPath(name));
+      var request = new Pusher.ScriptRequest(self.getPath(name, options));
       var receiver = self.receivers.create(function(error) {
         self.receivers.remove(receiver);
 
