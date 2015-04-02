@@ -66,7 +66,7 @@
           channel.handleEvent(params.event, params.data);
         }
       }
-      // Emit globaly [deprecated]
+      // Emit globally [deprecated]
       if (!internal) {
         self.global_emitter.emit(params.event, params.data);
       }
