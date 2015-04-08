@@ -1,23 +1,7 @@
 #!/usr/bin/env ruby
 
-require "rubygems"
-require "bundler/setup"
-
 debug = ARGV.any? { |arg| arg == "--debug" }
 params = !debug ? " > /dev/null 2>&1" : ""
 
-commands = [
-  "bundle exec jbundle server #{params}",
-  "karma start spec/karma/config/all.js"
-]
-
-pids = commands.map { |cmd|
-  spawn(cmd)
-}
-
-begin
-  Process.waitall
-rescue Interrupt => e
-  pids.each { |pid| Process.kill("INT", pid) }
-  Process.waitall
-end
+system(File.expand_path("../karma-unit #{params}", __FILE__))
+system(File.expand_path("../karma-integration #{params}", __FILE__))

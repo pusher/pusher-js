@@ -4,7 +4,7 @@ module.exports = function(config) {
     frameworks: ["jasmine"],
 
     files: []
-      .concat(require(__dirname + "/../files/source"))
+      .concat(require(__dirname + "/../files/built"))
       .concat(require(__dirname + "/../files/integration_tests")),
     exclude: [
       'src/sockjs/**/*',
@@ -29,7 +29,7 @@ module.exports = function(config) {
     autoWatch: true,
 
     browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
-    captureTimeout: 60000,
+    captureTimeout: 120000,
 
     singleRun: true
   });
