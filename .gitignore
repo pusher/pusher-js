@@ -5,3 +5,6 @@
 *.swp
 dist/*
 !/dist/*.js
+coverage
+node_modules
+target
