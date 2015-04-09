@@ -11,6 +11,9 @@ version '2.2.4'
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
+  
+  file 'build/umd_header.js'
+  
   file 'pusher.js'
 
   file 'utils/timers.js'
@@ -65,6 +68,8 @@ bundle 'pusher.js' do
   file 'channels/channels.js'
 
   file 'pusher_authorizer.js'
+  
+  file 'build/umd_footer.js'
 end
 
 bundle 'sockjs.js' do
