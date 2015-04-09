@@ -8,7 +8,7 @@ params = !debug ? " > /dev/null 2>&1" : ""
 
 commands = [
   "bundle exec jbundle server #{params}",
-  "karma start spec/karma/config/integration.js"
+  "./node_modules/karma/bin/karma start spec/karma/config/integration.js"
 ]
 
 pids = commands.map { |cmd|
