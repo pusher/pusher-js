@@ -4,7 +4,7 @@ require 'bundler/setup'
 require 'yaml'
 require 'jbundle'
 
-$:.push(File.expand_path('../lib', __FILE__))
+$:.push(File.expand_path('../support', __FILE__))
 autoload :S3Uploader, 's3_uploader'
 autoload :Acf, 'acf_invalidate'
 
