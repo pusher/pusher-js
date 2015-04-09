@@ -1,4 +1,4 @@
-describeIntegration("Host/Port Configuration", function() {
+describe("Host/Port Configuration", function() {
   var transport;
   var pusher;
 
