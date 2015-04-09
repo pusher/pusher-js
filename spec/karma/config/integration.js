@@ -31,6 +31,6 @@ module.exports = function(config) {
     browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
     captureTimeout: 60000,
 
-    singleRun: false
+    singleRun: true
   });
 };
