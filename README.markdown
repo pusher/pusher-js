@@ -330,7 +330,7 @@ There's also a JSHint watch, which will validate JS files on save.
 
 Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install karma npm modules
 
-    npm install -g karma karma-coverage karma-jasmine karma-chrome-launcher karma-firefox-launcher karma-opera-launcher karma-safari-launcher
+    npm install
 
 Then start the server, run one of following commands:
 
