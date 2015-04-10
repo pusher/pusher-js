@@ -1,10 +1,38 @@
 /*!
- * Pusher JavaScript Library v2.2.4
+ * Pusher JavaScript Library v3.0.0
  * http://pusher.com/
  *
  * Copyright 2014, Pusher
  * Released under the MIT licence.
  */
+
+// Uses Node, AMD or browser globals to create a module. This example creates
+// a global even when AMD is used. This is useful if you have some scripts
+// that are loaded by an AMD loader, but they still want access to globals.
+// If you do not need to export a global for the AMD case,
+// see returnExports.js.
+
+// If you want something that will work in other stricter CommonJS environments,
+// or if you need to create a circular dependency, see commonJsStrictGlobal.js
+
+// Defines a module "Pusher".
+
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
+    define(['Pusher'], function () {
+      return (root.Pusher = factory());
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like enviroments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    // Browser globals
+    root.Pusher = factory();
+  }
+}(this, function () {
 
 ;(function() {
   function Pusher(app_key, options) {
@@ -74,7 +102,7 @@
           channel.handleEvent(params.event, params.data);
         }
       }
-      // Emit globaly [deprecated]
+      // Emit globally [deprecated]
       if (!internal) {
         self.global_emitter.emit(params.event, params.data);
       }
@@ -188,7 +216,7 @@
 
   prototype.unsubscribe = function(channel_name) {
     var channel = this.channels.remove(channel_name);
-    if (this.connection.state === 'connected') {
+    if (channel && this.connection.state === 'connected') {
       channel.unsubscribe();
     }
   };
@@ -573,10 +601,6 @@
       return document;
     },
 
-    getNavigator: function() {
-      return navigator;
-    },
-
     getLocalStorage: function() {
       try {
         return window.localStorage;
@@ -588,7 +612,7 @@
     getClientFeatures: function() {
       return Pusher.Util.keys(
         Pusher.Util.filterObject(
-          { "ws": Pusher.WSTransport, "flash": Pusher.FlashTransport },
+          { "ws": Pusher.WSTransport },
           function (t) { return t.isSupported({}); }
         )
       );
@@ -626,7 +650,7 @@
 }).call(this);
 
 ;(function() {
-  Pusher.VERSION = '2.2.4';
+  Pusher.VERSION = '3.0.0';
   Pusher.PROTOCOL = 7;
 
   // DEPRECATED: WS connection parameters
@@ -700,7 +724,6 @@
 
       [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
       [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-      [":def_transport", "flash", "flash", 2, ":ws_options", ":ws_manager"],
       [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
       [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
       [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
@@ -709,7 +732,6 @@
 
       [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
       [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
-      [":def", "flash_loop", [":sequential", ":timeouts", ":flash"]],
       [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
 
       [":def", "streaming_loop", [":sequential", ":timeouts",
@@ -746,13 +768,8 @@
           [":first_connected",
             [":if", [":is_supported", ":ws"],
               wsStrategy,
-            [":if", [":is_supported", ":flash"], [
-              ":best_connected_ever",
-              ":flash_loop",
-              [":delayed", 2000, [":http_fallback_loop"]]
-            ], [
               ":http_fallback_loop"
-            ]]]
+            ]
           ]
         ]
       ]
@@ -1980,12 +1997,6 @@
         return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
       }
     },
-    /** URL scheme for Flash. Same as WebSocket, but with a flash parameter. */
-    flash: {
-      getInitial: function(key, params) {
-        return getGenericURL("ws", params, getGenericPath(key, "flash=true"));
-      }
-    },
     /** SockJS URL scheme. Supplies the path separately from the initial URL. */
     sockjs: {
       getInitial: function(key, params) {
@@ -2077,10 +2088,6 @@
     self.timeline.info(self.buildTimelineMessage({
       transport: self.name + (self.options.encrypted ? "s" : "")
     }));
-
-    if (self.hooks.beforeInitialize) {
-      self.hooks.beforeInitialize.call(self);
-    }
 
     if (self.hooks.isInitialized()) {
       self.changeState("initialized");
@@ -2344,45 +2351,6 @@
     }
   });
 
-  /** Flash transport using the WebSocket protocol. */
-  Pusher.FlashTransport = new Pusher.Transport({
-    file: "flashfallback",
-    urls: Pusher.URLSchemes.flash,
-    handlesActivityChecks: false,
-    supportsPing: false,
-
-    isSupported: function() {
-      try {
-        return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
-      } catch (e1) {
-        try {
-          var nav = Pusher.Util.getNavigator();
-          return Boolean(
-            nav &&
-            nav.mimeTypes &&
-            nav.mimeTypes["application/x-shockwave-flash"] !== undefined
-          );
-        } catch (e2) {
-          return false;
-        }
-      }
-    },
-    beforeInitialize: function() {
-      if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
-        window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-      }
-      window.WEB_SOCKET_SWF_LOCATION =
-        Pusher.Dependencies.getRoot({ encrypted: this.options.encrypted }) +
-        "/WebSocketMain.swf";
-    },
-    isInitialized: function() {
-      return window.FlashWebSocket !== undefined;
-    },
-    getSocket: function(url) {
-      return new FlashWebSocket(url);
-    }
-  });
-
   /** SockJS transport. */
   Pusher.SockJSTransport = new Pusher.Transport({
     file: "sockjs",
@@ -2609,7 +2577,6 @@
 
   var transports = {
     ws: Pusher.WSTransport,
-    flash: Pusher.FlashTransport,
     sockjs: Pusher.SockJSTransport,
     xhr_streaming: Pusher.XHRStreamingTransport,
     xdr_streaming: Pusher.XDRStreamingTransport,
@@ -2665,8 +2632,7 @@
         (!context.enabledTransports ||
           Pusher.Util.arrayIndexOf(context.enabledTransports, name) !== -1) &&
         (!context.disabledTransports ||
-          Pusher.Util.arrayIndexOf(context.disabledTransports, name) === -1) &&
-        (name !== "flash" || context.disableFlash !== true);
+          Pusher.Util.arrayIndexOf(context.disabledTransports, name) === -1);
 
       var transport;
       if (enabled) {
@@ -4013,4 +3979,7 @@
     }
   };
 }).call(this);
+
+return Pusher;
+}));
 
