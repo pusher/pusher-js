@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.0.0 (2015-04-23)
+
+[NEW] Introduce package.json, pusher-js will be published on NPM !
+[NEW] added header/footer for UMD, allows CommonJS loaded to use pusher-js
+
+[CHANGED] Remove the Flash fallback
+
+[FIXED] double-unsubscribe is now idempotent
+[FIXED] Serve only distribution files via Bower
+
+[INTERNAL] Cleaned up a lot of the build process, makes contributing easier
+
 ## 2.2.4 (2015-02-13)
 
 [FIXED] Dependency loader not using HTTPS for encrypted connections on pages loaded via HTTP

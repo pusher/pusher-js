@@ -1,6 +1,6 @@
 {
   "name": "pusher-js",
-  "version": "2.2.4",
+  "version": "3.0.0",
   "description": "Pusher JavaScript library for the browser",
   "main": "dist/pusher.js",
   "scripts": {
