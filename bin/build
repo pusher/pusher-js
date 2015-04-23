@@ -1,16 +1,25 @@
 #!/bin/bash
 
-cd src/web-socket-js
-rm WebSocketMain.swf WebSocketMainInsecure.swf WebSocketMainInsecure.zip
-cd -
+set -euo pipefail
 
-git submodule update
-cd src/web-socket-js/flash-src
-./build.sh
-cd ..
-unzip WebSocketMainInsecure.zip
+root="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. > /dev/null && pwd )"
 
-cd ../sockjs
+# clean up build artifacts (for submodule to be happy)
+cd $root/src/web-socket-js
+rm -f WebSocketMain.swf WebSocketMainInsecure.swf
+
+# update the submodules
+cd $root
+git submodule update --init
+
+# build web-socket-js (use our sane build script)
+$root/bin/build-web-socket-js.sh
+
+# build sockjs
+cd $root/src/sockjs
+npm i
 make
-cd ../..
+
+# jbundle all the things
+cd $root
 bundle exec jbundle
