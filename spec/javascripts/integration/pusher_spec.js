@@ -100,7 +100,25 @@ describeIntegration("Pusher", function() {
         expect(received).toBe(null);
       });
     });
+
+    it("should handle unsubscribing as an idempotent operation", function() {
+      var pusher = getPusher();
+      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
+
+      var onSubscribed = jasmine.createSpy("onSubscribed");
+      subscribe(pusher, channelName, onSubscribed);
+
+      waitsFor(function() {
+        return onSubscribed.calls.length;
+      }, "subscription to succeed", 10000);
+      runs(function() {
+        pusher.unsubscribe(channelName);
+        pusher.unsubscribe(channelName);
+        pusher.unsubscribe(channelName);
+      });
+    });
   }
+
 
   function buildClientEventsTests(getPusher1, getPusher2, prefix) {
     it("should receive a client event sent by another connection", function() {
