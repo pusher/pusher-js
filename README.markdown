@@ -13,6 +13,7 @@ They both include their own licences.
 
 The following topics are covered:
 
+* Installation
 * Configuration
 * Connection
 * Socket ids
@@ -21,6 +22,26 @@ The following topics are covered:
   * Globally
   * Per-channel
 * Default events
+
+## Installation
+
+Via the Pusher CDN:
+
+```html
+<script src="//js.pusher.com/3.0/pusher.min.js"></script>
+```
+
+Or via [Bower](http://bower.io/):
+
+```
+bower install pusher
+```
+
+and then
+
+```html
+<script src="bower_components/dist/pusher.min.js"></script>
+```
 
 ## Configuration
 
