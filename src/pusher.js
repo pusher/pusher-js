@@ -1,5 +1,9 @@
 ;(function() {
   function Pusher(app_key, options) {
+    if (!this instanceof Pusher) {
+      return new Pusher(arguments);
+    }
+
     checkAppKey(app_key);
     options = options || {};
 
