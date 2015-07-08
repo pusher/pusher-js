@@ -3133,19 +3133,22 @@
     self.onMessage = function(m) {
       self.unbindListeners();
 
+      var result;
       try {
-        var result = Pusher.Protocol.processHandshake(m);
-        if (result.action === "connected") {
-          self.finish("connected", {
-            connection: new Pusher.Connection(result.id, self.transport),
-            activityTimeout: result.activityTimeout
-          });
-        } else {
-          self.finish(result.action, { error: result.error });
-          self.transport.close();
-        }
+        result = Pusher.Protocol.processHandshake(m);
       } catch (e) {
         self.finish("error", { error: e });
+        self.transport.close();
+        return;
+      }
+
+      if (result.action === "connected") {
+        self.finish("connected", {
+          connection: new Pusher.Connection(result.id, self.transport),
+          activityTimeout: result.activityTimeout
+        });
+      } else {
+        self.finish(result.action, { error: result.error });
         self.transport.close();
       }
     };

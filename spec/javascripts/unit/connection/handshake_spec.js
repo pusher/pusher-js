@@ -11,13 +11,6 @@ describe("Handshake", function() {
     handshake = new Pusher.Handshake(transport, callback);
   });
 
-  it("should use Protocol.processHandshake to process first received message", function() {
-    transport.emit("message", { data: "dummy" });
-    expect(Pusher.Protocol.processHandshake).toHaveBeenCalledWith({
-      data: "dummy"
-    });
-  });
-
   describe("after a successful handshake", function() {
     beforeEach(function() {
       Pusher.Protocol.processHandshake.andReturn({
