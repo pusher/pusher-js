@@ -1,6 +1,6 @@
 # Pusher Javascript Client
 
-This library is an open source client that allows Javascript clients to connect to the [Pusher webservice](http://pusherapp.com/). It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
+This library is an open source client that allows Javascript web browser clients to connect to the [Pusher](http://pusher.com/) WebSocket API. It also supports fallback to HTTP connection transports. It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
 
 We have included the source code for following libraries:
 
@@ -12,7 +12,10 @@ They both include their own licences.
 
 The following topics are covered:
 
+* Installation
+* Initialization
 * Configuration
+* Global configuration
 * Connection
 * Socket ids
 * Subscribing to channels (public and private)
@@ -21,13 +24,42 @@ The following topics are covered:
   * Per-channel
 * Default events
 
+## Installation
+
+### CDN
+
+```html
+<script src="//js.pusher.com/3.0/pusher.min.js"></script>
+```
+
+### Bower
+
+```
+bower install pusher
+```
+
+### NPM
+
+```
+npm install pusher-js
+```
+
+## Initialization
+
+```js
+var pusher = new Pusher(APP_KEY);
+```
+
 ## Configuration
 
 There are a number of configuration parameters which can be set for the Pusher client, which can be passed as an object to the Pusher constructor, i.e.:
 
-    var pusher = new Pusher(API_KEY, {
-        authEndpoint: "http://example.com/pusher/auth"
-    });
+```js
+var pusher = new Pusher(APP_KEY, {
+    authEndpoint: "http://example.com/pusher/auth",
+    encrypted: true
+});
+```
 
 For most users, there is little need to change these. See [client API guide](http://pusher.com/docs/client_api_guide/client_connect) for more details.
 
@@ -100,6 +132,24 @@ After this time (in miliseconds) without any messages received from the server, 
 #### `pongTimeout` (Integer)
 
 Time before the connection is terminated after sending a ping message. Default is 30000 (30s). Low values will cause false disconnections, if latency is high.
+
+## Global configuration
+
+### `Pusher.enableLogging` (Boolean)
+
+Enables logging to the browser console via calls to `window.console.log`.
+
+### `Pusher.log` (Function)
+
+Assign a custom log handler for the Pusher library logging. For example:
+
+```js
+Pusher.log = function(msg) {
+  console.log(msg);
+};
+```
+
+By setting the `log` property you also override the use of `Pusher.enableLogging`.
 
 ## Connection
 
