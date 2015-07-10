@@ -89,6 +89,16 @@
 
   Pusher.instances = [];
   Pusher.isReady = false;
+  
+  Pusher.enableLogging = false;
+
+  if (window.console && window.console.log) {
+    Pusher.log = function(message) {
+      if (Pusher.enableLogging === true) {
+        window.console.log(message);
+      }
+    };
+  }
 
   // To receive log output provide a Pusher.log function, for example
   // Pusher.log = function(m){console.log(m)}

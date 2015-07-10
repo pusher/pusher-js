@@ -1,9 +1,10 @@
 describe("Pusher", function() {
-  var _isReady, _instances;
+  var _isReady, _instances, _enableLogging;
 
   beforeEach(function() {
     _instances = Pusher.instances;
     _isReady = Pusher.isReady;
+    _enableLogging = Pusher.enableLogging;
     Pusher.isReady = false;
     Pusher.instances = [];
 
@@ -32,6 +33,43 @@ describe("Pusher", function() {
   afterEach(function() {
     Pusher.instances = _instances;
     Pusher.isReady = _isReady;
+    Pusher.enableLogging = _enableLogging;
+  });
+
+describe("Pusher.enableLogging", function() {
+    
+    var _nativeConsoleLog;
+    var _consoleLogCalls;
+    
+    beforeEach(function() {
+      _consoleLogCalls = [];
+      
+      _nativeConsoleLog = window.console.log;
+      window.console.log = function() {
+        _consoleLogCalls.push(arguments);
+      };
+    });
+    
+    afterEach(function() {
+      window.console.log = _nativeConsoleLog;
+    });
+    
+    it("should be disabled by default", function() {
+      expect(Pusher.enableLogging).toEqual(false);
+    });
+    
+    it("should not log to the console if set to false", function() {
+      var pusher = new Pusher();
+
+      expect(_consoleLogCalls.length).toEqual(0);
+    });
+    
+    it("should log to the console if set to true", function() {
+      Pusher.enableLogging = true;
+      var pusher = new Pusher();
+
+      expect(_consoleLogCalls.length).toBeGreaterThan(0);
+    });
   });
 
   describe("app key validation", function() {
