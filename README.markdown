@@ -13,7 +13,6 @@ They both include their own licences.
 The following topics are covered:
 
 * Installation
-* Initialization
 * Configuration
 * Global configuration
 * Connection
@@ -27,6 +26,7 @@ The following topics are covered:
 ## Installation
 
 ### CDN
+Via the Pusher CDN:
 
 ```html
 <script src="//js.pusher.com/3.0/pusher.min.js"></script>
@@ -34,8 +34,14 @@ The following topics are covered:
 
 ### Bower
 
+Or via [Bower](http://bower.io/):
+
 ```
 bower install pusher
+```
+
+```html
+<script src="bower_components/dist/pusher.min.js"></script>
 ```
 
 ### NPM
@@ -44,13 +50,13 @@ bower install pusher
 npm install pusher-js
 ```
 
-## Initialization
+## Configuration
+
+The simplest configuration requires passing only the application key.
 
 ```js
 var pusher = new Pusher(APP_KEY);
 ```
-
-## Configuration
 
 There are a number of configuration parameters which can be set for the Pusher client, which can be passed as an object to the Pusher constructor, i.e.:
 

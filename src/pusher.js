@@ -1,5 +1,9 @@
 ;(function() {
   function Pusher(app_key, options) {
+    if (!this instanceof Pusher) {
+      return new Pusher(arguments);
+    }
+
     checkAppKey(app_key);
     options = options || {};
 
@@ -95,6 +99,14 @@
   if (window.console && window.console.log) {
     Pusher.log = function(message) {
       if (Pusher.enableLogging === true) {
+        window.console.log(message);
+      }
+    };
+  }
+
+  if (window.console && window.console.log) {
+    Pusher.log = function(message) {
+      if (Pusher.enableLogging) {
         window.console.log(message);
       }
     };
