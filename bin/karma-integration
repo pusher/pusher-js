@@ -2,22 +2,16 @@
 
 require "rubygems"
 require "bundler/setup"
+require File.expand_path('../../support/run_commands', __FILE__)
 
 debug = ARGV.any? { |arg| arg == "--debug" }
 params = !debug ? " > /dev/null 2>&1" : ""
 
-commands = [
+run_commands ["./bin/build"]
+
+test_cmds = [
   "bundle exec jbundle server #{params}",
-  "karma start spec/karma/config/integration.js"
+  "./node_modules/karma/bin/karma start spec/karma/config/integration.js"
 ]
 
-pids = commands.map { |cmd|
-  spawn(cmd)
-}
-
-begin
-  Process.waitall
-rescue Interrupt => e
-  pids.each { |pid| Process.kill("INT", pid) }
-  Process.waitall
-end
+run_commands test_cmds

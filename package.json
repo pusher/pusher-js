@@ -1,0 +1,37 @@
+{
+  "name": "pusher-js",
+  "version": "3.0.0",
+  "description": "Pusher JavaScript library for the browser",
+  "main": "dist/pusher.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pusher/pusher-js.git"
+  },
+  "keywords": [
+    "pusher",
+    "websocket",
+    "http",
+    "fallback",
+    "events",
+    "pubsub"
+  ],
+  "author": "Pusher",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pusher/pusher-js/issues"
+  },
+  "homepage": "https://github.com/pusher/pusher-js",
+  "devDependencies": {
+    "jshint": "~2.6.3",
+    "karma": "~0.12.0",
+    "karma-jasmine": "~0.1.0",
+    "karma-chrome-launcher": "^0.1.7",
+    "karma-coverage": "^0.2.7",
+    "karma-firefox-launcher": "^0.1.4",
+    "karma-opera-launcher": "^0.1.0",
+    "karma-safari-launcher": "^0.1.1"
+  }
+}

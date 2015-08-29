@@ -1,16 +1,24 @@
 require 'yaml'
-CONFIG = YAML.load_file('config/config.yml')[(ENV['ENVIRONMENT'] || 'development').to_sym]
+require 'json'
+
+ENVIRONMENT = (ENV['ENVIRONMENT'] || 'development').to_sym
+VERSION = JSON.load(::File.read('package.json'))['version']
+CONFIG = YAML.load_file('config/config.yml')[ENVIRONMENT]
+
 # JBundle configuration file
 # https://github.com/ismasan/jbundle
 
-target_dir './dist'
+target_dir './target'
 
 src_dir './src'
 
-version '2.2.4'
+version VERSION, directory: false
 
 bundle 'pusher.js' do
   license 'pusher-licence.js'
+
+  file 'build/umd_header.js'
+
   file 'pusher.js'
 
   file 'utils/timers.js'
@@ -65,12 +73,8 @@ bundle 'pusher.js' do
   file 'channels/channels.js'
 
   file 'pusher_authorizer.js'
-end
 
-bundle 'flashfallback.js' do
-  license 'web-socket-js-licence.js'
-  file 'web-socket-js/swfobject.js'
-  file 'web-socket-js/web_socket.js'
+  file 'build/umd_footer.js'
 end
 
 bundle 'sockjs.js' do
@@ -97,9 +101,6 @@ bundle 'xdr.js' do
 end
 
 file 'json2.js'
-
-# Just copy this file across
-file 'web-socket-js/WebSocketMainInsecure.swf' => 'WebSocketMain.swf'
 
 # Runs for every bundle and license source.
 filter do |src, config|

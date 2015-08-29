@@ -49,7 +49,7 @@ describe("StrategyBuilder", function() {
 
   it("should construct a cached strategy", function() {
     var strategy = Pusher.StrategyBuilder.build([
-      [":def_transport", "sub", "flash", 2, { disableFlash: true }],
+      [":def_transport", "sub", "xhr_streaming", 2],
       [":def", "strategy", [":cached", 1234, ":sub"]]
     ], { encrypted: true });
     expect(strategy).toEqual(jasmine.any(Pusher.CachedStrategy));
@@ -59,7 +59,7 @@ describe("StrategyBuilder", function() {
 
   it("should construct a first connected strategy", function() {
     var strategy = Pusher.StrategyBuilder.build([
-      [":def_transport", "sub", "flash", 2, { disableFlash: true }],
+      [":def_transport", "sub", "xhr_streaming", 2],
       [":def", "strategy", [":first_connected", ":sub"]]
     ]);
     expect(strategy).toEqual(jasmine.any(Pusher.FirstConnectedStrategy));
@@ -68,7 +68,7 @@ describe("StrategyBuilder", function() {
   it("should construct a best connected ever strategy", function() {
     var strategy = Pusher.StrategyBuilder.build([
       [":def_transport", "one", "ws", 1, {}],
-      [":def_transport", "two", "flash", 2, {}],
+      [":def_transport", "two", "xhr_streaming", 2, {}],
       [":def_transport", "three", "sockjs", 3, {}],
       [":def", "strategy", [":best_connected_ever", ":one", ":two", ":three"]]
     ]);

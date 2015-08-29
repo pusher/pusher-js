@@ -5,7 +5,6 @@ describeIntegration("Falling back", function() {
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
-    spyOn(Pusher.FlashTransport, "isSupported").andReturn(false);
     spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
     spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
     spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);

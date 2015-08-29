@@ -8,7 +8,6 @@ module.exports = function(config) {
       .concat(require(__dirname + "/../files/unit_tests")),
     exclude: [
       'src/sockjs/**/*',
-      'src/web-socket-js/**/*'
     ],
 
     preprocessors: {
@@ -32,6 +31,6 @@ module.exports = function(config) {
     browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
     captureTimeout: 60000,
 
-    singleRun: false
+    singleRun: true
   });
 };

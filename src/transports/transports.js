@@ -21,45 +21,6 @@
     }
   });
 
-  /** Flash transport using the WebSocket protocol. */
-  Pusher.FlashTransport = new Pusher.Transport({
-    file: "flashfallback",
-    urls: Pusher.URLSchemes.flash,
-    handlesActivityChecks: false,
-    supportsPing: false,
-
-    isSupported: function() {
-      try {
-        return Boolean(new ActiveXObject('ShockwaveFlash.ShockwaveFlash'));
-      } catch (e1) {
-        try {
-          var nav = Pusher.Util.getNavigator();
-          return Boolean(
-            nav &&
-            nav.mimeTypes &&
-            nav.mimeTypes["application/x-shockwave-flash"] !== undefined
-          );
-        } catch (e2) {
-          return false;
-        }
-      }
-    },
-    beforeInitialize: function() {
-      if (window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR === undefined) {
-        window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-      }
-      window.WEB_SOCKET_SWF_LOCATION =
-        Pusher.Dependencies.getRoot({ encrypted: this.options.encrypted }) +
-        "/WebSocketMain.swf";
-    },
-    isInitialized: function() {
-      return window.FlashWebSocket !== undefined;
-    },
-    getSocket: function(url) {
-      return new FlashWebSocket(url);
-    }
-  });
-
   /** SockJS transport. */
   Pusher.SockJSTransport = new Pusher.Transport({
     file: "sockjs",

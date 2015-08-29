@@ -1,12 +1,9 @@
 describe("Default", function() {
   describe("strategy", function() {
-    function buildTest(ws, flash) {
-      it("should be supported when ws=" + ws + " and flash=" + flash, function() {
+    function buildTest(ws) {
+      it("should be supported when ws=" + ws, function() {
         if (ws) {
           spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-        }
-        if (flash) {
-          spyOn(Pusher.FlashTransport, "isSupported").andReturn(true);
         }
         var strategy = Pusher.StrategyBuilder.build(
           Pusher.getDefaultStrategy(Pusher.getGlobalConfig())
@@ -16,9 +13,7 @@ describe("Default", function() {
     }
 
     for (var ws = 0; ws <= 1; ws++) {
-      for (var flash = 0; flash <= 1; flash++) {
-        buildTest(ws, flash);
-      }
+      buildTest(ws);
     }
   });
 });

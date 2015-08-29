@@ -194,7 +194,7 @@
 
   prototype.unsubscribe = function(channel_name) {
     var channel = this.channels.remove(channel_name);
-    if (this.connection.state === 'connected') {
+    if (channel && this.connection.state === 'connected') {
       channel.unsubscribe();
     }
   };

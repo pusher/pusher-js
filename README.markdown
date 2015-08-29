@@ -4,7 +4,6 @@ This library is an open source client that allows Javascript clients to connect 
 
 We have included the source code for following libraries:
 
-* web-socket-js
 * sockjs-client
 
 They both include their own licences.
@@ -83,32 +82,28 @@ Allows connecting to a different datacenter by setting up correct hostnames and 
     // will connect to the 'eu' cluster
     var pusher = new Pusher(API_KEY, { cluster: "eu" });
 
-#### `disableFlash` (Boolean)
-
-Disables Flash, leaving only WebSockets and HTTP fallback.
-
 #### `disableStats` (Boolean)
 
 Disables stats collection, so that connection metrics are not submitted to Pusher’s servers.
 
 #### `enabledTransports` (Array)
 
-Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `flash`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
+Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
 
     // will only use WebSockets
     var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
 
 #### `disabledTransports` (Array)
 
-Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `flash`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
+Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
 
-    // will use all transports except for flash
-    var pusher = new Pusher(API_KEY, { disabledTransports: ["flash"] });
+    // will use all transports except for sockjs
+    var pusher = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
 
     // will only use WebSockets
     var pusher = new Pusher(API_KEY, {
-      enabledTransports: ["ws", "flash"],
-      disabledTransports: ["flash"]
+      enabledTransports: ["ws", "xhr_streaming"],
+      disabledTransports: ["xhr_streaming"]
     });
 
 #### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
@@ -129,7 +124,7 @@ Time before the connection is terminated after sending a ping message. Default i
 
 ## Connection
 
-A websocket (or Flash Fallback) connection is established by providing your API key to the constructor function:
+A connection to Pusher is established by providing your API key to the constructor function:
 
     var socket = new Pusher(API_KEY);
 
@@ -235,7 +230,7 @@ There are a number of events which are used internally, but can also be of use e
 * connection_established
 * subscribe
 
-## Self-serving JS and Flash files
+## Self-serving JS files
 
 You can host JavaScript files yourself, but it's a bit more complicated than putting them somewhere and just linking `pusher.js` in the source of your website. Because pusher-js loads fallback files dynamically, the dependency loader must be configured correctly or it will be using `js.pusher.com`.
 
@@ -243,16 +238,12 @@ First, make sure you expose all files from the `dist` directory. They need to be
 
     http://example.com/pusher-js/2.1.3/pusher.js
     http://example.com/pusher-js/2.1.3/json2.js
-    http://example.com/pusher-js/2.1.3/flashfallback.js
-    http://example.com/pusher-js/2.1.3/WebSocketMain.swf
     http://example.com/pusher-js/2.1.3/sockjs.js
 
 Minified files should have `.min` in names, as in the `dist` directory:
 
     http://example.com/pusher-js/2.1.3/pusher.min.js
     http://example.com/pusher-js/2.1.3/json2.min.js
-    http://example.com/pusher-js/2.1.3/flashfallback.min.js
-    http://example.com/pusher-js/2.1.3/WebSocketMain.swf
     http://example.com/pusher-js/2.1.3/sockjs.min.js
 
 Then after loading `pusher.js`, but before connecting, you need to overwrite the dependency loader by executing following piece of code:
@@ -290,16 +281,6 @@ In order to build the minified versions:
 
 If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
 
-## How to install Flash SDK
-
-Download [Flex 4 SDK](http://sourceforge.net/adobe/flexsdk/wiki/Download%20Flex%204/ - if it returns an swf file, open it in the browser and you'll be greeted by the downloader).
-
-Unzip the SDK and move it somewhere (e.g. `/usr/local/flex`, so that executables are in `/usr/local/flex/bin`) and add it to the path:
-
-    export PATH=/usr/local/flex/bin:$PATH
-
-Now scripts should be able to pick up all the tools needed to build Flash files.
-
 ## Building
 
 `./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
@@ -327,7 +308,7 @@ Building everything from scratch is useful when you update submodules, which nee
 
     bin/build
 
-This will clean web-socket-js and sockjs-client submodules, check out last committed revisions, rebuild Flash fallback files and then run JBundle. Don't run this command if you have uncommitted changes in any of submodules, since it might overwrite them.
+This will clean sockjs-client submodule, check out last committed revision, rebuild SockJS fallback files and then run JBundle. Don't run this command if you have uncommitted changes in any of submodules, since it might overwrite them.
 
 ## Testing
 
@@ -370,7 +351,7 @@ There's also a JSHint watch, which will validate JS files on save.
 
 Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install karma npm modules
 
-    npm install -g karma karma-coverage karma-jasmine karma-chrome-launcher karma-firefox-launcher karma-opera-launcher karma-safari-launcher
+    npm install
 
 Then start the server, run one of following commands:
 

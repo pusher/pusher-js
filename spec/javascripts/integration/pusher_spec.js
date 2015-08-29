@@ -15,7 +15,6 @@ describeIntegration("Pusher", function() {
 
   var TRANSPORTS = {
     "ws": Pusher.WSTransport,
-    "flash": Pusher.FlashTransport,
     "sockjs": Pusher.SockJSTransport,
     "xhr_streaming": Pusher.XHRStreamingTransport,
     "xhr_polling": Pusher.XHRPollingTransport,
@@ -100,7 +99,25 @@ describeIntegration("Pusher", function() {
         expect(received).toBe(null);
       });
     });
+
+    it("should handle unsubscribing as an idempotent operation", function() {
+      var pusher = getPusher();
+      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
+
+      var onSubscribed = jasmine.createSpy("onSubscribed");
+      subscribe(pusher, channelName, onSubscribed);
+
+      waitsFor(function() {
+        return onSubscribed.calls.length;
+      }, "subscription to succeed", 10000);
+      runs(function() {
+        pusher.unsubscribe(channelName);
+        pusher.unsubscribe(channelName);
+        pusher.unsubscribe(channelName);
+      });
+    });
   }
+
 
   function buildClientEventsTests(getPusher1, getPusher2, prefix) {
     it("should receive a client event sent by another connection", function() {
@@ -499,9 +516,6 @@ describeIntegration("Pusher", function() {
 
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
-
-  // buildIntegrationTests("flash", false);
-  // buildIntegrationTests("flash", true);
 
   if (Pusher.Util.isXHRSupported()) {
     // CORS-compatible browsers

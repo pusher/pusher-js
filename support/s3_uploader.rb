@@ -21,7 +21,7 @@ class S3Uploader
     versions.each do |v|
       bucket = config[:bucket]
 
-      files = Dir.glob("#{dist_dir}/#{v}/*")
+      files = Dir.glob("#{dist_dir}/*")
 
       AWS::S3::Base.establish_connection!(
         :access_key_id     => config[:access_key_id],
