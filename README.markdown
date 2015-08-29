@@ -24,7 +24,7 @@ The following topics are covered:
 
 ## Installation
 
-Via the Pusher CDN:
+Via the Pusher CDN (or [CDNJS](https://cdnjs.com/libraries/pusher)):
 
 ```html
 <script src="//js.pusher.com/3.0/pusher.min.js"></script>
