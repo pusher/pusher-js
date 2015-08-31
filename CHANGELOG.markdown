@@ -4,7 +4,7 @@
 
 [NEW] Introduce package.json, pusher-js will be published on NPM !
 
-[NEW] added header/footer for UMD, allows CommonJS loaded to use pusher-js
+[NEW] added header/footer for UMD, allows CommonJS loaders to use pusher-js
 
 [CHANGED] Remove the Flash fallback
 
