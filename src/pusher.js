@@ -94,19 +94,11 @@
   Pusher.instances = [];
   Pusher.isReady = false;
   
-  Pusher.enableLogging = false;
+  Pusher.logToConsole = false;
 
   if (window.console && window.console.log) {
     Pusher.log = function(message) {
-      if (Pusher.enableLogging === true) {
-        window.console.log(message);
-      }
-    };
-  }
-
-  if (window.console && window.console.log) {
-    Pusher.log = function(message) {
-      if (Pusher.enableLogging) {
+      if (Pusher.logToConsole === true) {
         window.console.log(message);
       }
     };

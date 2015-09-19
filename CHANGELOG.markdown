@@ -2,7 +2,7 @@
 
 ## 3.1.0-pre
 
-[NEW] Added Pusher.enableLogging to log to console as a short-hand for writing a Pusher.log function to do so
+[NEW] Added Pusher.logToConsole to log to console as a short-hand for writing a Pusher.log function to do so
 
 ## 3.0.0 (2015-04-23)
 

@@ -1,10 +1,10 @@
 describe("Pusher", function() {
-  var _isReady, _instances, _enableLogging;
+  var _isReady, _instances, _logToConsole;
 
   beforeEach(function() {
     _instances = Pusher.instances;
     _isReady = Pusher.isReady;
-    _enableLogging = Pusher.enableLogging;
+    _logToConsole = Pusher.logToConsole;
     Pusher.isReady = false;
     Pusher.instances = [];
 
@@ -33,10 +33,10 @@ describe("Pusher", function() {
   afterEach(function() {
     Pusher.instances = _instances;
     Pusher.isReady = _isReady;
-    Pusher.enableLogging = _enableLogging;
+    Pusher.logToConsole = _logToConsole;
   });
 
-describe("Pusher.enableLogging", function() {
+describe("Pusher.logToConsole", function() {
     
     var _nativeConsoleLog;
     var _consoleLogCalls;
@@ -55,7 +55,7 @@ describe("Pusher.enableLogging", function() {
     });
     
     it("should be disabled by default", function() {
-      expect(Pusher.enableLogging).toEqual(false);
+      expect(Pusher.logToConsole).toEqual(false);
     });
     
     it("should not log to the console if set to false", function() {
@@ -65,7 +65,7 @@ describe("Pusher.enableLogging", function() {
     });
     
     it("should log to the console if set to true", function() {
-      Pusher.enableLogging = true;
+      Pusher.logToConsole = true;
       var pusher = new Pusher();
 
       expect(_consoleLogCalls.length).toBeGreaterThan(0);

@@ -141,7 +141,7 @@ Time before the connection is terminated after sending a ping message. Default i
 
 ## Global configuration
 
-### `Pusher.enableLogging` (Boolean)
+### `Pusher.logToConsole` (Boolean)
 
 Enables logging to the browser console via calls to `window.console.log`.
 
