@@ -93,12 +93,12 @@
 
   Pusher.instances = [];
   Pusher.isReady = false;
-
-  Pusher.verbose = false;
+  
+  Pusher.logToConsole = false;
 
   if (window.console && window.console.log) {
     Pusher.log = function(message) {
-      if (Pusher.verbose) {
+      if (Pusher.logToConsole === true) {
         window.console.log(message);
       }
     };
