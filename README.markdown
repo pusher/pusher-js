@@ -26,6 +26,7 @@ The following topics are covered:
 ## Installation
 
 ### CDN
+
 Via the Pusher CDN:
 
 ```html
@@ -89,6 +90,17 @@ Allows passing additional data to authorizers. Supports query string params and 
       auth: {
         params: { foo: "bar" },
         headers: { baz: "boo" }
+      }
+    });
+
+##### CSRF
+
+If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
+
+    var pusher = new Pusher(API_KEY, {
+      auth: {
+        params: { foo: "bar" },
+        headers: { "X-CSRF-Token": "SOME_CSRF_TOKEN" }
       }
     });
 
