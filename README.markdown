@@ -45,6 +45,7 @@ and then
 
 ```html
 <script src="bower_components/dist/pusher.min.js"></script>
+```
 
 ### NPM
 
