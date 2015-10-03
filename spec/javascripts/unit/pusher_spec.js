@@ -23,7 +23,7 @@ describe("Pusher", function() {
     spyOn(Pusher, "Channel").andCallFake(function(name, _) {
       return Pusher.Mocks.getChannel(name);
     });
-    spyOn(Pusher.Util, "getDocument").andReturn({
+    spyOn(Pusher.runtime, "getDocument").andReturn({
       location: {
         protocol: "http:"
       }
@@ -153,7 +153,7 @@ describe("Pusher.logToConsole", function() {
       });
 
       it("should be on when using https", function() {
-        Pusher.Util.getDocument.andReturn({
+        Pusher.runtime.getDocument.andReturn({
           location: {
             protocol: "https:"
           }
@@ -239,7 +239,7 @@ describe("Pusher.logToConsole", function() {
       });
 
       it("should be encrypted when using HTTPS", function() {
-        Pusher.Util.getDocument.andReturn({
+        Pusher.runtime.getDocument.andReturn({
           location: {
             protocol: "https:"
           }

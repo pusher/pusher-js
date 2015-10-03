@@ -51,7 +51,7 @@ var JSON;JSON||(JSON={}),function(){function str(a,b){var c,d,e,f,g=gap,h,i=b[a]
 //     [*] Including lib/index.js
 // Public object
 var SockJS = (function(){
-              var _document = document;
+              var _document = Pusher.runtime.getDocument();
               var _window = window;
               var utils = {};
 

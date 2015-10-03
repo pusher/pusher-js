@@ -333,7 +333,7 @@ describe("Transports", function() {
       describe("isSupported hook", function() {
         it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Pusher.runtime, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
@@ -343,7 +343,7 @@ describe("Transports", function() {
 
         it("should return true if window.XDomainRequest exists, document protocol is https: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Pusher.runtime, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }
@@ -353,7 +353,7 @@ describe("Transports", function() {
 
         it("should return false if window.XDomainRequest exists, document protocol is http: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Pusher.runtime, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
@@ -363,7 +363,7 @@ describe("Transports", function() {
 
         it("should return false if window.XDomainRequest exists, document protocol is https: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Pusher.runtime, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }

@@ -5,16 +5,19 @@
    * - online - when browser goes online
    * - offline - when browser goes offline
    */
+
+  var _window = Pusher.runtime.getWindow();
+
   function NetInfo() {
     Pusher.EventsDispatcher.call(this);
 
     var self = this;
     // This is okay, as IE doesn't support this stuff anyway.
-    if (window.addEventListener !== undefined) {
-      window.addEventListener("online", function() {
+    if (_window.addEventListener !== undefined) {
+      _window.addEventListener("online", function() {
         self.emit('online');
       }, false);
-      window.addEventListener("offline", function() {
+      _window.addEventListener("offline", function() {
         self.emit('offline');
       }, false);
     }
@@ -32,10 +35,10 @@
    * @return {Boolean}
    */
   prototype.isOnline = function() {
-    if (window.navigator.onLine === undefined) {
+    if (_window.navigator.onLine === undefined) {
       return true;
     } else {
-      return window.navigator.onLine;
+      return _window.navigator.onLine;
     }
   };
 

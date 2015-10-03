@@ -49,7 +49,7 @@
         if (typeof arguments[i] === "string") {
           m.push(arguments[i]);
         } else {
-          if (window.JSON === undefined) {
+          if (Pusher.runtime.getWindow().JSON === undefined) {
             m.push(arguments[i].toString());
           } else {
             m.push(JSON.stringify(arguments[i]));
@@ -131,7 +131,7 @@
      */
     apply: function(array, f, context) {
       for (var i = 0; i < array.length; i++) {
-        f.call(context || window, array[i], i, array);
+        f.call(context || Pusher.runtime.getWindow(), array[i], i, array);
       }
     },
 
@@ -283,17 +283,9 @@
       };
     },
 
-    getWindow: function() {
-      return window;
-    },
-
-    getDocument: function() {
-      return document;
-    },
-
     getLocalStorage: function() {
       try {
-        return window.localStorage;
+        return Pusher.runtime.getWindow().localStorage;
       } catch (e) {
         return undefined;
       }
@@ -318,7 +310,7 @@
     },
 
     removeWindowListener: function(event, listener) {
-      var _window = Pusher.Util.getWindow();
+      var _window = Pusher.runtime.getWindow();
       if (_window.addEventListener !== undefined) {
         _window.removeEventListener(event, listener, false);
       } else {
@@ -327,14 +319,14 @@
     },
 
     isXHRSupported: function() {
-      var XHR = window.XMLHttpRequest;
+      var XHR = Pusher.runtime.getWindow().XMLHttpRequest;
       return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
     },
 
     isXDRSupported: function(encrypted) {
       var protocol = encrypted ? "https:" : "http:";
-      var documentProtocol = Pusher.Util.getDocument().location.protocol;
-      return Boolean(window.XDomainRequest) && documentProtocol === protocol;
+      var documentProtocol = Pusher.runtime.getDocument().location.protocol;
+      return Boolean(Pusher.runtime.getWindow().XDomainRequest) && documentProtocol === protocol;
     }
   };
 }).call(this);

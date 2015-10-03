@@ -9,7 +9,7 @@ describe("DependencyLoader", function() {
     doc = Pusher.Mocks.getDocument();
     doc.location.protocol = "http:";
 
-    spyOn(Pusher.Util, "getDocument").andReturn(doc);
+    spyOn(Pusher.runtime, "getDocument").andReturn(doc);
     spyOn(Pusher, "ScriptRequest").andCallFake(function() {
       scriptRequest = Pusher.Mocks.getScriptRequest();
       return scriptRequest;

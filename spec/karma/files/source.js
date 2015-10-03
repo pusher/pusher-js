@@ -1,4 +1,5 @@
 module.exports = [
+  'src/runtime.js',
   'src/pusher.js',
 
   'src/utils/timers.js',

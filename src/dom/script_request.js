@@ -13,6 +13,8 @@
   }
   var prototype = ScriptRequest.prototype;
 
+  var _document = Pusher.runtime.getDocument();
+
   /** Sends the actual script request.
    *
    * @param {ScriptReceiver} receiver
@@ -21,7 +23,7 @@
     var self = this;
     var errorString = "Error loading " + self.src;
 
-    self.script = document.createElement("script");
+    self.script = _document.createElement("script");
     self.script.id = receiver.id;
     self.script.src = self.src;
     self.script.type = "text/javascript";
@@ -44,9 +46,9 @@
     }
 
     // Opera<11.6 hack for missing onerror callback
-    if (self.script.async === undefined && document.attachEvent &&
+    if (self.script.async === undefined && _document.attachEvent &&
         /opera/i.test(navigator.userAgent)) {
-      self.errorScript = document.createElement("script");
+      self.errorScript = _document.createElement("script");
       self.errorScript.id = receiver.id + "_error";
       self.errorScript.text = receiver.name + "('" + errorString + "');";
       self.script.async = self.errorScript.async = false;
@@ -54,7 +56,7 @@
       self.script.async = true;
     }
 
-    var head = document.getElementsByTagName('head')[0];
+    var head = _document.getElementsByTagName('head')[0];
     head.insertBefore(self.script, head.firstChild);
     if (self.errorScript) {
       head.insertBefore(self.errorScript, self.script.nextSibling);
