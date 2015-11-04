@@ -215,6 +215,16 @@ It is possible to access all subscribed channels through the `allChannels` funct
     }
     console.groupEnd();
 
+## Unsubscribing from channels
+
+To unsubscribe from a channel, invoke the `unsubscribe` method of your socket object:
+
+    socket.unsubscribe('my-channel');
+
+Unsubscribing from private channels is done in exactly the same way, just with the additional `private-` prefix:
+
+    socket.unsubscribe('private-my-channel');
+
 ## Binding to events
 
 Events can be bound to at 2 levels, the global, and per channel. They take a very similar form to the way events are handled in jQuery.
