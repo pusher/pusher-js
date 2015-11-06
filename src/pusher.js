@@ -89,6 +89,13 @@
       self.connect();
     }
   }
+
+  if (typeof(Window) !== 'undefined' && this instanceof Window && !!this.document){
+    Pusher.runtime = new _PusherRuntimes.Browser(this);
+  } else {
+    Pusher.runtime = new _PusherRuntimes.NonBrowser(this);
+  }
+
   var prototype = Pusher.prototype;
 
   Pusher.instances = [];
@@ -96,10 +103,12 @@
   
   Pusher.logToConsole = false;
 
-  if (window.console && window.console.log) {
+  var _window = Pusher.runtime.getWindow();
+
+  if (_window.console && _window.console.log) {
     Pusher.log = function(message) {
       if (Pusher.logToConsole === true) {
-        window.console.log(message);
+        _window.console.log(message);
       }
     };
   }
@@ -115,11 +124,11 @@
 
   Pusher.warn = function() {
     var message = Pusher.Util.stringify.apply(this, arguments);
-    if (window.console) {
-      if (window.console.warn) {
-        window.console.warn(message);
-      } else if (window.console.log) {
-        window.console.log(message);
+    if (_window.console) {
+      if (_window.console.warn) {
+        _window.console.warn(message);
+      } else if (_window.console.log) {
+        _window.console.log(message);
       }
     }
     if (Pusher.log) {
@@ -204,7 +213,7 @@
   };
 
   prototype.isEncrypted = function() {
-    if (Pusher.Util.getDocument().location.protocol === "https:") {
+    if (Pusher.runtime.getDocument().location.protocol === "https:") {
       return true;
     } else {
       return Boolean(this.config.encrypted);

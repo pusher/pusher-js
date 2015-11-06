@@ -1,10 +1,13 @@
 ;(function() {
+
+  var _window = Pusher.runtime.getWindow();
+
   // We need to bind clear functions this way to avoid exceptions on IE8
   function clearTimeout(timer) {
-    window.clearTimeout(timer);
+    _window.clearTimeout(timer);
   }
   function clearInterval(timer) {
-    window.clearInterval(timer);
+    _window.clearInterval(timer);
   }
 
   function GenericTimer(set, clear, delay, callback) {

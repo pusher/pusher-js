@@ -152,7 +152,7 @@ describe("JSONP Authorizer", function() {
     document.createElement.andReturn(script);
     document.getElementsByTagName.andReturn([]);
     document.documentElement = documentElement;
-    spyOn(Pusher.Util, "getDocument").andReturn(document);
+    spyOn(Pusher.runtime, "getDocument").andReturn(document);
 
     spyOn(Pusher, "warn");
     authorizer.authorize("1.23", function() {});

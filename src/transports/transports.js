@@ -1,4 +1,6 @@
 (function() {
+  var _window = Pusher.runtime.getWindow();
+
   /** WebSocket transport.
    *
    * Uses native WebSocket implementation, including MozWebSocket supported by
@@ -10,13 +12,13 @@
     supportsPing: false,
 
     isInitialized: function() {
-      return Boolean(window.WebSocket || window.MozWebSocket);
+      return Boolean(_window.WebSocket || _window.MozWebSocket);
     },
     isSupported: function() {
-      return Boolean(window.WebSocket || window.MozWebSocket);
+      return Boolean(_window.WebSocket || _window.MozWebSocket);
     },
     getSocket: function(url) {
-      var Constructor = window.WebSocket || window.MozWebSocket;
+      var Constructor = _window.WebSocket || _window.MozWebSocket;
       return new Constructor(url);
     }
   });
@@ -32,7 +34,7 @@
       return true;
     },
     isInitialized: function() {
-      return window.SockJS !== undefined;
+      return _window.SockJS !== undefined;
     },
     getSocket: function(url, options) {
       return new SockJS(url, null, {

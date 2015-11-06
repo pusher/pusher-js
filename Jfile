@@ -18,7 +18,7 @@ bundle 'pusher.js' do
   license 'pusher-licence.js'
 
   file 'build/umd_header.js'
-
+  file 'runtime.js'
   file 'pusher.js'
 
   file 'utils/timers.js'

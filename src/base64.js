@@ -43,7 +43,7 @@
     return chars.join('');
   };
 
-  var btoa = window.btoa || function(b) {
+  var btoa = Pusher.runtime.getWindow().btoa || function(b) {
     return b.replace(/[\s\S]{1,3}/g, cb_encode);
   };
 

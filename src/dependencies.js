@@ -16,7 +16,7 @@
 
   // Allows calling a function when the document body is available
    function onDocumentBody(callback) {
-    if (document.body) {
+    if (Pusher.runtime.getDocument().body) {
       callback();
     } else {
       setTimeout(function() {
@@ -29,9 +29,13 @@
     onDocumentBody(initialize);
   }
 
-  if (!window.JSON) {
+  if (typeof(Pusher.runtime.getWindow().JSON)=== undefined) {
     Pusher.Dependencies.load("json2", {}, initializeOnDocumentBody);
   } else {
-    initializeOnDocumentBody();
+    if (Pusher.runtime instanceof _PusherRuntimes.Browser){
+      initializeOnDocumentBody();
+    } else {
+      initialize();
+    }
   }
 })();

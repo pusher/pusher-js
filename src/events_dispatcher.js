@@ -1,4 +1,5 @@
 ;(function() {
+  var _window = Pusher.runtime.getWindow();
   /** Manages callback bindings and event emitting.
    *
    * @param Function failThrough called when no listeners are bound to an event
@@ -40,7 +41,7 @@
     var callbacks = this.callbacks.get(eventName);
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i].fn.call(callbacks[i].context || window, data);
+        callbacks[i].fn.call(callbacks[i].context || _window, data);
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);
