@@ -1,87 +1,90 @@
-;(function() {
-  /** Provides base public channel interface with an event emitter.
-   *
-   * Emits:
-   * - pusher:subscription_succeeded - after subscribing successfully
-   * - other non-internal events
-   *
-   * @param {String} name
-   * @param {Pusher} pusher
-   */
-  function Channel(name, pusher) {
-    Pusher.EventsDispatcher.call(this, function(event, data) {
-      Pusher.debug('No callbacks on ' + name + ' for ' + event);
-    });
+var EventsDispatcher = require('../events_dispatcher');
+var Util = require('../util');
+var Errors = require('../errors');
+var Logger = require('../logger');
 
-    this.name = name;
-    this.pusher = pusher;
-    this.subscribed = false;
+/** Provides base public channel interface with an event emitter.
+ *
+ * Emits:
+ * - pusher:subscription_succeeded - after subscribing successfully
+ * - other non-internal events
+ *
+ * @param {String} name
+ * @param {Pusher} pusher
+ */
+function Channel(name, pusher) {
+  EventsDispatcher.call(this, function(event, data) {
+    Logger.debug('No callbacks on ' + name + ' for ' + event);
+  });
+
+  this.name = name;
+  this.pusher = pusher;
+  this.subscribed = false;
+}
+var prototype = Channel.prototype;
+Util.extend(prototype, EventsDispatcher.prototype);
+
+/** Skips authorization, since public channels don't require it.
+ *
+ * @param {Function} callback
+ */
+prototype.authorize = function(socketId, callback) {
+  return callback(false, {});
+};
+
+/** Triggers an event */
+prototype.trigger = function(event, data) {
+  if (event.indexOf("client-") !== 0) {
+    throw new Errors.BadEventName(
+      "Event '" + event + "' does not start with 'client-'"
+    );
   }
-  var prototype = Channel.prototype;
-  Pusher.Util.extend(prototype, Pusher.EventsDispatcher.prototype);
+  return this.pusher.send_event(event, data, this.name);
+};
 
-  /** Skips authorization, since public channels don't require it.
-   *
-   * @param {Function} callback
-   */
-  prototype.authorize = function(socketId, callback) {
-    return callback(false, {});
-  };
+/** Signals disconnection to the channel. For internal use only. */
+prototype.disconnect = function() {
+  this.subscribed = false;
+};
 
-  /** Triggers an event */
-  prototype.trigger = function(event, data) {
-    if (event.indexOf("client-") !== 0) {
-      throw new Pusher.Errors.BadEventName(
-        "Event '" + event + "' does not start with 'client-'"
-      );
+/** Handles an event. For internal use only.
+ *
+ * @param {String} event
+ * @param {*} data
+ */
+prototype.handleEvent = function(event, data) {
+  if (event.indexOf("pusher_internal:") === 0) {
+    if (event === "pusher_internal:subscription_succeeded") {
+      this.subscribed = true;
+      this.emit("pusher:subscription_succeeded", data);
     }
-    return this.pusher.send_event(event, data, this.name);
-  };
+  } else {
+    this.emit(event, data);
+  }
+};
 
-  /** Signals disconnection to the channel. For internal use only. */
-  prototype.disconnect = function() {
-    this.subscribed = false;
-  };
+/** Sends a subscription request. For internal use only. */
+prototype.subscribe = function() {
+  var self = this;
 
-  /** Handles an event. For internal use only.
-   *
-   * @param {String} event
-   * @param {*} data
-   */
-  prototype.handleEvent = function(event, data) {
-    if (event.indexOf("pusher_internal:") === 0) {
-      if (event === "pusher_internal:subscription_succeeded") {
-        this.subscribed = true;
-        this.emit("pusher:subscription_succeeded", data);
-      }
+  self.authorize(self.pusher.connection.socket_id, function(error, data) {
+    if (error) {
+      self.handleEvent('pusher:subscription_error', data);
     } else {
-      this.emit(event, data);
+      self.pusher.send_event('pusher:subscribe', {
+        auth: data.auth,
+        channel_data: data.channel_data,
+        channel: self.name
+      });
     }
-  };
+  });
+};
 
-  /** Sends a subscription request. For internal use only. */
-  prototype.subscribe = function() {
-    var self = this;
+/** Sends an unsubscription request. For internal use only. */
+prototype.unsubscribe = function() {
+  this.pusher.send_event('pusher:unsubscribe', {
+    channel: this.name
+  });
+};
 
-    self.authorize(self.pusher.connection.socket_id, function(error, data) {
-      if (error) {
-        self.handleEvent('pusher:subscription_error', data);
-      } else {
-        self.pusher.send_event('pusher:subscribe', {
-          auth: data.auth,
-          channel_data: data.channel_data,
-          channel: self.name
-        });
-      }
-    });
-  };
-
-  /** Sends an unsubscription request. For internal use only. */
-  prototype.unsubscribe = function() {
-    this.pusher.send_event('pusher:unsubscribe', {
-      channel: this.name
-    });
-  };
-
-  Pusher.Channel = Channel;
-}).call(this);
+module.exports = Channel;

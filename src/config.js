@@ -1,27 +1,27 @@
-;(function() {
-  Pusher.getGlobalConfig = function() {
-    return {
-      wsHost: Pusher.host,
-      wsPort: Pusher.ws_port,
-      wssPort: Pusher.wss_port,
-      httpHost: Pusher.sockjs_host,
-      httpPort: Pusher.sockjs_http_port,
-      httpsPort: Pusher.sockjs_https_port,
-      httpPath: Pusher.sockjs_path,
-      statsHost: Pusher.stats_host,
-      authEndpoint: Pusher.channel_auth_endpoint,
-      authTransport: Pusher.channel_auth_transport,
-      // TODO make this consistent with other options in next major version
-      activity_timeout: Pusher.activity_timeout,
-      pong_timeout: Pusher.pong_timeout,
-      unavailable_timeout: Pusher.unavailable_timeout
-    };
-  };
+var Defaults = require('./defaults');
 
-  Pusher.getClusterConfig = function(clusterName) {
-    return {
-      wsHost: "ws-" + clusterName + ".pusher.com",
-      httpHost: "sockjs-" + clusterName + ".pusher.com"
-    };
+exports.getGlobalConfig = function() {
+  return {
+    wsHost: Defaults.host,
+    wsPort: Defaults.ws_port,
+    wssPort: Defaults.wss_port,
+    httpHost: Defaults.sockjs_host,
+    httpPort: Defaults.sockjs_http_port,
+    httpsPort: Defaults.sockjs_https_port,
+    httpPath: Defaults.sockjs_path,
+    statsHost: Defaults.stats_host,
+    authEndpoint: Defaults.channel_auth_endpoint,
+    authTransport: Defaults.channel_auth_transport,
+    // TODO make this consistent with other options in next major version
+    activity_timeout: Defaults.activity_timeout,
+    pong_timeout: Defaults.pong_timeout,
+    unavailable_timeout: Defaults.unavailable_timeout
   };
-}).call(this);
+};
+
+exports.getClusterConfig = function(clusterName) {
+  return {
+    wsHost: "ws-" + clusterName + ".pusher.com",
+    httpHost: "sockjs-" + clusterName + ".pusher.com"
+  };
+};

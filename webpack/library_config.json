@@ -1,0 +1,39 @@
+{
+  "development": {
+    "js": {
+      "host": "foo",
+      "cdn": {
+        "http": "http://localhost:5555/",
+        "https": "http://localhost:5555/"
+      }
+    }
+  },
+  "staging": {
+    "js": {
+      "cdn": {
+        "http": "http://js.staging.pusher.com/",
+        "https": "https://pusher-js-staging-pusher.netdna-ssl.com"
+      }
+    },
+    "s3": {
+      "cf_distribution_id": "<YOUR AWS CLOUD FRONT DISTRIBUTION ID>",
+      "bucket": "com.pusher.staging.js",
+      "access_key_id": null,
+      "secret_access_key": null
+    }
+  },
+  "production": {
+    "js": {
+      "cdn": {
+        "http": "http://js.pusher.com/",
+        "https": "https://js.pusher.com/"
+      }
+    },
+    "s3": {
+      "cf_distribution_id": "<YOUR AWS CLOUD FRONT DISTRIBUTION ID>",
+      "bucket": "com.pusher.js",
+      "access_key_id": null,
+      "secret_access_key": null
+    }
+  }
+}

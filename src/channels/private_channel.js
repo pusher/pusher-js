@@ -1,24 +1,25 @@
-;(function() {
-  /** Extends public channels to provide private channel interface.
-   *
-   * @param {String} name
-   * @param {Pusher} pusher
-   */
-  function PrivateChannel(name, pusher) {
-    Pusher.Channel.call(this, name, pusher);
-  }
-  var prototype = PrivateChannel.prototype;
-  Pusher.Util.extend(prototype, Pusher.Channel.prototype);
+var Channel = require('./channel');
+var Util = require('../util');
 
-  /** Authorizes the connection to use the channel.
-   *
-   * @param  {String} socketId
-   * @param  {Function} callback
-   */
-  prototype.authorize = function(socketId, callback) {
-    var authorizer = new Pusher.Channel.Authorizer(this, this.pusher.config);
-    return authorizer.authorize(socketId, callback);
-  };
+/** Extends public channels to provide private channel interface.
+ *
+ * @param {String} name
+ * @param {Pusher} pusher
+ */
+function PrivateChannel(name, pusher) {
+  Channel.call(this, name, pusher);
+}
+var prototype = PrivateChannel.prototype;
+Util.extend(prototype, Channel.prototype);
 
-  Pusher.PrivateChannel = PrivateChannel;
-}).call(this);
+/** Authorizes the connection to use the channel.
+ *
+ * @param  {String} socketId
+ * @param  {Function} callback
+ */
+prototype.authorize = function(socketId, callback) {
+  var authorizer = new Channel.Authorizer(this, this.pusher.config);
+  return authorizer.authorize(socketId, callback);
+};
+
+module.exports = PrivateChannel;

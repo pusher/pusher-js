@@ -1,37 +1,34 @@
-;(function() {
-  Pusher.DependenciesReceivers = new Pusher.ScriptReceiverFactory(
-    "_pusher_dependencies", "Pusher.DependenciesReceivers"
-  );
-  Pusher.Dependencies = new Pusher.DependencyLoader({
-    cdn_http: Pusher.cdn_http,
-    cdn_https: Pusher.cdn_https,
-    version: Pusher.VERSION,
-    suffix: Pusher.dependency_suffix,
-    receivers: Pusher.DependenciesReceivers
-  });
+var DependencyLoader = require('./dependency_loader');
+var Defaults = require('./defaults');
+var DependenciesReceivers = require('./dependencies_receivers');
 
-  function initialize() {
-    Pusher.ready();
-  }
+var Dependencies = new DependencyLoader({
+  cdn_http: Defaults.cdn_http,
+  cdn_https: Defaults.cdn_https,
+  version: Defaults.VERSION,
+  suffix: Defaults.dependency_suffix,
+  receivers: DependenciesReceivers
+});
 
-  // Allows calling a function when the document body is available
-   function onDocumentBody(callback) {
-    if (document.body) {
-      callback();
-    } else {
-      setTimeout(function() {
-        onDocumentBody(callback);
-      }, 0);
-    }
-  }
-
-  function initializeOnDocumentBody() {
-    onDocumentBody(initialize);
-  }
-
-  if (!window.JSON) {
-    Pusher.Dependencies.load("json2", {}, initializeOnDocumentBody);
+// Allows calling a function when the document body is available
+ function onDocumentBody(callback) {
+  if (document.body) {
+    callback();
   } else {
-    initializeOnDocumentBody();
+    setTimeout(function() {
+      onDocumentBody(callback);
+    }, 0);
   }
-})();
+}
+
+Dependencies.preparePusher = function(initialize){
+  if (!window.JSON) {
+    Dependencies.load("json2", {}, function(){
+      onDocumentBody(initialize);
+    });
+  } else {
+      onDocumentBody(initialize);
+  }
+}
+
+module.exports = Dependencies;
