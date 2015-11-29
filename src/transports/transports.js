@@ -2,6 +2,7 @@ var Transport = require('./transport');
 var URLSchemes = require('./url_schemes');
 var Util = require('../util');
 var Dependencies = require('../dependencies');
+var HTTP = require('../http/http');
 
 /** WebSocket transport.
  *
@@ -58,31 +59,29 @@ var httpConfiguration = {
   handlesActivityChecks: false,
   supportsPing: true,
   isInitialized: function() {
-    return Boolean(Pusher.HTTP.Socket);
+    return true;
   }
 };
 
 var streamingConfiguration = Util.extend(
   { getSocket: function(url) {
-      return Pusher.HTTP.getStreamingSocket(url);
+      return HTTP.getStreamingSocket(url);
     }
   },
   httpConfiguration
 );
 var pollingConfiguration = Util.extend(
   { getSocket: function(url) {
-      return Pusher.HTTP.getPollingSocket(url);
+      return HTTP.getPollingSocket(url);
     }
   },
   httpConfiguration
 );
 
 var xhrConfiguration = {
-  file: "xhr",
   isSupported: Util.isXHRSupported
 };
 var xdrConfiguration = {
-  file: "xdr",
   isSupported: function(environment) {
     return Util.isXDRSupported(environment.encrypted);
   }
