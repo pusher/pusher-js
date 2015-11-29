@@ -72,7 +72,6 @@ exports.getDefaultStrategy = function(config) {
 
     [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
     [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-    [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
     [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
     [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
     [":def_transport", "xhr_polling", "xhr_polling", 1, ":sockjs_options"],
@@ -80,7 +79,6 @@ exports.getDefaultStrategy = function(config) {
 
     [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
     [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
-    [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
 
     [":def", "streaming_loop", [":sequential", ":timeouts",
       [":if", [":is_supported", ":xhr_streaming"],

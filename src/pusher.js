@@ -9,7 +9,6 @@ var PeriodicTimer = require('./utils/timers').PeriodicTimer;
 var Defaults = require('./defaults');
 var DefaultConfig = require('./config');
 var Logger = require('./logger');
-var Dependencies = require('./dependencies');
 
 function Pusher(app_key, options) {
 

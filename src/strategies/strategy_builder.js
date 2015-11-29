@@ -25,7 +25,6 @@ module.exports = StrategyBuilder = {
 
 var transports = {
   ws: Transports.WSTransport,
-  sockjs: Transports.SockJSTransport,
   xhr_streaming: Transports.XHRStreamingTransport,
   xdr_streaming: Transports.XDRStreamingTransport,
   xhr_polling: Transports.XHRPollingTransport,

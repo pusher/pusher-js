@@ -1,6 +1,5 @@
 var Util = require('../util');
 var EventsDispatcher = require('../events_dispatcher');
-var Dependencies = require('../dependencies');
 var Logger = require('../logger');
 
 /** Provides universal API for transport connections.
@@ -77,25 +76,6 @@ prototype.initialize = function() {
 
   if (self.hooks.isInitialized()) {
     self.changeState("initialized");
-  } else if (self.hooks.file) {
-    console.log("self.hooks", self.hooks);
-    self.changeState("initializing");
-    Dependencies.load(
-      self.hooks.file,
-      { encrypted: self.options.encrypted },
-      function(error, callback) {
-        if (self.hooks.isInitialized()) {
-          self.changeState("initialized");
-          callback(true);
-        } else {
-          if (error) {
-            self.onError(error);
-          }
-          self.onClose();
-          callback(false);
-        }
-      }
-    );
   } else {
     self.onClose();
   }

@@ -1,7 +1,6 @@
 var Transport = require('./transport');
 var URLSchemes = require('./url_schemes');
 var Util = require('../util');
-var Dependencies = require('../dependencies');
 var HTTP = require('../http/http');
 
 /** WebSocket transport.
@@ -23,34 +22,6 @@ exports.WSTransport = new Transport({
   getSocket: function(url) {
     var Constructor = window.WebSocket || window.MozWebSocket;
     return new Constructor(url);
-  }
-});
-
-/** SockJS transport. */
-exports.SockJSTransport = new Transport({
-  file: "sockjs",
-  urls: URLSchemes.sockjs,
-  handlesActivityChecks: true,
-  supportsPing: false,
-
-  isSupported: function() {
-    return true;
-  },
-  isInitialized: function() {
-    return window.SockJS !== undefined;
-  },
-  getSocket: function(url, options) {
-    return new SockJS(url, null, {
-      js_path: Dependencies.getPath("sockjs", {
-        encrypted: options.encrypted
-      }),
-      ignore_null_origin: options.ignoreNullOrigin
-    });
-  },
-  beforeOpen: function(socket, path) {
-    socket.send(JSON.stringify({
-      path: path
-    }));
   }
 });
 

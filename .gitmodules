@@ -1,3 +1,0 @@
-[submodule "src/sockjs"]
-	path = src/sockjs
-	url = git://github.com/pusher/sockjs-client.git

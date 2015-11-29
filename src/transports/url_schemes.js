@@ -24,15 +24,6 @@ module.exports = {
       return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
     }
   },
-  /** SockJS URL scheme. Supplies the path separately from the initial URL. */
-  sockjs: {
-    getInitial: function(key, params) {
-      return getGenericURL("http", params, params.httpPath || "/pusher", "");
-    },
-    getPath: function(key, params) {
-      return getGenericPath(key);
-    }
-  },
   /** URL scheme for HTTP transports. Basically, WS scheme with a prefix. */
   http: {
     getInitial: function(key, params) {
