@@ -10,25 +10,4 @@ var Dependencies = new DependencyLoader({
   receivers: DependenciesReceivers
 });
 
-// Allows calling a function when the document body is available
- function onDocumentBody(callback) {
-  if (document.body) {
-    callback();
-  } else {
-    setTimeout(function() {
-      onDocumentBody(callback);
-    }, 0);
-  }
-}
-
-Dependencies.preparePusher = function(initialize){
-  if (!window.JSON) {
-    Dependencies.load("json2", {}, function(){
-      onDocumentBody(initialize);
-    });
-  } else {
-      onDocumentBody(initialize);
-  }
-}
-
 module.exports = Dependencies;

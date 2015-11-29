@@ -114,7 +114,17 @@ Pusher.ready = function() {
   }
 };
 
-Dependencies.preparePusher(Pusher.ready);
+function onDocumentBody(callback) {
+  if (document.body) {
+    callback();
+  } else {
+    setTimeout(function() {
+      onDocumentBody(callback);
+    }, 0);
+  }
+}
+
+onDocumentBody(Pusher.ready);
 
 Pusher.logToConsole = false;
 
