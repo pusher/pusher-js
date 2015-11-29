@@ -1,3 +1,6 @@
+var Timers = require('utils/timers');
+var PeriodicTimer = Timers.PeriodicTimer;
+
 describe("PeriodicTimer", function() {
   var callback;
   var timer;
@@ -6,7 +9,7 @@ describe("PeriodicTimer", function() {
     jasmine.Clock.useMock();
 
     callback = jasmine.createSpy("callback");
-    timer = new Pusher.PeriodicTimer(123, callback);
+    timer = new PeriodicTimer(123, callback);
   });
 
   afterEach(function() {

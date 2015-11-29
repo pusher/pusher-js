@@ -1,7 +1,10 @@
+var Mocks = require('mocks');
+var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy');
+
 describe("BestConnectedEverStrategy", function() {
   beforeEach(function() {
-    this.substrategies = Pusher.Mocks.getStrategies([true, true, true]);
-    this.strategy = new Pusher.BestConnectedEverStrategy(this.substrategies);
+    this.substrategies = Mocks.getStrategies([true, true, true]);
+    this.strategy = new BestConnectedEverStrategy(this.substrategies);
 
     this.callback = jasmine.createSpy();
   });
@@ -20,7 +23,7 @@ describe("BestConnectedEverStrategy", function() {
     describe("after establishing a connection", function() {
       var transport1;
       beforeEach(function() {
-        transport1 = Pusher.Mocks.getTransport();
+        transport1 = Mocks.getTransport();
         transport1.priority = 7;
         this.substrategies[0]._callback(null, { transport: transport1 });
       });
@@ -39,7 +42,7 @@ describe("BestConnectedEverStrategy", function() {
       });
 
       it("should call back again if another substrategy succeeds", function() {
-        var transport2 = Pusher.Mocks.getTransport();
+        var transport2 = Mocks.getTransport();
         transport2.priority = 19;
 
         this.substrategies[2]._callback(null, { transport: transport2 });
@@ -62,7 +65,7 @@ describe("BestConnectedEverStrategy", function() {
       });
 
       it("should not pass errors after one substrategy succeeded", function() {
-        var transport = Pusher.Mocks.getTransport();
+        var transport = Mocks.getTransport();
         this.substrategies[0]._callback(null, { transport: transport });
         expect(this.callback.calls.length).toEqual(1);
 
@@ -77,7 +80,7 @@ describe("BestConnectedEverStrategy", function() {
   describe("on abort", function() {
     it("should abort non-failed substrategies", function() {
       var runner = this.strategy.connect(0, this.callback);
-      var transport = Pusher.Mocks.getTransport();
+      var transport = Mocks.getTransport();
 
       this.substrategies[1]._callback(true);
       this.substrategies[2]._callback(null, { transport: transport });

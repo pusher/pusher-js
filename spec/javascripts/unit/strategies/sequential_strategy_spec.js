@@ -1,22 +1,25 @@
+var Mocks = require('mocks');
+var SequentialStrategy = require('strategies/sequential_strategy');
+
 describe("SequentialStrategy", function() {
   beforeEach(function() {
     this.callback = jasmine.createSpy();
-    this.substrategies = Pusher.Mocks.getStrategies([true, true]);
-    this.strategy = new Pusher.SequentialStrategy(this.substrategies, {});
+    this.substrategies = Mocks.getStrategies([true, true]);
+    this.strategy = new SequentialStrategy(this.substrategies, {});
 
     jasmine.Clock.useMock();
   });
 
   describe("after calling isSupported", function() {
     it("should return true when one of substrategies is supported", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, true]);
-      var strategy = new Pusher.SequentialStrategy(substrategies, {});
+      var substrategies = Mocks.getStrategies([false, true]);
+      var strategy = new SequentialStrategy(substrategies, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when none of substrategies are supported", function() {
-      var substrategies = Pusher.Mocks.getStrategies([false, false]);
-      var strategy = new Pusher.SequentialStrategy(substrategies, {});
+      var substrategies = Mocks.getStrategies([false, false]);
+      var strategy = new SequentialStrategy(substrategies, {});
       expect(strategy.isSupported()).toBe(false);
     });
   });
@@ -52,7 +55,7 @@ describe("SequentialStrategy", function() {
     });
 
     it("should support looping", function() {
-      var strategy = new Pusher.SequentialStrategy(this.substrategies, {
+      var strategy = new SequentialStrategy(this.substrategies, {
         loop: true
       });
       var runner = strategy.connect(0, this.callback);
@@ -99,7 +102,7 @@ describe("SequentialStrategy", function() {
     });
 
     it("should stop retrying with timeouts", function() {
-      var strategy = new Pusher.SequentialStrategy(this.substrategies, {
+      var strategy = new SequentialStrategy(this.substrategies, {
         timeout: 100
       });
       var runner = strategy.connect(0, this.callback);
@@ -115,8 +118,8 @@ describe("SequentialStrategy", function() {
 
   describe("on error", function() {
     it("should wait for the timeout before calling back", function() {
-      var substrategy = Pusher.Mocks.getStrategy(true);
-      var strategy = new Pusher.SequentialStrategy([substrategy], {
+      var substrategy = Mocks.getStrategy(true);
+      var strategy = new SequentialStrategy([substrategy], {
         timeout: 100
       });
 
@@ -130,8 +133,8 @@ describe("SequentialStrategy", function() {
     });
 
     it("should not wait for the timeout before calling back if failFast is on", function() {
-      var substrategy = Pusher.Mocks.getStrategy(true);
-      var strategy = new Pusher.SequentialStrategy([substrategy], {
+      var substrategy = Mocks.getStrategy(true);
+      var strategy = new SequentialStrategy([substrategy], {
         timeout: 100,
         failFast: true
       });
@@ -144,10 +147,10 @@ describe("SequentialStrategy", function() {
 
   describe("on timeout", function() {
     it("should try substrategies with exponential timeouts", function() {
-      var substrategies = Pusher.Mocks.getStrategies(
+      var substrategies = Mocks.getStrategies(
         [true, true, true, true, true]
       );
-      var strategy = new Pusher.SequentialStrategy(substrategies, {
+      var strategy = new SequentialStrategy(substrategies, {
         timeout: 100,
         timeoutLimit: 400
       });

@@ -1,3 +1,12 @@
+var Mocks = require('mocks')
+var Util = require('util');
+var Logger = require('logger');
+var StrategyBuilder = require('strategies/strategy_builder');
+var Defaults = require('defaults');
+var DefaultConfig = require('config');
+var TimelineSender = require('timeline/timeline_sender');
+var Pusher = require('pusher');
+
 describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
 
@@ -8,22 +17,22 @@ describe("Pusher", function() {
     Pusher.isReady = false;
     Pusher.instances = [];
 
-    spyOn(Pusher.StrategyBuilder, "build").andCallFake(function(definition, options) {
-      var strategy = Pusher.Mocks.getStrategy(true);
+    spyOn(StrategyBuilder, "build").andCallFake(function(definition, options) {
+      var strategy = Mocks.getStrategy(true);
       strategy.definition = definition;
       strategy.options = options;
       return strategy;
     });
     spyOn(Pusher, "ConnectionManager").andCallFake(function(key, options) {
-      var manager = Pusher.Mocks.getConnectionManager();
+      var manager = Mocks.getConnectionManager();
       manager.key = key;
       manager.options = options;
       return manager;
     });
     spyOn(Pusher, "Channel").andCallFake(function(name, _) {
-      return Pusher.Mocks.getChannel(name);
+      return Mocks.getChannel(name);
     });
-    spyOn(Pusher.Util, "getDocument").andReturn({
+    spyOn(Util, "getDocument").andReturn({
       location: {
         protocol: "http:"
       }
@@ -37,33 +46,33 @@ describe("Pusher", function() {
   });
 
 describe("Pusher.logToConsole", function() {
-    
+
     var _nativeConsoleLog;
     var _consoleLogCalls;
-    
+
     beforeEach(function() {
       _consoleLogCalls = [];
-      
+
       _nativeConsoleLog = window.console.log;
       window.console.log = function() {
         _consoleLogCalls.push(arguments);
       };
     });
-    
+
     afterEach(function() {
       window.console.log = _nativeConsoleLog;
     });
-    
+
     it("should be disabled by default", function() {
       expect(Pusher.logToConsole).toEqual(false);
     });
-    
+
     it("should not log to the console if set to false", function() {
       Pusher.warn("test", "this is a test");
 
       expect(_consoleLogCalls.length).toEqual(0);
     });
-    
+
     it("should log to the console if set to true", function() {
       Pusher.logToConsole = true;
       Pusher.warn("test", "this is a test");
@@ -79,6 +88,12 @@ describe("Pusher.logToConsole", function() {
 
     it("should throw on an undefined key", function() {
       expect(function() { new Pusher() }).toThrow("You must pass your app key when you instantiate Pusher.");
+    });
+
+    it("should allow a hex key", function() {
+      spyOn(Logger, "warn");
+      var pusher = new Pusher("1234567890abcdef");
+      expect(Logger.warn).not.toHaveBeenCalled();
     });
   });
 
@@ -106,7 +121,7 @@ describe("Pusher.logToConsole", function() {
     });
 
     it("should pass a feature list to the timeline", function() {
-      spyOn(Pusher.Util, "getClientFeatures").andReturn(["foo", "bar"]);
+      spyOn(Util, "getClientFeatures").andReturn(["foo", "bar"]);
       var pusher = new Pusher("foo");
       expect(pusher.timeline.options.features).toEqual(["foo", "bar"]);
     });
@@ -143,7 +158,7 @@ describe("Pusher.logToConsole", function() {
       });
 
       it("should be on when using https", function() {
-        Pusher.Util.getDocument.andReturn({
+        Util.getDocument.andReturn({
           location: {
             protocol: "https:"
           }
@@ -162,21 +177,21 @@ describe("Pusher.logToConsole", function() {
       it("should pass per-connection strategy options", function() {
         pusher = new Pusher("foo", { encrypted: true });
 
-        var expectedConfig = Pusher.Util.extend(
-          Pusher.getGlobalConfig(),
+        var expectedConfig = Util.extend(
+          DefaultConfig.getGlobalConfig(),
           { encrypted: true }
         );
 
         var getStrategy = pusher.connection.options.getStrategy;
         expect(getStrategy().options).toEqual(expectedConfig);
         expect(getStrategy().definition).toEqual(
-          Pusher.getDefaultStrategy(expectedConfig)
+          Defaults.getDefaultStrategy(expectedConfig)
         );
       });
 
       it("should pass options to the strategy builder", function() {
-        var expectedConfig = Pusher.Util.extend(
-          Pusher.getGlobalConfig(),
+        var expectedConfig = Util.extend(
+          DefaultConfig.getGlobalConfig(),
           { encrypted: true }
         );
 
@@ -185,7 +200,7 @@ describe("Pusher.logToConsole", function() {
           expectedConfig
         );
         expect(getStrategy({ encrypted: true }).definition).toEqual(
-          Pusher.getDefaultStrategy(expectedConfig)
+          Defaults.getDefaultStrategy(expectedConfig)
         );
       });
     });
@@ -229,7 +244,7 @@ describe("Pusher.logToConsole", function() {
       });
 
       it("should be encrypted when using HTTPS", function() {
-        Pusher.Util.getDocument.andReturn({
+        Util.getDocument.andReturn({
           location: {
             protocol: "https:"
           }
@@ -415,9 +430,9 @@ describe("Pusher.logToConsole", function() {
     it("should log a warning to console", function() {
       var pusher = new Pusher("foo", { disableStats: true });
 
-      spyOn(Pusher, "warn");
+      spyOn(Logger, "warn");
       pusher.connection.emit("error", "something");
-      expect(Pusher.warn).toHaveBeenCalledWith("Error", "something");
+      expect(Logger.warn).toHaveBeenCalledWith("Error", "something");
     });
   });
 
@@ -428,15 +443,15 @@ describe("Pusher.logToConsole", function() {
     beforeEach(function() {
       jasmine.Clock.useMock();
 
-      timelineSender = Pusher.Mocks.getTimelineSender();
+      timelineSender = Mocks.getTimelineSender();
       spyOn(Pusher, "TimelineSender").andReturn(timelineSender);
 
       pusher = new Pusher("foo");
     });
 
     it("should be sent to stats.pusher.com by default", function() {
-      expect(Pusher.TimelineSender.calls.length).toEqual(1);
-      expect(Pusher.TimelineSender).toHaveBeenCalledWith(
+      expect(TimelineSender.calls.length).toEqual(1);
+      expect(TimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/jsonp" }
       );
     });
@@ -445,7 +460,7 @@ describe("Pusher.logToConsole", function() {
       var pusher = new Pusher("foo", {
         statsHost: "example.com"
       });
-      expect(Pusher.TimelineSender).toHaveBeenCalledWith(
+      expect(TimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "example.com", path: "/timeline/v2/jsonp" }
       );
     });
@@ -466,7 +481,7 @@ describe("Pusher.logToConsole", function() {
 
     it("should be sent every 60 seconds after calling connect", function() {
       pusher.connect();
-      expect(Pusher.TimelineSender.calls.length).toEqual(1);
+      expect(TimelineSender.calls.length).toEqual(1);
 
       pusher.connection.options.timeline.info({});
 

@@ -87,4 +87,6 @@ prototype.unsubscribe = function() {
   });
 };
 
+Channel.Authorizer = require('../pusher_authorizer');
+
 module.exports = Channel;

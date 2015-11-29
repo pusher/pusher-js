@@ -1,12 +1,17 @@
+var WSTransport = require('transports/transports').WSTransport;
+var StrategyBuilder = require('strategies/strategy_builder');
+var Defaults = require('defaults');
+var DefaultConfig = require('config');
+
 describe("Default", function() {
   describe("strategy", function() {
     function buildTest(ws) {
       it("should be supported when ws=" + ws, function() {
         if (ws) {
-          spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
+          spyOn(WSTransport, "isSupported").andReturn(true);
         }
-        var strategy = Pusher.StrategyBuilder.build(
-          Pusher.getDefaultStrategy(Pusher.getGlobalConfig())
+        var strategy = StrategyBuilder.build(
+          Defaults.getDefaultStrategy(DefaultConfig.getGlobalConfig())
         );
         expect(strategy.isSupported()).toBe(true);
       });

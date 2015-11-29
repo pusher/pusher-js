@@ -1,8 +1,13 @@
+var Channels = require('channels/channels');
+var Channel = require('channels/channel');
+var PrivateChannel = require('channels/private_channel');
+var PresenceChannel = require('channels/presence_channel');
+
 describe("Channels", function() {
   var channels;
 
   beforeEach(function() {
-    channels = new Pusher.Channels();
+    channels = new Channels();
   });
 
   describe("#add", function() {
@@ -20,15 +25,15 @@ describe("Channels", function() {
     });
 
     it("should create a regular channel when name doesn't have known prefix", function() {
-      expect(channels.add("test")).toEqual(jasmine.any(Pusher.Channel));
+      expect(channels.add("test")).toEqual(jasmine.any(Channel));
     });
 
     it("should create a private channel when name starts with 'private-'", function() {
-      expect(channels.add("private-test")).toEqual(jasmine.any(Pusher.PrivateChannel));
+      expect(channels.add("private-test")).toEqual(jasmine.any(PrivateChannel));
     });
 
     it("should create a presence channel when name starts with 'presence-'", function() {
-      expect(channels.add("presence-test")).toEqual(jasmine.any(Pusher.PresenceChannel));
+      expect(channels.add("presence-test")).toEqual(jasmine.any(PresenceChannel));
     });
   });
 

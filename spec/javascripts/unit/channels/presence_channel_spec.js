@@ -1,10 +1,17 @@
+var Mocks = require('mocks');
+var PresenceChannel = require('channels/presence_channel');
+var Channel = require('channels/channel');
+var Members = require('channels/members');
+var Authorizer = require('pusher_authorizer');
+var Errors = require('errors');
+
 describe("PresenceChannel", function() {
   var pusher;
   var channel;
 
   beforeEach(function() {
-    pusher = Pusher.Mocks.getPusher({ foo: "bar" });
-    channel = new Pusher.PresenceChannel("presence-test", pusher);
+    pusher = Mocks.getPusher({ foo: "bar" });
+    channel = new PresenceChannel("presence-test", pusher);
   });
 
   describe("after construction", function() {
@@ -17,7 +24,7 @@ describe("PresenceChannel", function() {
     });
 
     it("#members should be created", function() {
-      expect(channel.members).toEqual(jasmine.any(Pusher.Members));
+      expect(channel.members).toEqual(jasmine.any(Members));
     });
 
     it("#members should be empty", function() {
@@ -33,14 +40,14 @@ describe("PresenceChannel", function() {
     var authorizer;
 
     beforeEach(function() {
-      authorizer = Pusher.Mocks.getAuthorizer();
-      spyOn(Pusher.Channel, "Authorizer").andReturn(authorizer);
+      authorizer = Mocks.getAuthorizer();
+      spyOn("Authorizer").andReturn(authorizer);
     });
 
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(Pusher.Channel.Authorizer.calls.length).toEqual(1);
-      expect(Pusher.Channel.Authorizer).toHaveBeenCalledWith(
+      expect(Authorizer.calls.length).toEqual(1);
+      expect(Authorizer).toHaveBeenCalledWith(
         channel,
         { foo: "bar" }
       );
@@ -76,7 +83,7 @@ describe("PresenceChannel", function() {
     it("should raise an exception if the event name does not start with client-", function() {
       expect(function() {
         channel.trigger("whatever", {});
-      }).toThrow(jasmine.any(Pusher.Errors.BadEventName));
+      }).toThrow(jasmine.any(Errors.BadEventName));
     });
 
     it("should call send_event on connection", function() {
@@ -100,8 +107,8 @@ describe("PresenceChannel", function() {
     var authorizer;
 
     beforeEach(function() {
-      authorizer = Pusher.Mocks.getAuthorizer();
-      spyOn(Pusher.Channel, "Authorizer").andReturn(authorizer);
+      authorizer = Mocks.getAuthorizer();
+      spyOn(Channel, "Authorizer").andReturn(authorizer);
       channel.authorize("1.23", function() {});
       authorizer._callback(false, {
         foo: "bar",
@@ -132,7 +139,7 @@ describe("PresenceChannel", function() {
             }
           });
 
-          expect(callback).toHaveBeenCalledWith(jasmine.any(Pusher.Members));
+          expect(callback).toHaveBeenCalledWith(jasmine.any(Members));
         });
 
         it("should set #subscribed to true", function() {

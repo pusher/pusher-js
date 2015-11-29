@@ -1,10 +1,13 @@
+var Mocks = require('mocks');
+var IfStrategy = require('strategies/if_strategy');
+
 describe("IfStrategy", function() {
   var test, trueBranch, falseBranch;
   var callback;
 
   beforeEach(function() {
-    trueBranch = Pusher.Mocks.getStrategy(true);
-    falseBranch = Pusher.Mocks.getStrategy(true);
+    trueBranch = Mocks.getStrategy(true);
+    falseBranch = Mocks.getStrategy(true);
     callback = jasmine.createSpy();
   });
 
@@ -13,23 +16,23 @@ describe("IfStrategy", function() {
 
     beforeEach(function() {
       test = function() { return true; };
-      strategy = new Pusher.IfStrategy(test, trueBranch, falseBranch);
+      strategy = new IfStrategy(test, trueBranch, falseBranch);
     });
 
     describe("#isSupported", function() {
       it("should return true if the 'true' branch is supported", function() {
-        trueBranch = Pusher.Mocks.getStrategy(true);
-        falseBranch = Pusher.Mocks.getStrategy(false);
-        var strategy = new Pusher.IfStrategy(
+        trueBranch = Mocks.getStrategy(true);
+        falseBranch = Mocks.getStrategy(false);
+        var strategy = new IfStrategy(
           test, trueBranch, falseBranch
         );
         expect(strategy.isSupported()).toBe(true);
       });
 
       it("should return false if the 'true' branch is not supported", function() {
-        trueBranch = Pusher.Mocks.getStrategy(false);
-        falseBranch = Pusher.Mocks.getStrategy(true);
-        var strategy = new Pusher.IfStrategy(
+        trueBranch = Mocks.getStrategy(false);
+        falseBranch = Mocks.getStrategy(true);
+        var strategy = new IfStrategy(
           test, trueBranch, falseBranch
         );
         expect(strategy.isSupported()).toBe(false);
@@ -88,23 +91,23 @@ describe("IfStrategy", function() {
 
     beforeEach(function() {
       test = function() { return false; };
-      strategy = new Pusher.IfStrategy(test, trueBranch, falseBranch);
+      strategy = new IfStrategy(test, trueBranch, falseBranch);
     });
 
     describe("after calling isSupported", function() {
       it("should return true if the 'false' branch is supported", function() {
-        trueBranch = Pusher.Mocks.getStrategy(false);
-        falseBranch = Pusher.Mocks.getStrategy(true);
-        var strategy = new Pusher.IfStrategy(
+        trueBranch = Mocks.getStrategy(false);
+        falseBranch = Mocks.getStrategy(true);
+        var strategy = new IfStrategy(
           test, trueBranch, falseBranch
         );
         expect(strategy.isSupported()).toBe(true);
       });
 
       it("should return false if the 'false' branch is not supported", function() {
-        trueBranch = Pusher.Mocks.getStrategy(true);
-        falseBranch = Pusher.Mocks.getStrategy(false);
-        var strategy = new Pusher.IfStrategy(
+        trueBranch = Mocks.getStrategy(true);
+        falseBranch = Mocks.getStrategy(false);
+        var strategy = new IfStrategy(
           test, trueBranch, falseBranch
         );
         expect(strategy.isSupported()).toBe(false);

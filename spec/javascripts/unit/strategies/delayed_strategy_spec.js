@@ -1,7 +1,10 @@
+var Mocks = require('mocks');
+var DelayedStrategy = require('strategies/delayed_strategy');
+
 describe("DelayedStrategy", function() {
   beforeEach(function() {
-    this.substrategy = Pusher.Mocks.getStrategy(true);
-    this.strategy = new Pusher.DelayedStrategy(this.substrategy, { delay: 0 });
+    this.substrategy = Mocks.getStrategy(true);
+    this.strategy = new DelayedStrategy(this.substrategy, { delay: 0 });
     this.callback = jasmine.createSpy();
 
     jasmine.Clock.useMock();
@@ -9,21 +12,21 @@ describe("DelayedStrategy", function() {
 
   describe("after calling isSupported", function() {
     it("should return true if substrategy is supported", function() {
-      var substrategy = Pusher.Mocks.getStrategy(true);
-      var strategy = new Pusher.DelayedStrategy(substrategy, {});
+      var substrategy = Mocks.getStrategy(true);
+      var strategy = new DelayedStrategy(substrategy, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false if substrategy is not supported", function() {
-      var substrategy = Pusher.Mocks.getStrategy(false);
-      var strategy = new Pusher.DelayedStrategy(substrategy, {});
+      var substrategy = Mocks.getStrategy(false);
+      var strategy = new DelayedStrategy(substrategy, {});
       expect(strategy.isSupported()).toBe(false);
     });
   });
 
   describe("on connect", function() {
     it("should connect to substrategy after a delay", function() {
-      var strategy = new Pusher.DelayedStrategy(this.substrategy, {
+      var strategy = new DelayedStrategy(this.substrategy, {
         delay: 100
       });
 

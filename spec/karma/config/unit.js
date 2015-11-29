@@ -1,17 +1,21 @@
+var path = require('path');
+var webpack = require('webpack');
+
 module.exports = function(config) {
   config.set({
     basePath: '../../../',
     frameworks: ["jasmine"],
 
     files: []
-      .concat(require(__dirname + "/../files/source"))
       .concat(require(__dirname + "/../files/unit_tests")),
     exclude: [
       'src/sockjs/**/*',
     ],
 
     preprocessors: {
-      '**/src/**/*.js': 'coverage'
+      '**/src/**/*.js': ['coverage', 'webpack'],
+      '**/spec/javascripts/helpers/*.js': ['webpack'],
+      '**/spec/javascripts/unit/**/*.js': ['webpack']
     },
     reporters: ['progress', 'coverage'],
 
@@ -19,6 +23,22 @@ module.exports = function(config) {
       type : 'html',
       dir : 'coverage/'
     },
+
+    webpack: {
+      resolve: {
+        root: [__dirname + '/../../../src',  __dirname + '/../../javascripts/helpers']
+      }
+    },
+
+    plugins: [
+      'karma-webpack', 
+      'karma-coverage', 
+      'karma-jasmine',
+      'karma-chrome-launcher',
+      'karma-firefox-launcher',
+      // 'karma-opera-launcher',
+      'karma-safari-launcher'
+    ],    
 
     port: 9876,
     runnerPort: 9100,
@@ -28,7 +48,9 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+    browsers: ['Chrome', 'Firefox', 
+    // 'Opera', 
+    'Safari'],
     captureTimeout: 60000,
 
     singleRun: true

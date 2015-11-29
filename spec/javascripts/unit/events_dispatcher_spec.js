@@ -1,8 +1,11 @@
+var EventsDispatcher = require('events_dispatcher');
+var Util = require('util');
+
 describe("EventsDispatcher", function() {
   var dispatcher;
 
   beforeEach(function() {
-    dispatcher = new Pusher.EventsDispatcher();
+    dispatcher = new EventsDispatcher();
   });
 
   describe("#bind", function() {
@@ -234,38 +237,38 @@ describe("EventsDispatcher", function() {
 
   describe("#emit", function() {
     it("should call all listeners", function() {
-      var callbacks = Pusher.Util.map([1, 2, 3], function(i) {
+      var callbacks = Util.map([1, 2, 3], function(i) {
         return jasmine.createSpy("onTest" + i);
       });
-      Pusher.Util.apply(callbacks, function(callback) {
+      Util.apply(callbacks, function(callback) {
         dispatcher.bind("test", callback);
       });
 
       dispatcher.emit("test", { x: 1 });
 
-      Pusher.Util.apply(callbacks, function(callback) {
+      Util.apply(callbacks, function(callback) {
         expect(callback).toHaveBeenCalledWith({ x: 1 });
       });
     });
 
     it("should call all global listeners", function() {
-      var callbacks = Pusher.Util.map([1, 2, 3], function(i) {
+      var callbacks = Util.map([1, 2, 3], function(i) {
         return jasmine.createSpy("onGlobal" + i);
       });
-      Pusher.Util.apply(callbacks, function(callback) {
+      Util.apply(callbacks, function(callback) {
         dispatcher.bind_all(callback);
       });
 
       dispatcher.emit("g", { y: 2 });
 
-      Pusher.Util.apply(callbacks, function(callback) {
+      Util.apply(callbacks, function(callback) {
         expect(callback).toHaveBeenCalledWith("g", { y: 2 });
       });
     });
 
     it("should call fail through function when there are no listeners for an event", function() {
       var failThrough = jasmine.createSpy("failThrough");
-      var dispatcher = new Pusher.EventsDispatcher(failThrough);
+      var dispatcher = new EventsDispatcher(failThrough);
 
       dispatcher.emit("nothing", "data");
 
@@ -275,7 +278,7 @@ describe("EventsDispatcher", function() {
     it("should call fail through function after removing all event's listeners", function() {
       var failThrough = jasmine.createSpy("failThrough");
       var onEvent = jasmine.createSpy("onEvent");
-      var dispatcher = new Pusher.EventsDispatcher(failThrough);
+      var dispatcher = new EventsDispatcher(failThrough);
 
       dispatcher.bind("event", onEvent);
       dispatcher.unbind("event", onEvent);

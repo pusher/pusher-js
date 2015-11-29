@@ -1,3 +1,9 @@
+var Util = require('util');
+var Mocks = require('mocks');
+var DependencyLoader = require('dependency_loader');
+var ScriptRequest = require('dom/script_request');
+var Integration = require('integration');
+
 describe("DependencyLoader", function() {
   var doc;
   var receivers;
@@ -6,23 +12,23 @@ describe("DependencyLoader", function() {
   var loader;
 
   beforeEach(function() {
-    doc = Pusher.Mocks.getDocument();
+    doc = Mocks.getDocument();
     doc.location.protocol = "http:";
 
-    spyOn(Pusher.Util, "getDocument").andReturn(doc);
-    spyOn(Pusher, "ScriptRequest").andCallFake(function() {
-      scriptRequest = Pusher.Mocks.getScriptRequest();
+    spyOn(Util, "getDocument").andReturn(doc);
+    spyOn(ScriptRequest).andCallFake(function() {
+      scriptRequest = Mocks.getScriptRequest();
       return scriptRequest;
     });
 
     onLoaded = jasmine.createSpy("onLoaded");
 
-    loader = new Pusher.DependencyLoader({
+    loader = new DependencyLoader({
       cdn_http: "http://example.com",
       cdn_https: "https://example.com",
       version: "6.6.6",
       suffix: "-test",
-      receivers: Pusher.Integration.ScriptReceivers
+      receivers: Integration.ScriptReceivers
     });
   });
 
@@ -49,12 +55,12 @@ describe("DependencyLoader", function() {
     });
 
     it("should strip trailing slashes from the CDN url", function() {
-      var loader = new Pusher.DependencyLoader({
+      var loader = new DependencyLoader({
         cdn_http: "http://example.com/",
         cdn_https: "https://example.com/",
         version: "6.6.6",
         suffix: "-test",
-        receivers: Pusher.Integration.ScriptReceivers
+        receivers: Integration.ScriptReceivers
       });
       expect(loader.getRoot()).toEqual(
         "http://example.com/6.6.6"
@@ -85,12 +91,12 @@ describe("DependencyLoader", function() {
     });
 
     it("should strip trailing slashes from the CDN url", function() {
-      var loader = new Pusher.DependencyLoader({
+      var loader = new DependencyLoader({
         cdn_http: "http://example.com/",
         cdn_https: "https://example.com/",
         version: "6.6.6",
         suffix: "-test",
-        receivers: Pusher.Integration.ScriptReceivers
+        receivers: Integration.ScriptReceivers
       });
       expect(loader.getPath("something_else")).toEqual(
         "http://example.com/6.6.6/something_else-test.js"
@@ -102,8 +108,8 @@ describe("DependencyLoader", function() {
     it("should send an unencrypted script request when served via http", function() {
       doc.location.protocol = "http:";
       loader.load("resource", {}, onLoaded);
-      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
-      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+      expect(ScriptRequest.calls.length).toEqual(1);
+      expect(ScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource-test.js"
       );
     });
@@ -111,8 +117,8 @@ describe("DependencyLoader", function() {
     it("should send an encrypted script request when served via https", function() {
       doc.location.protocol = "https:";
       loader.load("resource", {}, onLoaded);
-      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
-      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+      expect(ScriptRequest.calls.length).toEqual(1);
+      expect(ScriptRequest).toHaveBeenCalledWith(
         "https://example.com/6.6.6/resource-test.js"
       );
     });
@@ -120,26 +126,26 @@ describe("DependencyLoader", function() {
     it("should send an encrypted script request when served via http, but passed encrypted via options", function() {
       doc.location.protocol = "http:";
       loader.load("resource", { encrypted: true }, onLoaded);
-      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
-      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+      expect(ScriptRequest.calls.length).toEqual(1);
+      expect(ScriptRequest).toHaveBeenCalledWith(
         "https://example.com/6.6.6/resource-test.js"
       );
     });
 
     it("should only send one script request per resource at a time", function() {
-      expect(Pusher.ScriptRequest.calls.length).toEqual(0);
+      expect(ScriptRequest.calls.length).toEqual(0);
 
       loader.load("resource", {}, function() {});
       loader.load("resource", {}, function() {});
       loader.load("resource", {}, function() {});
-      expect(Pusher.ScriptRequest.calls.length).toEqual(1);
-      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+      expect(ScriptRequest.calls.length).toEqual(1);
+      expect(ScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource-test.js"
       );
 
       loader.load("resource2", {}, function() {});
-      expect(Pusher.ScriptRequest.calls.length).toEqual(2);
-      expect(Pusher.ScriptRequest).toHaveBeenCalledWith(
+      expect(ScriptRequest.calls.length).toEqual(2);
+      expect(ScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource2-test.js"
       );
     });
@@ -147,7 +153,7 @@ describe("DependencyLoader", function() {
     it("should register a receiver", function() {
       loader.load("resource", {}, onLoaded);
       var receiver = scriptRequest.send.calls[0].args[0];
-      expect(Pusher.Integration.ScriptReceivers[receiver.number]).toBe(
+      expect(Integration.ScriptReceivers[receiver.number]).toBe(
         receiver.callback
       );
     });
@@ -208,7 +214,7 @@ describe("DependencyLoader", function() {
       });
 
       it("should remove the receiver", function() {
-        expect(Pusher.Integration.ScriptReceivers[receiver.number]).toBe(
+        expect(Integration.ScriptReceivers[receiver.number]).toBe(
           undefined
         );
       });

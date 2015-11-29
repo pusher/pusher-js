@@ -25,7 +25,7 @@ function Pusher(app_key, options) {
   this.key = app_key;
   this.config = Util.extend(
     DefaultConfig.getGlobalConfig(),
-    options.cluster ? Pusher.getClusterConfig(options.cluster) : {},
+    options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {},
     options
   );
 

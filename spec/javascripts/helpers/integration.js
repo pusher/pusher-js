@@ -1,3 +1,7 @@
+var Util = require('util');
+var JSONPRequest = require('jsonp/jsonp_request');
+var ScriptReceiverFactory = require('dom/script_receiver_factory');
+
 function describeIntegration(name, body) {
   if (navigator.userAgent.match(/phantomjs/i)) {
     // Don't run integration tests from Guard
@@ -6,29 +10,31 @@ function describeIntegration(name, body) {
   describe(name + " (integration)", body);
 }
 
-Pusher.Integration = {};
+var Integration = {};
 
-Pusher.Integration.API_URL = "http://js-integration-api.pusher.com";
-Pusher.Integration.API_EU_URL = "http://js-integration-api-eu.pusher.com";
-Pusher.Integration.JS_HOST = "http://localhost:5555";
+Integration.API_URL = "http://js-integration-api.pusher.com";
+Integration.API_EU_URL = "http://js-integration-api-eu.pusher.com";
+Integration.JS_HOST = "http://localhost:5555";
 
-Pusher.Integration.ScriptReceivers = new Pusher.ScriptReceiverFactory(
+Integration.ScriptReceivers = new ScriptReceiverFactory(
   "_pusher_integration_script_receivers",
   "Pusher.Integration.ScriptReceivers"
 );
 
-Pusher.Integration.getRandomName = function(prefix) {
-  return prefix + "_" + Pusher.Util.now() + "_" + Math.floor(Math.random() * 1000000);
+Integration.getRandomName = function(prefix) {
+  return prefix + "_" + Util.now() + "_" + Math.floor(Math.random() * 1000000);
 };
 
-Pusher.Integration.sendAPIMessage = function(request) {
-  var jsonpRequest = new Pusher.JSONPRequest(request.url, {
+Integration.sendAPIMessage = function(request) {
+  var jsonpRequest = new JSONPRequest(request.url, {
     channel: request.channel,
     event: request.event,
     data: request.data
   });
-  var receiver = Pusher.Integration.ScriptReceivers.create(function() {
-    Pusher.Integration.ScriptReceivers.remove(receiver);
+  var receiver = Integration.ScriptReceivers.create(function() {
+    Pusher.ScriptReceivers.remove(receiver);
   });
   jsonpRequest.send(receiver);
 };
+
+module.exports = Integration;

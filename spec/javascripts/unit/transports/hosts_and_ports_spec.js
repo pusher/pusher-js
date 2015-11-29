@@ -1,10 +1,17 @@
+var Transports = require('transports/transports');
+var Mocks = require('mocks');
+var Network = require('net_info').Network;
+var Util = require('util');
+var Dependencies = require('dependencies');
+var Pusher = require('pusher');
+
 describe("Host/Port Configuration", function() {
   var transport;
   var pusher;
 
   beforeEach(function() {
-    spyOn(Pusher.Network, "isOnline").andReturn(true);
-    spyOn(Pusher.Util, "getLocalStorage").andReturn({});
+    spyOn(Network, "isOnline").andReturn(true);
+    spyOn(Util, "getLocalStorage").andReturn({});
   });
 
   afterEach(function() {
@@ -15,16 +22,16 @@ describe("Host/Port Configuration", function() {
     var _WebSocket;
 
     beforeEach(function() {
-      spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-      spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XDRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XHRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
+      spyOn(Transports.WSTransport, "isSupported").andReturn(true);
+      spyOn(Transports.XDRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XHRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XDRPollingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XHRPollingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.SockJSTransport, "isSupported").andReturn(false);
 
       _WebSocket = window.WebSocket;
       window.WebSocket = jasmine.createSpy("WebSocket").andCallFake(function() {
-        return Pusher.Mocks.getTransport();
+        return Mocks.getTransport();
       });
     });
 
@@ -73,20 +80,20 @@ describe("Host/Port Configuration", function() {
     var _SockJS;
 
     beforeEach(function() {
-      spyOn(Pusher.WSTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XDRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XDRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.XHRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
+      spyOn(Transports.WSTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XDRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XHRStreamingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XDRPollingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.XHRPollingTransport, "isSupported").andReturn(false);
+      spyOn(Transports.SockJSTransport, "isSupported").andReturn(true);
 
-      spyOn(Pusher.Dependencies, "load").andCallFake(function(file, callback) {
+      spyOn(Dependencies, "load").andCallFake(function(file, callback) {
         callback();
       });
 
       _SockJS = window.WebSocket;
       window.SockJS = jasmine.createSpy("WebSocket").andCallFake(function() {
-        return Pusher.Mocks.getTransport();
+        return Mocks.getTransport();
       });
     });
 

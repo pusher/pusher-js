@@ -26,13 +26,14 @@
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
     "jshint": "~2.6.3",
-    "karma": "~0.12.0",
-    "karma-jasmine": "~0.1.0",
+    "karma": "^0.13.15",
     "karma-chrome-launcher": "^0.1.7",
     "karma-coverage": "^0.2.7",
     "karma-firefox-launcher": "^0.1.4",
+    "karma-jasmine": "~0.1.0",
     "karma-opera-launcher": "^0.1.0",
-    "karma-safari-launcher": "^0.1.1"
+    "karma-safari-launcher": "^0.1.1",
+    "karma-webpack": "^1.7.0"
   },
   "dependencies": {
     "string-replace-webpack-plugin": "0.0.2",

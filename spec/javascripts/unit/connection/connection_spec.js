@@ -1,23 +1,27 @@
+var Mocks = require('mocks');
+var Connection = require('connection/connection');
+var Protocol = require('connection/protocol');
+
 describe("Connection", function() {
   var transport;
   var connection;
 
   beforeEach(function() {
-    transport = Pusher.Mocks.getTransport();
-    connection = new Pusher.Connection("111.22", transport);
+    transport = Mocks.getTransport();
+    connection = new Connection("111.22", transport);
   });
 
   describe("#activityTimeout", function() {
     it("should be set to undefined if the transport doesn't have a activityTimeout value", function() {
-      var transport = Pusher.Mocks.getTransport();
-      var connection = new Pusher.Connection("111.22", transport);
+      var transport = Mocks.getTransport();
+      var connection = new Connection("111.22", transport);
       expect(connection.activityTimeout).toBe(undefined);
     });
 
     it("should be set to the transport's activityTimeout value", function() {
-      var transport = Pusher.Mocks.getTransport();
+      var transport = Mocks.getTransport();
       transport.activityTimeout = 123123;
-      var connection = new Pusher.Connection("111.22", transport);
+      var connection = new Connection("111.22", transport);
       expect(connection.activityTimeout).toEqual(123123);
     });
   });
@@ -208,12 +212,12 @@ describe("Connection", function() {
     it("should emit the action dispatched by protocol", function() {
       var onMockAction = jasmine.createSpy("onMockAction");
       connection.bind("mock_action", onMockAction);
-      spyOn(Pusher.Protocol, "getCloseAction").andReturn("mock_action");
-      spyOn(Pusher.Protocol, "getCloseError").andReturn(null);
+      spyOn(Protocol, "getCloseAction").andReturn("mock_action");
+      spyOn(Protocol, "getCloseError").andReturn(null);
 
       transport.emit("closed", { code: 1006, reason: "unknown" });
 
-      expect(Pusher.Protocol.getCloseAction).toHaveBeenCalledWith({
+      expect(Protocol.getCloseAction).toHaveBeenCalledWith({
         code: 1006,
         reason: "unknown"
       });
@@ -223,8 +227,8 @@ describe("Connection", function() {
     it("should emit the error returned by protocol", function() {
       var onError = jasmine.createSpy("onError");
       connection.bind("error", onError);
-      spyOn(Pusher.Protocol, "getCloseAction").andReturn("mock_action");
-      spyOn(Pusher.Protocol, "getCloseError").andReturn({
+      spyOn(Protocol, "getCloseAction").andReturn("mock_action");
+      spyOn(Protocol, "getCloseError").andReturn({
         type: "MockError",
         data: {
           code: 4123,
@@ -234,7 +238,7 @@ describe("Connection", function() {
 
       transport.emit("closed", { code: 4123, reason: "something" });
 
-      expect(Pusher.Protocol.getCloseError).toHaveBeenCalledWith({
+      expect(Protocol.getCloseError).toHaveBeenCalledWith({
         code: 4123,
         reason: "something"
       });

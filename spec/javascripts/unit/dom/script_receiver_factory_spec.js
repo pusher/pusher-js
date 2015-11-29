@@ -1,10 +1,12 @@
+var ScriptReceiverFactory = require('dom/script_receiver_factory');
+
 describe("ScriptReceiverFactory", function() {
   var receivers;
   var callback1, callback2;
   var receiver1, receiver2;
 
   beforeEach(function() {
-    receivers = new Pusher.ScriptReceiverFactory("test_prefix", "Recv");
+    receivers = new ScriptReceiverFactory("test_prefix", "Recv");
     callback1 = jasmine.createSpy();
     callback2 = jasmine.createSpy();
     receiver1 = receivers.create(callback1);

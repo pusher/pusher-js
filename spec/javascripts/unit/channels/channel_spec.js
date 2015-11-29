@@ -1,10 +1,14 @@
+var Mocks = require('mocks');
+var Channel = require('channels/channel');
+var Errors = require('errors');
+
 describe("Channel", function() {
   var pusher;
   var channel;
 
   beforeEach(function() {
-    pusher = Pusher.Mocks.getPusher();
-    channel = new Pusher.Channel("test", pusher);
+    pusher = Mocks.getPusher();
+    channel = new Channel("test", pusher);
   });
 
   describe("after construction", function() {
@@ -25,7 +29,7 @@ describe("Channel", function() {
     it("should raise an exception if the event name does not start with client-", function() {
       expect(function() {
         channel.trigger("whatever", {});
-      }).toThrow(jasmine.any(Pusher.Errors.BadEventName));
+      }).toThrow(jasmine.any(Errors.BadEventName));
     });
 
     it("should call send_event on connection", function() {

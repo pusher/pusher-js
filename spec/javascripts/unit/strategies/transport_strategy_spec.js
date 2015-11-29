@@ -1,18 +1,23 @@
+var Mocks = require('mocks');
+var TransportStrategy = require('strategies/transport_strategy');
+var Errors = require('errors');
+var Handshake = require('connection/handshake');
+
 describe("TransportStrategy", function() {
   var transport, transportClass, handshake;
   var callback;
   var strategy;
 
   beforeEach(function() {
-    transport = Pusher.Mocks.getTransport(true);
-    transportClass = Pusher.Mocks.getTransportClass(true, transport);
+    transport = Mocks.getTransport(true);
+    transportClass = Mocks.getTransportClass(true, transport);
 
-    spyOn(Pusher, "Handshake").andCallFake(function(transport, callback) {
-      handshake = Pusher.Mocks.getHandshake(transport, callback);
+    spyOn(Handshake).andCallFake(function(transport, callback) {
+      handshake = Mocks.getHandshake(transport, callback);
       return handshake;
     });
 
-    strategy = new Pusher.TransportStrategy(
+    strategy = new TransportStrategy(
       "name", 1, transportClass, { key: "foo" }
     );
 
@@ -21,15 +26,15 @@ describe("TransportStrategy", function() {
 
   describe("#isSupported", function() {
     it("should return true when transport is supported", function() {
-      var transportClass = Pusher.Mocks.getTransportClass(true);
-      var strategy = new Pusher.TransportStrategy("name", 1, transportClass);
+      var transportClass = Mocks.getTransportClass(true);
+      var strategy = new TransportStrategy("name", 1, transportClass);
 
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when transport is not supported", function() {
-      var strategy = new Pusher.TransportStrategy(
-        "name", 1, Pusher.Mocks.getTransportClass(false)
+      var strategy = new TransportStrategy(
+        "name", 1, Mocks.getTransportClass(false)
       );
       expect(strategy.isSupported()).toBe(false);
     });
@@ -41,7 +46,7 @@ describe("TransportStrategy", function() {
         key: "asdf",
         foo: "bar"
       };
-      var strategy = new Pusher.TransportStrategy(
+      var strategy = new TransportStrategy(
         "name", 1, transportClass, options
       );
 
@@ -87,7 +92,7 @@ describe("TransportStrategy", function() {
       var handshakeResult = {
         action: "connected",
         transport: transport,
-        connection: Pusher.Mocks.getConnection()
+        connection: Mocks.getConnection()
       };
       handshake._callback(handshakeResult);
 
@@ -119,7 +124,7 @@ describe("TransportStrategy", function() {
       transport.emit("closed");
 
       expect(callback)
-        .toHaveBeenCalledWith(jasmine.any(Pusher.Errors.TransportClosed));
+        .toHaveBeenCalledWith(jasmine.any(Errors.TransportClosed));
     });
 
     it("should call back with an error if transport's priority is too low", function() {
@@ -131,7 +136,7 @@ describe("TransportStrategy", function() {
       }, "callback to be called", 100);
       runs(function() {
         expect(callback).toHaveBeenCalledWith(
-          jasmine.any(Pusher.Errors.TransportPriorityTooLow)
+          jasmine.any(Errors.TransportPriorityTooLow)
         );
       });
     });
@@ -146,7 +151,7 @@ describe("TransportStrategy", function() {
       }, "callback to be called", 100);
       runs(function() {
         expect(callback).toHaveBeenCalledWith(
-          jasmine.any(Pusher.Errors.UnsupportedStrategy)
+          jasmine.any(Errors.UnsupportedStrategy)
         );
       });
     });

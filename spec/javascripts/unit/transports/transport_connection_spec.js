@@ -1,15 +1,21 @@
+var Mocks = require('mocks');
+var TransportConnection = require('transports/transport_connection');
+var Util = require('util');
+var Dependencies = require('dependencies');
+var Timer = require('utils/timers').Timer;
+
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {
-    options = Pusher.Util.extend({
+    options = Util.extend({
       encrypted: false,
       hostUnencrypted: "example.com:12345",
       hostEncrypted: "example.com:54321"
     }, options);
 
-    return new Pusher.TransportConnection(hooks, "test", 7, key, options);
+    return new TransportConnection(hooks, "test", 7, key, options);
   }
 
-  var _Dependencies = Pusher.Dependencies;
+  var _Dependencies = Dependencies;
 
   var urls;
   var hooks;
@@ -18,9 +24,9 @@ describe("TransportConnection", function() {
   var transport;
 
   beforeEach(function() {
-    Pusher.Dependencies = Pusher.Mocks.getDependencies();
+    Dependencies = Mocks.getDependencies();
 
-    timeline = Pusher.Mocks.getTimeline();
+    timeline = Mocks.getTimeline();
     timeline.generateUniqueID.andReturn(667);
 
     urls = {
@@ -28,7 +34,7 @@ describe("TransportConnection", function() {
         return (params.encrypted ? "wss" : "ws") + "://test/" + key;
       }
     };
-    socket = Pusher.Mocks.getWebSocket();
+    socket = Mocks.getWebSocket();
     hooks = {
       urls: urls,
       supportsPing: false,
@@ -42,7 +48,7 @@ describe("TransportConnection", function() {
   });
 
   afterEach(function() {
-    Pusher.Dependencies = _Dependencies;
+    Dependencies = _Dependencies;
   });
 
   describe("#activityTimeout", function() {
@@ -134,8 +140,8 @@ describe("TransportConnection", function() {
 
       it("should load the resource file (encrypted=false)", function() {
         transport.initialize();
-        expect(Pusher.Dependencies.load.calls.length).toEqual(1);
-        expect(Pusher.Dependencies.load).toHaveBeenCalledWith(
+        expect(Dependencies.load.calls.length).toEqual(1);
+        expect(Dependencies.load).toHaveBeenCalledWith(
           "test", { encrypted: false }, jasmine.any(Function)
         );
       });
@@ -147,8 +153,8 @@ describe("TransportConnection", function() {
         });
 
         transport.initialize();
-        expect(Pusher.Dependencies.load.calls.length).toEqual(1);
-        expect(Pusher.Dependencies.load).toHaveBeenCalledWith(
+        expect(Dependencies.load.calls.length).toEqual(1);
+        expect(Dependencies.load).toHaveBeenCalledWith(
           "test", { encrypted: true }, jasmine.any(Function)
         );
       });
@@ -166,7 +172,7 @@ describe("TransportConnection", function() {
           // after loading the resource, isInitialized will return true
           hooks.isInitialized.andReturn(true);
           // fire the callback for the resource file load
-          Pusher.Dependencies.load.calls[0].args[2](null, loadCallback);
+          Dependencies.load.calls[0].args[2](null, loadCallback);
         });
 
         it("should transition to 'initialized'", function() {
@@ -192,7 +198,7 @@ describe("TransportConnection", function() {
           // after loading the resource, isInitialized will return true
           hooks.isInitialized.andReturn(false);
           // fire the callback for the resource file load
-          Pusher.Dependencies.load.calls[0].args[2](null, loadCallback);
+          Dependencies.load.calls[0].args[2](null, loadCallback);
         });
 
         it("should transition to 'closed'", function() {
@@ -356,7 +362,7 @@ describe("TransportConnection", function() {
         transport.close();
         socket.onclose({ wasClean: true });
 
-        timer = new Pusher.Timer(100, function() {});
+        timer = new Timer(100, function() {});
       });
       waitsFor(function () {
         return !timer.isRunning();

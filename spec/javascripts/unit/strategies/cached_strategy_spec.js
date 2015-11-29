@@ -1,3 +1,7 @@
+var Mocks = require('mocks');
+var CachedStrategy = require('strategies/cached_strategy');
+var Util = require('util');
+
 describe("CachedStrategy", function() {
   beforeEach(function() {
     jasmine.Clock.useMock();
@@ -5,26 +9,26 @@ describe("CachedStrategy", function() {
 
   describe("after calling isSupported", function() {
     it("should return true when the substrategy is supported", function() {
-      var substrategy = Pusher.Mocks.getStrategy(true);
-      var strategy = new Pusher.CachedStrategy(substrategy, {}, {});
+      var substrategy = Mocks.getStrategy(true);
+      var strategy = new CachedStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when the substrategy is not supported", function() {
-      var substrategy = Pusher.Mocks.getStrategy(false);
-      var strategy = new Pusher.CachedStrategy(substrategy, {}, {});
+      var substrategy = Mocks.getStrategy(false);
+      var strategy = new CachedStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(false);
     });
   });
 
   describe("on browsers not supporting localStorage", function() {
     beforeEach(function() {
-      spyOn(Pusher.Util, "getLocalStorage").andReturn(undefined);
+      spyOn(Util, "getLocalStorage").andReturn(undefined);
     });
 
     it("should try the substrategy immediately", function() {
-      var substrategy = Pusher.Mocks.getStrategy(false);
-      var strategy = new Pusher.CachedStrategy(substrategy, {}, {});
+      var substrategy = Mocks.getStrategy(false);
+      var strategy = new CachedStrategy(substrategy, {}, {});
       var callback = jasmine.createSpy("callback");
       strategy.connect(0, callback);
       expect(substrategy.connect).toHaveBeenCalled();
@@ -36,7 +40,7 @@ describe("CachedStrategy", function() {
 
     beforeEach(function() {
       localStorage = {};
-      spyOn(Pusher.Util, "getLocalStorage").andReturn(localStorage);
+      spyOn(Util, "getLocalStorage").andReturn(localStorage);
     });
 
     function buildCachedTransportTests(encrypted) {
@@ -51,13 +55,13 @@ describe("CachedStrategy", function() {
       var callback;
 
       beforeEach(function() {
-        substrategy = Pusher.Mocks.getStrategy(true);
+        substrategy = Mocks.getStrategy(true);
         transports = {
-          test: Pusher.Mocks.getStrategy(true)
+          test: Mocks.getStrategy(true)
         };
-        timeline = Pusher.Mocks.getTimeline();
+        timeline = Mocks.getTimeline();
 
-        strategy = new Pusher.CachedStrategy(substrategy, transports, {
+        strategy = new CachedStrategy(substrategy, transports, {
           encrypted: encrypted,
           timeline: timeline
         });
@@ -82,7 +86,7 @@ describe("CachedStrategy", function() {
 
         it("should try the substrategy immediately when cache is stale", function() {
           localStorage[usedKey] = JSON.stringify({
-            timestamp: Pusher.Util.now() - 1801*1000 // default ttl is 1800s
+            timestamp: Util.now() - 1801*1000 // default ttl is 1800s
           });
 
           strategy.connect(0, callback);
@@ -108,13 +112,13 @@ describe("CachedStrategy", function() {
           var startTimestamp;
 
           beforeEach(function() {
-            startTimestamp = Pusher.Util.now();
-            spyOn(Pusher.Util, "now").andReturn(startTimestamp);
+            startTimestamp = Util.now();
+            spyOn(Util, "now").andReturn(startTimestamp);
 
             strategy.connect(0, callback);
-            Pusher.Util.now.andReturn(startTimestamp + 1000);
+            Util.now.andReturn(startTimestamp + 1000);
 
-            transport = Pusher.Mocks.getTransport(true);
+            transport = Mocks.getTransport(true);
             transport.name = "test";
             substrategy._callback(null, { transport: transport });
           });
@@ -127,7 +131,7 @@ describe("CachedStrategy", function() {
 
           it("should cache the connected transport", function() {
             expect(JSON.parse(localStorage[usedKey])).toEqual({
-              timestamp: Pusher.Util.now(),
+              timestamp: Util.now(),
               transport: "test",
               latency: 1000
             });
@@ -157,10 +161,10 @@ describe("CachedStrategy", function() {
       });
 
       describe("with cached transport, encrypted=" + encrypted, function() {
-        var t0 = Pusher.Util.now();
+        var t0 = Util.now();
 
         beforeEach(function() {
-          cachedStrategy = Pusher.Mocks.getStrategy(true);
+          cachedStrategy = Mocks.getStrategy(true);
           localStorage[usedKey] = JSON.stringify({
             timestamp: t0,
             transport: "test",
@@ -202,13 +206,13 @@ describe("CachedStrategy", function() {
           var transport;
 
           beforeEach(function() {
-            startTimestamp = Pusher.Util.now();
-            spyOn(Pusher.Util, "now").andReturn(startTimestamp);
+            startTimestamp = Util.now();
+            spyOn(Util, "now").andReturn(startTimestamp);
 
             strategy.connect(0, callback);
-            Pusher.Util.now.andReturn(startTimestamp + 2000);
+            Util.now.andReturn(startTimestamp + 2000);
 
-            transport = Pusher.Mocks.getTransport(true);
+            transport = Mocks.getTransport(true);
             transport.name = "test";
             transport.options = { encrypted: false };
             transports.test._callback(null, { transport: transport });
@@ -224,7 +228,7 @@ describe("CachedStrategy", function() {
 
           it("should cache the connected transport", function() {
             expect(JSON.parse(localStorage[usedKey])).toEqual({
-              timestamp: Pusher.Util.now(),
+              timestamp: Util.now(),
               transport: "test",
               latency: 2000
             });
@@ -234,12 +238,12 @@ describe("CachedStrategy", function() {
 
         describe("after double the cached latency + 1s", function() {
           beforeEach(function() {
-            startTimestamp = Pusher.Util.now();
-            spyOn(Pusher.Util, "now").andReturn(startTimestamp);
+            startTimestamp = Util.now();
+            spyOn(Util, "now").andReturn(startTimestamp);
 
             strategy.connect(0, callback);
 
-            Pusher.Util.now.andReturn(startTimestamp + 3000);
+            Util.now.andReturn(startTimestamp + 3000);
             jasmine.Clock.tick(3000);
           });
 
@@ -261,14 +265,14 @@ describe("CachedStrategy", function() {
           var runner;
 
           beforeEach(function() {
-            startTimestamp = Pusher.Util.now();
-            spyOn(Pusher.Util, "now").andReturn(startTimestamp);
+            startTimestamp = Util.now();
+            spyOn(Util, "now").andReturn(startTimestamp);
 
             runner = strategy.connect(0, callback);
             runner.forceMinPriority(666);
-            Pusher.Util.now.andReturn(startTimestamp + 2000);
+            Util.now.andReturn(startTimestamp + 2000);
             transports.test._callback("error");
-            Pusher.Util.now.andReturn(startTimestamp + 2500);
+            Util.now.andReturn(startTimestamp + 2500);
           });
 
           it("should fall back to the substrategy", function() {
@@ -308,7 +312,7 @@ describe("CachedStrategy", function() {
                 options: { encrypted: true, "hostEncrypted": "example.net" }
               };
 
-              transport = Pusher.Mocks.getTransport(true);
+              transport = Mocks.getTransport(true);
               transport.name = "test";
               substrategy._callback(null, { transport: transport });
             });
@@ -321,7 +325,7 @@ describe("CachedStrategy", function() {
 
             it("should cache the connected transport", function() {
               expect(JSON.parse(localStorage[usedKey])).toEqual({
-                timestamp: Pusher.Util.now(),
+                timestamp: Util.now(),
                 transport: "test",
                 latency: 500
               });

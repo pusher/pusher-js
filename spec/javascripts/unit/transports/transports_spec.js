@@ -1,12 +1,17 @@
+var Mocks = require('mocks');
+var Dependencies = require('dependencies');
+var Transports = require('transports/transports');
+var Util = require('util');
+
 describe("Transports", function() {
-  var _Dependencies = Pusher.Dependencies;
+  var _Dependencies = Dependencies;
 
   beforeEach(function() {
-    Pusher.Dependencies = Pusher.Mocks.getDependencies();
+    Dependencies = Mocks.getDependencies();
   });
 
   afterEach(function() {
-    Pusher.Dependencies = _Dependencies;
+    Dependencies = _Dependencies;
   });
 
   describe("WSTransport", function() {
@@ -19,7 +24,7 @@ describe("Transports", function() {
     });
 
     it("should generate correct unencrypted URLs", function() {
-      var url = Pusher.WSTransport.hooks.urls.getInitial("foobar", {
+      var url = Transports.WSTransport.hooks.urls.getInitial("foobar", {
         encrypted: false,
         hostUnencrypted: "example.com:123"
       });
@@ -29,7 +34,7 @@ describe("Transports", function() {
     });
 
     it("should generate correct encrypted URLs", function() {
-      var url = Pusher.WSTransport.hooks.urls.getInitial("foobar", {
+      var url = Transports.WSTransport.hooks.urls.getInitial("foobar", {
         encrypted: true,
         hostEncrypted: "example.org:321"
       });
@@ -39,23 +44,23 @@ describe("Transports", function() {
     });
 
     it("should not have a resource file", function() {
-      expect(Pusher.WSTransport.hooks.file).toBe(undefined);
+      expect(Transports.WSTransport.hooks.file).toBe(undefined);
     });
 
     it("should not expose the URL path generator", function() {
-      expect(Pusher.WSTransport.hooks.urls.getPath).toBe(undefined);
+      expect(Transports.WSTransport.hooks.urls.getPath).toBe(undefined);
     });
 
     it("should not handle activity checks", function() {
-      expect(Pusher.WSTransport.hooks.handlesActivityChecks).toBe(false);
+      expect(Transports.WSTransport.hooks.handlesActivityChecks).toBe(false);
     });
 
     it("should not support ping", function() {
-      expect(Pusher.WSTransport.hooks.supportsPing).toBe(false);
+      expect(Transports.WSTransport.hooks.supportsPing).toBe(false);
     });
 
     it("should not have a beforeOpen hook", function() {
-      expect(Pusher.WSTransport.hooks.beforeOpen).toBe(undefined);
+      expect(Transports.WSTransport.hooks.beforeOpen).toBe(undefined);
     });
 
     describe("isSupported hook", function() {
@@ -63,21 +68,21 @@ describe("Transports", function() {
         window.WebSocket = {};
         window.MozWebSocket = undefined;
 
-        expect(Pusher.WSTransport.hooks.isSupported({})).toBe(true);
+        expect(Transports.WSTransport.hooks.isSupported({})).toBe(true);
       });
 
       it("should return true if the MozWebSocket class is present and WebSocket class is absent", function() {
         window.WebSocket = undefined;
         window.MozWebSocket = {};
 
-        expect(Pusher.WSTransport.hooks.isSupported({})).toBe(true);
+        expect(Transports.WSTransport.hooks.isSupported({})).toBe(true);
       });
 
       it("should return false if WebSocket and MozWebSocket classes are absent", function() {
         window.WebSocket = undefined;
         window.MozWebSocket = undefined;
 
-        expect(Pusher.WSTransport.hooks.isSupported({})).toBe(false);
+        expect(Transports.WSTransport.hooks.isSupported({})).toBe(false);
       });
     });
 
@@ -88,7 +93,7 @@ describe("Transports", function() {
         });
         window.MozWebSocket = undefined;
 
-        var socket = Pusher.WSTransport.hooks.getSocket("testurl");
+        var socket = Transports.WSTransport.hooks.getSocket("testurl");
         expect(window.WebSocket.calls.length).toEqual(1);
         expect(window.WebSocket).toHaveBeenCalledWith("testurl");
         expect(socket).toEqual(jasmine.any(window.WebSocket));
@@ -101,7 +106,7 @@ describe("Transports", function() {
           this.url = url;
         });
 
-        var socket = Pusher.WSTransport.hooks.getSocket("moztesturl");
+        var socket = Transports.WSTransport.hooks.getSocket("moztesturl");
         expect(window.MozWebSocket.calls.length).toEqual(1);
         expect(window.MozWebSocket).toHaveBeenCalledWith("moztesturl");
         expect(socket).toEqual(jasmine.any(window.MozWebSocket));
@@ -118,11 +123,11 @@ describe("Transports", function() {
     });
 
     it("should have a 'sockjs' resource file", function() {
-      expect(Pusher.SockJSTransport.hooks.file).toEqual("sockjs");
+      expect(Transports.SockJSTransport.hooks.file).toEqual("sockjs");
     });
 
     it("should generate correct unencrypted URLs", function() {
-      var url = Pusher.SockJSTransport.hooks.urls.getInitial("foobar", {
+      var url = Transports.SockJSTransport.hooks.urls.getInitial("foobar", {
         encrypted: false,
         hostUnencrypted: "example.com:111"
       });
@@ -130,7 +135,7 @@ describe("Transports", function() {
     });
 
     it("should generate correct encrypted URLs", function() {
-      var url = Pusher.SockJSTransport.hooks.urls.getInitial("foobar", {
+      var url = Transports.SockJSTransport.hooks.urls.getInitial("foobar", {
         encrypted: true,
         hostEncrypted: "example.com:222"
       });
@@ -138,23 +143,23 @@ describe("Transports", function() {
     });
 
     it("should generate correct paths", function() {
-      var path = Pusher.SockJSTransport.hooks.urls.getPath("asdf", {});
+      var path = Transports.SockJSTransport.hooks.urls.getPath("asdf", {});
       expect(path).toEqual("/app/asdf?protocol=7&client=js&version=<VERSION>");
     });
 
     it("should handle activity checks", function() {
-      expect(Pusher.SockJSTransport.hooks.handlesActivityChecks).toBe(true);
+      expect(Transports.SockJSTransport.hooks.handlesActivityChecks).toBe(true);
     });
 
     it("should not support ping", function() {
-      expect(Pusher.SockJSTransport.hooks.supportsPing).toBe(false);
+      expect(Transports.SockJSTransport.hooks.supportsPing).toBe(false);
     });
 
     describe("beforeOpen hook", function() {
       it("should send the path over the socket", function() {
         // SockJS objects have WebSocket-compatible interface
-        var socket = Pusher.Mocks.getWebSocket();
-        Pusher.SockJSTransport.hooks.beforeOpen(socket, "test/path");
+        var socket = Mocks.getWebSocket();
+        Transports.SockJSTransport.hooks.beforeOpen(socket, "test/path");
 
         expect(socket.send.calls.length).toEqual(1);
         var pathMessage = JSON.parse(socket.send.calls[0].args[0]);
@@ -164,14 +169,14 @@ describe("Transports", function() {
 
     describe("isSupported hook", function() {
       it("should always return true", function() {
-        expect(Pusher.SockJSTransport.hooks.isSupported({})).toBe(true);
+        expect(Transports.SockJSTransport.hooks.isSupported({})).toBe(true);
       });
     });
 
     describe("getSocket hook", function() {
       beforeEach(function() {
-        Pusher.Dependencies = Pusher.Mocks.getDependencies();
-        Pusher.Dependencies.getPath.andCallFake(function(file, options) {
+        Dependencies = Mocks.getDependencies();
+        Dependencies.getPath.andCallFake(function(file, options) {
           return (options.encrypted ? "https" : "http") + "://host/" + file;
         });
       });
@@ -179,7 +184,7 @@ describe("Transports", function() {
       it("should pass ignoreNullOrigin to the SockJS constructor", function() {
         window.SockJS = jasmine.createSpy();
 
-        var socket = Pusher.SockJSTransport.hooks.getSocket(
+        var socket = Transports.SockJSTransport.hooks.getSocket(
           "url", { encrypted: false, ignoreNullOrigin: true }
         );
         expect(window.SockJS).toHaveBeenCalledWith(
@@ -192,7 +197,7 @@ describe("Transports", function() {
       it("should generate a correct JS path", function() {
         window.SockJS = jasmine.createSpy();
 
-        var socket = Pusher.SockJSTransport.hooks.getSocket(
+        var socket = Transports.SockJSTransport.hooks.getSocket(
           "url", { encrypted: true }
         );
         expect(window.SockJS).toHaveBeenCalledWith(
@@ -205,7 +210,7 @@ describe("Transports", function() {
           this.url = url;
         });
 
-        var socket = Pusher.SockJSTransport.hooks.getSocket(
+        var socket = Transports.SockJSTransport.hooks.getSocket(
           "sock_test", { encrypted: false }
         );
         expect(window.SockJS.calls.length).toEqual(1);
@@ -221,10 +226,10 @@ describe("Transports", function() {
   var POLLING_TRANSPORTS = ["XHRPollingTransport", "XDRPollingTransport"];
   var HTTP_TRANSPORTS = [].concat(XHR_TRANSPORTS, XDR_TRANSPORTS);
 
-  Pusher.Util.apply(HTTP_TRANSPORTS, function(transport) {
+  Transports.Util.apply(HTTP_TRANSPORTS, function(transport) {
     describe(transport, function() {
       it("should generate correct unencrypted URLs with default path prefix", function() {
-        var url = Pusher[transport].hooks.urls.getInitial("foobar", {
+        var url = Transports[transport].hooks.urls.getInitial("foobar", {
           encrypted: false,
           hostUnencrypted: "example.com:8080"
         });
@@ -234,7 +239,7 @@ describe("Transports", function() {
       });
 
       it("should generate correct unencrypted URLs with custom path prefix", function() {
-        var url = Pusher[transport].hooks.urls.getInitial("foobar", {
+        var url = Transports[transport].hooks.urls.getInitial("foobar", {
           encrypted: false,
           hostUnencrypted: "example.com:8080",
           httpPath: "/a/b/c"
@@ -245,7 +250,7 @@ describe("Transports", function() {
       });
 
       it("should generate correct encrypted URLs with default path prefix", function() {
-        var url = Pusher[transport].hooks.urls.getInitial("foobar", {
+        var url = Transports[transport].hooks.urls.getInitial("foobar", {
           encrypted: true,
           hostEncrypted: "example.org:4443"
         });
@@ -255,7 +260,7 @@ describe("Transports", function() {
       });
 
       it("should generate correct encrypted URLs with custom path prefix", function() {
-        var url = Pusher[transport].hooks.urls.getInitial("foobar", {
+        var url = Transports[transport].hooks.urls.getInitial("foobar", {
           encrypted: true,
           hostEncrypted: "example.org:4443",
           httpPath: "/c/b/a"
@@ -266,24 +271,24 @@ describe("Transports", function() {
       });
 
       it("should not expose the URL path generator", function() {
-        expect(Pusher[transport].hooks.urls.getPath).toBe(undefined);
+        expect(Transports[transport].hooks.urls.getPath).toBe(undefined);
       });
 
       it("should not handle activity checks", function() {
-        expect(Pusher[transport].hooks.handlesActivityChecks).toBe(false);
+        expect(Transports[transport].hooks.handlesActivityChecks).toBe(false);
       });
 
       it("should support ping", function() {
-        expect(Pusher[transport].hooks.supportsPing).toBe(true);
+        expect(Transports[transport].hooks.supportsPing).toBe(true);
       });
 
       it("should not have a beforeOpen hook", function() {
-        expect(Pusher[transport].hooks.beforeOpen).toBe(undefined);
+        expect(Transports[transport].hooks.beforeOpen).toBe(undefined);
       });
     });
   });
 
-  Pusher.Util.apply(XHR_TRANSPORTS, function(transport) {
+  Util.apply(XHR_TRANSPORTS, function(transport) {
     describe(transport, function() {
       var _XMLHttpRequest = window.XMLHttpRequest;
 
@@ -292,7 +297,7 @@ describe("Transports", function() {
       });
 
       it("should have a 'xhr' resource file", function() {
-        expect(Pusher[transport].hooks.file).toEqual("xhr");
+        expect(Transports[transport].hooks.file).toEqual("xhr");
       });
 
       describe("isSupported hook", function() {
@@ -300,25 +305,25 @@ describe("Transports", function() {
           window.XMLHttpRequest = jasmine.createSpy().andCallFake(function() {
             this.withCredentials = false;
           });
-          expect(Pusher[transport].hooks.isSupported({})).toBe(true);
+          expect(Transports[transport].hooks.isSupported({})).toBe(true);
         });
 
         it("should return false if window.XMLHttpRequest exists, but its instances don't have a withCredentials property", function() {
           window.XMLHttpRequest = jasmine.createSpy().andCallFake(function() {
             this.withCredentials = undefined;
           });
-          expect(Pusher[transport].hooks.isSupported({})).toBe(false);
+          expect(Transports[transport].hooks.isSupported({})).toBe(false);
         });
 
         it("should return false if window.XMLHttpRequest does not exist", function() {
           window.XMLHttpRequest = undefined;
-          expect(Pusher[transport].hooks.isSupported({})).toBe(false);
+          expect(Transports[transport].hooks.isSupported({})).toBe(false);
         });
       });
     });
   });
 
-  Pusher.Util.apply(XDR_TRANSPORTS, function(transport) {
+  Util.apply(XDR_TRANSPORTS, function(transport) {
     describe(transport, function() {
       var _XDomainRequest = window.XDomainRequest;
 
@@ -327,60 +332,60 @@ describe("Transports", function() {
       });
 
       it("should have a 'xhr' resource file", function() {
-        expect(Pusher[transport].hooks.file).toEqual("xdr");
+        expect(Transports[transport].hooks.file).toEqual("xdr");
       });
 
       describe("isSupported hook", function() {
         it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Util, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
           });
-          expect(Pusher[transport].hooks.isSupported({ encrypted: false })).toBe(true);
+          expect(Transports[transport].hooks.isSupported({ encrypted: false })).toBe(true);
         });
 
         it("should return true if window.XDomainRequest exists, document protocol is https: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Util, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }
           });
-          expect(Pusher[transport].hooks.isSupported({ encrypted: true })).toBe(true);
+          expect(Transports[transport].hooks.isSupported({ encrypted: true })).toBe(true);
         });
 
         it("should return false if window.XDomainRequest exists, document protocol is http: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Util, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
           });
-          expect(Pusher[transport].hooks.isSupported({ encrypted: true })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ encrypted: true })).toBe(false);
         });
 
         it("should return false if window.XDomainRequest exists, document protocol is https: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Pusher.Util, "getDocument").andReturn({
+          spyOn(Util, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }
           });
-          expect(Pusher[transport].hooks.isSupported({ encrypted: false })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ encrypted: false })).toBe(false);
         });
 
         it("should return false if window.XDomainRequest does not exist", function() {
           window.XDomainRequest = undefined;
-          expect(Pusher[transport].hooks.isSupported({ encrypted: false })).toBe(false);
-          expect(Pusher[transport].hooks.isSupported({ encrypted: true })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ encrypted: false })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ encrypted: true })).toBe(false);
         });
       });
     });
   });
 
-  Pusher.Util.apply(STREAMING_TRANSPORTS, function(transport) {
+  Util.apply(STREAMING_TRANSPORTS, function(transport) {
     describe(transport, function() {
       describe("getSocket hook", function() {
         it("should return a new streaming HTTPSocket object", function() {
@@ -388,7 +393,7 @@ describe("Transports", function() {
             return "streaming socket mock";
           });
 
-          var socket = Pusher[transport].hooks.getSocket("streamurl");
+          var socket = Transports[transport].hooks.getSocket("streamurl");
           expect(Pusher.HTTP.getStreamingSocket.calls.length).toEqual(1);
           expect(Pusher.HTTP.getStreamingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("streaming socket mock");
@@ -397,7 +402,7 @@ describe("Transports", function() {
     });
   });
 
-  Pusher.Util.apply(POLLING_TRANSPORTS, function(transport) {
+  Util.apply(POLLING_TRANSPORTS, function(transport) {
     describe(transport, function() {
       describe("getSocket hook", function() {
         it("should return a new polling HTTPSocket object", function() {
@@ -405,7 +410,7 @@ describe("Transports", function() {
             return "polling socket mock";
           });
 
-          var socket = Pusher[transport].hooks.getSocket("streamurl");
+          var socket = Transports[transport].hooks.getSocket("streamurl");
           expect(Pusher.HTTP.getPollingSocket.calls.length).toEqual(1);
           expect(Pusher.HTTP.getPollingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("polling socket mock");

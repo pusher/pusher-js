@@ -1,3 +1,5 @@
+var Protocol = require('connection/protocol');
+
 describe("Protocol", function() {
   describe("#decodeMessage", function() {
     it("should parse a single-encoded message with an object", function() {
@@ -8,7 +10,7 @@ describe("Protocol", function() {
         })
       };
 
-      expect(Pusher.Protocol.decodeMessage(message)).toEqual({
+      expect(Protocol.decodeMessage(message)).toEqual({
         event: "random",
         data: {
           foo: "bar"
@@ -24,7 +26,7 @@ describe("Protocol", function() {
         })
       };
 
-      expect(Pusher.Protocol.decodeMessage(message)).toEqual({
+      expect(Protocol.decodeMessage(message)).toEqual({
         event: "raw",
         data: "just a string"
       });
@@ -38,7 +40,7 @@ describe("Protocol", function() {
         })
       };
 
-      expect(Pusher.Protocol.decodeMessage(message)).toEqual({
+      expect(Protocol.decodeMessage(message)).toEqual({
         event: "double",
         data: {
           x: "y",
@@ -53,7 +55,7 @@ describe("Protocol", function() {
       };
 
       try {
-        Pusher.Protocol.decodeMessage(message);
+        Protocol.decodeMessage(message);
         throw "Should not reach this line";
       } catch (e) {
         expect(e.type).toEqual("MessageParseError");
@@ -71,7 +73,7 @@ describe("Protocol", function() {
         channel: "test_channel"
       };
 
-      var encoded = Pusher.Protocol.encodeMessage(message);
+      var encoded = Protocol.encodeMessage(message);
       expect(JSON.parse(encoded)).toEqual(message);
     });
   });
@@ -88,7 +90,7 @@ describe("Protocol", function() {
         })
       };
 
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "connected",
         id: "123.456",
         activityTimeout: 30000
@@ -109,7 +111,7 @@ describe("Protocol", function() {
 
     it("should return 'ssl_only' for code 4000", function() {
       var message = getErrorMessage(4000, "SSL ONLY!");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "ssl_only",
         error: {
           type: "PusherError",
@@ -123,7 +125,7 @@ describe("Protocol", function() {
 
     it("should return 'refused' for code 4001", function() {
       var message = getErrorMessage(4001, "REFUSED 4001");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "refused",
         error: {
           type: "PusherError",
@@ -137,7 +139,7 @@ describe("Protocol", function() {
 
     it("should return 'refused' for code 4099", function() {
       var message = getErrorMessage(4099, "REFUSED 4099");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "refused",
         error: {
           type: "PusherError",
@@ -151,7 +153,7 @@ describe("Protocol", function() {
 
     it("should return 'backoff' for code 4100", function() {
       var message = getErrorMessage(4100, "BACKOFF 4100");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "backoff",
         error: {
           type: "PusherError",
@@ -165,7 +167,7 @@ describe("Protocol", function() {
 
     it("should return 'backoff' for code 4199", function() {
       var message = getErrorMessage(4199, "BACKOFF 4199");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "backoff",
         error: {
           type: "PusherError",
@@ -179,7 +181,7 @@ describe("Protocol", function() {
 
     it("should return 'retry' for code 4200", function() {
       var message = getErrorMessage(4200, "RETRY 4200");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "retry",
         error: {
           type: "PusherError",
@@ -193,7 +195,7 @@ describe("Protocol", function() {
 
     it("should return 'retry' for code 4299", function() {
       var message = getErrorMessage(4299, "RETRY 4299");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "retry",
         error: {
           type: "PusherError",
@@ -207,7 +209,7 @@ describe("Protocol", function() {
 
     it("should return 'refused' for code 4300", function() {
       var message = getErrorMessage(4300, "REFUSED 4300");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "refused",
         error: {
           type: "PusherError",
@@ -221,7 +223,7 @@ describe("Protocol", function() {
 
     it("should return 'refused' for code 4399", function() {
       var message = getErrorMessage(4399, "REFUSED 4399");
-      expect(Pusher.Protocol.processHandshake(message)).toEqual({
+      expect(Protocol.processHandshake(message)).toEqual({
         action: "refused",
         error: {
           type: "PusherError",
@@ -235,7 +237,7 @@ describe("Protocol", function() {
 
     it("should throw an exception when activity timeout is unspecified", function() {
       expect(function() {
-        return Pusher.Protocol.processHandshake({
+        return Protocol.processHandshake({
           data: JSON.stringify({
             event: "pusher:connection_established",
             data: {
@@ -248,7 +250,7 @@ describe("Protocol", function() {
 
     it("should throw an exception on invalid handshake", function() {
       expect(function() {
-        return Pusher.Protocol.processHandshake({
+        return Protocol.processHandshake({
           data: JSON.stringify({
             event: "weird"
           })
@@ -259,91 +261,91 @@ describe("Protocol", function() {
 
   describe("#getCloseAction", function() {
     it("should return null for code 1000", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 1000 })).toBe(null);
+      expect(Protocol.getCloseAction({ code: 1000 })).toBe(null);
     });
 
     it("should return null for code 1001", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 1001 })).toBe(null);
+      expect(Protocol.getCloseAction({ code: 1001 })).toBe(null);
     });
 
     it("should return 'backoff' for code 1002", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 1002 })).toBe("backoff");
+      expect(Protocol.getCloseAction({ code: 1002 })).toBe("backoff");
     });
 
     it("should return 'backoff' for code 1003", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 1003 })).toBe("backoff");
+      expect(Protocol.getCloseAction({ code: 1003 })).toBe("backoff");
     });
 
     it("should return 'backoff' for code 1004", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 1004 })).toBe("backoff");
+      expect(Protocol.getCloseAction({ code: 1004 })).toBe("backoff");
     });
 
     it("should return null for code 1005", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 1005 })).toBe(null);
+      expect(Protocol.getCloseAction({ code: 1005 })).toBe(null);
     });
 
     it("should return null for code 3999", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 3999 })).toBe(null);
+      expect(Protocol.getCloseAction({ code: 3999 })).toBe(null);
     });
 
     it("should return 'ssl_only' for code 4000", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4000 })).toEqual("ssl_only");
+      expect(Protocol.getCloseAction({ code: 4000 })).toEqual("ssl_only");
     });
 
     it("should return 'refused' for code 4001", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4001 })).toBe("refused");
+      expect(Protocol.getCloseAction({ code: 4001 })).toBe("refused");
     });
 
     it("should return 'refused' for code 4099", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4099 })).toBe("refused");
+      expect(Protocol.getCloseAction({ code: 4099 })).toBe("refused");
     });
 
     it("should return 'backoff' for code 4100", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4100 })).toBe("backoff");
+      expect(Protocol.getCloseAction({ code: 4100 })).toBe("backoff");
     });
 
     it("should return 'backoff' for code 4199", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4199 })).toBe("backoff");
+      expect(Protocol.getCloseAction({ code: 4199 })).toBe("backoff");
     });
 
     it("should return 'retry' for code 4200", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4200 })).toBe("retry");
+      expect(Protocol.getCloseAction({ code: 4200 })).toBe("retry");
     });
 
     it("should return 'retry' for code 4299", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4299 })).toBe("retry");
+      expect(Protocol.getCloseAction({ code: 4299 })).toBe("retry");
     });
 
     it("should return 'retry' for code 4200", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4200 })).toBe("retry");
+      expect(Protocol.getCloseAction({ code: 4200 })).toBe("retry");
     });
 
     it("should return 'retry' for code 4299", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4299 })).toBe("retry");
+      expect(Protocol.getCloseAction({ code: 4299 })).toBe("retry");
     });
 
     it("should return 'refused' for code 4300", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4300 })).toBe("refused");
+      expect(Protocol.getCloseAction({ code: 4300 })).toBe("refused");
     });
 
     it("should return 'refused' for code 4399", function() {
-      expect(Pusher.Protocol.getCloseAction({ code: 4399 })).toBe("refused");
+      expect(Protocol.getCloseAction({ code: 4399 })).toBe("refused");
     });
   });
 
   describe("#getCloseError", function() {
     it("should return null for code 1000", function() {
-      expect(Pusher.Protocol.getCloseError({ code: 1000, reason: "no" }))
+      expect(Protocol.getCloseError({ code: 1000, reason: "no" }))
           .toBe(null);
     });
 
     it("should return null for code 1001", function() {
-      expect(Pusher.Protocol.getCloseError({ code: 1001, reason: "no" }))
+      expect(Protocol.getCloseError({ code: 1001, reason: "no" }))
           .toBe(null);
     });
 
     it("should return an error using 'reason' field for code 1002", function() {
-      expect(Pusher.Protocol.getCloseError({
+      expect(Protocol.getCloseError({
         code: 1002,
         reason: "foo"
       })).toEqual({
@@ -356,7 +358,7 @@ describe("Protocol", function() {
     });
 
     it("should return an error using 'reason' field for code 4999", function() {
-      expect(Pusher.Protocol.getCloseError({
+      expect(Protocol.getCloseError({
         code: 4999,
         reason: "bar"
       })).toEqual({
@@ -369,7 +371,7 @@ describe("Protocol", function() {
     });
 
     it("should return an error using 'message' field for code 1002", function() {
-      expect(Pusher.Protocol.getCloseError({
+      expect(Protocol.getCloseError({
         code: 1002,
         message: "foo"
       })).toEqual({
@@ -383,7 +385,7 @@ describe("Protocol", function() {
 
 
     it("should return an error using 'message' field for code 4999", function() {
-      expect(Pusher.Protocol.getCloseError({
+      expect(Protocol.getCloseError({
         code: 4999,
         message: "bar"
       })).toEqual({

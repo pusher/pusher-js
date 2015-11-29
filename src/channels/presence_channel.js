@@ -1,6 +1,7 @@
 var Util = require('../util');
 var PrivateChannel = require('./private_channel');
 var Members = require('./members');
+var Logger = require('../logger');
 
 /** Adds presence channel functionality to private channels.
  *
@@ -25,7 +26,7 @@ prototype.authorize = function(socketId, callback) {
   _super.call(self, socketId, function(error, authData) {
     if (!error) {
       if (authData.channel_data === undefined) {
-        Pusher.warn(
+        Logger.warn(
           "Invalid auth response for channel '" +
           self.name +
           "', expected 'channel_data' field"

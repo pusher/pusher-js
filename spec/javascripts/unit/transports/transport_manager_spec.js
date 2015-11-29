@@ -1,16 +1,20 @@
+var TransportManager = require('transports/transport_manager');
+var Mocks = require('mocks');
+var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager');
+
 describe("TransportManager", function() {
   it("should create an assistant for a transport class", function() {
-    var transportClass = Pusher.Mocks.getTransportClass(true);
-    var assistant = Pusher.Mocks.getAssistantToTheTransportManager();
-    var manager = new Pusher.TransportManager({
+    var transportClass = Mocks.getTransportClass(true);
+    var assistant = Mocks.getAssistantToTheTransportManager();
+    var manager = new TransportManager({
       minPingDelay: 1111,
       maxPingDelay: 2222
     });
 
-    spyOn(Pusher, "AssistantToTheTransportManager").andReturn(assistant);
+    spyOn(AssistantToTheTransportManager).andReturn(assistant);
 
     expect(manager.getAssistant(transportClass)).toBe(assistant);
-    expect(Pusher.AssistantToTheTransportManager).toHaveBeenCalledWith(
+    expect(AssistantToTheTransportManager).toHaveBeenCalledWith(
       manager, transportClass, { minPingDelay: 1111, maxPingDelay: 2222 }
     );
   });
@@ -19,7 +23,7 @@ describe("TransportManager", function() {
     var manager;
 
     beforeEach(function() {
-      manager = new Pusher.TransportManager({ lives: 2 });
+      manager = new TransportManager({ lives: 2 });
     });
 
     it("should be alive in the beginning", function() {
@@ -42,7 +46,7 @@ describe("TransportManager", function() {
     var manager;
 
     beforeEach(function() {
-      manager = new Pusher.TransportManager();
+      manager = new TransportManager();
     });
 
     it("should be alive in the beginning", function() {

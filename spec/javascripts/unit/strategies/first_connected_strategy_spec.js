@@ -1,11 +1,14 @@
+var Mocks = require('mocks');
+var FirstConnectedStrategy = require('strategies/first_connected_strategy');
+
 describe("FirstConnectedStrategy", function() {
   var substrategy;
   var callback;
   var strategy;
 
   beforeEach(function() {
-    substrategy = Pusher.Mocks.getStrategy(true);
-    strategy = new Pusher.FirstConnectedStrategy(substrategy);
+    substrategy = Mocks.getStrategy(true);
+    strategy = new FirstConnectedStrategy(substrategy);
     state = {};
 
     callback = jasmine.createSpy();
@@ -13,14 +16,14 @@ describe("FirstConnectedStrategy", function() {
 
   describe("after calling isSupported", function() {
     it("should return true when the substrategy is supported", function() {
-      var substrategy = Pusher.Mocks.getStrategy(true);
-      var strategy = new Pusher.FirstConnectedStrategy(substrategy);
+      var substrategy = Mocks.getStrategy(true);
+      var strategy = new FirstConnectedStrategy(substrategy);
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when the substrategy is not supported", function() {
-      var substrategy = Pusher.Mocks.getStrategy(false);
-      var strategy = new Pusher.FirstConnectedStrategy(substrategy);
+      var substrategy = Mocks.getStrategy(false);
+      var strategy = new FirstConnectedStrategy(substrategy);
       expect(strategy.isSupported()).toBe(false);
     });
   });

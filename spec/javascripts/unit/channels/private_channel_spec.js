@@ -1,10 +1,16 @@
+var Mocks = require('mocks');
+var PrivateChannel = require('channels/private_channel');
+var Authorizer = require('pusher_authorizer');
+var Errors = require('errors');
+var Channel = require('channels/channel');
+
 describe("PrivateChannel", function() {
   var pusher;
   var channel;
 
   beforeEach(function() {
-    pusher = Pusher.Mocks.getPusher({ foo: "bar" });
-    channel = new Pusher.PrivateChannel("private-test", pusher);
+    pusher = Mocks.getPusher({ foo: "bar" });
+    channel = new PrivateChannel("private-test", pusher);
   });
 
   describe("after construction", function() {
@@ -17,14 +23,14 @@ describe("PrivateChannel", function() {
     var authorizer;
 
     beforeEach(function() {
-      authorizer = Pusher.Mocks.getAuthorizer();
-      spyOn(Pusher.Channel, "Authorizer").andReturn(authorizer);
+      authorizer = Mocks.getAuthorizer();
+      spyOn(Channel, "Authorizer").andReturn(authorizer);
     });
 
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(Pusher.Channel.Authorizer.calls.length).toEqual(1);
-      expect(Pusher.Channel.Authorizer).toHaveBeenCalledWith(
+      expect(Authorizer.calls.length).toEqual(1);
+      expect(Authorizer).toHaveBeenCalledWith(
         channel,
         { foo: "bar" }
       );
@@ -45,7 +51,7 @@ describe("PrivateChannel", function() {
     it("should raise an exception if the event name does not start with client-", function() {
       expect(function() {
         channel.trigger("whatever", {});
-      }).toThrow(jasmine.any(Pusher.Errors.BadEventName));
+      }).toThrow(jasmine.any(Errors.BadEventName));
     });
 
     it("should call send_event on connection", function() {

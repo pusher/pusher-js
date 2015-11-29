@@ -1,3 +1,8 @@
+var Mocks = require('mocks');
+var ConnectionManager = require('connection/connection_manager');
+var Util = require('util');
+var Network = require('net_info').Network;
+
 describe("ConnectionManager", function() {
   var connection, strategy, timeline;
   var managerOptions, manager;
@@ -5,11 +10,11 @@ describe("ConnectionManager", function() {
   beforeEach(function() {
     jasmine.Clock.useMock();
 
-    connection = Pusher.Mocks.getConnection();
-    strategy = Pusher.Mocks.getStrategy(true);
-    timeline = Pusher.Mocks.getTimeline();
+    connection = Mocks.getConnection();
+    strategy = Mocks.getStrategy(true);
+    timeline = Mocks.getTimeline();
 
-    spyOn(Pusher.Network, "isOnline").andReturn(true);
+    spyOn(Network, "isOnline").andReturn(true);
 
     managerOptions = {
       getStrategy: jasmine.createSpy("getStrategy").andReturn(strategy),
@@ -18,7 +23,7 @@ describe("ConnectionManager", function() {
       pongTimeout: 2345,
       unavailableTimeout: 1234
     };
-    manager = new Pusher.ConnectionManager("foo", managerOptions);
+    manager = new ConnectionManager("foo", managerOptions);
   });
 
   describe("on construction", function() {
@@ -36,7 +41,7 @@ describe("ConnectionManager", function() {
         return strategy;
       });
 
-      var manager = new Pusher.ConnectionManager("foo", {
+      var manager = new ConnectionManager("foo", {
         getStrategy: getStrategy,
         timeline: timeline,
         activityTimeout: 3456,
@@ -57,8 +62,8 @@ describe("ConnectionManager", function() {
     });
 
     it("should return true if the manager has been created with encrypted=true", function() {
-      var manager = new Pusher.ConnectionManager(
-        "foo", Pusher.Util.extend(managerOptions, { encrypted: true })
+      var manager = new ConnectionManager(
+        "foo", Util.extend(managerOptions, { encrypted: true })
       );
       expect(manager.isEncrypted()).toEqual(true);
     });
@@ -154,7 +159,7 @@ describe("ConnectionManager", function() {
       var encryptedStrategy;
 
       beforeEach(function() {
-        encryptedStrategy = Pusher.Mocks.getStrategy(true);
+        encryptedStrategy = Mocks.getStrategy(true);
         managerOptions.getStrategy.andReturn(encryptedStrategy);
 
         handshake = { action: "ssl_only" };
@@ -438,7 +443,7 @@ describe("ConnectionManager", function() {
 
     describe("on offline event", function() {
       it("should send an activity check and disconnect after no pong response", function() {
-        Pusher.Network.emit("offline");
+        Network.emit("offline");
         expect(connection.ping).toHaveBeenCalled();
 
         jasmine.Clock.tick(2344);
@@ -476,7 +481,7 @@ describe("ConnectionManager", function() {
       manager.connect();
       expect(strategy.connect.calls.length).toEqual(1);
 
-      Pusher.Network.emit("online");
+      Network.emit("online");
       expect(strategy.connect.calls.length).toEqual(1);
       expect(manager.state).toEqual("connecting");
 
@@ -491,7 +496,7 @@ describe("ConnectionManager", function() {
       jasmine.Clock.tick(1234);
       expect(strategy.connect.calls.length).toEqual(1);
       expect(manager.state).toEqual("unavailable");
-      Pusher.Network.emit("online");
+      Network.emit("online");
 
       jasmine.Clock.tick(1);
       expect(strategy.connect.calls.length).toEqual(2);

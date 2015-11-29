@@ -1,9 +1,14 @@
+var Mocks = require('mocks');
+var TimelineSender = require('timeline/timeline_sender');
+var JSONPRequest = require('jsonp/jsonp_request');
+var ScriptReceivers = require('dom/script_receivers');
+
 describe("TimelineSender", function() {
   var jsonpRequest;
   var timeline, onSend, sender;
 
   beforeEach(function() {
-    timeline = Pusher.Mocks.getTimeline();
+    timeline = Mocks.getTimeline();
     timeline.isEmpty.andReturn(false);
     timeline.send.andCallFake(function(sendJSONP, callback) {
       sendJSONP({ events: [1, 2, 3]}, callback);
@@ -12,11 +17,11 @@ describe("TimelineSender", function() {
     onSend = jasmine.createSpy("onSend");
     spyOn(Pusher, "JSONPRequest").andCallFake(function() {
       // JSONPRequest and ScriptRequest have compatible interfaces
-      jsonpRequest = Pusher.Mocks.getScriptRequest();
+      jsonpRequest = Mocks.getScriptRequest();
       return jsonpRequest;
     });
 
-    sender = new Pusher.TimelineSender(timeline, {
+    sender = new TimelineSender(timeline, {
       host: "example.com",
       path: "/timeline"
     });
@@ -24,7 +29,7 @@ describe("TimelineSender", function() {
 
   describe("on construction", function() {
     it("should expose options", function() {
-      sender = new Pusher.TimelineSender(timeline, {
+      sender = new TimelineSender(timeline, {
         host: "localhost",
         port: 666
       });
@@ -39,8 +44,8 @@ describe("TimelineSender", function() {
     it("should send a non-empty timeline", function() {
       sender.send(false, onSend);
 
-      expect(Pusher.JSONPRequest.calls.length).toEqual(1);
-      expect(Pusher.JSONPRequest).toHaveBeenCalledWith(
+      expect(JSONPRequest.calls.length).toEqual(1);
+      expect(JSONPRequest).toHaveBeenCalledWith(
         "http://example.com/timeline",
         { "events": [1, 2, 3] }
       );
@@ -48,25 +53,25 @@ describe("TimelineSender", function() {
     });
 
     it("should send secure JSONP requests when encrypted", function() {
-      var sender = new Pusher.TimelineSender(timeline, {
+      var sender = new TimelineSender(timeline, {
         encrypted: true,
         host: "example.com",
         path: "/timeline"
       });
       sender.send(true, onSend);
 
-      expect(Pusher.JSONPRequest.calls.length).toEqual(1);
-      expect(Pusher.JSONPRequest).toHaveBeenCalledWith(
+      expect(JSONPRequest.calls.length).toEqual(1);
+      expect(JSONPRequest).toHaveBeenCalledWith(
         "https://example.com/timeline",
         { "events": [1, 2, 3] }
       );
     });
 
-    it("should register a receiver using Pusher.ScriptReceivers", function() {
+    it("should register a receiver using ScriptReceivers", function() {
       sender.send(false, onSend);
 
       var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      expect(Pusher.ScriptReceivers[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
+      expect(ScriptReceivers[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
     });
 
     it("should call back after a successful JSONP request", function() {
@@ -87,12 +92,12 @@ describe("TimelineSender", function() {
       expect(onSend).toHaveBeenCalledWith("ERROR!", undefined);
     });
 
-    it("should remove the receiver from Pusher.ScriptReceivers", function() {
+    it("should remove the receiver from ScriptReceivers", function() {
       sender.send(false, onSend);
 
       var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
       jsonpReceiver.callback(null, {});
-      expect(Pusher.ScriptReceivers[jsonpReceiver.number]).toBe(undefined);
+      expect(ScriptReceivers[jsonpReceiver.number]).toBe(undefined);
     });
 
     it("should clean up the JSONP request", function() {
@@ -107,7 +112,7 @@ describe("TimelineSender", function() {
     it("should not send an empty timeline", function() {
       timeline.isEmpty.andReturn(true);
       sender.send(false, onSend);
-      expect(Pusher.JSONPRequest).not.toHaveBeenCalled();
+      expect(JSONPRequest).not.toHaveBeenCalled();
     });
 
     it("should use returned hostname for subsequent requests", function() {
@@ -117,7 +122,7 @@ describe("TimelineSender", function() {
       jsonpReceiver.callback(null, { host: "returned.example.com" });
 
       sender.send(false);
-      expect(Pusher.JSONPRequest).toHaveBeenCalledWith(
+      expect(JSONPRequest).toHaveBeenCalledWith(
         "http://returned.example.com/timeline",
         { "events": [1, 2, 3] }
       );

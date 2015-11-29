@@ -1,16 +1,20 @@
+var Mocks = require('mocks');
+var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager');
+var Util = require('util');
+
 describe("AssistantToTheTransportManager", function() {
   var transport, transportClass;
   var manager;
 
   beforeEach(function() {
     jasmine.Clock.useMock();
-    spyOn(Pusher.Util, "now").andReturn(1);
+    spyOn(Util, "now").andReturn(1);
 
-    transport = Pusher.Mocks.getTransport(true);
-    transportManager = Pusher.Mocks.getTransportManager();
-    transportClass = Pusher.Mocks.getTransportClass(true, transport);
+    transport = Mocks.getTransport(true);
+    transportManager = Mocks.getTransportManager();
+    transportClass = Mocks.getTransportClass(true, transport);
 
-    assistant = new Pusher.AssistantToTheTransportManager(
+    assistant = new AssistantToTheTransportManager(
       transportManager,
       transportClass,
       { minPingDelay: 10000, maxPingDelay: 120000 }
@@ -19,18 +23,18 @@ describe("AssistantToTheTransportManager", function() {
 
   describe("#isSupported", function() {
     it("should return true when transport is supported", function() {
-      var assistant = new Pusher.AssistantToTheTransportManager(
+      var assistant = new AssistantToTheTransportManager(
         transportManager,
-        Pusher.Mocks.getTransportClass(true),
+        Mocks.getTransportClass(true),
         { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       expect(assistant.isSupported()).toBe(true);
     });
 
     it("should return false when transport is not supported", function() {
-      var assistant = new Pusher.AssistantToTheTransportManager(
+      var assistant = new AssistantToTheTransportManager(
         transportManager,
-        Pusher.Mocks.getTransportClass(false),
+        Mocks.getTransportClass(false),
         { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       expect(assistant.isSupported()).toBe(false);
@@ -65,9 +69,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       connection = assistant.createConnection("x", 1, "a", {});
-      Pusher.Util.now.andReturn(1);
+      Util.now.andReturn(1);
       connection.emit("open");
-      Pusher.Util.now.andReturn(100001);
+      Util.now.andReturn(100001);
       connection.emit("closed", { wasClean: true, code: 1002 });
     });
 
@@ -81,9 +85,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       connection = assistant.createConnection("x", 1, "a", {});
-      Pusher.Util.now.andReturn(1);
+      Util.now.andReturn(1);
       connection.emit("open");
-      Pusher.Util.now.andReturn(100001);
+      Util.now.andReturn(100001);
       connection.emit("closed", { wasClean: true, code: 1003 });
     });
 
@@ -97,15 +101,15 @@ describe("AssistantToTheTransportManager", function() {
     var assistant;
 
     beforeEach(function() {
-      assistant = new Pusher.AssistantToTheTransportManager(
+      assistant = new AssistantToTheTransportManager(
         transportManager,
         transportClass,
         { minPingDelay: 10000, maxPingDelay: 100000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
-      Pusher.Util.now.andReturn(1);
+      Util.now.andReturn(1);
       connection.emit("open");
-      Pusher.Util.now.andReturn(190001);
+      Util.now.andReturn(190001);
       connection.emit("closed", { wasClean: false });
     });
 
@@ -126,15 +130,15 @@ describe("AssistantToTheTransportManager", function() {
     var assistant;
 
     beforeEach(function() {
-      assistant = new Pusher.AssistantToTheTransportManager(
+      assistant = new AssistantToTheTransportManager(
         transportManager,
         transportClass,
         { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
-      Pusher.Util.now.andReturn(1);
+      Util.now.andReturn(1);
       connection.emit("open");
-      Pusher.Util.now.andReturn(100002);
+      Util.now.andReturn(100002);
       connection.emit("closed", { wasClean: false });
     });
 
@@ -155,15 +159,15 @@ describe("AssistantToTheTransportManager", function() {
     var assistant;
 
     beforeEach(function() {
-      assistant = new Pusher.AssistantToTheTransportManager(
+      assistant = new AssistantToTheTransportManager(
         transportManager,
         transportClass,
         { minPingDelay: 20000, maxPingDelay: 100000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
-      Pusher.Util.now.andReturn(1);
+      Util.now.andReturn(1);
       connection.emit("open");
-      Pusher.Util.now.andReturn(32001);
+      Util.now.andReturn(32001);
       connection.emit("closed", { wasClean: false });
     });
 
@@ -184,9 +188,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       connection = assistant.createConnection("x", 1, "a", {});
-      Pusher.Util.now.andReturn(1);
+      Util.now.andReturn(1);
       connection.emit("open");
-      Pusher.Util.now.andReturn(100001);
+      Util.now.andReturn(100001);
       connection.emit("closed", { wasClean: true });
     });
 
