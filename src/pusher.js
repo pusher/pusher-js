@@ -113,54 +113,9 @@ Pusher.ready = function() {
   }
 };
 
-function onDocumentBody(callback) {
-  if (document.body) {
-    callback();
-  } else {
-    setTimeout(function() {
-      onDocumentBody(callback);
-    }, 0);
-  }
-}
-
-onDocumentBody(Pusher.ready);
-
-Pusher.logToConsole = false;
-
-if (window.console && window.console.log) {
-  Pusher.log = function(message) {
-    if (Pusher.logToConsole === true) {
-      window.console.log(message);
-    }
-  };
-}
-
 Pusher.setLogger = function(logger){
   Logger.log = logger;
 }
-
-// To receive log output provide a Pusher.log function, for example
-// Pusher.log = function(m){console.log(m)}
-Pusher.debug = function() {
-  if (!Pusher.log) {
-    return;
-  }
-  Pusher.log(Util.stringify.apply(this, arguments));
-};
-
-Pusher.warn = function() {
-  var message = Util.stringify.apply(this, arguments);
-  if (window.console) {
-    if (window.console.warn) {
-      window.console.warn(message);
-    } else if (window.console.log) {
-      window.console.log(message);
-    }
-  }
-  if (Pusher.log) {
-    Pusher.log(message);
-  }
-};
 
 prototype.channel = function(name) {
   return this.channels.find(name);
@@ -245,6 +200,7 @@ function checkAppKey(key) {
   }
 }
 
-Pusher.HTTP = {};
+// init Pusher:
+Pusher.ready()
 
 module.exports = Pusher;
