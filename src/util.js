@@ -336,7 +336,14 @@ module.exports = Util = {
 
   isXDRSupported: function(encrypted) {
     var protocol = encrypted ? "https:" : "http:";
-    var documentProtocol = this.getDocument().location.protocol;
+    var documentProtocol = this.getProtocol();
     return Boolean(window.XDomainRequest) && documentProtocol === protocol;
+  },
+
+  getProtocol: function(){
+    if (this.getDocument() !== undefined){
+      return this.getDocument().location.protocol;
+    }
+    return "http:";
   }
 };
