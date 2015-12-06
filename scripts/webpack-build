@@ -3,4 +3,4 @@
 set -e
 cd "$(dirname "$0")"/..
 
-node_modules/webpack/bin/webpack.js --config=webpack/config.js
+node_modules/webpack/bin/webpack.js --config=webpack/config.web.js

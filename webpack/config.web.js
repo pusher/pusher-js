@@ -7,15 +7,11 @@ module.exports = {
   entry: "./src/pusher",
   output: {
     library: "Pusher",
-    path: path.join(__dirname, "../bundle"),
+    path: path.join(__dirname, "../bundle/web"),
     filename: "pusher.js"
   },
-  externals: {
-    "ws": "window.WebSocket || window.MozWebSocket",
-    "xhr": "window.XMLHttpRequest"
-  },
   resolve: {
-    root: ["./src/context"]
+    modulesDirectories: ["node_modules", "src/interfaces/web"]
   },
   module: {
     loaders: [
