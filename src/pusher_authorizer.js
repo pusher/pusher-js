@@ -32,11 +32,7 @@ var authorizers = {
   ajax: function(socketId, callback){
     var self = this, xhr;
 
-    if (Pusher.XHR) {
-      xhr = new Pusher.XHR();
-    } else {
-      xhr = (window.XMLHttpRequest ? new window.XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP"));
-    }
+    xhr = Util.createXHR();
 
     xhr.open("POST", self.options.authEndpoint, true);
 

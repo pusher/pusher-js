@@ -11,7 +11,8 @@ module.exports = {
     filename: "pusher.js"
   },
   externals: {
-    "ws": "window.WebSocket || window.MozWebSocket"
+    "ws": "window.WebSocket || window.MozWebSocket",
+    "xhr": "window.XMLHttpRequest"
   },
   resolve: {
     root: ["./src/context"]

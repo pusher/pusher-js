@@ -1,4 +1,5 @@
 var Timer = require('./utils/timers').Timer;
+var XHR = require('xhr');
 
 module.exports = Util = {
   now: function() {
@@ -330,7 +331,6 @@ module.exports = Util = {
   },
 
   isXHRSupported: function() {
-    var XHR = window.XMLHttpRequest;
     return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
   },
 
@@ -345,5 +345,14 @@ module.exports = Util = {
       return this.getDocument().location.protocol;
     }
     return "http:";
+  },
+
+  createXHR: function(){
+    if (XHR){
+      return new XHR();
+    } else {
+      return new ActiveXObject("Microsoft.XMLHTTP");
+    }
   }
+
 };

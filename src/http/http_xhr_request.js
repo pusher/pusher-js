@@ -1,8 +1,9 @@
 var HTTPRequest = require('./http_request');
+var XHR = require('xhr');
 
 var hooks = {
   getRequest: function(socket) {
-    var xhr = new window.XMLHttpRequest();
+    var xhr = new XHR();
     xhr.onreadystatechange = xhr.onprogress = function() {
       switch (xhr.readyState) {
         case 3:
