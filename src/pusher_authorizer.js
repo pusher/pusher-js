@@ -28,7 +28,6 @@ Authorizer.prototype = {
 
 var nextAuthCallbackID = 1;
 
-var auth_callbacks = {};
 var authorizers = {
   ajax: function(socketId, callback){
     var self = this, xhr;
@@ -71,32 +70,6 @@ var authorizers = {
 
     xhr.send(this.composeQuery(socketId));
     return xhr;
-  },
-
-  jsonp: function(socketId, callback){
-    if(this.authOptions.headers !== undefined) {
-      Logger.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
-    }
-
-    var callbackName = nextAuthCallbackID.toString();
-    nextAuthCallbackID++;
-
-    var document = Util.getDocument();
-    var script = document.createElement("script");
-    // Hacked wrapper.
-    auth_callbacks[callbackName] = function(data) {
-      callback(false, data);
-    };
-
-    var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
-    script.src = this.options.authEndpoint +
-      '?callback=' +
-      encodeURIComponent(callback_name) +
-      '&' +
-      this.composeQuery(socketId);
-
-    var head = document.getElementsByTagName("head")[0] || document.documentElement;
-    head.insertBefore( script, head.firstChild );
   }
 };
 

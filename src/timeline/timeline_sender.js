@@ -1,5 +1,4 @@
-var JSONPRequest = require('../jsonp/jsonp_request');
-var ScriptReceivers = require('../dom/script_receivers');
+var Util = require('../util');
 
 function TimelineSender(timeline, options) {
   this.timeline = timeline;
@@ -14,25 +13,12 @@ prototype.send = function(encrypted, callback) {
     return;
   }
 
-  var sendJSONP = function(data, callback) {
+  var sendXHR = function(data, callback) {
     var scheme = "http" + (encrypted ? "s" : "") + "://";
     var url = scheme + (self.host || self.options.host) + self.options.path;
-    var request = new JSONPRequest(url, data);
-
-    var receiver = ScriptReceivers.create(function(error, result) {
-      ScriptReceivers.remove(receiver);
-      request.cleanup();
-
-      if (result && result.host) {
-        self.host = result.host;
-      }
-      if (callback) {
-        callback(error, result);
-      }
-    });
-    request.send(receiver);
+    // UNFINISHED
   };
-  self.timeline.send(sendJSONP, callback);
+  self.timeline.send(sendXHR, callback);
 };
 
 module.exports = TimelineSender;

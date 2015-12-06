@@ -42,7 +42,7 @@ prototype.isEmpty = function() {
   return this.events.length === 0;
 };
 
-prototype.send = function(sendJSONP, callback) {
+prototype.send = function(sendXHR, callback) {
   var self = this;
 
   var data = Util.extend({
@@ -57,7 +57,7 @@ prototype.send = function(sendJSONP, callback) {
   }, self.options.params);
 
   self.events = [];
-  sendJSONP(data, function(error, result) {
+  sendXHR(data, function(error, result) {
     if (!error) {
       self.sent++;
     }
