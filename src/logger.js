@@ -10,11 +10,12 @@ module.exports = {
 
   warn: function(){
     var message = Util.stringify.apply(this, arguments);
-    if (window.console) {
-      if (window.console.warn) {
-        window.console.warn(message);
-      } else if (window.console.log) {
-        window.console.log(message);
+    var _global = Util.getGlobal();
+    if (_global.console) {
+      if (_global.console.warn) {
+        _global.console.warn(message);
+      } else if (_global.console.log) {
+        _global.console.log(message);
       }
     }
     if (this.log) {
