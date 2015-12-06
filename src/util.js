@@ -1,4 +1,3 @@
-var Timer = require('./utils/timers').Timer;
 var XHR = require('xhr');
 
 module.exports = Util = {
@@ -11,6 +10,7 @@ module.exports = Util = {
   },
 
   defer: function(callback) {
+    var Timer = require('./utils/timers').Timer;
     return new Timer(0, callback);
   },
 
@@ -353,6 +353,9 @@ module.exports = Util = {
     } else {
       return new ActiveXObject("Microsoft.XMLHTTP");
     }
-  }
+  },
 
+  getGlobal: function(){
+    return Function("return this")();
+  }
 };
