@@ -41,8 +41,14 @@ var cb_encode = function(ccc) {
   return chars.join('');
 };
 
-var btoa = window.btoa || function(b) {
-  return b.replace(/[\s\S]{1,3}/g, cb_encode);
-};
+var btoa;
+
+if (window && window.btoa){
+  btoa = window.btoa
+} else {
+  btoa = function(b) {
+    return b.replace(/[\s\S]{1,3}/g, cb_encode);
+  }
+}
 
 module.exports = Base64;
