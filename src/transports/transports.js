@@ -2,6 +2,7 @@ var Transport = require('./transport');
 var URLSchemes = require('./url_schemes');
 var Util = require('../util');
 var HTTP = require('../http/http');
+var WS = require('ws');
 
 /** WebSocket transport.
  *
@@ -14,13 +15,13 @@ exports.WSTransport = new Transport({
   supportsPing: false,
 
   isInitialized: function() {
-    return Boolean(window.WebSocket || window.MozWebSocket);
+    return Boolean(WS);
   },
   isSupported: function() {
-    return Boolean(window.WebSocket || window.MozWebSocket);
+    return Boolean(WS);
   },
   getSocket: function(url) {
-    var Constructor = window.WebSocket || window.MozWebSocket;
+    var Constructor = WS;
     return new Constructor(url);
   }
 });

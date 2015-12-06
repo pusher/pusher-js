@@ -36,6 +36,7 @@
     "karma-webpack": "^1.7.0"
   },
   "dependencies": {
+    "faye-websocket": "0.9.4",
     "string-replace-webpack-plugin": "0.0.2",
     "webpack": "^1.12.9"
   }

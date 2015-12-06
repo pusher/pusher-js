@@ -10,6 +10,12 @@ module.exports = {
     path: path.join(__dirname, "../bundle"),
     filename: "pusher.js"
   },
+  externals: {
+    "ws": "window.WebSocket || window.MozWebSocket"
+  },
+  resolve: {
+    root: ["./src/context"]
+  },
   module: {
     loaders: [
       {
