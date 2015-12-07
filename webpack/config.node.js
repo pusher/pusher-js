@@ -20,5 +20,9 @@ module.exports = {
   },
   plugins: [
     new StringReplacePlugin()
-  ]
+  ],
+  externals: {
+    "faye-websocket": "commonjs faye-websocket",
+    "xmlhttprequest": "commonjs xmlhttprequest"
+  }
 }
