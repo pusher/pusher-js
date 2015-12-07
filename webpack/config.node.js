@@ -5,11 +5,12 @@ module.exports = {
   entry: "./src/pusher",
   output: {
     library: "Pusher",
-    path: path.join(__dirname, "../bundle/web"),
+    path: path.join(__dirname, "../bundle/node"),
     filename: "pusher.js"
   },
+  target: "node",
   resolve: {
-    modulesDirectories: ["node_modules", "src/interfaces/web"]
+    modulesDirectories: ["node_modules", "src/interfaces/node"]
   },
   module: {
     loaders: [
