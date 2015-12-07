@@ -1,5 +1,3 @@
-var XHR = require('xhr');
-
 module.exports = Util = {
   now: function() {
     if (Date.now) {
@@ -335,6 +333,7 @@ module.exports = Util = {
   },
 
   isXHRSupported: function() {
+    var XHR = require('xhr');
     return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
   },
 
@@ -352,6 +351,7 @@ module.exports = Util = {
   },
 
   createXHR: function(){
+    var XHR = require('xhr');
     if (XHR){
       return new XHR();
     } else {
