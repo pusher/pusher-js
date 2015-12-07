@@ -1,5 +1,5 @@
-var EventsDispatcher = require('./events_dispatcher');
-var Util = require('./util');
+var EventsDispatcher = require('../../events_dispatcher');
+var Util = require('../../util');
 
 /** Really basic interface providing network availability info.
  *

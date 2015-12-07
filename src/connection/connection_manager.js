@@ -1,7 +1,7 @@
 var Util = require('../util');
 var EventsDispatcher = require('../events_dispatcher');
 var Timer = require('../utils/timers').Timer;
-var Network = require('../net_info').Network;
+var Network = require('net_info').Network;
 var Logger = require('../logger');
 
 /** Manages connection to Pusher.

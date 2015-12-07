@@ -10,7 +10,7 @@ module.exports = {
   },
   target: "node",
   resolve: {
-    modulesDirectories: ["node_modules", "src/interfaces/node"]
+    modulesDirectories: ["node_modules", "src/platforms/node"]
   },
   module: {
     loaders: [

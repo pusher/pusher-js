@@ -291,7 +291,11 @@ module.exports = Util = {
   },
 
   getDocument: function() {
-    return document;
+    try {
+      return document || undefined;
+    } catch(e) {
+      return undefined;
+    }
   },
 
   getLocalStorage: function() {

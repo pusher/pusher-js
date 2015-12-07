@@ -187,7 +187,7 @@ prototype.send_event = function(event_name, data, channel) {
 };
 
 prototype.isEncrypted = function() {
-  if (Util.getDocument().location.protocol === "https:") {
+  if (Util.getProtocol() === "https:") {
     return true;
   } else {
     return Boolean(this.config.encrypted);

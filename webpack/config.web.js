@@ -9,7 +9,7 @@ module.exports = {
     filename: "pusher.js"
   },
   resolve: {
-    modulesDirectories: ["node_modules", "src/interfaces/web"]
+    modulesDirectories: ["node_modules", "src/platforms/web"]
   },
   module: {
     loaders: [
