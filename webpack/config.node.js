@@ -5,6 +5,7 @@ module.exports = {
   entry: "./src/pusher",
   output: {
     library: "Pusher",
+    libraryTarget:"commonjs2",
     path: path.join(__dirname, "../bundle/node"),
     filename: "pusher.js"
   },
