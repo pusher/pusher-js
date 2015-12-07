@@ -91,7 +91,7 @@ function Pusher(app_key, options) {
     self.channels.disconnect();
   });
   this.connection.bind('error', function(err) {
-    Pusher.warn('Error', err);
+    Logger.warn('Error', err);
   });
 
   Pusher.instances.push(this);
