@@ -50,7 +50,7 @@ module.exports = Util = {
       if (typeof arguments[i] === "string") {
         m.push(arguments[i]);
       } else {
-        if (Util.getGlobal().JSON === undefined) {
+        if (Util.global.JSON === undefined) {
           m.push(arguments[i].toString());
         } else {
           m.push(JSON.stringify(arguments[i]));
@@ -132,7 +132,7 @@ module.exports = Util = {
    */
   apply: function(array, f, context) {
     for (var i = 0; i < array.length; i++) {
-      f.call(context || this.getGlobal(), array[i], i, array);
+      f.call(context || this.global, array[i], i, array);
     }
   },
 
@@ -359,7 +359,5 @@ module.exports = Util = {
     }
   },
 
-  getGlobal: function(){
-    return Function("return this")();
-  }
+  global: Function("return this")()
 };

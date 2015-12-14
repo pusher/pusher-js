@@ -1,3 +1,3 @@
-var globalScope = require('../../util').getGlobal();
+var globalScope = require('../../util').global;
 
 module.exports = globalScope.WebSocket || globalScope.MozWebSocket;

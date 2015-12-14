@@ -10,7 +10,7 @@ module.exports = {
 
   warn: function(){
     var message = Util.stringify.apply(this, arguments);
-    var _global = Util.getGlobal();
+    var _global = Util.global;
     if (_global.console) {
       if (_global.console.warn) {
         _global.console.warn(message);

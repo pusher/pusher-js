@@ -1,5 +1,5 @@
 var Util = require('../util');
-var _global = Util.getGlobal();
+var _global = Util.global;
 
 // We need to bind clear functions this way to avoid exceptions on IE8
 function clearTimeout(timer) {

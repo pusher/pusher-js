@@ -41,7 +41,7 @@ prototype.emit = function(eventName, data) {
   var callbacks = this.callbacks.get(eventName);
   if (callbacks && callbacks.length > 0) {
     for (i = 0; i < callbacks.length; i++) {
-      callbacks[i].fn.call(callbacks[i].context || Util.getGlobal(), data);
+      callbacks[i].fn.call(callbacks[i].context || Util.global, data);
     }
   } else if (this.failThrough) {
     this.failThrough(eventName, data);
