@@ -2,12 +2,6 @@
 
 This library is an open source client that allows Javascript web browser clients to connect to the [Pusher](http://pusher.com/) WebSocket API. It also supports fallback to HTTP connection transports. It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
 
-We have included the source code for following libraries:
-
-* sockjs-client
-
-They both include their own licences.
-
 ## Usage overview
 
 The following topics are covered:
@@ -125,7 +119,7 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 #### `enabledTransports` (Array)
 
-Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
+Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
 
 ```js
 // will only use WebSockets
@@ -134,11 +128,7 @@ var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
 
 #### `disabledTransports` (Array)
 
-Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
-
-```js
-// will use all transports except for sockjs
-var pusher = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
+Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
 
 // will only use WebSockets
 var pusher = new Pusher(API_KEY, {

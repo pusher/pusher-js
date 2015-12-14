@@ -77,11 +77,6 @@ bundle 'pusher.js' do
   file 'build/umd_footer.js'
 end
 
-bundle 'sockjs.js' do
-  license 'sockjs-licence.js'
-  file 'sockjs/sockjs.js'
-end
-
 bundle 'xhr.js' do
   license 'pusher-licence.js'
   file 'http/http_request.js'

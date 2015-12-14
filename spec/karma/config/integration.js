@@ -6,9 +6,6 @@ module.exports = function(config) {
     files: []
       .concat(require(__dirname + "/../files/built"))
       .concat(require(__dirname + "/../files/integration_tests")),
-    exclude: [
-      'src/sockjs/**/*',
-    ],
 
     preprocessors: {
       '**/src/**/*.js': 'coverage'

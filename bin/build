@@ -2,7 +2,4 @@
 set -e
 cd "$(dirname "$0")"/..
 
-pushd src/sockjs
-make
-popd
 bundle exec jbundle
