@@ -6,7 +6,6 @@ describeIntegration("Timeout Configuration", function() {
     spyOn(Pusher.Network, "isOnline").andReturn(true);
 
     spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(false);
 
     spyOn(Pusher.Util, "getLocalStorage").andReturn({});
 

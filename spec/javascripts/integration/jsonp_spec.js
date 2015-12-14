@@ -7,18 +7,18 @@ describeIntegration("JSONP", function() {
     runs(function() {
       var request = new Pusher.JSONPRequest(url, {
         "session": 2289545,
-        "features": ["ws", "sockjs"],
+        "features": ["ws"],
         "version": "1.13.0",
         "t0": 1355850357911,
         "timeline": [
           { t:    0, e: 2 },
           { t:    2, e: 2, type: "ws" },
           { t: 1001, e: 4, type: "ws" },
-          { t: 1001, e: 0, type: "sockjs" },
+          { t: 1001, e: 0, type: "xhr_streaming" },
           { t: 2000, e: 5 },
-          { t: 2158, e: 1, type: "sockjs" },
-          { t: 2378, e: 2, type: "sockjs" },
-          { t: 3892, e: 3, type: "sockjs" },
+          { t: 2158, e: 1, type: "xhr_streaming" },
+          { t: 2378, e: 2, type: "xhr_streaming" },
+          { t: 3892, e: 3, type: "xhr_streaming" },
           { t: 3892, e: 3 }
         ]
       });
@@ -31,18 +31,18 @@ describeIntegration("JSONP", function() {
       expect(callback.calls.length).toEqual(1);
       expect(callback).toHaveBeenCalledWith(null, {
         "session": "2289545",
-        "features": ["ws", "sockjs"],
+        "features": ["ws"],
         "version": "1.13.0",
         "t0": "1355850357911",
         "timeline": [
           { t:    0, e: 2 },
           { t:    2, e: 2, type: "ws" },
           { t: 1001, e: 4, type: "ws" },
-          { t: 1001, e: 0, type: "sockjs" },
+          { t: 1001, e: 0, type: "xhr_streaming" },
           { t: 2000, e: 5 },
-          { t: 2158, e: 1, type: "sockjs" },
-          { t: 2378, e: 2, type: "sockjs" },
-          { t: 3892, e: 3, type: "sockjs" },
+          { t: 2158, e: 1, type: "xhr_streaming" },
+          { t: 2378, e: 2, type: "xhr_streaming" },
+          { t: 3892, e: 3, type: "xhr_streaming" },
           { t: 3892, e: 3 }
         ]
       });

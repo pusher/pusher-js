@@ -4,20 +4,20 @@ describe("Transport lists", function() {
   beforeEach(function() {
     spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
     spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(true);
-    spyOn(Pusher.SockJSTransport, "isSupported").andReturn(true);
+    spyOn(Pusher.XHRPollingTransport, "isSupported").andReturn(true);
 
     spyOn(Pusher.WSTransport, "createConnection")
       .andCallFake(Pusher.Mocks.getTransport);
     spyOn(Pusher.XHRStreamingTransport, "createConnection")
       .andCallFake(Pusher.Mocks.getTransport);
-    spyOn(Pusher.SockJSTransport, "createConnection")
+    spyOn(Pusher.XHRPollingTransport, "createConnection")
       .andCallFake(Pusher.Mocks.getTransport);
 
     spyOn(Pusher, "getDefaultStrategy").andCallFake(function() {
       return [
         [":def_transport", "a", "ws", 1, {}],
         [":def_transport", "b", "xhr_streaming", 2, {}],
-        [":def_transport", "c", "sockjs", 3, {}],
+        [":def_transport", "c", "xhr_polling", 3, {}],
         [":def", "strategy", [":best_connected_ever", ":a", ":b", ":c"]]
       ];
     });
@@ -34,7 +34,7 @@ describe("Transport lists", function() {
     var pusher = new Pusher("asdf", { disableStats: true });
     expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
     expect(Pusher.XHRStreamingTransport.createConnection).toHaveBeenCalled();
-    expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -45,7 +45,7 @@ describe("Transport lists", function() {
     });
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.SockJSTransport.createConnection).not.toHaveBeenCalled();
+    expect(Pusher.XHRPollingTransport.createConnection).not.toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -56,7 +56,7 @@ describe("Transport lists", function() {
     });
     expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
     expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -67,7 +67,7 @@ describe("Transport lists", function() {
     });
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -79,7 +79,7 @@ describe("Transport lists", function() {
     });
     expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
     expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 });

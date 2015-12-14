@@ -93,6 +93,7 @@ describeIntegration("Falling back", function() {
     });
   });
 
+  // TODO replace with XHR
   it("should not close established SockJS connection when WebSocket is stuck in handshake", function() {
     var wsTransport, sockjsTransport;
 

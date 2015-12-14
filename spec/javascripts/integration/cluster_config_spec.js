@@ -1,7 +1,6 @@
 describeIntegration("Cluster Configuration", function() {
   var TRANSPORTS = {
     "ws": Pusher.WSTransport,
-    "sockjs": Pusher.SockJSTransport,
     "xhr_streaming": Pusher.XHRStreamingTransport,
     "xhr_polling": Pusher.XHRPollingTransport,
     "xdr_streaming": Pusher.XDRStreamingTransport,
@@ -129,13 +128,8 @@ describeIntegration("Cluster Configuration", function() {
     describeClusterTest({ transport: "xdr_streaming", encrypted: true});
     describeClusterTest({ transport: "xdr_polling", encrypted: false});
     describeClusterTest({ transport: "xdr_polling", encrypted: true});
-    // IE can fall back to SockJS if protocols don't match
-    // No SockJS encrypted tests due to the way JS files are served
-    describeClusterTest({ transport: "sockjs", encrypted: false});
   } else {
-    // Browsers using SockJS
-    describeClusterTest({ transport: "sockjs", encrypted: false});
-    describeClusterTest({ transport: "sockjs", encrypted: true});
+    throw new Error("this environment is not supported");
   }
 
   it("should restore the global config", function() {

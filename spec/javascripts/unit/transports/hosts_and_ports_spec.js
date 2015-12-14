@@ -76,6 +76,7 @@ describe("Host/Port Configuration", function() {
     });
   });
 
+  // TODO change to XHR
   describe("SockJS", function() {
     var _SockJS;
 

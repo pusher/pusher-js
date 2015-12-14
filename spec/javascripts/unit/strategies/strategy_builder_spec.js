@@ -8,18 +8,18 @@ var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy
 var IfStrategy = require('strategies/if_strategy');
 var Errors = require('errors');
 var Transports = require('transports/transports');
-var SockJSTransport = Transports.SockJSTransport;
+var XHRStreamingTransport = Transports.XHRStreamingTransport;
 var WSTransport = Transports.WSTransport;
 
 describe("StrategyBuilder", function() {
   it("should construct a transport strategy", function() {
     var strategy = StrategyBuilder.build([
-      [":def_transport", "test", "sockjs", 1, { option: "value" }],
+      [":def_transport", "test", "xhr_streaming", 1, { option: "value" }],
       [":def", "strategy", ":test"]
     ]);
 
     expect(strategy).toEqual(jasmine.any(TransportStrategy));
-    expect(strategy.transport).toBe(SockJSTransport);
+    expect(strategy.transport).toBe(XHRStreamingTransport);
     expect(strategy.options).toEqual({
       option: "value"
     });
@@ -27,7 +27,7 @@ describe("StrategyBuilder", function() {
 
   it("should construct a delayed strategy", function() {
     var strategy = StrategyBuilder.build([
-      [":def_transport", "test", "sockjs", 1, { option: "value" }],
+      [":def_transport", "test", "xhr_streaming", 1, { option: "value" }],
       [":def", "strategy", [":delayed", 2000, ":test"]]
     ]);
 
@@ -41,7 +41,7 @@ describe("StrategyBuilder", function() {
 
     var strategy = StrategyBuilder.build([
       [":def_transport", "one", "ws", 1, { option: "1" }],
-      [":def_transport", "two", "sockjs", 1, { option: "2" }],
+      [":def_transport", "two", "xhr_streaming", 1, { option: "2" }],
       [":def", "timeouts", { loop: true, timeout: 2000, timeoutLimit: 8000}],
       [":def", "strategy", [":sequential", ":timeouts", ":one", ":two"]]
     ]);
@@ -53,7 +53,7 @@ describe("StrategyBuilder", function() {
 
     expect(strategy.strategies[1])
       .toEqual(jasmine.any(TransportStrategy));
-    expect(strategy.strategies[1].transport).toBe(SockJSTransport);
+    expect(strategy.strategies[1].transport).toBe(XHRStreamingTransport);
 
     expect(strategy.loop).toBe(true);
     expect(strategy.timeout).toEqual(2000);
@@ -82,7 +82,7 @@ describe("StrategyBuilder", function() {
     var strategy = StrategyBuilder.build([
       [":def_transport", "one", "ws", 1, {}],
       [":def_transport", "two", "xhr_streaming", 2, {}],
-      [":def_transport", "three", "sockjs", 3, {}],
+      [":def_transport", "three", "xhr_polling", 3, {}],
       [":def", "strategy", [":best_connected_ever", ":one", ":two", ":three"]]
     ]);
     expect(strategy).toEqual(jasmine.any(BestConnectedEverStrategy));
@@ -91,12 +91,12 @@ describe("StrategyBuilder", function() {
   it("should construct an if strategy with isSupported call", function() {
     var strategy = StrategyBuilder.build([
       [":def_transport", "ws", "ws", 1, {}],
-      [":def_transport", "sockjs", "sockjs", 2, {}],
+      [":def_transport", "xhr_streaming", "xhr_streaming", 2, {}],
       [":def", "strategy",
         [":if", [":is_supported", ":ws"], [
           ":ws"
         ], [
-          ":sockjs"
+          ":xhr_streaming"
         ]]
       ]
     ]);

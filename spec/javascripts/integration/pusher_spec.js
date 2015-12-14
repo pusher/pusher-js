@@ -6,16 +6,8 @@ describeIntegration("Pusher", function() {
   // Ideally, we'd have a separate connection per spec, but this introduces
   // significant delays and triggers security mechanisms in some browsers.
 
-  function canRunTwoConnections(transport, encrypted) {
-    if (transport !== "sockjs") {
-      return true;
-    }
-    return !/(MSIE [67])|(Version\/(4|5\.0).*Safari)/.test(navigator.userAgent);
-  }
-
   var TRANSPORTS = {
     "ws": Pusher.WSTransport,
-    "sockjs": Pusher.SockJSTransport,
     "xhr_streaming": Pusher.XHRStreamingTransport,
     "xhr_polling": Pusher.XHRPollingTransport,
     "xdr_streaming": Pusher.XDRStreamingTransport,
@@ -421,18 +413,16 @@ describeIntegration("Pusher", function() {
             encrypted: encrypted,
             disableStats: true
           });
-          if (canRunTwoConnections(transport, encrypted)) {
-            pusher2 = new Pusher("7324d55a5eeb8f554761", {
-              encrypted: encrypted,
-              disableStats: true
-            });
-            waitsFor(function() {
-              return pusher2.connection.state === "connected";
-            }, "second connection to be established", 20000);
-          }
+          pusher2 = new Pusher("7324d55a5eeb8f554761", {
+            encrypted: encrypted,
+            disableStats: true
+          });
           waitsFor(function() {
             return pusher1.connection.state === "connected";
           }, "first connection to be established", 20000);
+          waitsFor(function() {
+            return pusher2.connection.state === "connected";
+          }, "second connection to be established", 20000);
         });
 
       });
@@ -450,41 +440,34 @@ describeIntegration("Pusher", function() {
         buildPublicChannelTests(
           function() { return pusher1; }
         );
-        if (canRunTwoConnections(transport, encrypted)) {
-          buildClientEventsTests(
-            function() { return pusher1; },
-            function() { return pusher2; },
-            "private-"
-          );
-        }
+        buildClientEventsTests(
+          function() { return pusher1; },
+          function() { return pusher2; },
+          "private-"
+        );
       });
 
       describe("with a presence channel", function() {
         buildPublicChannelTests(
           function() { return pusher1; }
         );
-        if (canRunTwoConnections(transport, encrypted)) {
-          buildClientEventsTests(
-            function() { return pusher1; },
-            function() { return pusher2; },
-            "presence-"
-          );
-          buildPresenceChannelTests(
-            function() { return pusher1; },
-            function() { return pusher2; }
-          );
-        }
+        buildClientEventsTests(
+          function() { return pusher1; },
+          function() { return pusher2; },
+          "presence-"
+        );
+        buildPresenceChannelTests(
+          function() { return pusher1; },
+          function() { return pusher2; }
+        );
       });
 
       describe("teardown", function() {
-        if (canRunTwoConnections(transport, encrypted)) {
-          it("should disconnect second connection", function() {
-            pusher2.disconnect();
-          });
-        }
-
         it("should disconnect first connection", function() {
           pusher1.disconnect();
+        });
+        it("should disconnect second connection", function() {
+          pusher2.disconnect();
         });
       });
     });
@@ -531,13 +514,8 @@ describeIntegration("Pusher", function() {
     buildIntegrationTests("xdr_streaming", true);
     buildIntegrationTests("xdr_polling", false);
     buildIntegrationTests("xdr_polling", true);
-    // IE can fall back to SockJS if protocols don't match
-    // No SockJS encrypted tests due to the way JS files are served
-    buildIntegrationTests("sockjs", false);
   } else {
-    // Browsers using SockJS
-    buildIntegrationTests("sockjs", false);
-    buildIntegrationTests("sockjs", true);
+    throw new Error("this environment is not supported");
   }
 
   it("should restore the global config", function() {
