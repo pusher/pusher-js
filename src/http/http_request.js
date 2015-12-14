@@ -22,7 +22,7 @@ prototype.start = function(payload) {
   self.unloader = function() {
     self.close();
   };
-  Util.addWindowListener("unload", self.unloader);
+  Util.addUnloadListener(self.unloader);
 
   self.xhr.open(self.method, self.url, true);
   self.xhr.send(payload);
@@ -30,7 +30,7 @@ prototype.start = function(payload) {
 
 prototype.close = function() {
   if (this.unloader) {
-    Util.removeWindowListener("unload", this.unloader);
+    Util.removeUnloadListener(this.unloader);
     this.unloader = null;
   }
   if (this.xhr) {

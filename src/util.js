@@ -284,10 +284,6 @@ module.exports = Util = {
     };
   },
 
-  getWindow: function() {
-    return window;
-  },
-
   getDocument: function() {
     try {
       return document || undefined;
@@ -314,21 +310,21 @@ module.exports = Util = {
     );
   },
 
-  addWindowListener: function(event, listener) {
-    var _window = this.getWindow();
+  addUnloadListener: function(listener) {
+    var _window = this.global;
     if (_window.addEventListener !== undefined) {
-      _window.addEventListener(event, listener, false);
-    } else {
-      _window.attachEvent("on" + event, listener);
+      _window.addEventListener("unload", listener, false);
+    } else if (_window.attachEvent !== undefined) {
+      _window.attachEvent("onunload", listener);
     }
   },
 
-  removeWindowListener: function(event, listener) {
-    var _window = this.getWindow();
+  removeUnloadListener: function(listener) {
+    var _window = this.global;
     if (_window.addEventListener !== undefined) {
-      _window.removeEventListener(event, listener, false);
-    } else {
-      _window.detachEvent("on" + event, listener);
+      _window.removeEventListener("unload", listener, false);
+    } else if (_window.detachEvent !== undefined) {
+      _window.detachEvent("onunload", listener);
     }
   },
 
