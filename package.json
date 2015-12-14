@@ -33,12 +33,12 @@
     "karma-jasmine": "~0.1.0",
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
-    "karma-webpack": "^1.7.0"
+    "karma-webpack": "^1.7.0",
+    "string-replace-webpack-plugin": "0.0.2",
+    "webpack": "^1.12.9"
   },
   "dependencies": {
     "faye-websocket": "0.9.4",
-    "string-replace-webpack-plugin": "0.0.2",
-    "webpack": "^1.12.9",
     "xmlhttprequest": "^1.8.0"
   }
 }
