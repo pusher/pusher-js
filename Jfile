@@ -95,8 +95,6 @@ bundle 'xdr.js' do
   file 'http/http_polling_socket.js'
 end
 
-file 'json2.js'
-
 # Runs for every bundle and license source.
 filter do |src, config|
   src.gsub! /<VERSION>/, config.version.to_s
