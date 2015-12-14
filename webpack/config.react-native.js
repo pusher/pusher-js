@@ -1,6 +1,14 @@
 var path = require("path");
 var StringReplacePlugin = require('string-replace-webpack-plugin');
+var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
+var pathToSource = require('./path_to_source');
 
+//////////////////////////////////////////////
+// The ReactNative build uses:              //
+// WebSocket: platforms/web/ws              //
+// XHR: platforms/web/xhr                   //
+// NetInfo: platforms/react-native/net_info //
+//////////////////////////////////////////////
 module.exports = {
   entry: "./src/pusher",
   output: {
@@ -10,13 +18,6 @@ module.exports = {
     filename: "pusher.js"
   },
   target: "node",
-  resolve: {
-    alias: {
-      ws: path.join(__dirname, "../src") + "/platforms/web/ws.js",
-      xhr: path.join(__dirname, "../src") +  "/platforms/web/xhr.js"
-    },
-    modulesDirectories: ["node_modules", "src/platforms/react-native"]
-  },
   externals: {
     "react-native": "{}"
   },
@@ -26,6 +27,9 @@ module.exports = {
     ],
   },
   plugins: [
-    new StringReplacePlugin()
+    new StringReplacePlugin(),
+    new NormalModuleReplacementPlugin(/platforms\/node\/ws/, pathToSource('platforms/web/ws')),
+    new NormalModuleReplacementPlugin(/platforms\/node\/xhr/, pathToSource('platforms/web/xhr')),
+    new NormalModuleReplacementPlugin(/platforms\/node\/net_info/, pathToSource('platforms/react-native/net_info'))
   ]
 }

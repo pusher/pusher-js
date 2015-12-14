@@ -2,7 +2,7 @@
   "name": "pusher-js",
   "version": "3.0.0",
   "description": "Pusher JavaScript library for the browser",
-  "main": "dist/pusher.js",
+  "main": "src/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -1,5 +1,5 @@
 var HTTPRequest = require('./http_request');
-var XHR = require('xhr');
+var XHR = require('../platforms/node/xhr');
 
 var hooks = {
   getRequest: function(socket) {

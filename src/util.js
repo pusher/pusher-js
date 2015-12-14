@@ -329,7 +329,7 @@ module.exports = Util = {
   },
 
   isXHRSupported: function() {
-    var XHR = require('xhr');
+    var XHR = require('./platforms/node/xhr');
     return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
   },
 
@@ -347,7 +347,7 @@ module.exports = Util = {
   },
 
   createXHR: function(){
-    var XHR = require('xhr');
+    var XHR = require('./platforms/node/xhr');
     if (XHR){
       return new XHR();
     } else {

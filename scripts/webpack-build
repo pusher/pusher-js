@@ -6,9 +6,6 @@ cd "$(dirname "$0")"/..
 echo "Browser Release:"
 node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 
-echo "NodeJS Release:"
-node_modules/webpack/bin/webpack.js --config=webpack/config.node.js
-
 echo "React Native Release:"
 node_modules/webpack/bin/webpack.js --config=webpack/config.react-native.js
 
