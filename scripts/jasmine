@@ -6,6 +6,7 @@ require "bundler/setup"
 debug = ARGV.any? { |arg| arg == "--debug" }
 params = !debug ? " > /dev/null 2>&1" : ""
 
+# FIXME use the webpack build
 commands = [
   "bundle exec jbundle server #{params}",
   "rake jasmine"

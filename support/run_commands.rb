@@ -1,4 +1,3 @@
-
 def run_commands(cmds)
   pids = cmds.map { |cmd|
     spawn(cmd)

@@ -3,9 +3,6 @@ source "http://rubygems.org"
 group :development do
   # uploader
   gem 'rake'
-  gem 'jbundle', :github => 'mloughran/jbundle'
-  gem 'aws-s3', '~> 0.6.0'
-  gem 'httparty'
   # testing
   gem 'jasmine', '~> 1.2.0'
   # jasmine guard integration
