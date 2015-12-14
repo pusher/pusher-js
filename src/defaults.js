@@ -18,10 +18,6 @@ exports.channel_auth_transport = 'ajax';
 exports.activity_timeout = 120000;
 exports.pong_timeout = 30000;
 exports.unavailable_timeout = 10000;
-// CDN configuration
-exports.cdn_http = '<CDN_HTTP>';
-exports.cdn_https = '<CDN_HTTPS>';
-exports.dependency_suffix = '<DEPENDENCY_SUFFIX>';
 
 exports.getDefaultStrategy = function(config) {
   var wsStrategy;

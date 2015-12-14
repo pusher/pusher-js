@@ -10,18 +10,6 @@ module.exports = {
           var packageJSON = require('../package');
           return packageJSON.version;
         }
-      },
-      {
-        pattern: /<CDN_HTTP>/ig,
-        replacement: function(){
-          return libConfig.js.cdn.http;
-        }
-      },
-      {
-        pattern: /<CDN_HTTPS>/ig,
-        replacement: function(){
-          return libConfig.js.cdn.https;
-        }
       }
     ]
   })
