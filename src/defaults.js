@@ -6,12 +6,12 @@ exports.host = 'ws.pusherapp.com';
 exports.ws_port = 80;
 exports.wss_port = 443;
 // DEPRECATED: SockJS fallback parameters
-exports.sockjs_host = 'sockjs.exports.com';
+exports.sockjs_host = 'sockjs.pusher.com';
 exports.sockjs_http_port = 80;
 exports.sockjs_https_port = 443;
 exports.sockjs_path = "/pusher";
 // DEPRECATED: Stats
-exports.stats_host = 'stats.exports.com';
+exports.stats_host = 'stats.pusher.com';
 // DEPRECATED: Other settings
 exports.channel_auth_endpoint = '/pusher/auth';
 exports.channel_auth_transport = 'ajax';
