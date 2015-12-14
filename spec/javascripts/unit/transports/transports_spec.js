@@ -1,19 +1,8 @@
 var Mocks = require('mocks');
-var Dependencies = require('dependencies');
 var Transports = require('transports/transports');
 var Util = require('util');
 
 describe("Transports", function() {
-  var _Dependencies = Dependencies;
-
-  beforeEach(function() {
-    Dependencies = Mocks.getDependencies();
-  });
-
-  afterEach(function() {
-    Dependencies = _Dependencies;
-  });
-
   describe("WSTransport", function() {
     var _WebSocket = window.WebSocket;
     var _MozWebSocket = window.MozWebSocket;

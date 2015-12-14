@@ -136,34 +136,3 @@ describe("AJAX Authorizer", function() {
     );
   });
 });
-
-describe("JSONP Authorizer", function() {
-  it("should raise a warning if headers are passed", function() {
-    var headers = { "foo": "bar", "n": 42 };
-    var authorizer = new Authorizer(
-      { name: "chan" },
-      { authTransport: "jsonp",
-        auth: {
-          headers: headers
-        }
-      }
-    );
-
-    var document = Mocks.getDocument();
-    var script = Mocks.getDocumentElement();
-    var documentElement = Mocks.getDocumentElement();
-
-    document.createElement.andReturn(script);
-    document.getElementsByTagName.andReturn([]);
-    document.documentElement = documentElement;
-    spyOn(Util, "getDocument").andReturn(document);
-
-    spyOn(Logger, "warn");
-    authorizer.authorize("1.23", function() {});
-
-    expect(Logger.warn).toHaveBeenCalledWith(
-      "Warn",
-      "To send headers with the auth request, you must use AJAX, rather than JSONP."
-    );
-  });
-});

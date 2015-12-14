@@ -1,7 +1,6 @@
 var Mocks = require('mocks');
 var TransportConnection = require('transports/transport_connection');
 var Util = require('util');
-var Dependencies = require('dependencies');
 var Timer = require('utils/timers').Timer;
 
 describe("TransportConnection", function() {
@@ -15,8 +14,6 @@ describe("TransportConnection", function() {
     return new TransportConnection(hooks, "test", 7, key, options);
   }
 
-  var _Dependencies = Dependencies;
-
   var urls;
   var hooks;
   var socket;
@@ -24,8 +21,6 @@ describe("TransportConnection", function() {
   var transport;
 
   beforeEach(function() {
-    Dependencies = Mocks.getDependencies();
-
     timeline = Mocks.getTimeline();
     timeline.generateUniqueID.andReturn(667);
 
@@ -45,10 +40,6 @@ describe("TransportConnection", function() {
     transport = getTransport(hooks, "foo", {
       timeline: timeline
     });
-  });
-
-  afterEach(function() {
-    Dependencies = _Dependencies;
   });
 
   describe("#activityTimeout", function() {
@@ -136,79 +127,6 @@ describe("TransportConnection", function() {
         transport.initialize();
         expect(onInitializing).toHaveBeenCalled();
         expect(transport.state).toEqual("initializing");
-      });
-
-      it("should load the resource file (encrypted=false)", function() {
-        transport.initialize();
-        expect(Dependencies.load.calls.length).toEqual(1);
-        expect(Dependencies.load).toHaveBeenCalledWith(
-          "test", { encrypted: false }, jasmine.any(Function)
-        );
-      });
-
-      it("should load the resource file (encrypted=true)", function() {
-        var transport = getTransport(hooks, "foo", {
-          encrypted: true,
-          timeline: timeline
-        });
-
-        transport.initialize();
-        expect(Dependencies.load.calls.length).toEqual(1);
-        expect(Dependencies.load).toHaveBeenCalledWith(
-          "test", { encrypted: true }, jasmine.any(Function)
-        );
-      });
-
-      describe("after loading the resource successfully", function() {
-        var onInitialized;
-        var loadCallback;
-
-        beforeEach(function() {
-          onInitialized = jasmine.createSpy("onInitialized");
-          loadCallback = jasmine.createSpy("loadCallback");
-          transport.bind("initialized", onInitialized);
-
-          transport.initialize();
-          // after loading the resource, isInitialized will return true
-          hooks.isInitialized.andReturn(true);
-          // fire the callback for the resource file load
-          Dependencies.load.calls[0].args[2](null, loadCallback);
-        });
-
-        it("should transition to 'initialized'", function() {
-          expect(onInitialized).toHaveBeenCalled();
-          expect(transport.state).toEqual("initialized");
-        });
-
-        it("should call the load callback with true", function() {
-          expect(loadCallback).toHaveBeenCalledWith(true);
-        });
-      });
-
-      describe("after failing to load the resource", function() {
-        var onClosed;
-        var loadCallback;
-
-        beforeEach(function() {
-          onClosed = jasmine.createSpy("onClosed");
-          loadCallback = jasmine.createSpy("loadCallback");
-          transport.bind("closed", onClosed);
-
-          transport.initialize();
-          // after loading the resource, isInitialized will return true
-          hooks.isInitialized.andReturn(false);
-          // fire the callback for the resource file load
-          Dependencies.load.calls[0].args[2](null, loadCallback);
-        });
-
-        it("should transition to 'closed'", function() {
-          expect(onClosed).toHaveBeenCalled();
-          expect(transport.state).toEqual("closed");
-        });
-
-        it("should call the load callback with false", function() {
-          expect(loadCallback).toHaveBeenCalledWith(false);
-        });
       });
     });
   });
