@@ -1,3 +1,5 @@
+var util = require("./util");
+
 var Base64 = {
   encode: function (s) {
     return btoa(utob(s));
@@ -43,8 +45,8 @@ var cb_encode = function(ccc) {
 
 var btoa;
 
-if (window && window.btoa){
-  btoa = window.btoa
+if (util.global && util.global.btoa){
+  btoa = util.global.btoa
 } else {
   btoa = function(b) {
     return b.replace(/[\s\S]{1,3}/g, cb_encode);
