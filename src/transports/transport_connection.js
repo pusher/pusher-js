@@ -93,7 +93,6 @@ prototype.connect = function() {
   }
 
   var url = self.hooks.urls.getInitial(self.key, self.options);
-  console.log(url);
   try {
     self.socket = self.hooks.getSocket(url, self.options);
   } catch (e) {

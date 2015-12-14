@@ -80,7 +80,6 @@ prototype.connect = function(minPriority, callback) {
   transport.bind("closed", onClosed);
 
   // connect will be called automatically after initialization
-  console.log(transport);
   transport.initialize();
 
   return {
