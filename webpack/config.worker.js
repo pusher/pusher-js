@@ -2,6 +2,7 @@ var path = require("path");
 var StringReplacePlugin = require('string-replace-webpack-plugin');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var pathToSource = require('./path_to_source');
+var version = require('../package').version;
 
 //////////////////////////////////////
 // The worker build uses:           //
@@ -16,10 +17,8 @@ module.exports = {
     path: path.join(__dirname, "../bundle/worker"),
     filename: "pusher.js"
   },
-  module: {
-    loaders: [
-      require('./gsub')
-    ],
+  externals: {
+    '../package': '{version: "'+ version +'"}'
   },
   plugins: [
     new StringReplacePlugin(),

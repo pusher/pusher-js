@@ -1,4 +1,4 @@
-exports.VERSION = '<VERSION>';
+exports.VERSION = require('../package').version;
 exports.PROTOCOL = 7;
 
 // DEPRECATED: WS connection parameters
