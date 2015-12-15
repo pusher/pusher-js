@@ -1,29 +1,31 @@
 {
-  "name": "pusher-js",
-  "version": "3.0.0",
-  "description": "Pusher JavaScript library for the browser",
+  "name": "pusher-websocket-iso",
+  "version": "0.0.1",
+  "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
   "main": "src/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pusher/pusher-js.git"
+    "url": "https://github.com/pusher-community/pusher-websocket-js-iso.git"
   },
   "keywords": [
     "pusher",
+    "client",
     "websocket",
     "http",
     "fallback",
+    "isomorphic",
     "events",
     "pubsub"
   ],
   "author": "Pusher",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pusher/pusher-js/issues"
+    "url": "https://github.com/pusher-community/pusher-websocket-js-iso/issues"
   },
-  "homepage": "https://github.com/pusher/pusher-js",
+  "homepage": "https://github.com/pusher-community/pusher-websocket-js-iso",
   "devDependencies": {
     "jshint": "~2.6.3",
     "karma": "^0.13.15",

@@ -1,10 +1,19 @@
 {
-  "name": "pusher",
-  "location": "git://github.com/pusher/pusher-js.git",
-  "description": "Pusher JavaScript library",
-  "keywords": ["pusher", "client", "publish", "subscribe", "realtime", "websocket"],
+  "name": "pusher-websocket-iso",
+  "location": "git://github.com/pusher-community/pusher-websocket-js-iso.git",
+  "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
+  "keywords": [
+    "pusher",
+    "client",
+    "websocket",
+    "http",
+    "fallback",
+    "isomorphic",
+    "events",
+    "pubsub"
+  ],
   "licence": "MIT",
   "authors": ["Pusher <support@pusher.com>"],
-  "main": "./dist/pusher.js",
+  "main": "./dist/web/pusher.js",
   "ignore": ["**/*", "!/dist/*", "!LICENCE", "!README.markdown", "!bower.json", "!CHANGELOG.markdown"]
 }
