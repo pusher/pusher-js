@@ -1,4 +1,4 @@
-var XHR = require('pusher-websocket-js-iso-externals-node/xhr');
+var XHR = require('pusher-websocket-iso-externals-node/xhr');
 
 module.exports = Util = {
   now: function() {

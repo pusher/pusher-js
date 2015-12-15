@@ -20,12 +20,12 @@ module.exports = {
   },
   plugins: [
     new NormalModuleReplacementPlugin(
-      /^pusher-websocket-js-iso-externals-node\/ws$/,
-      "pusher-websocket-js-iso-externals-web/ws"
+      /^pusher-websocket-iso-externals-node\/ws$/,
+      "pusher-websocket-iso-externals-web/ws"
     ),
     new NormalModuleReplacementPlugin(
-      /^pusher-websocket-js-iso-externals-node\/xhr$/,
-      "pusher-websocket-js-iso-externals-web/xhr"
+      /^pusher-websocket-iso-externals-node\/xhr$/,
+      "pusher-websocket-iso-externals-web/xhr"
     )
   ]
 }

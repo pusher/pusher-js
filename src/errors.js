@@ -10,7 +10,7 @@ function buildExceptionClass(name) {
   return constructor;
 }
 
-/** Error classes used throughout pusher-js library. */
+/** Error classes used throughout the library. */
 module.exports = {
   BadEventName: buildExceptionClass("BadEventName"),
   RequestTimedOut: buildExceptionClass("RequestTimedOut"),

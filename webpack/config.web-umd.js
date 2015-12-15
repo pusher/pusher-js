@@ -19,16 +19,16 @@ module.exports = {
   },
   plugins: [
     new NormalModuleReplacementPlugin(
-      /^pusher-websocket-js-iso-externals-node\/ws$/,
-      "pusher-websocket-js-iso-externals-web/ws"
+      /^pusher-websocket-iso-externals-node\/ws$/,
+      "pusher-websocket-iso-externals-web/ws"
     ),
     new NormalModuleReplacementPlugin(
-      /^pusher-websocket-js-iso-externals-node\/xhr$/,
-      "pusher-websocket-js-iso-externals-web/xhr"
+      /^pusher-websocket-iso-externals-node\/xhr$/,
+      "pusher-websocket-iso-externals-web/xhr"
     ),
     new NormalModuleReplacementPlugin(
-      /^pusher-websocket-js-iso-externals-node\/net_info$/,
-      "pusher-websocket-js-iso-externals-web/net_info"
+      /^pusher-websocket-iso-externals-node\/net_info$/,
+      "pusher-websocket-iso-externals-web/net_info"
     )
   ]
 }

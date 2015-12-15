@@ -2,7 +2,7 @@ var Transport = require('./transport');
 var URLSchemes = require('./url_schemes');
 var Util = require('../util');
 var HTTP = require('../http/http');
-var WS = require('pusher-websocket-js-iso-externals-node/ws');
+var WS = require('pusher-websocket-iso-externals-node/ws');
 
 /** WebSocket transport.
  *
