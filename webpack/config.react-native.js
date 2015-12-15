@@ -1,7 +1,5 @@
 var path = require("path");
-var StringReplacePlugin = require('string-replace-webpack-plugin');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
-var pathToSource = require('./path_to_source');
 var version = require('../package').version;
 
 //////////////////////////////////////////////
@@ -15,7 +13,7 @@ module.exports = {
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",
-    path: path.join(__dirname, "../bundle/react-native"),
+    path: path.join(__dirname, "../dist/react-native"),
     filename: "pusher.js"
   },
   target: "node",
