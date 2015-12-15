@@ -46,16 +46,16 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Channels = __webpack_require__(20);
-	var EventsDispatcher = __webpack_require__(7);
-	var Timeline = __webpack_require__(27);
-	var TimelineSender = __webpack_require__(28);
-	var StrategyBuilder = __webpack_require__(30);
-	var ConnectionManager = __webpack_require__(43);
-	var PeriodicTimer = __webpack_require__(3).PeriodicTimer;
-	var Defaults = __webpack_require__(10);
-	var DefaultConfig = __webpack_require__(45);
-	var Logger = __webpack_require__(8);
+	var Channels = __webpack_require__(21);
+	var EventsDispatcher = __webpack_require__(8);
+	var Timeline = __webpack_require__(28);
+	var TimelineSender = __webpack_require__(29);
+	var StrategyBuilder = __webpack_require__(31);
+	var ConnectionManager = __webpack_require__(44);
+	var PeriodicTimer = __webpack_require__(4).PeriodicTimer;
+	var Defaults = __webpack_require__(11);
+	var DefaultConfig = __webpack_require__(46);
+	var Logger = __webpack_require__(9);
 
 	function Pusher(app_key, options) {
 
@@ -259,7 +259,8 @@ var Pusher =
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var XHR = __webpack_require__(2);
+	var global = __webpack_require__(2);
+	var XHR = __webpack_require__(3);
 
 	module.exports = Util = {
 	  now: function() {
@@ -271,7 +272,7 @@ var Pusher =
 	  },
 
 	  defer: function(callback) {
-	    var Timer = __webpack_require__(3).Timer;
+	    var Timer = __webpack_require__(4).Timer;
 	    return new Timer(0, callback);
 	  },
 
@@ -313,7 +314,7 @@ var Pusher =
 	      if (typeof arguments[i] === "string") {
 	        m.push(arguments[i]);
 	      } else {
-	        if (Util.global.JSON === undefined) {
+	        if (global.JSON === undefined) {
 	          m.push(arguments[i].toString());
 	        } else {
 	          m.push(JSON.stringify(arguments[i]));
@@ -395,7 +396,7 @@ var Pusher =
 	   */
 	  apply: function(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	      f.call(context || this.global, array[i], i, array);
+	      f.call(context || global, array[i], i, array);
 	    }
 	  },
 
@@ -564,7 +565,7 @@ var Pusher =
 	  },
 
 	  getClientFeatures: function() {
-	    var WSTransport = __webpack_require__(4).WSTransport;
+	    var WSTransport = __webpack_require__(5).WSTransport;
 	    return this.keys(
 	      this.filterObject(
 	        { "ws": WSTransport },
@@ -574,20 +575,18 @@ var Pusher =
 	  },
 
 	  addUnloadListener: function(listener) {
-	    var _window = this.global;
-	    if (_window.addEventListener !== undefined) {
-	      _window.addEventListener("unload", listener, false);
-	    } else if (_window.attachEvent !== undefined) {
-	      _window.attachEvent("onunload", listener);
+	    if (global.addEventListener !== undefined) {
+	      global.addEventListener("unload", listener, false);
+	    } else if (global.attachEvent !== undefined) {
+	      global.attachEvent("onunload", listener);
 	    }
 	  },
 
 	  removeUnloadListener: function(listener) {
-	    var _window = this.global;
-	    if (_window.addEventListener !== undefined) {
-	      _window.removeEventListener("unload", listener, false);
-	    } else if (_window.detachEvent !== undefined) {
-	      _window.detachEvent("onunload", listener);
+	    if (global.addEventListener !== undefined) {
+	      global.removeEventListener("unload", listener, false);
+	    } else if (global.detachEvent !== undefined) {
+	      global.detachEvent("onunload", listener);
 	    }
 	  },
 
@@ -609,39 +608,44 @@ var Pusher =
 	  },
 
 	  createXHR: function(){
-
 	    if (XHR){
 	      return new XHR();
 	    } else {
 	      return new ActiveXObject("Microsoft.XMLHTTP");
 	    }
-	  },
-
-	  global: Function("return this")()
+	  }
 	};
 
 
 /***/ },
 /* 2 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var globalScope = __webpack_require__(1).global;
+	module.exports = Function("return this")();
 
-	module.exports = globalScope.XMLHttpRequest;
 
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var global = __webpack_require__(2);
+
+	module.exports = global.XMLHttpRequest;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
 	var Util = __webpack_require__(1);
-	var _global = Util.global;
+	var global = __webpack_require__(2);
 
 	// We need to bind clear functions this way to avoid exceptions on IE8
 	function clearTimeout(timer) {
-	  _global.clearTimeout(timer);
+	  global.clearTimeout(timer);
 	}
 	function clearInterval(timer) {
-	  _global.clearInterval(timer);
+	  global.clearInterval(timer);
 	}
 
 	function GenericTimer(set, clear, delay, callback) {
@@ -703,14 +707,14 @@ var Pusher =
 
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Transport = __webpack_require__(5);
-	var URLSchemes = __webpack_require__(9);
+	var Transport = __webpack_require__(6);
+	var URLSchemes = __webpack_require__(10);
 	var Util = __webpack_require__(1);
-	var HTTP = __webpack_require__(12);
-	var WS = __webpack_require__(19);
+	var HTTP = __webpack_require__(13);
+	var WS = __webpack_require__(20);
 
 	/** WebSocket transport.
 	 *
@@ -786,10 +790,10 @@ var Pusher =
 
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TransportConnection = __webpack_require__(6);
+	var TransportConnection = __webpack_require__(7);
 
 	/** Provides interface for transport connection instantiation.
 	 *
@@ -840,12 +844,12 @@ var Pusher =
 
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(7);
-	var Logger = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(8);
+	var Logger = __webpack_require__(9);
 
 	/** Provides universal API for transport connections.
 	 *
@@ -1092,10 +1096,10 @@ var Pusher =
 
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
+	/* WEBPACK VAR INJECTION */(function(global) {var Util = __webpack_require__(1);
 
 	/** Manages callback bindings and event emitting.
 	 *
@@ -1138,7 +1142,7 @@ var Pusher =
 	  var callbacks = this.callbacks.get(eventName);
 	  if (callbacks && callbacks.length > 0) {
 	    for (i = 0; i < callbacks.length; i++) {
-	      callbacks[i].fn.call(callbacks[i].context || Util.global, data);
+	      callbacks[i].fn.call(callbacks[i].context || global, data);
 	    }
 	  } else if (this.failThrough) {
 	    this.failThrough(eventName, data);
@@ -1200,11 +1204,13 @@ var Pusher =
 
 	module.exports = EventsDispatcher;
 
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
+	var global = __webpack_require__(2);
 	var Util = __webpack_require__(1);
 
 	module.exports = {
@@ -1217,25 +1223,25 @@ var Pusher =
 
 	  warn: function(){
 	    var message = Util.stringify.apply(this, arguments);
-	    var _global = Util.global;
-	    if (_global.console) {
-	      if (_global.console.warn) {
-	        _global.console.warn(message);
-	      } else if (_global.console.log) {
-	        _global.console.log(message);
+	    if (global.console) {
+	      if (global.console.warn) {
+	        global.console.warn(message);
+	      } else if (global.console.log) {
+	        global.console.log(message);
 	      }
 	    }
 	    if (this.log) {
 	      this.log(message);
-	    }   
+	    }
 	  }
 	}
 
+
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Defaults = __webpack_require__(10);
+	var Defaults = __webpack_require__(11);
 
 	function getGenericURL(baseScheme, params, path) {
 	  var scheme = baseScheme + (params.encrypted ? "s" : "");
@@ -1272,10 +1278,10 @@ var Pusher =
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.VERSION = __webpack_require__(11).version;
+	exports.VERSION = __webpack_require__(12).version;
 	exports.PROTOCOL = 7;
 
 	// DEPRECATED: WS connection parameters
@@ -1389,25 +1395,25 @@ var Pusher =
 
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	module.exports = {version: "0.0.1"};
 
 /***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = {
-	  getStreamingSocket: __webpack_require__(13),
-	  getPollingSocket: __webpack_require__(18)
-	}
-
-/***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPSocket = __webpack_require__(14);
+	module.exports = {
+	  getStreamingSocket: __webpack_require__(14),
+	  getPollingSocket: __webpack_require__(19)
+	}
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var HTTPSocket = __webpack_require__(15);
 
 	var hooks = {
 	  getReceiveURL: function(url, session) {
@@ -1430,12 +1436,12 @@ var Pusher =
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var getXHR = __webpack_require__(15);
-	var getXDR = __webpack_require__(17);
+	var getXHR = __webpack_require__(16);
+	var getXDR = __webpack_require__(18);
 
 	var CONNECTING = 0;
 	var OPEN = 1;
@@ -1658,11 +1664,11 @@ var Pusher =
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPRequest = __webpack_require__(16);
-	var XHR = __webpack_require__(2);
+	var HTTPRequest = __webpack_require__(17);
+	var XHR = __webpack_require__(3);
 
 	var hooks = {
 	  getRequest: function(socket) {
@@ -1698,10 +1704,10 @@ var Pusher =
 
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(7);
+	var EventsDispatcher = __webpack_require__(8);
 	var Util = __webpack_require__(1);
 
 	var MAX_BUFFER_LENGTH = 256*1024;
@@ -1777,10 +1783,10 @@ var Pusher =
 
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPRequest = __webpack_require__(16);
+	var HTTPRequest = __webpack_require__(17);
 
 	var hooks = {
 	  getRequest: function(socket) {
@@ -1819,10 +1825,10 @@ var Pusher =
 
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPSocket = __webpack_require__(14);
+	var HTTPSocket = __webpack_require__(15);
 
 	var hooks = {
 	  getReceiveURL: function(url, session) {
@@ -1849,20 +1855,21 @@ var Pusher =
 
 
 /***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var globalScope = __webpack_require__(1).global;
-
-	module.exports = globalScope.WebSocket || globalScope.MozWebSocket;
-
-/***/ },
 /* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Channel = __webpack_require__(21);
-	var PresenceChannel = __webpack_require__(24);
-	var PrivateChannel = __webpack_require__(25);
+	var global = __webpack_require__(2);
+
+	module.exports = global.WebSocket || global.MozWebSocket;
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Channel = __webpack_require__(22);
+	var PresenceChannel = __webpack_require__(25);
+	var PrivateChannel = __webpack_require__(26);
 	var Util = __webpack_require__(1);
 
 	/** Handles a channel map. */
@@ -1932,13 +1939,13 @@ var Pusher =
 
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(7);
+	var EventsDispatcher = __webpack_require__(8);
 	var Util = __webpack_require__(1);
-	var Errors = __webpack_require__(22);
-	var Logger = __webpack_require__(8);
+	var Errors = __webpack_require__(23);
+	var Logger = __webpack_require__(9);
 
 	/** Provides base public channel interface with an event emitter.
 	 *
@@ -2024,13 +2031,13 @@ var Pusher =
 	  });
 	};
 
-	Channel.Authorizer = __webpack_require__(23);
+	Channel.Authorizer = __webpack_require__(24);
 
 	module.exports = Channel;
 
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
@@ -2057,10 +2064,10 @@ var Pusher =
 
 
 /***/ },
-/* 23 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Logger = __webpack_require__(8);
+	var Logger = __webpack_require__(9);
 	var Util = __webpack_require__(1);
 
 	var Authorizer = function(channel, options) {
@@ -2135,13 +2142,13 @@ var Pusher =
 
 
 /***/ },
-/* 24 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var PrivateChannel = __webpack_require__(25);
-	var Members = __webpack_require__(26);
-	var Logger = __webpack_require__(8);
+	var PrivateChannel = __webpack_require__(26);
+	var Members = __webpack_require__(27);
+	var Logger = __webpack_require__(9);
 
 	/** Adds presence channel functionality to private channels.
 	 *
@@ -2218,10 +2225,10 @@ var Pusher =
 
 
 /***/ },
-/* 25 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Channel = __webpack_require__(21);
+	var Channel = __webpack_require__(22);
 	var Util = __webpack_require__(1);
 
 	/** Extends public channels to provide private channel interface.
@@ -2249,7 +2256,7 @@ var Pusher =
 
 
 /***/ },
-/* 26 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
@@ -2332,7 +2339,7 @@ var Pusher =
 
 
 /***/ },
-/* 27 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
@@ -2415,11 +2422,11 @@ var Pusher =
 
 
 /***/ },
-/* 28 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Base64 = __webpack_require__(29);
+	var Base64 = __webpack_require__(30);
 
 	function TimelineSender(timeline, options) {
 	  this.timeline = timeline;
@@ -2475,10 +2482,10 @@ var Pusher =
 
 
 /***/ },
-/* 29 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var util = __webpack_require__(1);
+	var global = __webpack_require__(2);
 
 	var Base64 = {
 	  encode: function (s) {
@@ -2525,32 +2532,32 @@ var Pusher =
 
 	var btoa;
 
-	if (util.global && util.global.btoa){
-	  btoa = util.global.btoa
+	if (global && global.btoa){
+	  btoa = global.btoa;
 	} else {
 	  btoa = function(b) {
 	    return b.replace(/[\s\S]{1,3}/g, cb_encode);
-	  }
+	  };
 	}
 
 	module.exports = Base64;
 
 
 /***/ },
-/* 30 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Transports = __webpack_require__(4);
-	var TransportManager = __webpack_require__(31);
-	var Errors = __webpack_require__(22);
-	var TransportStrategy = __webpack_require__(33);
-	var SequentialStrategy = __webpack_require__(37);
-	var BestConnectedEverStrategy = __webpack_require__(38);
-	var CachedStrategy = __webpack_require__(39);
-	var DelayedStrategy = __webpack_require__(40);
-	var IfStrategy = __webpack_require__(41);
-	var FirstConnectedStrategy = __webpack_require__(42);
+	var Transports = __webpack_require__(5);
+	var TransportManager = __webpack_require__(32);
+	var Errors = __webpack_require__(23);
+	var TransportStrategy = __webpack_require__(34);
+	var SequentialStrategy = __webpack_require__(38);
+	var BestConnectedEverStrategy = __webpack_require__(39);
+	var CachedStrategy = __webpack_require__(40);
+	var DelayedStrategy = __webpack_require__(41);
+	var IfStrategy = __webpack_require__(42);
+	var FirstConnectedStrategy = __webpack_require__(43);
 
 	module.exports = StrategyBuilder = {
 	  /** Transforms a JSON scheme to a strategy tree.
@@ -2752,10 +2759,10 @@ var Pusher =
 
 
 /***/ },
-/* 31 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AssistantToTheTransportManager = __webpack_require__(32);
+	var AssistantToTheTransportManager = __webpack_require__(33);
 
 	/** Keeps track of the number of lives left for a transport.
 	 *
@@ -2801,7 +2808,7 @@ var Pusher =
 
 
 /***/ },
-/* 32 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
@@ -2891,12 +2898,12 @@ var Pusher =
 
 
 /***/ },
-/* 33 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Errors = __webpack_require__(22);
-	var Handshake = __webpack_require__(34);
+	var Errors = __webpack_require__(23);
+	var Handshake = __webpack_require__(35);
 
 	/** Provides a strategy interface for transports.
 	 *
@@ -3019,12 +3026,12 @@ var Pusher =
 
 
 /***/ },
-/* 34 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Protocol = __webpack_require__(35);
-	var Connection = __webpack_require__(36);
+	var Protocol = __webpack_require__(36);
+	var Connection = __webpack_require__(37);
 
 	/**
 	 * Handles Pusher protocol handshakes for transports.
@@ -3107,7 +3114,7 @@ var Pusher =
 
 
 /***/ },
-/* 35 */
+/* 36 */
 /***/ function(module, exports) {
 
 	/**
@@ -3253,13 +3260,13 @@ var Pusher =
 
 
 /***/ },
-/* 36 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(7);
-	var Protocol = __webpack_require__(35);
-	var Logger = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(8);
+	var Protocol = __webpack_require__(36);
+	var Logger = __webpack_require__(9);
 
 	/**
 	 * Provides Pusher protocol interface for transports.
@@ -3417,11 +3424,11 @@ var Pusher =
 
 
 /***/ },
-/* 37 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Timer = __webpack_require__(3).Timer;
+	var Timer = __webpack_require__(4).Timer;
 
 	/** Loops through strategies with optional timeouts.
 	 *
@@ -3542,7 +3549,7 @@ var Pusher =
 
 
 /***/ },
-/* 38 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
@@ -3622,11 +3629,11 @@ var Pusher =
 
 
 /***/ },
-/* 39 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var SequentialStrategy = __webpack_require__(37);
+	var SequentialStrategy = __webpack_require__(38);
 
 	/** Caches last successful transport and uses it for following attempts.
 	 *
@@ -3752,10 +3759,10 @@ var Pusher =
 
 
 /***/ },
-/* 40 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Timer = __webpack_require__(3).Timer;
+	var Timer = __webpack_require__(4).Timer;
 
 	/** Runs substrategy after specified delay.
 	 *
@@ -3802,7 +3809,7 @@ var Pusher =
 
 
 /***/ },
-/* 41 */
+/* 42 */
 /***/ function(module, exports) {
 
 	/** Proxies method calls to one of substrategies basing on the test function.
@@ -3832,7 +3839,7 @@ var Pusher =
 
 
 /***/ },
-/* 42 */
+/* 43 */
 /***/ function(module, exports) {
 
 	/** Launches the substrategy and terminates on the first open connection.
@@ -3865,14 +3872,14 @@ var Pusher =
 
 
 /***/ },
-/* 43 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(7);
-	var Timer = __webpack_require__(3).Timer;
-	var Network = __webpack_require__(44).Network;
-	var Logger = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(8);
+	var Timer = __webpack_require__(4).Timer;
+	var Network = __webpack_require__(45).Network;
+	var Logger = __webpack_require__(9);
 
 	/** Manages connection to Pusher.
 	 *
@@ -4231,10 +4238,10 @@ var Pusher =
 
 
 /***/ },
-/* 44 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(7);
+	var EventsDispatcher = __webpack_require__(8);
 	var Util = __webpack_require__(1);
 
 	/** Really basic interface providing network availability info.
@@ -4282,10 +4289,10 @@ var Pusher =
 
 
 /***/ },
-/* 45 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Defaults = __webpack_require__(10);
+	var Defaults = __webpack_require__(11);
 
 	exports.getGlobalConfig = function() {
 	  return {

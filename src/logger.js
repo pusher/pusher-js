@@ -1,3 +1,4 @@
+var global = require('./global');
 var Util = require('./util');
 
 module.exports = {
@@ -10,16 +11,15 @@ module.exports = {
 
   warn: function(){
     var message = Util.stringify.apply(this, arguments);
-    var _global = Util.global;
-    if (_global.console) {
-      if (_global.console.warn) {
-        _global.console.warn(message);
-      } else if (_global.console.log) {
-        _global.console.log(message);
+    if (global.console) {
+      if (global.console.warn) {
+        global.console.warn(message);
+      } else if (global.console.log) {
+        global.console.log(message);
       }
     }
     if (this.log) {
       this.log(message);
-    }   
+    }
   }
 }

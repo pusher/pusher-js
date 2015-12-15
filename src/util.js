@@ -1,3 +1,4 @@
+var global = require('./global');
 var XHR = require('pusher-websocket-iso-externals-node/xhr');
 
 module.exports = Util = {
@@ -52,7 +53,7 @@ module.exports = Util = {
       if (typeof arguments[i] === "string") {
         m.push(arguments[i]);
       } else {
-        if (Util.global.JSON === undefined) {
+        if (global.JSON === undefined) {
           m.push(arguments[i].toString());
         } else {
           m.push(JSON.stringify(arguments[i]));
@@ -134,7 +135,7 @@ module.exports = Util = {
    */
   apply: function(array, f, context) {
     for (var i = 0; i < array.length; i++) {
-      f.call(context || this.global, array[i], i, array);
+      f.call(context || global, array[i], i, array);
     }
   },
 
@@ -313,20 +314,18 @@ module.exports = Util = {
   },
 
   addUnloadListener: function(listener) {
-    var _window = this.global;
-    if (_window.addEventListener !== undefined) {
-      _window.addEventListener("unload", listener, false);
-    } else if (_window.attachEvent !== undefined) {
-      _window.attachEvent("onunload", listener);
+    if (global.addEventListener !== undefined) {
+      global.addEventListener("unload", listener, false);
+    } else if (global.attachEvent !== undefined) {
+      global.attachEvent("onunload", listener);
     }
   },
 
   removeUnloadListener: function(listener) {
-    var _window = this.global;
-    if (_window.addEventListener !== undefined) {
-      _window.removeEventListener("unload", listener, false);
-    } else if (_window.detachEvent !== undefined) {
-      _window.detachEvent("onunload", listener);
+    if (global.addEventListener !== undefined) {
+      global.removeEventListener("unload", listener, false);
+    } else if (global.detachEvent !== undefined) {
+      global.detachEvent("onunload", listener);
     }
   },
 
@@ -348,13 +347,10 @@ module.exports = Util = {
   },
 
   createXHR: function(){
-
     if (XHR){
       return new XHR();
     } else {
       return new ActiveXObject("Microsoft.XMLHTTP");
     }
-  },
-
-  global: Function("return this")()
+  }
 };

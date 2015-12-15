@@ -1,4 +1,4 @@
-var util = require("./util");
+var global = require("./global");
 
 var Base64 = {
   encode: function (s) {
@@ -45,12 +45,12 @@ var cb_encode = function(ccc) {
 
 var btoa;
 
-if (util.global && util.global.btoa){
-  btoa = util.global.btoa
+if (global && global.btoa){
+  btoa = global.btoa;
 } else {
   btoa = function(b) {
     return b.replace(/[\s\S]{1,3}/g, cb_encode);
-  }
+  };
 }
 
 module.exports = Base64;

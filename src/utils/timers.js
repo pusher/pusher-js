@@ -1,12 +1,12 @@
 var Util = require('../util');
-var _global = Util.global;
+var global = require('../global');
 
 // We need to bind clear functions this way to avoid exceptions on IE8
 function clearTimeout(timer) {
-  _global.clearTimeout(timer);
+  global.clearTimeout(timer);
 }
 function clearInterval(timer) {
-  _global.clearInterval(timer);
+  global.clearInterval(timer);
 }
 
 function GenericTimer(set, clear, delay, callback) {
