@@ -1392,7 +1392,7 @@ var Pusher =
 /* 11 */
 /***/ function(module, exports) {
 
-	module.exports = {version: "3.0.0"};
+	module.exports = {version: "0.0.1"};
 
 /***/ },
 /* 12 */
@@ -2045,7 +2045,7 @@ var Pusher =
 	  return constructor;
 	}
 
-	/** Error classes used throughout pusher-js library. */
+	/** Error classes used throughout the library. */
 	module.exports = {
 	  BadEventName: buildExceptionClass("BadEventName"),
 	  RequestTimedOut: buildExceptionClass("RequestTimedOut"),

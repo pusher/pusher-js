@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("{version: \"3.0.0\"}"));
+		module.exports = factory(require("{version: \"0.0.1\"}"));
 	else if(typeof define === 'function' && define.amd)
-		define(["{version: \"3.0.0\"}"], factory);
+		define(["{version: \"0.0.1\"}"], factory);
 	else if(typeof exports === 'object')
-		exports["Pusher"] = factory(require("{version: \"3.0.0\"}"));
+		exports["Pusher"] = factory(require("{version: \"0.0.1\"}"));
 	else
-		root["Pusher"] = factory(root["{version: \"3.0.0\"}"]);
+		root["Pusher"] = factory(root["{version: \"0.0.1\"}"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_11__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -2054,7 +2054,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  return constructor;
 	}
 
-	/** Error classes used throughout pusher-js library. */
+	/** Error classes used throughout the library. */
 	module.exports = {
 	  BadEventName: buildExceptionClass("BadEventName"),
 	  RequestTimedOut: buildExceptionClass("RequestTimedOut"),
