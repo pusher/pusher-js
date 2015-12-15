@@ -8,3 +8,5 @@ dist/*
 coverage
 node_modules
 target
+
+!/src/node_modules

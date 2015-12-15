@@ -1,5 +1,5 @@
 var HTTPRequest = require('./http_request');
-var XHR = require('../platforms/node/xhr');
+var XHR = require('pusher-websocket-js-iso-externals-node/xhr');
 
 var hooks = {
   getRequest: function(socket) {

@@ -19,8 +19,17 @@ module.exports = {
     '../package': '{version: "'+ version +'"}'
   },
   plugins: [
-    new NormalModuleReplacementPlugin(/platforms\/node\/ws/, pathToSource('platforms/web/ws')),
-    new NormalModuleReplacementPlugin(/platforms\/node\/xhr/, pathToSource('platforms/web/xhr')),
-    new NormalModuleReplacementPlugin(/platforms\/node\/net_info/, pathToSource('platforms/web/net_info')),
+    new NormalModuleReplacementPlugin(
+      /^pusher-websocket-js-iso-externals-node\/ws$/,
+      "pusher-websocket-js-iso-externals-web/ws"
+    ),
+    new NormalModuleReplacementPlugin(
+      /^pusher-websocket-js-iso-externals-node\/xhr$/,
+      "pusher-websocket-js-iso-externals-web/xhr"
+    ),
+    new NormalModuleReplacementPlugin(
+      /^pusher-websocket-js-iso-externals-node\/net_info$/,
+      "pusher-websocket-js-iso-externals-web/net_info"
+    )
   ]
 }
