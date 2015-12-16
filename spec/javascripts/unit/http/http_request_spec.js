@@ -1,7 +1,7 @@
 var Mocks = require("../../helpers/mocks");
 
 var HTTPRequest = require("http/http_request");
-var util = require("util");
+var App = require("pusher-websocket-iso-externals-node/app");
 
 describe("HTTPRequest", function() {
   var xhr;
@@ -19,8 +19,8 @@ describe("HTTPRequest", function() {
       abortRequest: jasmine.createSpy()
     };
 
-    spyOn(util, "addUnloadListener");
-    spyOn(util, "removeUnloadListener");
+    spyOn(App, "addUnloadListener");
+    spyOn(App, "removeUnloadListener");
 
     request = new HTTPRequest(hooks, "GET", "http://example.com");
   });
@@ -44,7 +44,7 @@ describe("HTTPRequest", function() {
     it("should register an unloader", function() {
       request.start("test payload");
 
-      expect(util.addUnloadListener).toHaveBeenCalledWith(
+      expect(App.addUnloadListener).toHaveBeenCalledWith(
         jasmine.any(Function)
       );
     });
@@ -84,9 +84,9 @@ describe("HTTPRequest", function() {
     });
 
     it("should unregister the unloader", function() {
-      var unloader = util.addUnloadListener.calls[0].args[0];
+      var unloader = App.addUnloadListener.calls[0].args[0];
       request.close();
-      expect(util.removeUnloadListener).toHaveBeenCalledWith(unloader);
+      expect(App.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
   });
 
@@ -171,7 +171,7 @@ describe("HTTPRequest", function() {
 
     beforeEach(function() {
       request.start("test payload");
-      unloader = util.addUnloadListener.calls[0].args[0];
+      unloader = App.addUnloadListener.calls[0].args[0];
     });
 
     it("should abort the request using the abortRequest hook", function() {
@@ -182,7 +182,7 @@ describe("HTTPRequest", function() {
 
     it("should unregister the unloader", function() {
       unloader();
-      expect(util.removeUnloadListener).toHaveBeenCalledWith(unloader);
+      expect(App.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
   });
 });

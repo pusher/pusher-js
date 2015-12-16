@@ -1,4 +1,3 @@
-var global = require('./global');
 var XHR = require('pusher-websocket-iso-externals-node/xhr');
 
 module.exports = Util = {
@@ -307,22 +306,6 @@ module.exports = Util = {
         function (t) { return t.isSupported({}); }
       )
     );
-  },
-
-  addUnloadListener: function(listener) {
-    if (global.addEventListener !== undefined) {
-      global.addEventListener("unload", listener, false);
-    } else if (global.attachEvent !== undefined) {
-      global.attachEvent("onunload", listener);
-    }
-  },
-
-  removeUnloadListener: function(listener) {
-    if (global.addEventListener !== undefined) {
-      global.removeEventListener("unload", listener, false);
-    } else if (global.detachEvent !== undefined) {
-      global.detachEvent("onunload", listener);
-    }
   },
 
   isXHRSupported: function() {

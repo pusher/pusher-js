@@ -1,3 +1,5 @@
+var App = require("pusher-websocket-iso-externals-node/app");
+
 var EventsDispatcher = require('../events_dispatcher');
 var Util = require('../util');
 
@@ -22,7 +24,7 @@ prototype.start = function(payload) {
   self.unloader = function() {
     self.close();
   };
-  Util.addUnloadListener(self.unloader);
+  App.addUnloadListener(self.unloader);
 
   self.xhr.open(self.method, self.url, true);
   self.xhr.send(payload);
@@ -30,7 +32,7 @@ prototype.start = function(payload) {
 
 prototype.close = function() {
   if (this.unloader) {
-    Util.removeUnloadListener(this.unloader);
+    App.removeUnloadListener(this.unloader);
     this.unloader = null;
   }
   if (this.xhr) {
