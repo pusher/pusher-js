@@ -1,5 +1,6 @@
 var Util = require('../util');
-var global = require('../global');
+
+var global = Function("return this")();
 
 // We need to bind clear functions this way to avoid exceptions on IE8
 function clearTimeout(timer) {

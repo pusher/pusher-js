@@ -1,4 +1,4 @@
-var global = require("./global");
+var global = Function("return this")();
 
 var Base64 = {
   encode: function (s) {
