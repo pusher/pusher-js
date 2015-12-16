@@ -1,7 +1,8 @@
-var Mocks = require('mocks');
 var ConnectionManager = require('connection/connection_manager');
 var Util = require('util');
-var Network = require('net_info').Network;
+var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
+
+var Mocks = require("../../helpers/mocks");
 
 describe("ConnectionManager", function() {
   var connection, strategy, timeline;

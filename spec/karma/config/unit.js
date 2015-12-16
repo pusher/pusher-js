@@ -1,19 +1,17 @@
-var path = require('path');
-var webpack = require('webpack');
+var version = require('../../../package').version;
+
+var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 
 module.exports = function(config) {
   config.set({
     basePath: '../../../',
     frameworks: ["jasmine"],
 
-    files: []
-      .concat(require(__dirname + "/../files/unit_tests")),
-
+    files: require(__dirname + "/../files/unit_tests"),
     preprocessors: {
-      '**/src/**/*.js': ['coverage', 'webpack'],
-      '**/spec/javascripts/helpers/*.js': ['webpack'],
       '**/spec/javascripts/unit/**/*.js': ['webpack']
     },
+
     reporters: ['progress', 'coverage'],
 
     coverageReporter: {
@@ -23,19 +21,29 @@ module.exports = function(config) {
 
     webpack: {
       resolve: {
-        root: [__dirname + '/../../../src',  __dirname + '/../../javascripts/helpers']
-      }
+        root: [
+          __dirname + '/../../../src',
+          __dirname + '/../../../src/node_modules'
+        ]
+      },
+      externals: {
+        '../package': '{version: "'+ version +'"}'
+      },
+      plugins: [
+        new NormalModuleReplacementPlugin(
+          /^pusher-websocket-iso-externals-node\/ws$/,
+          "pusher-websocket-iso-externals-web/ws"
+        ),
+        new NormalModuleReplacementPlugin(
+          /^pusher-websocket-iso-externals-node\/xhr$/,
+          "pusher-websocket-iso-externals-web/xhr"
+        ),
+        new NormalModuleReplacementPlugin(
+          /^pusher-websocket-iso-externals-node\/net_info$/,
+          "pusher-websocket-iso-externals-web/net_info"
+        )
+      ]
     },
-
-    plugins: [
-      'karma-webpack', 
-      'karma-coverage', 
-      'karma-jasmine',
-      'karma-chrome-launcher',
-      'karma-firefox-launcher',
-      // 'karma-opera-launcher',
-      'karma-safari-launcher'
-    ],    
 
     port: 9876,
     runnerPort: 9100,
@@ -45,10 +53,8 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome', 'Firefox', 
-    // 'Opera', 
-    'Safari'],
-    captureTimeout: 60000,
+    browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+    captureTimeout: 120000,
 
     singleRun: true
   });

@@ -1,4 +1,5 @@
-var Mocks = require('mocks');
+var Mocks = require("../../helpers/mocks");
+
 var DelayedStrategy = require('strategies/delayed_strategy');
 
 describe("DelayedStrategy", function() {

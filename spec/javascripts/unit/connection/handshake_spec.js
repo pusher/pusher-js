@@ -1,7 +1,8 @@
 var Handshake = require('connection/handshake');
 var Protocol = require('connection/protocol');
-var Mocks = require('mocks');
 var Connection = require('connection/connection');
+
+var Mocks = require("../../helpers/mocks");
 
 describe("Handshake", function() {
   var transport;

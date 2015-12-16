@@ -1,17 +1,22 @@
+var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
+
+var Timeline = require("timeline/timeline");
+var util = require("util");
+
 describe("Timeline", function() {
   var sendJSONP, onSend, timeline;
 
   beforeEach(function() {
     sendJSONP = jasmine.createSpy("sendJSONP");
     onSend = jasmine.createSpy("onSend");
-    timeline = new Pusher.Timeline("foo", 666, {
-      level: Pusher.Timeline.DEBUG
+    timeline = new Timeline("foo", 666, {
+      level: Timeline.DEBUG
     });
   });
 
   it("should expose the key, session id and options", function() {
-    var timeline = new Pusher.Timeline("foobar", 666, {
-      level: Pusher.Timeline.INFO,
+    var timeline = new Timeline("foobar", 666, {
+      level: Timeline.INFO,
       cluster: "test",
       features: ["x", "y", "z"]
     });
@@ -26,15 +31,15 @@ describe("Timeline", function() {
   });
 
   it("should not be empty after pushing an event", function() {
-    timeline.log(Pusher.Timeline.INFO, {});
+    timeline.log(Timeline.INFO, {});
     expect(timeline.isEmpty()).toBe(false);
   });
 
   it("should not log events with too low level", function() {
-    timeline = new Pusher.Timeline("foo", 666, {
-      level: Pusher.Timeline.ERROR
+    timeline = new Timeline("foo", 666, {
+      level: Timeline.ERROR
     });
-    timeline.log(Pusher.Timeline.INFO, {});
+    timeline.log(Timeline.INFO, {});
     expect(timeline.isEmpty()).toBe(true);
   });
 
@@ -44,12 +49,12 @@ describe("Timeline", function() {
 
   describe("on send", function() {
     beforeEach(function() {
-      spyOn(Pusher.Network, "isOnline").andReturn(true);
+      spyOn(Network, "isOnline").andReturn(true);
     });
 
     it("should include key, session id, cluster, features, version and params", function() {
-      var timeline = new Pusher.Timeline("foobar", 666, {
-        level: Pusher.Timeline.INFO,
+      var timeline = new Timeline("foobar", 666, {
+        level: Timeline.INFO,
         cluster: "test",
         features: ["x", "y", "z"],
         version: "6.6.6",
@@ -77,15 +82,15 @@ describe("Timeline", function() {
     });
 
     it("should include pushed events", function() {
-      spyOn(Pusher.Util, "now");
+      spyOn(util, "now");
 
-      Pusher.Util.now.andReturn(1000);
+      util.now.andReturn(1000);
       timeline.log(2, {a: 1});
-      Pusher.Util.now.andReturn(2000);
+      util.now.andReturn(2000);
       timeline.error({ b: 2.2 });
-      Pusher.Util.now.andReturn(100000);
+      util.now.andReturn(100000);
       timeline.info({ foo: "bar" });
-      Pusher.Util.now.andReturn(100001);
+      util.now.andReturn(100001);
       timeline.debug({ debug: true });
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
@@ -106,20 +111,20 @@ describe("Timeline", function() {
     });
 
     it("should become empty again", function() {
-      timeline.log(Pusher.Timeline.INFO, {});
+      timeline.log(Timeline.INFO, {});
       timeline.send(sendJSONP, onSend);
       expect(timeline.isEmpty()).toBe(true);
     });
 
     it("should respect the size limit", function() {
-      spyOn(Pusher.Util, "now").andReturn(123);
+      spyOn(util, "now").andReturn(123);
 
-      var timeline = new Pusher.Timeline("bar", 123, {
-        level: Pusher.Timeline.INFO,
+      var timeline = new Timeline("bar", 123, {
+        level: Timeline.INFO,
         limit: 3
       });
       for (var i = 1; i <= 4; i++) {
-        timeline.log(Pusher.Timeline.INFO, { i: i });
+        timeline.log(Timeline.INFO, { i: i });
       }
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);

@@ -1,4 +1,4 @@
-describe("HTTP.getStreamingSocket", function() {
+xdescribe("HTTP.getStreamingSocket", function() {
   var hooks;
   var url;
   var socket;

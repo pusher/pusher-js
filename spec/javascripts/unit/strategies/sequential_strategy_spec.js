@@ -1,4 +1,5 @@
-var Mocks = require('mocks');
+var Mocks = require("../../helpers/mocks");
+
 var SequentialStrategy = require('strategies/sequential_strategy');
 
 describe("SequentialStrategy", function() {

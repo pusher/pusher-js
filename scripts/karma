@@ -1,7 +1,0 @@
-#!/usr/bin/env ruby
-
-debug = ARGV.any? { |arg| arg == "--debug" }
-params = !debug ? " > /dev/null 2>&1" : ""
-
-system(File.expand_path("../karma-unit #{params}", __FILE__))
-system(File.expand_path("../karma-integration #{params}", __FILE__))

@@ -1,4 +1,4 @@
-describe("HTTP.getPollingSocket", function() {
+xdescribe("HTTP.getPollingSocket", function() {
   var hooks;
   var url;
   var socket;

@@ -1,6 +1,7 @@
-var Mocks = require('mocks');
 var Channel = require('channels/channel');
 var Errors = require('errors');
+
+var Mocks = require("../../helpers/mocks");
 
 describe("Channel", function() {
   var pusher;

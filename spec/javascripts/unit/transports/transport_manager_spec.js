@@ -1,9 +1,11 @@
+var Mocks = require("../../helpers/mocks");
+
 var TransportManager = require('transports/transport_manager');
-var Mocks = require('mocks');
 var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager');
 
 describe("TransportManager", function() {
-  it("should create an assistant for a transport class", function() {
+  // FIXME
+  xit("should create an assistant for a transport class", function() {
     var transportClass = Mocks.getTransportClass(true);
     var assistant = Mocks.getAssistantToTheTransportManager();
     var manager = new TransportManager({

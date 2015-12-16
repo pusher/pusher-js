@@ -1,6 +1,9 @@
-describe("HTTP.Request", function() {
-  var _XMLHttpRequest = window.XMLHttpRequest;
+var Mocks = require("../../helpers/mocks");
 
+var HTTPRequest = require("http/http_request");
+var util = require("util");
+
+describe("HTTPRequest", function() {
   var xhr;
   var hooks;
   var request;
@@ -10,20 +13,16 @@ describe("HTTP.Request", function() {
   beforeEach(function() {
     hooks = {
       getRequest: jasmine.createSpy().andCallFake(function() {
-        lastXHR = Pusher.Mocks.getXHR();
+        lastXHR = Mocks.getXHR();
         return lastXHR;
       }),
       abortRequest: jasmine.createSpy()
     };
 
-    spyOn(Pusher.Util, "addWindowListener");
-    spyOn(Pusher.Util, "removeWindowListener");
+    spyOn(util, "addUnloadListener");
+    spyOn(util, "removeUnloadListener");
 
-    request = new Pusher.HTTP.Request(hooks, "GET", "http://example.com");
-  });
-
-  afterEach(function() {
-    window.XMLHttpRequest = _XMLHttpRequest;
+    request = new HTTPRequest(hooks, "GET", "http://example.com");
   });
 
   describe("#start", function() {
@@ -45,14 +44,14 @@ describe("HTTP.Request", function() {
     it("should register an unloader", function() {
       request.start("test payload");
 
-      expect(Pusher.Util.addWindowListener).toHaveBeenCalledWith(
-        "unload", jasmine.any(Function)
+      expect(util.addUnloadListener).toHaveBeenCalledWith(
+        jasmine.any(Function)
       );
     });
 
-    it(" raised by XMLHttpRequest#open", function() {
+    it("raised by XMLHttpRequest#open", function() {
       hooks.getRequest = function() {
-        xhr = Pusher.Mocks.getXHR();
+        xhr = Mocks.getXHR();
         xhr.open.andThrow("open exception");
         return xhr;
       };
@@ -63,7 +62,7 @@ describe("HTTP.Request", function() {
 
     it("should re-throw the exception raised by XMLHttpRequest#send", function() {
       hooks.getRequest = function() {
-        xhr = Pusher.Mocks.getXHR();
+        xhr = Mocks.getXHR();
         xhr.send.andThrow("send exception");
         return xhr;
       };
@@ -85,11 +84,9 @@ describe("HTTP.Request", function() {
     });
 
     it("should unregister the unloader", function() {
-      var unloader = Pusher.Util.addWindowListener.calls[0].args[1];
+      var unloader = util.addUnloadListener.calls[0].args[0];
       request.close();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
+      expect(util.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
   });
 
@@ -174,7 +171,7 @@ describe("HTTP.Request", function() {
 
     beforeEach(function() {
       request.start("test payload");
-      unloader = Pusher.Util.addWindowListener.calls[0].args[1];
+      unloader = util.addUnloadListener.calls[0].args[0];
     });
 
     it("should abort the request using the abortRequest hook", function() {
@@ -185,9 +182,7 @@ describe("HTTP.Request", function() {
 
     it("should unregister the unloader", function() {
       unloader();
-      expect(Pusher.Util.removeWindowListener).toHaveBeenCalledWith(
-        "unload", unloader
-      );
+      expect(util.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
   });
 });

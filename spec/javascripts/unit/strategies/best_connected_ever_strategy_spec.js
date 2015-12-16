@@ -1,4 +1,5 @@
-var Mocks = require('mocks');
+var Mocks = require("../../helpers/mocks");
+
 var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy');
 
 describe("BestConnectedEverStrategy", function() {

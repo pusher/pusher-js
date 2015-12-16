@@ -1,6 +1,7 @@
-var Mocks = require('mocks');
 var Connection = require('connection/connection');
 var Protocol = require('connection/protocol');
+
+var Mocks = require("../../helpers/mocks");
 
 describe("Connection", function() {
   var transport;

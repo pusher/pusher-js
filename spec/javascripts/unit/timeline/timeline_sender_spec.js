@@ -1,4 +1,4 @@
-var Mocks = require('mocks');
+var Mocks = require('../../helpers/mocks');
 var TimelineSender = require('timeline/timeline_sender');
 
 // FIXME

@@ -1,4 +1,5 @@
-var Mocks = require('mocks');
+var Mocks = require("../../helpers/mocks");
+
 var IfStrategy = require('strategies/if_strategy');
 
 describe("IfStrategy", function() {

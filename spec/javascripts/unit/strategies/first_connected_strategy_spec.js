@@ -1,4 +1,5 @@
-var Mocks = require('mocks');
+var Mocks = require("../../helpers/mocks");
+
 var FirstConnectedStrategy = require('strategies/first_connected_strategy');
 
 describe("FirstConnectedStrategy", function() {

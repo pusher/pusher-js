@@ -1,4 +1,5 @@
-var Mocks = require('mocks');
+var Mocks = require("../../helpers/mocks");
+
 var CachedStrategy = require('strategies/cached_strategy');
 var Util = require('util');
 

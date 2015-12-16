@@ -1,4 +1,4 @@
-describe("HTTP.Socket", function() {
+xdescribe("HTTP.Socket", function() {
   var onOpen, onMessage, onActivity, onClose;
   var hooks;
 

@@ -3,6 +3,8 @@ var Channel = require('channels/channel');
 var PrivateChannel = require('channels/private_channel');
 var PresenceChannel = require('channels/presence_channel');
 
+var Mocks = require("../../helpers/mocks");
+
 describe("Channels", function() {
   var channels;
 
