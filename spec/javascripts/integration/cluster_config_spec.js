@@ -57,7 +57,7 @@ Integration.describe("Cluster Configuration", function() {
             received = message;
           });
           Integration.sendAPIMessage({
-            url: Integration.API_EU_URL + "/v2/send",
+            url: Integration.API_EU_URL + "/send",
             channel: channelName,
             event: eventName,
             data: data

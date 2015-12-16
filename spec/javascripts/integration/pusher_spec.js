@@ -49,7 +49,7 @@ Integration.describe("Pusher", function() {
           received = message;
         });
         Integration.sendAPIMessage({
-          url: Integration.API_URL + "/v2/send",
+          url: Integration.API_URL + "/send",
           channel: channelName,
           event: eventName,
           data: data
@@ -84,7 +84,7 @@ Integration.describe("Pusher", function() {
         });
         pusher.unsubscribe(channelName);
         Integration.sendAPIMessage({
-          url: Integration.API_URL + "/v2/send",
+          url: Integration.API_URL + "/send",
           channel: channelName,
           event: eventName,
           data: {}

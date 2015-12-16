@@ -1,9 +1,8 @@
 var base64 = require('base64');
 var util = require('util');
 
-exports.API_URL = "http://js-integration-api.pusher.com";
-exports.API_EU_URL = "http://js-integration-api-eu.pusher.com";
-exports.JS_HOST = "http://localhost:5555";
+exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";
+exports.API_EU_URL = "http://pusher-js-integration-api-eu.herokuapp.com";
 
 exports.describe = function(name, body) {
   if (navigator.userAgent.match(/phantomjs/i)) {
