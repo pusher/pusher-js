@@ -1,4 +1,9 @@
-describeIntegration("Falling back", function() {
+var Integration = require("../helpers/integration");
+
+Integration.describe("Falling back", function() {
+  // FIXME
+  return;
+
   var pusher;
 
   beforeEach(function() {

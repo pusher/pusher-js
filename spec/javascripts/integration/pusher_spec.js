@@ -1,4 +1,11 @@
-describeIntegration("Pusher", function() {
+var Integration = require("../helpers/integration");
+
+var Pusher = require("pusher");
+var transports = require("transports/transports");
+var util = require("util");
+var Timer = require("utils/timers").Timer;
+
+Integration.describe("Pusher", function() {
   // Integration tests in Jasmine need to have setup and teardown phases as
   // separate specs to make sure we share connections between actual specs.
   // This way we can also make sure connections are closed even when tests fail.
@@ -7,11 +14,11 @@ describeIntegration("Pusher", function() {
   // significant delays and triggers security mechanisms in some browsers.
 
   var TRANSPORTS = {
-    "ws": Pusher.WSTransport,
-    "xhr_streaming": Pusher.XHRStreamingTransport,
-    "xhr_polling": Pusher.XHRPollingTransport,
-    "xdr_streaming": Pusher.XDRStreamingTransport,
-    "xdr_polling": Pusher.XDRPollingTransport
+    "ws": transports.WSTransport,
+    "xhr_streaming": transports.XHRStreamingTransport,
+    "xhr_polling": transports.XHRPollingTransport,
+    "xdr_streaming": transports.XDRStreamingTransport,
+    "xdr_polling": transports.XDRPollingTransport
   };
 
   function subscribe(pusher, channelName, callback) {
@@ -25,7 +32,7 @@ describeIntegration("Pusher", function() {
   function buildPublicChannelTests(getPusher, prefix) {
     it("should subscribe and receive a message sent via REST API", function() {
       var pusher = getPusher();
-      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
 
       var onSubscribed = jasmine.createSpy("onSubscribed");
       var channel = subscribe(pusher, channelName, onSubscribed);
@@ -41,8 +48,8 @@ describeIntegration("Pusher", function() {
         channel.bind(eventName, function(message) {
           received = message;
         });
-        Pusher.Integration.sendAPIMessage({
-          url: Pusher.Integration.API_URL + "/v2/send",
+        Integration.sendAPIMessage({
+          url: Integration.API_URL + "/v2/send",
           channel: channelName,
           event: eventName,
           data: data
@@ -59,7 +66,7 @@ describeIntegration("Pusher", function() {
 
     it("should not receive messages after unsubscribing", function() {
       var pusher = getPusher();
-      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
 
       var onSubscribed = jasmine.createSpy("onSubscribed");
       var channel = subscribe(pusher, channelName, onSubscribed);
@@ -76,13 +83,13 @@ describeIntegration("Pusher", function() {
           received = message;
         });
         pusher.unsubscribe(channelName);
-        Pusher.Integration.sendAPIMessage({
-          url: Pusher.Integration.API_URL + "/v2/send",
+        Integration.sendAPIMessage({
+          url: Integration.API_URL + "/v2/send",
           channel: channelName,
           event: eventName,
           data: {}
         });
-        timer = new Pusher.Timer(3000, function() {});
+        timer = new Timer(3000, function() {});
       });
       waitsFor(function() {
         return !timer.isRunning();
@@ -94,7 +101,7 @@ describeIntegration("Pusher", function() {
 
     it("should handle unsubscribing as an idempotent operation", function() {
       var pusher = getPusher();
-      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration");
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
 
       var onSubscribed = jasmine.createSpy("onSubscribed");
       subscribe(pusher, channelName, onSubscribed);
@@ -116,7 +123,7 @@ describeIntegration("Pusher", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
 
-      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration_client_events");
+      var channelName = Integration.getRandomName((prefix || "") + "integration_client_events");
 
       var channel1, channel2;
       var onSubscribed1 = jasmine.createSpy("onSubscribed1");
@@ -151,7 +158,7 @@ describeIntegration("Pusher", function() {
     it("should not receive a client event sent by itself", function() {
       var pusher = getPusher1();
 
-      var channelName = Pusher.Integration.getRandomName((prefix || "") + "integration_client_events");
+      var channelName = Integration.getRandomName((prefix || "") + "integration_client_events");
       var onSubscribed = jasmine.createSpy("onSubscribed");
 
       var eventName = "client-test";
@@ -165,7 +172,7 @@ describeIntegration("Pusher", function() {
       runs(function() {
         channel.bind(eventName, onEvent);
         pusher.send_event(eventName, {}, channelName);
-        timer = new Pusher.Timer(3000, function() {});
+        timer = new Timer(3000, function() {});
       });
       waitsFor(function() {
         return !timer.isRunning();
@@ -180,7 +187,7 @@ describeIntegration("Pusher", function() {
   function buildPresenceChannelTests(getPusher1, getPusher2) {
     it("should get connection's member data", function() {
       var pusher = getPusher1();
-      var channelName = Pusher.Integration.getRandomName("presence-integration_me");
+      var channelName = Integration.getRandomName("presence-integration_me");
 
       var members = null;
       subscribe(pusher, channelName, function(channel, ms) {
@@ -204,7 +211,7 @@ describeIntegration("Pusher", function() {
     it("should receive a member added event", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = Pusher.Integration.getRandomName("presence-integration_member_added");
+      var channelName = Integration.getRandomName("presence-integration_member_added");
 
       var member = null;
       subscribe(pusher1, channelName, function(channel) {
@@ -236,7 +243,7 @@ describeIntegration("Pusher", function() {
     it("should receive a member removed event", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = Pusher.Integration.getRandomName("presence-integration_member_removed");
+      var channelName = Integration.getRandomName("presence-integration_member_removed");
 
       var member = null;
       subscribe(pusher2, channelName, function(channel) {
@@ -270,7 +277,7 @@ describeIntegration("Pusher", function() {
     it("should maintain correct members count", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = Pusher.Integration.getRandomName("presence-integration_member_count");
+      var channelName = Integration.getRandomName("presence-integration_member_count");
 
       var channel1, channel2;
 
@@ -316,7 +323,7 @@ describeIntegration("Pusher", function() {
     it("should maintain correct members data", function() {
       var pusher1 = getPusher1();
       var pusher2 = getPusher2();
-      var channelName = Pusher.Integration.getRandomName("presence-integration_member_count");
+      var channelName = Integration.getRandomName("presence-integration_member_count");
 
       var channel1, channel2;
 
@@ -400,21 +407,18 @@ describeIntegration("Pusher", function() {
     describe("with " + (transport ? transport + ", " : "") + "encrypted=" + encrypted, function() {
       var pusher1, pusher2;
 
-      beforeEach(function() {
-        Pusher.Util.objectApply(TRANSPORTS, function(t, name) {
-          spyOn(t, "isSupported").andReturn(false);
-        });
-        TRANSPORTS[transport].isSupported.andReturn(true);
-      });
-
       describe("setup", function() {
         it("should open connections", function() {
           pusher1 = new Pusher("7324d55a5eeb8f554761", {
+            enabledTransports: [transport],
             encrypted: encrypted,
+            authEndpoint: Integration.API_URL + "/auth",
             disableStats: true
           });
           pusher2 = new Pusher("7324d55a5eeb8f554761", {
+            enabledTransports: [transport],
             encrypted: encrypted,
+            authEndpoint: Integration.API_URL + "/auth",
             disableStats: true
           });
           waitsFor(function() {
@@ -434,7 +438,7 @@ describeIntegration("Pusher", function() {
       });
 
       describe("with a private channel", function() {
-        var channelName = Pusher.Integration.getRandomName("private-integration");
+        var channelName = Integration.getRandomName("private-integration");
         var channel1, channel2;
 
         buildPublicChannelTests(
@@ -473,34 +477,10 @@ describeIntegration("Pusher", function() {
     });
   }
 
-  var _VERSION;
-  var _channel_auth_transport;
-  var _channel_auth_endpoint;
-  var _Dependencies;
-
-  it("should prepare the global config", function() {
-    // TODO fix how versions work in unit tests
-    _VERSION = Pusher.VERSION;
-    _channel_auth_transport = Pusher.channel_auth_transport;
-    _channel_auth_endpoint = Pusher.channel_auth_endpoint;
-    _Dependencies = Pusher.Dependencies;
-
-    Pusher.VERSION = "8.8.8";
-    Pusher.channel_auth_transport = 'jsonp';
-    Pusher.channel_auth_endpoint = Pusher.Integration.API_URL + "/auth";
-    Pusher.Dependencies = new Pusher.DependencyLoader({
-      cdn_http: Pusher.Integration.JS_HOST,
-      cdn_https: Pusher.Integration.JS_HOST,
-      version: Pusher.VERSION,
-      suffix: "",
-      receivers: Pusher.DependenciesReceivers
-    });
-  });
-
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
 
-  if (Pusher.Util.isXHRSupported()) {
+  if (util.isXHRSupported()) {
     // CORS-compatible browsers
     if (!/Android 2\./i.test(navigator.userAgent)) {
       // Android 2.x does a lot of buffering, which kills streaming
@@ -509,7 +489,7 @@ describeIntegration("Pusher", function() {
     }
     buildIntegrationTests("xhr_polling", false);
     buildIntegrationTests("xhr_polling", true);
-  } else if (Pusher.Util.isXDRSupported(false)) {
+  } else if (util.isXDRSupported(false)) {
     buildIntegrationTests("xdr_streaming", false);
     buildIntegrationTests("xdr_streaming", true);
     buildIntegrationTests("xdr_polling", false);
@@ -517,11 +497,4 @@ describeIntegration("Pusher", function() {
   } else {
     throw new Error("this environment is not supported");
   }
-
-  it("should restore the global config", function() {
-    Pusher.Dependencies = _Dependencies;
-    Pusher.channel_auth_endpoint = _channel_auth_endpoint;
-    Pusher.channel_auth_transport = _channel_auth_transport;
-    Pusher.VERSION = _VERSION;
-  });
 });

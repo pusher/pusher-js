@@ -1,40 +1,46 @@
-var Util = require('util');
-var JSONPRequest = require('jsonp/jsonp_request');
-var ScriptReceiverFactory = require('dom/script_receiver_factory');
+var base64 = require('base64');
+var util = require('util');
 
-function describeIntegration(name, body) {
+exports.API_URL = "http://js-integration-api.pusher.com";
+exports.API_EU_URL = "http://js-integration-api-eu.pusher.com";
+exports.JS_HOST = "http://localhost:5555";
+
+exports.describe = function(name, body) {
   if (navigator.userAgent.match(/phantomjs/i)) {
     // Don't run integration tests from Guard
     return;
   }
   describe(name + " (integration)", body);
-}
-
-var Integration = {};
-
-Integration.API_URL = "http://js-integration-api.pusher.com";
-Integration.API_EU_URL = "http://js-integration-api-eu.pusher.com";
-Integration.JS_HOST = "http://localhost:5555";
-
-Integration.ScriptReceivers = new ScriptReceiverFactory(
-  "_pusher_integration_script_receivers",
-  "Pusher.Integration.ScriptReceivers"
-);
-
-Integration.getRandomName = function(prefix) {
-  return prefix + "_" + Util.now() + "_" + Math.floor(Math.random() * 1000000);
 };
 
-Integration.sendAPIMessage = function(request) {
-  var jsonpRequest = new JSONPRequest(request.url, {
+exports.getRandomName = function(prefix) {
+  return prefix + "_" + util.now() + "_" + Math.floor(Math.random() * 1000000);
+};
+
+// FIXME implement an XHR endpoint
+exports.sendAPIMessage = function(request) {
+  var params = {
     channel: request.channel,
     event: request.event,
     data: request.data
-  });
-  var receiver = Integration.ScriptReceivers.create(function() {
-    Pusher.ScriptReceivers.remove(receiver);
-  });
-  jsonpRequest.send(receiver);
+  };
+  var query = util.map(
+    util.flatten(encodeParamsObject(params)),
+    util.method("join", "=")
+  ).join("&");
+
+  url = request.url + ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
+
+  var xhr = util.createXHR();
+  xhr.open("GET", url, true);
+  xhr.send()
 };
 
-module.exports = Integration;
+function encodeParamsObject(data) {
+  return util.mapObject(data, function(value) {
+    if (typeof value === "object") {
+      value = JSON.stringify(value);
+    }
+    return encodeURIComponent(base64.encode(value.toString()));
+  });
+}

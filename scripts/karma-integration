@@ -1,18 +1,5 @@
-#!/usr/bin/env ruby
+#!/bin/bash
+set -euo pipefail
+cd "$(dirname "$0")"/..
 
-require "rubygems"
-require "bundler/setup"
-require File.expand_path('../../support/run_commands', __FILE__)
-
-debug = ARGV.any? { |arg| arg == "--debug" }
-params = !debug ? " > /dev/null 2>&1" : ""
-
-run_commands ["./scripts/webpack-build"]
-
-# FIXME use the webpack build
-test_cmds = [
-  "bundle exec jbundle server #{params}",
-  "./node_modules/karma/bin/karma start spec/karma/config/integration.js"
-]
-
-run_commands test_cmds
+node_modules/karma/bin/karma start spec/karma/config/integration.js
