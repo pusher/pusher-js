@@ -23,7 +23,11 @@ module.exports = function(config) {
 
     webpack: {
       resolve: {
-        root: [__dirname + '/../../../src', __dirname + '/../../../src/platforms/web']
+        root: [
+          __dirname + '/../../../src',
+          __dirname + '/../../../src/node_modules',
+          __dirname + '/../../../src/platforms/web'
+        ]
       },
       externals: {
         '../package': '{version: "'+ version +'"}'
