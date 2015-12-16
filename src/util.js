@@ -53,11 +53,7 @@ module.exports = Util = {
       if (typeof arguments[i] === "string") {
         m.push(arguments[i]);
       } else {
-        if (global.JSON === undefined) {
-          m.push(arguments[i].toString());
-        } else {
-          m.push(JSON.stringify(arguments[i]));
-        }
+        m.push(JSON.stringify(arguments[i]));
       }
     }
     return m.join(" : ");
