@@ -1,21 +1,24 @@
 var Integration = require("../helpers/integration");
+var Mocks = require("../helpers/mocks");
+
+var Pusher = require("pusher");
+
+var defaults = require("defaults");
+var Network = require("pusher-websocket-iso-externals-node/net_info").Network;
+var transports = require("transports/transports");
+var util = require("util");
 
 Integration.describe("Timeout Configuration", function() {
-  // FIXME
-  return
-
   var transport;
   var pusher;
 
   beforeEach(function() {
-    spyOn(Pusher.Network, "isOnline").andReturn(true);
+    spyOn(Network, "isOnline").andReturn(true);
+    spyOn(transports.WSTransport, "isSupported").andReturn(true);
+    spyOn(util, "getLocalStorage").andReturn({});
 
-    spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-
-    spyOn(Pusher.Util, "getLocalStorage").andReturn({});
-
-    spyOn(Pusher.WSTransport, "createConnection").andCallFake(function() {
-      transport = Pusher.Mocks.getTransport(true);
+    spyOn(transports.WSTransport, "createConnection").andCallFake(function() {
+      transport = Mocks.getTransport(true);
       transport.supportsPing.andReturn(false);
       return transport;
     });
@@ -33,7 +36,7 @@ Integration.describe("Timeout Configuration", function() {
     pusher.connect();
     pusher.connection.bind("unavailable", onUnavailable);
 
-    jasmine.Clock.tick(Pusher.unavailable_timeout - 1);
+    jasmine.Clock.tick(defaults.unavailable_timeout - 1);
     expect(onUnavailable).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
     expect(onUnavailable).toHaveBeenCalled();
@@ -78,7 +81,7 @@ Integration.describe("Timeout Configuration", function() {
     jasmine.Clock.tick(1);
     expect(firstTransport.send).toHaveBeenCalled();
 
-    jasmine.Clock.tick(Pusher.pong_timeout - 1);
+    jasmine.Clock.tick(defaults.pong_timeout - 1);
     expect(firstTransport.close).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
     expect(firstTransport.close).toHaveBeenCalled();
