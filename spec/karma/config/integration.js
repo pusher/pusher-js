@@ -7,13 +7,11 @@ module.exports = function(config) {
     basePath: '../../../',
     frameworks: ["jasmine"],
 
-    files: []
-      .concat(require(__dirname + "/../files/integration_tests")),
-
+    files: require(__dirname + "/../files/integration_tests"),
     preprocessors: {
-      '**/src/**/*.js': ['coverage', 'webpack'],
       '**/spec/javascripts/integration/**/*.js': ['webpack']
     },
+
     reporters: ['progress', 'coverage'],
 
     coverageReporter: {
@@ -25,8 +23,7 @@ module.exports = function(config) {
       resolve: {
         root: [
           __dirname + '/../../../src',
-          __dirname + '/../../../src/node_modules',
-          __dirname + '/../../../src/platforms/web'
+          __dirname + '/../../../src/node_modules'
         ]
       },
       externals: {
@@ -56,16 +53,7 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    // browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
-
-    customLaunchers: {
-      ChromeWithoutSecurity: {
-        base: 'Chrome',
-        flags: ['--disable-web-security']
-      }
-    },
-
-    browsers: ['ChromeWithoutSecurity'],
+    browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
     captureTimeout: 120000,
 
     singleRun: true
