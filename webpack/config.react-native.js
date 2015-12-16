@@ -24,11 +24,11 @@ module.exports = {
   plugins: [
     new NormalModuleReplacementPlugin(
       /^pusher-websocket-iso-externals-node\/ws$/,
-      "pusher-websocket-iso-externals-web/ws"
+      "pusher-websocket-iso-externals-react-native/ws"
     ),
     new NormalModuleReplacementPlugin(
       /^pusher-websocket-iso-externals-node\/xhr$/,
-      "pusher-websocket-iso-externals-web/xhr"
+      "pusher-websocket-iso-externals-react-native/xhr"
     ),
     new NormalModuleReplacementPlugin(
       /^pusher-websocket-iso-externals-node\/net_info$/,
