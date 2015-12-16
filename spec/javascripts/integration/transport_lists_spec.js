@@ -1,22 +1,26 @@
-describe("Transport lists", function() {
-  // FIXME
-  return;
+var Integration = require("../helpers/integration");
+var Mocks = require("../helpers/mocks");
 
-  var _isReady = Pusher.isReady;
+var Pusher = require("pusher");
 
+var defaults = require("defaults");
+var Network = require("pusher-websocket-iso-externals-node/net_info").Network;
+var transports = require("transports/transports");
+
+Integration.describe("Transport lists", function() {
   beforeEach(function() {
-    spyOn(Pusher.WSTransport, "isSupported").andReturn(true);
-    spyOn(Pusher.XHRStreamingTransport, "isSupported").andReturn(true);
-    spyOn(Pusher.XHRPollingTransport, "isSupported").andReturn(true);
+    spyOn(transports.WSTransport, "isSupported").andReturn(true);
+    spyOn(transports.XHRStreamingTransport, "isSupported").andReturn(true);
+    spyOn(transports.XHRPollingTransport, "isSupported").andReturn(true);
 
-    spyOn(Pusher.WSTransport, "createConnection")
-      .andCallFake(Pusher.Mocks.getTransport);
-    spyOn(Pusher.XHRStreamingTransport, "createConnection")
-      .andCallFake(Pusher.Mocks.getTransport);
-    spyOn(Pusher.XHRPollingTransport, "createConnection")
-      .andCallFake(Pusher.Mocks.getTransport);
+    spyOn(transports.WSTransport, "createConnection")
+      .andCallFake(Mocks.getTransport);
+    spyOn(transports.XHRStreamingTransport, "createConnection")
+      .andCallFake(Mocks.getTransport);
+    spyOn(transports.XHRPollingTransport, "createConnection")
+      .andCallFake(Mocks.getTransport);
 
-    spyOn(Pusher, "getDefaultStrategy").andCallFake(function() {
+    spyOn(defaults, "getDefaultStrategy").andCallFake(function() {
       return [
         [":def_transport", "a", "ws", 1, {}],
         [":def_transport", "b", "xhr_streaming", 2, {}],
@@ -25,19 +29,14 @@ describe("Transport lists", function() {
       ];
     });
 
-    spyOn(Pusher.Network, "isOnline").andReturn(true);
-    Pusher.isReady = true;
-  });
-
-  afterEach(function() {
-    Pusher.isReady = _isReady;
+    spyOn(Network, "isOnline").andReturn(true);
   });
 
   it("should use all transports if the whitelist is not specified", function() {
     var pusher = new Pusher("asdf", { disableStats: true });
-    expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
-    expect(Pusher.XHRStreamingTransport.createConnection).toHaveBeenCalled();
-    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
+    expect(transports.WSTransport.createConnection).toHaveBeenCalled();
+    expect(transports.XHRStreamingTransport.createConnection).toHaveBeenCalled();
+    expect(transports.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -46,9 +45,9 @@ describe("Transport lists", function() {
       disableStats: true,
       enabledTransports: []
     });
-    expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRPollingTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.WSTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRPollingTransport.createConnection).not.toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -57,9 +56,9 @@ describe("Transport lists", function() {
       disableStats: true,
       enabledTransports: ["a", "c"]
     });
-    expect(Pusher.WSTransport.createConnection).toHaveBeenCalled();
-    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
+    expect(transports.WSTransport.createConnection).toHaveBeenCalled();
+    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -68,9 +67,9 @@ describe("Transport lists", function() {
       disableStats: true,
       disabledTransports: ["a", "b"]
     });
-    expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
+    expect(transports.WSTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -80,9 +79,9 @@ describe("Transport lists", function() {
       enabledTransports: ["b", "c"],
       disabledTransports: ["b"]
     });
-    expect(Pusher.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(Pusher.XHRPollingTransport.createConnection).toHaveBeenCalled();
+    expect(transports.WSTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.XHRPollingTransport.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 });
