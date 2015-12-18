@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("{version: \"0.0.1\"}"));
+		module.exports = factory(require("{version: \"0.1.0\"}"));
 	else if(typeof define === 'function' && define.amd)
-		define(["{version: \"0.0.1\"}"], factory);
+		define(["{version: \"0.1.0\"}"], factory);
 	else if(typeof exports === 'object')
-		exports["Pusher"] = factory(require("{version: \"0.0.1\"}"));
+		exports["Pusher"] = factory(require("{version: \"0.1.0\"}"));
 	else
-		root["Pusher"] = factory(root["{version: \"0.0.1\"}"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_12__) {
+		root["Pusher"] = factory(root["{version: \"0.1.0\"}"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_11__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -56,15 +56,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Util = __webpack_require__(1);
 	var Channels = __webpack_require__(21);
-	var EventsDispatcher = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(7);
 	var Timeline = __webpack_require__(28);
 	var TimelineSender = __webpack_require__(29);
 	var StrategyBuilder = __webpack_require__(31);
 	var ConnectionManager = __webpack_require__(44);
-	var PeriodicTimer = __webpack_require__(4).PeriodicTimer;
-	var Defaults = __webpack_require__(11);
+	var PeriodicTimer = __webpack_require__(3).PeriodicTimer;
+	var Defaults = __webpack_require__(10);
 	var DefaultConfig = __webpack_require__(46);
-	var Logger = __webpack_require__(9);
+	var Logger = __webpack_require__(8);
 
 	function Pusher(app_key, options) {
 
@@ -268,8 +268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var global = __webpack_require__(2);
-	var XHR = __webpack_require__(3);
+	/* WEBPACK VAR INJECTION */(function(global) {var XHR = __webpack_require__(2);
 
 	module.exports = Util = {
 	  now: function() {
@@ -281,7 +280,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  defer: function(callback) {
-	    var Timer = __webpack_require__(4).Timer;
+	    var Timer = __webpack_require__(3).Timer;
 	    return new Timer(0, callback);
 	  },
 
@@ -323,11 +322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      if (typeof arguments[i] === "string") {
 	        m.push(arguments[i]);
 	      } else {
-	        if (global.JSON === undefined) {
-	          m.push(arguments[i].toString());
-	        } else {
-	          m.push(JSON.stringify(arguments[i]));
-	        }
+	        m.push(JSON.stringify(arguments[i]));
 	      }
 	    }
 	    return m.join(" : ");
@@ -574,29 +569,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	  },
 
 	  getClientFeatures: function() {
-	    var WSTransport = __webpack_require__(5).WSTransport;
+	    var WSTransport = __webpack_require__(4).WSTransport;
 	    return this.keys(
 	      this.filterObject(
 	        { "ws": WSTransport },
 	        function (t) { return t.isSupported({}); }
 	      )
 	    );
-	  },
-
-	  addUnloadListener: function(listener) {
-	    if (global.addEventListener !== undefined) {
-	      global.addEventListener("unload", listener, false);
-	    } else if (global.attachEvent !== undefined) {
-	      global.attachEvent("onunload", listener);
-	    }
-	  },
-
-	  removeUnloadListener: function(listener) {
-	    if (global.addEventListener !== undefined) {
-	      global.removeEventListener("unload", listener, false);
-	    } else if (global.detachEvent !== undefined) {
-	      global.detachEvent("onunload", listener);
-	    }
 	  },
 
 	  isXHRSupported: function() {
@@ -625,29 +604,22 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = Function("return this")();
+	module.exports = window.XMLHttpRequest;
 
 
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var global = __webpack_require__(2);
-
-	module.exports = global.XMLHttpRequest;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
 	var Util = __webpack_require__(1);
-	var global = __webpack_require__(2);
+
+	var global = Function("return this")();
 
 	// We need to bind clear functions this way to avoid exceptions on IE8
 	function clearTimeout(timer) {
@@ -716,13 +688,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 5 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Transport = __webpack_require__(6);
-	var URLSchemes = __webpack_require__(10);
+	var Transport = __webpack_require__(5);
+	var URLSchemes = __webpack_require__(9);
 	var Util = __webpack_require__(1);
-	var HTTP = __webpack_require__(13);
+	var HTTP = __webpack_require__(12);
 	var WS = __webpack_require__(20);
 
 	/** WebSocket transport.
@@ -799,10 +771,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 6 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TransportConnection = __webpack_require__(7);
+	var TransportConnection = __webpack_require__(6);
 
 	/** Provides interface for transport connection instantiation.
 	 *
@@ -853,12 +825,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 7 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(8);
-	var Logger = __webpack_require__(9);
+	var EventsDispatcher = __webpack_require__(7);
+	var Logger = __webpack_require__(8);
 
 	/** Provides universal API for transport connections.
 	 *
@@ -1105,7 +1077,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 8 */
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {var Util = __webpack_require__(1);
@@ -1216,10 +1188,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var global = __webpack_require__(2);
 	var Util = __webpack_require__(1);
 
 	module.exports = {
@@ -1232,12 +1203,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	  warn: function(){
 	    var message = Util.stringify.apply(this, arguments);
-	    if (global.console) {
-	      if (global.console.warn) {
-	        global.console.warn(message);
-	      } else if (global.console.log) {
-	        global.console.log(message);
-	      }
+	    if (console.warn) {
+	      console.warn(message);
+	    } else if (console.log) {
+	      console.log(message);
 	    }
 	    if (this.log) {
 	      this.log(message);
@@ -1247,10 +1216,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Defaults = __webpack_require__(11);
+	var Defaults = __webpack_require__(10);
 
 	function getGenericURL(baseScheme, params, path) {
 	  var scheme = baseScheme + (params.encrypted ? "s" : "");
@@ -1287,10 +1256,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 11 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.VERSION = __webpack_require__(12).version;
+	exports.VERSION = __webpack_require__(11).version;
 	exports.PROTOCOL = 7;
 
 	// DEPRECATED: WS connection parameters
@@ -1404,25 +1373,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 11 */
 /***/ function(module, exports) {
 
-	module.exports = __WEBPACK_EXTERNAL_MODULE_12__;
+	module.exports = __WEBPACK_EXTERNAL_MODULE_11__;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = {
+	  getStreamingSocket: __webpack_require__(13),
+	  getPollingSocket: __webpack_require__(19)
+	}
 
 /***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {
-	  getStreamingSocket: __webpack_require__(14),
-	  getPollingSocket: __webpack_require__(19)
-	}
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var HTTPSocket = __webpack_require__(15);
+	var HTTPSocket = __webpack_require__(14);
 
 	var hooks = {
 	  getReceiveURL: function(url, session) {
@@ -1445,11 +1414,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var getXHR = __webpack_require__(16);
+	var getXHR = __webpack_require__(15);
 	var getXDR = __webpack_require__(18);
 
 	var CONNECTING = 0;
@@ -1673,11 +1642,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPRequest = __webpack_require__(17);
-	var XHR = __webpack_require__(3);
+	var HTTPRequest = __webpack_require__(16);
+	var XHR = __webpack_require__(2);
 
 	var hooks = {
 	  getRequest: function(socket) {
@@ -1713,10 +1682,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 17 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(8);
+	var App = __webpack_require__(17);
+
+	var EventsDispatcher = __webpack_require__(7);
 	var Util = __webpack_require__(1);
 
 	var MAX_BUFFER_LENGTH = 256*1024;
@@ -1740,7 +1711,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  self.unloader = function() {
 	    self.close();
 	  };
-	  Util.addUnloadListener(self.unloader);
+	  App.addUnloadListener(self.unloader);
 
 	  self.xhr.open(self.method, self.url, true);
 	  self.xhr.send(payload);
@@ -1748,7 +1719,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	prototype.close = function() {
 	  if (this.unloader) {
-	    Util.removeUnloadListener(this.unloader);
+	    App.removeUnloadListener(this.unloader);
 	    this.unloader = null;
 	  }
 	  if (this.xhr) {
@@ -1792,10 +1763,31 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	exports.addUnloadListener = function(listener) {
+	  if (window.addEventListener !== undefined) {
+	    window.addEventListener("unload", listener, false);
+	  } else if (window.attachEvent !== undefined) {
+	    window.attachEvent("onunload", listener);
+	  }
+	};
+
+	exports.removeUnloadListener = function(listener) {
+	  if (window.addEventListener !== undefined) {
+	    window.removeEventListener("unload", listener, false);
+	  } else if (window.detachEvent !== undefined) {
+	    window.detachEvent("onunload", listener);
+	  }
+	};
+
+
+/***/ },
 /* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPRequest = __webpack_require__(17);
+	var HTTPRequest = __webpack_require__(16);
 
 	var hooks = {
 	  getRequest: function(socket) {
@@ -1837,7 +1829,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPSocket = __webpack_require__(15);
+	var HTTPSocket = __webpack_require__(14);
 
 	var hooks = {
 	  getReceiveURL: function(url, session) {
@@ -1865,11 +1857,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 20 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var global = __webpack_require__(2);
-
-	module.exports = global.WebSocket || global.MozWebSocket;
+	module.exports = window.WebSocket || window.MozWebSocket;
 
 
 /***/ },
@@ -1951,10 +1941,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(7);
 	var Util = __webpack_require__(1);
 	var Errors = __webpack_require__(23);
-	var Logger = __webpack_require__(9);
+	var Logger = __webpack_require__(8);
 
 	/** Provides base public channel interface with an event emitter.
 	 *
@@ -2076,7 +2066,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Logger = __webpack_require__(9);
+	var Logger = __webpack_require__(8);
 	var Util = __webpack_require__(1);
 
 	var Authorizer = function(channel, options) {
@@ -2157,7 +2147,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Util = __webpack_require__(1);
 	var PrivateChannel = __webpack_require__(26);
 	var Members = __webpack_require__(27);
-	var Logger = __webpack_require__(9);
+	var Logger = __webpack_require__(8);
 
 	/** Adds presence channel functionality to private channels.
 	 *
@@ -2492,9 +2482,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 30 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var global = __webpack_require__(2);
+	var global = Function("return this")();
 
 	var Base64 = {
 	  encode: function (s) {
@@ -2557,7 +2547,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Transports = __webpack_require__(5);
+	var Transports = __webpack_require__(4);
 	var TransportManager = __webpack_require__(32);
 	var Errors = __webpack_require__(23);
 	var TransportStrategy = __webpack_require__(34);
@@ -3273,9 +3263,9 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(7);
 	var Protocol = __webpack_require__(36);
-	var Logger = __webpack_require__(9);
+	var Logger = __webpack_require__(8);
 
 	/**
 	 * Provides Pusher protocol interface for transports.
@@ -3437,7 +3427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var Timer = __webpack_require__(4).Timer;
+	var Timer = __webpack_require__(3).Timer;
 
 	/** Loops through strategies with optional timeouts.
 	 *
@@ -3771,7 +3761,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Timer = __webpack_require__(4).Timer;
+	var Timer = __webpack_require__(3).Timer;
 
 	/** Runs substrategy after specified delay.
 	 *
@@ -3885,10 +3875,10 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(8);
-	var Timer = __webpack_require__(4).Timer;
+	var EventsDispatcher = __webpack_require__(7);
+	var Timer = __webpack_require__(3).Timer;
 	var Network = __webpack_require__(45).Network;
-	var Logger = __webpack_require__(9);
+	var Logger = __webpack_require__(8);
 
 	/** Manages connection to Pusher.
 	 *
@@ -4250,7 +4240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(8);
+	var EventsDispatcher = __webpack_require__(7);
 	var Util = __webpack_require__(1);
 
 	/** Really basic interface providing network availability info.
@@ -4301,7 +4291,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Defaults = __webpack_require__(11);
+	var Defaults = __webpack_require__(10);
 
 	exports.getGlobalConfig = function() {
 	  return {
