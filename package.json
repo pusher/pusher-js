@@ -1,6 +1,6 @@
 {
   "name": "pusher-websocket-iso",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
   "main": "src/pusher.js",
   "scripts": {
