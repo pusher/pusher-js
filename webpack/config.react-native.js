@@ -18,7 +18,7 @@ module.exports = {
   },
   target: "node",
   externals: {
-    "react-native": "{}",
+    "react-native": "react-native",
     '../package': 'var {version: "'+ version +'"}'
   },
   plugins: [

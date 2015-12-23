@@ -54,7 +54,7 @@ module.exports =
 	var ConnectionManager = __webpack_require__(44);
 	var PeriodicTimer = __webpack_require__(3).PeriodicTimer;
 	var Defaults = __webpack_require__(10);
-	var DefaultConfig = __webpack_require__(46);
+	var DefaultConfig = __webpack_require__(47);
 	var Logger = __webpack_require__(8);
 
 	function Pusher(app_key, options) {
@@ -4221,13 +4221,38 @@ module.exports =
 /* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// var NetInfo = require('react-native').NetInfo;
-	// Do things with: https://facebook.github.io/react-native/docs/netinfo.html
+	var NativeNetInfo = __webpack_require__(46).NetInfo;
 	var EventsDispatcher = __webpack_require__(7);
 	var Util = __webpack_require__(1);
 
+	function hasOnlineConnectionState(connectionState){
+	  return connectionState.toLowerCase() !== "none";
+	}
+
 	function NetInfo(){
 	  EventsDispatcher.call(this);
+
+	  var self = this;
+	  self.online = true;
+
+	  NativeNetInfo.fetch().done(function(connectionState){
+	    self.online = hasOnlineConnectionState(connectionState);
+	  });
+
+	  NativeNetInfo.addEventListener('change', function(connectionState){
+	    var isNowOnline = hasOnlineConnectionState(connectionState);
+
+	    // React Native counts the switch from Wi-Fi to Cellular
+	    // as a state change. Return if current and previous states
+	    // are both online/offline
+	    if (self.online === isNowOnline) return;
+	    self.online = isNowOnline;
+	    if (self.online){
+	      self.emit("online");
+	    } else {
+	      self.emit("offline");
+	    }
+	  });
 	}
 
 	Util.extend(NetInfo.prototype, EventsDispatcher.prototype);
@@ -4235,7 +4260,7 @@ module.exports =
 	var prototype = NetInfo.prototype;
 
 	prototype.isOnline = function(){
-	  return true;
+	  return self.online;
 	}
 
 	exports.NetInfo = NetInfo;
@@ -4243,6 +4268,12 @@ module.exports =
 
 /***/ },
 /* 46 */
+/***/ function(module, exports) {
+
+	module.exports = require("react-native");
+
+/***/ },
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var Defaults = __webpack_require__(10);
