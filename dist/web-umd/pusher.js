@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("{version: \"0.1.0\"}"));
+		module.exports = factory(require("{version: \"0.2.0\"}"));
 	else if(typeof define === 'function' && define.amd)
-		define(["{version: \"0.1.0\"}"], factory);
+		define(["{version: \"0.2.0\"}"], factory);
 	else if(typeof exports === 'object')
-		exports["Pusher"] = factory(require("{version: \"0.1.0\"}"));
+		exports["Pusher"] = factory(require("{version: \"0.2.0\"}"));
 	else
-		root["Pusher"] = factory(root["{version: \"0.1.0\"}"]);
+		root["Pusher"] = factory(root["{version: \"0.2.0\"}"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_11__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache

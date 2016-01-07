@@ -601,7 +601,7 @@ var Pusher =
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = window.XMLHttpRequest;
+	module.exports = XMLHttpRequest;
 
 
 /***/ },
@@ -1367,7 +1367,7 @@ var Pusher =
 /* 11 */
 /***/ function(module, exports) {
 
-	module.exports = {version: "0.1.0"};
+	module.exports = {version: "0.2.0"};
 
 /***/ },
 /* 12 */
@@ -1842,7 +1842,7 @@ var Pusher =
 /* 20 */
 /***/ function(module, exports) {
 
-	module.exports = window.WebSocket || window.MozWebSocket;
+	module.exports = WebSocket || MozWebSocket;
 
 
 /***/ },
