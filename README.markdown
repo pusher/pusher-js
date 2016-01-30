@@ -44,7 +44,7 @@ bower install pusher
 and then
 
 ```html
-<script src="bower_components/dist/pusher.min.js"></script>
+<script src="bower_components/pusher/dist/pusher.min.js"></script>
 ```
 
 ### NPM
