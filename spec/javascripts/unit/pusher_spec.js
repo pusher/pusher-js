@@ -59,36 +59,26 @@ describe("Pusher.logToConsole", function() {
     });
     
     it("should not log to the console if set to false", function() {
-      var pusher = new Pusher();
+      Pusher.warn("test", "this is a test");
 
       expect(_consoleLogCalls.length).toEqual(0);
     });
     
     it("should log to the console if set to true", function() {
       Pusher.logToConsole = true;
-      var pusher = new Pusher();
+      Pusher.warn("test", "this is a test");
 
       expect(_consoleLogCalls.length).toBeGreaterThan(0);
     });
   });
 
   describe("app key validation", function() {
-    it("should allow a hex key", function() {
-      spyOn(Pusher, "warn");
-      var pusher = new Pusher("1234567890abcdef");
-      expect(Pusher.warn).not.toHaveBeenCalled();
+    it("should throw on a null key", function() {
+      expect(function() { new Pusher(null) }).toThrow("You must pass your app key when you instantiate Pusher.");
     });
 
-    it("should warn on a null key", function() {
-      spyOn(Pusher, "warn");
-      var pusher = new Pusher(null);
-      expect(Pusher.warn).toHaveBeenCalled();
-    });
-
-    it("should warn on an undefined key", function() {
-      spyOn(Pusher, "warn");
-      var pusher = new Pusher();
-      expect(Pusher.warn).toHaveBeenCalled();
+    it("should throw on an undefined key", function() {
+      expect(function() { new Pusher() }).toThrow("You must pass your app key when you instantiate Pusher.");
     });
   });
 
@@ -252,7 +242,7 @@ describe("Pusher.logToConsole", function() {
 
   describe(".ready", function() {
     it("should start connection attempts for instances", function() {
-      var pusher = new Pusher();
+      var pusher = new Pusher("01234567890abcdef");
       spyOn(pusher, "connect");
 
       expect(pusher.connect).not.toHaveBeenCalled();
