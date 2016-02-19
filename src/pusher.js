@@ -213,9 +213,7 @@
 
   function checkAppKey(key) {
     if (key === null || key === undefined) {
-      Pusher.warn(
-        'Warning', 'You must pass your app key when you instantiate Pusher.'
-      );
+      throw 'You must pass your app key when you instantiate Pusher.';
     }
   }
 
