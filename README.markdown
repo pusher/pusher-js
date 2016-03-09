@@ -37,7 +37,7 @@ Via the Pusher CDN:
 
 Or via [Bower](http://bower.io/):
 
-```
+```bash
 bower install pusher
 ```
 
@@ -49,7 +49,7 @@ and then
 
 ### NPM
 
-```
+```bash
 npm install pusher-js
 ```
 
@@ -88,30 +88,36 @@ Defines how the authentication endpoint, defined using authEndpoint, will be cal
 
 Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
 
-    var pusher = new Pusher(API_KEY, {
-      auth: {
-        params: { foo: "bar" },
-        headers: { baz: "boo" }
-      }
-    });
+```js
+var pusher = new Pusher(API_KEY, {
+  auth: {
+    params: { foo: "bar" },
+    headers: { baz: "boo" }
+  }
+});
+```
 
 ##### CSRF
 
 If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
 
-    var pusher = new Pusher(API_KEY, {
-      auth: {
-        params: { foo: "bar" },
-        headers: { "X-CSRF-Token": "SOME_CSRF_TOKEN" }
-      }
-    });
+```js
+var pusher = new Pusher(API_KEY, {
+  auth: {
+    params: { foo: "bar" },
+    headers: { "X-CSRF-Token": "SOME_CSRF_TOKEN" }
+  }
+});
+```
 
 #### `cluster` (String)
 
 Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
 
-    // will connect to the 'eu' cluster
-    var pusher = new Pusher(API_KEY, { cluster: "eu" });
+```js
+// will connect to the 'eu' cluster
+var pusher = new Pusher(API_KEY, { cluster: "eu" });
+```
 
 #### `disableStats` (Boolean)
 
@@ -121,21 +127,25 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
 
-    // will only use WebSockets
-    var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
+```js
+// will only use WebSockets
+var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
+```
 
 #### `disabledTransports` (Array)
 
 Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
 
-    // will use all transports except for sockjs
-    var pusher = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
+```js
+// will use all transports except for sockjs
+var pusher = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
 
-    // will only use WebSockets
-    var pusher = new Pusher(API_KEY, {
-      enabledTransports: ["ws", "xhr_streaming"],
-      disabledTransports: ["xhr_streaming"]
-    });
+// will only use WebSockets
+var pusher = new Pusher(API_KEY, {
+  enabledTransports: ["ws", "xhr_streaming"],
+  disabledTransports: ["xhr_streaming"]
+});
+```
 
 #### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
 
@@ -175,7 +185,9 @@ By setting the `log` property you also override the use of `Pusher.enableLogging
 
 A connection to Pusher is established by providing your API key to the constructor function:
 
-    var socket = new Pusher(API_KEY);
+```js
+var socket = new Pusher(API_KEY);
+```
 
 This returns a socket object which can then be used to subscribe to channels.
 
@@ -191,7 +203,9 @@ It is also stored within the socket, and used as a token for generating signatur
 
 The default method for subscribing to a channel involves invoking the `subscribe` method of your socket object:
 
-    var my_channel = socket.subscribe('my-channel');
+```js
+var my_channel = socket.subscribe('my-channel');
+```
 
 This returns a Channel object which events can be bound to.
 
@@ -199,31 +213,42 @@ This returns a Channel object which events can be bound to.
 
 Private channels are created in exactly the same way as normal channels, except that they reside in the 'private-' namespace. This means prefixing the channel name:
 
-    var my_channel = socket.subscribe('private-my-channel');
+```js
+var my_channel = socket.subscribe('private-my-channel');
+```
 
 It is possible to access channels by name, through the `channel` function:
 
-    channel = socket.channel('private-my-channel');
+```js
+channel = socket.channel('private-my-channel');
+```
 
 It is possible to access all subscribed channels through the `allChannels` function:
 
-    var channels = socket.allChannels();
-    console.group('Pusher - subscribed to:');
-    for (var i = 0; i < channels.length; i++) {
-        var channel = channels[i];
-        console.log(channel.name);
-    }
-    console.groupEnd();
+```js
+var channels = socket.allChannels();
+console.group('Pusher - subscribed to:');
+for (var i = 0; i < channels.length; i++) {
+    var channel = channels[i];
+    console.log(channel.name);
+}
+
+console.groupEnd();
+```
 
 ## Unsubscribing from channels
 
 To unsubscribe from a channel, invoke the `unsubscribe` method of your socket object:
 
-    socket.unsubscribe('my-channel');
+```js
+socket.unsubscribe('my-channel');
+```
 
 Unsubscribing from private channels is done in exactly the same way, just with the additional `private-` prefix:
 
-    socket.unsubscribe('private-my-channel');
+```js
+socket.unsubscribe('private-my-channel');
+```
 
 ## Binding to events
 
@@ -233,46 +258,53 @@ Events can be bound to at 2 levels, the global, and per channel. They take a ver
 
 You can attach behaviour to these events regardless of the channel the event is broadcast to. The following is an example of an app that binds to new comments from any channel:
 
-    var socket = new Pusher('MY_API_KEY');
-    var my_channel = socket.subscribe('my-channel');
-    socket.bind('new-comment',
-      function(data) {
-        // add comment into page
-      }
-    );
+```js
+var socket = new Pusher('MY_API_KEY');
+var my_channel = socket.subscribe('my-channel');
+socket.bind('new-comment',
+  function(data) {
+    // add comment into page
+  }
+);
+```
 
 ### Per-channel events
 
 These are bound to a specific channel, and mean that you can reuse event names in different parts of your client application. The following might be an example of a stock tracking app where several channels are opened for different companies:
 
-    var socket = new Pusher('MY_API_KEY');
-    var channel = socket.subscribe('APPL');
-    channel.bind('new-price',
-      function(data) {
-        // add new price into the APPL widget
-      }
-    );
+```js
+var socket = new Pusher('MY_API_KEY');
+var channel = socket.subscribe('APPL');
+channel.bind('new-price',
+  function(data) {
+    // add new price into the APPL widget
+  }
+);
+```
 
 ### Bind event handler with optional context
 
 It is possible to provide a third, optional parameter that is used as the `this` value when calling a handler:
 
-    var context = { title: 'Pusher' };
-    var handler = function(){
-      console.log('My name is ' + this.title);
-    };
-    channel.bind('new-comment', handler, context);
+```js
+var context = { title: 'Pusher' };
+var handler = function(){
+  console.log('My name is ' + this.title);
+};
+channel.bind('new-comment', handler, context);
+```
 
 ### Unbind event handlers
 
 Remove previously-bound handlers from an object. Only handlers that match all of the provided arguments (`eventName`, `handler` or `context`) are removed:
 
-    channel.unbind('new-comment', handler); // removes just `handler` for the `new-comment` event
-    channel.unbind('new-comment'); // removes all handlers for the `new-comment` event
-    channel.unbind(null, handler); // removes `handler` for all events
-    channel.unbind(null, null, context); // removes all handlers for `context`
-    channel.unbind(); // removes all handlers on `channel`
-
+```js
+channel.unbind('new-comment', handler); // removes just `handler` for the `new-comment` event
+channel.unbind('new-comment'); // removes all handlers for the `new-comment` event
+channel.unbind(null, handler); // removes `handler` for all events
+channel.unbind(null, null, context); // removes all handlers for `context`
+channel.unbind(); // removes all handlers on `channel`
+```
 
 ### Binding to everything
 
@@ -307,12 +339,14 @@ Minified files should have `.min` in names, as in the `dist` directory:
 
 Then after loading `pusher.js`, but before connecting, you need to overwrite the dependency loader by executing following piece of code:
 
-    Pusher.Dependencies = new Pusher.DependencyLoader({
-      cdn_http: "http://example.com/pusher-js/",
-      cdn_https: "https://example.com/pusher-js/",
-      version: Pusher.VERSION,
-      suffix: Pusher.dependency_suffix
-    });
+```js
+Pusher.Dependencies = new Pusher.DependencyLoader({
+  cdn_http: "http://example.com/pusher-js/",
+  cdn_https: "https://example.com/pusher-js/",
+  version: Pusher.VERSION,
+  suffix: Pusher.dependency_suffix
+});
+```
 
 ## SockJS compatibility
 
@@ -324,19 +358,27 @@ All other browsers work fine with two or three connections.
 
 Use Bundler to install all development dependencies
 
-    bundle install
+```bash
+bundle install
+```
 
 and create a local config file
 
-    mv config/config.yml.example config/config.yml # and edit
+```bash
+mv config/config.yml.example config/config.yml # and edit
+```
 
 Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
 
-    bundle exec jbundle server
+```bash
+bundle exec jbundle server
+```
 
 In order to build the minified versions:
 
-    ENVIRONMENT=development rake build
+```bash
+ENVIRONMENT=development rake build
+```
 
 If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
 
@@ -345,17 +387,23 @@ If you wish to host the javascript on your own server you need to change [:js][:
 `./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
 Define the version number in JFile (should be in the format 1.2.3).
 
-    rake build
+```bash
+rake build
+```
 
 That writes source and minified versions of each bundle declared in the JFile into versioned directories. For example if the JFile says
 
-    version '1.7.1'
+```rb
+version '1.7.1'
+```
 
 Then rake build will put copies of the files in ./dist/1.7.1/ and ./dist/1.7/
 
 However for a prerelease
 
-    version '1.7.2-pre'
+```rb
+version '1.7.2-pre'
+```
 
 It will only write to the full, suffixed directory ./dist/1.7.2-pre
 
@@ -365,7 +413,9 @@ This is so prereleases don't overwrite the previous stable release.
 
 Building everything from scratch is useful when you update submodules, which need compiling. If you want to perform a clean build, run:
 
-    bin/build
+```bash
+bin/build
+```
 
 This will clean sockjs-client submodule, check out last committed revision, rebuild SockJS fallback files and then run JBundle. Don't run this command if you have uncommitted changes in any of submodules, since it might overwrite them.
 
@@ -384,13 +434,17 @@ There are several ways to run jasmine tests. All commands mentioned below also s
 
 Please make sure you run bundler before running any of following commands.
 
-    bundle install
+```bash
+bundle install
+```
 
 #### Run tests manually in a browser
 
 First, start the jasmine and JSONP integration servers:
 
-    bin/jasmine
+```bash
+bin/jasmine
+```
 
 Then open any browser and navigate to <http://localhost:8888/> - it will run both unit and integration tests.
 
@@ -398,7 +452,9 @@ Then open any browser and navigate to <http://localhost:8888/> - it will run bot
 
 Running headless tests is very convenient for development, especially when using guard. Make sure you have PhantomJS installed - you can use `brew install phantomjs` on OS X. Start jasmine and guard:
 
-    bin/guard
+```bash
+bin/guard
+```
 
 Tests will be run automatically in the terminal. Guard watches JS files and specs and re-runs aproppriate tests whenever you save any changes. Press enter to re-run all tests.
 
@@ -410,12 +466,16 @@ There's also a JSHint watch, which will validate JS files on save.
 
 Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install karma npm modules
 
-    npm install
+```bash
+npm install
+```
 
 Then start the server, run one of following commands:
 
-    bin/karma-unit           # runs only unit tests
-    bin/karma-integration    # runs only integration tests
-    bin/karma                # runs both unit and integration tests
+```bash
+bin/karma-unit           # runs only unit tests
+bin/karma-integration    # runs only integration tests
+bin/karma                # runs both unit and integration tests
+```
 
 All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
