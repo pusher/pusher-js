@@ -340,7 +340,11 @@
     var previousState = this.state;
     this.state = newState;
     if (previousState !== newState) {
-      Pusher.debug('State changed', previousState + ' -> ' + newState);
+      var newStateDescription = newState;
+      if (newState === "connected") {
+        newStateDescription += " with new socket ID " + data.socket_id;
+      }
+      Pusher.debug('State changed', previousState + ' -> ' + newStateDescription);
       this.timeline.info({ state: newState, params: data });
       this.emit('state_change', { previous: previousState, current: newState });
       this.emit(newState, data);
