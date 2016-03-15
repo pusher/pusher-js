@@ -365,7 +365,7 @@ bundle install
 and create a local config file
 
 ```bash
-mv config/config.yml.example config/config.yml # and edit
+cp config/config.yml.example config/config.yml # and edit
 ```
 
 Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
@@ -384,11 +384,22 @@ If you wish to host the javascript on your own server you need to change [:js][:
 
 ## Building
 
+You must first build `src/sockjs/sockjs.js`:
+
+```bash
+git submodule init
+git submodule update
+pushd src/sockjs
+npm install
+make sockjs.js
+popd
+```
+
 `./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
 Define the version number in JFile (should be in the format 1.2.3).
 
 ```bash
-rake build
+bundle exec rake build
 ```
 
 That writes source and minified versions of each bundle declared in the JFile into versioned directories. For example if the JFile says
