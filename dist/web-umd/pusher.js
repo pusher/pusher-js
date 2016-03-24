@@ -252,9 +252,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function checkAppKey(key) {
 	  if (key === null || key === undefined) {
-	    Logger.warn(
-	      'Warning', 'You must pass your app key when you instantiate Pusher.'
-	    );
+	    throw "You must pass your app key when you instantiate Pusher.";
 	  }
 	}
 
@@ -270,7 +268,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	/* WEBPACK VAR INJECTION */(function(global) {var XHR = __webpack_require__(2);
 
-	module.exports = Util = {
+	module.exports = {
 	  now: function() {
 	    if (Date.now) {
 	      return Date.now();
@@ -1408,7 +1406,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	module.exports = getStreamingSocket = function(url) {
+	module.exports = function(url) {
 	  return new HTTPSocket(hooks, url);
 	};
 
@@ -1676,7 +1674,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	module.exports = getXHR = function(method, url) {
+	module.exports = function(method, url) {
 	  return new HTTPRequest(hooks, method, url);
 	};
 
@@ -1820,7 +1818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	module.exports = getXDR = function(method, url) {
+	module.exports = function(method, url) {
 	  return new HTTPRequest(hooks, method, url);
 	};
 
@@ -1850,7 +1848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	};
 
-	module.exports = getPollingSocket = function(url) {
+	module.exports = function(url) {
 	  return new HTTPSocket(hooks, url);
 	};
 
@@ -2558,7 +2556,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var IfStrategy = __webpack_require__(42);
 	var FirstConnectedStrategy = __webpack_require__(43);
 
-	module.exports = StrategyBuilder = {
+	module.exports = {
 	  /** Transforms a JSON scheme to a strategy tree.
 	   *
 	   * @param {Array} scheme JSON strategy scheme
@@ -4221,7 +4219,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var previousState = this.state;
 	  this.state = newState;
 	  if (previousState !== newState) {
-	    Logger.debug('State changed', previousState + ' -> ' + newState);
+	    var newStateDescription = newState;
+	    if (newState === "connected") {
+	      newStateDescription += " with new socket ID " + data.socket_id;
+	    }
+	    Logger.debug('State changed', previousState + ' -> ' + newStateDescription);
 	    this.timeline.info({ state: newState, params: data });
 	    this.emit('state_change', { previous: previousState, current: newState });
 	    this.emit(newState, data);

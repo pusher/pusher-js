@@ -31,6 +31,6 @@ var hooks = {
   }
 };
 
-module.exports = getXDR = function(method, url) {
+module.exports = function(method, url) {
   return new HTTPRequest(hooks, method, url);
 };

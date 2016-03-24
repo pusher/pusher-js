@@ -19,6 +19,6 @@ var hooks = {
   }
 };
 
-module.exports = getPollingSocket = function(url) {
+module.exports = function(url) {
   return new HTTPSocket(hooks, url);
 };

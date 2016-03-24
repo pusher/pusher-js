@@ -15,6 +15,6 @@ var hooks = {
   }
 };
 
-module.exports = getStreamingSocket = function(url) {
+module.exports = function(url) {
   return new HTTPSocket(hooks, url);
 };

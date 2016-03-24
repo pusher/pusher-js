@@ -29,6 +29,6 @@ var hooks = {
   }
 };
 
-module.exports = getXHR = function(method, url) {
+module.exports = function(method, url) {
   return new HTTPRequest(hooks, method, url);
 };

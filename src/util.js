@@ -1,6 +1,6 @@
 var XHR = require('pusher-websocket-iso-externals-node/xhr');
 
-module.exports = Util = {
+module.exports = {
   now: function() {
     if (Date.now) {
       return Date.now();

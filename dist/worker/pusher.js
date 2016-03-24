@@ -243,9 +243,7 @@ var Pusher =
 
 	function checkAppKey(key) {
 	  if (key === null || key === undefined) {
-	    Logger.warn(
-	      'Warning', 'You must pass your app key when you instantiate Pusher.'
-	    );
+	    throw "You must pass your app key when you instantiate Pusher.";
 	  }
 	}
 
@@ -261,7 +259,7 @@ var Pusher =
 
 	/* WEBPACK VAR INJECTION */(function(global) {var XHR = __webpack_require__(2);
 
-	module.exports = Util = {
+	module.exports = {
 	  now: function() {
 	    if (Date.now) {
 	      return Date.now();
@@ -1399,7 +1397,7 @@ var Pusher =
 	  }
 	};
 
-	module.exports = getStreamingSocket = function(url) {
+	module.exports = function(url) {
 	  return new HTTPSocket(hooks, url);
 	};
 
@@ -1667,7 +1665,7 @@ var Pusher =
 	  }
 	};
 
-	module.exports = getXHR = function(method, url) {
+	module.exports = function(method, url) {
 	  return new HTTPRequest(hooks, method, url);
 	};
 
@@ -1803,7 +1801,7 @@ var Pusher =
 	  }
 	};
 
-	module.exports = getXDR = function(method, url) {
+	module.exports = function(method, url) {
 	  return new HTTPRequest(hooks, method, url);
 	};
 
@@ -1833,7 +1831,7 @@ var Pusher =
 	  }
 	};
 
-	module.exports = getPollingSocket = function(url) {
+	module.exports = function(url) {
 	  return new HTTPSocket(hooks, url);
 	};
 
@@ -2541,7 +2539,7 @@ var Pusher =
 	var IfStrategy = __webpack_require__(42);
 	var FirstConnectedStrategy = __webpack_require__(43);
 
-	module.exports = StrategyBuilder = {
+	module.exports = {
 	  /** Transforms a JSON scheme to a strategy tree.
 	   *
 	   * @param {Array} scheme JSON strategy scheme
@@ -4204,7 +4202,11 @@ var Pusher =
 	  var previousState = this.state;
 	  this.state = newState;
 	  if (previousState !== newState) {
-	    Logger.debug('State changed', previousState + ' -> ' + newState);
+	    var newStateDescription = newState;
+	    if (newState === "connected") {
+	      newStateDescription += " with new socket ID " + data.socket_id;
+	    }
+	    Logger.debug('State changed', previousState + ' -> ' + newStateDescription);
 	    this.timeline.info({ state: newState, params: data });
 	    this.emit('state_change', { previous: previousState, current: newState });
 	    this.emit(newState, data);

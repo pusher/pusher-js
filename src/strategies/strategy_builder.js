@@ -10,7 +10,7 @@ var DelayedStrategy = require('./delayed_strategy');
 var IfStrategy = require('./if_strategy');
 var FirstConnectedStrategy = require('./first_connected_strategy');
 
-module.exports = StrategyBuilder = {
+module.exports = {
   /** Transforms a JSON scheme to a strategy tree.
    *
    * @param {Array} scheme JSON strategy scheme
