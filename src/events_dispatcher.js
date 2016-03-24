@@ -40,7 +40,7 @@
     var callbacks = this.callbacks.get(eventName);
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i].fn.call(callbacks[i].context || window, data);
+        callbacks[i].fn.call(callbacks[i].context || window, data, eventName);
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);
@@ -56,10 +56,19 @@
   }
 
   CallbackRegistry.prototype.get = function(name) {
-    return this._callbacks[prefix(name)];
+    var matches = [];
+
+    Pusher.Util.objectApply(this._callbacks, function(callbacks, key){
+      var pattern = deprefix(key);
+      if (new RegExp(pattern).test(name)) {
+        matches = matches.concat(callbacks);
+      }
+    });
+    return matches;
   };
 
   CallbackRegistry.prototype.add = function(name, callback, context) {
+    name = ensurePattern(name);
     var prefixedEventName = prefix(name);
     this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
     this._callbacks[prefixedEventName].push({
@@ -74,7 +83,7 @@
       return;
     }
 
-    var names = name ? [prefix(name)] : Pusher.Util.keys(this._callbacks);
+    var names = name ? [prefix(ensurePattern(name))] : Pusher.Util.keys(this._callbacks);
 
     if (callback || context) {
       Pusher.Util.apply(names, function(name) {
@@ -96,8 +105,24 @@
     }
   };
 
+  function ensurePattern(name) {
+    if (typeof(name) === "string") {
+      return "^"+name+"$";
+    } else if (name instanceof(RegExp)) {
+      return name.source;
+    } else {
+      throw new Pusher.Errors.BadEventName(
+        "The event supplied is not a String or RegExp"
+      );
+    }
+  }
+
   function prefix(name) {
     return "_" + name;
+  }
+
+  function deprefix(name) {
+    return name.substring(1);
   }
 
   Pusher.EventsDispatcher = EventsDispatcher;
