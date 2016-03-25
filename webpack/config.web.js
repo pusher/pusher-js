@@ -7,7 +7,7 @@ var version = require('../package').version;
 // XHR, WebSocket and NetInfo in platforms/web/* //
 ///////////////////////////////////////////////////
 module.exports = {
-  entry: "./src/pusher",
+  entry: "./src/pusher.ts",
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
@@ -15,6 +15,14 @@ module.exports = {
   },
   externals: {
     '../package': '{version: "'+ version +'"}'
+  },
+  resolve: {
+    extensions: ['', '.webpack.js', '.web.js', '.ts', '.js']
+  },
+  module: {
+    loaders: [
+      { test: /\.ts$/, loader: 'ts-loader' }
+    ]
   },
   plugins: [
     new NormalModuleReplacementPlugin(

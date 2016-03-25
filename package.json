@@ -36,10 +36,13 @@
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-webpack": "^1.7.0",
-    "webpack": "^1.12.9"
+    "webpack": "^1.12.9",
+    "node-libs-browser": "^0.5.0",
+    "typescript": "^1.8.0"
   },
   "dependencies": {
     "faye-websocket": "0.9.4",
+    "ts-loader": "^0.8.1",
     "xmlhttprequest": "^1.8.0"
   }
 }

@@ -45,733 +45,847 @@ var Pusher =
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
 	var Util = __webpack_require__(1);
-	var Channels = __webpack_require__(21);
-	var EventsDispatcher = __webpack_require__(7);
-	var Timeline = __webpack_require__(28);
-	var TimelineSender = __webpack_require__(29);
-	var StrategyBuilder = __webpack_require__(31);
-	var ConnectionManager = __webpack_require__(44);
-	var PeriodicTimer = __webpack_require__(3).PeriodicTimer;
-	var Defaults = __webpack_require__(10);
-	var DefaultConfig = __webpack_require__(46);
-	var Logger = __webpack_require__(8);
-
-	function Pusher(app_key, options) {
-
-	  if (!this instanceof Pusher) {
-	    return new Pusher(arguments);
-	  }
-
-	  checkAppKey(app_key);
-	  options = options || {};
-
-	  var self = this;
-
-	  this.key = app_key;
-	  this.config = Util.extend(
-	    DefaultConfig.getGlobalConfig(),
-	    options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {},
-	    options
-	  );
-
-	  this.channels = new Channels();
-	  this.global_emitter = new EventsDispatcher();
-	  this.sessionID = Math.floor(Math.random() * 1000000000);
-
-	  this.timeline = new Timeline(this.key, this.sessionID, {
-	    cluster: this.config.cluster,
-	    features: Util.getClientFeatures(),
-	    params: this.config.timelineParams || {},
-	    limit: 50,
-	    level: Timeline.INFO,
-	    version: Pusher.VERSION
-	  });
-	  if (!this.config.disableStats) {
-	    this.timelineSender = new TimelineSender(this.timeline, {
-	      host: this.config.statsHost,
-	      path: "/timeline/v2/jsonp"
-	    });
-	  }
-
-	  var getStrategy = function(options) {
-	    var config = Util.extend({}, self.config, options);
-	    return StrategyBuilder.build(
-	      Defaults.getDefaultStrategy(config), config
-	    );
-	  };
-
-	  this.connection = new ConnectionManager(
-	    this.key,
-	    Util.extend(
-	      { getStrategy: getStrategy,
-	        timeline: this.timeline,
-	        activityTimeout: this.config.activity_timeout,
-	        pongTimeout: this.config.pong_timeout,
-	        unavailableTimeout: this.config.unavailable_timeout
-	      },
-	      this.config,
-	      { encrypted: this.isEncrypted() }
-	    )
-	  );
-
-	  this.connection.bind('connected', function() {
-	    self.subscribeAll();
-	    if (self.timelineSender) {
-	      self.timelineSender.send(self.connection.isEncrypted());
+	var Collections = __webpack_require__(2);
+	var channels_1 = __webpack_require__(26);
+	var dispatcher_1 = __webpack_require__(10);
+	var timeline_1 = __webpack_require__(32);
+	var timeline_sender_1 = __webpack_require__(34);
+	var level_1 = __webpack_require__(33);
+	var StrategyBuilder = __webpack_require__(36);
+	var connection_manager_1 = __webpack_require__(51);
+	var timers_1 = __webpack_require__(3);
+	var Defaults = __webpack_require__(7);
+	var DefaultConfig = __webpack_require__(53);
+	var logger_1 = __webpack_require__(12);
+	var state_1 = __webpack_require__(13);
+	var Pusher = (function () {
+	    function Pusher(app_key, options) {
+	        checkAppKey(app_key);
+	        options = options || {};
+	        var self = this;
+	        this.key = app_key;
+	        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
+	        this.channels = new channels_1.default();
+	        this.global_emitter = new dispatcher_1.default();
+	        this.sessionID = Math.floor(Math.random() * 1000000000);
+	        this.timeline = new timeline_1.default(this.key, this.sessionID, {
+	            cluster: this.config.cluster,
+	            features: Util.getClientFeatures(),
+	            params: this.config.timelineParams || {},
+	            limit: 50,
+	            level: level_1.default.INFO,
+	            version: Defaults.VERSION
+	        });
+	        if (!this.config.disableStats) {
+	            this.timelineSender = new timeline_sender_1.default(this.timeline, {
+	                host: this.config.statsHost,
+	                path: "/timeline/v2/jsonp"
+	            });
+	        }
+	        var getStrategy = function (options) {
+	            var config = Collections.extend({}, self.config, options);
+	            return StrategyBuilder.build(Defaults.getDefaultStrategy(config), config);
+	        };
+	        this.connection = new connection_manager_1.default(this.key, Collections.extend({ getStrategy: getStrategy,
+	            timeline: this.timeline,
+	            activityTimeout: this.config.activity_timeout,
+	            pongTimeout: this.config.pong_timeout,
+	            unavailableTimeout: this.config.unavailable_timeout
+	        }, this.config, { encrypted: this.isEncrypted() }));
+	        this.connection.bind('connected', function () {
+	            self.subscribeAll();
+	            if (self.timelineSender) {
+	                self.timelineSender.send(self.connection.isEncrypted());
+	            }
+	        });
+	        this.connection.bind('message', function (params) {
+	            var internal = (params.event.indexOf('pusher_internal:') === 0);
+	            if (params.channel) {
+	                var channel = self.channel(params.channel);
+	                if (channel) {
+	                    channel.handleEvent(params.event, params.data);
+	                }
+	            }
+	            // Emit globally [deprecated]
+	            if (!internal) {
+	                self.global_emitter.emit(params.event, params.data);
+	            }
+	        });
+	        this.connection.bind('disconnected', function () {
+	            self.channels.disconnect();
+	        });
+	        this.connection.bind('error', function (err) {
+	            logger_1.default.warn('Error', err);
+	        });
+	        Pusher.instances.push(this);
+	        this.timeline.info({ instances: Pusher.instances.length });
+	        if (Pusher.isReady) {
+	            self.connect();
+	        }
 	    }
-	  });
-	  this.connection.bind('message', function(params) {
-	    var internal = (params.event.indexOf('pusher_internal:') === 0);
-	    if (params.channel) {
-	      var channel = self.channel(params.channel);
-	      if (channel) {
-	        channel.handleEvent(params.event, params.data);
-	      }
-	    }
-	    // Emit globally [deprecated]
-	    if (!internal) {
-	      self.global_emitter.emit(params.event, params.data);
-	    }
-	  });
-	  this.connection.bind('disconnected', function() {
-	    self.channels.disconnect();
-	  });
-	  this.connection.bind('error', function(err) {
-	    Logger.warn('Error', err);
-	  });
-
-	  Pusher.instances.push(this);
-	  this.timeline.info({ instances: Pusher.instances.length });
-
-	  if (Pusher.isReady) {
-	    self.connect();
-	  }
-	}
-	var prototype = Pusher.prototype;
-
-	Pusher.instances = [];
-	Pusher.isReady = false;
-
-	Pusher.ready = function() {
-	  Pusher.isReady = true;
-	  for (var i = 0, l = Pusher.instances.length; i < l; i++) {
-	    Pusher.instances[i].connect();
-	  }
-	};
-
-	Pusher.setLogger = function(logger){
-	  Logger.log = logger;
-	}
-
-	prototype.channel = function(name) {
-	  return this.channels.find(name);
-	};
-
-	prototype.allChannels = function() {
-	  return this.channels.all();
-	};
-
-	prototype.connect = function() {
-	  this.connection.connect();
-
-	  if (this.timelineSender) {
-	    if (!this.timelineSenderTimer) {
-	      var encrypted = this.connection.isEncrypted();
-	      var timelineSender = this.timelineSender;
-	      this.timelineSenderTimer = new PeriodicTimer(60000, function() {
-	        timelineSender.send(encrypted);
-	      });
-	    }
-	  }
-	};
-
-	prototype.disconnect = function() {
-	  this.connection.disconnect();
-
-	  if (this.timelineSenderTimer) {
-	    this.timelineSenderTimer.ensureAborted();
-	    this.timelineSenderTimer = null;
-	  }
-	};
-
-	prototype.bind = function(event_name, callback) {
-	  this.global_emitter.bind(event_name, callback);
-	  return this;
-	};
-
-	prototype.bind_all = function(callback) {
-	  this.global_emitter.bind_all(callback);
-	  return this;
-	};
-
-	prototype.subscribeAll = function() {
-	  var channelName;
-	  for (channelName in this.channels.channels) {
-	    if (this.channels.channels.hasOwnProperty(channelName)) {
-	      this.subscribe(channelName);
-	    }
-	  }
-	};
-
-	prototype.subscribe = function(channel_name) {
-	  var channel = this.channels.add(channel_name, this);
-	  if (this.connection.state === 'connected') {
-	    channel.subscribe();
-	  }
-	  return channel;
-	};
-
-	prototype.unsubscribe = function(channel_name) {
-	  var channel = this.channels.remove(channel_name);
-	  if (channel && this.connection.state === 'connected') {
-	    channel.unsubscribe();
-	  }
-	};
-
-	prototype.send_event = function(event_name, data, channel) {
-	  return this.connection.send_event(event_name, data, channel);
-	};
-
-	prototype.isEncrypted = function() {
-	  if (Util.getProtocol() === "https:") {
-	    return true;
-	  } else {
-	    return Boolean(this.config.encrypted);
-	  }
-	};
-
+	    Pusher.ready = function () {
+	        Pusher.isReady = true;
+	        for (var i = 0, l = Pusher.instances.length; i < l; i++) {
+	            Pusher.instances[i].connect();
+	        }
+	    };
+	    Pusher.setLogger = function (logger) {
+	        logger_1.default.log = logger;
+	    };
+	    Pusher.prototype.channel = function (name) {
+	        return this.channels.find(name);
+	    };
+	    Pusher.prototype.allChannels = function () {
+	        return this.channels.all();
+	    };
+	    Pusher.prototype.connect = function () {
+	        this.connection.connect();
+	        if (this.timelineSender) {
+	            if (!this.timelineSenderTimer) {
+	                var encrypted = this.connection.isEncrypted();
+	                var timelineSender = this.timelineSender;
+	                this.timelineSenderTimer = new timers_1.PeriodicTimer(60000, function () {
+	                    timelineSender.send(encrypted);
+	                });
+	            }
+	        }
+	    };
+	    Pusher.prototype.disconnect = function () {
+	        this.connection.disconnect();
+	        if (this.timelineSenderTimer) {
+	            this.timelineSenderTimer.ensureAborted();
+	            this.timelineSenderTimer = null;
+	        }
+	    };
+	    Pusher.prototype.bind = function (event_name, callback) {
+	        this.global_emitter.bind(event_name, callback);
+	        return this;
+	    };
+	    Pusher.prototype.bind_all = function (callback) {
+	        this.global_emitter.bind_all(callback);
+	        return this;
+	    };
+	    Pusher.prototype.subscribeAll = function () {
+	        var channelName;
+	        for (channelName in this.channels.channels) {
+	            if (this.channels.channels.hasOwnProperty(channelName)) {
+	                this.subscribe(channelName);
+	            }
+	        }
+	    };
+	    Pusher.prototype.subscribe = function (channel_name) {
+	        var channel = this.channels.add(channel_name, this);
+	        if (this.connection.state === state_1.default.CONNECTED) {
+	            channel.subscribe();
+	        }
+	        return channel;
+	    };
+	    Pusher.prototype.unsubscribe = function (channel_name) {
+	        var channel = this.channels.remove(channel_name);
+	        if (channel && this.connection.state === state_1.default.CONNECTED) {
+	            channel.unsubscribe();
+	        }
+	    };
+	    Pusher.prototype.send_event = function (event_name, data, channel) {
+	        return this.connection.send_event(event_name, data, channel);
+	    };
+	    Pusher.prototype.isEncrypted = function () {
+	        if (Util.getProtocol() === "https:") {
+	            return true;
+	        }
+	        else {
+	            return Boolean(this.config.encrypted);
+	        }
+	    };
+	    /*  STATIC PROPERTIES */
+	    Pusher.instances = [];
+	    Pusher.isReady = false;
+	    return Pusher;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Pusher;
 	function checkAppKey(key) {
-	  if (key === null || key === undefined) {
-	    throw "You must pass your app key when you instantiate Pusher.";
-	  }
+	    if (key === null || key === undefined) {
+	        throw "You must pass your app key when you instantiate Pusher.";
+	    }
 	}
-
 	// init Pusher:
-	Pusher.ready()
-
-	module.exports = Pusher;
+	Pusher.ready();
 
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	/* WEBPACK VAR INJECTION */(function(global) {var XHR = __webpack_require__(2);
-
-	module.exports = {
-	  now: function() {
+	"use strict";
+	var Collections = __webpack_require__(2);
+	var timers_1 = __webpack_require__(3);
+	var transports_1 = __webpack_require__(5);
+	var xhr_1 = __webpack_require__(22);
+	var global = Function("return this")();
+	function now() {
 	    if (Date.now) {
-	      return Date.now();
-	    } else {
-	      return new Date().valueOf();
+	        return Date.now();
 	    }
-	  },
-
-	  defer: function(callback) {
-	    var Timer = __webpack_require__(3).Timer;
-	    return new Timer(0, callback);
-	  },
-
-	  /** Merges multiple objects into the target argument.
-	   *
-	   * For properties that are plain Objects, performs a deep-merge. For the
-	   * rest it just copies the value of the property.
-	   *
-	   * To extend prototypes use it as following:
-	   *   Pusher.Util.extend(Target.prototype, Base.prototype)
-	   *
-	   * You can also use it to merge objects without altering them:
-	   *   Pusher.Util.extend({}, object1, object2)
-	   *
-	   * @param  {Object} target
-	   * @return {Object} the target argument
-	   */
-	  extend: function(target) {
-	    var self = this;
-	    for (var i = 1; i < arguments.length; i++) {
-	      var extensions = arguments[i];
-	      for (var property in extensions) {
-	        if (extensions[property] && extensions[property].constructor &&
-	            extensions[property].constructor === Object) {
-	          target[property] = self.extend(
-	            target[property] || {}, extensions[property]
-	          );
-	        } else {
-	          target[property] = extensions[property];
-	        }
-	      }
+	    else {
+	        return new Date().valueOf();
 	    }
-	    return target;
-	  },
-
-	  stringify: function() {
-	    var m = ["Pusher"];
-	    for (var i = 0; i < arguments.length; i++) {
-	      if (typeof arguments[i] === "string") {
-	        m.push(arguments[i]);
-	      } else {
-	        m.push(JSON.stringify(arguments[i]));
-	      }
+	}
+	exports.now = now;
+	function defer(callback) {
+	    return new timers_1.OneOffTimer(0, callback);
+	}
+	exports.defer = defer;
+	/** Builds a function that will proxy a method call to its first argument.
+	*
+	* Allows partial application of arguments, so additional arguments are
+	* prepended to the argument list.
+	*
+	* @param  {String} name method name
+	* @return {Function} proxy function
+	*/
+	function method(name) {
+	    var args = [];
+	    for (var _i = 1; _i < arguments.length; _i++) {
+	        args[_i - 1] = arguments[_i];
 	    }
-	    return m.join(" : ");
-	  },
-
-	  arrayIndexOf: function(array, item) { // MSIE doesn't have array.indexOf
-	    var nativeIndexOf = Array.prototype.indexOf;
-	    if (array === null) {
-	      return -1;
-	    }
-	    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
-	      return array.indexOf(item);
-	    }
-	    for (var i = 0, l = array.length; i < l; i++) {
-	      if (array[i] === item) {
-	        return i;
-	      }
-	    }
-	    return -1;
-	  },
-
-	  /** Applies a function f to all properties of an object.
-	   *
-	   * Function f gets 3 arguments passed:
-	   * - element from the object
-	   * - key of the element
-	   * - reference to the object
-	   *
-	   * @param {Object} object
-	   * @param {Function} f
-	   */
-	  objectApply: function(object, f) {
-	    for (var key in object) {
-	      if (Object.prototype.hasOwnProperty.call(object, key)) {
-	        f(object[key], key, object);
-	      }
-	    }
-	  },
-
-	  /** Return a list of object's own property keys
-	   *
-	   * @param {Object} object
-	   * @returns {Array}
-	   */
-	  keys: function(object) {
-	    var keys = [];
-	    this.objectApply(object, function(_, key) {
-	      keys.push(key);
-	    });
-	    return keys;
-	  },
-
-	  /** Return a list of object's own property values
-	   *
-	   * @param {Object} object
-	   * @returns {Array}
-	   */
-	  values: function(object) {
-	    var values = [];
-	    this.objectApply(object, function(value) {
-	      values.push(value);
-	    });
-	    return values;
-	  },
-
-	  /** Applies a function f to all elements of an array.
-	   *
-	   * Function f gets 3 arguments passed:
-	   * - element from the array
-	   * - index of the element
-	   * - reference to the array
-	   *
-	   * @param {Array} array
-	   * @param {Function} f
-	   */
-	  apply: function(array, f, context) {
-	    for (var i = 0; i < array.length; i++) {
-	      f.call(context || global, array[i], i, array);
-	    }
-	  },
-
-	  /** Maps all elements of the array and returns the result.
-	   *
-	   * Function f gets 4 arguments passed:
-	   * - element from the array
-	   * - index of the element
-	   * - reference to the source array
-	   * - reference to the destination array
-	   *
-	   * @param {Array} array
-	   * @param {Function} f
-	   */
-	  map: function(array, f) {
-	    var result = [];
-	    for (var i = 0; i < array.length; i++) {
-	      result.push(f(array[i], i, array, result));
-	    }
-	    return result;
-	  },
-
-	  /** Maps all elements of the object and returns the result.
-	   *
-	   * Function f gets 4 arguments passed:
-	   * - element from the object
-	   * - key of the element
-	   * - reference to the source object
-	   * - reference to the destination object
-	   *
-	   * @param {Object} object
-	   * @param {Function} f
-	   */
-	  mapObject: function(object, f) {
-	    var result = {};
-	    this.objectApply(object, function(value, key) {
-	      result[key] = f(value);
-	    });
-	    return result;
-	  },
-
-	  /** Filters elements of the array using a test function.
-	   *
-	   * Function test gets 4 arguments passed:
-	   * - element from the array
-	   * - index of the element
-	   * - reference to the source array
-	   * - reference to the destination array
-	   *
-	   * @param {Array} array
-	   * @param {Function} f
-	   */
-	  filter: function(array, test) {
-	    test = test || function(value) { return !!value; };
-
-	    var result = [];
-	    for (var i = 0; i < array.length; i++) {
-	      if (test(array[i], i, array, result)) {
-	        result.push(array[i]);
-	      }
-	    }
-	    return result;
-	  },
-
-	  /** Filters properties of the object using a test function.
-	   *
-	   * Function test gets 4 arguments passed:
-	   * - element from the object
-	   * - key of the element
-	   * - reference to the source object
-	   * - reference to the destination object
-	   *
-	   * @param {Object} object
-	   * @param {Function} f
-	   */
-	  filterObject: function(object, test) {
-	    var result = {};
-	    this.objectApply(object, function(value, key) {
-	      if ((test && test(value, key, object, result)) || Boolean(value)) {
-	        result[key] = value;
-	      }
-	    });
-	    return result;
-	  },
-
-	  /** Flattens an object into a two-dimensional array.
-	   *
-	   * @param  {Object} object
-	   * @return {Array} resulting array of [key, value] pairs
-	   */
-	  flatten: function(object) {
-	    var result = [];
-	    this.objectApply(object, function(value, key) {
-	      result.push([key, value]);
-	    });
-	    return result;
-	  },
-
-	  /** Checks whether any element of the array passes the test.
-	   *
-	   * Function test gets 3 arguments passed:
-	   * - element from the array
-	   * - index of the element
-	   * - reference to the source array
-	   *
-	   * @param {Array} array
-	   * @param {Function} f
-	   */
-	  any: function(array, test) {
-	    for (var i = 0; i < array.length; i++) {
-	      if (test(array[i], i, array)) {
-	        return true;
-	      }
-	    }
-	    return false;
-	  },
-
-	  /** Checks whether all elements of the array pass the test.
-	   *
-	   * Function test gets 3 arguments passed:
-	   * - element from the array
-	   * - index of the element
-	   * - reference to the source array
-	   *
-	   * @param {Array} array
-	   * @param {Function} f
-	   */
-	  all: function(array, test) {
-	    for (var i = 0; i < array.length; i++) {
-	      if (!test(array[i], i, array)) {
-	        return false;
-	      }
-	    }
-	    return true;
-	  },
-
-	  /** Builds a function that will proxy a method call to its first argument.
-	   *
-	   * Allows partial application of arguments, so additional arguments are
-	   * prepended to the argument list.
-	   *
-	   * @param  {String} name method name
-	   * @return {Function} proxy function
-	   */
-	  method: function(name) {
 	    var boundArguments = Array.prototype.slice.call(arguments, 1);
-	    return function(object) {
-	      return object[name].apply(object, boundArguments.concat(arguments));
+	    return function (object) {
+	        return object[name].apply(object, boundArguments.concat(arguments));
 	    };
-	  },
-
-	  getDocument: function() {
+	}
+	exports.method = method;
+	function getLocalStorage() {
 	    try {
-	      return document || undefined;
-	    } catch(e) {
-	      return undefined;
+	        return window.localStorage;
 	    }
-	  },
-
-	  getLocalStorage: function() {
-	    try {
-	      return window.localStorage;
-	    } catch (e) {
-	      return undefined;
+	    catch (e) {
+	        return undefined;
 	    }
-	  },
-
-	  getClientFeatures: function() {
-	    var WSTransport = __webpack_require__(4).WSTransport;
-	    return this.keys(
-	      this.filterObject(
-	        { "ws": WSTransport },
-	        function (t) { return t.isSupported({}); }
-	      )
-	    );
-	  },
-
-	  isXHRSupported: function() {
-	    return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
-	  },
-
-	  isXDRSupported: function(encrypted) {
+	}
+	exports.getLocalStorage = getLocalStorage;
+	function getClientFeatures() {
+	    return Collections.keys(Collections.filterObject({ "ws": transports_1.WSTransport }, function (t) { return t.isSupported({}); }));
+	}
+	exports.getClientFeatures = getClientFeatures;
+	function isXHRSupported() {
+	    return Boolean(xhr_1.default) && (new xhr_1.default()).withCredentials !== undefined;
+	}
+	exports.isXHRSupported = isXHRSupported;
+	function isXDRSupported(encrypted) {
 	    var protocol = encrypted ? "https:" : "http:";
-	    var documentProtocol = this.getProtocol();
-	    return Boolean(window.XDomainRequest) && documentProtocol === protocol;
-	  },
-
-	  getProtocol: function(){
-	    if (this.getDocument() !== undefined){
-	      return this.getDocument().location.protocol;
+	    var documentProtocol = getProtocol();
+	    return Boolean('XDomainRequest' in window) && documentProtocol === protocol;
+	}
+	exports.isXDRSupported = isXDRSupported;
+	function getDocument() {
+	    try {
+	        return document || undefined;
+	    }
+	    catch (e) {
+	        return undefined;
+	    }
+	}
+	exports.getDocument = getDocument;
+	function getProtocol() {
+	    if (getDocument() !== undefined) {
+	        return getDocument().location.protocol;
 	    }
 	    return "http:";
-	  },
-
-	  createXHR: function(){
-	    if (XHR){
-	      return new XHR();
-	    } else {
-	      return new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	exports.getProtocol = getProtocol;
+	function createXHR() {
+	    if (xhr_1.default) {
+	        return new xhr_1.default();
 	    }
-	  }
-	};
+	    else {
+	        return new ActiveXObject("Microsoft.XMLHTTP");
+	    }
+	}
+	exports.createXHR = createXHR;
 
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ },
 /* 2 */
 /***/ function(module, exports) {
 
-	module.exports = window.XMLHttpRequest;
+	"use strict";
+	var global = Function("return this")();
+	/** Merges multiple objects into the target argument.
+	*
+	* For properties that are plain Objects, performs a deep-merge. For the
+	* rest it just copies the value of the property.
+	*
+	* To extend prototypes use it as following:
+	*   Pusher.Util.extend(Target.prototype, Base.prototype)
+	*
+	* You can also use it to merge objects without altering them:
+	*   Pusher.Util.extend({}, object1, object2)
+	*
+	* @param  {Object} target
+	* @return {Object} the target argument
+	*/
+	function extend(target) {
+	    var sources = [];
+	    for (var _i = 1; _i < arguments.length; _i++) {
+	        sources[_i - 1] = arguments[_i];
+	    }
+	    var self = this;
+	    for (var i = 0; i < sources.length; i++) {
+	        var extensions = sources[i];
+	        for (var property in extensions) {
+	            if (extensions[property] && extensions[property].constructor &&
+	                extensions[property].constructor === Object) {
+	                target[property] = self.extend(target[property] || {}, extensions[property]);
+	            }
+	            else {
+	                target[property] = extensions[property];
+	            }
+	        }
+	    }
+	    return target;
+	}
+	exports.extend = extend;
+	function stringify() {
+	    var m = ["Pusher"];
+	    for (var i = 0; i < arguments.length; i++) {
+	        if (typeof arguments[i] === "string") {
+	            m.push(arguments[i]);
+	        }
+	        else {
+	            m.push(JSON.stringify(arguments[i]));
+	        }
+	    }
+	    return m.join(" : ");
+	}
+	exports.stringify = stringify;
+	function arrayIndexOf(array, item) {
+	    var nativeIndexOf = Array.prototype.indexOf;
+	    if (array === null) {
+	        return -1;
+	    }
+	    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
+	        return array.indexOf(item);
+	    }
+	    for (var i = 0, l = array.length; i < l; i++) {
+	        if (array[i] === item) {
+	            return i;
+	        }
+	    }
+	    return -1;
+	}
+	exports.arrayIndexOf = arrayIndexOf;
+	/** Applies a function f to all properties of an object.
+	*
+	* Function f gets 3 arguments passed:
+	* - element from the object
+	* - key of the element
+	* - reference to the object
+	*
+	* @param {Object} object
+	* @param {Function} f
+	*/
+	function objectApply(object, f) {
+	    for (var key in object) {
+	        if (Object.prototype.hasOwnProperty.call(object, key)) {
+	            f(object[key], key, object);
+	        }
+	    }
+	}
+	exports.objectApply = objectApply;
+	/** Return a list of objects own proerty keys
+	*
+	* @param {Object} object
+	* @returns {Array}
+	*/
+	function keys(object) {
+	    var keys = [];
+	    objectApply(object, function (_, key) {
+	        keys.push(key);
+	    });
+	    return keys;
+	}
+	exports.keys = keys;
+	/** Return a list of object's own property values
+	*
+	* @param {Object} object
+	* @returns {Array}
+	*/
+	function values(object) {
+	    var values = [];
+	    objectApply(object, function (value) {
+	        values.push(value);
+	    });
+	    return values;
+	}
+	exports.values = values;
+	/** Applies a function f to all elements of an array.
+	*
+	* Function f gets 3 arguments passed:
+	* - element from the array
+	* - index of the element
+	* - reference to the array
+	*
+	* @param {Array} array
+	* @param {Function} f
+	*/
+	function apply(array, f, context) {
+	    for (var i = 0; i < array.length; i++) {
+	        f.call(context || global, array[i], i, array);
+	    }
+	}
+	exports.apply = apply;
+	/** Maps all elements of the array and returns the result.
+	*
+	* Function f gets 4 arguments passed:
+	* - element from the array
+	* - index of the element
+	* - reference to the source array
+	* - reference to the destination array
+	*
+	* @param {Array} array
+	* @param {Function} f
+	*/
+	function map(array, f) {
+	    var result = [];
+	    for (var i = 0; i < array.length; i++) {
+	        result.push(f(array[i], i, array, result));
+	    }
+	    return result;
+	}
+	exports.map = map;
+	/** Maps all elements of the object and returns the result.
+	*
+	* Function f gets 4 arguments passed:
+	* - element from the object
+	* - key of the element
+	* - reference to the source object
+	* - reference to the destination object
+	*
+	* @param {Object} object
+	* @param {Function} f
+	*/
+	function mapObject(object, f) {
+	    var result = {};
+	    objectApply(object, function (value, key) {
+	        result[key] = f(value);
+	    });
+	    return result;
+	}
+	exports.mapObject = mapObject;
+	/** Filters elements of the array using a test function.
+	*
+	* Function test gets 4 arguments passed:
+	* - element from the array
+	* - index of the element
+	* - reference to the source array
+	* - reference to the destination array
+	*
+	* @param {Array} array
+	* @param {Function} f
+	*/
+	function filter(array, test) {
+	    test = test || function (value) { return !!value; };
+	    var result = [];
+	    for (var i = 0; i < array.length; i++) {
+	        if (test(array[i], i, array, result)) {
+	            result.push(array[i]);
+	        }
+	    }
+	    return result;
+	}
+	exports.filter = filter;
+	/** Filters properties of the object using a test function.
+	*
+	* Function test gets 4 arguments passed:
+	* - element from the object
+	* - key of the element
+	* - reference to the source object
+	* - reference to the destination object
+	*
+	* @param {Object} object
+	* @param {Function} f
+	*/
+	function filterObject(object, test) {
+	    var result = {};
+	    objectApply(object, function (value, key) {
+	        if ((test && test(value, key, object, result)) || Boolean(value)) {
+	            result[key] = value;
+	        }
+	    });
+	    return result;
+	}
+	exports.filterObject = filterObject;
+	/** Flattens an object into a two-dimensional array.
+	*
+	* @param  {Object} object
+	* @return {Array} resulting array of [key, value] pairs
+	*/
+	function flatten(object) {
+	    var result = [];
+	    objectApply(object, function (value, key) {
+	        result.push([key, value]);
+	    });
+	    return result;
+	}
+	exports.flatten = flatten;
+	/** Checks whether any element of the array passes the test.
+	*
+	* Function test gets 3 arguments passed:
+	* - element from the array
+	* - index of the element
+	* - reference to the source array
+	*
+	* @param {Array} array
+	* @param {Function} f
+	*/
+	function any(array, test) {
+	    for (var i = 0; i < array.length; i++) {
+	        if (test(array[i], i, array)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	exports.any = any;
+	/** Checks whether all elements of the array pass the test.
+	*
+	* Function test gets 3 arguments passed:
+	* - element from the array
+	* - index of the element
+	* - reference to the source array
+	*
+	* @param {Array} array
+	* @param {Function} f
+	*/
+	function all(array, test) {
+	    for (var i = 0; i < array.length; i++) {
+	        if (!test(array[i], i, array)) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+	exports.all = all;
 
 
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var abstract_timer_1 = __webpack_require__(4);
 	var global = Function("return this")();
-
 	// We need to bind clear functions this way to avoid exceptions on IE8
 	function clearTimeout(timer) {
-	  global.clearTimeout(timer);
+	    global.clearTimeout(timer);
 	}
 	function clearInterval(timer) {
-	  global.clearInterval(timer);
+	    global.clearInterval(timer);
 	}
-
-	function GenericTimer(set, clear, delay, callback) {
-	  var self = this;
-
-	  this.clear = clear;
-	  this.timer = set(function() {
-	    if (self.timer !== null) {
-	      self.timer = callback(self.timer);
-	    }
-	  }, delay);
-	}
-	var prototype = GenericTimer.prototype;
-
-	/** Returns whether the timer is still running.
-	 *
-	 * @return {Boolean}
-	 */
-	prototype.isRunning = function() {
-	  return this.timer !== null;
-	};
-
-	/** Aborts a timer when it's running. */
-	prototype.ensureAborted = function() {
-	  if (this.timer) {
-	    // Clear function is already bound
-	    this.clear(this.timer);
-	    this.timer = null;
-	  }
-	};
-
 	/** Cross-browser compatible one-off timer abstraction.
 	 *
 	 * @param {Number} delay
 	 * @param {Function} callback
 	 */
-	var Timer = function(delay, callback) {
-	  return new GenericTimer(setTimeout, clearTimeout, delay, function(timer) {
-	    callback();
-	    return null;
-	  });
-	};
+	var OneOffTimer = (function (_super) {
+	    __extends(OneOffTimer, _super);
+	    function OneOffTimer(delay, callback) {
+	        _super.call(this, setTimeout, clearTimeout, delay, function (timer) {
+	            callback();
+	            return null;
+	        });
+	    }
+	    return OneOffTimer;
+	}(abstract_timer_1.default));
+	exports.OneOffTimer = OneOffTimer;
 	/** Cross-browser compatible periodic timer abstraction.
 	 *
 	 * @param {Number} delay
 	 * @param {Function} callback
 	 */
-	var PeriodicTimer = function(delay, callback) {
-	  return new GenericTimer(setInterval, clearInterval, delay, function(timer) {
-	    callback();
-	    return timer;
-	  });
-	};
-
-	module.exports = {
-	  Timer: Timer,
-	  PeriodicTimer: PeriodicTimer
-	}
+	var PeriodicTimer = (function (_super) {
+	    __extends(PeriodicTimer, _super);
+	    function PeriodicTimer(delay, callback) {
+	        _super.call(this, setInterval, clearInterval, delay, function (timer) {
+	            callback();
+	            return timer;
+	        });
+	    }
+	    return PeriodicTimer;
+	}(abstract_timer_1.default));
+	exports.PeriodicTimer = PeriodicTimer;
 
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var Transport = __webpack_require__(5);
-	var URLSchemes = __webpack_require__(9);
-	var Util = __webpack_require__(1);
-	var HTTP = __webpack_require__(12);
-	var WS = __webpack_require__(20);
-
-	/** WebSocket transport.
-	 *
-	 * Uses native WebSocket implementation, including MozWebSocket supported by
-	 * earlier Firefox versions.
-	 */
-	exports.WSTransport = new Transport({
-	  urls: URLSchemes.ws,
-	  handlesActivityChecks: false,
-	  supportsPing: false,
-
-	  isInitialized: function() {
-	    return Boolean(WS);
-	  },
-	  isSupported: function() {
-	    return Boolean(WS);
-	  },
-	  getSocket: function(url) {
-	    var Constructor = WS;
-	    return new Constructor(url);
-	  }
-	});
-
-	var httpConfiguration = {
-	  urls: URLSchemes.http,
-	  handlesActivityChecks: false,
-	  supportsPing: true,
-	  isInitialized: function() {
-	    return true;
-	  }
-	};
-
-	var streamingConfiguration = Util.extend(
-	  { getSocket: function(url) {
-	      return HTTP.getStreamingSocket(url);
+	"use strict";
+	var Timer = (function () {
+	    function Timer(set, clear, delay, callback) {
+	        var _this = this;
+	        this.clear = clear;
+	        this.timer = set(function () {
+	            if (_this.timer) {
+	                _this.timer = callback(_this.timer);
+	            }
+	        }, delay);
 	    }
-	  },
-	  httpConfiguration
-	);
-	var pollingConfiguration = Util.extend(
-	  { getSocket: function(url) {
-	      return HTTP.getPollingSocket(url);
-	    }
-	  },
-	  httpConfiguration
-	);
-
-	var xhrConfiguration = {
-	  isSupported: Util.isXHRSupported
-	};
-	var xdrConfiguration = {
-	  isSupported: function(environment) {
-	    return Util.isXDRSupported(environment.encrypted);
-	  }
-	};
-
-	/** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
-	exports.XHRStreamingTransport = new Transport(
-	  Util.extend({}, streamingConfiguration, xhrConfiguration)
-	);
-	/** HTTP streaming transport using XDomainRequest (IE 8,9). */
-	exports.XDRStreamingTransport = new Transport(
-	  Util.extend({}, streamingConfiguration, xdrConfiguration)
-	);
-	/** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
-	exports.XHRPollingTransport = new Transport(
-	  Util.extend({}, pollingConfiguration, xhrConfiguration)
-	);
-	/** HTTP long-polling transport using XDomainRequest (IE 8,9). */
-	exports.XDRPollingTransport = new Transport(
-	  Util.extend({}, pollingConfiguration, xdrConfiguration)
-	);
+	    /** Returns whether the timer is still running.
+	     *
+	     * @return {Boolean}
+	     */
+	    Timer.prototype.isRunning = function () {
+	        return this.timer !== null;
+	    };
+	    /** Aborts a timer when it's running. */
+	    Timer.prototype.ensureAborted = function () {
+	        if (this.timer) {
+	            this.clear(this.timer);
+	            this.timer = null;
+	        }
+	    };
+	    return Timer;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Timer;
 
 
 /***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TransportConnection = __webpack_require__(6);
+	"use strict";
+	var URLSchemes = __webpack_require__(6);
+	var transport_ts_1 = __webpack_require__(8);
+	var Util = __webpack_require__(1);
+	var Collections = __webpack_require__(2);
+	var ws_1 = __webpack_require__(14);
+	var HTTP = __webpack_require__(15);
+	/** WebSocket transport.
+	 *
+	 * Uses native WebSocket implementation, including MozWebSocket supported by
+	 * earlier Firefox versions.
+	 */
+	exports.WSTransport = new transport_ts_1.default({
+	    urls: URLSchemes.ws,
+	    handlesActivityChecks: false,
+	    supportsPing: false,
+	    isInitialized: function () {
+	        return Boolean(ws_1.default);
+	    },
+	    isSupported: function () {
+	        return Boolean(ws_1.default);
+	    },
+	    getSocket: function (url) {
+	        var Constructor = ws_1.default;
+	        return new Constructor(url);
+	    }
+	});
+	var httpConfiguration = {
+	    urls: URLSchemes.http,
+	    handlesActivityChecks: false,
+	    supportsPing: true,
+	    isInitialized: function () {
+	        return true;
+	    }
+	};
+	var streamingConfiguration = Collections.extend({ getSocket: function (url) {
+	        return HTTP.getStreamingSocket(url);
+	    }
+	}, httpConfiguration);
+	var pollingConfiguration = Collections.extend({ getSocket: function (url) {
+	        return HTTP.getPollingSocket(url);
+	    }
+	}, httpConfiguration);
+	var xhrConfiguration = {
+	    isSupported: function () {
+	        return Util.isXHRSupported();
+	    }
+	};
+	var xdrConfiguration = {
+	    isSupported: function (environment) {
+	        return Util.isXDRSupported(environment.encrypted);
+	    }
+	};
+	/** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
+	exports.XHRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xhrConfiguration));
+	/** HTTP streaming transport using XDomainRequest (IE 8,9). */
+	exports.XDRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xdrConfiguration));
+	/** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
+	exports.XHRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xhrConfiguration));
+	/** HTTP long-polling transport using XDomainRequest (IE 8,9). */
+	exports.XDRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xdrConfiguration));
 
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var defaults_ts_1 = __webpack_require__(7);
+	function getGenericURL(baseScheme, params, path) {
+	    var scheme = baseScheme + (params.encrypted ? "s" : "");
+	    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
+	    return scheme + "://" + host + path;
+	}
+	function getGenericPath(key, queryString) {
+	    var path = "/app/" + key;
+	    var query = "?protocol=" + defaults_ts_1.PROTOCOL +
+	        "&client=js" +
+	        "&version=" + defaults_ts_1.VERSION +
+	        (queryString ? ("&" + queryString) : "");
+	    return path + query;
+	}
+	exports.ws = {
+	    getInitial: function (key, params) {
+	        return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
+	    },
+	    getPath: function (key, options) {
+	        return this.getInitial(key, options);
+	    }
+	};
+	exports.http = {
+	    getInitial: function (key, params) {
+	        var path = (params.httpPath || "/pusher") + getGenericPath(key);
+	        return getGenericURL("http", params, path);
+	    },
+	    getPath: function (key, options) {
+	        return this.getInitial(key, options);
+	    }
+	};
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+	exports.VERSION = '4.0';
+	exports.PROTOCOL = 7;
+	// DEPRECATED: WS connection parameters
+	exports.host = 'ws.pusherapp.com';
+	exports.ws_port = 80;
+	exports.wss_port = 443;
+	// DEPRECATED: SockJS fallback parameters
+	exports.sockjs_host = 'sockjs.pusher.com';
+	exports.sockjs_http_port = 80;
+	exports.sockjs_https_port = 443;
+	exports.sockjs_path = "/pusher";
+	// DEPRECATED: Stats
+	exports.stats_host = 'stats.pusher.com';
+	// DEPRECATED: Other settings
+	exports.channel_auth_endpoint = '/pusher/auth';
+	exports.channel_auth_transport = 'ajax';
+	exports.activity_timeout = 120000;
+	exports.pong_timeout = 30000;
+	exports.unavailable_timeout = 10000;
+	exports.getDefaultStrategy = function (config) {
+	    var wsStrategy;
+	    if (config.encrypted) {
+	        wsStrategy = [
+	            ":best_connected_ever",
+	            ":ws_loop",
+	            [":delayed", 2000, [":http_loop"]]
+	        ];
+	    }
+	    else {
+	        wsStrategy = [
+	            ":best_connected_ever",
+	            ":ws_loop",
+	            [":delayed", 2000, [":wss_loop"]],
+	            [":delayed", 5000, [":http_loop"]]
+	        ];
+	    }
+	    return [
+	        [":def", "ws_options", {
+	                hostUnencrypted: config.wsHost + ":" + config.wsPort,
+	                hostEncrypted: config.wsHost + ":" + config.wssPort
+	            }],
+	        [":def", "wss_options", [":extend", ":ws_options", {
+	                    encrypted: true
+	                }]],
+	        [":def", "http_options", {
+	                hostUnencrypted: config.httpHost + ":" + config.httpPort,
+	                hostEncrypted: config.httpHost + ":" + config.httpsPort,
+	                httpPath: config.httpPath
+	            }],
+	        [":def", "timeouts", {
+	                loop: true,
+	                timeout: 15000,
+	                timeoutLimit: 60000
+	            }],
+	        [":def", "ws_manager", [":transport_manager", {
+	                    lives: 2,
+	                    minPingDelay: 10000,
+	                    maxPingDelay: config.activity_timeout
+	                }]],
+	        [":def", "streaming_manager", [":transport_manager", {
+	                    lives: 2,
+	                    minPingDelay: 10000,
+	                    maxPingDelay: config.activity_timeout
+	                }]],
+	        [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
+	        [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
+	        [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
+	        [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":http_options", ":streaming_manager"],
+	        [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
+	        [":def_transport", "xdr_polling", "xdr_polling", 1, ":http_options"],
+	        [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
+	        [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
+	        [":def", "streaming_loop", [":sequential", ":timeouts",
+	                [":if", [":is_supported", ":xhr_streaming"],
+	                    ":xhr_streaming",
+	                    ":xdr_streaming"
+	                ]
+	            ]],
+	        [":def", "polling_loop", [":sequential", ":timeouts",
+	                [":if", [":is_supported", ":xhr_polling"],
+	                    ":xhr_polling",
+	                    ":xdr_polling"
+	                ]
+	            ]],
+	        [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
+	                    ":best_connected_ever",
+	                    ":streaming_loop",
+	                    [":delayed", 4000, [":polling_loop"]]
+	                ], [
+	                    ":polling_loop"
+	                ]]],
+	        [":def", "strategy",
+	            [":cached", 1800000,
+	                [":first_connected",
+	                    [":if", [":is_supported", ":ws"],
+	                        wsStrategy,
+	                        ":http_loop"
+	                    ]
+	                ]
+	            ]
+	        ]
+	    ];
+	};
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var transport_connection_1 = __webpack_require__(9);
 	/** Provides interface for transport connection instantiation.
 	 *
 	 * Takes transport-specific hooks as the only argument, which allow checking
 	 * for transport support and creating its connections.
 	 *
-	 * Supported hooks:
-	 * - file - the name of the file to be fetched during initialization
+	 * Supported hooks: * - file - the name of the file to be fetched during initialization
 	 * - urls - URL scheme to be used by transport
 	 * - handlesActivityCheck - true when the transport handles activity checks
 	 * - supportsPing - true when the transport has a ping/activity API
@@ -782,45 +896,50 @@ var Pusher =
 	 *
 	 * @param {Object} hooks object containing all needed transport hooks
 	 */
-	function Transport(hooks) {
-	  this.hooks = hooks;
-	}
-	var prototype = Transport.prototype;
-
-	/** Returns whether the transport is supported in the environment.
-	 *
-	 * @param {Object} environment the environment details (encryption, settings)
-	 * @returns {Boolean} true when the transport is supported
-	 */
-	prototype.isSupported = function(environment) {
-	  return this.hooks.isSupported(environment);
-	};
-
-	/** Creates a transport connection.
-	 *
-	 * @param {String} name
-	 * @param {Number} priority
-	 * @param {String} key the application key
-	 * @param {Object} options
-	 * @returns {TransportConnection}
-	 */
-	prototype.createConnection = function(name, priority, key, options) {
-	  return new TransportConnection(
-	    this.hooks, name, priority, key, options
-	  );
-	};
-
-	module.exports = Transport;
+	var Transport = (function () {
+	    function Transport(hooks) {
+	        this.hooks = hooks;
+	    }
+	    /** Returns whether the transport is supported in the environment.
+	     *
+	     * @param {Object} envronment te environment details (encryption, settings)
+	     * @returns {Boolean} true when the transport is supported
+	     */
+	    Transport.prototype.isSupported = function (environment) {
+	        return this.hooks.isSupported(environment);
+	    };
+	    /** Creates a transport connection.
+	     *
+	     * @param {String} name
+	     * @param {Number} priority
+	     * @param {String} key the application key
+	     * @param {Object} options
+	     * @returns {TransportConnection}
+	     */
+	    Transport.prototype.createConnection = function (name, priority, key, options) {
+	        return new transport_connection_1.default(this.hooks, name, priority, key, options);
+	    };
+	    return Transport;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Transport;
 
 
 /***/ },
-/* 6 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
 	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(7);
-	var Logger = __webpack_require__(8);
-
+	var Collections = __webpack_require__(2);
+	var dispatcher_1 = __webpack_require__(10);
+	var logger_1 = __webpack_require__(12);
+	var state_1 = __webpack_require__(13);
 	/** Provides universal API for transport connections.
 	 *
 	 * Transport connection is a low-level object that wraps a connection method
@@ -849,1092 +968,1008 @@ var Pusher =
 	 * @param {String} key application key
 	 * @param {Object} options
 	 */
-	function TransportConnection(hooks, name, priority, key, options) {
-	  EventsDispatcher.call(this);
-
-	  this.hooks = hooks;
-	  this.name = name;
-	  this.priority = priority;
-	  this.key = key;
-	  this.options = options;
-
-	  this.state = "new";
-	  this.timeline = options.timeline;
-	  this.activityTimeout = options.activityTimeout;
-	  this.id = this.timeline.generateUniqueID();
-	}
-	var prototype = TransportConnection.prototype;
-	Util.extend(prototype, EventsDispatcher.prototype);
-
-	/** Checks whether the transport handles activity checks by itself.
-	 *
-	 * @return {Boolean}
-	 */
-	prototype.handlesActivityChecks = function() {
-	  return Boolean(this.hooks.handlesActivityChecks);
-	};
-
-	/** Checks whether the transport supports the ping/pong API.
-	 *
-	 * @return {Boolean}
-	 */
-	prototype.supportsPing = function() {
-	  return Boolean(this.hooks.supportsPing);
-	};
-
-	/** Initializes the transport.
-	 *
-	 * Fetches resources if needed and then transitions to initialized.
-	 */
-	prototype.initialize = function() {
-	  var self = this;
-
-	  self.timeline.info(self.buildTimelineMessage({
-	    transport: self.name + (self.options.encrypted ? "s" : "")
-	  }));
-
-	  if (self.hooks.isInitialized()) {
-	    self.changeState("initialized");
-	  } else {
-	    self.onClose();
-	  }
-	};
-
-	/** Tries to establish a connection.
-	 *
-	 * @returns {Boolean} false if transport is in invalid state
-	 */
-	prototype.connect = function() {
-	  var self = this;
-
-	  if (self.socket || self.state !== "initialized") {
-	    return false;
-	  }
-
-	  var url = self.hooks.urls.getInitial(self.key, self.options);
-	  try {
-	    self.socket = self.hooks.getSocket(url, self.options);
-	  } catch (e) {
-	    Util.defer(function() {
-	      self.onError(e);
-	      self.changeState("closed");
-	    });
-	    return false;
-	  }
-
-	  self.bindListeners();
-
-	  Logger.debug("Connecting", { transport: self.name, url: url });
-	  self.changeState("connecting");
-	  return true;
-	};
-
-	/** Closes the connection.
-	 *
-	 * @return {Boolean} true if there was a connection to close
-	 */
-	prototype.close = function() {
-	  if (this.socket) {
-	    this.socket.close();
-	    return true;
-	  } else {
-	    return false;
-	  }
-	};
-
-	/** Sends data over the open connection.
-	 *
-	 * @param {String} data
-	 * @return {Boolean} true only when in the "open" state
-	 */
-	prototype.send = function(data) {
-	  var self = this;
-
-	  if (self.state === "open") {
-	    // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
-	    Util.defer(function() {
-	      if (self.socket) {
-	        self.socket.send(data);
-	      }
-	    });
-	    return true;
-	  } else {
-	    return false;
-	  }
-	};
-
-	/** Sends a ping if the connection is open and transport supports it. */
-	prototype.ping = function() {
-	  if (this.state === "open" && this.supportsPing()) {
-	    this.socket.ping();
-	  }
-	};
-
-	/** @private */
-	prototype.onOpen = function() {
-	  if (this.hooks.beforeOpen) {
-	    this.hooks.beforeOpen(
-	      this.socket, this.hooks.urls.getPath(this.key, this.options)
-	    );
-	  }
-	  this.changeState("open");
-	  this.socket.onopen = undefined;
-	};
-
-	/** @private */
-	prototype.onError = function(error) {
-	  this.emit("error", { type: 'WebSocketError', error: error });
-	  this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
-	};
-
-	/** @private */
-	prototype.onClose = function(closeEvent) {
-	  if (closeEvent) {
-	    this.changeState("closed", {
-	      code: closeEvent.code,
-	      reason: closeEvent.reason,
-	      wasClean: closeEvent.wasClean
-	    });
-	  } else {
-	    this.changeState("closed");
-	  }
-	  this.unbindListeners();
-	  this.socket = undefined;
-	};
-
-	/** @private */
-	prototype.onMessage = function(message) {
-	  this.emit("message", message);
-	};
-
-	/** @private */
-	prototype.onActivity = function() {
-	  this.emit("activity");
-	};
-
-	/** @private */
-	prototype.bindListeners = function() {
-	  var self = this;
-
-	  self.socket.onopen = function() {
-	    self.onOpen();
-	  };
-	  self.socket.onerror = function(error) {
-	    self.onError(error);
-	  };
-	  self.socket.onclose = function(closeEvent) {
-	    self.onClose(closeEvent);
-	  };
-	  self.socket.onmessage = function(message) {
-	    self.onMessage(message);
-	  };
-
-	  if (self.supportsPing()) {
-	    self.socket.onactivity = function() { self.onActivity(); };
-	  }
-	};
-
-	/** @private */
-	prototype.unbindListeners = function() {
-	  if (this.socket) {
-	    this.socket.onopen = undefined;
-	    this.socket.onerror = undefined;
-	    this.socket.onclose = undefined;
-	    this.socket.onmessage = undefined;
-	    if (this.supportsPing()) {
-	      this.socket.onactivity = undefined;
+	var TransportConnection = (function (_super) {
+	    __extends(TransportConnection, _super);
+	    function TransportConnection(hooks, name, priority, key, options) {
+	        _super.call(this);
+	        this.hooks = hooks;
+	        this.name = name;
+	        this.priority = priority;
+	        this.key = key;
+	        this.options = options;
+	        this.state = state_1.default.NEW;
+	        this.timeline = options.timeline;
+	        this.activityTimeout = options.activityTimeout;
+	        this.id = this.timeline.generateUniqueID();
 	    }
-	  }
-	};
-
-	/** @private */
-	prototype.changeState = function(state, params) {
-	  this.state = state;
-	  this.timeline.info(this.buildTimelineMessage({
-	    state: state,
-	    params: params
-	  }));
-	  this.emit(state, params);
-	};
-
-	/** @private */
-	prototype.buildTimelineMessage = function(message) {
-	  return Util.extend({ cid: this.id }, message);
-	};
-
-	module.exports = TransportConnection;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	/* WEBPACK VAR INJECTION */(function(global) {var Util = __webpack_require__(1);
-
-	/** Manages callback bindings and event emitting.
-	 *
-	 * @param Function failThrough called when no listeners are bound to an event
-	 */
-	function EventsDispatcher(failThrough) {
-	  this.callbacks = new CallbackRegistry();
-	  this.global_callbacks = [];
-	  this.failThrough = failThrough;
-	}
-	var prototype = EventsDispatcher.prototype;
-
-	prototype.bind = function(eventName, callback, context) {
-	  this.callbacks.add(eventName, callback, context);
-	  return this;
-	};
-
-	prototype.bind_all = function(callback) {
-	  this.global_callbacks.push(callback);
-	  return this;
-	};
-
-	prototype.unbind = function(eventName, callback, context) {
-	  this.callbacks.remove(eventName, callback, context);
-	  return this;
-	};
-
-	prototype.unbind_all = function(eventName, callback) {
-	  this.callbacks.remove(eventName, callback);
-	  return this;
-	};
-
-	prototype.emit = function(eventName, data) {
-	  var i;
-
-	  for (i = 0; i < this.global_callbacks.length; i++) {
-	    this.global_callbacks[i](eventName, data);
-	  }
-
-	  var callbacks = this.callbacks.get(eventName);
-	  if (callbacks && callbacks.length > 0) {
-	    for (i = 0; i < callbacks.length; i++) {
-	      callbacks[i].fn.call(callbacks[i].context || global, data);
-	    }
-	  } else if (this.failThrough) {
-	    this.failThrough(eventName, data);
-	  }
-
-	  return this;
-	};
-
-	/** Callback registry helper. */
-
-	function CallbackRegistry() {
-	  this._callbacks = {};
-	}
-
-	CallbackRegistry.prototype.get = function(name) {
-	  return this._callbacks[prefix(name)];
-	};
-
-	CallbackRegistry.prototype.add = function(name, callback, context) {
-	  var prefixedEventName = prefix(name);
-	  this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
-	  this._callbacks[prefixedEventName].push({
-	    fn: callback,
-	    context: context
-	  });
-	};
-
-	CallbackRegistry.prototype.remove = function(name, callback, context) {
-	  if (!name && !callback && !context) {
-	    this._callbacks = {};
-	    return;
-	  }
-
-	  var names = name ? [prefix(name)] : Util.keys(this._callbacks);
-
-	  if (callback || context) {
-	    Util.apply(names, function(name) {
-	      this._callbacks[name] = Util.filter(
-	        this._callbacks[name] || [],
-	        function(binding) {
-	          return (callback && callback !== binding.fn) ||
-	                 (context && context !== binding.context);
+	    /** Checks whether the transport handles activity checks by itself.
+	     *
+	     * @return {Boolean}
+	     */
+	    TransportConnection.prototype.handlesActivityChecks = function () {
+	        return Boolean(this.hooks.handlesActivityChecks);
+	    };
+	    /** Checks whether the transport supports the ping/pong API.
+	     *
+	     * @return {Boolean}
+	     */
+	    TransportConnection.prototype.supportsPing = function () {
+	        return Boolean(this.hooks.supportsPing);
+	    };
+	    /** Initializes the transport.
+	     *
+	     * Fetches resources if needed and then transitions to initialized.
+	     */
+	    TransportConnection.prototype.initialize = function () {
+	        var self = this;
+	        self.timeline.info(self.buildTimelineMessage({
+	            transport: self.name + (self.options.encrypted ? "s" : "")
+	        }));
+	        if (self.hooks.isInitialized()) {
+	            self.changeState(state_1.default.INITIALIZED);
 	        }
-	      );
-	      if (this._callbacks[name].length === 0) {
-	        delete this._callbacks[name];
-	      }
-	    }, this);
-	  } else {
-	    Util.apply(names, function(name) {
-	      delete this._callbacks[name];
-	    }, this);
-	  }
-	};
-
-	function prefix(name) {
-	  return "_" + name;
-	}
-
-	module.exports = EventsDispatcher;
-
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(1);
-
-	module.exports = {
-	  debug: function(){
-	    if (!this.log) {
-	      return
-	    }
-	    this.log(Util.stringify.apply(this, arguments));
-	  },
-
-	  warn: function(){
-	    var message = Util.stringify.apply(this, arguments);
-	    if (console.warn) {
-	      console.warn(message);
-	    } else if (console.log) {
-	      console.log(message);
-	    }
-	    if (this.log) {
-	      this.log(message);
-	    }
-	  }
-	}
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Defaults = __webpack_require__(10);
-
-	function getGenericURL(baseScheme, params, path) {
-	  var scheme = baseScheme + (params.encrypted ? "s" : "");
-	  var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
-	  return scheme + "://" + host + path;
-	}
-
-	function getGenericPath(key, queryString) {
-	  var path = "/app/" + key;
-	  var query =
-	    "?protocol=" + Defaults.PROTOCOL +
-	    "&client=js" +
-	    "&version=" + Defaults.VERSION +
-	    (queryString ? ("&" + queryString) : "");
-	  return path + query;
-	}
-
-	/** URL schemes for different transport types. */
-	module.exports = {
-	  /** Standard WebSocket URL scheme. */
-	  ws: {
-	    getInitial: function(key, params) {
-	      return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
-	    }
-	  },
-	  /** URL scheme for HTTP transports. Basically, WS scheme with a prefix. */
-	  http: {
-	    getInitial: function(key, params) {
-	      var path = (params.httpPath || "/pusher") + getGenericPath(key);
-	      return getGenericURL("http", params, path);
-	    }
-	  }
-	};
+	        else {
+	            self.onClose();
+	        }
+	    };
+	    /** Tries to establish a connection.
+	     *
+	     * @returns {Boolean} false if transport is in invalid state
+	     */
+	    TransportConnection.prototype.connect = function () {
+	        var self = this;
+	        if (self.socket || self.state !== state_1.default.INITIALIZED) {
+	            return false;
+	        }
+	        var url = self.hooks.urls.getInitial(self.key, self.options);
+	        try {
+	            self.socket = self.hooks.getSocket(url, self.options);
+	        }
+	        catch (e) {
+	            Util.defer(function () {
+	                self.onError(e);
+	                self.changeState(state_1.default.CLOSED);
+	            });
+	            return false;
+	        }
+	        self.bindListeners();
+	        logger_1.default.debug("Connecting", { transport: self.name, url: url });
+	        self.changeState(state_1.default.CONNECTING);
+	        return true;
+	    };
+	    /** Closes the connection.
+	     *
+	     * @return {Boolean} true if there was a connection to close
+	     */
+	    TransportConnection.prototype.close = function () {
+	        if (this.socket) {
+	            this.socket.close();
+	            return true;
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    /** Sends data over the open connection.
+	     *
+	     * @param {String} data
+	     * @return {Boolean} true only when in the "open" state
+	     */
+	    TransportConnection.prototype.send = function (data) {
+	        var self = this;
+	        if (self.state === state_1.default.OPEN) {
+	            // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
+	            Util.defer(function () {
+	                if (self.socket) {
+	                    self.socket.send(data);
+	                }
+	            });
+	            return true;
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    /** Sends a ping if the connection is open and transport supports it. */
+	    TransportConnection.prototype.ping = function () {
+	        if (this.state === state_1.default.OPEN && this.supportsPing()) {
+	            this.socket.ping();
+	        }
+	    };
+	    /** @private */
+	    TransportConnection.prototype.onOpen = function () {
+	        if (this.hooks.beforeOpen) {
+	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
+	        }
+	        this.changeState(state_1.default.OPEN);
+	        this.socket.onopen = undefined;
+	    };
+	    /** @private */
+	    TransportConnection.prototype.onError = function (error) {
+	        this.emit("error", { type: 'WebSocketError', error: error });
+	        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
+	    };
+	    /** @private */
+	    TransportConnection.prototype.onClose = function (closeEvent) {
+	        if (closeEvent) {
+	            this.changeState(state_1.default.CLOSED, {
+	                code: closeEvent.code,
+	                reason: closeEvent.reason,
+	                wasClean: closeEvent.wasClean
+	            });
+	        }
+	        else {
+	            this.changeState(state_1.default.CLOSED);
+	        }
+	        this.unbindListeners();
+	        this.socket = undefined;
+	    };
+	    /** @private */
+	    TransportConnection.prototype.onMessage = function (message) {
+	        this.emit("message", message);
+	    };
+	    /** @private */
+	    TransportConnection.prototype.onActivity = function () {
+	        this.emit("activity");
+	    };
+	    /** @private */
+	    TransportConnection.prototype.bindListeners = function () {
+	        var self = this;
+	        self.socket.onopen = function () {
+	            self.onOpen();
+	        };
+	        self.socket.onerror = function (error) {
+	            self.onError(error);
+	        };
+	        self.socket.onclose = function (closeEvent) {
+	            self.onClose(closeEvent);
+	        };
+	        self.socket.onmessage = function (message) {
+	            self.onMessage(message);
+	        };
+	        if (self.supportsPing()) {
+	            self.socket.onactivity = function () { self.onActivity(); };
+	        }
+	    };
+	    /** @private */
+	    TransportConnection.prototype.unbindListeners = function () {
+	        if (this.socket) {
+	            this.socket.onopen = undefined;
+	            this.socket.onerror = undefined;
+	            this.socket.onclose = undefined;
+	            this.socket.onmessage = undefined;
+	            if (this.supportsPing()) {
+	                this.socket.onactivity = undefined;
+	            }
+	        }
+	    };
+	    /** @private */
+	    TransportConnection.prototype.changeState = function (state, params) {
+	        this.state = state;
+	        this.timeline.info(this.buildTimelineMessage({
+	            state: state,
+	            params: params
+	        }));
+	        this.emit(state, params);
+	    };
+	    TransportConnection.prototype.buildTimelineMessage = function (message) {
+	        return Collections.extend({ cid: this.id }, message);
+	    };
+	    return TransportConnection;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = TransportConnection;
 
 
 /***/ },
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	exports.VERSION = __webpack_require__(11).version;
-	exports.PROTOCOL = 7;
-
-	// DEPRECATED: WS connection parameters
-	exports.host = 'ws.pusherapp.com';
-	exports.ws_port = 80;
-	exports.wss_port = 443;
-	// DEPRECATED: SockJS fallback parameters
-	exports.sockjs_host = 'sockjs.pusher.com';
-	exports.sockjs_http_port = 80;
-	exports.sockjs_https_port = 443;
-	exports.sockjs_path = "/pusher";
-	// DEPRECATED: Stats
-	exports.stats_host = 'stats.pusher.com';
-	// DEPRECATED: Other settings
-	exports.channel_auth_endpoint = '/pusher/auth';
-	exports.channel_auth_transport = 'ajax';
-	exports.activity_timeout = 120000;
-	exports.pong_timeout = 30000;
-	exports.unavailable_timeout = 10000;
-
-	exports.getDefaultStrategy = function(config) {
-	  var wsStrategy;
-	  if (config.encrypted) {
-	    wsStrategy = [
-	      ":best_connected_ever",
-	      ":ws_loop",
-	      [":delayed", 2000, [":http_loop"]]
-	    ];
-	  } else {
-	    wsStrategy = [
-	      ":best_connected_ever",
-	      ":ws_loop",
-	      [":delayed", 2000, [":wss_loop"]],
-	      [":delayed", 5000, [":http_loop"]]
-	    ];
-	  }
-
-	  return [
-	    [":def", "ws_options", {
-	      hostUnencrypted: config.wsHost + ":" + config.wsPort,
-	      hostEncrypted: config.wsHost + ":" + config.wssPort
-	    }],
-	    [":def", "wss_options", [":extend", ":ws_options", {
-	      encrypted: true
-	    }]],
-	    [":def", "http_options", {
-	      hostUnencrypted: config.httpHost + ":" + config.httpPort,
-	      hostEncrypted: config.httpHost + ":" + config.httpsPort,
-	      httpPath: config.httpPath
-	    }],
-	    [":def", "timeouts", {
-	      loop: true,
-	      timeout: 15000,
-	      timeoutLimit: 60000
-	    }],
-
-	    [":def", "ws_manager", [":transport_manager", {
-	      lives: 2,
-	      minPingDelay: 10000,
-	      maxPingDelay: config.activity_timeout
-	    }]],
-	    [":def", "streaming_manager", [":transport_manager", {
-	      lives: 2,
-	      minPingDelay: 10000,
-	      maxPingDelay: config.activity_timeout
-	    }]],
-
-	    [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
-	    [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-	    [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
-	    [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":http_options", ":streaming_manager"],
-	    [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
-	    [":def_transport", "xdr_polling", "xdr_polling", 1, ":http_options"],
-
-	    [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
-	    [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
-
-	    [":def", "streaming_loop", [":sequential", ":timeouts",
-	      [":if", [":is_supported", ":xhr_streaming"],
-	        ":xhr_streaming",
-	        ":xdr_streaming"
-	      ]
-	    ]],
-	    [":def", "polling_loop", [":sequential", ":timeouts",
-	      [":if", [":is_supported", ":xhr_polling"],
-	        ":xhr_polling",
-	        ":xdr_polling"
-	      ]
-	    ]],
-
-	    [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
-	      ":best_connected_ever",
-	        ":streaming_loop",
-	        [":delayed", 4000, [":polling_loop"]]
-	    ], [
-	      ":polling_loop"
-	    ]]],
-
-	    [":def", "strategy",
-	      [":cached", 1800000,
-	        [":first_connected",
-	          [":if", [":is_supported", ":ws"],
-	            wsStrategy,
-	            ":http_loop"
-	          ]
-	        ]
-	      ]
-	    ]
-	  ];
-	};
+	"use strict";
+	// import * as Util from './util';
+	var callback_registry_1 = __webpack_require__(11);
+	var global = Function("return this")();
+	/** Manages callback bindings and event emitting.
+	 *
+	 * @param Function failThrough called when no listeners are bound to an event
+	 */
+	var Dispatcher = (function () {
+	    function Dispatcher(failThrough) {
+	        this.callbacks = new callback_registry_1.default();
+	        this.global_callbacks = [];
+	        this.failThrough = failThrough;
+	    }
+	    Dispatcher.prototype.bind = function (eventName, callback, context) {
+	        this.callbacks.add(eventName, callback, context);
+	        return this;
+	    };
+	    Dispatcher.prototype.bind_all = function (callback) {
+	        this.global_callbacks.push(callback);
+	        return this;
+	    };
+	    Dispatcher.prototype.unbind = function (eventName, callback, context) {
+	        this.callbacks.remove(eventName, callback, context);
+	        return this;
+	    };
+	    Dispatcher.prototype.unbind_all = function (eventName, callback) {
+	        this.callbacks.remove(eventName, callback);
+	        return this;
+	    };
+	    Dispatcher.prototype.emit = function (eventName, data) {
+	        var i;
+	        for (i = 0; i < this.global_callbacks.length; i++) {
+	            this.global_callbacks[i](eventName, data);
+	        }
+	        var callbacks = this.callbacks.get(eventName);
+	        if (callbacks && callbacks.length > 0) {
+	            for (i = 0; i < callbacks.length; i++) {
+	                callbacks[i].fn.call(callbacks[i].context || global, data);
+	            }
+	        }
+	        else if (this.failThrough) {
+	            this.failThrough(eventName, data);
+	        }
+	        return this;
+	    };
+	    return Dispatcher;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Dispatcher;
 
 
 /***/ },
 /* 11 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {version: "0.2.0"};
+	"use strict";
+	var Util = __webpack_require__(2);
+	var CallbackRegistry = (function () {
+	    function CallbackRegistry() {
+	        this._callbacks = {};
+	    }
+	    CallbackRegistry.prototype.get = function (name) {
+	        return this._callbacks[prefix(name)];
+	    };
+	    CallbackRegistry.prototype.add = function (name, callback, context) {
+	        var prefixedEventName = prefix(name);
+	        this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
+	        this._callbacks[prefixedEventName].push({
+	            fn: callback,
+	            context: context
+	        });
+	    };
+	    CallbackRegistry.prototype.remove = function (name, callback, context) {
+	        if (!name && !callback && !context) {
+	            this._callbacks = {};
+	            return;
+	        }
+	        var names = name ? [prefix(name)] : Util.keys(this._callbacks);
+	        if (callback || context) {
+	            Util.apply(names, function (name) {
+	                this._callbacks[name] = Util.filter(this._callbacks[name] || [], function (binding) {
+	                    return (callback && callback !== binding.fn) ||
+	                        (context && context !== binding.context);
+	                });
+	                if (this._callbacks[name].length === 0) {
+	                    delete this._callbacks[name];
+	                }
+	            }, this);
+	        }
+	        else {
+	            Util.apply(names, function (name) {
+	                delete this._callbacks[name];
+	            }, this);
+	        }
+	    };
+	    return CallbackRegistry;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = CallbackRegistry;
+	function prefix(name) {
+	    return "_" + name;
+	}
+
 
 /***/ },
 /* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = {
-	  getStreamingSocket: __webpack_require__(13),
-	  getPollingSocket: __webpack_require__(19)
-	}
+	"use strict";
+	var collections_1 = __webpack_require__(2);
+	var Logger = {
+	    log: null,
+	    debug: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        if (!this.log) {
+	            return;
+	        }
+	        this.log(collections_1.stringify.apply(this, arguments));
+	    },
+	    warn: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        var message = collections_1.stringify.apply(this, arguments);
+	        if (console.warn) {
+	            console.warn(message);
+	        }
+	        else if (console.log) {
+	            console.log(message);
+	        }
+	        if (this.log) {
+	            this.log(message);
+	        }
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Logger;
+
 
 /***/ },
 /* 13 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var HTTPSocket = __webpack_require__(14);
-
-	var hooks = {
-	  getReceiveURL: function(url, session) {
-	    return url.base + "/" + session + "/xhr_streaming" + url.queryString;
-	  },
-	  onHeartbeat: function(socket) {
-	    socket.sendRaw("[]");
-	  },
-	  sendHeartbeat: function(socket) {
-	    socket.sendRaw("[]");
-	  },
-	  onFinished: function(socket, status) {
-	    socket.onClose(1006, "Connection interrupted (" + status + ")", false);
-	  }
-	};
-
-	module.exports = function(url) {
-	  return new HTTPSocket(hooks, url);
-	};
+	"use strict";
+	var ConnectionState;
+	(function (ConnectionState) {
+	    ConnectionState[ConnectionState["OPEN"] = "open"] = "OPEN";
+	    ConnectionState[ConnectionState["CLOSED"] = "closed"] = "CLOSED";
+	    ConnectionState[ConnectionState["NEW"] = "new"] = "NEW";
+	    ConnectionState[ConnectionState["INITIALIZED"] = "initialized"] = "INITIALIZED";
+	    ConnectionState[ConnectionState["CONNECTING"] = "connecting"] = "CONNECTING";
+	    ConnectionState[ConnectionState["FAILED"] = "failed"] = "FAILED";
+	    ConnectionState[ConnectionState["DISCONNECTED"] = "disconnected"] = "DISCONNECTED";
+	    ConnectionState[ConnectionState["UNAVAILABLE"] = "unavailable"] = "UNAVAILABLE";
+	    ConnectionState[ConnectionState["CONNECTED"] = "connected"] = "CONNECTED";
+	})(ConnectionState || (ConnectionState = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = ConnectionState;
 
 
 /***/ },
 /* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var Util = __webpack_require__(1);
-	var getXHR = __webpack_require__(15);
-	var getXDR = __webpack_require__(18);
-
-	var CONNECTING = 0;
-	var OPEN = 1;
-	var CLOSED = 3;
-
-	var autoIncrement = 1;
-
-	function HTTPSocket(hooks, url) {
-	  this.hooks = hooks;
-	  this.session = randomNumber(1000) + "/" + randomString(8);
-	  this.location = getLocation(url);
-	  this.readyState = CONNECTING;
-	  this.openStream();
-	}
-	var prototype = HTTPSocket.prototype;
-
-	prototype.send = function(payload) {
-	  return this.sendRaw(JSON.stringify([payload]));
-	};
-
-	prototype.ping = function() {
-	  this.hooks.sendHeartbeat(this);
-	};
-
-	prototype.close = function(code, reason) {
-	  this.onClose(code, reason, true);
-	};
-
-	/** For internal use only */
-	prototype.sendRaw = function(payload) {
-	  if (this.readyState === OPEN) {
-	    try {
-	      createRequest(
-	        "POST", getUniqueURL(getSendURL(this.location, this.session))
-	      ).start(payload);
-	      return true;
-	    } catch(e) {
-	      return false;
-	    }
-	  } else {
-	    return false;
-	  }
-	};
-
-	/** For internal use only */
-	prototype.reconnect = function() {
-	  this.closeStream();
-	  this.openStream();
-	};
-
-	/** For internal use only */
-	prototype.onClose = function(code, reason, wasClean) {
-	  this.closeStream();
-	  this.readyState = CLOSED;
-	  if (this.onclose) {
-	    this.onclose({
-	      code: code,
-	      reason: reason,
-	      wasClean: wasClean
-	    });
-	  }
-	};
-
-	/** @private */
-	prototype.onChunk = function(chunk) {
-	  if (chunk.status !== 200) {
-	    return;
-	  }
-	  if (this.readyState === OPEN) {
-	    this.onActivity();
-	  }
-
-	  var payload;
-	  var type = chunk.data.slice(0, 1);
-	  switch(type) {
-	    case 'o':
-	      payload = JSON.parse(chunk.data.slice(1) || '{}');
-	      this.onOpen(payload);
-	      break;
-	    case 'a':
-	      payload = JSON.parse(chunk.data.slice(1) || '[]');
-	      for (var i = 0; i < payload.length; i++){
-	        this.onEvent(payload[i]);
-	      }
-	      break;
-	    case 'm':
-	      payload = JSON.parse(chunk.data.slice(1) || 'null');
-	      this.onEvent(payload);
-	      break;
-	    case 'h':
-	      this.hooks.onHeartbeat(this);
-	      break;
-	    case 'c':
-	      payload = JSON.parse(chunk.data.slice(1) || '[]');
-	      this.onClose(payload[0], payload[1], true);
-	      break;
-	  }
-	};
-
-	/** @private */
-	prototype.onOpen = function(options) {
-	  if (this.readyState === CONNECTING) {
-	    if (options && options.hostname) {
-	      this.location.base = replaceHost(this.location.base, options.hostname);
-	    }
-	    this.readyState = OPEN;
-
-	    if (this.onopen) {
-	      this.onopen();
-	    }
-	  } else {
-	    this.onClose(1006, "Server lost session", true);
-	  }
-	};
-
-	/** @private */
-	prototype.onEvent = function(event) {
-	  if (this.readyState === OPEN && this.onmessage) {
-	    this.onmessage({ data: event });
-	  }
-	};
-
-	/** @private */
-	prototype.onActivity = function() {
-	  if (this.onactivity) {
-	    this.onactivity();
-	  }
-	};
-
-	/** @private */
-	prototype.onError = function(error) {
-	  if (this.onerror) {
-	    this.onerror(error);
-	  }
-	};
-
-	/** @private */
-	prototype.openStream = function() {
-	  var self = this;
-
-	  self.stream = createRequest(
-	    "POST",
-	    getUniqueURL(self.hooks.getReceiveURL(self.location, self.session))
-	  );
-
-	  self.stream.bind("chunk", function(chunk) {
-	    self.onChunk(chunk);
-	  });
-	  self.stream.bind("finished", function(status) {
-	    self.hooks.onFinished(self, status);
-	  });
-	  self.stream.bind("buffer_too_long", function() {
-	    self.reconnect();
-	  });
-
-	  try {
-	    self.stream.start();
-	  } catch (error) {
-	    Util.defer(function() {
-	      self.onError(error);
-	      self.onClose(1006, "Could not start streaming", false);
-	    });
-	  }
-	};
-
-	/** @private */
-	prototype.closeStream = function() {
-	  if (this.stream) {
-	    this.stream.unbind_all();
-	    this.stream.close();
-	    this.stream = null;
-	  }
-	};
-
-	function getLocation(url) {
-	  var parts = /([^\?]*)\/*(\??.*)/.exec(url);
-	  return {
-	    base: parts[1],
-	    queryString: parts[2]
-	  };
-	}
-
-	function getSendURL(url, session) {
-	  return url.base + "/" + session + "/xhr_send";
-	}
-
-	function getUniqueURL(url) {
-	  var separator = (url.indexOf('?') === -1) ? "?" : "&";
-	  return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
-	}
-
-	function replaceHost(url, hostname) {
-	  var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
-	  return urlParts[1] + hostname + urlParts[3];
-	}
-
-	function randomNumber(max) {
-	  return Math.floor(Math.random() * max);
-	}
-
-	function randomString(length) {
-	  var result = [];
-	  for (var i = 0; i < length; i++) {
-	    result.push(randomNumber(32).toString(32));
-	  }
-	  return result.join('');
-	}
-
-	function createRequest(method, url) {
-	  if (Util.isXHRSupported()) {
-	    return getXHR(method, url);
-	  } else if (Util.isXDRSupported(url.indexOf("https:") === 0)) {
-	    return getXDR(method, url);
-	  } else {
-	    throw "Cross-origin HTTP requests are not supported";
-	  }
-	}
-
-	module.exports = HTTPSocket;
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = window.WebSocket || window.MozWebSocket;
 
 
 /***/ },
 /* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPRequest = __webpack_require__(16);
-	var XHR = __webpack_require__(2);
-
-	var hooks = {
-	  getRequest: function(socket) {
-	    var xhr = new XHR();
-	    xhr.onreadystatechange = xhr.onprogress = function() {
-	      switch (xhr.readyState) {
-	        case 3:
-	          if (xhr.responseText && xhr.responseText.length > 0) {
-	            socket.onChunk(xhr.status, xhr.responseText);
-	          }
-	          break;
-	        case 4:
-	          // this happens only on errors, never after calling close
-	          if (xhr.responseText && xhr.responseText.length > 0) {
-	            socket.onChunk(xhr.status, xhr.responseText);
-	          }
-	          socket.emit("finished", xhr.status);
-	          socket.close();
-	          break;
-	      }
-	    };
-	    return xhr;
-	  },
-	  abortRequest: function(xhr) {
-	    xhr.onreadystatechange = null;
-	    xhr.abort();
-	  }
-	};
-
-	module.exports = function(method, url) {
-	  return new HTTPRequest(hooks, method, url);
-	};
+	"use strict";
+	var http_streaming_socket_1 = __webpack_require__(16);
+	exports.getStreamingSocket = http_streaming_socket_1.default;
+	var http_polling_socket_1 = __webpack_require__(25);
+	exports.getPollingSocket = http_polling_socket_1.default;
 
 
 /***/ },
 /* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var App = __webpack_require__(17);
-
-	var EventsDispatcher = __webpack_require__(7);
-	var Util = __webpack_require__(1);
-
-	var MAX_BUFFER_LENGTH = 256*1024;
-
-	function HTTPRequest(hooks, method, url) {
-	  EventsDispatcher.call(this);
-
-	  this.hooks = hooks;
-	  this.method = method;
-	  this.url = url;
-	}
-	var prototype = HTTPRequest.prototype;
-	Util.extend(prototype, EventsDispatcher.prototype);
-
-	prototype.start = function(payload) {
-	  var self = this;
-
-	  self.position = 0;
-	  self.xhr = self.hooks.getRequest(self);
-
-	  self.unloader = function() {
-	    self.close();
-	  };
-	  App.addUnloadListener(self.unloader);
-
-	  self.xhr.open(self.method, self.url, true);
-	  self.xhr.send(payload);
-	};
-
-	prototype.close = function() {
-	  if (this.unloader) {
-	    App.removeUnloadListener(this.unloader);
-	    this.unloader = null;
-	  }
-	  if (this.xhr) {
-	    this.hooks.abortRequest(this.xhr);
-	    this.xhr = null;
-	  }
-	};
-
-	prototype.onChunk = function(status, data) {
-	  while (true) {
-	    var chunk = this.advanceBuffer(data);
-	    if (chunk) {
-	      this.emit("chunk", { status: status, data: chunk });
-	    } else {
-	      break;
+	"use strict";
+	var http_socket_1 = __webpack_require__(17);
+	var hooks = {
+	    getReceiveURL: function (url, session) {
+	        return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+	    },
+	    onHeartbeat: function (socket) {
+	        socket.sendRaw("[]");
+	    },
+	    sendHeartbeat: function (socket) {
+	        socket.sendRaw("[]");
+	    },
+	    onFinished: function (socket, status) {
+	        socket.onClose(1006, "Connection interrupted (" + status + ")", false);
 	    }
-	  }
-	  if (this.isBufferTooLong(data)) {
-	    this.emit("buffer_too_long");
-	  }
 	};
-
-	prototype.advanceBuffer = function(buffer) {
-	  var unreadData = buffer.slice(this.position);
-	  var endOfLinePosition = unreadData.indexOf("\n");
-
-	  if (endOfLinePosition !== -1) {
-	    this.position += endOfLinePosition + 1;
-	    return unreadData.slice(0, endOfLinePosition);
-	  } else {
-	    // chunk is not finished yet, don't move the buffer pointer
-	    return null;
-	  }
-	};
-
-	prototype.isBufferTooLong = function(buffer) {
-	  return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
-	};
-
-	module.exports = HTTPRequest;
+	function default_1(url) {
+	    return new http_socket_1.default(hooks, url);
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = default_1;
+	;
 
 
 /***/ },
 /* 17 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	exports.addUnloadListener = function(listener) {
-	  if (window.addEventListener !== undefined) {
-	    window.addEventListener("unload", listener, false);
-	  } else if (window.attachEvent !== undefined) {
-	    window.attachEvent("onunload", listener);
-	  }
-	};
-
-	exports.removeUnloadListener = function(listener) {
-	  if (window.addEventListener !== undefined) {
-	    window.removeEventListener("unload", listener, false);
-	  } else if (window.detachEvent !== undefined) {
-	    window.detachEvent("onunload", listener);
-	  }
-	};
+	"use strict";
+	var state_1 = __webpack_require__(18);
+	var Util = __webpack_require__(1);
+	var http_xhr_request_1 = __webpack_require__(19);
+	var http_xdomain_request_1 = __webpack_require__(23);
+	var autoIncrement = 1;
+	var HTTPSocket = (function () {
+	    function HTTPSocket(hooks, url) {
+	        this.hooks = hooks;
+	        this.session = randomNumber(1000) + "/" + randomString(8);
+	        this.location = getLocation(url);
+	        this.readyState = state_1.default.CONNECTING;
+	        this.openStream();
+	    }
+	    HTTPSocket.prototype.send = function (payload) {
+	        return this.sendRaw(JSON.stringify([payload]));
+	    };
+	    HTTPSocket.prototype.ping = function () {
+	        this.hooks.sendHeartbeat(this);
+	    };
+	    HTTPSocket.prototype.close = function (code, reason) {
+	        this.onClose(code, reason, true);
+	    };
+	    /** For internal use only */
+	    HTTPSocket.prototype.sendRaw = function (payload) {
+	        if (this.readyState === state_1.default.OPEN) {
+	            try {
+	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+	                return true;
+	            }
+	            catch (e) {
+	                return false;
+	            }
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    /** For internal use only */
+	    HTTPSocket.prototype.reconnect = function () {
+	        this.closeStream();
+	        this.openStream();
+	    };
+	    ;
+	    /** For internal use only */
+	    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
+	        this.closeStream();
+	        this.readyState = state_1.default.CLOSED;
+	        if (this.onclose) {
+	            this.onclose({
+	                code: code,
+	                reason: reason,
+	                wasClean: wasClean
+	            });
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onChunk = function (chunk) {
+	        if (chunk.status !== 200) {
+	            return;
+	        }
+	        if (this.readyState === state_1.default.OPEN) {
+	            this.onActivity();
+	        }
+	        var payload;
+	        var type = chunk.data.slice(0, 1);
+	        switch (type) {
+	            case 'o':
+	                payload = JSON.parse(chunk.data.slice(1) || '{}');
+	                this.onOpen(payload);
+	                break;
+	            case 'a':
+	                payload = JSON.parse(chunk.data.slice(1) || '[]');
+	                for (var i = 0; i < payload.length; i++) {
+	                    this.onEvent(payload[i]);
+	                }
+	                break;
+	            case 'm':
+	                payload = JSON.parse(chunk.data.slice(1) || 'null');
+	                this.onEvent(payload);
+	                break;
+	            case 'h':
+	                this.hooks.onHeartbeat(this);
+	                break;
+	            case 'c':
+	                payload = JSON.parse(chunk.data.slice(1) || '[]');
+	                this.onClose(payload[0], payload[1], true);
+	                break;
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onOpen = function (options) {
+	        if (this.readyState === state_1.default.CONNECTING) {
+	            if (options && options.hostname) {
+	                this.location.base = replaceHost(this.location.base, options.hostname);
+	            }
+	            this.readyState = state_1.default.OPEN;
+	            if (this.onopen) {
+	                this.onopen();
+	            }
+	        }
+	        else {
+	            this.onClose(1006, "Server lost session", true);
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onEvent = function (event) {
+	        if (this.readyState === state_1.default.OPEN && this.onmessage) {
+	            this.onmessage({ data: event });
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onActivity = function () {
+	        if (this.onactivity) {
+	            this.onactivity();
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onError = function (error) {
+	        if (this.onerror) {
+	            this.onerror(error);
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.openStream = function () {
+	        var self = this;
+	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
+	        self.stream.bind("chunk", function (chunk) {
+	            self.onChunk(chunk);
+	        });
+	        self.stream.bind("finished", function (status) {
+	            self.hooks.onFinished(self, status);
+	        });
+	        self.stream.bind("buffer_too_long", function () {
+	            self.reconnect();
+	        });
+	        try {
+	            self.stream.start();
+	        }
+	        catch (error) {
+	            Util.defer(function () {
+	                self.onError(error);
+	                self.onClose(1006, "Could not start streaming", false);
+	            });
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.closeStream = function () {
+	        if (this.stream) {
+	            this.stream.unbind_all();
+	            this.stream.close();
+	            this.stream = null;
+	        }
+	    };
+	    return HTTPSocket;
+	}());
+	function getLocation(url) {
+	    var parts = /([^\?]*)\/*(\??.*)/.exec(url);
+	    return {
+	        base: parts[1],
+	        queryString: parts[2]
+	    };
+	}
+	function getSendURL(url, session) {
+	    return url.base + "/" + session + "/xhr_send";
+	}
+	function getUniqueURL(url) {
+	    var separator = (url.indexOf('?') === -1) ? "?" : "&";
+	    return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
+	}
+	function replaceHost(url, hostname) {
+	    var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
+	    return urlParts[1] + hostname + urlParts[3];
+	}
+	function randomNumber(max) {
+	    return Math.floor(Math.random() * max);
+	}
+	function randomString(length) {
+	    var result = [];
+	    for (var i = 0; i < length; i++) {
+	        result.push(randomNumber(32).toString(32));
+	    }
+	    return result.join('');
+	}
+	function createRequest(method, url) {
+	    if (Util.isXHRSupported()) {
+	        return http_xhr_request_1.default(method, url);
+	    }
+	    else if (Util.isXDRSupported(url.indexOf("https:") === 0)) {
+	        return http_xdomain_request_1.default(method, url);
+	    }
+	    else {
+	        throw "Cross-origin HTTP requests are not supported";
+	    }
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HTTPSocket;
 
 
 /***/ },
 /* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var HTTPRequest = __webpack_require__(16);
-
-	var hooks = {
-	  getRequest: function(socket) {
-	    var xdr = new window.XDomainRequest();
-	    xdr.ontimeout = function() {
-	      socket.emit("error", new Pusher.Errors.RequestTimedOut());
-	      socket.close();
-	    };
-	    xdr.onerror = function(e) {
-	      socket.emit("error", e);
-	      socket.close();
-	    };
-	    xdr.onprogress = function() {
-	      if (xdr.responseText && xdr.responseText.length > 0) {
-	        socket.onChunk(200, xdr.responseText);
-	      }
-	    };
-	    xdr.onload = function() {
-	      if (xdr.responseText && xdr.responseText.length > 0) {
-	        socket.onChunk(200, xdr.responseText);
-	      }
-	      socket.emit("finished", 200);
-	      socket.close();
-	    };
-	    return xdr;
-	  },
-	  abortRequest: function(xdr) {
-	    xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
-	    xdr.abort();
-	  }
-	};
-
-	module.exports = function(method, url) {
-	  return new HTTPRequest(hooks, method, url);
-	};
+	"use strict";
+	var State;
+	(function (State) {
+	    State[State["CONNECTING"] = 0] = "CONNECTING";
+	    State[State["OPEN"] = 1] = "OPEN";
+	    State[State["CLOSED"] = 3] = "CLOSED";
+	})(State || (State = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = State;
 
 
 /***/ },
 /* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var HTTPSocket = __webpack_require__(14);
-
+	"use strict";
+	var http_request_1 = __webpack_require__(20);
+	var xhr_1 = __webpack_require__(22);
 	var hooks = {
-	  getReceiveURL: function(url, session) {
-	    return url.base + "/" + session + "/xhr" + url.queryString;
-	  },
-	  onHeartbeat: function() {
-	    // next HTTP request will reset server's activity timer
-	  },
-	  sendHeartbeat: function(socket) {
-	    socket.sendRaw("[]");
-	  },
-	  onFinished: function(socket, status) {
-	    if (status === 200) {
-	      socket.reconnect();
-	    } else {
-	      socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+	    getRequest: function (socket) {
+	        var xhr = new xhr_1.default();
+	        xhr.onreadystatechange = xhr.onprogress = function () {
+	            switch (xhr.readyState) {
+	                case 3:
+	                    if (xhr.responseText && xhr.responseText.length > 0) {
+	                        socket.onChunk(xhr.status, xhr.responseText);
+	                    }
+	                    break;
+	                case 4:
+	                    // this happens only on errors, never after calling close
+	                    if (xhr.responseText && xhr.responseText.length > 0) {
+	                        socket.onChunk(xhr.status, xhr.responseText);
+	                    }
+	                    socket.emit("finished", xhr.status);
+	                    socket.close();
+	                    break;
+	            }
+	        };
+	        return xhr;
+	    },
+	    abortRequest: function (xhr) {
+	        xhr.onreadystatechange = null;
+	        xhr.abort();
 	    }
-	  }
 	};
-
-	module.exports = function(url) {
-	  return new HTTPSocket(hooks, url);
+	var getXHR = function (method, url) {
+	    return new http_request_1.default(hooks, method, url);
 	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = getXHR;
 
 
 /***/ },
 /* 20 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	module.exports = window.WebSocket || window.MozWebSocket;
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var App = __webpack_require__(21);
+	var dispatcher_1 = __webpack_require__(10);
+	var MAX_BUFFER_LENGTH = 256 * 1024;
+	var HTTPRequest = (function (_super) {
+	    __extends(HTTPRequest, _super);
+	    function HTTPRequest(hooks, method, url) {
+	        _super.call(this);
+	        this.hooks = hooks;
+	        this.method = method;
+	        this.url = url;
+	    }
+	    HTTPRequest.prototype.start = function (payload) {
+	        var self = this;
+	        self.position = 0;
+	        self.xhr = self.hooks.getRequest(self);
+	        self.unloader = function () {
+	            self.close();
+	        };
+	        App.addUnloadListener(self.unloader);
+	        self.xhr.open(self.method, self.url, true);
+	        self.xhr.send(payload);
+	    };
+	    HTTPRequest.prototype.close = function () {
+	        if (this.unloader) {
+	            App.removeUnloadListener(this.unloader);
+	            this.unloader = null;
+	        }
+	        if (this.xhr) {
+	            this.hooks.abortRequest(this.xhr);
+	            this.xhr = null;
+	        }
+	    };
+	    HTTPRequest.prototype.onChunk = function (status, data) {
+	        while (true) {
+	            var chunk = this.advanceBuffer(data);
+	            if (chunk) {
+	                this.emit("chunk", { status: status, data: chunk });
+	            }
+	            else {
+	                break;
+	            }
+	        }
+	        if (this.isBufferTooLong(data)) {
+	            this.emit("buffer_too_long");
+	        }
+	    };
+	    HTTPRequest.prototype.advanceBuffer = function (buffer) {
+	        var unreadData = buffer.slice(this.position);
+	        var endOfLinePosition = unreadData.indexOf("\n");
+	        if (endOfLinePosition !== -1) {
+	            this.position += endOfLinePosition + 1;
+	            return unreadData.slice(0, endOfLinePosition);
+	        }
+	        else {
+	            // chunk is not finished yet, don't move the buffer pointer
+	            return null;
+	        }
+	    };
+	    HTTPRequest.prototype.isBufferTooLong = function (buffer) {
+	        return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
+	    };
+	    return HTTPRequest;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HTTPRequest;
 
 
 /***/ },
 /* 21 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
-	var Channel = __webpack_require__(22);
-	var PresenceChannel = __webpack_require__(25);
-	var PrivateChannel = __webpack_require__(26);
-	var Util = __webpack_require__(1);
-
-	/** Handles a channel map. */
-	function Channels() {
-	  this.channels = {};
-	}
-	var prototype = Channels.prototype;
-
-	/** Creates or retrieves an existing channel by its name.
-	 *
-	 * @param {String} name
-	 * @param {Pusher} pusher
-	 * @return {Channel}
-	 */
-	prototype.add = function(name, pusher) {
-	  if (!this.channels[name]) {
-	    this.channels[name] = createChannel(name, pusher);
-	  }
-	  return this.channels[name];
+	"use strict";
+	exports.addUnloadListener = function (listener) {
+	    if (window.addEventListener !== undefined) {
+	        window.addEventListener("unload", listener, false);
+	    }
+	    else if (window.attachEvent !== undefined) {
+	        window.attachEvent("onunload", listener);
+	    }
 	};
-
-	/** Returns a list of all channels
-	 *
-	 * @return {Array}
-	 */
-	prototype.all = function(name) {
-	  return Util.values(this.channels);
+	exports.removeUnloadListener = function (listener) {
+	    if (window.addEventListener !== undefined) {
+	        window.removeEventListener("unload", listener, false);
+	    }
+	    else if (window.detachEvent !== undefined) {
+	        window.detachEvent("onunload", listener);
+	    }
 	};
-
-	/** Finds a channel by its name.
-	 *
-	 * @param {String} name
-	 * @return {Channel} channel or null if it doesn't exist
-	 */
-	prototype.find = function(name) {
-	  return this.channels[name];
-	};
-
-	/** Removes a channel from the map.
-	 *
-	 * @param {String} name
-	 */
-	prototype.remove = function(name) {
-	  var channel = this.channels[name];
-	  delete this.channels[name];
-	  return channel;
-	};
-
-	/** Proxies disconnection signal to all channels. */
-	prototype.disconnect = function() {
-	  Util.objectApply(this.channels, function(channel) {
-	    channel.disconnect();
-	  });
-	};
-
-	function createChannel(name, pusher) {
-	  if (name.indexOf('private-') === 0) {
-	    return new PrivateChannel(name, pusher);
-	  } else if (name.indexOf('presence-') === 0) {
-	    return new PresenceChannel(name, pusher);
-	  } else {
-	    return new Channel(name, pusher);
-	  }
-	}
-
-	module.exports = Channels;
 
 
 /***/ },
 /* 22 */
+/***/ function(module, exports) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = window.XMLHttpRequest;
+
+
+/***/ },
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(7);
-	var Util = __webpack_require__(1);
-	var Errors = __webpack_require__(23);
-	var Logger = __webpack_require__(8);
+	"use strict";
+	var http_request_1 = __webpack_require__(20);
+	var Errors = __webpack_require__(24);
+	var hooks = {
+	    getRequest: function (socket) {
+	        var xdr = new window.XDomainRequest();
+	        xdr.ontimeout = function () {
+	            socket.emit("error", new Errors.RequestTimedOut());
+	            socket.close();
+	        };
+	        xdr.onerror = function (e) {
+	            socket.emit("error", e);
+	            socket.close();
+	        };
+	        xdr.onprogress = function () {
+	            if (xdr.responseText && xdr.responseText.length > 0) {
+	                socket.onChunk(200, xdr.responseText);
+	            }
+	        };
+	        xdr.onload = function () {
+	            if (xdr.responseText && xdr.responseText.length > 0) {
+	                socket.onChunk(200, xdr.responseText);
+	            }
+	            socket.emit("finished", 200);
+	            socket.close();
+	        };
+	        return xdr;
+	    },
+	    abortRequest: function (xdr) {
+	        xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
+	        xdr.abort();
+	    }
+	};
+	var getXDR = function (method, url) {
+	    return new http_request_1.default(hooks, method, url);
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = getXDR;
 
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	/** Error classes used throughout the library. */
+	var BadEventName = (function (_super) {
+	    __extends(BadEventName, _super);
+	    function BadEventName() {
+	        _super.apply(this, arguments);
+	    }
+	    return BadEventName;
+	}(Error));
+	exports.BadEventName = BadEventName;
+	var RequestTimedOut = (function (_super) {
+	    __extends(RequestTimedOut, _super);
+	    function RequestTimedOut() {
+	        _super.apply(this, arguments);
+	    }
+	    return RequestTimedOut;
+	}(Error));
+	exports.RequestTimedOut = RequestTimedOut;
+	var TransportPriorityTooLow = (function (_super) {
+	    __extends(TransportPriorityTooLow, _super);
+	    function TransportPriorityTooLow() {
+	        _super.apply(this, arguments);
+	    }
+	    return TransportPriorityTooLow;
+	}(Error));
+	exports.TransportPriorityTooLow = TransportPriorityTooLow;
+	var TransportClosed = (function (_super) {
+	    __extends(TransportClosed, _super);
+	    function TransportClosed() {
+	        _super.apply(this, arguments);
+	    }
+	    return TransportClosed;
+	}(Error));
+	exports.TransportClosed = TransportClosed;
+	var UnsupportedTransport = (function (_super) {
+	    __extends(UnsupportedTransport, _super);
+	    function UnsupportedTransport() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedTransport;
+	}(Error));
+	exports.UnsupportedTransport = UnsupportedTransport;
+	var UnsupportedStrategy = (function (_super) {
+	    __extends(UnsupportedStrategy, _super);
+	    function UnsupportedStrategy() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedStrategy;
+	}(Error));
+	exports.UnsupportedStrategy = UnsupportedStrategy;
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var http_socket_1 = __webpack_require__(17);
+	var hooks = {
+	    getReceiveURL: function (url, session) {
+	        return url.base + "/" + session + "/xhr" + url.queryString;
+	    },
+	    onHeartbeat: function () {
+	        // next HTTP request will reset server's activity timer
+	    },
+	    sendHeartbeat: function (socket) {
+	        socket.sendRaw("[]");
+	    },
+	    onFinished: function (socket, status) {
+	        if (status === 200) {
+	            socket.reconnect();
+	        }
+	        else {
+	            socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+	        }
+	    }
+	};
+	function default_1(url) {
+	    return new http_socket_1.default(hooks, url);
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = default_1;
+	;
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var channel_1 = __webpack_require__(27);
+	var presence_channel_1 = __webpack_require__(28);
+	var private_channel_1 = __webpack_require__(29);
+	var Collections = __webpack_require__(2);
+	/** Handles a channel map. */
+	var Channels = (function () {
+	    function Channels() {
+	        this.channels = {};
+	    }
+	    /** Creates or retrieves an existing channel by its name.
+	     *
+	     * @param {String} name
+	     * @param {Pusher} pusher
+	     * @return {Channel}
+	     */
+	    Channels.prototype.add = function (name, pusher) {
+	        if (!this.channels[name]) {
+	            this.channels[name] = createChannel(name, pusher);
+	        }
+	        return this.channels[name];
+	    };
+	    /** Returns a list of all channels
+	     *
+	     * @return {Array}
+	     */
+	    Channels.prototype.all = function () {
+	        return Collections.values(this.channels);
+	    };
+	    /** Finds a channel by its name.
+	     *
+	     * @param {String} name
+	     * @return {Channel} channel or null if it doesn't exist
+	     */
+	    Channels.prototype.find = function (name) {
+	        return this.channels[name];
+	    };
+	    /** Removes a channel from the map.
+	     *
+	     * @param {String} name
+	     */
+	    Channels.prototype.remove = function (name) {
+	        var channel = this.channels[name];
+	        delete this.channels[name];
+	        return channel;
+	    };
+	    /** Proxies disconnection signal to all channels. */
+	    Channels.prototype.disconnect = function () {
+	        Collections.objectApply(this.channels, function (channel) {
+	            channel.disconnect();
+	        });
+	    };
+	    return Channels;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Channels;
+	function createChannel(name, pusher) {
+	    if (name.indexOf('private-') === 0) {
+	        return new private_channel_1.default(name, pusher);
+	    }
+	    else if (name.indexOf('presence-') === 0) {
+	        return new presence_channel_1.default(name, pusher);
+	    }
+	    else {
+	        return new channel_1.default(name, pusher);
+	    }
+	}
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var dispatcher_1 = __webpack_require__(10);
+	var Errors = __webpack_require__(24);
+	var logger_1 = __webpack_require__(12);
 	/** Provides base public channel interface with an event emitter.
 	 *
 	 * Emits:
@@ -1944,814 +1979,722 @@ var Pusher =
 	 * @param {String} name
 	 * @param {Pusher} pusher
 	 */
-	function Channel(name, pusher) {
-	  EventsDispatcher.call(this, function(event, data) {
-	    Logger.debug('No callbacks on ' + name + ' for ' + event);
-	  });
-
-	  this.name = name;
-	  this.pusher = pusher;
-	  this.subscribed = false;
-	}
-	var prototype = Channel.prototype;
-	Util.extend(prototype, EventsDispatcher.prototype);
-
-	/** Skips authorization, since public channels don't require it.
-	 *
-	 * @param {Function} callback
-	 */
-	prototype.authorize = function(socketId, callback) {
-	  return callback(false, {});
-	};
-
-	/** Triggers an event */
-	prototype.trigger = function(event, data) {
-	  if (event.indexOf("client-") !== 0) {
-	    throw new Errors.BadEventName(
-	      "Event '" + event + "' does not start with 'client-'"
-	    );
-	  }
-	  return this.pusher.send_event(event, data, this.name);
-	};
-
-	/** Signals disconnection to the channel. For internal use only. */
-	prototype.disconnect = function() {
-	  this.subscribed = false;
-	};
-
-	/** Handles an event. For internal use only.
-	 *
-	 * @param {String} event
-	 * @param {*} data
-	 */
-	prototype.handleEvent = function(event, data) {
-	  if (event.indexOf("pusher_internal:") === 0) {
-	    if (event === "pusher_internal:subscription_succeeded") {
-	      this.subscribed = true;
-	      this.emit("pusher:subscription_succeeded", data);
+	var Channel = (function (_super) {
+	    __extends(Channel, _super);
+	    function Channel(name, pusher) {
+	        _super.call(this, function (event, data) {
+	            logger_1.default.debug('No callbacks on ' + name + ' for ' + event);
+	        });
+	        this.name = name;
+	        this.pusher = pusher;
+	        this.subscribed = false;
 	    }
-	  } else {
-	    this.emit(event, data);
-	  }
-	};
-
-	/** Sends a subscription request. For internal use only. */
-	prototype.subscribe = function() {
-	  var self = this;
-
-	  self.authorize(self.pusher.connection.socket_id, function(error, data) {
-	    if (error) {
-	      self.handleEvent('pusher:subscription_error', data);
-	    } else {
-	      self.pusher.send_event('pusher:subscribe', {
-	        auth: data.auth,
-	        channel_data: data.channel_data,
-	        channel: self.name
-	      });
-	    }
-	  });
-	};
-
-	/** Sends an unsubscription request. For internal use only. */
-	prototype.unsubscribe = function() {
-	  this.pusher.send_event('pusher:unsubscribe', {
-	    channel: this.name
-	  });
-	};
-
-	Channel.Authorizer = __webpack_require__(24);
-
-	module.exports = Channel;
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(1);
-
-	function buildExceptionClass(name) {
-	  var constructor = function(message) {
-	    Error.call(this, message);
-	    this.name = name;
-	  };
-	  Util.extend(constructor.prototype, Error.prototype);
-
-	  return constructor;
-	}
-
-	/** Error classes used throughout the library. */
-	module.exports = {
-	  BadEventName: buildExceptionClass("BadEventName"),
-	  RequestTimedOut: buildExceptionClass("RequestTimedOut"),
-	  TransportPriorityTooLow: buildExceptionClass("TransportPriorityTooLow"),
-	  TransportClosed: buildExceptionClass("TransportClosed"),
-	  UnsupportedTransport: buildExceptionClass("UnsupportedTransport"),
-	  UnsupportedStrategy: buildExceptionClass("UnsupportedStrategy")
-	};
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Logger = __webpack_require__(8);
-	var Util = __webpack_require__(1);
-
-	var Authorizer = function(channel, options) {
-	  this.channel = channel;
-	  this.type = options.authTransport;
-
-	  this.options = options;
-	  this.authOptions = (options || {}).auth || {};
-	};
-
-	Authorizer.prototype = {
-	  composeQuery: function(socketId) {
-	    var query = 'socket_id=' + encodeURIComponent(socketId) +
-	      '&channel_name=' + encodeURIComponent(this.channel.name);
-
-	    for(var i in this.authOptions.params) {
-	      query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
-	    }
-
-	    return query;
-	  },
-
-	  authorize: function(socketId, callback) {
-	    return authorizers[this.type].call(this, socketId, callback);
-	  }
-	};
-
-	var nextAuthCallbackID = 1;
-
-	var authorizers = {
-	  ajax: function(socketId, callback){
-	    var self = this, xhr;
-
-	    xhr = Util.createXHR();
-
-	    xhr.open("POST", self.options.authEndpoint, true);
-
-	    // add request headers
-	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	    for(var headerName in this.authOptions.headers) {
-	      xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
-	    }
-
-	    xhr.onreadystatechange = function() {
-	      if (xhr.readyState === 4) {
-	        if (xhr.status === 200) {
-	          var data, parsed = false;
-
-	          try {
-	            data = JSON.parse(xhr.responseText);
-	            parsed = true;
-	          } catch (e) {
-	            callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
-	          }
-
-	          if (parsed) { // prevents double execution.
-	            callback(false, data);
-	          }
-	        } else {
-	          Logger.warn("Couldn't get auth info from your webapp", xhr.status);
-	          callback(true, xhr.status);
+	    /** Skips authorization, since public channels don't require it.
+	     *
+	     * @param {Function} callback
+	     */
+	    Channel.prototype.authorize = function (socketId, callback) {
+	        return callback(false, {});
+	    };
+	    /** Triggers an event */
+	    Channel.prototype.trigger = function (event, data) {
+	        if (event.indexOf("client-") !== 0) {
+	            throw new Errors.BadEventName("Event '" + event + "' does not start with 'client-'");
 	        }
-	      }
+	        return this.pusher.send_event(event, data, this.name);
 	    };
-
-	    xhr.send(this.composeQuery(socketId));
-	    return xhr;
-	  }
-	};
-
-	module.exports = Authorizer;
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(1);
-	var PrivateChannel = __webpack_require__(26);
-	var Members = __webpack_require__(27);
-	var Logger = __webpack_require__(8);
-
-	/** Adds presence channel functionality to private channels.
-	 *
-	 * @param {String} name
-	 * @param {Pusher} pusher
-	 */
-	function PresenceChannel(name, pusher) {
-	  PrivateChannel.call(this, name, pusher);
-	  this.members = new Members();
-	}
-	var prototype = PresenceChannel.prototype;
-	Util.extend(prototype, PrivateChannel.prototype);
-
-	/** Authenticates the connection as a member of the channel.
-	 *
-	 * @param  {String} socketId
-	 * @param  {Function} callback
-	 */
-	prototype.authorize = function(socketId, callback) {
-	  var _super = PrivateChannel.prototype.authorize;
-	  var self = this;
-	  _super.call(self, socketId, function(error, authData) {
-	    if (!error) {
-	      if (authData.channel_data === undefined) {
-	        Logger.warn(
-	          "Invalid auth response for channel '" +
-	          self.name +
-	          "', expected 'channel_data' field"
-	        );
-	        callback("Invalid auth response");
-	        return;
-	      }
-	      var channelData = JSON.parse(authData.channel_data);
-	      self.members.setMyID(channelData.user_id);
-	    }
-	    callback(error, authData);
-	  });
-	};
-
-	/** Handles presence and subscription events. For internal use only.
-	 *
-	 * @param {String} event
-	 * @param {*} data
-	 */
-	prototype.handleEvent = function(event, data) {
-	  switch (event) {
-	    case "pusher_internal:subscription_succeeded":
-	      this.members.onSubscription(data);
-	      this.subscribed = true;
-	      this.emit("pusher:subscription_succeeded", this.members);
-	      break;
-	    case "pusher_internal:member_added":
-	      var addedMember = this.members.addMember(data);
-	      this.emit('pusher:member_added', addedMember);
-	      break;
-	    case "pusher_internal:member_removed":
-	      var removedMember = this.members.removeMember(data);
-	      if (removedMember) {
-	        this.emit('pusher:member_removed', removedMember);
-	      }
-	      break;
-	    default:
-	      PrivateChannel.prototype.handleEvent.call(this, event, data);
-	  }
-	};
-
-	/** Resets the channel state, including members map. For internal use only. */
-	prototype.disconnect = function() {
-	  this.members.reset();
-	  PrivateChannel.prototype.disconnect.call(this);
-	};
-
-	module.exports = PresenceChannel;
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Channel = __webpack_require__(22);
-	var Util = __webpack_require__(1);
-
-	/** Extends public channels to provide private channel interface.
-	 *
-	 * @param {String} name
-	 * @param {Pusher} pusher
-	 */
-	function PrivateChannel(name, pusher) {
-	  Channel.call(this, name, pusher);
-	}
-	var prototype = PrivateChannel.prototype;
-	Util.extend(prototype, Channel.prototype);
-
-	/** Authorizes the connection to use the channel.
-	 *
-	 * @param  {String} socketId
-	 * @param  {Function} callback
-	 */
-	prototype.authorize = function(socketId, callback) {
-	  var authorizer = new Channel.Authorizer(this, this.pusher.config);
-	  return authorizer.authorize(socketId, callback);
-	};
-
-	module.exports = PrivateChannel;
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var Util = __webpack_require__(1);
-
-	/** Represents a collection of members of a presence channel. */
-	function Members() {
-	  this.reset();
-	}
-	var prototype = Members.prototype;
-
-	/** Returns member's info for given id.
-	 *
-	 * Resulting object containts two fields - id and info.
-	 *
-	 * @param {Number} id
-	 * @return {Object} member's info or null
-	 */
-	prototype.get = function(id) {
-	  if (Object.prototype.hasOwnProperty.call(this.members, id)) {
-	    return {
-	      id: id,
-	      info: this.members[id]
+	    /** Signals disconnection to the channel. For internal use only. */
+	    Channel.prototype.disconnect = function () {
+	        this.subscribed = false;
 	    };
-	  } else {
-	    return null;
-	  }
-	};
-
-	/** Calls back for each member in unspecified order.
-	 *
-	 * @param  {Function} callback
-	 */
-	prototype.each = function(callback) {
-	  var self = this;
-	  Util.objectApply(self.members, function(member, id) {
-	    callback(self.get(id));
-	  });
-	};
-
-	/** Updates the id for connected member. For internal use only. */
-	prototype.setMyID = function(id) {
-	  this.myID = id;
-	};
-
-	/** Handles subscription data. For internal use only. */
-	prototype.onSubscription = function(subscriptionData) {
-	  this.members = subscriptionData.presence.hash;
-	  this.count = subscriptionData.presence.count;
-	  this.me = this.get(this.myID);
-	};
-
-	/** Adds a new member to the collection. For internal use only. */
-	prototype.addMember = function(memberData) {
-	  if (this.get(memberData.user_id) === null) {
-	    this.count++;
-	  }
-	  this.members[memberData.user_id] = memberData.user_info;
-	  return this.get(memberData.user_id);
-	};
-
-	/** Adds a member from the collection. For internal use only. */
-	prototype.removeMember = function(memberData) {
-	  var member = this.get(memberData.user_id);
-	  if (member) {
-	    delete this.members[memberData.user_id];
-	    this.count--;
-	  }
-	  return member;
-	};
-
-	/** Resets the collection to the initial state. For internal use only. */
-	prototype.reset = function() {
-	  this.members = {};
-	  this.count = 0;
-	  this.myID = null;
-	  this.me = null;
-	};
-
-	module.exports = Members;
+	    /** Handles an event. For internal use only.
+	     *
+	     * @param {String} event
+	     * @param {*} data
+	     */
+	    Channel.prototype.handleEvent = function (event, data) {
+	        if (event.indexOf("pusher_internal:") === 0) {
+	            if (event === "pusher_internal:subscription_succeeded") {
+	                this.subscribed = true;
+	                this.emit("pusher:subscription_succeeded", data);
+	            }
+	        }
+	        else {
+	            this.emit(event, data);
+	        }
+	    };
+	    /** Sends a subscription request. For internal use only. */
+	    Channel.prototype.subscribe = function () {
+	        var _this = this;
+	        this.authorize(this.pusher.connection.socket_id, function (error, data) {
+	            if (error) {
+	                _this.handleEvent('pusher:subscription_error', data);
+	            }
+	            else {
+	                _this.pusher.send_event('pusher:subscribe', {
+	                    auth: data.auth,
+	                    channel_data: data.channel_data,
+	                    channel: _this.name
+	                });
+	            }
+	        });
+	    };
+	    /** Sends an unsubscription request. For internal use only. */
+	    Channel.prototype.unsubscribe = function () {
+	        this.pusher.send_event('pusher:unsubscribe', {
+	            channel: this.name
+	        });
+	    };
+	    return Channel;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Channel;
 
 
 /***/ },
 /* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-
-	function Timeline(key, session, options) {
-	  this.key = key;
-	  this.session = session;
-	  this.events = [];
-	  this.options = options || {};
-	  this.sent = 0;
-	  this.uniqueID = 0;
-	}
-	var prototype = Timeline.prototype;
-
-	// Log levels
-	Timeline.ERROR = 3;
-	Timeline.INFO = 6;
-	Timeline.DEBUG = 7;
-
-	prototype.log = function(level, event) {
-	  if (level <= this.options.level) {
-	    this.events.push(
-	      Util.extend({}, event, { timestamp: Util.now() })
-	    );
-	    if (this.options.limit && this.events.length > this.options.limit) {
-	      this.events.shift();
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var private_channel_1 = __webpack_require__(29);
+	var logger_1 = __webpack_require__(12);
+	var members_1 = __webpack_require__(31);
+	var PresenceChannel = (function (_super) {
+	    __extends(PresenceChannel, _super);
+	    /** Adds presence channel functionality to private channels.
+	     *
+	     * @param {String} name
+	     * @param {Pusher} pusher
+	     */
+	    function PresenceChannel(name, pusher) {
+	        _super.call(this, name, pusher);
+	        this.members = new members_1.default();
 	    }
-	  }
-	};
-
-	prototype.error = function(event) {
-	  this.log(Timeline.ERROR, event);
-	};
-
-	prototype.info = function(event) {
-	  this.log(Timeline.INFO, event);
-	};
-
-	prototype.debug = function(event) {
-	  this.log(Timeline.DEBUG, event);
-	};
-
-	prototype.isEmpty = function() {
-	  return this.events.length === 0;
-	};
-
-	prototype.send = function(sendXHR, callback) {
-	  var self = this;
-
-	  var data = Util.extend({
-	    session: self.session,
-	    bundle: self.sent + 1,
-	    key: self.key,
-	    lib: "js",
-	    version: self.options.version,
-	    cluster: self.options.cluster,
-	    features: self.options.features,
-	    timeline: self.events
-	  }, self.options.params);
-
-	  self.events = [];
-	  sendXHR(data, function(error, result) {
-	    if (!error) {
-	      self.sent++;
-	    }
-	    if (callback) {
-	      callback(error, result);
-	    }
-	  });
-
-	  return true;
-	};
-
-	prototype.generateUniqueID = function() {
-	  this.uniqueID++;
-	  return this.uniqueID;
-	};
-
-	module.exports = Timeline;
+	    /** Authenticates the connection as a member of the channel.
+	     *
+	     * @param  {String} socketId
+	     * @param  {Function} callback
+	     */
+	    PresenceChannel.prototype.authorize = function (socketId, callback) {
+	        var self = this;
+	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+	            if (!error) {
+	                if (authData.channel_data === undefined) {
+	                    logger_1.default.warn("Invalid auth response for channel '" +
+	                        self.name +
+	                        "', expected 'channel_data' field");
+	                    callback("Invalid auth response");
+	                    return;
+	                }
+	                var channelData = JSON.parse(authData.channel_data);
+	                self.members.setMyID(channelData.user_id);
+	            }
+	            callback(error, authData);
+	        });
+	    };
+	    /** Handles presence and subscription events. For internal use only.
+	     *
+	     * @param {String} event
+	     * @param {*} data
+	     */
+	    PresenceChannel.prototype.handleEvent = function (event, data) {
+	        switch (event) {
+	            case "pusher_internal:subscription_succeeded":
+	                this.members.onSubscription(data);
+	                this.subscribed = true;
+	                this.emit("pusher:subscription_succeeded", this.members);
+	                break;
+	            case "pusher_internal:member_added":
+	                var addedMember = this.members.addMember(data);
+	                this.emit('pusher:member_added', addedMember);
+	                break;
+	            case "pusher_internal:member_removed":
+	                var removedMember = this.members.removeMember(data);
+	                if (removedMember) {
+	                    this.emit('pusher:member_removed', removedMember);
+	                }
+	                break;
+	            default:
+	                private_channel_1.default.prototype.handleEvent.call(this, event, data);
+	        }
+	    };
+	    /** Resets the channel state, including members map. For internal use only. */
+	    PresenceChannel.prototype.disconnect = function () {
+	        this.members.reset();
+	        _super.prototype.disconnect.call(this);
+	    };
+	    return PresenceChannel;
+	}(private_channel_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = PresenceChannel;
 
 
 /***/ },
 /* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-	var Base64 = __webpack_require__(30);
-
-	function TimelineSender(timeline, options) {
-	  this.timeline = timeline;
-	  this.options = options || {};
-	}
-	var prototype = TimelineSender.prototype;
-
-	prototype.send = function(encrypted, callback) {
-	  var self = this;
-
-	  if (self.timeline.isEmpty()) {
-	    return;
-	  }
-
-	  var sendXHR = function(data, callback) {
-	    var scheme = "http" + (encrypted ? "s" : "") + "://";
-	    var url = scheme + (self.host || self.options.host) + self.options.path;
-	    var params = Util.filterObject(data, function(value) {
-	      return value !== undefined;
-	    });
-
-	    var query = Util.map(
-	      Util.flatten(encodeParamsObject(params)),
-	      Util.method("join", "=")
-	    ).join("&");
-
-	    url += ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
-
-	    var xhr = Util.createXHR();
-	    xhr.open("GET", url, true);
-
-	    xhr.onreadystatechange = function(){
-	      if (xhr.readyState === 4) {
-	        // TODO: handle response
-	      }
-	    }
-
-	    xhr.send()
-	  };
-	  self.timeline.send(sendXHR, callback);
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-
-	function encodeParamsObject(data) {
-	  return Util.mapObject(data, function(value) {
-	    if (typeof value === "object") {
-	      value = JSON.stringify(value);
+	var channel_1 = __webpack_require__(27);
+	var pusher_authorizer_1 = __webpack_require__(30);
+	/** Extends public channels to provide private channel interface.
+	 *
+	 * @param {String} name
+	 * @param {Pusher} pusher
+	 */
+	var PrivateChannel = (function (_super) {
+	    __extends(PrivateChannel, _super);
+	    function PrivateChannel() {
+	        _super.apply(this, arguments);
 	    }
-	    return encodeURIComponent(Base64.encode(value.toString()));
-	  });
-	}
-
-	module.exports = TimelineSender;
+	    /** Authorizes the connection to use the channel.
+	     *
+	     * @param  {String} socketId
+	     * @param  {Function} callback
+	     */
+	    PrivateChannel.prototype.authorize = function (socketId, callback) {
+	        var authorizer = new pusher_authorizer_1.default(this, this.pusher.config);
+	        return authorizer.authorize(socketId, callback);
+	    };
+	    return PrivateChannel;
+	}(channel_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = PrivateChannel;
 
 
 /***/ },
 /* 30 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	var global = Function("return this")();
-
-	var Base64 = {
-	  encode: function (s) {
-	    return btoa(utob(s));
-	  }
+	"use strict";
+	var logger_1 = __webpack_require__(12);
+	var Util = __webpack_require__(1);
+	var Authorizer = (function () {
+	    function Authorizer(channel, options) {
+	        this.channel = channel;
+	        this.type = options.authTransport;
+	        this.options = options;
+	        this.authOptions = (options || {}).auth || {};
+	    }
+	    Authorizer.prototype.composeQuery = function (socketId) {
+	        var query = 'socket_id=' + encodeURIComponent(socketId) +
+	            '&channel_name=' + encodeURIComponent(this.channel.name);
+	        for (var i in this.authOptions.params) {
+	            query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
+	        }
+	        return query;
+	    };
+	    Authorizer.prototype.authorize = function (socketId, callback) {
+	        return authorizers[this.type].call(this, socketId, callback);
+	    };
+	    return Authorizer;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Authorizer;
+	var authorizers = {
+	    ajax: function (socketId, callback) {
+	        var self = this, xhr;
+	        xhr = Util.createXHR();
+	        xhr.open("POST", self.options.authEndpoint, true);
+	        // add request headers
+	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	        for (var headerName in this.authOptions.headers) {
+	            xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
+	        }
+	        xhr.onreadystatechange = function () {
+	            if (xhr.readyState === 4) {
+	                if (xhr.status === 200) {
+	                    var data, parsed = false;
+	                    try {
+	                        data = JSON.parse(xhr.responseText);
+	                        parsed = true;
+	                    }
+	                    catch (e) {
+	                        callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
+	                    }
+	                    if (parsed) {
+	                        callback(false, data);
+	                    }
+	                }
+	                else {
+	                    logger_1.default.warn("Couldn't get auth info from your webapp", xhr.status);
+	                    callback(true, xhr.status);
+	                }
+	            }
+	        };
+	        xhr.send(this.composeQuery(socketId));
+	        return xhr;
+	    }
 	};
-
-	var fromCharCode = String.fromCharCode;
-
-	var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-	var b64tab = {};
-
-	for (var i = 0, l = b64chars.length; i < l; i++) {
-	  b64tab[b64chars.charAt(i)] = i;
-	}
-
-	var cb_utob = function(c) {
-	  var cc = c.charCodeAt(0);
-	  return cc < 0x80 ? c
-	      : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +
-	                     fromCharCode(0x80 | (cc & 0x3f))
-	      : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +
-	        fromCharCode(0x80 | ((cc >>>  6) & 0x3f)) +
-	        fromCharCode(0x80 | ( cc         & 0x3f));
-	};
-
-	var utob = function(u) {
-	  return u.replace(/[^\x00-\x7F]/g, cb_utob);
-	};
-
-	var cb_encode = function(ccc) {
-	  var padlen = [0, 2, 1][ccc.length % 3];
-	  var ord = ccc.charCodeAt(0) << 16
-	    | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
-	    | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0));
-	  var chars = [
-	    b64chars.charAt( ord >>> 18),
-	    b64chars.charAt((ord >>> 12) & 63),
-	    padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
-	    padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
-	  ];
-	  return chars.join('');
-	};
-
-	var btoa;
-
-	if (global && global.btoa){
-	  btoa = global.btoa;
-	} else {
-	  btoa = function(b) {
-	    return b.replace(/[\s\S]{1,3}/g, cb_encode);
-	  };
-	}
-
-	module.exports = Base64;
 
 
 /***/ },
 /* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-	var Transports = __webpack_require__(4);
-	var TransportManager = __webpack_require__(32);
-	var Errors = __webpack_require__(23);
-	var TransportStrategy = __webpack_require__(34);
-	var SequentialStrategy = __webpack_require__(38);
-	var BestConnectedEverStrategy = __webpack_require__(39);
-	var CachedStrategy = __webpack_require__(40);
-	var DelayedStrategy = __webpack_require__(41);
-	var IfStrategy = __webpack_require__(42);
-	var FirstConnectedStrategy = __webpack_require__(43);
-
-	module.exports = {
-	  /** Transforms a JSON scheme to a strategy tree.
-	   *
-	   * @param {Array} scheme JSON strategy scheme
-	   * @param {Object} options a hash of symbols to be included in the scheme
-	   * @returns {Strategy} strategy tree that's represented by the scheme
-	   */
-	  build: function(scheme, options) {
-	    var context = Util.extend({}, globalContext, options);
-	    return evaluate(scheme, context)[1].strategy;
-	  }
-	};
-
-	var transports = {
-	  ws: Transports.WSTransport,
-	  xhr_streaming: Transports.XHRStreamingTransport,
-	  xdr_streaming: Transports.XDRStreamingTransport,
-	  xhr_polling: Transports.XHRPollingTransport,
-	  xdr_polling: Transports.XDRPollingTransport
-	};
-
-	var UnsupportedStrategy = {
-	  isSupported: function() {
-	    return false;
-	  },
-	  connect: function(_, callback) {
-	    var deferred = Util.defer(function() {
-	      callback(new Errors.UnsupportedStrategy());
-	    });
-	    return {
-	      abort: function() {
-	        deferred.ensureAborted();
-	      },
-	      forceMinPriority: function() {}
+	"use strict";
+	var Collections = __webpack_require__(2);
+	/** Represents a collection of members of a presence channel. */
+	var Members = (function () {
+	    function Members() {
+	        this.reset();
+	    }
+	    /** Returns member's info for given id.
+	     *
+	     * Resulting object containts two fields - id and info.
+	     *
+	     * @param {Number} id
+	     * @return {Object} member's info or null
+	     */
+	    Members.prototype.get = function (id) {
+	        if (Object.prototype.hasOwnProperty.call(this.members, id)) {
+	            return {
+	                id: id,
+	                info: this.members[id]
+	            };
+	        }
+	        else {
+	            return null;
+	        }
 	    };
-	  }
-	};
-
-	// DSL bindings
-
-	function returnWithOriginalContext(f) {
-	  return function(context) {
-	    return [f.apply(this, arguments), context];
-	  };
-	}
-
-	var globalContext = {
-	  extend: function(context, first, second) {
-	    return [Util.extend({}, first, second), context];
-	  },
-
-	  def: function(context, name, value) {
-	    if (context[name] !== undefined) {
-	      throw "Redefining symbol " + name;
-	    }
-	    context[name] = value;
-	    return [undefined, context];
-	  },
-
-	  def_transport: function(context, name, type, priority, options, manager) {
-	    var transportClass = transports[type];
-	    if (!transportClass) {
-	      throw new Errors.UnsupportedTransport(type);
-	    }
-
-	    var enabled =
-	      (!context.enabledTransports ||
-	        Util.arrayIndexOf(context.enabledTransports, name) !== -1) &&
-	      (!context.disabledTransports ||
-	        Util.arrayIndexOf(context.disabledTransports, name) === -1);
-
-	    var transport;
-	    if (enabled) {
-	      transport = new TransportStrategy(
-	        name,
-	        priority,
-	        manager ? manager.getAssistant(transportClass) : transportClass,
-	        Util.extend({
-	          key: context.key,
-	          encrypted: context.encrypted,
-	          timeline: context.timeline,
-	          ignoreNullOrigin: context.ignoreNullOrigin
-	        }, options)
-	      );
-	    } else {
-	      transport = UnsupportedStrategy;
-	    }
-
-	    var newContext = context.def(context, name, transport)[1];
-	    newContext.transports = context.transports || {};
-	    newContext.transports[name] = transport;
-	    return [undefined, newContext];
-	  },
-
-	  transport_manager: returnWithOriginalContext(function(_, options) {
-	    return new TransportManager(options);
-	  }),
-
-	  sequential: returnWithOriginalContext(function(_, options) {
-	    var strategies = Array.prototype.slice.call(arguments, 2);
-	    return new SequentialStrategy(strategies, options);
-	  }),
-
-	  cached: returnWithOriginalContext(function(context, ttl, strategy){
-	    return new CachedStrategy(strategy, context.transports, {
-	      ttl: ttl,
-	      timeline: context.timeline,
-	      encrypted: context.encrypted
-	    });
-	  }),
-
-	  first_connected: returnWithOriginalContext(function(_, strategy) {
-	    return new FirstConnectedStrategy(strategy);
-	  }),
-
-	  best_connected_ever: returnWithOriginalContext(function() {
-	    var strategies = Array.prototype.slice.call(arguments, 1);
-	    return new BestConnectedEverStrategy(strategies);
-	  }),
-
-	  delayed: returnWithOriginalContext(function(_, delay, strategy) {
-	    return new DelayedStrategy(strategy, { delay: delay });
-	  }),
-
-	  "if": returnWithOriginalContext(function(_, test, trueBranch, falseBranch) {
-	    return new IfStrategy(test, trueBranch, falseBranch);
-	  }),
-
-	  is_supported: returnWithOriginalContext(function(_, strategy) {
-	    return function() {
-	      return strategy.isSupported();
+	    /** Calls back for each member in unspecified order.
+	     *
+	     * @param  {Function} callback
+	     */
+	    Members.prototype.each = function (callback) {
+	        var _this = this;
+	        Collections.objectApply(this.members, function (member, id) {
+	            callback(_this.get(id));
+	        });
 	    };
-	  })
-	};
-
-	// DSL interpreter
-
-	function isSymbol(expression) {
-	  return (typeof expression === "string") && expression.charAt(0) === ":";
-	}
-
-	function getSymbolValue(expression, context) {
-	  return context[expression.slice(1)];
-	}
-
-	function evaluateListOfExpressions(expressions, context) {
-	  if (expressions.length === 0) {
-	    return [[], context];
-	  }
-	  var head = evaluate(expressions[0], context);
-	  var tail = evaluateListOfExpressions(expressions.slice(1), head[1]);
-	  return [[head[0]].concat(tail[0]), tail[1]];
-	}
-
-	function evaluateString(expression, context) {
-	  if (!isSymbol(expression)) {
-	    return [expression, context];
-	  }
-	  var value = getSymbolValue(expression, context);
-	  if (value === undefined) {
-	    throw "Undefined symbol " + expression;
-	  }
-	  return [value, context];
-	}
-
-	function evaluateArray(expression, context) {
-	  if (isSymbol(expression[0])) {
-	    var f = getSymbolValue(expression[0], context);
-	    if (expression.length > 1) {
-	      if (typeof f !== "function") {
-	        throw "Calling non-function " + expression[0];
-	      }
-	      var args = [Util.extend({}, context)].concat(
-	        Util.map(expression.slice(1), function(arg) {
-	          return evaluate(arg, Util.extend({}, context))[0];
-	        })
-	      );
-	      return f.apply(this, args);
-	    } else {
-	      return [f, context];
-	    }
-	  } else {
-	    return evaluateListOfExpressions(expression, context);
-	  }
-	}
-
-	function evaluate(expression, context) {
-	  var expressionType = typeof expression;
-	  if (typeof expression === "string") {
-	    return evaluateString(expression, context);
-	  } else if (typeof expression === "object") {
-	    if (expression instanceof Array && expression.length > 0) {
-	      return evaluateArray(expression, context);
-	    }
-	  }
-	  return [expression, context];
-	}
+	    /** Updates the id for connected member. For internal use only. */
+	    Members.prototype.setMyID = function (id) {
+	        this.myID = id;
+	    };
+	    /** Handles subscription data. For internal use only. */
+	    Members.prototype.onSubscription = function (subscriptionData) {
+	        this.members = subscriptionData.presence.hash;
+	        this.count = subscriptionData.presence.count;
+	        this.me = this.get(this.myID);
+	    };
+	    /** Adds a new member to the collection. For internal use only. */
+	    Members.prototype.addMember = function (memberData) {
+	        if (this.get(memberData.user_id) === null) {
+	            this.count++;
+	        }
+	        this.members[memberData.user_id] = memberData.user_info;
+	        return this.get(memberData.user_id);
+	    };
+	    /** Adds a member from the collection. For internal use only. */
+	    Members.prototype.removeMember = function (memberData) {
+	        var member = this.get(memberData.user_id);
+	        if (member) {
+	            delete this.members[memberData.user_id];
+	            this.count--;
+	        }
+	        return member;
+	    };
+	    /** Resets the collection to the initial state. For internal use only. */
+	    Members.prototype.reset = function () {
+	        this.members = {};
+	        this.count = 0;
+	        this.myID = null;
+	        this.me = null;
+	    };
+	    return Members;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Members;
 
 
 /***/ },
 /* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var AssistantToTheTransportManager = __webpack_require__(33);
+	"use strict";
+	var Collections = __webpack_require__(2);
+	var Util = __webpack_require__(1);
+	var level_1 = __webpack_require__(33);
+	var Timeline = (function () {
+	    function Timeline(key, session, options) {
+	        this.key = key;
+	        this.session = session;
+	        this.events = [];
+	        this.options = options || {};
+	        this.sent = 0;
+	        this.uniqueID = 0;
+	    }
+	    Timeline.prototype.log = function (level, event) {
+	        if (level <= this.options.level) {
+	            this.events.push(Collections.extend({}, event, { timestamp: Util.now() }));
+	            if (this.options.limit && this.events.length > this.options.limit) {
+	                this.events.shift();
+	            }
+	        }
+	    };
+	    Timeline.prototype.error = function (event) {
+	        this.log(level_1.default.ERROR, event);
+	    };
+	    Timeline.prototype.info = function (event) {
+	        this.log(level_1.default.INFO, event);
+	    };
+	    Timeline.prototype.debug = function (event) {
+	        this.log(level_1.default.DEBUG, event);
+	    };
+	    Timeline.prototype.isEmpty = function () {
+	        return this.events.length === 0;
+	    };
+	    Timeline.prototype.send = function (sendXHR, callback) {
+	        var self = this;
+	        var data = Collections.extend({
+	            session: self.session,
+	            bundle: self.sent + 1,
+	            key: self.key,
+	            lib: "js",
+	            version: self.options.version,
+	            cluster: self.options.cluster,
+	            features: self.options.features,
+	            timeline: self.events
+	        }, self.options.params);
+	        self.events = [];
+	        sendXHR(data, function (error, result) {
+	            if (!error) {
+	                self.sent++;
+	            }
+	            if (callback) {
+	                callback(error, result);
+	            }
+	        });
+	        return true;
+	    };
+	    Timeline.prototype.generateUniqueID = function () {
+	        this.uniqueID++;
+	        return this.uniqueID;
+	    };
+	    return Timeline;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Timeline;
 
+
+/***/ },
+/* 33 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var TimelineLevel;
+	(function (TimelineLevel) {
+	    TimelineLevel[TimelineLevel["ERROR"] = 3] = "ERROR";
+	    TimelineLevel[TimelineLevel["INFO"] = 6] = "INFO";
+	    TimelineLevel[TimelineLevel["DEBUG"] = 7] = "DEBUG";
+	})(TimelineLevel || (TimelineLevel = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = TimelineLevel;
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(2);
+	var Util = __webpack_require__(1);
+	var base64_1 = __webpack_require__(35);
+	var TimelineSender = (function () {
+	    function TimelineSender(timeline, options) {
+	        this.timeline = timeline;
+	        this.options = options || {};
+	    }
+	    TimelineSender.prototype.send = function (encrypted, callback) {
+	        var self = this;
+	        if (self.timeline.isEmpty()) {
+	            return;
+	        }
+	        var sendXHR = function (data, callback) {
+	            var scheme = "http" + (encrypted ? "s" : "") + "://";
+	            var url = scheme + (self.options.host) + self.options.path;
+	            var params = Collections.filterObject(data, function (value) {
+	                return value !== undefined;
+	            });
+	            var query = Collections.map(Collections.flatten(encodeParamsObject(params)), Util.method("join", "=")).join("&");
+	            url += ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
+	            var xhr = Util.createXHR();
+	            xhr.open("GET", url, true);
+	            xhr.onreadystatechange = function () {
+	                if (xhr.readyState === 4) {
+	                }
+	            };
+	            xhr.send();
+	        };
+	        self.timeline.send(sendXHR, callback);
+	    };
+	    return TimelineSender;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = TimelineSender;
+	function encodeParamsObject(data) {
+	    return Collections.mapObject(data, function (value) {
+	        if (typeof value === "object") {
+	            value = JSON.stringify(value);
+	        }
+	        return encodeURIComponent(base64_1.default(value.toString()));
+	    });
+	}
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var global = Function("return this")();
+	function encode(s) {
+	    return btoa(utob(s));
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = encode;
+	var fromCharCode = String.fromCharCode;
+	var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	var b64tab = {};
+	for (var i = 0, l = b64chars.length; i < l; i++) {
+	    b64tab[b64chars.charAt(i)] = i;
+	}
+	var cb_utob = function (c) {
+	    var cc = c.charCodeAt(0);
+	    return cc < 0x80 ? c
+	        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +
+	            fromCharCode(0x80 | (cc & 0x3f))
+	            : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +
+	                fromCharCode(0x80 | ((cc >>> 6) & 0x3f)) +
+	                fromCharCode(0x80 | (cc & 0x3f));
+	};
+	var utob = function (u) {
+	    return u.replace(/[^\x00-\x7F]/g, cb_utob);
+	};
+	var cb_encode = function (ccc) {
+	    var padlen = [0, 2, 1][ccc.length % 3];
+	    var ord = ccc.charCodeAt(0) << 16
+	        | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+	        | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0));
+	    var chars = [
+	        b64chars.charAt(ord >>> 18),
+	        b64chars.charAt((ord >>> 12) & 63),
+	        padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+	        padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+	    ];
+	    return chars.join('');
+	};
+	var btoa;
+	if (global && global.btoa) {
+	    btoa = global.btoa;
+	}
+	else {
+	    btoa = function (b) {
+	        return b.replace(/[\s\S]{1,3}/g, cb_encode);
+	    };
+	}
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(2);
+	var Util = __webpack_require__(1);
+	var Transports = __webpack_require__(5);
+	var transport_manager_1 = __webpack_require__(37);
+	var Errors = __webpack_require__(24);
+	var transport_strategy_1 = __webpack_require__(39);
+	var sequential_strategy_1 = __webpack_require__(45);
+	var best_connected_ever_strategy_1 = __webpack_require__(46);
+	var cached_strategy_1 = __webpack_require__(47);
+	var delayed_strategy_1 = __webpack_require__(48);
+	var if_strategy_1 = __webpack_require__(49);
+	var first_connected_strategy_1 = __webpack_require__(50);
+	/** Transforms a JSON scheme to a strategy tree.
+	 *
+	 * @param {Array} scheme JSON strategy scheme
+	 * @param {Object} options a hash of symbols to be included in the scheme
+	 * @returns {Strategy} strategy tree that's represented by the scheme
+	 */
+	exports.build = function (scheme, options) {
+	    var context = Collections.extend({}, globalContext, options);
+	    return evaluate(scheme, context)[1].strategy;
+	};
+	var transports = {
+	    ws: Transports.WSTransport,
+	    xhr_streaming: Transports.XHRStreamingTransport,
+	    xdr_streaming: Transports.XDRStreamingTransport,
+	    xhr_polling: Transports.XHRPollingTransport,
+	    xdr_polling: Transports.XDRPollingTransport
+	};
+	var UnsupportedStrategy = {
+	    isSupported: function () {
+	        return false;
+	    },
+	    connect: function (_, callback) {
+	        var deferred = Util.defer(function () {
+	            callback(new Errors.UnsupportedStrategy());
+	        });
+	        return {
+	            abort: function () {
+	                deferred.ensureAborted();
+	            },
+	            forceMinPriority: function () { }
+	        };
+	    }
+	};
+	// DSL bindings
+	function returnWithOriginalContext(f) {
+	    return function (context) {
+	        return [f.apply(this, arguments), context];
+	    };
+	}
+	var globalContext = {
+	    extend: function (context, first, second) {
+	        return [Collections.extend({}, first, second), context];
+	    },
+	    def: function (context, name, value) {
+	        if (context[name] !== undefined) {
+	            throw "Redefining symbol " + name;
+	        }
+	        context[name] = value;
+	        return [undefined, context];
+	    },
+	    def_transport: function (context, name, type, priority, options, manager) {
+	        var transportClass = transports[type];
+	        if (!transportClass) {
+	            throw new Errors.UnsupportedTransport(type);
+	        }
+	        var enabled = (!context.enabledTransports ||
+	            Collections.arrayIndexOf(context.enabledTransports, name) !== -1) &&
+	            (!context.disabledTransports ||
+	                Collections.arrayIndexOf(context.disabledTransports, name) === -1);
+	        var transport;
+	        if (enabled) {
+	            transport = new transport_strategy_1.default(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, Collections.extend({
+	                key: context.key,
+	                encrypted: context.encrypted,
+	                timeline: context.timeline,
+	                ignoreNullOrigin: context.ignoreNullOrigin
+	            }, options));
+	        }
+	        else {
+	            transport = UnsupportedStrategy;
+	        }
+	        var newContext = context.def(context, name, transport)[1];
+	        newContext.transports = context.transports || {};
+	        newContext.transports[name] = transport;
+	        return [undefined, newContext];
+	    },
+	    transport_manager: returnWithOriginalContext(function (_, options) {
+	        return new transport_manager_1.default(options);
+	    }),
+	    sequential: returnWithOriginalContext(function (_, options) {
+	        var strategies = Array.prototype.slice.call(arguments, 2);
+	        return new sequential_strategy_1.default(strategies, options);
+	    }),
+	    cached: returnWithOriginalContext(function (context, ttl, strategy) {
+	        return new cached_strategy_1.default(strategy, context.transports, {
+	            ttl: ttl,
+	            timeline: context.timeline,
+	            encrypted: context.encrypted
+	        });
+	    }),
+	    first_connected: returnWithOriginalContext(function (_, strategy) {
+	        return new first_connected_strategy_1.default(strategy);
+	    }),
+	    best_connected_ever: returnWithOriginalContext(function () {
+	        var strategies = Array.prototype.slice.call(arguments, 1);
+	        return new best_connected_ever_strategy_1.default(strategies);
+	    }),
+	    delayed: returnWithOriginalContext(function (_, delay, strategy) {
+	        return new delayed_strategy_1.default(strategy, { delay: delay });
+	    }),
+	    "if": returnWithOriginalContext(function (_, test, trueBranch, falseBranch) {
+	        return new if_strategy_1.default(test, trueBranch, falseBranch);
+	    }),
+	    is_supported: returnWithOriginalContext(function (_, strategy) {
+	        return function () {
+	            return strategy.isSupported();
+	        };
+	    })
+	};
+	// DSL interpreter
+	function isSymbol(expression) {
+	    return (typeof expression === "string") && expression.charAt(0) === ":";
+	}
+	function getSymbolValue(expression, context) {
+	    return context[expression.slice(1)];
+	}
+	function evaluateListOfExpressions(expressions, context) {
+	    if (expressions.length === 0) {
+	        return [[], context];
+	    }
+	    var head = evaluate(expressions[0], context);
+	    var tail = evaluateListOfExpressions(expressions.slice(1), head[1]);
+	    return [[head[0]].concat(tail[0]), tail[1]];
+	}
+	function evaluateString(expression, context) {
+	    if (!isSymbol(expression)) {
+	        return [expression, context];
+	    }
+	    var value = getSymbolValue(expression, context);
+	    if (value === undefined) {
+	        throw "Undefined symbol " + expression;
+	    }
+	    return [value, context];
+	}
+	function evaluateArray(expression, context) {
+	    if (isSymbol(expression[0])) {
+	        var f = getSymbolValue(expression[0], context);
+	        if (expression.length > 1) {
+	            if (typeof f !== "function") {
+	                throw "Calling non-function " + expression[0];
+	            }
+	            var args = [Collections.extend({}, context)].concat(Collections.map(expression.slice(1), function (arg) {
+	                return evaluate(arg, Collections.extend({}, context))[0];
+	            }));
+	            return f.apply(this, args);
+	        }
+	        else {
+	            return [f, context];
+	        }
+	    }
+	    else {
+	        return evaluateListOfExpressions(expression, context);
+	    }
+	}
+	function evaluate(expression, context) {
+	    var expressionType = typeof expression;
+	    if (typeof expression === "string") {
+	        return evaluateString(expression, context);
+	    }
+	    else if (typeof expression === "object") {
+	        if (expression instanceof Array && expression.length > 0) {
+	            return evaluateArray(expression, context);
+	        }
+	    }
+	    return [expression, context];
+	}
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var assistant_to_the_transport_manager_1 = __webpack_require__(38);
 	/** Keeps track of the number of lives left for a transport.
 	 *
 	 * In the beginning of a session, transports may be assigned a number of
@@ -2761,46 +2704,46 @@ var Pusher =
 	 *
 	 * @param {Object} options
 	 */
-	function TransportManager(options) {
-	  this.options = options || {};
-	  this.livesLeft = this.options.lives || Infinity;
-	}
-	var prototype = TransportManager.prototype;
-
-	/** Creates a assistant for the transport.
-	 *
-	 * @param {Transport} transport
-	 * @returns {AssistantToTheTransportManager}
-	 */
-	prototype.getAssistant = function(transport) {
-	  return new AssistantToTheTransportManager(this, transport, {
-	    minPingDelay: this.options.minPingDelay,
-	    maxPingDelay: this.options.maxPingDelay
-	  });
-	};
-
-	/** Returns whether the transport has any lives left.
-	 *
-	 * @returns {Boolean}
-	 */
-	prototype.isAlive = function() {
-	  return this.livesLeft > 0;
-	};
-
-	/** Takes one life from the transport. */
-	prototype.reportDeath = function() {
-	  this.livesLeft -= 1;
-	};
-
-	module.exports = TransportManager;
+	var TransportManager = (function () {
+	    function TransportManager(options) {
+	        this.options = options;
+	        this.livesLeft = this.options.lives || Infinity;
+	    }
+	    /** Creates a assistant for the transport.
+	     *
+	     * @param {Transport} transport
+	     * @returns {AssistantToTheTransportManager}
+	     */
+	    TransportManager.prototype.getAssistant = function (transport) {
+	        return new assistant_to_the_transport_manager_1.default(this, transport, {
+	            minPingDelay: this.options.minPingDelay,
+	            maxPingDelay: this.options.maxPingDelay
+	        });
+	    };
+	    /** Returns whether the transport has any lives left.
+	     *
+	     * @returns {Boolean}
+	     */
+	    TransportManager.prototype.isAlive = function () {
+	        return this.livesLeft > 0;
+	    };
+	    /** Takes one life from the transport. */
+	    TransportManager.prototype.reportDeath = function () {
+	        this.livesLeft -= 1;
+	    };
+	    return TransportManager;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = TransportManager;
 
 
 /***/ },
-/* 33 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
 	var Util = __webpack_require__(1);
-
+	var Collections = __webpack_require__(2);
 	/** Creates transport connections monitored by a transport manager.
 	 *
 	 * When a transport is closed, it might mean the environment does not support
@@ -2814,85 +2757,79 @@ var Pusher =
 	 * @param {TransportConnection} transport
 	 * @param {Object} options
 	 */
-	function AssistantToTheTransportManager(manager, transport, options) {
-	  this.manager = manager;
-	  this.transport = transport;
-	  this.minPingDelay = options.minPingDelay;
-	  this.maxPingDelay = options.maxPingDelay;
-	  this.pingDelay = undefined;
-	}
-	var prototype = AssistantToTheTransportManager.prototype;
-
-	/** Creates a transport connection.
-	 *
-	 * This function has the same API as Transport#createConnection.
-	 *
-	 * @param {String} name
-	 * @param {Number} priority
-	 * @param {String} key the application key
-	 * @param {Object} options
-	 * @returns {TransportConnection}
-	 */
-	prototype.createConnection = function(name, priority, key, options) {
-	  var self = this;
-
-	  options = Util.extend({}, options, {
-	    activityTimeout: self.pingDelay
-	  });
-	  var connection = self.transport.createConnection(
-	    name, priority, key, options
-	  );
-
-	  var openTimestamp = null;
-
-	  var onOpen = function() {
-	    connection.unbind("open", onOpen);
-	    connection.bind("closed", onClosed);
-	    openTimestamp = Util.now();
-	  };
-	  var onClosed = function(closeEvent) {
-	    connection.unbind("closed", onClosed);
-
-	    if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-	      // we don't want to use transports not obeying the protocol
-	      self.manager.reportDeath();
-	    } else if (!closeEvent.wasClean && openTimestamp) {
-	      // report deaths only for short-living transport
-	      var lifespan = Util.now() - openTimestamp;
-	      if (lifespan < 2 * self.maxPingDelay) {
-	        self.manager.reportDeath();
-	        self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
-	      }
+	var AssistantToTheTransportManager = (function () {
+	    function AssistantToTheTransportManager(manager, transport, options) {
+	        this.manager = manager;
+	        this.transport = transport;
+	        this.minPingDelay = options.minPingDelay;
+	        this.maxPingDelay = options.maxPingDelay;
+	        this.pingDelay = undefined;
 	    }
-	  };
-
-	  connection.bind("open", onOpen);
-	  return connection;
-	};
-
-	/** Returns whether the transport is supported in the environment.
-	 *
-	 * This function has the same API as Transport#isSupported. Might return false
-	 * when the manager decides to kill the transport.
-	 *
-	 * @param {Object} environment the environment details (encryption, settings)
-	 * @returns {Boolean} true when the transport is supported
-	 */
-	prototype.isSupported = function(environment) {
-	  return this.manager.isAlive() && this.transport.isSupported(environment);
-	};
-
-	module.exports = AssistantToTheTransportManager;
+	    /** Creates a transport connection.
+	     *
+	     * This function has the same API as Transport#createConnection.
+	     *
+	     * @param {String} name
+	     * @param {Number} priority
+	     * @param {String} key the application key
+	     * @param {Object} options
+	     * @returns {TransportConnection}
+	     */
+	    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
+	        var self = this;
+	        options = Collections.extend({}, options, {
+	            activityTimeout: self.pingDelay
+	        });
+	        var connection = self.transport.createConnection(name, priority, key, options);
+	        var openTimestamp = null;
+	        var onOpen = function () {
+	            connection.unbind("open", onOpen);
+	            connection.bind("closed", onClosed);
+	            openTimestamp = Util.now();
+	        };
+	        var onClosed = function (closeEvent) {
+	            connection.unbind("closed", onClosed);
+	            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
+	                // we don't want to use transports not obeying the protocol
+	                self.manager.reportDeath();
+	            }
+	            else if (!closeEvent.wasClean && openTimestamp) {
+	                // report deaths only for short-living transport
+	                var lifespan = Util.now() - openTimestamp;
+	                if (lifespan < 2 * self.maxPingDelay) {
+	                    self.manager.reportDeath();
+	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
+	                }
+	            }
+	        };
+	        connection.bind("open", onOpen);
+	        return connection;
+	    };
+	    /** Returns whether the transport is supported in the environment.
+	     *
+	     * This function has the same API as Transport#isSupported. Might return false
+	     * when the manager decides to kill the transport.
+	     *
+	     * @param {Object} environment the environment details (encryption, settings)
+	     * @returns {Boolean} true when the transport is supported
+	     */
+	    AssistantToTheTransportManager.prototype.isSupported = function (environment) {
+	        return this.manager.isAlive() && this.transport.isSupported(environment);
+	    };
+	    return AssistantToTheTransportManager;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = AssistantToTheTransportManager;
 
 
 /***/ },
-/* 34 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
 	var Util = __webpack_require__(1);
-	var Errors = __webpack_require__(23);
-	var Handshake = __webpack_require__(35);
-
+	var Errors = __webpack_require__(24);
+	var handshake_1 = __webpack_require__(40);
 	/** Provides a strategy interface for transports.
 	 *
 	 * @param {String} name
@@ -2900,127 +2837,121 @@ var Pusher =
 	 * @param {Class} transport
 	 * @param {Object} options
 	 */
-	function TransportStrategy(name, priority, transport, options) {
-	  this.name = name;
-	  this.priority = priority;
-	  this.transport = transport;
-	  this.options = options || {};
-	}
-	var prototype = TransportStrategy.prototype;
-
-	/** Returns whether the transport is supported in the browser.
-	 *
-	 * @returns {Boolean}
-	 */
-	prototype.isSupported = function() {
-	  return this.transport.isSupported({
-	    encrypted: this.options.encrypted
-	  });
-	};
-
-	/** Launches a connection attempt and returns a strategy runner.
-	 *
-	 * @param  {Function} callback
-	 * @return {Object} strategy runner
-	 */
-	prototype.connect = function(minPriority, callback) {
-	  if (!this.isSupported()) {
-	    return failAttempt(new Errors.UnsupportedStrategy(), callback);
-	  } else if (this.priority < minPriority) {
-	    return failAttempt(new Errors.TransportPriorityTooLow(), callback);
-	  }
-
-	  var self = this;
-	  var connected = false;
-
-	  var transport = this.transport.createConnection(
-	    this.name, this.priority, this.options.key, this.options
-	  );
-	  var handshake = null;
-
-	  var onInitialized = function() {
-	    transport.unbind("initialized", onInitialized);
-	    transport.connect();
-	  };
-	  var onOpen = function() {
-	    handshake = new Handshake(transport, function(result) {
-	      connected = true;
-	      unbindListeners();
-	      callback(null, result);
-	    });
-	  };
-	  var onError = function(error) {
-	    unbindListeners();
-	    callback(error);
-	  };
-	  var onClosed = function() {
-	    unbindListeners();
-	    callback(new Errors.TransportClosed(transport));
-	  };
-
-	  var unbindListeners = function() {
-	    transport.unbind("initialized", onInitialized);
-	    transport.unbind("open", onOpen);
-	    transport.unbind("error", onError);
-	    transport.unbind("closed", onClosed);
-	  };
-
-	  transport.bind("initialized", onInitialized);
-	  transport.bind("open", onOpen);
-	  transport.bind("error", onError);
-	  transport.bind("closed", onClosed);
-
-	  // connect will be called automatically after initialization
-	  transport.initialize();
-
-	  return {
-	    abort: function() {
-	      if (connected) {
-	        return;
-	      }
-	      unbindListeners();
-	      if (handshake) {
-	        handshake.close();
-	      } else {
-	        transport.close();
-	      }
-	    },
-	    forceMinPriority: function(p) {
-	      if (connected) {
-	        return;
-	      }
-	      if (self.priority < p) {
-	        if (handshake) {
-	          handshake.close();
-	        } else {
-	          transport.close();
-	        }
-	      }
+	var TransportStrategy = (function () {
+	    function TransportStrategy(name, priority, transport, options) {
+	        this.name = name;
+	        this.priority = priority;
+	        this.transport = transport;
+	        this.options = options || {};
 	    }
-	  };
-	};
-
+	    /** Returns whether the transport is supported in the browser.
+	     *
+	     * @returns {Boolean}
+	     */
+	    TransportStrategy.prototype.isSupported = function () {
+	        return this.transport.isSupported({
+	            encrypted: this.options.encrypted
+	        });
+	    };
+	    /** Launches a connection attempt and returns a strategy runner.
+	     *
+	     * @param  {Function} callback
+	     * @return {Object} strategy runner
+	     */
+	    TransportStrategy.prototype.connect = function (minPriority, callback) {
+	        if (!this.isSupported()) {
+	            return failAttempt(new Errors.UnsupportedStrategy(), callback);
+	        }
+	        else if (this.priority < minPriority) {
+	            return failAttempt(new Errors.TransportPriorityTooLow(), callback);
+	        }
+	        var self = this;
+	        var connected = false;
+	        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
+	        var handshake = null;
+	        var onInitialized = function () {
+	            transport.unbind("initialized", onInitialized);
+	            transport.connect();
+	        };
+	        var onOpen = function () {
+	            handshake = new handshake_1.default(transport, function (result) {
+	                connected = true;
+	                unbindListeners();
+	                callback(null, result);
+	            });
+	        };
+	        var onError = function (error) {
+	            unbindListeners();
+	            callback(error);
+	        };
+	        var onClosed = function () {
+	            unbindListeners();
+	            callback(new Errors.TransportClosed(JSON.stringify(transport)));
+	        };
+	        var unbindListeners = function () {
+	            transport.unbind("initialized", onInitialized);
+	            transport.unbind("open", onOpen);
+	            transport.unbind("error", onError);
+	            transport.unbind("closed", onClosed);
+	        };
+	        transport.bind("initialized", onInitialized);
+	        transport.bind("open", onOpen);
+	        transport.bind("error", onError);
+	        transport.bind("closed", onClosed);
+	        // connect will be called automatically after initialization
+	        transport.initialize();
+	        return {
+	            abort: function () {
+	                if (connected) {
+	                    return;
+	                }
+	                unbindListeners();
+	                if (handshake) {
+	                    handshake.close();
+	                }
+	                else {
+	                    transport.close();
+	                }
+	            },
+	            forceMinPriority: function (p) {
+	                if (connected) {
+	                    return;
+	                }
+	                if (self.priority < p) {
+	                    if (handshake) {
+	                        handshake.close();
+	                    }
+	                    else {
+	                        transport.close();
+	                    }
+	                }
+	            }
+	        };
+	    };
+	    return TransportStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = TransportStrategy;
 	function failAttempt(error, callback) {
-	  Util.defer(function() {
-	    callback(error);
-	  });
-	  return {
-	    abort: function() {},
-	    forceMinPriority: function() {}
-	  };
+	    Util.defer(function () {
+	        callback(error);
+	    });
+	    return {
+	        abort: function () { },
+	        forceMinPriority: function () { }
+	    };
 	}
-
-	module.exports = TransportStrategy;
 
 
 /***/ },
-/* 35 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-	var Protocol = __webpack_require__(36);
-	var Connection = __webpack_require__(37);
-
+	"use strict";
+	var Collections = __webpack_require__(2);
+	var Protocol = __webpack_require__(41);
+	var connection_1 = __webpack_require__(44);
+	var handshake_results_1 = __webpack_require__(43);
 	/**
 	 * Handles Pusher protocol handshakes for transports.
 	 *
@@ -3037,79 +2968,73 @@ var Pusher =
 	 * @param {AbstractTransport} transport
 	 * @param {Function} callback
 	 */
-	function Handshake(transport, callback) {
-	  this.transport = transport;
-	  this.callback = callback;
-	  this.bindListeners();
-	}
-	var prototype = Handshake.prototype;
-
-	prototype.close = function() {
-	  this.unbindListeners();
-	  this.transport.close();
-	};
-
-	/** @private */
-	prototype.bindListeners = function() {
-	  var self = this;
-
-	  self.onMessage = function(m) {
-	    self.unbindListeners();
-
-	    try {
-	      var result = Protocol.processHandshake(m);
-	      if (result.action === "connected") {
-	        self.finish("connected", {
-	          connection: new Connection(result.id, self.transport),
-	          activityTimeout: result.activityTimeout
-	        });
-	      } else {
-	        self.finish(result.action, { error: result.error });
-	        self.transport.close();
-	      }
-	    } catch (e) {
-	      self.finish("error", { error: e });
-	      self.transport.close();
+	var Handshake = (function () {
+	    function Handshake(transport, callback) {
+	        this.transport = transport;
+	        this.callback = callback;
+	        this.bindListeners();
 	    }
-	  };
-
-	  self.onClosed = function(closeEvent) {
-	    self.unbindListeners();
-
-	    var action = Protocol.getCloseAction(closeEvent) || "backoff";
-	    var error = Protocol.getCloseError(closeEvent);
-	    self.finish(action, { error: error });
-	  };
-
-	  self.transport.bind("message", self.onMessage);
-	  self.transport.bind("closed", self.onClosed);
-	};
-
-	/** @private */
-	prototype.unbindListeners = function() {
-	  this.transport.unbind("message", this.onMessage);
-	  this.transport.unbind("closed", this.onClosed);
-	};
-
-	/** @private */
-	prototype.finish = function(action, params) {
-	  this.callback(
-	    Util.extend({ transport: this.transport, action: action }, params)
-	  );
-	};
-
-	module.exports = Handshake;
+	    Handshake.prototype.close = function () {
+	        this.unbindListeners();
+	        this.transport.close();
+	    };
+	    /** @private */
+	    Handshake.prototype.bindListeners = function () {
+	        var self = this;
+	        self.onMessage = function (m) {
+	            self.unbindListeners();
+	            try {
+	                var result = Protocol.processHandshake(m);
+	                if (result.action === handshake_results_1.default.CONNECTED) {
+	                    self.finish("connected", {
+	                        connection: new connection_1.default(result.id, self.transport),
+	                        activityTimeout: result.activityTimeout
+	                    });
+	                }
+	                else {
+	                    self.finish(result.action, { error: result.error });
+	                    self.transport.close();
+	                }
+	            }
+	            catch (e) {
+	                self.finish("error", { error: e });
+	                self.transport.close();
+	            }
+	        };
+	        self.onClosed = function (closeEvent) {
+	            self.unbindListeners();
+	            var action = Protocol.getCloseAction(closeEvent) || "backoff";
+	            var error = Protocol.getCloseError(closeEvent);
+	            self.finish(action, { error: error });
+	        };
+	        self.transport.bind("message", self.onMessage);
+	        self.transport.bind("closed", self.onClosed);
+	    };
+	    /** @private */
+	    Handshake.prototype.unbindListeners = function () {
+	        this.transport.unbind("message", this.onMessage);
+	        this.transport.unbind("closed", this.onClosed);
+	    };
+	    /** @private */
+	    Handshake.prototype.finish = function (action, params) {
+	        this.callback(Collections.extend({ transport: this.transport, action: action }, params));
+	    };
+	    return Handshake;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Handshake;
 
 
 /***/ },
-/* 36 */
-/***/ function(module, exports) {
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+	var internal_events_1 = __webpack_require__(42);
+	var handshake_results_1 = __webpack_require__(43);
 	/**
 	 * Provides functions for handling Pusher protocol-specific messages.
 	 */
-	var Protocol = {};
-
 	/**
 	 * Decodes a message in a Pusher format.
 	 *
@@ -3118,36 +3043,36 @@ var Pusher =
 	 * @param  {Object} message
 	 * @return {Object}
 	 */
-	Protocol.decodeMessage = function(message) {
-	  try {
-	    var params = JSON.parse(message.data);
-	    if (typeof params.data === 'string') {
-	      try {
-	        params.data = JSON.parse(params.data);
-	      } catch (e) {
-	        if (!(e instanceof SyntaxError)) {
-	          // TODO looks like unreachable code
-	          // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
-	          throw e;
+	exports.decodeMessage = function (message) {
+	    try {
+	        var params = JSON.parse(message.data);
+	        if (typeof params.data === 'string') {
+	            try {
+	                params.data = JSON.parse(params.data);
+	            }
+	            catch (e) {
+	                if (!(e instanceof SyntaxError)) {
+	                    // TODO looks like unreachable code
+	                    // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
+	                    throw e;
+	                }
+	            }
 	        }
-	      }
+	        return params;
 	    }
-	    return params;
-	  } catch (e) {
-	    throw { type: 'MessageParseError', error: e, data: message.data};
-	  }
+	    catch (e) {
+	        throw { type: 'MessageParseError', error: e, data: message.data };
+	    }
 	};
-
 	/**
 	 * Encodes a message to be sent.
 	 *
 	 * @param  {Object} message
 	 * @return {String}
 	 */
-	Protocol.encodeMessage = function(message) {
-	  return JSON.stringify(message);
+	exports.encodeMessage = function (message) {
+	    return JSON.stringify(message);
 	};
-
 	/** Processes a handshake message and returns appropriate actions.
 	 *
 	 * Returns an object with an 'action' and other action-specific properties.
@@ -3161,30 +3086,30 @@ var Pusher =
 	 * @param {String} message
 	 * @result Object
 	 */
-	Protocol.processHandshake = function(message) {
-	  message = this.decodeMessage(message);
-
-	  if (message.event === "pusher:connection_established") {
-	    if (!message.data.activity_timeout) {
-	      throw "No activity timeout specified in handshake";
+	exports.processHandshake = function (message) {
+	    message = exports.decodeMessage(message);
+	    if (message.event === internal_events_1.default.CONNECTION_ESTABLISHED) {
+	        if (!message.data.activity_timeout) {
+	            throw "No activity timeout specified in handshake";
+	        }
+	        return {
+	            action: handshake_results_1.default.CONNECTED,
+	            id: message.data.socket_id,
+	            activityTimeout: message.data.activity_timeout * 1000
+	        };
 	    }
-	    return {
-	      action: "connected",
-	      id: message.data.socket_id,
-	      activityTimeout: message.data.activity_timeout * 1000
-	    };
-	  } else if (message.event === "pusher:error") {
-	    // From protocol 6 close codes are sent only once, so this only
-	    // happens when connection does not support close codes
-	    return {
-	      action: this.getCloseAction(message.data),
-	      error: this.getCloseError(message.data)
-	    };
-	  } else {
-	    throw "Invalid handshake";
-	  }
+	    else if (message.event === internal_events_1.default.ERROR) {
+	        // From protocol 6 close codes are sent only once, so this only
+	        // happens when connection does not support close codes
+	        return {
+	            action: this.getCloseAction(message.data),
+	            error: this.getCloseError(message.data)
+	        };
+	    }
+	    else {
+	        throw "Invalid handshake";
+	    }
 	};
-
 	/**
 	 * Dispatches the close event and returns an appropriate action name.
 	 *
@@ -3195,32 +3120,37 @@ var Pusher =
 	 * @param  {CloseEvent} closeEvent
 	 * @return {String} close action name
 	 */
-	Protocol.getCloseAction = function(closeEvent) {
-	  if (closeEvent.code < 4000) {
-	    // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
-	    //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
-	    // ignore 1007...3999
-	    // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
-	    //        1004 CLOSE_TOO_LARGE
-	    if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-	      return "backoff";
-	    } else {
-	      return null;
+	exports.getCloseAction = function (closeEvent) {
+	    if (closeEvent.code < 4000) {
+	        // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
+	        //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
+	        // ignore 1007...3999
+	        // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
+	        //        1004 CLOSE_TOO_LARGE
+	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
+	            return handshake_results_1.default.BACKOFF;
+	        }
+	        else {
+	            return null;
+	        }
 	    }
-	  } else if (closeEvent.code === 4000) {
-	    return "ssl_only";
-	  } else if (closeEvent.code < 4100) {
-	    return "refused";
-	  } else if (closeEvent.code < 4200) {
-	    return "backoff";
-	  } else if (closeEvent.code < 4300) {
-	    return "retry";
-	  } else {
-	    // unknown error
-	    return "refused";
-	  }
+	    else if (closeEvent.code === 4000) {
+	        return handshake_results_1.default.SSL_ONLY;
+	    }
+	    else if (closeEvent.code < 4100) {
+	        return handshake_results_1.default.REFUSED;
+	    }
+	    else if (closeEvent.code < 4200) {
+	        return handshake_results_1.default.BACKOFF;
+	    }
+	    else if (closeEvent.code < 4300) {
+	        return handshake_results_1.default.RETRY;
+	    }
+	    else {
+	        // unknown error
+	        return handshake_results_1.default.REFUSED;
+	    }
 	};
-
 	/**
 	 * Returns an error or null basing on the close event.
 	 *
@@ -3230,32 +3160,67 @@ var Pusher =
 	 * @param  {CloseEvent} closeEvent
 	 * @return {Object} error object
 	 */
-	Protocol.getCloseError = function(closeEvent) {
-	  if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
-	    return {
-	      type: 'PusherError',
-	      data: {
-	        code: closeEvent.code,
-	        message: closeEvent.reason || closeEvent.message
-	      }
-	    };
-	  } else {
-	    return null;
-	  }
+	exports.getCloseError = function (closeEvent) {
+	    if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
+	        return {
+	            type: 'PusherError',
+	            data: {
+	                code: closeEvent.code,
+	                message: closeEvent.reason || closeEvent.message
+	            }
+	        };
+	    }
+	    else {
+	        return null;
+	    }
 	};
-
-	module.exports = Protocol;
 
 
 /***/ },
-/* 37 */
+/* 42 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var InternalEvents;
+	(function (InternalEvents) {
+	    InternalEvents[InternalEvents["CONNECTION_ESTABLISHED"] = "pusher:connection_established"] = "CONNECTION_ESTABLISHED";
+	    InternalEvents[InternalEvents["ERROR"] = "pusher:error"] = "ERROR";
+	})(InternalEvents || (InternalEvents = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = InternalEvents;
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var HandshakeResults;
+	(function (HandshakeResults) {
+	    HandshakeResults[HandshakeResults["CONNECTED"] = "connected"] = "CONNECTED";
+	    HandshakeResults[HandshakeResults["BACKOFF"] = "backoff"] = "BACKOFF";
+	    HandshakeResults[HandshakeResults["SSL_ONLY"] = "ssl_only"] = "SSL_ONLY";
+	    HandshakeResults[HandshakeResults["REFUSED"] = "refused"] = "REFUSED";
+	    HandshakeResults[HandshakeResults["RETRY"] = "retry"] = "RETRY";
+	})(HandshakeResults || (HandshakeResults = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HandshakeResults;
+
+
+/***/ },
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(7);
-	var Protocol = __webpack_require__(36);
-	var Logger = __webpack_require__(8);
-
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var Collections = __webpack_require__(2);
+	var dispatcher_1 = __webpack_require__(10);
+	var Protocol = __webpack_require__(41);
+	var logger_1 = __webpack_require__(12);
 	/**
 	 * Provides Pusher protocol interface for transports.
 	 *
@@ -3272,152 +3237,142 @@ var Pusher =
 	 * @param {Number} id
 	 * @param {AbstractTransport} transport
 	 */
-	function Connection(id, transport) {
-	  EventsDispatcher.call(this);
-
-	  this.id = id;
-	  this.transport = transport;
-	  this.activityTimeout = transport.activityTimeout;
-	  this.bindListeners();
-	}
-	var prototype = Connection.prototype;
-	Util.extend(prototype, EventsDispatcher.prototype);
-
-	/** Returns whether used transport handles activity checks by itself
-	 *
-	 * @returns {Boolean} true if activity checks are handled by the transport
-	 */
-	prototype.handlesActivityChecks = function() {
-	  return this.transport.handlesActivityChecks();
-	};
-
-	/** Sends raw data.
-	 *
-	 * @param {String} data
-	 */
-	prototype.send = function(data) {
-	  return this.transport.send(data);
-	};
-
-	/** Sends an event.
-	 *
-	 * @param {String} name
-	 * @param {String} data
-	 * @param {String} [channel]
-	 * @returns {Boolean} whether message was sent or not
-	 */
-	prototype.send_event = function(name, data, channel) {
-	  var message = { event: name, data: data };
-	  if (channel) {
-	    message.channel = channel;
-	  }
-	  Logger.debug('Event sent', message);
-	  return this.send(Protocol.encodeMessage(message));
-	};
-
-	/** Sends a ping message to the server.
-	 *
-	 * Basing on the underlying transport, it might send either transport's
-	 * protocol-specific ping or pusher:ping event.
-	 */
-	prototype.ping = function() {
-	  if (this.transport.supportsPing()) {
-	    this.transport.ping();
-	  } else {
-	    this.send_event('pusher:ping', {});
-	  }
-	};
-
-	/** Closes the connection. */
-	prototype.close = function() {
-	  this.transport.close();
-	};
-
-	/** @private */
-	prototype.bindListeners = function() {
-	  var self = this;
-
-	  var listeners = {
-	    message: function(m) {
-	      var message;
-	      try {
-	        message = Protocol.decodeMessage(m);
-	      } catch(e) {
-	        self.emit('error', {
-	          type: 'MessageParseError',
-	          error: e,
-	          data: m.data
-	        });
-	      }
-
-	      if (message !== undefined) {
-	        Logger.debug('Event recd', message);
-
-	        switch (message.event) {
-	          case 'pusher:error':
-	            self.emit('error', { type: 'PusherError', data: message.data });
-	            break;
-	          case 'pusher:ping':
-	            self.emit("ping");
-	            break;
-	          case 'pusher:pong':
-	            self.emit("pong");
-	            break;
-	        }
-	        self.emit('message', message);
-	      }
-	    },
-	    activity: function() {
-	      self.emit("activity");
-	    },
-	    error: function(error) {
-	      self.emit("error", { type: "WebSocketError", error: error });
-	    },
-	    closed: function(closeEvent) {
-	      unbindListeners();
-
-	      if (closeEvent && closeEvent.code) {
-	        self.handleCloseEvent(closeEvent);
-	      }
-
-	      self.transport = null;
-	      self.emit("closed");
+	var Connection = (function (_super) {
+	    __extends(Connection, _super);
+	    function Connection(id, transport) {
+	        _super.call(this);
+	        this.id = id;
+	        this.transport = transport;
+	        this.activityTimeout = transport.activityTimeout;
+	        this.bindListeners();
 	    }
-	  };
-
-	  var unbindListeners = function() {
-	    Util.objectApply(listeners, function(listener, event) {
-	      self.transport.unbind(event, listener);
-	    });
-	  };
-
-	  Util.objectApply(listeners, function(listener, event) {
-	    self.transport.bind(event, listener);
-	  });
-	};
-
-	/** @private */
-	prototype.handleCloseEvent = function(closeEvent) {
-	  var action = Protocol.getCloseAction(closeEvent);
-	  var error = Protocol.getCloseError(closeEvent);
-	  if (error) {
-	    this.emit('error', error);
-	  }
-	  if (action) {
-	    this.emit(action);
-	  }
-	};
-
-	module.exports = Connection;
+	    /** Returns whether used transport handles activity checks by itself
+	     *
+	     * @returns {Boolean} true if activity checks are handled by the transport
+	     */
+	    Connection.prototype.handlesActivityChecks = function () {
+	        return this.transport.handlesActivityChecks();
+	    };
+	    /** Sends raw data.
+	     *
+	     * @param {String} data
+	     */
+	    Connection.prototype.send = function (data) {
+	        return this.transport.send(data);
+	    };
+	    /** Sends an event.
+	     *
+	     * @param {String} name
+	     * @param {String} data
+	     * @param {String} [channel]
+	     * @returns {Boolean} whether message was sent or not
+	     */
+	    Connection.prototype.send_event = function (name, data, channel) {
+	        var message = { event: name, data: data };
+	        if (channel) {
+	            message.channel = channel;
+	        }
+	        logger_1.default.debug('Event sent', message);
+	        return this.send(Protocol.encodeMessage(message));
+	    };
+	    /** Sends a ping message to the server.
+	     *
+	     * Basing on the underlying transport, it might send either transport's
+	     * protocol-specific ping or pusher:ping event.
+	     */
+	    Connection.prototype.ping = function () {
+	        if (this.transport.supportsPing()) {
+	            this.transport.ping();
+	        }
+	        else {
+	            this.send_event('pusher:ping', {});
+	        }
+	    };
+	    /** Closes the connection. */
+	    Connection.prototype.close = function () {
+	        this.transport.close();
+	    };
+	    /** @private */
+	    Connection.prototype.bindListeners = function () {
+	        var self = this;
+	        var listeners = {
+	            message: function (m) {
+	                var message;
+	                try {
+	                    message = Protocol.decodeMessage(m);
+	                }
+	                catch (e) {
+	                    self.emit('error', {
+	                        type: 'MessageParseError',
+	                        error: e,
+	                        data: m.data
+	                    });
+	                }
+	                if (message !== undefined) {
+	                    logger_1.default.debug('Event recd', message);
+	                    switch (message.event) {
+	                        case 'pusher:error':
+	                            self.emit('error', { type: 'PusherError', data: message.data });
+	                            break;
+	                        case 'pusher:ping':
+	                            self.emit("ping");
+	                            break;
+	                        case 'pusher:pong':
+	                            self.emit("pong");
+	                            break;
+	                    }
+	                    self.emit('message', message);
+	                }
+	            },
+	            activity: function () {
+	                self.emit("activity");
+	            },
+	            error: function (error) {
+	                self.emit("error", { type: "WebSocketError", error: error });
+	            },
+	            closed: function (closeEvent) {
+	                unbindListeners();
+	                if (closeEvent && closeEvent.code) {
+	                    self.handleCloseEvent(closeEvent);
+	                }
+	                self.transport = null;
+	                self.emit("closed");
+	            }
+	        };
+	        var unbindListeners = function () {
+	            Collections.objectApply(listeners, function (listener, event) {
+	                self.transport.unbind(event, listener);
+	            });
+	        };
+	        Collections.objectApply(listeners, function (listener, event) {
+	            self.transport.bind(event, listener);
+	        });
+	    };
+	    /** @private */
+	    Connection.prototype.handleCloseEvent = function (closeEvent) {
+	        var action = Protocol.getCloseAction(closeEvent);
+	        var error = Protocol.getCloseError(closeEvent);
+	        if (error) {
+	            this.emit('error', error);
+	        }
+	        if (action) {
+	            this.emit(action);
+	        }
+	    };
+	    return Connection;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Connection;
 
 
 /***/ },
-/* 38 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+	var Collections = __webpack_require__(2);
 	var Util = __webpack_require__(1);
-	var Timer = __webpack_require__(3).Timer;
-
+	var timers_1 = __webpack_require__(3);
 	/** Loops through strategies with optional timeouts.
 	 *
 	 * Options:
@@ -3428,151 +3383,136 @@ var Pusher =
 	 * @param {Strategy[]} strategies
 	 * @param {Object} options
 	 */
-	function SequentialStrategy(strategies, options) {
-	  this.strategies = strategies;
-	  this.loop = Boolean(options.loop);
-	  this.failFast = Boolean(options.failFast);
-	  this.timeout = options.timeout;
-	  this.timeoutLimit = options.timeoutLimit;
-	}
-	var prototype = SequentialStrategy.prototype;
-
-	prototype.isSupported = function() {
-	  return Util.any(this.strategies, Util.method("isSupported"));
-	};
-
-	prototype.connect = function(minPriority, callback) {
-	  var self = this;
-
-	  var strategies = this.strategies;
-	  var current = 0;
-	  var timeout = this.timeout;
-	  var runner = null;
-
-	  var tryNextStrategy = function(error, handshake) {
-	    if (handshake) {
-	      callback(null, handshake);
-	    } else {
-	      current = current + 1;
-	      if (self.loop) {
-	        current = current % strategies.length;
-	      }
-
-	      if (current < strategies.length) {
-	        if (timeout) {
-	          timeout = timeout * 2;
-	          if (self.timeoutLimit) {
-	            timeout = Math.min(timeout, self.timeoutLimit);
-	          }
+	var SequentialStrategy = (function () {
+	    function SequentialStrategy(strategies, options) {
+	        this.strategies = strategies;
+	        this.loop = Boolean(options.loop);
+	        this.failFast = Boolean(options.failFast);
+	        this.timeout = options.timeout;
+	        this.timeoutLimit = options.timeoutLimit;
+	    }
+	    SequentialStrategy.prototype.isSupported = function () {
+	        return Collections.any(this.strategies, Util.method("isSupported"));
+	    };
+	    SequentialStrategy.prototype.connect = function (minPriority, callback) {
+	        var self = this;
+	        var strategies = this.strategies;
+	        var current = 0;
+	        var timeout = this.timeout;
+	        var runner = null;
+	        var tryNextStrategy = function (error, handshake) {
+	            if (handshake) {
+	                callback(null, handshake);
+	            }
+	            else {
+	                current = current + 1;
+	                if (self.loop) {
+	                    current = current % strategies.length;
+	                }
+	                if (current < strategies.length) {
+	                    if (timeout) {
+	                        timeout = timeout * 2;
+	                        if (self.timeoutLimit) {
+	                            timeout = Math.min(timeout, self.timeoutLimit);
+	                        }
+	                    }
+	                    runner = self.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: self.failFast }, tryNextStrategy);
+	                }
+	                else {
+	                    callback(true);
+	                }
+	            }
+	        };
+	        runner = this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: this.failFast }, tryNextStrategy);
+	        return {
+	            abort: function () {
+	                runner.abort();
+	            },
+	            forceMinPriority: function (p) {
+	                minPriority = p;
+	                if (runner) {
+	                    runner.forceMinPriority(p);
+	                }
+	            }
+	        };
+	    };
+	    /** @private */
+	    SequentialStrategy.prototype.tryStrategy = function (strategy, minPriority, options, callback) {
+	        var timer = null;
+	        var runner = null;
+	        if (options.timeout > 0) {
+	            timer = new timers_1.OneOffTimer(options.timeout, function () {
+	                runner.abort();
+	                callback(true);
+	            });
 	        }
-	        runner = self.tryStrategy(
-	          strategies[current],
-	          minPriority,
-	          { timeout: timeout, failFast: self.failFast },
-	          tryNextStrategy
-	        );
-	      } else {
-	        callback(true);
-	      }
-	    }
-	  };
-
-	  runner = this.tryStrategy(
-	    strategies[current],
-	    minPriority,
-	    { timeout: timeout, failFast: this.failFast },
-	    tryNextStrategy
-	  );
-
-	  return {
-	    abort: function() {
-	      runner.abort();
-	    },
-	    forceMinPriority: function(p) {
-	      minPriority = p;
-	      if (runner) {
-	        runner.forceMinPriority(p);
-	      }
-	    }
-	  };
-	};
-
-	/** @private */
-	prototype.tryStrategy = function(strategy, minPriority, options, callback) {
-	  var timer = null;
-	  var runner = null;
-
-	  if (options.timeout > 0) {
-	    timer = new Timer(options.timeout, function() {
-	      runner.abort();
-	      callback(true);
-	    });
-	  }
-
-	  runner = strategy.connect(minPriority, function(error, handshake) {
-	    if (error && timer && timer.isRunning() && !options.failFast) {
-	      // advance to the next strategy after the timeout
-	      return;
-	    }
-	    if (timer) {
-	      timer.ensureAborted();
-	    }
-	    callback(error, handshake);
-	  });
-
-	  return {
-	    abort: function() {
-	      if (timer) {
-	        timer.ensureAborted();
-	      }
-	      runner.abort();
-	    },
-	    forceMinPriority: function(p) {
-	      runner.forceMinPriority(p);
-	    }
-	  };
-	};
-
-	module.exports = SequentialStrategy;
+	        runner = strategy.connect(minPriority, function (error, handshake) {
+	            if (error && timer && timer.isRunning() && !options.failFast) {
+	                // advance to the next strategy after the timeout
+	                return;
+	            }
+	            if (timer) {
+	                timer.ensureAborted();
+	            }
+	            callback(error, handshake);
+	        });
+	        return {
+	            abort: function () {
+	                if (timer) {
+	                    timer.ensureAborted();
+	                }
+	                runner.abort();
+	            },
+	            forceMinPriority: function (p) {
+	                runner.forceMinPriority(p);
+	            }
+	        };
+	    };
+	    return SequentialStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = SequentialStrategy;
 
 
 /***/ },
-/* 39 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
+	var Collections = __webpack_require__(2);
 	var Util = __webpack_require__(1);
-
 	/** Launches all substrategies and emits prioritized connected transports.
 	 *
 	 * @param {Array} strategies
 	 */
-	function BestConnectedEverStrategy(strategies) {
-	  this.strategies = strategies;
-	}
-	var prototype = BestConnectedEverStrategy.prototype;
-
-	prototype.isSupported = function() {
-	  return Util.any(this.strategies, Util.method("isSupported"));
-	};
-
-	prototype.connect = function(minPriority, callback) {
-	  return connect(this.strategies, minPriority, function(i, runners) {
-	    return function(error, handshake) {
-	      runners[i].error = error;
-	      if (error) {
-	        if (allRunnersFailed(runners)) {
-	          callback(true);
-	        }
-	        return;
-	      }
-	      Util.apply(runners, function(runner) {
-	        runner.forceMinPriority(handshake.transport.priority);
-	      });
-	      callback(null, handshake);
+	var BestConnectedEverStrategy = (function () {
+	    function BestConnectedEverStrategy(strategies) {
+	        this.strategies = strategies;
+	    }
+	    BestConnectedEverStrategy.prototype.isSupported = function () {
+	        return Collections.any(this.strategies, Util.method("isSupported"));
 	    };
-	  });
-	};
-
+	    BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {
+	        return connect(this.strategies, minPriority, function (i, runners) {
+	            return function (error, handshake) {
+	                runners[i].error = error;
+	                if (error) {
+	                    if (allRunnersFailed(runners)) {
+	                        callback(true);
+	                    }
+	                    return;
+	                }
+	                Collections.apply(runners, function (runner) {
+	                    runner.forceMinPriority(handshake.transport.priority);
+	                });
+	                callback(null, handshake);
+	            };
+	        });
+	    };
+	    return BestConnectedEverStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = BestConnectedEverStrategy;
 	/** Connects to all strategies in parallel.
 	 *
 	 * Callback builder should be a function that takes two arguments: index
@@ -3585,173 +3525,158 @@ var Pusher =
 	 * @return {Object} strategy runner
 	 */
 	function connect(strategies, minPriority, callbackBuilder) {
-	  var runners = Util.map(strategies, function(strategy, i, _, rs) {
-	    return strategy.connect(minPriority, callbackBuilder(i, rs));
-	  });
-	  return {
-	    abort: function() {
-	      Util.apply(runners, abortRunner);
-	    },
-	    forceMinPriority: function(p) {
-	      Util.apply(runners, function(runner) {
-	        runner.forceMinPriority(p);
-	      });
-	    }
-	  };
+	    var runners = Collections.map(strategies, function (strategy, i, _, rs) {
+	        return strategy.connect(minPriority, callbackBuilder(i, rs));
+	    });
+	    return {
+	        abort: function () {
+	            Collections.apply(runners, abortRunner);
+	        },
+	        forceMinPriority: function (p) {
+	            Collections.apply(runners, function (runner) {
+	                runner.forceMinPriority(p);
+	            });
+	        }
+	    };
 	}
-
 	function allRunnersFailed(runners) {
-	  return Util.all(runners, function(runner) {
-	    return Boolean(runner.error);
-	  });
+	    return Collections.all(runners, function (runner) {
+	        return Boolean(runner.error);
+	    });
 	}
-
 	function abortRunner(runner) {
-	  if (!runner.error && !runner.aborted) {
-	    runner.abort();
-	    runner.aborted = true;
-	  }
+	    if (!runner.error && !runner.aborted) {
+	        runner.abort();
+	        runner.aborted = true;
+	    }
 	}
-
-	module.exports = BestConnectedEverStrategy;
 
 
 /***/ },
-/* 40 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
+	"use strict";
 	var Util = __webpack_require__(1);
-	var SequentialStrategy = __webpack_require__(38);
-
+	var sequential_strategy_1 = __webpack_require__(45);
 	/** Caches last successful transport and uses it for following attempts.
 	 *
 	 * @param {Strategy} strategy
 	 * @param {Object} transports
 	 * @param {Object} options
 	 */
-	function CachedStrategy(strategy, transports, options) {
-	  this.strategy = strategy;
-	  this.transports = transports;
-	  this.ttl = options.ttl || 1800*1000;
-	  this.encrypted = options.encrypted;
-	  this.timeline = options.timeline;
-	}
-	var prototype = CachedStrategy.prototype;
-
-	prototype.isSupported = function() {
-	  return this.strategy.isSupported();
-	};
-
-	prototype.connect = function(minPriority, callback) {
-	  var encrypted = this.encrypted;
-	  var info = fetchTransportCache(encrypted);
-
-	  var strategies = [this.strategy];
-	  if (info && info.timestamp + this.ttl >= Util.now()) {
-	    var transport = this.transports[info.transport];
-	    if (transport) {
-	      this.timeline.info({
-	        cached: true,
-	        transport: info.transport,
-	        latency: info.latency
-	      });
-	      strategies.push(new SequentialStrategy([transport], {
-	        timeout: info.latency * 2 + 1000,
-	        failFast: true
-	      }));
+	var CachedStrategy = (function () {
+	    function CachedStrategy(strategy, transports, options) {
+	        this.strategy = strategy;
+	        this.transports = transports;
+	        this.ttl = options.ttl || 1800 * 1000;
+	        this.encrypted = options.encrypted;
+	        this.timeline = options.timeline;
 	    }
-	  }
-
-	  var startTimestamp = Util.now();
-	  var runner = strategies.pop().connect(
-	    minPriority,
-	    function cb(error, handshake) {
-	      if (error) {
-	        flushTransportCache(encrypted);
-	        if (strategies.length > 0) {
-	          startTimestamp = Util.now();
-	          runner = strategies.pop().connect(minPriority, cb);
-	        } else {
-	          callback(error);
+	    CachedStrategy.prototype.isSupported = function () {
+	        return this.strategy.isSupported();
+	    };
+	    CachedStrategy.prototype.connect = function (minPriority, callback) {
+	        var encrypted = this.encrypted;
+	        var info = fetchTransportCache(encrypted);
+	        var strategies = [this.strategy];
+	        if (info && info.timestamp + this.ttl >= Util.now()) {
+	            var transport = this.transports[info.transport];
+	            if (transport) {
+	                this.timeline.info({
+	                    cached: true,
+	                    transport: info.transport,
+	                    latency: info.latency
+	                });
+	                strategies.push(new sequential_strategy_1.default([transport], {
+	                    timeout: info.latency * 2 + 1000,
+	                    failFast: true
+	                }));
+	            }
 	        }
-	      } else {
-	        storeTransportCache(
-	          encrypted,
-	          handshake.transport.name,
-	          Util.now() - startTimestamp
-	        );
-	        callback(null, handshake);
-	      }
-	    }
-	  );
-
-	  return {
-	    abort: function() {
-	      runner.abort();
-	    },
-	    forceMinPriority: function(p) {
-	      minPriority = p;
-	      if (runner) {
-	        runner.forceMinPriority(p);
-	      }
-	    }
-	  };
-	};
-
+	        var startTimestamp = Util.now();
+	        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {
+	            if (error) {
+	                flushTransportCache(encrypted);
+	                if (strategies.length > 0) {
+	                    startTimestamp = Util.now();
+	                    runner = strategies.pop().connect(minPriority, cb);
+	                }
+	                else {
+	                    callback(error);
+	                }
+	            }
+	            else {
+	                storeTransportCache(encrypted, handshake.transport.name, Util.now() - startTimestamp);
+	                callback(null, handshake);
+	            }
+	        });
+	        return {
+	            abort: function () {
+	                runner.abort();
+	            },
+	            forceMinPriority: function (p) {
+	                minPriority = p;
+	                if (runner) {
+	                    runner.forceMinPriority(p);
+	                }
+	            }
+	        };
+	    };
+	    return CachedStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = CachedStrategy;
 	function getTransportCacheKey(encrypted) {
-	  return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
+	    return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
 	}
-
 	function fetchTransportCache(encrypted) {
-	  var storage = Util.getLocalStorage();
-	  if (storage) {
-	    try {
-	      var serializedCache = storage[getTransportCacheKey(encrypted)];
-	      if (serializedCache) {
-	        return JSON.parse(serializedCache);
-	      }
-	    } catch (e) {
-	      flushTransportCache(encrypted);
+	    var storage = Util.getLocalStorage();
+	    if (storage) {
+	        try {
+	            var serializedCache = storage[getTransportCacheKey(encrypted)];
+	            if (serializedCache) {
+	                return JSON.parse(serializedCache);
+	            }
+	        }
+	        catch (e) {
+	            flushTransportCache(encrypted);
+	        }
 	    }
-	  }
-	  return null;
+	    return null;
 	}
-
 	function storeTransportCache(encrypted, transport, latency) {
-	  var storage = Util.getLocalStorage();
-	  if (storage) {
-	    try {
-	      storage[getTransportCacheKey(encrypted)] = JSON.stringify({
-	        timestamp: Util.now(),
-	        transport: transport,
-	        latency: latency
-	      });
-	    } catch (e) {
-	      // catch over quota exceptions raised by localStorage
+	    var storage = Util.getLocalStorage();
+	    if (storage) {
+	        try {
+	            storage[getTransportCacheKey(encrypted)] = JSON.stringify({
+	                timestamp: Util.now(),
+	                transport: transport,
+	                latency: latency
+	            });
+	        }
+	        catch (e) {
+	        }
 	    }
-	  }
 	}
-
 	function flushTransportCache(encrypted) {
-	  var storage = Util.getLocalStorage();
-	  if (storage) {
-	    try {
-	      delete storage[getTransportCacheKey(encrypted)];
-	    } catch (e) {
-	      // catch exceptions raised by localStorage
+	    var storage = Util.getLocalStorage();
+	    if (storage) {
+	        try {
+	            delete storage[getTransportCacheKey(encrypted)];
+	        }
+	        catch (e) {
+	        }
 	    }
-	  }
 	}
-
-	module.exports = CachedStrategy;
 
 
 /***/ },
-/* 41 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Timer = __webpack_require__(3).Timer;
-
+	"use strict";
+	var timers_1 = __webpack_require__(3);
 	/** Runs substrategy after specified delay.
 	 *
 	 * Options:
@@ -3760,115 +3685,120 @@ var Pusher =
 	 * @param {Strategy} strategy
 	 * @param {Object} options
 	 */
-	function DelayedStrategy(strategy, options) {
-	  this.strategy = strategy;
-	  this.options = { delay: options.delay };
-	}
-	var prototype = DelayedStrategy.prototype;
-
-	prototype.isSupported = function() {
-	  return this.strategy.isSupported();
-	};
-
-	prototype.connect = function(minPriority, callback) {
-	  var strategy = this.strategy;
-	  var runner;
-	  var timer = new Timer(this.options.delay, function() {
-	    runner = strategy.connect(minPriority, callback);
-	  });
-
-	  return {
-	    abort: function() {
-	      timer.ensureAborted();
-	      if (runner) {
-	        runner.abort();
-	      }
-	    },
-	    forceMinPriority: function(p) {
-	      minPriority = p;
-	      if (runner) {
-	        runner.forceMinPriority(p);
-	      }
+	var DelayedStrategy = (function () {
+	    function DelayedStrategy(strategy, _a) {
+	        var number = _a.delay;
+	        this.strategy = strategy;
+	        this.options = { delay: number };
 	    }
-	  };
-	};
-
-	module.exports = DelayedStrategy;
+	    DelayedStrategy.prototype.isSupported = function () {
+	        return this.strategy.isSupported();
+	    };
+	    DelayedStrategy.prototype.connect = function (minPriority, callback) {
+	        var strategy = this.strategy;
+	        var runner;
+	        var timer = new timers_1.OneOffTimer(this.options.delay, function () {
+	            runner = strategy.connect(minPriority, callback);
+	        });
+	        return {
+	            abort: function () {
+	                timer.ensureAborted();
+	                if (runner) {
+	                    runner.abort();
+	                }
+	            },
+	            forceMinPriority: function (p) {
+	                minPriority = p;
+	                if (runner) {
+	                    runner.forceMinPriority(p);
+	                }
+	            }
+	        };
+	    };
+	    return DelayedStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = DelayedStrategy;
 
 
 /***/ },
-/* 42 */
+/* 49 */
 /***/ function(module, exports) {
 
+	"use strict";
 	/** Proxies method calls to one of substrategies basing on the test function.
 	 *
 	 * @param {Function} test
 	 * @param {Strategy} trueBranch strategy used when test returns true
 	 * @param {Strategy} falseBranch strategy used when test returns false
 	 */
-	function IfStrategy(test, trueBranch, falseBranch) {
-	  this.test = test;
-	  this.trueBranch = trueBranch;
-	  this.falseBranch = falseBranch;
-	}
-	var prototype = IfStrategy.prototype;
-
-	prototype.isSupported = function() {
-	  var branch = this.test() ? this.trueBranch : this.falseBranch;
-	  return branch.isSupported();
-	};
-
-	prototype.connect = function(minPriority, callback) {
-	  var branch = this.test() ? this.trueBranch : this.falseBranch;
-	  return branch.connect(minPriority, callback);
-	};
-
-	module.exports = IfStrategy;
+	var IfStrategy = (function () {
+	    function IfStrategy(test, trueBranch, falseBranch) {
+	        this.test = test;
+	        this.trueBranch = trueBranch;
+	        this.falseBranch = falseBranch;
+	    }
+	    IfStrategy.prototype.isSupported = function () {
+	        var branch = this.test() ? this.trueBranch : this.falseBranch;
+	        return branch.isSupported();
+	    };
+	    IfStrategy.prototype.connect = function (minPriority, callback) {
+	        var branch = this.test() ? this.trueBranch : this.falseBranch;
+	        return branch.connect(minPriority, callback);
+	    };
+	    return IfStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = IfStrategy;
 
 
 /***/ },
-/* 43 */
+/* 50 */
 /***/ function(module, exports) {
 
+	"use strict";
 	/** Launches the substrategy and terminates on the first open connection.
 	 *
 	 * @param {Strategy} strategy
 	 */
-	function FirstConnectedStrategy(strategy) {
-	  this.strategy = strategy;
-	}
-	var prototype = FirstConnectedStrategy.prototype;
-
-	prototype.isSupported = function() {
-	  return this.strategy.isSupported();
-	};
-
-	prototype.connect = function(minPriority, callback) {
-	  var runner = this.strategy.connect(
-	    minPriority,
-	    function(error, handshake) {
-	      if (handshake) {
-	        runner.abort();
-	      }
-	      callback(error, handshake);
+	var FirstConnectedStrategy = (function () {
+	    function FirstConnectedStrategy(strategy) {
+	        this.strategy = strategy;
 	    }
-	  );
-	  return runner;
-	};
-
-	module.exports = FirstConnectedStrategy;
+	    FirstConnectedStrategy.prototype.isSupported = function () {
+	        return this.strategy.isSupported();
+	    };
+	    FirstConnectedStrategy.prototype.connect = function (minPriority, callback) {
+	        var runner = this.strategy.connect(minPriority, function (error, handshake) {
+	            if (handshake) {
+	                runner.abort();
+	            }
+	            callback(error, handshake);
+	        });
+	        return runner;
+	    };
+	    return FirstConnectedStrategy;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = FirstConnectedStrategy;
 
 
 /***/ },
-/* 44 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Util = __webpack_require__(1);
-	var EventsDispatcher = __webpack_require__(7);
-	var Timer = __webpack_require__(3).Timer;
-	var Network = __webpack_require__(45).Network;
-	var Logger = __webpack_require__(8);
-
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var dispatcher_1 = __webpack_require__(10);
+	var timers_1 = __webpack_require__(3);
+	var net_info_1 = __webpack_require__(52);
+	var logger_1 = __webpack_require__(12);
+	var state_1 = __webpack_require__(13);
+	var Collections = __webpack_require__(2);
 	/** Manages connection to Pusher.
 	 *
 	 * Uses a strategy (currently only default), timers and network availability
@@ -3895,421 +3825,408 @@ var Pusher =
 	 * @param {String} key application key
 	 * @param {Object} options
 	 */
-	function ConnectionManager(key, options) {
-	  EventsDispatcher.call(this);
-
-	  this.key = key;
-	  this.options = options || {};
-	  this.state = "initialized";
-	  this.connection = null;
-	  this.encrypted = !!options.encrypted;
-	  this.timeline = this.options.timeline;
-
-	  this.connectionCallbacks = this.buildConnectionCallbacks();
-	  this.errorCallbacks = this.buildErrorCallbacks();
-	  this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
-
-	  var self = this;
-
-	  Network.bind("online", function() {
-	    self.timeline.info({ netinfo: "online" });
-	    if (self.state === "connecting" || self.state === "unavailable") {
-	      self.retryIn(0);
+	var ConnectionManager = (function (_super) {
+	    __extends(ConnectionManager, _super);
+	    function ConnectionManager(key, options) {
+	        _super.call(this);
+	        this.key = key;
+	        this.options = options || {};
+	        this.state = state_1.default.INITIALIZED;
+	        this.connection = null;
+	        this.encrypted = !!options.encrypted;
+	        this.timeline = this.options.timeline;
+	        this.connectionCallbacks = this.buildConnectionCallbacks();
+	        this.errorCallbacks = this.buildErrorCallbacks();
+	        this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
+	        var self = this;
+	        net_info_1.Network.bind("online", function () {
+	            self.timeline.info({ netinfo: "online" });
+	            if ((self.state) === "connecting" || (self.state) === "unavailable") {
+	                self.retryIn(0);
+	            }
+	        });
+	        net_info_1.Network.bind("offline", function () {
+	            self.timeline.info({ netinfo: "offline" });
+	            if (self.connection) {
+	                self.sendActivityCheck();
+	            }
+	        });
+	        this.updateStrategy();
 	    }
-	  });
-	  Network.bind("offline", function() {
-	    self.timeline.info({ netinfo: "offline" });
-	    if (self.connection) {
-	      self.sendActivityCheck();
-	    }
-	  });
-
-	  this.updateStrategy();
-	}
-	var prototype = ConnectionManager.prototype;
-
-	Util.extend(prototype, EventsDispatcher.prototype);
-
-	/** Establishes a connection to Pusher.
-	 *
-	 * Does nothing when connection is already established. See top-level doc
-	 * to find events emitted on connection attempts.
-	 */
-	prototype.connect = function() {
-	  if (this.connection || this.runner) {
-	    return;
-	  }
-	  if (!this.strategy.isSupported()) {
-	    this.updateState("failed");
-	    return;
-	  }
-	  this.updateState("connecting");
-	  this.startConnecting();
-	  this.setUnavailableTimer();
-	};
-
-	/** Sends raw data.
-	 *
-	 * @param {String} data
-	 */
-	prototype.send = function(data) {
-	  if (this.connection) {
-	    return this.connection.send(data);
-	  } else {
-	    return false;
-	  }
-	};
-
-	/** Sends an event.
-	 *
-	 * @param {String} name
-	 * @param {String} data
-	 * @param {String} [channel]
-	 * @returns {Boolean} whether message was sent or not
-	 */
-	prototype.send_event = function(name, data, channel) {
-	  if (this.connection) {
-	    return this.connection.send_event(name, data, channel);
-	  } else {
-	    return false;
-	  }
-	};
-
-	/** Closes the connection. */
-	prototype.disconnect = function() {
-	  this.disconnectInternally();
-	  this.updateState("disconnected");
-	};
-
-	prototype.isEncrypted = function() {
-	  return this.encrypted;
-	};
-
-	/** @private */
-	prototype.startConnecting = function() {
-	  var self = this;
-	  var callback = function(error, handshake) {
-	    if (error) {
-	      self.runner = self.strategy.connect(0, callback);
-	    } else {
-	      if (handshake.action === "error") {
-	        self.emit("error", { type: "HandshakeError", error: handshake.error });
-	        self.timeline.error({ handshakeError: handshake.error });
-	      } else {
-	        self.abortConnecting(); // we don't support switching connections yet
-	        self.handshakeCallbacks[handshake.action](handshake);
-	      }
-	    }
-	  };
-	  self.runner = self.strategy.connect(0, callback);
-	};
-
-	/** @private */
-	prototype.abortConnecting = function() {
-	  if (this.runner) {
-	    this.runner.abort();
-	    this.runner = null;
-	  }
-	};
-
-	/** @private */
-	prototype.disconnectInternally = function() {
-	  this.abortConnecting();
-	  this.clearRetryTimer();
-	  this.clearUnavailableTimer();
-	  if (this.connection) {
-	    var connection = this.abandonConnection();
-	    connection.close();
-	  }
-	};
-
-	/** @private */
-	prototype.updateStrategy = function() {
-	  this.strategy = this.options.getStrategy({
-	    key: this.key,
-	    timeline: this.timeline,
-	    encrypted: this.encrypted
-	  });
-	};
-
-	/** @private */
-	prototype.retryIn = function(delay) {
-	  var self = this;
-	  self.timeline.info({ action: "retry", delay: delay });
-	  if (delay > 0) {
-	    self.emit("connecting_in", Math.round(delay / 1000));
-	  }
-	  self.retryTimer = new Timer(delay || 0, function() {
-	    self.disconnectInternally();
-	    self.connect();
-	  });
-	};
-
-	/** @private */
-	prototype.clearRetryTimer = function() {
-	  if (this.retryTimer) {
-	    this.retryTimer.ensureAborted();
-	    this.retryTimer = null;
-	  }
-	};
-
-	/** @private */
-	prototype.setUnavailableTimer = function() {
-	  var self = this;
-	  self.unavailableTimer = new Timer(
-	    self.options.unavailableTimeout,
-	    function() {
-	      self.updateState("unavailable");
-	    }
-	  );
-	};
-
-	/** @private */
-	prototype.clearUnavailableTimer = function() {
-	  if (this.unavailableTimer) {
-	    this.unavailableTimer.ensureAborted();
-	  }
-	};
-
-	/** @private */
-	prototype.sendActivityCheck = function() {
-	  var self = this;
-	  self.stopActivityCheck();
-	  self.connection.ping();
-	  // wait for pong response
-	  self.activityTimer = new Timer(
-	    self.options.pongTimeout,
-	    function() {
-	      self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-	      self.retryIn(0);
-	    }
-	  );
-	};
-
-	/** @private */
-	prototype.resetActivityCheck = function() {
-	  var self = this;
-	  self.stopActivityCheck();
-	  // send ping after inactivity
-	  if (!self.connection.handlesActivityChecks()) {
-	    self.activityTimer = new Timer(self.activityTimeout, function() {
-	      self.sendActivityCheck();
-	    });
-	  }
-	};
-
-	/** @private */
-	prototype.stopActivityCheck = function() {
-	  if (this.activityTimer) {
-	    this.activityTimer.ensureAborted();
-	  }
-	};
-
-	/** @private */
-	prototype.buildConnectionCallbacks = function() {
-	  var self = this;
-	  return {
-	    message: function(message) {
-	      // includes pong messages from server
-	      self.resetActivityCheck();
-	      self.emit('message', message);
-	    },
-	    ping: function() {
-	      self.send_event('pusher:pong', {});
-	    },
-	    activity: function() {
-	      self.resetActivityCheck();
-	    },
-	    error: function(error) {
-	      // just emit error to user - socket will already be closed by browser
-	      self.emit("error", { type: "WebSocketError", error: error });
-	    },
-	    closed: function() {
-	      self.abandonConnection();
-	      if (self.shouldRetry()) {
-	        self.retryIn(1000);
-	      }
-	    }
-	  };
-	};
-
-	/** @private */
-	prototype.buildHandshakeCallbacks = function(errorCallbacks) {
-	  var self = this;
-	  return Util.extend({}, errorCallbacks, {
-	    connected: function(handshake) {
-	      self.activityTimeout = Math.min(
-	        self.options.activityTimeout,
-	        handshake.activityTimeout,
-	        handshake.connection.activityTimeout || Infinity
-	      );
-	      self.clearUnavailableTimer();
-	      self.setConnection(handshake.connection);
-	      self.socket_id = self.connection.id;
-	      self.updateState("connected", { socket_id: self.socket_id });
-	    }
-	  });
-	};
-
-	/** @private */
-	prototype.buildErrorCallbacks = function() {
-	  var self = this;
-
-	  function withErrorEmitted(callback) {
-	    return function(result) {
-	      if (result.error) {
-	        self.emit("error", { type: "WebSocketError", error: result.error });
-	      }
-	      callback(result);
+	    /** Establishes a connection to Pusher.
+	     *
+	     * Does nothing when connection is already established. See top-level doc
+	     * to find events emitted on connection attempts.
+	     */
+	    ConnectionManager.prototype.connect = function () {
+	        if (this.connection || this.runner) {
+	            return;
+	        }
+	        if (!this.strategy.isSupported()) {
+	            this.updateState(state_1.default.FAILED);
+	            return;
+	        }
+	        this.updateState(state_1.default.CONNECTING);
+	        this.startConnecting();
+	        this.setUnavailableTimer();
 	    };
-	  }
-
-	  return {
-	    ssl_only: withErrorEmitted(function() {
-	      self.encrypted = true;
-	      self.updateStrategy();
-	      self.retryIn(0);
-	    }),
-	    refused: withErrorEmitted(function() {
-	      self.disconnect();
-	    }),
-	    backoff: withErrorEmitted(function() {
-	      self.retryIn(1000);
-	    }),
-	    retry: withErrorEmitted(function() {
-	      self.retryIn(0);
-	    })
-	  };
-	};
-
-	/** @private */
-	prototype.setConnection = function(connection) {
-	  this.connection = connection;
-	  for (var event in this.connectionCallbacks) {
-	    this.connection.bind(event, this.connectionCallbacks[event]);
-	  }
-	  this.resetActivityCheck();
-	};
-
-	/** @private */
-	prototype.abandonConnection = function() {
-	  if (!this.connection) {
-	    return;
-	  }
-	  this.stopActivityCheck();
-	  for (var event in this.connectionCallbacks) {
-	    this.connection.unbind(event, this.connectionCallbacks[event]);
-	  }
-	  var connection = this.connection;
-	  this.connection = null;
-	  return connection;
-	};
-
-	/** @private */
-	prototype.updateState = function(newState, data) {
-	  var previousState = this.state;
-	  this.state = newState;
-	  if (previousState !== newState) {
-	    var newStateDescription = newState;
-	    if (newState === "connected") {
-	      newStateDescription += " with new socket ID " + data.socket_id;
-	    }
-	    Logger.debug('State changed', previousState + ' -> ' + newStateDescription);
-	    this.timeline.info({ state: newState, params: data });
-	    this.emit('state_change', { previous: previousState, current: newState });
-	    this.emit(newState, data);
-	  }
-	};
-
-	/** @private */
-	prototype.shouldRetry = function() {
-	  return this.state === "connecting" || this.state === "connected";
-	};
-
-	module.exports = ConnectionManager;
+	    ;
+	    /** Sends raw data.
+	     *
+	     * @param {String} data
+	     */
+	    ConnectionManager.prototype.send = function (data) {
+	        if (this.connection) {
+	            return this.connection.send(data);
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    ;
+	    /** Sends an event.
+	     *
+	     * @param {String} name
+	     * @param {String} data
+	     * @param {String} [channel]
+	     * @returns {Boolean} whether message was sent or not
+	     */
+	    ConnectionManager.prototype.send_event = function (name, data, channel) {
+	        if (this.connection) {
+	            return this.connection.send_event(name, data, channel);
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    ;
+	    /** Closes the connection. */
+	    ConnectionManager.prototype.disconnect = function () {
+	        this.disconnectInternally();
+	        this.updateState(state_1.default.DISCONNECTED);
+	    };
+	    ;
+	    ConnectionManager.prototype.isEncrypted = function () {
+	        return this.encrypted;
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.startConnecting = function () {
+	        var self = this;
+	        var callback = function (error, handshake) {
+	            if (error) {
+	                self.runner = self.strategy.connect(0, callback);
+	            }
+	            else {
+	                if (handshake.action === "error") {
+	                    self.emit("error", { type: "HandshakeError", error: handshake.error });
+	                    self.timeline.error({ handshakeError: handshake.error });
+	                }
+	                else {
+	                    self.abortConnecting(); // we don't support switching connections yet
+	                    self.handshakeCallbacks[handshake.action](handshake);
+	                }
+	            }
+	        };
+	        self.runner = self.strategy.connect(0, callback);
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.abortConnecting = function () {
+	        if (this.runner) {
+	            this.runner.abort();
+	            this.runner = null;
+	        }
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.disconnectInternally = function () {
+	        this.abortConnecting();
+	        this.clearRetryTimer();
+	        this.clearUnavailableTimer();
+	        if (this.connection) {
+	            var connection = this.abandonConnection();
+	            connection.close();
+	        }
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.updateStrategy = function () {
+	        this.strategy = this.options.getStrategy({
+	            key: this.key,
+	            timeline: this.timeline,
+	            encrypted: this.encrypted
+	        });
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.retryIn = function (delay) {
+	        var self = this;
+	        self.timeline.info({ action: "retry", delay: delay });
+	        if (delay > 0) {
+	            self.emit("connecting_in", Math.round(delay / 1000));
+	        }
+	        self.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {
+	            self.disconnectInternally();
+	            self.connect();
+	        });
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.clearRetryTimer = function () {
+	        if (this.retryTimer) {
+	            this.retryTimer.ensureAborted();
+	            this.retryTimer = null;
+	        }
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.setUnavailableTimer = function () {
+	        var self = this;
+	        self.unavailableTimer = new timers_1.OneOffTimer(self.options.unavailableTimeout, function () {
+	            self.updateState(state_1.default.UNAVAILABLE);
+	        });
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.clearUnavailableTimer = function () {
+	        if (this.unavailableTimer) {
+	            this.unavailableTimer.ensureAborted();
+	        }
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.sendActivityCheck = function () {
+	        var self = this;
+	        self.stopActivityCheck();
+	        self.connection.ping();
+	        // wait for pong response
+	        self.activityTimer = new timers_1.OneOffTimer(self.options.pongTimeout, function () {
+	            self.timeline.error({ pong_timed_out: self.options.pongTimeout });
+	            self.retryIn(0);
+	        });
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.resetActivityCheck = function () {
+	        var self = this;
+	        self.stopActivityCheck();
+	        // send ping after inactivity
+	        if (!self.connection.handlesActivityChecks()) {
+	            self.activityTimer = new timers_1.OneOffTimer(self.activityTimeout, function () {
+	                self.sendActivityCheck();
+	            });
+	        }
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.stopActivityCheck = function () {
+	        if (this.activityTimer) {
+	            this.activityTimer.ensureAborted();
+	        }
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.buildConnectionCallbacks = function () {
+	        var self = this;
+	        return {
+	            message: function (message) {
+	                // includes pong messages from server
+	                self.resetActivityCheck();
+	                self.emit('message', message);
+	            },
+	            ping: function () {
+	                self.send_event('pusher:pong', {});
+	            },
+	            activity: function () {
+	                self.resetActivityCheck();
+	            },
+	            error: function (error) {
+	                // just emit error to user - socket will already be closed by browser
+	                self.emit("error", { type: "WebSocketError", error: error });
+	            },
+	            closed: function () {
+	                self.abandonConnection();
+	                if (self.shouldRetry()) {
+	                    self.retryIn(1000);
+	                }
+	            }
+	        };
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
+	        var self = this;
+	        return Collections.extend({}, errorCallbacks, {
+	            connected: function (handshake) {
+	                self.activityTimeout = Math.min(self.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
+	                self.clearUnavailableTimer();
+	                self.setConnection(handshake.connection);
+	                self.socket_id = self.connection.id;
+	                self.updateState(state_1.default.CONNECTED, { socket_id: self.socket_id });
+	            }
+	        });
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.buildErrorCallbacks = function () {
+	        var self = this;
+	        function withErrorEmitted(callback) {
+	            return function (result) {
+	                if (result.error) {
+	                    self.emit("error", { type: "WebSocketError", error: result.error });
+	                }
+	                callback(result);
+	            };
+	        }
+	        return {
+	            ssl_only: withErrorEmitted(function () {
+	                self.encrypted = true;
+	                self.updateStrategy();
+	                self.retryIn(0);
+	            }),
+	            refused: withErrorEmitted(function () {
+	                self.disconnect();
+	            }),
+	            backoff: withErrorEmitted(function () {
+	                self.retryIn(1000);
+	            }),
+	            retry: withErrorEmitted(function () {
+	                self.retryIn(0);
+	            })
+	        };
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.setConnection = function (connection) {
+	        this.connection = connection;
+	        for (var event in this.connectionCallbacks) {
+	            this.connection.bind(event, this.connectionCallbacks[event]);
+	        }
+	        this.resetActivityCheck();
+	    };
+	    ;
+	    /** @private */
+	    ConnectionManager.prototype.abandonConnection = function () {
+	        if (!this.connection) {
+	            return;
+	        }
+	        this.stopActivityCheck();
+	        for (var event in this.connectionCallbacks) {
+	            this.connection.unbind(event, this.connectionCallbacks[event]);
+	        }
+	        var connection = this.connection;
+	        this.connection = null;
+	        return connection;
+	    };
+	    /** @private */
+	    ConnectionManager.prototype.updateState = function (newState, data) {
+	        var previousState = this.state;
+	        this.state = newState;
+	        if (previousState !== newState) {
+	            var newStateDescription = newState;
+	            if (newStateDescription === "connected") {
+	                newStateDescription += " with new socket ID " + data.socket_id;
+	            }
+	            logger_1.default.debug('State changed', previousState + ' -> ' + newStateDescription);
+	            this.timeline.info({ state: newState, params: data });
+	            this.emit('state_change', { previous: previousState, current: newState });
+	            this.emit(newState, data);
+	        }
+	    };
+	    /** @private */
+	    ConnectionManager.prototype.shouldRetry = function () {
+	        return (this.state) === "connecting" || (this.state) === "connected";
+	    };
+	    return ConnectionManager;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = ConnectionManager;
 
 
 /***/ },
-/* 45 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var EventsDispatcher = __webpack_require__(7);
-	var Util = __webpack_require__(1);
-
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var dispatcher_1 = __webpack_require__(10);
 	/** Really basic interface providing network availability info.
 	 *
 	 * Emits:
 	 * - online - when browser goes online
 	 * - offline - when browser goes offline
 	 */
-	function NetInfo() {
-	  EventsDispatcher.call(this);
-
-	  var self = this;
-	  // This is okay, as IE doesn't support this stuff anyway.
-	  if (window.addEventListener !== undefined) {
-	    window.addEventListener("online", function() {
-	      self.emit('online');
-	    }, false);
-	    window.addEventListener("offline", function() {
-	      self.emit('offline');
-	    }, false);
-	  }
-	}
-	Util.extend(NetInfo.prototype, EventsDispatcher.prototype);
-
-	var prototype = NetInfo.prototype;
-
-	/** Returns whether browser is online or not
-	 *
-	 * Offline means definitely offline (no connection to router).
-	 * Inverse does NOT mean definitely online (only currently supported in Safari
-	 * and even there only means the device has a connection to the router).
-	 *
-	 * @return {Boolean}
-	 */
-	prototype.isOnline = function() {
-	  if (window.navigator.onLine === undefined) {
-	    return true;
-	  } else {
-	    return window.navigator.onLine;
-	  }
-	};
-
+	var NetInfo = (function (_super) {
+	    __extends(NetInfo, _super);
+	    function NetInfo() {
+	        _super.call(this);
+	        var self = this;
+	        // This is okay, as IE doesn't support this stuff anyway.
+	        if (window.addEventListener !== undefined) {
+	            window.addEventListener("online", function () {
+	                self.emit('online');
+	            }, false);
+	            window.addEventListener("offline", function () {
+	                self.emit('offline');
+	            }, false);
+	        }
+	    }
+	    /** Returns whether browser is online or not
+	     *
+	     * Offline means definitely offline (no connection to router).
+	     * Inverse does NOT mean definitely online (only currently supported in Safari
+	     * and even there only means the device has a connection to the router).
+	     *
+	     * @return {Boolean}
+	     */
+	    NetInfo.prototype.isOnline = function () {
+	        if (window.navigator.onLine === undefined) {
+	            return true;
+	        }
+	        else {
+	            return window.navigator.onLine;
+	        }
+	    };
+	    return NetInfo;
+	}(dispatcher_1.default));
 	exports.NetInfo = NetInfo;
 	exports.Network = new NetInfo();
 
 
 /***/ },
-/* 46 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Defaults = __webpack_require__(10);
-
-	exports.getGlobalConfig = function() {
-	  return {
-	    wsHost: Defaults.host,
-	    wsPort: Defaults.ws_port,
-	    wssPort: Defaults.wss_port,
-	    httpHost: Defaults.sockjs_host,
-	    httpPort: Defaults.sockjs_http_port,
-	    httpsPort: Defaults.sockjs_https_port,
-	    httpPath: Defaults.sockjs_path,
-	    statsHost: Defaults.stats_host,
-	    authEndpoint: Defaults.channel_auth_endpoint,
-	    authTransport: Defaults.channel_auth_transport,
-	    // TODO make this consistent with other options in next major version
-	    activity_timeout: Defaults.activity_timeout,
-	    pong_timeout: Defaults.pong_timeout,
-	    unavailable_timeout: Defaults.unavailable_timeout
-	  };
+	"use strict";
+	var Defaults = __webpack_require__(7);
+	exports.getGlobalConfig = function () {
+	    return {
+	        wsHost: Defaults.host,
+	        wsPort: Defaults.ws_port,
+	        wssPort: Defaults.wss_port,
+	        httpHost: Defaults.sockjs_host,
+	        httpPort: Defaults.sockjs_http_port,
+	        httpsPort: Defaults.sockjs_https_port,
+	        httpPath: Defaults.sockjs_path,
+	        statsHost: Defaults.stats_host,
+	        authEndpoint: Defaults.channel_auth_endpoint,
+	        authTransport: Defaults.channel_auth_transport,
+	        // TODO make this consistent with other options in next major version
+	        activity_timeout: Defaults.activity_timeout,
+	        pong_timeout: Defaults.pong_timeout,
+	        unavailable_timeout: Defaults.unavailable_timeout
+	    };
 	};
-
-	exports.getClusterConfig = function(clusterName) {
-	  return {
-	    wsHost: "ws-" + clusterName + ".pusher.com",
-	    httpHost: "sockjs-" + clusterName + ".pusher.com"
-	  };
+	exports.getClusterConfig = function (clusterName) {
+	    return {
+	        wsHost: "ws-" + clusterName + ".pusher.com",
+	        httpHost: "sockjs-" + clusterName + ".pusher.com"
+	    };
 	};
 
 

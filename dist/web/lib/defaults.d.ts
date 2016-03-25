@@ -1,0 +1,16 @@
+export declare var VERSION: string;
+export declare var PROTOCOL: number;
+export declare var host: string;
+export declare var ws_port: number;
+export declare var wss_port: number;
+export declare var sockjs_host: string;
+export declare var sockjs_http_port: number;
+export declare var sockjs_https_port: number;
+export declare var sockjs_path: string;
+export declare var stats_host: string;
+export declare var channel_auth_endpoint: string;
+export declare var channel_auth_transport: string;
+export declare var activity_timeout: number;
+export declare var pong_timeout: number;
+export declare var unavailable_timeout: number;
+export declare var getDefaultStrategy: (config: any) => any;

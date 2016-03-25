@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "lib/",
+    "declaration": true,
+    "sourceMap": true,
+    "target": "es5"
+  },
+  "files": [
+    "src/d.ts/faye-websocket/faye-websocket.d.ts",
+    "src/d.ts/xmlhttprequest/xmlhttprequest.d.ts",
+    "src/d.ts/window/websocket.d.ts",
+    "src/d.ts/window/xmlhttprequest.d.ts",
+    "src/d.ts/window/events.d.ts",
+    "src/pusher.ts",
+    "src/node_modules/pusher-websocket-iso-externals-web/net_info.ts",
+    "src/node_modules/pusher-websocket-iso-externals-web/ws.ts",
+    "src/node_modules/pusher-websocket-iso-externals-web/xhr.ts",
+    "src/node_modules/pusher-websocket-iso-externals-web/app.ts"
+  ]
+}
