@@ -20,7 +20,6 @@ export default class Pusher {
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
   static isReady : boolean = false;
-  static factory : Factory = new Factory();
 
   static ready() {
     Pusher.isReady = true;
@@ -58,7 +57,7 @@ export default class Pusher {
       options
     );
 
-    this.channels = Pusher.factory.createChannels();
+    this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
@@ -71,7 +70,7 @@ export default class Pusher {
       version: Defaults.VERSION
     });
     if (!this.config.disableStats) {
-      this.timelineSender = Pusher.factory.createTimelineSender(this.timeline, {
+      this.timelineSender = Factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
         path: "/timeline/v2/jsonp"
       });
@@ -84,7 +83,7 @@ export default class Pusher {
       );
     };
 
-    this.connection = Pusher.factory.createConnectionManager(
+    this.connection = Factory.createConnectionManager(
       this.key,
       Collections.extend(
         { getStrategy: getStrategy,

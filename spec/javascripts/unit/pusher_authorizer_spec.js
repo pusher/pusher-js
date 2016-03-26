@@ -5,15 +5,9 @@ var Util = require('util');
 var Factory = require('utils/factory').default;
 
 describe("Authorizer", function() {
-  var factory;
-
-  beforeEach(function(){
-    factory = new Factory();
-  });
-
   describe("#composeQuery", function() {
     it("should return str with just socket id and channel name if no auth query options", function(test) {
-      var authorizer = new Authorizer(factory, { name: "chan" }, {});
+      var authorizer = new Authorizer({ name: "chan" }, {});
 
       expect(authorizer.composeQuery("1.1"))
         .toEqual("socket_id=1.1&channel_name=chan");
@@ -21,7 +15,6 @@ describe("Authorizer", function() {
 
     it("should add query params specified in options object", function(test) {
       var authorizer = new Authorizer(
-        factory,
         { name: "chan" },
         { auth: {
             params: { a: 1, b: 2 }
@@ -37,22 +30,20 @@ describe("Authorizer", function() {
 });
 
 describe("AJAX Authorizer", function() {
-  var xhr, factory;
+  var xhr;
 
   beforeEach(function() {
-    factory = new Factory();
     xhr = new Mocks.getXHR();
     if (window.XMLHttpRequest) {
-      spyOn(factory, "createXMLHttpRequest").andReturn(xhr);
+      spyOn(Factory, "createXMLHttpRequest").andReturn(xhr);
     } else {
-      spyOn(factory, "createMicrosoftXHR").andReturn(xhr);
+      spyOn(Factory, "createMicrosoftXHR").andReturn(xhr);
     }
   });
 
   it("should pass headers in the request", function() {
     var headers = { "foo": "bar", "n": 42 };
     var authorizer = new Authorizer(
-      factory,
       { name: "chan" },
       { authTransport: "ajax",
         auth: {
@@ -73,7 +64,6 @@ describe("AJAX Authorizer", function() {
   it("should pass params in the query string", function() {
     var params = { "a": 1, "b": 2 };
     var authorizer = new Authorizer(
-      factory,
       { name: "chan" },
       { authTransport: "ajax",
         auth: {
@@ -91,7 +81,6 @@ describe("AJAX Authorizer", function() {
 
   it("should call back with auth result on success", function(test) {
     var authorizer = new Authorizer(
-      factory,
       { name: "chan" },
       { authTransport: "ajax" }
     );
@@ -103,9 +92,9 @@ describe("AJAX Authorizer", function() {
     authorizer.authorize("1.23", callback);
 
     if (window.XMLHttpRequest) {
-      expect(factory.createXMLHttpRequest.calls.length).toEqual(1);
+      expect(Factory.createXMLHttpRequest.calls.length).toEqual(1);
     } else {
-      expect(factory.createMicrosoftXHR.calls.length).toEqual(1);
+      expect(Factory.createMicrosoftXHR.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;
@@ -119,7 +108,6 @@ describe("AJAX Authorizer", function() {
 
   it("should call back with an error if JSON in xhr.responseText is invalid", function(test) {
     var authorizer = new Authorizer(
-      factory,
       { name: "chan" },
       { authTransport: "ajax" }
     );
@@ -128,9 +116,9 @@ describe("AJAX Authorizer", function() {
     authorizer.authorize("1.23", callback);
 
     if (window.XMLHttpRequest) {
-      expect(factory.createXMLHttpRequest.calls.length).toEqual(1);
+      expect(Factory.createXMLHttpRequest.calls.length).toEqual(1);
     } else {
-      expect(factory.createMicrosoftXHR.calls.length).toEqual(1);
+      expect(Factory.createMicrosoftXHR.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;

@@ -8,10 +8,8 @@ import Factory from '../utils/factory';
 /** Handles a channel map. */
 export default class Channels {
   channels: ChannelTable;
-  factory: Factory;
 
-  constructor(factory: Factory) {
-    this.factory = factory;
+  constructor() {
     this.channels = {};
   }
 
@@ -23,7 +21,7 @@ export default class Channels {
    */
   add(name : string, pusher : any) {
     if (!this.channels[name]) {
-      this.channels[name] = createChannel(this.factory, name, pusher);
+      this.channels[name] = createChannel(name, pusher);
     }
     return this.channels[name];
   }
@@ -63,12 +61,12 @@ export default class Channels {
   }
 }
 
-function createChannel(factory: Factory, name : string, pusher : any) : Channel {
+function createChannel(name : string, pusher : any) : Channel {
   if (name.indexOf('private-') === 0) {
-    return factory.createPrivateChannel(name, pusher);
+    return Factory.createPrivateChannel(name, pusher);
   } else if (name.indexOf('presence-') === 0) {
-    return factory.createPresenceChannel(name, pusher);
+    return Factory.createPresenceChannel(name, pusher);
   } else {
-    return factory.createChannel(name, pusher);
+    return Factory.createChannel(name, pusher);
   }
 }

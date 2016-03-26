@@ -1,14 +1,22 @@
-var Transports = require('transports/transports').default;
-var Util = require('util');
 var Pusher = require('pusher').default;
+var NetInfo  = require('pusher-websocket-iso-externals-web/net_info');
+var Mocks = require('../../helpers/mocks');
+var version = require('defaults').VERSION;
+var Factory  = require('utils/factory').default;
 
-// FIXME
-xdescribe("Host/Port Configuration", function() {
+describe("Host/Port Configuration", function() {
   var transport;
   var pusher;
+  var Transports;
 
   beforeEach(function() {
-    spyOn(Network, "isOnline").andReturn(true);
+    var Util = require('util');
+
+    spyOn(Factory, 'getNetwork').andCallFake(function(){
+      var network = new NetInfo();
+      network.isOnline = jasmine.createSpy("isOnline")
+        .andReturn(true);
+    });
     spyOn(Util, "getLocalStorage").andReturn({});
   });
 
@@ -20,17 +28,20 @@ xdescribe("Host/Port Configuration", function() {
     var _WebSocket;
 
     beforeEach(function() {
+      _WebSocket = window.WebSocket;
+      // window.WebSocket = jasmine.createSpy("WebSocket").andCallFake(function() {
+      //   return Mocks.getTransport();
+      // });
+      spyOn(Factory, 'newWebSocket').andReturn(Mocks.getTransport());
+
+      Transports = require('transports/transports');
+
       spyOn(Transports.WSTransport, "isSupported").andReturn(true);
       spyOn(Transports.XDRStreamingTransport, "isSupported").andReturn(false);
       spyOn(Transports.XHRStreamingTransport, "isSupported").andReturn(false);
       spyOn(Transports.XDRPollingTransport, "isSupported").andReturn(false);
       spyOn(Transports.XHRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.SockJSTransport, "isSupported").andReturn(false);
-
-      _WebSocket = window.WebSocket;
-      window.WebSocket = jasmine.createSpy("WebSocket").andCallFake(function() {
-        return Mocks.getTransport();
-      });
+      // spyOn(Transports.SockJSTransport, "isSupported").andReturn(false);
     });
 
     afterEach(function() {
@@ -41,8 +52,8 @@ xdescribe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar");
       pusher.connect();
 
-      expect(window.WebSocket).toHaveBeenCalledWith(
-        "ws://ws.pusherapp.com:80/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
+      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+        "ws://ws.pusherapp.com:80/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
 
@@ -50,8 +61,8 @@ xdescribe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar", { encrypted: true });
       pusher.connect();
 
-      expect(window.WebSocket).toHaveBeenCalledWith(
-        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
+      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
 
@@ -59,8 +70,8 @@ xdescribe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar", { wsHost: "example.com", wsPort: 1999 });
       pusher.connect();
 
-      expect(window.WebSocket).toHaveBeenCalledWith(
-        "ws://example.com:1999/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
+      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+        "ws://example.com:1999/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
 
@@ -68,8 +79,8 @@ xdescribe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar", { wsHost: "example.org", wssPort: 4444, encrypted: true });
       pusher.connect();
 
-      expect(window.WebSocket).toHaveBeenCalledWith(
-        "wss://example.org:4444/app/foobar?protocol=7&client=js&version=<VERSION>&flash=false"
+      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+        "wss://example.org:4444/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
   });

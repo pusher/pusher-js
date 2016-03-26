@@ -6,7 +6,7 @@ var authorizers = {
   ajax: function(socketId, callback){
     var self = this, xhr;
 
-    xhr = this.factory.createXHR();
+    xhr = Factory.createXHR();
     xhr.open("POST", self.options.authEndpoint, true);
 
     // add request headers
@@ -46,14 +46,12 @@ export default class Authorizer {
 
   static authorizers = authorizers;
 
-  factory: Factory;
   channel: Channel;
   type: string;
   options: any;
   authOptions: any;
 
-  constructor(factory: Factory, channel : Channel, options : any) {
-    this.factory = factory;
+  constructor(channel : Channel, options : any) {
     this.channel = channel;
     this.type = options.authTransport;
     this.options = options;

@@ -7,6 +7,7 @@ var DefaultConfig = require('config');
 var TimelineSender = require('timeline/timeline_sender').default;
 var Pusher = require('pusher').default;
 var Mocks = require('../helpers/mocks');
+var Factory = require('utils/factory').default;
 
 describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
@@ -25,13 +26,13 @@ describe("Pusher", function() {
       return strategy;
     });
 
-    spyOn(Pusher.factory, "createConnectionManager").andCallFake(function(key, options) {
+    spyOn(Factory, "createConnectionManager").andCallFake(function(key, options) {
       var manager = Mocks.getConnectionManager();
       manager.key = key;
       manager.options = options;
       return manager;
     });
-    spyOn(Pusher.factory, "createChannel").andCallFake(function(name, _) {
+    spyOn(Factory, "createChannel").andCallFake(function(name, _) {
       return Mocks.getChannel(name);
     });
     spyOn(Util, "getDocument").andReturn({
@@ -446,14 +447,14 @@ describe("Pusher", function() {
       jasmine.Clock.useMock();
 
       timelineSender = Mocks.getTimelineSender();
-      spyOn(Pusher.factory, "createTimelineSender").andReturn(timelineSender);
+      spyOn(Factory, "createTimelineSender").andReturn(timelineSender);
 
       pusher = new Pusher("foo");
     });
 
     it("should be sent to stats.pusher.com by default", function() {
-      expect(Pusher.factory.createTimelineSender.calls.length).toEqual(1);
-      expect(Pusher.factory.createTimelineSender).toHaveBeenCalledWith(
+      expect(Factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/jsonp" }
       );
     });
@@ -462,7 +463,7 @@ describe("Pusher", function() {
       var pusher = new Pusher("foo", {
         statsHost: "example.com"
       });
-      expect(Pusher.factory.createTimelineSender).toHaveBeenCalledWith(
+      expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "example.com", path: "/timeline/v2/jsonp" }
       );
     });
@@ -483,7 +484,7 @@ describe("Pusher", function() {
 
     it("should be sent every 60 seconds after calling connect", function() {
       pusher.connect();
-      expect(Pusher.factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Factory.createTimelineSender.calls.length).toEqual(1);
 
       pusher.connection.options.timeline.info({});
 

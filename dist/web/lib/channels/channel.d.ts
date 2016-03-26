@@ -1,5 +1,4 @@
 import { default as EventsDispatcher } from '../events/dispatcher';
-import Factory from '../utils/factory';
 /** Provides base public channel interface with an event emitter.
  *
  * Emits:
@@ -13,8 +12,7 @@ export default class Channel extends EventsDispatcher {
     name: string;
     pusher: any;
     subscribed: boolean;
-    factory: Factory;
-    constructor(factory: Factory, name: string, pusher: any);
+    constructor(name: string, pusher: any);
     /** Skips authorization, since public channels don't require it.
      *
      * @param {Function} callback

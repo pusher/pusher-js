@@ -1,19 +1,16 @@
-var PrivateChannel = require('channels/private_channel').default;
 var Authorizer = require('pusher_authorizer').default;
 var Errors = require('errors');
-var Channel = require('channels/channel').default;
+var PrivateChannel = require('channels/private_channel').default;
 var Factory = require('utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
 describe("PrivateChannel", function() {
   var pusher;
   var channel;
-  var factory;
 
   beforeEach(function() {
     pusher = Mocks.getPusher({ foo: "bar" });
-    factory = new Factory();
-    channel = new PrivateChannel(factory, "private-test", pusher);
+    channel = new PrivateChannel("private-test", pusher);
   });
 
   describe("after construction", function() {
@@ -27,13 +24,13 @@ describe("PrivateChannel", function() {
 
     beforeEach(function() {
       authorizer = Mocks.getAuthorizer();
-      spyOn(factory, "createAuthorizer").andReturn(authorizer);
+      spyOn(Factory, "createAuthorizer").andReturn(authorizer);
     });
 
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(factory.createAuthorizer.calls.length).toEqual(1);
-      expect(factory.createAuthorizer).toHaveBeenCalledWith(
+      expect(Factory.createAuthorizer.calls.length).toEqual(1);
+      expect(Factory.createAuthorizer).toHaveBeenCalledWith(
         channel,
         { foo: "bar" }
       );

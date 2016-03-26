@@ -1,11 +1,9 @@
 import Channel from "./channel";
 import ChannelTable from './channel_table';
-import Factory from '../utils/factory';
 /** Handles a channel map. */
 export default class Channels {
     channels: ChannelTable;
-    factory: Factory;
-    constructor(factory: Factory);
+    constructor();
     /** Creates or retrieves an existing channel by its name.
      *
      * @param {String} name

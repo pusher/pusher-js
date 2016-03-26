@@ -7,7 +7,8 @@ import Channel from "../channels/channel";
 import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
 import Channels from "../channels/channels";
-export default class Factory {
+import { NetInfo } from "../node_modules/pusher-websocket-iso-externals-web/net_info";
+declare var Factory: {
     createXHR(): Ajax;
     createXMLHttpRequest(): Ajax;
     createMicrosoftXHR(): Ajax;
@@ -18,4 +19,7 @@ export default class Factory {
     createPresenceChannel(name: string, pusher: any): PresenceChannel;
     createTimelineSender(timeline: Timeline, options: any): TimelineSender;
     createAuthorizer(channel: Channel, options: any): Authorizer;
-}
+    getNetwork(): NetInfo;
+    newWebSocket(url: string): any;
+};
+export default Factory;

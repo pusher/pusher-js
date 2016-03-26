@@ -5,6 +5,7 @@ import * as Collections from "../utils/collections.ts";
 import TransportHooks from "./transport_hooks.ts";
 import WS from 'pusher-websocket-iso-externals-node/ws';
 import HTTPFactory from '../http/http';
+import Factory from '../utils/factory';
 
 /** WebSocket transport.
  *
@@ -23,8 +24,9 @@ export var WSTransport = new Transport(<TransportHooks> {
     return Boolean(WS);
   },
   getSocket: function(url) {
-    var Constructor = WS;
-    return new Constructor(url);
+    return Factory.newWebSocket(url);
+    // var Constructor = WS;
+    // return new Constructor(url);
   }
 });
 

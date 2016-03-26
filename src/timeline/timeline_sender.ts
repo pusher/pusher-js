@@ -1,6 +1,5 @@
 import * as Collections from "../utils/collections";
 import * as Util from "../util";
-import Factory from '../utils/factory';
 import base64encode from "../base64";
 import Timeline from "./timeline";
 
@@ -8,7 +7,7 @@ export default class TimelineSender {
   timeline: Timeline;
   options : any;
 
-  constructor(factory: Factory, timeline: Timeline, options : any) {
+  constructor(timeline: Timeline, options : any) {
     this.timeline = timeline;
     this.options = options || {};
   }

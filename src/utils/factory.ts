@@ -10,8 +10,10 @@ import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
 import XHR from "pusher-websocket-iso-externals-node/xhr";
 import Channels from "../channels/channels";
+import {Network, NetInfo} from "../node_modules/pusher-websocket-iso-externals-web/net_info";
+import WS from 'pusher-websocket-iso-externals-node/ws';
 
-export default class Factory {
+var Factory = {
 
   createXHR() : Ajax {
     if (XHR){
@@ -19,42 +21,59 @@ export default class Factory {
     } else {
       return this.createMicrosoftXHR();
     }
-  }
+  },
 
   createXMLHttpRequest() : Ajax {
     return new XHR();
-  }
+  },
 
   createMicrosoftXHR() : Ajax {
     return new ActiveXObject("Microsoft.XMLHTTP");
-  }
+  },
 
   createChannels() : Channels {
-    return new Channels(this);
-  }
+    return new Channels();
+  },
 
   createConnectionManager(key : string, options : any) : ConnectionManager {
     return new ConnectionManager(key, options);
-  }
+  },
 
   createChannel(name: string, pusher: any) : Channel {
-    return new Channel(this, name, pusher);
-  }
+    return new Channel(name, pusher);
+  },
 
   createPrivateChannel(name: string, pusher: any) : PrivateChannel {
-    return new PrivateChannel(this, name, pusher);
-  }
+    return new PrivateChannel(name, pusher);
+  },
 
   createPresenceChannel(name: string, pusher: any) : PresenceChannel {
-    return new PresenceChannel(this, name, pusher);
-  }
+    return new PresenceChannel(name, pusher);
+  },
 
   createTimelineSender(timeline : Timeline, options : any) {
-    return new TimelineSender(this, timeline, options);
-  }
+    return new TimelineSender(timeline, options);
+  },
 
   createAuthorizer(channel : Channel, options : any) : Authorizer {
-    return new Authorizer(this, channel, options);
-  }
+    return new Authorizer(channel, options);
+  },
 
+  /* RETRIEVE APIS */
+  getNetwork() : NetInfo {
+    return Network;
+  },
+
+  newWebSocket(url : string) : any {
+    return new WS(url);
+  }
+  // getLocalStorage() : any {
+  //   try {
+  //     return window.localStorage;
+  //   } catch (e) {
+  //     return undefined;
+  //   }
+  // }
 }
+
+export default Factory;

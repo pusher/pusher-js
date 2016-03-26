@@ -1,6 +1,7 @@
 import Factory from "../utils/factory";
 import TransportHooks from "./transport_hooks";
 import TransportConnection from "./transport_connection";
+import WS from 'pusher-websocket-iso-externals-node/ws';
 
 /** Provides interface for transport connection instantiation.
  *

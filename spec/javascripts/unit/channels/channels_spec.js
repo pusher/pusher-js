@@ -7,11 +7,9 @@ var Mocks = require("../../helpers/mocks");
 
 describe("Channels", function() {
   var channels;
-  var factory;
 
   beforeEach(function() {
-    factory = new Factory();
-    channels = new Channels(factory);
+    channels = new Channels(Factory);
   });
 
   describe("#add", function() {
