@@ -1,4 +1,4 @@
-var Authorizer = require('pusher_authorizer');
+var Authorizer = require('pusher_authorizer').default;
 var Logger = require('logger');
 
 describe("Authorizer", function() {

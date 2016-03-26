@@ -2,6 +2,7 @@ var Mocks = require("../../helpers/mocks");
 
 var transports = require('transports/transports');
 var Util = require('util');
+var Collections = require('utils/collections');
 
 var VERSION = require('defaults').VERSION;
 
@@ -117,7 +118,7 @@ describe("transports", function() {
   var POLLING_TRANSPORTS = ["XHRPollingTransport", "XDRPollingTransport"];
   var HTTP_TRANSPORTS = [].concat(XHR_TRANSPORTS, XDR_TRANSPORTS);
 
-  Util.apply(HTTP_TRANSPORTS, function(transport) {
+  Collections.apply(HTTP_TRANSPORTS, function(transport) {
     describe(transport, function() {
       it("should generate correct unencrypted URLs with default path prefix", function() {
         var url = transports[transport].hooks.urls.getInitial("foobar", {
@@ -179,7 +180,7 @@ describe("transports", function() {
     });
   });
 
-  Util.apply(XHR_TRANSPORTS, function(transport) {
+  Collections.apply(XHR_TRANSPORTS, function(transport) {
     describe(transport, function() {
       var _XMLHttpRequest = window.XMLHttpRequest;
 
@@ -211,7 +212,7 @@ describe("transports", function() {
     });
   });
 
-  Util.apply(XDR_TRANSPORTS, function(transport) {
+  Collections.apply(XDR_TRANSPORTS, function(transport) {
     describe(transport, function() {
       var _XDomainRequest = window.XDomainRequest;
 
@@ -270,7 +271,7 @@ describe("transports", function() {
     });
   });
 
-  Util.apply(STREAMING_TRANSPORTS, function(transport) {
+  Collections.apply(STREAMING_TRANSPORTS, function(transport) {
     describe(transport, function() {
       describe("getSocket hook", function() {
         // FIXME
@@ -288,7 +289,7 @@ describe("transports", function() {
     });
   });
 
-  Util.apply(POLLING_TRANSPORTS, function(transport) {
+  Collections.apply(POLLING_TRANSPORTS, function(transport) {
     describe(transport, function() {
       describe("getSocket hook", function() {
         // FIXME

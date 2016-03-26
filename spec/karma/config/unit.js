@@ -1,6 +1,8 @@
 var version = require('../../../package').version;
-
+var objectAssign = require('object-assign-deep');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
+
+var webpackConfig = require('../../../webpack/config.shared')
 
 module.exports = function(config) {
   config.set({
@@ -19,7 +21,7 @@ module.exports = function(config) {
       dir : 'coverage/'
     },
 
-    webpack: {
+    webpack: objectAssign(webpackConfig,{
       resolve: {
         root: [
           __dirname + '/../../../src',
@@ -43,7 +45,7 @@ module.exports = function(config) {
           "pusher-websocket-iso-externals-web/net_info"
         )
       ]
-    },
+    }),
 
     port: 9876,
     runnerPort: 9100,
@@ -53,7 +55,8 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+    // browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+    browsers: ['Chrome'],
     captureTimeout: 120000,
 
     singleRun: true

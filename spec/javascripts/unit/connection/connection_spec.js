@@ -1,5 +1,5 @@
-var Connection = require('connection/connection');
-var Protocol = require('connection/protocol');
+var Connection = require('connection/connection').default;
+var Protocol = require('connection/protocol/protocol');
 
 var Mocks = require("../../helpers/mocks");
 

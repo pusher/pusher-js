@@ -1,6 +1,6 @@
 var Mocks = require("../../helpers/mocks");
 
-var FirstConnectedStrategy = require('strategies/first_connected_strategy');
+var FirstConnectedStrategy = require('strategies/first_connected_strategy').default;
 
 describe("FirstConnectedStrategy", function() {
   var substrategy;

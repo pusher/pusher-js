@@ -20,10 +20,6 @@ function getGenericPath(key : string, queryString?:string) : string {
 export var ws : URLScheme = {
     getInitial: function(key : string , params : any) : string {
         return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
-    },
-
-    getPath: function(key : string, options : any) : string {
-      return this.getInitial(key, options)
     }
 };
 
@@ -31,9 +27,5 @@ export var http : URLScheme = {
     getInitial: function(key : string, params : any) : string {
         var path = (params.httpPath || "/pusher") + getGenericPath(key);
         return getGenericURL("http", params, path);
-    },
-
-    getPath: function(key : string, options : any) : string {
-      return this.getInitial(key, options)
     }
 };

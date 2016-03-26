@@ -1,7 +1,7 @@
-var Channels = require('channels/channels');
-var Channel = require('channels/channel');
-var PrivateChannel = require('channels/private_channel');
-var PresenceChannel = require('channels/presence_channel');
+var Channels = require('channels/channels').default;
+var Channel = require('channels/channel').default;
+var PrivateChannel = require('channels/private_channel').default;
+var PresenceChannel = require('channels/presence_channel').default;
 
 var Mocks = require("../../helpers/mocks");
 

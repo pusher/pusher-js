@@ -1,6 +1,6 @@
 var Mocks = require("../../helpers/mocks");
 
-var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager');
+var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager').default;
 var Util = require('util');
 
 describe("AssistantToTheTransportManager", function() {

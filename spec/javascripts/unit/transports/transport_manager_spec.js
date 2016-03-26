@@ -1,7 +1,7 @@
 var Mocks = require("../../helpers/mocks");
 
-var TransportManager = require('transports/transport_manager');
-var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager');
+var TransportManager = require('transports/transport_manager').default;
+var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager').default;
 
 describe("TransportManager", function() {
   // FIXME

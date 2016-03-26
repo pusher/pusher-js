@@ -9,7 +9,7 @@ describe("timers", function() {
       jasmine.Clock.useMock();
 
       callback = jasmine.createSpy("callback");
-      timer = new timers.Timer(123, callback);
+      timer = new timers.OneOffTimer(123, callback);
     });
 
     afterEach(function() {

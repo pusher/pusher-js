@@ -16,7 +16,7 @@ export default class TransportManager {
   livesLeft: number;
 
   constructor(options : any){
-    this.options = options;
+    this.options = options || [];
     this.livesLeft = this.options.lives || Infinity;
   }
 

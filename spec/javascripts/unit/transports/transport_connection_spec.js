@@ -1,12 +1,12 @@
 var Mocks = require("../../helpers/mocks");
 
-var TransportConnection = require('transports/transport_connection');
-var Util = require('util');
-var Timer = require('utils/timers').Timer;
+var TransportConnection = require('transports/transport_connection').default;
+var Collections = require('utils/collections');
+var Timer = require('utils/timers').OneOffTimer;
 
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {
-    options = Util.extend({
+    options = Collections.extend({
       encrypted: false,
       hostUnencrypted: "example.com:12345",
       hostEncrypted: "example.com:54321"

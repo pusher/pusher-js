@@ -1,5 +1,5 @@
-var ConnectionManager = require('connection/connection_manager');
-var Util = require('util');
+var ConnectionManager = require('connection/connection_manager').default;
+var Collections = require('utils/collections');
 var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
 
 var Mocks = require("../../helpers/mocks");
@@ -64,7 +64,7 @@ describe("ConnectionManager", function() {
 
     it("should return true if the manager has been created with encrypted=true", function() {
       var manager = new ConnectionManager(
-        "foo", Util.extend(managerOptions, { encrypted: true })
+        "foo", Collections.extend(managerOptions, { encrypted: true })
       );
       expect(manager.isEncrypted()).toEqual(true);
     });

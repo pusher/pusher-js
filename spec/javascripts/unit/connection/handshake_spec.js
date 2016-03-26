@@ -1,6 +1,6 @@
-var Handshake = require('connection/handshake');
-var Protocol = require('connection/protocol');
-var Connection = require('connection/connection');
+var Handshake = require('connection/handshake').default;
+var Protocol = require('connection/protocol/protocol');
+var Connection = require('connection/connection').default;
 
 var Mocks = require("../../helpers/mocks");
 

@@ -1,4 +1,4 @@
-var Channel = require('channels/channel');
+var Channel = require('channels/channel').default;
 var Errors = require('errors');
 
 var Mocks = require("../../helpers/mocks");

@@ -1,5 +1,5 @@
 var Mocks = require('../../helpers/mocks');
-var TimelineSender = require('timeline/timeline_sender');
+var TimelineSender = require('timeline/timeline_sender').default;
 
 // FIXME
 xdescribe("TimelineSender", function() {

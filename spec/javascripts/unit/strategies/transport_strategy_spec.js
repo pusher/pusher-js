@@ -1,6 +1,6 @@
-var TransportStrategy = require('strategies/transport_strategy');
+var TransportStrategy = require('strategies/transport_strategy').defaul;
 var Errors = require('errors');
-var Handshake = require('connection/handshake');
+var Handshake = require('connection/handshake').default;
 
 // FIXME
 xdescribe("TransportStrategy", function() {

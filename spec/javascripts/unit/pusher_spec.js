@@ -1,10 +1,11 @@
 var Util = require('util');
-var Logger = require('logger');
-var StrategyBuilder = require('strategies/strategy_builder');
+var Collections = require('utils/collections');
+var Logger = require('logger').default;
+var StrategyBuilder = require('strategies/strategy_builder').default;
 var Defaults = require('defaults');
 var DefaultConfig = require('config');
-var TimelineSender = require('timeline/timeline_sender');
-var Pusher = require('pusher');
+var TimelineSender = require('timeline/timeline_sender').default;
+var Pusher = require('pusher').default;
 
 // FIXME
 xdescribe("Pusher", function() {
@@ -177,7 +178,7 @@ describe("Pusher.logToConsole", function() {
       it("should pass per-connection strategy options", function() {
         pusher = new Pusher("foo", { encrypted: true });
 
-        var expectedConfig = Util.extend(
+        var expectedConfig = Collections.extend(
           DefaultConfig.getGlobalConfig(),
           { encrypted: true }
         );
@@ -190,7 +191,7 @@ describe("Pusher.logToConsole", function() {
       });
 
       it("should pass options to the strategy builder", function() {
-        var expectedConfig = Util.extend(
+        var expectedConfig = Collections.extend(
           DefaultConfig.getGlobalConfig(),
           { encrypted: true }
         );

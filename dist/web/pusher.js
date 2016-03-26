@@ -748,18 +748,12 @@ var Pusher =
 	exports.ws = {
 	    getInitial: function (key, params) {
 	        return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
-	    },
-	    getPath: function (key, options) {
-	        return this.getInitial(key, options);
 	    }
 	};
 	exports.http = {
 	    getInitial: function (key, params) {
 	        var path = (params.httpPath || "/pusher") + getGenericPath(key);
 	        return getGenericURL("http", params, path);
-	    },
-	    getPath: function (key, options) {
-	        return this.getInitial(key, options);
 	    }
 	};
 

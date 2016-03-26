@@ -1,6 +1,6 @@
-var Transports = require('transports/transports');
+var Transports = require('transports/transports').default;
 var Util = require('util');
-var Pusher = require('pusher');
+var Pusher = require('pusher').default;
 
 // FIXME
 xdescribe("Host/Port Configuration", function() {

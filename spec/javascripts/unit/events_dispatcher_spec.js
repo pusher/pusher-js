@@ -1,5 +1,5 @@
-var EventsDispatcher = require('events_dispatcher');
-var Util = require('util');
+var EventsDispatcher = require('events/dispatcher').default;
+var Collections = require('utils/collections');
 
 describe("EventsDispatcher", function() {
   var dispatcher;
@@ -237,31 +237,31 @@ describe("EventsDispatcher", function() {
 
   describe("#emit", function() {
     it("should call all listeners", function() {
-      var callbacks = Util.map([1, 2, 3], function(i) {
+      var callbacks = Collections.map([1, 2, 3], function(i) {
         return jasmine.createSpy("onTest" + i);
       });
-      Util.apply(callbacks, function(callback) {
+      Collections.apply(callbacks, function(callback) {
         dispatcher.bind("test", callback);
       });
 
       dispatcher.emit("test", { x: 1 });
 
-      Util.apply(callbacks, function(callback) {
+      Collections.apply(callbacks, function(callback) {
         expect(callback).toHaveBeenCalledWith({ x: 1 });
       });
     });
 
     it("should call all global listeners", function() {
-      var callbacks = Util.map([1, 2, 3], function(i) {
+      var callbacks = Collections.map([1, 2, 3], function(i) {
         return jasmine.createSpy("onGlobal" + i);
       });
-      Util.apply(callbacks, function(callback) {
+      Collections.apply(callbacks, function(callback) {
         dispatcher.bind_all(callback);
       });
 
       dispatcher.emit("g", { y: 2 });
 
-      Util.apply(callbacks, function(callback) {
+      Collections.apply(callbacks, function(callback) {
         expect(callback).toHaveBeenCalledWith("g", { y: 2 });
       });
     });

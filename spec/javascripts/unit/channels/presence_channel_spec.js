@@ -1,7 +1,7 @@
-var PresenceChannel = require('channels/presence_channel');
-var Channel = require('channels/channel');
-var Members = require('channels/members');
-var Authorizer = require('pusher_authorizer');
+var PresenceChannel = require('channels/presence_channel').default;
+var Channel = require('channels/channel').default;
+var Members = require('channels/members').default;
+var Authorizer = require('pusher_authorizer').default;
 var Errors = require('errors');
 
 var Mocks = require("../../helpers/mocks");

@@ -1,6 +1,6 @@
 var Mocks = require("../../helpers/mocks");
 
-var DelayedStrategy = require('strategies/delayed_strategy');
+var DelayedStrategy = require('strategies/delayed_strategy').default;
 
 describe("DelayedStrategy", function() {
   beforeEach(function() {

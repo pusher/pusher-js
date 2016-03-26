@@ -1,7 +1,7 @@
 var Integration = require("../helpers/integration");
 var Mocks = require("../helpers/mocks");
 
-var Pusher = require("pusher");
+var Pusher = require("pusher").default;
 
 var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
 var Timer = require("utils/timers").Timer;

@@ -1,5 +1,4 @@
 module.exports = {
-  entry: "./src/pusher",
   resolve: {
     extensions: ['', '.webpack.js', '.web.js', '.ts', '.js']
   },

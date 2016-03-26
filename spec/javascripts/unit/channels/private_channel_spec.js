@@ -1,7 +1,7 @@
-var PrivateChannel = require('channels/private_channel');
-var Authorizer = require('pusher_authorizer');
+var PrivateChannel = require('channels/private_channel').default;
+var Authorizer = require('pusher_authorizer').default;
 var Errors = require('errors');
-var Channel = require('channels/channel');
+var Channel = require('channels/channel').default;
 
 var Mocks = require("../../helpers/mocks");
 

@@ -1,6 +1,6 @@
 var Mocks = require("../../helpers/mocks");
 
-var HTTPRequest = require("http/http_request");
+var HTTPRequest = require("http/http_request").default;
 var App = require("pusher-websocket-iso-externals-node/app");
 
 describe("HTTPRequest", function() {

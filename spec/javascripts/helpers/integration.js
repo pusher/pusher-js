@@ -1,5 +1,5 @@
-var base64 = require('base64');
-var util = require('util');
+var base64 = require('base64').default;
+var util = require('util').default;
 
 exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";
 exports.API_EU_URL = "http://pusher-js-integration-api-eu.herokuapp.com";

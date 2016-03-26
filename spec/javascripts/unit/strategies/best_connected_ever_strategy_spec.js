@@ -1,6 +1,6 @@
 var Mocks = require("../../helpers/mocks");
 
-var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy');
+var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy').default;
 
 describe("BestConnectedEverStrategy", function() {
   beforeEach(function() {

@@ -1,6 +1,6 @@
 var Mocks = require("../../helpers/mocks");
 
-var IfStrategy = require('strategies/if_strategy');
+var IfStrategy = require('strategies/if_strategy').default;
 
 describe("IfStrategy", function() {
   var test, trueBranch, falseBranch;
