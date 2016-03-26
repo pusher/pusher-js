@@ -7,3 +7,4 @@ node_modules
 
 !/dist/*
 !/src/node_modules
+!spec/node_modules

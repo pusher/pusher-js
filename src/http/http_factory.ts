@@ -31,6 +31,5 @@ export default class HTTPFactory {
 
   createRequest(hooks : RequestHooks, method : string, url : string) : HTTPRequest {
     return new HTTPRequest(hooks, method, url);
-
   }
 }

@@ -1,23 +1,26 @@
-// FIXME
-xdescribe("HTTP.getXDR", function() {
+var Mocks = require('../../helpers/mocks');
+var Errors = require('errors');
+
+describe("HTTP.getXDR", function() {
   var _XDomainRequest = window.XDomainRequest;
 
   var hooks, method, url;
   var request;
+  var HTTPFactory;
 
   beforeEach(function() {
-    window.XDomainRequest = jasmine.createSpy().andCallFake(
-      Pusher.Mocks.getXHR
-    );
+    HTTPFactory = require('http/http').default;
 
-    spyOn(Pusher.HTTP, "Request").andCallFake(function(h, m, u) {
+    window.XDomainRequest = require('pusher-websocket-iso-externals-test/xhr').default;
+
+    spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
       hooks = h;
       method = m;
       url = u;
-      return Pusher.Mocks.getHTTPRequest(m, u);
+      return Mocks.getHTTPRequest(m, u);
     });
 
-    request = Pusher.HTTP.getXDR("HEAD", "http://example.net");
+    request = HTTPFactory.createXDR("HEAD", "http://example.net");
   });
 
   afterEach(function() {
@@ -37,7 +40,7 @@ xdescribe("HTTP.getXDR", function() {
     var socket;
 
     beforeEach(function() {
-      socket = Pusher.Mocks.getHTTPSocket();
+      socket = Mocks.getHTTPSocket();
       xdr = hooks.getRequest(socket);
     });
 
@@ -55,7 +58,7 @@ xdescribe("HTTP.getXDR", function() {
           socket.close.andCallFake(function() {
             expect(onError.calls.length).toEqual(1);
             expect(onError).toHaveBeenCalledWith(
-              jasmine.any(Pusher.Errors.RequestTimedOut)
+              jasmine.any(Errors.RequestTimedOut)
             );
           });
 

@@ -11,7 +11,8 @@ module.exports = function(config) {
 
     files: require(__dirname + "/../files/unit_tests"),
     preprocessors: {
-      '**/spec/javascripts/unit/**/*.js': ['webpack']
+      '**/spec/javascripts/unit/**/*.js': ['webpack'],
+      '**/spec/node_modules/**/*.ts': ['webpack']
     },
 
     reporters: ['progress', 'coverage'],
@@ -25,7 +26,8 @@ module.exports = function(config) {
       resolve: {
         root: [
           __dirname + '/../../../src',
-          __dirname + '/../../../src/node_modules'
+          __dirname + '/../../../src/node_modules',
+          __dirname + '/../../node_modules'
         ]
       },
       externals: {
@@ -38,7 +40,7 @@ module.exports = function(config) {
         ),
         new NormalModuleReplacementPlugin(
           /^pusher-websocket-iso-externals-node\/xhr$/,
-          "pusher-websocket-iso-externals-web/xhr"
+          "pusher-websocket-iso-externals-test/xhr"
         ),
         new NormalModuleReplacementPlugin(
           /^pusher-websocket-iso-externals-node\/net_info$/,

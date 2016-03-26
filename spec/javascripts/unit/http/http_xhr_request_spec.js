@@ -1,21 +1,21 @@
-// FIXME
-xdescribe("HTTP.getXHR", function() {
+var Mocks = require('../../helpers/mocks');
+
+describe("HTTP.getXHR", function() {
   var _XMLHttpRequest = window.XMLHttpRequest;
 
   var hooks;
   var request;
+  var HTTPFactory;
 
   beforeEach(function() {
-    window.XMLHttpRequest = jasmine.createSpy().andCallFake(
-      Pusher.Mocks.getXHR
-    );
+    HTTPFactory = require('http/http').default;
 
-    spyOn(Pusher.HTTP, "Request").andCallFake(function(h, m, u) {
+    spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
       hooks = h;
-      return Pusher.Mocks.getHTTPRequest(m, u);
+      return Mocks.getHTTPRequest(m, u);
     });
 
-    request = Pusher.HTTP.getXHR("OPTIONS", "http://example.org");
+    request = HTTPFactory.createXHR("OPTIONS", "http://example.org");
   });
 
   afterEach(function() {
@@ -36,7 +36,7 @@ xdescribe("HTTP.getXHR", function() {
       var socket;
 
       beforeEach(function() {
-        socket = Pusher.Mocks.getHTTPSocket();
+        socket = Mocks.getHTTPSocket();
         xhr = hooks.getRequest(socket);
       });
 
@@ -145,7 +145,7 @@ xdescribe("HTTP.getXHR", function() {
 
     describe("#abortRequest", function() {
       it("should abort the passed request", function() {
-        var xhr = Pusher.Mocks.getXHR();
+        var xhr = Mocks.getXHR();
 
         expect(xhr.abort.calls.length).toEqual(0);
         hooks.abortRequest(xhr);
@@ -153,7 +153,7 @@ xdescribe("HTTP.getXHR", function() {
       });
 
       it("should set the onreadystatechange listener to null before calling abort", function() {
-        var xhr = Pusher.Mocks.getXHR();
+        var xhr = Mocks.getXHR();
         xhr.onreadystatechange = function() {};
         xhr.abort.andCallFake(function() {
           expect(xhr.onreadystatechange).toBe(null);
