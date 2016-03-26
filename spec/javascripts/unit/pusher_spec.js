@@ -1,13 +1,14 @@
 var Util = require('util');
 var Collections = require('utils/collections');
 var Logger = require('logger').default;
-var StrategyBuilder = require('strategies/strategy_builder').default;
+var StrategyBuilder = require('strategies/strategy_builder');
 var Defaults = require('defaults');
 var DefaultConfig = require('config');
 var TimelineSender = require('timeline/timeline_sender').default;
 var Pusher = require('pusher').default;
+var Mocks = require('../helpers/mocks');
 
-xdescribe("Pusher", function() {
+describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
 
   beforeEach(function() {
@@ -23,13 +24,14 @@ xdescribe("Pusher", function() {
       strategy.options = options;
       return strategy;
     });
-    spyOn(Pusher, "ConnectionManager").andCallFake(function(key, options) {
+
+    spyOn(Pusher.factory, "createConnectionManager").andCallFake(function(key, options) {
       var manager = Mocks.getConnectionManager();
       manager.key = key;
       manager.options = options;
       return manager;
     });
-    spyOn(Pusher, "Channel").andCallFake(function(name, _) {
+    spyOn(Pusher.factory, "createChannel").andCallFake(function(name, _) {
       return Mocks.getChannel(name);
     });
     spyOn(Util, "getDocument").andReturn({
@@ -45,7 +47,7 @@ xdescribe("Pusher", function() {
     Pusher.logToConsole = _logToConsole;
   });
 
-describe("Pusher.logToConsole", function() {
+  xdescribe("Pusher.logToConsole", function() {
 
     var _nativeConsoleLog;
     var _consoleLogCalls;
@@ -127,7 +129,7 @@ describe("Pusher.logToConsole", function() {
     });
 
     it("should pass the version number to the timeline", function() {
-      expect(pusher.timeline.options.version).toEqual(Pusher.VERSION);
+      expect(pusher.timeline.options.version).toEqual(Defaults.VERSION);
     });
 
     it("should pass per-connection timeline params", function() {
@@ -215,9 +217,9 @@ describe("Pusher.logToConsole", function() {
         var pusher = new Pusher("foo");
         var options = pusher.connection.options;
 
-        expect(options.activityTimeout).toEqual(Pusher.activity_timeout);
-        expect(options.pongTimeout).toEqual(Pusher.pong_timeout);
-        expect(options.unavailableTimeout).toEqual(Pusher.unavailable_timeout);
+        expect(options.activityTimeout).toEqual(Defaults.activity_timeout);
+        expect(options.pongTimeout).toEqual(Defaults.pong_timeout);
+        expect(options.unavailableTimeout).toEqual(Defaults.unavailable_timeout);
       });
 
       it("should use user-specified timeouts", function() {
@@ -444,14 +446,14 @@ describe("Pusher.logToConsole", function() {
       jasmine.Clock.useMock();
 
       timelineSender = Mocks.getTimelineSender();
-      spyOn(Pusher, "TimelineSender").andReturn(timelineSender);
+      spyOn(Pusher.factory, "createTimelineSender").andReturn(timelineSender);
 
       pusher = new Pusher("foo");
     });
 
     it("should be sent to stats.pusher.com by default", function() {
-      expect(TimelineSender.calls.length).toEqual(1);
-      expect(TimelineSender).toHaveBeenCalledWith(
+      expect(Pusher.factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Pusher.factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/jsonp" }
       );
     });
@@ -460,7 +462,7 @@ describe("Pusher.logToConsole", function() {
       var pusher = new Pusher("foo", {
         statsHost: "example.com"
       });
-      expect(TimelineSender).toHaveBeenCalledWith(
+      expect(Pusher.factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "example.com", path: "/timeline/v2/jsonp" }
       );
     });
@@ -481,7 +483,7 @@ describe("Pusher.logToConsole", function() {
 
     it("should be sent every 60 seconds after calling connect", function() {
       pusher.connect();
-      expect(TimelineSender.calls.length).toEqual(1);
+      expect(Pusher.factory.createTimelineSender.calls.length).toEqual(1);
 
       pusher.connection.options.timeline.info({});
 

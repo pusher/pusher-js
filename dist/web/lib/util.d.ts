@@ -11,8 +11,8 @@ export declare function defer(callback: TimedCallback): OneOffTimer;
 * @return {Function} proxy function
 */
 export declare function method(name: string, ...args: any[]): Function;
-export declare function getLocalStorage(): Object;
-export declare function getClientFeatures(): Object[];
+export declare function getLocalStorage(): any;
+export declare function getClientFeatures(): any[];
 export declare function isXHRSupported(): boolean;
 export declare function isXDRSupported(encrypted: boolean): boolean;
 export declare function getDocument(): any;

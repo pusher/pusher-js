@@ -1,27 +1,31 @@
-xdescribe("HTTP.Socket", function() {
+var Mocks = require('../../helpers/mocks');
+var Util = require('util');
+var HTTPSocket = require('http/http_socket').default;
+
+describe("HTTP.Socket", function() {
   var onOpen, onMessage, onActivity, onClose;
   var hooks;
 
   var lastXHR;
   var socket;
 
-  var _getXHR = Pusher.HTTP.getXHR;
-  var _getXDR = Pusher.HTTP.getXDR;
+  var HTTPFactory;
 
   beforeEach(function() {
+    HTTPFactory = require('http/http').default;
     jasmine.Clock.useMock();
 
-    spyOn(Pusher.HTTP, "getXHR").andCallFake(function(method, url) {
-      lastXHR = Pusher.Mocks.getHTTPRequest(method, url);
+    spyOn(HTTPFactory, "createXHR").andCallFake(function(method, url) {
+      lastXHR = Mocks.getHTTPRequest(method, url);
       return lastXHR;
     });
-    spyOn(Pusher.HTTP, "getXDR").andCallFake(function(method, url) {
-      lastXHR = Pusher.Mocks.getHTTPRequest(method, url);
+    spyOn(HTTPFactory, "createXDR").andCallFake(function(method, url) {
+      lastXHR = Mocks.getHTTPRequest(method, url);
       return lastXHR;
     });
 
-    spyOn(Pusher.Util, "isXHRSupported").andReturn(true);
-    spyOn(Pusher.Util, "isXDRSupported").andReturn(false);
+    spyOn(Util, "isXHRSupported").andReturn(true);
+    spyOn(Util, "isXDRSupported").andReturn(false);
 
     hooks = {
       getReceiveURL: jasmine.createSpy().andCallFake(function(url, session) {
@@ -31,7 +35,7 @@ xdescribe("HTTP.Socket", function() {
       sendHeartbeat: jasmine.createSpy(),
       onFinished: jasmine.createSpy()
     };
-    socket = new Pusher.HTTP.Socket(hooks, "http://example.com/pusher");
+    socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com/pusher");
 
     onOpen = jasmine.createSpy("onOpen");
     onMessage = jasmine.createSpy("onMessage");
@@ -46,31 +50,29 @@ xdescribe("HTTP.Socket", function() {
 
   afterEach(function() {
     socket.close();
-    Pusher.HTTP.getXHR = _getXHR;
-    Pusher.HTTP.getXDR = _getXDR;
   });
 
   it("should use XHR if it's supported", function() {
-    Pusher.Util.isXHRSupported.andReturn(true);
-    Pusher.Util.isXDRSupported.andReturn(false);
+    Util.isXHRSupported.andReturn(true);
+    Util.isXDRSupported.andReturn(false);
 
-    var socket = new Pusher.HTTP.Socket(hooks, "http://example.com");
-    expect(Pusher.HTTP.getXHR).toHaveBeenCalled();
+    var socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+    expect(HTTPFactory.createXHR).toHaveBeenCalled();
     socket.close();
   });
 
   it("should use XDR if it's supported", function() {
-    Pusher.Util.isXHRSupported.andReturn(false);
-    Pusher.Util.isXDRSupported.andReturn(true);
+    Util.isXHRSupported.andReturn(false);
+    Util.isXDRSupported.andReturn(true);
 
-    var socket = new Pusher.HTTP.Socket(hooks, "http://example.com");
-    expect(Pusher.HTTP.getXDR).toHaveBeenCalled();
+    var socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+    expect(HTTPFactory.createXDR).toHaveBeenCalled();
 
     socket.close();
   });
 
   it("should send a POST request to the URL constructed with getReceiveURL", function() {
-    var socket = new Pusher.HTTP.Socket(hooks, "http://example.com/x?arg=val");
+    var socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com/x?arg=val");
 
     expect(lastXHR.method).toEqual("POST");
     expect(lastXHR.url).toMatch(
@@ -85,9 +87,9 @@ xdescribe("HTTP.Socket", function() {
   });
 
   it("should start streaming from different URLs", function() {
-    var socket1 = new Pusher.HTTP.Socket(hooks, "http://example.com");
+    var socket1 = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
     var url1 = lastXHR.url;
-    var socket2 = new Pusher.HTTP.Socket(hooks, "http://example.com");
+    var socket2 = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
     var url2 = lastXHR.url;
 
     expect(url1).not.toEqual(url2);
@@ -101,8 +103,8 @@ xdescribe("HTTP.Socket", function() {
       // close the default socket
       socket.close();
 
-      Pusher.HTTP.getXHR.andCallFake(function() {
-        stream = Pusher.Mocks.getHTTPRequest();
+      HTTPFactory.createXHR.andCallFake(function() {
+        stream = Mocks.getHTTPRequest();
         stream.start.andThrow("start exception");
         return stream;
       });
@@ -110,7 +112,7 @@ xdescribe("HTTP.Socket", function() {
       onError = jasmine.createSpy("onError");
       onClose = jasmine.createSpy("onClose");
 
-      socket = new Pusher.HTTP.Socket(hooks, "http://example.com");
+      socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
       socket.onerror = onError;
       socket.onclose = onClose;
     });
@@ -180,9 +182,9 @@ xdescribe("HTTP.Socket", function() {
       });
 
       it("should not trigger any HTTP requests", function() {
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
+        expect(HTTPFactory.createXHR.calls.length).toEqual(1);
         socket.send("test");
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
+        expect(HTTPFactory.createXHR.calls.length).toEqual(1);
       });
     });
   });
@@ -190,9 +192,9 @@ xdescribe("HTTP.Socket", function() {
   describe("when connecting", function() {
     describe("before the open frame", function() {
       it("should ignore heartbeat frames", function() {
-        var requestCount = Pusher.HTTP.getXHR.calls.length;
+        var requestCount = HTTPFactory.createXHR.calls.length;
         lastXHR.emit("chunk", { status: 200, data: "hhhhhhhhhhh" });
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(requestCount);
+        expect(HTTPFactory.createXHR.calls.length).toEqual(requestCount);
       });
     });
 
@@ -212,10 +214,10 @@ xdescribe("HTTP.Socket", function() {
 
     describe("#send", function() {
       it("should send an HTTP request to a correct URL", function() {
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(1);
+        expect(HTTPFactory.createXHR.calls.length).toEqual(1);
         socket.send("test");
 
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(2);
+        expect(HTTPFactory.createXHR.calls.length).toEqual(2);
         expect(lastXHR.method).toEqual("POST");
         expect(lastXHR.url).toMatch(
           new RegExp(
@@ -249,8 +251,8 @@ xdescribe("HTTP.Socket", function() {
       });
 
       it("should return false if the request raised an exception", function() {
-        Pusher.HTTP.getXHR.andCallFake(function() {
-          var request = Pusher.Mocks.getHTTPRequest();
+        HTTPFactory.createXHR.andCallFake(function() {
+          var request = Mocks.getHTTPRequest();
           request.start.andThrow("exception");
           return request;
         });
@@ -342,7 +344,7 @@ xdescribe("HTTP.Socket", function() {
       it("should send an HTTP request to the updated host", function() {
         socket.send("test");
         // opening the connection sends the first request
-        expect(Pusher.HTTP.getXHR.calls.length).toEqual(2);
+        expect(HTTPFactory.createXHR.calls.length).toEqual(2);
         expect(lastXHR.method).toEqual("POST");
         expect(lastXHR.url).toMatch(
           new RegExp(

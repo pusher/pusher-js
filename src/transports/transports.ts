@@ -4,7 +4,7 @@ import * as Util from "../util.ts";
 import * as Collections from "../utils/collections.ts";
 import TransportHooks from "./transport_hooks.ts";
 import WS from 'pusher-websocket-iso-externals-node/ws';
-import * as HTTP from '../http/http';
+import HTTPFactory from '../http/http';
 
 /** WebSocket transport.
  *
@@ -39,14 +39,14 @@ var httpConfiguration = {
 
 var streamingConfiguration = Collections.extend(
   { getSocket: function(url) {
-      return HTTP.getStreamingSocket(url);
+      return HTTPFactory.createStreamingSocket(url);
     }
   },
   httpConfiguration
 );
 var pollingConfiguration = Collections.extend(
   { getSocket: function(url) {
-      return HTTP.getPollingSocket(url);
+      return HTTPFactory.createPollingSocket(url);
     }
   },
   httpConfiguration

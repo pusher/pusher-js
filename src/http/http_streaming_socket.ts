@@ -1,6 +1,8 @@
+import SocketHooks from "./socket_hooks";
+import HTTPFactory from "./http_factory";
 import HTTPSocket from "./http_socket";
 
-var hooks = {
+var hooks : SocketHooks = {
   getReceiveURL: function(url, session) {
     return url.base + "/" + session + "/xhr_streaming" + url.queryString;
   },
@@ -15,6 +17,4 @@ var hooks = {
   }
 };
 
-export default function(url : string) : HTTPSocket {
-  return new HTTPSocket(hooks, url);
-};
+export default hooks;

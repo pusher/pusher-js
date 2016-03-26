@@ -1,3 +1,3 @@
-import HTTPRequest from './http_request';
-declare var getXHR: (method: string, url: string) => HTTPRequest;
-export default getXHR;
+import RequestHooks from "./request_hooks";
+declare var hooks: RequestHooks;
+export default hooks;

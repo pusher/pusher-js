@@ -58,7 +58,7 @@ export default class Pusher {
       options
     );
 
-    this.channels = new Channels(Pusher.factory);
+    this.channels = Pusher.factory.createChannels();
     this.global_emitter = new EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
@@ -71,7 +71,7 @@ export default class Pusher {
       version: Defaults.VERSION
     });
     if (!this.config.disableStats) {
-      this.timelineSender = new TimelineSender(Pusher.factory, this.timeline, {
+      this.timelineSender = Pusher.factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
         path: "/timeline/v2/jsonp"
       });
@@ -84,7 +84,7 @@ export default class Pusher {
       );
     };
 
-    this.connection = new ConnectionManager(
+    this.connection = Pusher.factory.createConnectionManager(
       this.key,
       Collections.extend(
         { getStrategy: getStrategy,

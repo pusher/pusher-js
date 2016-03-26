@@ -65,10 +65,10 @@ export default class Channels {
 
 function createChannel(factory: Factory, name : string, pusher : any) : Channel {
   if (name.indexOf('private-') === 0) {
-    return new PrivateChannel(factory, name, pusher);
+    return factory.createPrivateChannel(name, pusher);
   } else if (name.indexOf('presence-') === 0) {
-    return new PresenceChannel(factory, name, pusher);
+    return factory.createPresenceChannel(name, pusher);
   } else {
-    return new Channel(factory, name, pusher);
+    return factory.createChannel(name, pusher);
   }
 }

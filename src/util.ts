@@ -34,7 +34,7 @@ export function method(name : string, ...args : any[]) : Function {
   };
 }
 
-export function getLocalStorage() : Object {
+export function getLocalStorage() : any {
   try {
     return window.localStorage;
   } catch (e) {
@@ -42,7 +42,7 @@ export function getLocalStorage() : Object {
   }
 }
 
-export function getClientFeatures() : Object[] {
+export function getClientFeatures() : any[] {
   return Collections.keys(
     Collections.filterObject(
       { "ws": WSTransport },

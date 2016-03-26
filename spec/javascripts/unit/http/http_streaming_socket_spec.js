@@ -1,11 +1,14 @@
-xdescribe("HTTP.getStreamingSocket", function() {
+var Mocks = require('../../helpers/mocks');
+var HTTPFactory = require('http/http').default;
+
+describe("HTTP.getStreamingSocket", function() {
   var hooks;
   var url;
   var socket;
 
   beforeEach(function() {
-    spyOn(Pusher.HTTP, "Socket").andCallFake(function(h, u) {
-      socket = Pusher.Mocks.getHTTPSocket();
+    spyOn(HTTPFactory, "createSocket").andCallFake(function(h, u) {
+      socket = Mocks.getHTTPSocket();
       hooks = h;
       url = u;
       return socket;
@@ -13,13 +16,13 @@ xdescribe("HTTP.getStreamingSocket", function() {
   });
 
   it("should pass the correct url", function() {
-    Pusher.HTTP.getStreamingSocket("http://example.org/xyz");
+    HTTPFactory.createStreamingSocket("http://example.org/xyz");
     expect(url).toEqual("http://example.org/xyz");
   });
 
   describe("hooks", function() {
     beforeEach(function() {
-      Pusher.HTTP.getStreamingSocket("http://example.com");
+      HTTPFactory.createStreamingSocket("http://example.com");
     });
 
     it("#getReceiveURL should generate a correct streaming URL", function() {

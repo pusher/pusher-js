@@ -1,3 +1,4 @@
+import HTTPFactory from "./http_factory";
 import URLLocation from "./url_location";
 import State from "./state";
 import Socket from "../socket/socket";
@@ -9,12 +10,13 @@ declare class HTTPSocket implements Socket {
     location: URLLocation;
     readyState: State;
     stream: HTTPRequest;
+    factory: HTTPFactory;
     onopen: () => void;
     onerror: (error: any) => void;
     onclose: (closeEvent: any) => void;
     onmessage: (message: any) => void;
     onactivity: () => void;
-    constructor(hooks: SocketHooks, url: string);
+    constructor(factory: HTTPFactory, hooks: SocketHooks, url: string);
     send(payload: any): boolean;
     ping(): void;
     close(code: any, reason: any): void;

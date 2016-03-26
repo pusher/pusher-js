@@ -3,17 +3,18 @@ var Channel = require('channels/channel').default;
 var Members = require('channels/members').default;
 var Authorizer = require('pusher_authorizer').default;
 var Errors = require('errors');
-
+var Factory = require('utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
-// FIXME
-xdescribe("PresenceChannel", function() {
+describe("PresenceChannel", function() {
   var pusher;
   var channel;
+  var factory;
 
   beforeEach(function() {
     pusher = Mocks.getPusher({ foo: "bar" });
-    channel = new PresenceChannel("presence-test", pusher);
+    factory = new Factory();
+    channel = new PresenceChannel(factory, "presence-test", pusher);
   });
 
   describe("after construction", function() {
@@ -43,13 +44,13 @@ xdescribe("PresenceChannel", function() {
 
     beforeEach(function() {
       authorizer = Mocks.getAuthorizer();
-      spyOn("Authorizer").andReturn(authorizer);
+      spyOn(factory, "createAuthorizer").andReturn(authorizer);
     });
 
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(Authorizer.calls.length).toEqual(1);
-      expect(Authorizer).toHaveBeenCalledWith(
+      expect(factory.createAuthorizer.calls.length).toEqual(1);
+      expect(factory.createAuthorizer).toHaveBeenCalledWith(
         channel,
         { foo: "bar" }
       );
@@ -110,7 +111,7 @@ xdescribe("PresenceChannel", function() {
 
     beforeEach(function() {
       authorizer = Mocks.getAuthorizer();
-      spyOn(Channel, "Authorizer").andReturn(authorizer);
+      spyOn(factory, "createAuthorizer").andReturn(authorizer);
       channel.authorize("1.23", function() {});
       authorizer._callback(false, {
         foo: "bar",

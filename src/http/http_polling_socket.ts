@@ -21,6 +21,4 @@ var hooks : SocketHooks = {
   }
 };
 
-export default function(url : string) : HTTPSocket {
-  return new HTTPSocket(hooks, url);
-};
+export default hooks;

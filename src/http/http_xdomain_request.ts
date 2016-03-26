@@ -34,8 +34,4 @@ var hooks : RequestHooks = {
   }
 };
 
-var getXDR = function(method : string, url : string) : HTTPRequest {
-  return new HTTPRequest(hooks, method, url);
-};
-
-export default getXDR;
+export default hooks;

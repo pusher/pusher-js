@@ -1,2 +1,3 @@
-import HTTPSocket from "./http_socket";
-export default function (url: string): HTTPSocket;
+import SocketHooks from "./socket_hooks";
+declare var hooks: SocketHooks;
+export default hooks;
