@@ -1,13 +1,13 @@
 var path = require("path");
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var version = require('../package').version;
+var objectAssign = require('object-assign-deep');
 
 ///////////////////////////////////////////////////
 // The web build uses:                           //
 // XHR, WebSocket and NetInfo in platforms/web/* //
 ///////////////////////////////////////////////////
-module.exports = {
-  entry: "./src/pusher.ts",
+var config = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
@@ -15,14 +15,6 @@ module.exports = {
   },
   externals: {
     '../package': '{version: "'+ version +'"}'
-  },
-  resolve: {
-    extensions: ['', '.webpack.js', '.web.js', '.ts', '.js']
-  },
-  module: {
-    loaders: [
-      { test: /\.ts$/, loader: 'ts-loader' }
-    ]
   },
   plugins: [
     new NormalModuleReplacementPlugin(
@@ -42,4 +34,6 @@ module.exports = {
       "pusher-websocket-iso-externals-web/net_info"
     )
   ]
-}
+});
+
+module.exports = config;
