@@ -1,10 +1,19 @@
 var Authorizer = require('pusher_authorizer').default;
 var Logger = require('logger');
+var Mocks = require('../helpers/mocks');
+var Util = require('util');
+var Factory = require('utils/factory').default;
 
 describe("Authorizer", function() {
+  var factory;
+
+  beforeEach(function(){
+    factory = new Factory();
+  });
+
   describe("#composeQuery", function() {
     it("should return str with just socket id and channel name if no auth query options", function(test) {
-      var authorizer = new Authorizer({ name: "chan" }, {});
+      var authorizer = new Authorizer(factory, { name: "chan" }, {});
 
       expect(authorizer.composeQuery("1.1"))
         .toEqual("socket_id=1.1&channel_name=chan");
@@ -12,6 +21,7 @@ describe("Authorizer", function() {
 
     it("should add query params specified in options object", function(test) {
       var authorizer = new Authorizer(
+        factory,
         { name: "chan" },
         { auth: {
             params: { a: 1, b: 2 }
@@ -26,22 +36,23 @@ describe("Authorizer", function() {
 
 });
 
-// FIXME
-xdescribe("AJAX Authorizer", function() {
-  var xhr;
+describe("AJAX Authorizer", function() {
+  var xhr, factory;
 
   beforeEach(function() {
+    factory = new Factory();
     xhr = new Mocks.getXHR();
     if (window.XMLHttpRequest) {
-      spyOn(window, "XMLHttpRequest").andReturn(xhr);
+      spyOn(factory, "createXMLHttpRequest").andReturn(xhr);
     } else {
-      spyOn(window, "ActiveXObject").andReturn(xhr);
+      spyOn(factory, "createMicrosoftXHR").andReturn(xhr);
     }
   });
 
   it("should pass headers in the request", function() {
     var headers = { "foo": "bar", "n": 42 };
     var authorizer = new Authorizer(
+      factory,
       { name: "chan" },
       { authTransport: "ajax",
         auth: {
@@ -62,6 +73,7 @@ xdescribe("AJAX Authorizer", function() {
   it("should pass params in the query string", function() {
     var params = { "a": 1, "b": 2 };
     var authorizer = new Authorizer(
+      factory,
       { name: "chan" },
       { authTransport: "ajax",
         auth: {
@@ -79,6 +91,7 @@ xdescribe("AJAX Authorizer", function() {
 
   it("should call back with auth result on success", function(test) {
     var authorizer = new Authorizer(
+      factory,
       { name: "chan" },
       { authTransport: "ajax" }
     );
@@ -90,10 +103,9 @@ xdescribe("AJAX Authorizer", function() {
     authorizer.authorize("1.23", callback);
 
     if (window.XMLHttpRequest) {
-      expect(window.XMLHttpRequest.calls.length).toEqual(1);
+      expect(factory.createXMLHttpRequest.calls.length).toEqual(1);
     } else {
-      expect(window.ActiveXObject.calls.length).toEqual(1);
-      expect(window.ActiveXObject).toHaveBeenCalledWith("Microsoft.XMLHTTP");
+      expect(factory.createMicrosoftXHR.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;
@@ -107,19 +119,18 @@ xdescribe("AJAX Authorizer", function() {
 
   it("should call back with an error if JSON in xhr.responseText is invalid", function(test) {
     var authorizer = new Authorizer(
+      factory,
       { name: "chan" },
       { authTransport: "ajax" }
     );
     var invalidJSON = 'INVALID { "something": "something"}';
     var callback = jasmine.createSpy("callback");
-
     authorizer.authorize("1.23", callback);
 
     if (window.XMLHttpRequest) {
-      expect(window.XMLHttpRequest.calls.length).toEqual(1);
+      expect(factory.createXMLHttpRequest.calls.length).toEqual(1);
     } else {
-      expect(window.ActiveXObject.calls.length).toEqual(1);
-      expect(window.ActiveXObject).toHaveBeenCalledWith("Microsoft.XMLHTTP");
+      expect(factory.createMicrosoftXHR.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;

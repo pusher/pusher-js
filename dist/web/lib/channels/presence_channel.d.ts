@@ -1,5 +1,6 @@
 import PrivateChannel from './private_channel';
 import Members from './members';
+import Factory from '../utils/factory';
 export default class PresenceChannel extends PrivateChannel {
     members: Members;
     /** Adds presence channel functionality to private channels.
@@ -7,7 +8,7 @@ export default class PresenceChannel extends PrivateChannel {
      * @param {String} name
      * @param {Pusher} pusher
      */
-    constructor(name: string, pusher: any);
+    constructor(factory: Factory, name: string, pusher: any);
     /** Authenticates the connection as a member of the channel.
      *
      * @param  {String} socketId

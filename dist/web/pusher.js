@@ -60,6 +60,7 @@ var Pusher =
 	var DefaultConfig = __webpack_require__(53);
 	var logger_1 = __webpack_require__(12);
 	var state_1 = __webpack_require__(13);
+	var factory_1 = __webpack_require__(54);
 	var Pusher = (function () {
 	    function Pusher(app_key, options) {
 	        checkAppKey(app_key);
@@ -67,7 +68,7 @@ var Pusher =
 	        var self = this;
 	        this.key = app_key;
 	        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
-	        this.channels = new channels_1.default();
+	        this.channels = new channels_1.default(Pusher.factory);
 	        this.global_emitter = new dispatcher_1.default();
 	        this.sessionID = Math.floor(Math.random() * 1000000000);
 	        this.timeline = new timeline_1.default(this.key, this.sessionID, {
@@ -79,7 +80,7 @@ var Pusher =
 	            version: Defaults.VERSION
 	        });
 	        if (!this.config.disableStats) {
-	            this.timelineSender = new timeline_sender_1.default(this.timeline, {
+	            this.timelineSender = new timeline_sender_1.default(Pusher.factory, this.timeline, {
 	                host: this.config.statsHost,
 	                path: "/timeline/v2/jsonp"
 	            });
@@ -202,6 +203,7 @@ var Pusher =
 	    /*  STATIC PROPERTIES */
 	    Pusher.instances = [];
 	    Pusher.isReady = false;
+	    Pusher.factory = new factory_1.default();
 	    return Pusher;
 	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -296,15 +298,6 @@ var Pusher =
 	    return "http:";
 	}
 	exports.getProtocol = getProtocol;
-	function createXHR() {
-	    if (xhr_1.default) {
-	        return new xhr_1.default();
-	    }
-	    else {
-	        return new ActiveXObject("Microsoft.XMLHTTP");
-	    }
-	}
-	exports.createXHR = createXHR;
 
 
 /***/ },
@@ -1889,7 +1882,8 @@ var Pusher =
 	var Collections = __webpack_require__(2);
 	/** Handles a channel map. */
 	var Channels = (function () {
-	    function Channels() {
+	    function Channels(factory) {
+	        this.factory = factory;
 	        this.channels = {};
 	    }
 	    /** Creates or retrieves an existing channel by its name.
@@ -1940,13 +1934,13 @@ var Pusher =
 	exports.default = Channels;
 	function createChannel(name, pusher) {
 	    if (name.indexOf('private-') === 0) {
-	        return new private_channel_1.default(name, pusher);
+	        return new private_channel_1.default(this.factory, name, pusher);
 	    }
 	    else if (name.indexOf('presence-') === 0) {
-	        return new presence_channel_1.default(name, pusher);
+	        return new presence_channel_1.default(this.factory, name, pusher);
 	    }
 	    else {
-	        return new channel_1.default(name, pusher);
+	        return new channel_1.default(this.factory, name, pusher);
 	    }
 	}
 
@@ -1975,10 +1969,11 @@ var Pusher =
 	 */
 	var Channel = (function (_super) {
 	    __extends(Channel, _super);
-	    function Channel(name, pusher) {
+	    function Channel(factory, name, pusher) {
 	        _super.call(this, function (event, data) {
 	            logger_1.default.debug('No callbacks on ' + name + ' for ' + event);
 	        });
+	        this.factory = factory;
 	        this.name = name;
 	        this.pusher = pusher;
 	        this.subscribed = false;
@@ -2065,8 +2060,8 @@ var Pusher =
 	     * @param {String} name
 	     * @param {Pusher} pusher
 	     */
-	    function PresenceChannel(name, pusher) {
-	        _super.call(this, name, pusher);
+	    function PresenceChannel(factory, name, pusher) {
+	        _super.call(this, factory, name, pusher);
 	        this.members = new members_1.default();
 	    }
 	    /** Authenticates the connection as a member of the channel.
@@ -2156,7 +2151,7 @@ var Pusher =
 	     * @param  {Function} callback
 	     */
 	    PrivateChannel.prototype.authorize = function (socketId, callback) {
-	        var authorizer = new pusher_authorizer_1.default(this, this.pusher.config);
+	        var authorizer = new pusher_authorizer_1.default(this.factory, this, this.pusher.config);
 	        return authorizer.authorize(socketId, callback);
 	    };
 	    return PrivateChannel;
@@ -2171,33 +2166,11 @@ var Pusher =
 
 	"use strict";
 	var logger_1 = __webpack_require__(12);
-	var Util = __webpack_require__(1);
-	var Authorizer = (function () {
-	    function Authorizer(channel, options) {
-	        this.channel = channel;
-	        this.type = options.authTransport;
-	        this.options = options;
-	        this.authOptions = (options || {}).auth || {};
-	    }
-	    Authorizer.prototype.composeQuery = function (socketId) {
-	        var query = 'socket_id=' + encodeURIComponent(socketId) +
-	            '&channel_name=' + encodeURIComponent(this.channel.name);
-	        for (var i in this.authOptions.params) {
-	            query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
-	        }
-	        return query;
-	    };
-	    Authorizer.prototype.authorize = function (socketId, callback) {
-	        return authorizers[this.type].call(this, socketId, callback);
-	    };
-	    return Authorizer;
-	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Authorizer;
 	var authorizers = {
 	    ajax: function (socketId, callback) {
 	        var self = this, xhr;
-	        xhr = Util.createXHR();
+	        xhr = this.factory.createXHR();
+	        console.log(xhr);
 	        xhr.open("POST", self.options.authEndpoint, true);
 	        // add request headers
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -2229,6 +2202,30 @@ var Pusher =
 	        return xhr;
 	    }
 	};
+	var Authorizer = (function () {
+	    function Authorizer(factory, channel, options) {
+	        this.factory = factory;
+	        this.channel = channel;
+	        this.type = options.authTransport;
+	        this.options = options;
+	        this.authOptions = (options || {}).auth || {};
+	    }
+	    Authorizer.prototype.composeQuery = function (socketId) {
+	        var query = 'socket_id=' + encodeURIComponent(socketId) +
+	            '&channel_name=' + encodeURIComponent(this.channel.name);
+	        for (var i in this.authOptions.params) {
+	            query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
+	        }
+	        return query;
+	    };
+	    Authorizer.prototype.authorize = function (socketId, callback) {
+	        return Authorizer.authorizers[this.type].call(this, socketId, callback);
+	    };
+	    Authorizer.authorizers = authorizers;
+	    return Authorizer;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Authorizer;
 
 
 /***/ },
@@ -2404,7 +2401,7 @@ var Pusher =
 	var Util = __webpack_require__(1);
 	var base64_1 = __webpack_require__(35);
 	var TimelineSender = (function () {
-	    function TimelineSender(timeline, options) {
+	    function TimelineSender(factory, timeline, options) {
 	        this.timeline = timeline;
 	        this.options = options || {};
 	    }
@@ -2421,7 +2418,7 @@ var Pusher =
 	            });
 	            var query = Collections.map(Collections.flatten(encodeParamsObject(params)), Util.method("join", "=")).join("&");
 	            url += ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
-	            var xhr = Util.createXHR();
+	            var xhr = this.factory.createXHR();
 	            xhr.open("GET", url, true);
 	            xhr.onreadystatechange = function () {
 	                if (xhr.readyState === 4) {
@@ -2700,7 +2697,7 @@ var Pusher =
 	 */
 	var TransportManager = (function () {
 	    function TransportManager(options) {
-	        this.options = options;
+	        this.options = options || [];
 	        this.livesLeft = this.options.lives || Infinity;
 	    }
 	    /** Creates a assistant for the transport.
@@ -4222,6 +4219,35 @@ var Pusher =
 	        httpHost: "sockjs-" + clusterName + ".pusher.com"
 	    };
 	};
+
+
+/***/ },
+/* 54 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var xhr_1 = __webpack_require__(22);
+	var Factory = (function () {
+	    function Factory() {
+	    }
+	    Factory.prototype.createXHR = function () {
+	        if (xhr_1.default) {
+	            return this.createXMLHttpRequest();
+	        }
+	        else {
+	            return this.createMicrosoftXHR();
+	        }
+	    };
+	    Factory.prototype.createXMLHttpRequest = function () {
+	        return new xhr_1.default();
+	    };
+	    Factory.prototype.createMicrosoftXHR = function () {
+	        return new ActiveXObject("Microsoft.XMLHTTP");
+	    };
+	    return Factory;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Factory;
 
 
 /***/ }

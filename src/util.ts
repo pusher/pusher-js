@@ -1,7 +1,6 @@
 import * as Collections from "./utils/collections";
 import TimedCallback from "./utils/timers/timed_callback";
 import {OneOffTimer, PeriodicTimer} from "./utils/timers";
-import Ajax from "./http/ajax";
 import {WSTransport} from "./transports/transports";
 import XHR from "pusher-websocket-iso-externals-node/xhr";
 
@@ -75,12 +74,4 @@ export function getProtocol() : string {
     return getDocument().location.protocol;
   }
   return "http:";
-}
-
-export function createXHR() : Ajax {
-  if (XHR){
-    return new XHR();
-  } else {
-    return new ActiveXObject("Microsoft.XMLHTTP");
-  }
 }

@@ -2,14 +2,16 @@ var Channels = require('channels/channels').default;
 var Channel = require('channels/channel').default;
 var PrivateChannel = require('channels/private_channel').default;
 var PresenceChannel = require('channels/presence_channel').default;
-
+var Factory = require('utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
 describe("Channels", function() {
   var channels;
+  var factory;
 
   beforeEach(function() {
-    channels = new Channels();
+    factory = new Factory();
+    channels = new Channels(factory);
   });
 
   describe("#add", function() {

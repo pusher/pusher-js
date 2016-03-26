@@ -1,6 +1,5 @@
 import TimedCallback from "./utils/timers/timed_callback";
 import { OneOffTimer } from "./utils/timers";
-import Ajax from "./http/ajax";
 export declare function now(): number;
 export declare function defer(callback: TimedCallback): OneOffTimer;
 /** Builds a function that will proxy a method call to its first argument.
@@ -18,4 +17,3 @@ export declare function isXHRSupported(): boolean;
 export declare function isXDRSupported(encrypted: boolean): boolean;
 export declare function getDocument(): any;
 export declare function getProtocol(): string;
-export declare function createXHR(): Ajax;

@@ -1,6 +1,6 @@
 var Channel = require('channels/channel').default;
 var Errors = require('errors');
-
+var Factory = require('utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
 describe("Channel", function() {
@@ -9,7 +9,8 @@ describe("Channel", function() {
 
   beforeEach(function() {
     pusher = Mocks.getPusher();
-    channel = new Channel("test", pusher);
+    var factory = new Factory();
+    channel = new Channel(factory, "test", pusher);
   });
 
   describe("after construction", function() {

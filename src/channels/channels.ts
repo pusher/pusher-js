@@ -3,12 +3,15 @@ import PresenceChannel from './presence_channel';
 import PrivateChannel from './private_channel';
 import * as Collections from '../utils/collections';
 import ChannelTable from './channel_table';
+import Factory from '../utils/factory';
 
 /** Handles a channel map. */
 export default class Channels {
   channels: ChannelTable;
+  factory: Factory;
 
-  constructor() {
+  constructor(factory: Factory) {
+    this.factory = factory;
     this.channels = {};
   }
 
@@ -20,7 +23,7 @@ export default class Channels {
    */
   add(name : string, pusher : any) {
     if (!this.channels[name]) {
-      this.channels[name] = createChannel(name, pusher);
+      this.channels[name] = createChannel(this.factory, name, pusher);
     }
     return this.channels[name];
   }
@@ -60,12 +63,12 @@ export default class Channels {
   }
 }
 
-function createChannel(name : string, pusher : any) : Channel {
+function createChannel(factory: Factory, name : string, pusher : any) : Channel {
   if (name.indexOf('private-') === 0) {
-    return new PrivateChannel(name, pusher);
+    return new PrivateChannel(factory, name, pusher);
   } else if (name.indexOf('presence-') === 0) {
-    return new PresenceChannel(name, pusher);
+    return new PresenceChannel(factory, name, pusher);
   } else {
-    return new Channel(name, pusher);
+    return new Channel(factory, name, pusher);
   }
 }

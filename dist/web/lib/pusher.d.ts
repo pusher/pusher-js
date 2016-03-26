@@ -5,9 +5,11 @@ import Timeline from './timeline/timeline';
 import TimelineSender from './timeline/timeline_sender';
 import ConnectionManager from './connection/connection_manager';
 import { PeriodicTimer } from './utils/timers';
+import Factory from './utils/factory';
 export default class Pusher {
     static instances: Pusher[];
     static isReady: boolean;
+    static factory: Factory;
     static ready(): void;
     static setLogger(logger: Function): void;
     key: string;

@@ -7,7 +7,6 @@ var DefaultConfig = require('config');
 var TimelineSender = require('timeline/timeline_sender').default;
 var Pusher = require('pusher').default;
 
-// FIXME
 xdescribe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
 

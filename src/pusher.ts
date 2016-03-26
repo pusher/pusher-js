@@ -13,12 +13,14 @@ import * as Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import ConnectionState from './connection/state';
+import Factory from './utils/factory';
 
 export default class Pusher {
 
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
   static isReady : boolean = false;
+  static factory : Factory = new Factory();
 
   static ready() {
     Pusher.isReady = true;
@@ -56,7 +58,7 @@ export default class Pusher {
       options
     );
 
-    this.channels = new Channels();
+    this.channels = new Channels(Pusher.factory);
     this.global_emitter = new EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
 
@@ -69,7 +71,7 @@ export default class Pusher {
       version: Defaults.VERSION
     });
     if (!this.config.disableStats) {
-      this.timelineSender = new TimelineSender(this.timeline, {
+      this.timelineSender = new TimelineSender(Pusher.factory, this.timeline, {
         host: this.config.statsHost,
         path: "/timeline/v2/jsonp"
       });

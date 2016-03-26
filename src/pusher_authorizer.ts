@@ -1,42 +1,12 @@
 import Logger from './logger';
-import * as Util from './util';
 import Channel from './channels/channel';
-
-export default class Authorizer {
-  channel: Channel;
-  type: string;
-  options: any;
-  authOptions: any;
-
-  constructor(channel : Channel, options : any) {
-    this.channel = channel;
-    this.type = options.authTransport;
-    this.options = options;
-    this.authOptions = (options || {}).auth || {}
-  }
-
-  composeQuery(socketId : string) : string {
-    var query = 'socket_id=' + encodeURIComponent(socketId) +
-      '&channel_name=' + encodeURIComponent(this.channel.name);
-
-    for(var i in this.authOptions.params) {
-      query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
-    }
-
-    return query;
-  }
-
-  authorize(socketId : string, callback : Function) : any {
-    return authorizers[this.type].call(this, socketId, callback);
-  }
-}
+import Factory from './utils/factory';
 
 var authorizers = {
   ajax: function(socketId, callback){
     var self = this, xhr;
 
-    xhr = Util.createXHR();
-
+    xhr = this.factory.createXHR();
     xhr.open("POST", self.options.authEndpoint, true);
 
     // add request headers
@@ -71,3 +41,37 @@ var authorizers = {
     return xhr;
   }
 };
+
+export default class Authorizer {
+
+  static authorizers = authorizers;
+
+  factory: Factory;
+  channel: Channel;
+  type: string;
+  options: any;
+  authOptions: any;
+
+  constructor(factory: Factory, channel : Channel, options : any) {
+    this.factory = factory;
+    this.channel = channel;
+    this.type = options.authTransport;
+    this.options = options;
+    this.authOptions = (options || {}).auth || {}
+  }
+
+  composeQuery(socketId : string) : string {
+    var query = 'socket_id=' + encodeURIComponent(socketId) +
+      '&channel_name=' + encodeURIComponent(this.channel.name);
+
+    for(var i in this.authOptions.params) {
+      query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
+    }
+
+    return query;
+  }
+
+  authorize(socketId : string, callback : Function) : any {
+    return Authorizer.authorizers[this.type].call(this, socketId, callback);
+  }
+}
