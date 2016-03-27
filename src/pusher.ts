@@ -28,6 +28,13 @@ export default class Pusher {
     }
   }
 
+  static logToConsole() {
+    if (!console.log) throw "Your environment doesn't have console.log. Please use Pusher.setLogger for your own custom logger."
+    this.setLogger(function(log){
+      console.log(log);
+    });
+  }
+
   static setLogger(logger : Function) {
     Logger.log = logger;
   }
