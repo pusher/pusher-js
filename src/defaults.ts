@@ -19,6 +19,11 @@ export var activity_timeout = 120000;
 export var pong_timeout = 30000;
 export var unavailable_timeout = 10000;
 
+// CDN configuration
+export var cdn_http = '<CDN_HTTP>';
+export var cdn_https = '<CDN_HTTPS>';
+export var dependency_suffix = '<DEPENDENCY_SUFFIX>';
+
 export var getDefaultStrategy = function(config : any) : any {
   var wsStrategy;
   if (config.encrypted) {
@@ -44,7 +49,7 @@ export var getDefaultStrategy = function(config : any) : any {
     [":def", "wss_options", [":extend", ":ws_options", {
       encrypted: true
     }]],
-    [":def", "http_options", {
+    [":def", "sockjs_options", {
       hostUnencrypted: config.httpHost + ":" + config.httpPort,
       hostEncrypted: config.httpHost + ":" + config.httpsPort,
       httpPath: config.httpPath
@@ -68,10 +73,10 @@ export var getDefaultStrategy = function(config : any) : any {
 
     [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
     [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-    [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
-    [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":http_options", ":streaming_manager"],
-    [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
-    [":def_transport", "xdr_polling", "xdr_polling", 1, ":http_options"],
+    [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
+    [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
+    [":def_transport", "xhr_polling", "xhr_polling", 1, ":sockjs_options"],
+    [":def_transport", "xdr_polling", "xdr_polling", 1, ":sockjs_options"],
 
     [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
     [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
@@ -97,12 +102,20 @@ export var getDefaultStrategy = function(config : any) : any {
       ":polling_loop"
     ]]],
 
+    [":def", "http_fallback_loop",
+      [":if", [":is_supported", ":http_loop"], [
+        ":http_loop"
+      ], [
+        ":sockjs_loop"
+      ]]
+    ],
+
     [":def", "strategy",
       [":cached", 1800000,
         [":first_connected",
           [":if", [":is_supported", ":ws"],
             wsStrategy,
-            ":http_loop"
+            ":http_fallback_loop"
           ]
         ]
       ]

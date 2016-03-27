@@ -7,6 +7,7 @@ import WS from 'pusher-websocket-iso-externals-node/ws';
 import HTTPFactory from '../http/http';
 import Factory from '../utils/factory';
 import Runtime from '../runtimes/runtime';
+import {Dependencies} from '../runtimes/dom/dependencies';
 
 /** WebSocket transport.
  *
@@ -26,6 +27,33 @@ export var WSTransport = new Transport(<TransportHooks> {
   },
   getSocket: function(url) {
     return Factory.createWebSocket(url);
+  }
+});
+
+export var SockJSTransport = new Transport(<TransportHooks>{
+  file: "sockjs",
+  urls: URLSchemes.sockjs,
+  handlesActivityChecks: true,
+  supportsPing: false,
+
+  isSupported: function() {
+    return Runtime.isSockJSSupported();
+  },
+  isInitialized: function() {
+    return window.SockJS !== undefined;
+  },
+  getSocket: function(url, options) {
+    return new window.SockJS(url, null, {
+      js_path: Dependencies.getPath("sockjs", {
+        encrypted: options.encrypted
+      }),
+      ignore_null_origin: options.ignoreNullOrigin
+    });
+  },
+  beforeOpen: function(socket, path) {
+    socket.send(JSON.stringify({
+      path: path
+    }));
   }
 });
 

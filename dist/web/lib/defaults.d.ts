@@ -13,4 +13,7 @@ export declare var channel_auth_transport: string;
 export declare var activity_timeout: number;
 export declare var pong_timeout: number;
 export declare var unavailable_timeout: number;
+export declare var cdn_http: string;
+export declare var cdn_https: string;
+export declare var dependency_suffix: string;
 export declare var getDefaultStrategy: (config: any) => any;

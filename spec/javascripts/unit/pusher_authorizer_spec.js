@@ -3,6 +3,8 @@ var Logger = require('logger');
 var Mocks = require('../helpers/mocks');
 var Util = require('util').default;
 var Factory = require('utils/factory').default;
+var Logger = require('logger').default;
+var Runtime = require('runtimes/runtime').default;
 
 describe("Authorizer", function() {
   describe("#composeQuery", function() {
@@ -132,6 +134,37 @@ describe("AJAX Authorizer", function() {
       "JSON returned from webapp was invalid, yet status code was 200. " +
         "Data was: " +
         invalidJSON
+    );
+  });
+});
+
+describe("JSONP Authorizer", function() {
+  it("should raise a warning if headers are passed", function() {
+    var headers = { "foo": "bar", "n": 42 };
+    var authorizer = new Authorizer(
+      { name: "chan" },
+      { authTransport: "jsonp",
+        auth: {
+          headers: headers
+        }
+      }
+    );
+
+    var document = Mocks.getDocument();
+    var script = Mocks.getDocumentElement();
+    var documentElement = Mocks.getDocumentElement();
+
+    document.createElement.andReturn(script);
+    document.getElementsByTagName.andReturn([]);
+    document.documentElement = documentElement;
+    spyOn(Runtime, "getDocument").andReturn(document);
+
+    spyOn(Logger, "warn");
+    authorizer.authorize("1.23", function() {});
+
+    expect(Logger.warn).toHaveBeenCalledWith(
+      "Warn",
+      "To send headers with the auth request, you must use AJAX, rather than JSONP."
     );
   });
 });

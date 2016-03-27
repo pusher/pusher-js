@@ -1,12 +1,15 @@
 import * as Collections from '../utils/collections';
 import {WSTransport} from '../transports/transports';
+import {AuthTransports, ajax} from '../auth_transports';
 
 abstract class Runtime {
   abstract whenReady(callback : Function) : void;
   abstract getProtocol() : string;
   abstract isXHRSupported() : boolean;
   abstract isXDRSupported(encrypted?: boolean) : boolean;
+  abstract isSockJSSupported() : boolean;
   abstract getDocument() : any;
+  abstract getGlobal() : any;
 
   getLocalStorage() : any {
     try {
@@ -23,6 +26,10 @@ abstract class Runtime {
         function (t) { return t.isSupported({}); }
       )
     );
+  }
+
+  getAuthorizers() : AuthTransports {
+    return {ajax};
   }
 }
 

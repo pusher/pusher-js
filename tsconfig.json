@@ -11,6 +11,7 @@
     "src/d.ts/xmlhttprequest/xmlhttprequest.d.ts",
     "src/d.ts/window/websocket.d.ts",
     "src/d.ts/window/xmlhttprequest.d.ts",
+    "src/d.ts/window/sockjs.d.ts",
     "src/d.ts/window/events.d.ts",
     "src/pusher.ts",
     "src/node_modules/pusher-websocket-iso-externals-web/net_info.ts",

@@ -29,3 +29,12 @@ export var http : URLScheme = {
         return getGenericURL("http", params, path);
     }
 };
+
+export var sockjs : URLScheme = {
+  getInitial: function(key : string, params : any) : string {
+    return getGenericURL("http", params, params.httpPath || "/pusher");
+  },
+  getPath: function(key : string, params : any) : string {
+    return getGenericPath(key);
+  }
+};

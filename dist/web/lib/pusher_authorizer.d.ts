@@ -1,8 +1,7 @@
 import Channel from './channels/channel';
+import { AuthTransports } from './auth_transports';
 export default class Authorizer {
-    static authorizers: {
-        ajax: (socketId: any, callback: any) => any;
-    };
+    static authorizers: AuthTransports;
     channel: Channel;
     type: string;
     options: any;

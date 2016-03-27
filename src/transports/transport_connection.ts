@@ -5,6 +5,7 @@ import Logger from '../logger';
 import ConnectionState from '../connection/state';
 import TransportHooks from './transport_hooks';
 import Socket from '../socket/socket';
+import {Dependencies} from '../runtimes/dom/dependencies';
 
 /** Provides universal API for transport connections.
  *
@@ -90,6 +91,24 @@ export default class TransportConnection extends EventsDispatcher {
 
     if (self.hooks.isInitialized()) {
       self.changeState(ConnectionState.INITIALIZED);
+    } else if (self.hooks.file) {
+      self.changeState(ConnectionState.INITIALIZING);
+      Dependencies.load(
+        self.hooks.file,
+        { encrypted: self.options.encrypted },
+        function(error, callback) {
+          if (self.hooks.isInitialized()) {
+            self.changeState(ConnectionState.INITIALIZED);
+            callback(true);
+          } else {
+            if (error) {
+              self.onError(error);
+            }
+            self.onClose();
+            callback(false);
+          }
+        }
+      );
     } else {
       self.onClose();
     }

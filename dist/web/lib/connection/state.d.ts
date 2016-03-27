@@ -3,6 +3,7 @@ declare enum ConnectionState {
     CLOSED,
     NEW,
     INITIALIZED,
+    INITIALIZING,
     CONNECTING,
     FAILED,
     DISCONNECTED,

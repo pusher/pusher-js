@@ -18,6 +18,14 @@ export default class Isomorphic extends Runtime {
     return false;
   }
 
+  isSockJSSupported() : boolean {
+    return false;
+  }
+
+  getGlobal() : any {
+    return Function("return this")();
+  }
+
   getDocument() : any {
     throw("Isomorphic runtime detected, but document not available. Please raise an issue on pusher/pusher-websocket-js-iso");
   }

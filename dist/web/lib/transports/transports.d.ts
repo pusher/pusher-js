@@ -5,6 +5,7 @@ import Transport from "./transport.ts";
  * earlier Firefox versions.
  */
 export declare var WSTransport: Transport;
+export declare var SockJSTransport: Transport;
 /** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
 export declare var XHRStreamingTransport: Transport;
 /** HTTP streaming transport using XDomainRequest (IE 8,9). */

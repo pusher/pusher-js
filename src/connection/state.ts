@@ -3,8 +3,9 @@ enum ConnectionState {
   CLOSED = <any>"closed",
   NEW = <any> "new",
   INITIALIZED = <any> "initialized",
+  INITIALIZING = <any> "initializing",
 
-  
+
   CONNECTING = <any> "connecting",
   FAILED = <any> "failed",
   DISCONNECTED = <any> "disconnected",
