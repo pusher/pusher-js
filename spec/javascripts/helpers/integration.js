@@ -1,5 +1,6 @@
 var base64 = require('base64').default;
 var util = require('util').default;
+var ScriptReceiverFactory = require('runtimes/dom/script_receiver_factory').ScriptReceiverFactory;
 
 exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";
 exports.API_EU_URL = "http://pusher-js-integration-api-eu.herokuapp.com";
@@ -11,6 +12,11 @@ exports.describe = function(name, body) {
   }
   describe(name + " (integration)", body);
 };
+
+exports.ScriptReceivers = new ScriptReceiverFactory(
+  "_pusher_integration_script_receivers",
+  "Pusher.Integration.ScriptReceivers"
+);
 
 exports.getRandomName = function(prefix) {
   return prefix + "_" + util.now() + "_" + Math.floor(Math.random() * 1000000);

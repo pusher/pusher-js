@@ -18,6 +18,7 @@ import Channels from "../channels/channels";
 import {Network, NetInfo} from "../node_modules/pusher-websocket-iso-externals-web/net_info";
 import WS from 'pusher-websocket-iso-externals-node/ws';
 import JSONPRequest from '../runtimes/dom/jsonp_request';
+import ScriptRequest from '../runtimes/dom/script_request';
 
 var Factory = {
 
@@ -86,6 +87,10 @@ var Factory = {
 
   createJSONPRequest(url : string, data : any) : JSONPRequest {
     return new JSONPRequest(url, data);
+  },
+
+  createScriptRequest(src : string) : ScriptRequest {
+    return new ScriptRequest(src);
   }
 }
 

@@ -11,6 +11,7 @@ module.exports = function(config) {
     files: require(__dirname + "/../files/unit_tests"),
     preprocessors: {
       '**/spec/javascripts/unit/**/*.js': ['webpack'],
+      '**/spec/javascripts/helpers/**/*.js': ['webpack'],
       '**/spec/node_modules/**/*.ts': ['webpack']
     },
 
