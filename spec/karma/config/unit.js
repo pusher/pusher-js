@@ -15,7 +15,7 @@ module.exports = function(config) {
       '**/spec/node_modules/**/*.ts': ['webpack']
     },
 
-    reporters: ['progress', 'coverage'],
+    reporters: ['progress', 'coverage', 'spec'],
 
     coverageReporter: {
       type : 'html',
