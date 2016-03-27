@@ -1,5 +1,5 @@
 var Mocks = require("../../helpers/mocks");
-
+var Runtime = require('runtimes/runtime').default;
 var CachedStrategy = require('strategies/cached_strategy').default;
 var Util = require('util').default;
 
@@ -24,7 +24,7 @@ describe("CachedStrategy", function() {
 
   describe("on browsers not supporting localStorage", function() {
     beforeEach(function() {
-      spyOn(Util, "getLocalStorage").andReturn(undefined);
+      spyOn(Runtime, "getLocalStorage").andReturn(undefined);
     });
 
     it("should try the substrategy immediately", function() {
@@ -41,7 +41,7 @@ describe("CachedStrategy", function() {
 
     beforeEach(function() {
       localStorage = {};
-      spyOn(Util, "getLocalStorage").andReturn(localStorage);
+      spyOn(Runtime, "getLocalStorage").andReturn(localStorage);
     });
 
     function buildCachedTransportTests(encrypted) {

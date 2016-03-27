@@ -1,4 +1,5 @@
 import Util from '../util';
+import Runtime from '../runtimes/runtime';
 import Strategy from './strategy';
 import SequentialStrategy from './sequential_strategy';
 import StrategyOptions from "./strategy_options";
@@ -91,7 +92,7 @@ function getTransportCacheKey(encrypted : boolean) : string {
 }
 
 function fetchTransportCache(encrypted : boolean) : any {
-  var storage = Util.getLocalStorage();
+  var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
       var serializedCache = storage[getTransportCacheKey(encrypted)];
@@ -106,7 +107,7 @@ function fetchTransportCache(encrypted : boolean) : any {
 }
 
 function storeTransportCache(encrypted : boolean, transport : TransportStrategy, latency : number) {
-  var storage = Util.getLocalStorage();
+  var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
       storage[getTransportCacheKey(encrypted)] = JSON.stringify({
@@ -121,7 +122,7 @@ function storeTransportCache(encrypted : boolean, transport : TransportStrategy,
 }
 
 function flushTransportCache(encrypted : boolean) {
-  var storage = Util.getLocalStorage();
+  var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
       delete storage[getTransportCacheKey(encrypted)];

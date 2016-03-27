@@ -4,7 +4,5 @@ declare var Util: {
     now(): number;
     defer(callback: TimedCallback): OneOffTimer;
     method(name: string, ...args: any[]): Function;
-    getLocalStorage(): any;
-    getClientFeatures(): any[];
 };
 export default Util;

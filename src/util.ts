@@ -4,9 +4,6 @@ import {OneOffTimer, PeriodicTimer} from "./utils/timers";
 import {WSTransport} from "./transports/transports";
 import XHR from "pusher-websocket-iso-externals-node/xhr";
 
-var global = Function("return this")();
-declare var ActiveXObject: (type: string) => void;
-
 var Util = {
   now() : number {
     if (Date.now) {
@@ -33,23 +30,6 @@ var Util = {
     return function(object) {
       return object[name].apply(object, boundArguments.concat(arguments));
     };
-  },
-
-  getLocalStorage() : any {
-    try {
-      return window.localStorage;
-    } catch (e) {
-      return undefined;
-    }
-  },
-
-  getClientFeatures() : any[] {
-    return Collections.keys(
-      Collections.filterObject(
-        { "ws": WSTransport },
-        function (t) { return t.isSupported({}); }
-      )
-    );
   }
 }
 

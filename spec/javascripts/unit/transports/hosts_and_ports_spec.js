@@ -3,6 +3,7 @@ var NetInfo  = require('pusher-websocket-iso-externals-web/net_info');
 var Mocks = require('../../helpers/mocks');
 var version = require('defaults').VERSION;
 var Factory  = require('utils/factory').default;
+var Runtime = require('runtimes/runtime').default;
 
 describe("Host/Port Configuration", function() {
   var transport;
@@ -10,14 +11,12 @@ describe("Host/Port Configuration", function() {
   var Transports;
 
   beforeEach(function() {
-    var Util = require('util').default;
-
     spyOn(Factory, 'getNetwork').andCallFake(function(){
       var network = new NetInfo();
       network.isOnline = jasmine.createSpy("isOnline")
         .andReturn(true);
     });
-    spyOn(Util, "getLocalStorage").andReturn({});
+    spyOn(Runtime, "getLocalStorage").andReturn({});
   });
 
   afterEach(function() {

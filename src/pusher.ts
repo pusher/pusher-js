@@ -71,7 +71,7 @@ export default class Pusher {
 
     this.timeline = new Timeline(this.key, this.sessionID, {
       cluster: this.config.cluster,
-      features: Util.getClientFeatures(),
+      features: Runtime.getClientFeatures(),
       params: this.config.timelineParams || {},
       limit: 50,
       level: TimelineLevel.INFO,
