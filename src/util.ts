@@ -57,10 +57,10 @@ var Util = {
     return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
   },
 
-  isXDRSupported(encrypted : boolean) : boolean {
+  isXDRSupported(encrypted?: boolean) : boolean {
     var protocol = encrypted ? "https:" : "http:";
     var documentProtocol = this.getProtocol();
-    return Boolean('XDomainRequest' in window) && documentProtocol === protocol;
+    return Boolean(<any>(window['XDomainRequest'])) && documentProtocol === protocol;
   },
 
   getDocument() : any {

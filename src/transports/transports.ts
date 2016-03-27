@@ -20,7 +20,7 @@ export var WSTransport = new Transport(<TransportHooks> {
   isInitialized: function() {
     return Boolean(WS.getAPI());
   },
-  isSupported: function() {
+  isSupported: function() : boolean {
     return Boolean(WS.getAPI());
   },
   getSocket: function(url) {
@@ -53,13 +53,14 @@ var pollingConfiguration = Collections.extend(
 );
 
 var xhrConfiguration = {
-  isSupported: function() {
+  isSupported: function() : boolean {
     return Util.isXHRSupported()
   }
 };
 var xdrConfiguration = {
-  isSupported: function(environment) {
-    return Util.isXDRSupported(environment.encrypted);
+  isSupported: function(environment) : boolean {
+    var yes = Util.isXDRSupported(environment.encrypted);
+    return yes;
   }
 };
 

@@ -4,6 +4,7 @@ var transports = require('transports/transports');
 var Util = require('util').default;
 var Collections = require('utils/collections');
 var WS = require('pusher-websocket-iso-externals-web/ws');
+var HTTP = require('http/http').default;
 
 var VERSION = require('defaults').VERSION;
 
@@ -270,15 +271,14 @@ describe("transports", function() {
   Collections.apply(STREAMING_TRANSPORTS, function(transport) {
     describe(transport, function() {
       describe("getSocket hook", function() {
-        // FIXME
-        xit("should return a new streaming HTTPSocket object", function() {
-          spyOn(Pusher.HTTP, "getStreamingSocket").andCallFake(function(url) {
+        it("should return a new streaming HTTPSocket object", function() {
+          spyOn(HTTP, "createStreamingSocket").andCallFake(function(url) {
             return "streaming socket mock";
           });
 
           var socket = transports[transport].hooks.getSocket("streamurl");
-          expect(Pusher.HTTP.getStreamingSocket.calls.length).toEqual(1);
-          expect(Pusher.HTTP.getStreamingSocket).toHaveBeenCalledWith("streamurl");
+          expect(HTTP.createStreamingSocket.calls.length).toEqual(1);
+          expect(HTTP.createStreamingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("streaming socket mock");
         });
       });
@@ -288,15 +288,14 @@ describe("transports", function() {
   Collections.apply(POLLING_TRANSPORTS, function(transport) {
     describe(transport, function() {
       describe("getSocket hook", function() {
-        // FIXME
-        xit("should return a new polling HTTPSocket object", function() {
-          spyOn(Pusher.HTTP, "getPollingSocket").andCallFake(function(url) {
+        it("should return a new polling HTTPSocket object", function() {
+          spyOn(HTTP, "createPollingSocket").andCallFake(function(url) {
             return "polling socket mock";
           });
 
           var socket = transports[transport].hooks.getSocket("streamurl");
-          expect(Pusher.HTTP.getPollingSocket.calls.length).toEqual(1);
-          expect(Pusher.HTTP.getPollingSocket).toHaveBeenCalledWith("streamurl");
+          expect(HTTP.createPollingSocket.calls.length).toEqual(1);
+          expect(HTTP.createPollingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("polling socket mock");
         });
       });
