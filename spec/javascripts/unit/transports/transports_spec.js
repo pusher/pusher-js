@@ -1,10 +1,10 @@
 var Mocks = require("../../helpers/mocks");
 var Factory = require('utils/factory').default;
 var transports = require('transports/transports');
-var Util = require('util').default;
 var Collections = require('utils/collections');
 var WS = require('pusher-websocket-iso-externals-web/ws');
 var HTTP = require('http/http').default;
+var Runtime = require('runtimes/runtime').default;
 
 var VERSION = require('defaults').VERSION;
 
@@ -221,7 +221,7 @@ describe("transports", function() {
       describe("isSupported hook", function() {
         it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Util, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
@@ -231,7 +231,7 @@ describe("transports", function() {
 
         it("should return true if window.XDomainRequest exists, document protocol is https: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Util, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }
@@ -241,7 +241,7 @@ describe("transports", function() {
 
         it("should return false if window.XDomainRequest exists, document protocol is http: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Util, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
@@ -251,7 +251,7 @@ describe("transports", function() {
 
         it("should return false if window.XDomainRequest exists, document protocol is https: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Util, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }

@@ -1,6 +1,7 @@
 var Mocks = require('../../helpers/mocks');
 var Util = require('util').default;
 var HTTPSocket = require('http/http_socket').default;
+var Runtime = require('runtimes/runtime').default;
 
 describe("HTTP.Socket", function() {
   var onOpen, onMessage, onActivity, onClose;
@@ -24,8 +25,8 @@ describe("HTTP.Socket", function() {
       return lastXHR;
     });
 
-    spyOn(Util, "isXHRSupported").andReturn(true);
-    spyOn(Util, "isXDRSupported").andReturn(false);
+    spyOn(Runtime, "isXHRSupported").andReturn(true);
+    spyOn(Runtime, "isXDRSupported").andReturn(false);
 
     hooks = {
       getReceiveURL: jasmine.createSpy().andCallFake(function(url, session) {
@@ -53,8 +54,8 @@ describe("HTTP.Socket", function() {
   });
 
   it("should use XHR if it's supported", function() {
-    Util.isXHRSupported.andReturn(true);
-    Util.isXDRSupported.andReturn(false);
+    Runtime.isXHRSupported.andReturn(true);
+    Runtime.isXDRSupported.andReturn(false);
 
     var socket = new HTTPSocket(hooks, "http://example.com");
     expect(HTTPFactory.createXHR).toHaveBeenCalled();
@@ -62,8 +63,8 @@ describe("HTTP.Socket", function() {
   });
 
   it("should use XDR if it's supported", function() {
-    Util.isXHRSupported.andReturn(false);
-    Util.isXDRSupported.andReturn(true);
+    Runtime.isXHRSupported.andReturn(false);
+    Runtime.isXDRSupported.andReturn(true);
 
     var socket = new HTTPSocket(hooks, "http://example.com");
     expect(HTTPFactory.createXDR).toHaveBeenCalled();

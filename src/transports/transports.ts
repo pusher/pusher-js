@@ -6,6 +6,7 @@ import TransportHooks from "./transport_hooks.ts";
 import WS from 'pusher-websocket-iso-externals-node/ws';
 import HTTPFactory from '../http/http';
 import Factory from '../utils/factory';
+import Runtime from '../runtimes/runtime';
 
 /** WebSocket transport.
  *
@@ -54,12 +55,12 @@ var pollingConfiguration = Collections.extend(
 
 var xhrConfiguration = {
   isSupported: function() : boolean {
-    return Util.isXHRSupported()
+    return Runtime.isXHRSupported()
   }
 };
 var xdrConfiguration = {
   isSupported: function(environment) : boolean {
-    var yes = Util.isXDRSupported(environment.encrypted);
+    var yes = Runtime.isXDRSupported(environment.encrypted);
     return yes;
   }
 };

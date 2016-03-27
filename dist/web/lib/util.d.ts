@@ -6,9 +6,5 @@ declare var Util: {
     method(name: string, ...args: any[]): Function;
     getLocalStorage(): any;
     getClientFeatures(): any[];
-    isXHRSupported(): boolean;
-    isXDRSupported(encrypted?: boolean): boolean;
-    getDocument(): any;
-    getProtocol(): string;
 };
 export default Util;

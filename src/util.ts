@@ -50,32 +50,6 @@ var Util = {
         function (t) { return t.isSupported({}); }
       )
     );
-  },
-
-  isXHRSupported() : boolean {
-    var Constructor = XHR.getAPI();
-    return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
-  },
-
-  isXDRSupported(encrypted?: boolean) : boolean {
-    var protocol = encrypted ? "https:" : "http:";
-    var documentProtocol = this.getProtocol();
-    return Boolean(<any>(window['XDomainRequest'])) && documentProtocol === protocol;
-  },
-
-  getDocument() : any {
-    try {
-      return document || undefined;
-    } catch(e) {
-      return undefined;
-    }
-  },
-
-  getProtocol() : string {
-    if (this.getDocument() !== undefined){
-      return this.getDocument().location.protocol;
-    }
-    return "http:";
   }
 }
 

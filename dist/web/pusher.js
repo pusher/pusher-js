@@ -46,18 +46,19 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(1);
-	var Collections = __webpack_require__(2);
-	var dispatcher_1 = __webpack_require__(10);
-	var timeline_1 = __webpack_require__(38);
-	var level_1 = __webpack_require__(39);
-	var StrategyBuilder = __webpack_require__(40);
-	var timers_1 = __webpack_require__(3);
-	var Defaults = __webpack_require__(7);
-	var DefaultConfig = __webpack_require__(55);
-	var logger_1 = __webpack_require__(12);
-	var state_1 = __webpack_require__(13);
-	var factory_1 = __webpack_require__(27);
+	var runtime_1 = __webpack_require__(1);
+	var util_1 = __webpack_require__(6);
+	var Collections = __webpack_require__(7);
+	var dispatcher_1 = __webpack_require__(15);
+	var timeline_1 = __webpack_require__(47);
+	var level_1 = __webpack_require__(48);
+	var StrategyBuilder = __webpack_require__(49);
+	var timers_1 = __webpack_require__(8);
+	var Defaults = __webpack_require__(12);
+	var DefaultConfig = __webpack_require__(58);
+	var logger_1 = __webpack_require__(17);
+	var state_1 = __webpack_require__(18);
+	var factory_1 = __webpack_require__(30);
 	var Pusher = (function () {
 	    function Pusher(app_key, options) {
 	        checkAppKey(app_key);
@@ -129,6 +130,13 @@ var Pusher =
 	            Pusher.instances[i].connect();
 	        }
 	    };
+	    Pusher.logToConsole = function () {
+	        if (!console.log)
+	            throw "Your environment doesn't have console.log. Please use Pusher.setLogger for your own custom logger.";
+	        this.setLogger(function (log) {
+	            console.log(log);
+	        });
+	    };
 	    Pusher.setLogger = function (logger) {
 	        logger_1.default.log = logger;
 	    };
@@ -190,7 +198,7 @@ var Pusher =
 	        return this.connection.send_event(event_name, data, channel);
 	    };
 	    Pusher.prototype.isEncrypted = function () {
-	        if (util_1.default.getProtocol() === "https:") {
+	        if (runtime_1.default.getProtocol() === "https:") {
 	            return true;
 	        }
 	        else {
@@ -209,6 +217,7 @@ var Pusher =
 	        throw "You must pass your app key when you instantiate Pusher.";
 	    }
 	}
+	runtime_1.default.whenReady(Pusher.ready);
 	// init Pusher:
 	Pusher.ready();
 
@@ -218,10 +227,135 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var timers_1 = __webpack_require__(3);
-	var transports_1 = __webpack_require__(5);
-	var xhr_1 = __webpack_require__(24);
+	var browser_1 = __webpack_require__(2);
+	var isomorphic_1 = __webpack_require__(5);
+	function decide() {
+	    if (typeof (window) !== 'undefined' && typeof ((window).document) !== 'undefined') {
+	        return new browser_1.default();
+	    }
+	    else {
+	        return new isomorphic_1.default();
+	    }
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = decide();
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var abstract_runtime_1 = __webpack_require__(3);
+	var xhr_1 = __webpack_require__(4);
+	var Browser = (function (_super) {
+	    __extends(Browser, _super);
+	    function Browser() {
+	        _super.apply(this, arguments);
+	    }
+	    // TODO: REPLACE WITH DEPENDENCY LOADER
+	    Browser.prototype.whenReady = function (callback) {
+	        callback();
+	    };
+	    Browser.prototype.getDocument = function () {
+	        return document;
+	    };
+	    Browser.prototype.getProtocol = function () {
+	        return document.location.protocol;
+	    };
+	    Browser.prototype.isXHRSupported = function () {
+	        var Constructor = xhr_1.default.getAPI();
+	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
+	    };
+	    Browser.prototype.isXDRSupported = function (encrypted) {
+	        var protocol = encrypted ? "https:" : "http:";
+	        var documentProtocol = this.getProtocol();
+	        return Boolean((window['XDomainRequest'])) && documentProtocol === protocol;
+	    };
+	    return Browser;
+	}(abstract_runtime_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Browser;
+
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var Runtime = (function () {
+	    function Runtime() {
+	    }
+	    return Runtime;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Runtime;
+
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var XHR = {
+	    getAPI: function () {
+	        return window.XMLHttpRequest;
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = XHR;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var abstract_runtime_1 = __webpack_require__(3);
+	var Isomorphic = (function (_super) {
+	    __extends(Isomorphic, _super);
+	    function Isomorphic() {
+	        _super.apply(this, arguments);
+	    }
+	    Isomorphic.prototype.whenReady = function (callback) {
+	        callback();
+	    };
+	    Isomorphic.prototype.getProtocol = function () {
+	        return "http:";
+	    };
+	    Isomorphic.prototype.isXHRSupported = function () {
+	        return true;
+	    };
+	    Isomorphic.prototype.isXDRSupported = function (encrypted) {
+	        return false;
+	    };
+	    Isomorphic.prototype.getDocument = function () {
+	        throw ("Isomorphic runtime detected, but document not available. Please raise an issue on pusher/pusher-websocket-js-iso");
+	    };
+	    return Isomorphic;
+	}(abstract_runtime_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Isomorphic;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(7);
+	var timers_1 = __webpack_require__(8);
+	var transports_1 = __webpack_require__(10);
 	var global = Function("return this")();
 	var Util = {
 	    now: function () {
@@ -263,29 +397,6 @@ var Pusher =
 	    },
 	    getClientFeatures: function () {
 	        return Collections.keys(Collections.filterObject({ "ws": transports_1.WSTransport }, function (t) { return t.isSupported({}); }));
-	    },
-	    isXHRSupported: function () {
-	        var Constructor = xhr_1.default.getAPI();
-	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
-	    },
-	    isXDRSupported: function (encrypted) {
-	        var protocol = encrypted ? "https:" : "http:";
-	        var documentProtocol = this.getProtocol();
-	        return Boolean((window['XDomainRequest'])) && documentProtocol === protocol;
-	    },
-	    getDocument: function () {
-	        try {
-	            return document || undefined;
-	        }
-	        catch (e) {
-	            return undefined;
-	        }
-	    },
-	    getProtocol: function () {
-	        if (this.getDocument() !== undefined) {
-	            return this.getDocument().location.protocol;
-	        }
-	        return "http:";
 	    }
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -293,7 +404,7 @@ var Pusher =
 
 
 /***/ },
-/* 2 */
+/* 7 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -557,7 +668,7 @@ var Pusher =
 
 
 /***/ },
-/* 3 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -566,7 +677,7 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var abstract_timer_1 = __webpack_require__(4);
+	var abstract_timer_1 = __webpack_require__(9);
 	var global = Function("return this")();
 	// We need to bind clear functions this way to avoid exceptions on IE8
 	function clearTimeout(timer) {
@@ -610,7 +721,7 @@ var Pusher =
 
 
 /***/ },
-/* 4 */
+/* 9 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -645,17 +756,17 @@ var Pusher =
 
 
 /***/ },
-/* 5 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var URLSchemes = __webpack_require__(6);
-	var transport_ts_1 = __webpack_require__(8);
-	var util_ts_1 = __webpack_require__(1);
-	var Collections = __webpack_require__(2);
-	var ws_1 = __webpack_require__(14);
-	var http_1 = __webpack_require__(15);
-	var factory_1 = __webpack_require__(27);
+	var URLSchemes = __webpack_require__(11);
+	var transport_ts_1 = __webpack_require__(13);
+	var Collections = __webpack_require__(7);
+	var ws_1 = __webpack_require__(19);
+	var http_1 = __webpack_require__(20);
+	var factory_1 = __webpack_require__(30);
+	var runtime_1 = __webpack_require__(1);
 	/** WebSocket transport.
 	 *
 	 * Uses native WebSocket implementation, including MozWebSocket supported by
@@ -672,7 +783,7 @@ var Pusher =
 	        return Boolean(ws_1.default.getAPI());
 	    },
 	    getSocket: function (url) {
-	        return factory_1.default.newWebSocket(url);
+	        return factory_1.default.createWebSocket(url);
 	    }
 	});
 	var httpConfiguration = {
@@ -693,12 +804,12 @@ var Pusher =
 	}, httpConfiguration);
 	var xhrConfiguration = {
 	    isSupported: function () {
-	        return util_ts_1.default.isXHRSupported();
+	        return runtime_1.default.isXHRSupported();
 	    }
 	};
 	var xdrConfiguration = {
 	    isSupported: function (environment) {
-	        var yes = util_ts_1.default.isXDRSupported(environment.encrypted);
+	        var yes = runtime_1.default.isXDRSupported(environment.encrypted);
 	        return yes;
 	    }
 	};
@@ -713,11 +824,11 @@ var Pusher =
 
 
 /***/ },
-/* 6 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var defaults_ts_1 = __webpack_require__(7);
+	var defaults_ts_1 = __webpack_require__(12);
 	function getGenericURL(baseScheme, params, path) {
 	    var scheme = baseScheme + (params.encrypted ? "s" : "");
 	    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
@@ -745,7 +856,7 @@ var Pusher =
 
 
 /***/ },
-/* 7 */
+/* 12 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -855,11 +966,11 @@ var Pusher =
 
 
 /***/ },
-/* 8 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var transport_connection_1 = __webpack_require__(9);
+	var transport_connection_1 = __webpack_require__(14);
 	/** Provides interface for transport connection instantiation.
 	 *
 	 * Takes transport-specific hooks as the only argument, which allow checking
@@ -906,7 +1017,7 @@ var Pusher =
 
 
 /***/ },
-/* 9 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -915,11 +1026,11 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var util_1 = __webpack_require__(1);
-	var Collections = __webpack_require__(2);
-	var dispatcher_1 = __webpack_require__(10);
-	var logger_1 = __webpack_require__(12);
-	var state_1 = __webpack_require__(13);
+	var util_1 = __webpack_require__(6);
+	var Collections = __webpack_require__(7);
+	var dispatcher_1 = __webpack_require__(15);
+	var logger_1 = __webpack_require__(17);
+	var state_1 = __webpack_require__(18);
 	/** Provides universal API for transport connections.
 	 *
 	 * Transport connection is a low-level object that wraps a connection method
@@ -1142,12 +1253,12 @@ var Pusher =
 
 
 /***/ },
-/* 10 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	// import Util from './util';
-	var callback_registry_1 = __webpack_require__(11);
+	var callback_registry_1 = __webpack_require__(16);
 	var global = Function("return this")();
 	/** Manages callback bindings and event emitting.
 	 *
@@ -1198,11 +1309,11 @@ var Pusher =
 
 
 /***/ },
-/* 11 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
+	var Collections = __webpack_require__(7);
 	var CallbackRegistry = (function () {
 	    function CallbackRegistry() {
 	        this._callbacks = {};
@@ -1251,11 +1362,11 @@ var Pusher =
 
 
 /***/ },
-/* 12 */
+/* 17 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var collections_1 = __webpack_require__(2);
+	var collections_1 = __webpack_require__(7);
 	var Logger = {
 	    log: null,
 	    debug: function () {
@@ -1290,7 +1401,7 @@ var Pusher =
 
 
 /***/ },
-/* 13 */
+/* 18 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1311,7 +1422,7 @@ var Pusher =
 
 
 /***/ },
-/* 14 */
+/* 19 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1325,55 +1436,42 @@ var Pusher =
 
 
 /***/ },
-/* 15 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var http_factory_1 = __webpack_require__(16);
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = new http_factory_1.default();
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var http_request_1 = __webpack_require__(17);
-	var http_socket_1 = __webpack_require__(19);
-	var http_streaming_socket_1 = __webpack_require__(21);
-	var http_polling_socket_1 = __webpack_require__(22);
-	var http_xhr_request_1 = __webpack_require__(23);
-	var http_xdomain_request_1 = __webpack_require__(25);
-	var HTTPFactory = (function () {
-	    function HTTPFactory() {
-	    }
-	    HTTPFactory.prototype.createStreamingSocket = function (url) {
+	var http_request_1 = __webpack_require__(21);
+	var http_socket_1 = __webpack_require__(23);
+	var http_streaming_socket_1 = __webpack_require__(25);
+	var http_polling_socket_1 = __webpack_require__(26);
+	var http_xhr_request_1 = __webpack_require__(27);
+	var http_xdomain_request_1 = __webpack_require__(28);
+	var HTTP = {
+	    createStreamingSocket: function (url) {
 	        return this.createSocket(http_streaming_socket_1.default, url);
-	    };
-	    HTTPFactory.prototype.createPollingSocket = function (url) {
+	    },
+	    createPollingSocket: function (url) {
 	        return this.createSocket(http_polling_socket_1.default, url);
-	    };
-	    HTTPFactory.prototype.createSocket = function (hooks, url) {
-	        return new http_socket_1.default(this, hooks, url);
-	    };
-	    HTTPFactory.prototype.createXHR = function (method, url) {
+	    },
+	    createSocket: function (hooks, url) {
+	        return new http_socket_1.default(hooks, url);
+	    },
+	    createXHR: function (method, url) {
 	        return this.createRequest(http_xhr_request_1.default, method, url);
-	    };
-	    HTTPFactory.prototype.createXDR = function (method, url) {
+	    },
+	    createXDR: function (method, url) {
 	        return this.createRequest(http_xdomain_request_1.default, method, url);
-	    };
-	    HTTPFactory.prototype.createRequest = function (hooks, method, url) {
+	    },
+	    createRequest: function (hooks, method, url) {
 	        return new http_request_1.default(hooks, method, url);
-	    };
-	    return HTTPFactory;
-	}());
+	    }
+	};
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTPFactory;
+	exports.default = HTTP;
 
 
 /***/ },
-/* 17 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1382,8 +1480,8 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var App = __webpack_require__(18);
-	var dispatcher_1 = __webpack_require__(10);
+	var App = __webpack_require__(22);
+	var dispatcher_1 = __webpack_require__(15);
 	var MAX_BUFFER_LENGTH = 256 * 1024;
 	var HTTPRequest = (function (_super) {
 	    __extends(HTTPRequest, _super);
@@ -1450,7 +1548,7 @@ var Pusher =
 
 
 /***/ },
-/* 18 */
+/* 22 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1473,16 +1571,17 @@ var Pusher =
 
 
 /***/ },
-/* 19 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var state_1 = __webpack_require__(20);
-	var util_1 = __webpack_require__(1);
+	var state_1 = __webpack_require__(24);
+	var util_1 = __webpack_require__(6);
+	var http_1 = __webpack_require__(20);
+	var runtime_1 = __webpack_require__(1);
 	var autoIncrement = 1;
 	var HTTPSocket = (function () {
-	    function HTTPSocket(factory, hooks, url) {
-	        this.factory = factory;
+	    function HTTPSocket(hooks, url) {
 	        this.hooks = hooks;
 	        this.session = randomNumber(1000) + "/" + randomString(8);
 	        this.location = getLocation(url);
@@ -1502,7 +1601,7 @@ var Pusher =
 	    HTTPSocket.prototype.sendRaw = function (payload) {
 	        if (this.readyState === state_1.default.OPEN) {
 	            try {
-	                createRequest(this.factory, "POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
 	                return true;
 	            }
 	            catch (e) {
@@ -1601,7 +1700,7 @@ var Pusher =
 	    /** @private */
 	    HTTPSocket.prototype.openStream = function () {
 	        var self = this;
-	        self.stream = createRequest(self.factory, "POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
+	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
 	        self.stream.bind("chunk", function (chunk) {
 	            self.onChunk(chunk);
 	        });
@@ -1659,12 +1758,12 @@ var Pusher =
 	    }
 	    return result.join('');
 	}
-	function createRequest(factory, method, url) {
-	    if (util_1.default.isXHRSupported()) {
-	        return factory.createXHR(method, url);
+	function createRequest(method, url) {
+	    if (runtime_1.default.isXHRSupported()) {
+	        return http_1.default.createXHR(method, url);
 	    }
-	    else if (util_1.default.isXDRSupported(url.indexOf("https:") === 0)) {
-	        return factory.createXDR(method, url);
+	    else if (runtime_1.default.isXDRSupported(url.indexOf("https:") === 0)) {
+	        return http_1.default.createXDR(method, url);
 	    }
 	    else {
 	        throw "Cross-origin HTTP requests are not supported";
@@ -1675,7 +1774,7 @@ var Pusher =
 
 
 /***/ },
-/* 20 */
+/* 24 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1690,7 +1789,7 @@ var Pusher =
 
 
 /***/ },
-/* 21 */
+/* 25 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1713,7 +1812,7 @@ var Pusher =
 
 
 /***/ },
-/* 22 */
+/* 26 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1741,11 +1840,11 @@ var Pusher =
 
 
 /***/ },
-/* 23 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var xhr_1 = __webpack_require__(24);
+	var xhr_1 = __webpack_require__(4);
 	var hooks = {
 	    getRequest: function (socket) {
 	        var Constructor = xhr_1.default.getAPI();
@@ -1779,25 +1878,11 @@ var Pusher =
 
 
 /***/ },
-/* 24 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var XHR = {
-	    getAPI: function () {
-	        return window.XMLHttpRequest;
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = XHR;
-
-
-/***/ },
-/* 25 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Errors = __webpack_require__(26);
+	var Errors = __webpack_require__(29);
 	var hooks = {
 	    getRequest: function (socket) {
 	        var xdr = new window.XDomainRequest();
@@ -1833,7 +1918,7 @@ var Pusher =
 
 
 /***/ },
-/* 26 */
+/* 29 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1894,20 +1979,22 @@ var Pusher =
 
 
 /***/ },
-/* 27 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var pusher_authorizer_1 = __webpack_require__(28);
-	var timeline_sender_1 = __webpack_require__(29);
-	var presence_channel_1 = __webpack_require__(31);
-	var private_channel_1 = __webpack_require__(32);
-	var channel_1 = __webpack_require__(33);
-	var connection_manager_1 = __webpack_require__(35);
-	var xhr_1 = __webpack_require__(24);
-	var channels_1 = __webpack_require__(37);
-	var net_info_1 = __webpack_require__(36);
-	var ws_1 = __webpack_require__(14);
+	var assistant_to_the_transport_manager_1 = __webpack_require__(31);
+	var handshake_1 = __webpack_require__(32);
+	var pusher_authorizer_1 = __webpack_require__(37);
+	var timeline_sender_1 = __webpack_require__(38);
+	var presence_channel_1 = __webpack_require__(40);
+	var private_channel_1 = __webpack_require__(41);
+	var channel_1 = __webpack_require__(42);
+	var connection_manager_1 = __webpack_require__(44);
+	var xhr_1 = __webpack_require__(4);
+	var channels_1 = __webpack_require__(46);
+	var net_info_1 = __webpack_require__(45);
+	var ws_1 = __webpack_require__(19);
 	var Factory = {
 	    createXHR: function () {
 	        if (xhr_1.default.getAPI()) {
@@ -1945,13 +2032,19 @@ var Pusher =
 	    createAuthorizer: function (channel, options) {
 	        return new pusher_authorizer_1.default(channel, options);
 	    },
+	    createHandshake: function (transport, callback) {
+	        return new handshake_1.default(transport, callback);
+	    },
 	    /* RETRIEVE APIS */
 	    getNetwork: function () {
 	        return net_info_1.Network;
 	    },
-	    newWebSocket: function (url) {
+	    createWebSocket: function (url) {
 	        var Constructor = ws_1.default.getAPI();
 	        return new Constructor(url);
+	    },
+	    createAssistantToTheTransportManager: function (manager, transport, options) {
+	        return new assistant_to_the_transport_manager_1.default(manager, transport, options);
 	    }
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -1959,12 +2052,519 @@ var Pusher =
 
 
 /***/ },
-/* 28 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var logger_1 = __webpack_require__(12);
-	var factory_1 = __webpack_require__(27);
+	var util_1 = __webpack_require__(6);
+	var Collections = __webpack_require__(7);
+	/** Creates transport connections monitored by a transport manager.
+	 *
+	 * When a transport is closed, it might mean the environment does not support
+	 * it. It's possible that messages get stuck in an intermediate buffer or
+	 * proxies terminate inactive connections. To combat these problems,
+	 * assistants monitor the connection lifetime, report unclean exits and
+	 * adjust ping timeouts to keep the connection active. The decision to disable
+	 * a transport is the manager's responsibility.
+	 *
+	 * @param {TransportManager} manager
+	 * @param {TransportConnection} transport
+	 * @param {Object} options
+	 */
+	var AssistantToTheTransportManager = (function () {
+	    function AssistantToTheTransportManager(manager, transport, options) {
+	        this.manager = manager;
+	        this.transport = transport;
+	        this.minPingDelay = options.minPingDelay;
+	        this.maxPingDelay = options.maxPingDelay;
+	        this.pingDelay = undefined;
+	    }
+	    /** Creates a transport connection.
+	     *
+	     * This function has the same API as Transport#createConnection.
+	     *
+	     * @param {String} name
+	     * @param {Number} priority
+	     * @param {String} key the application key
+	     * @param {Object} options
+	     * @returns {TransportConnection}
+	     */
+	    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
+	        var self = this;
+	        options = Collections.extend({}, options, {
+	            activityTimeout: self.pingDelay
+	        });
+	        var connection = self.transport.createConnection(name, priority, key, options);
+	        var openTimestamp = null;
+	        var onOpen = function () {
+	            connection.unbind("open", onOpen);
+	            connection.bind("closed", onClosed);
+	            openTimestamp = util_1.default.now();
+	        };
+	        var onClosed = function (closeEvent) {
+	            connection.unbind("closed", onClosed);
+	            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
+	                // we don't want to use transports not obeying the protocol
+	                self.manager.reportDeath();
+	            }
+	            else if (!closeEvent.wasClean && openTimestamp) {
+	                // report deaths only for short-living transport
+	                var lifespan = util_1.default.now() - openTimestamp;
+	                if (lifespan < 2 * self.maxPingDelay) {
+	                    self.manager.reportDeath();
+	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
+	                }
+	            }
+	        };
+	        connection.bind("open", onOpen);
+	        return connection;
+	    };
+	    /** Returns whether the transport is supported in the environment.
+	     *
+	     * This function has the same API as Transport#isSupported. Might return false
+	     * when the manager decides to kill the transport.
+	     *
+	     * @param {Object} environment the environment details (encryption, settings)
+	     * @returns {Boolean} true when the transport is supported
+	     */
+	    AssistantToTheTransportManager.prototype.isSupported = function (environment) {
+	        return this.manager.isAlive() && this.transport.isSupported(environment);
+	    };
+	    return AssistantToTheTransportManager;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = AssistantToTheTransportManager;
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(7);
+	var Protocol = __webpack_require__(33);
+	var connection_1 = __webpack_require__(36);
+	var handshake_results_1 = __webpack_require__(35);
+	/**
+	 * Handles Pusher protocol handshakes for transports.
+	 *
+	 * Calls back with a result object after handshake is completed. Results
+	 * always have two fields:
+	 * - action - string describing action to be taken after the handshake
+	 * - transport - the transport object passed to the constructor
+	 *
+	 * Different actions can set different additional properties on the result.
+	 * In the case of 'connected' action, there will be a 'connection' property
+	 * containing a Connection object for the transport. Other actions should
+	 * carry an 'error' property.
+	 *
+	 * @param {AbstractTransport} transport
+	 * @param {Function} callback
+	 */
+	var Handshake = (function () {
+	    function Handshake(transport, callback) {
+	        this.transport = transport;
+	        this.callback = callback;
+	        this.bindListeners();
+	    }
+	    Handshake.prototype.close = function () {
+	        this.unbindListeners();
+	        this.transport.close();
+	    };
+	    /** @private */
+	    Handshake.prototype.bindListeners = function () {
+	        var self = this;
+	        self.onMessage = function (m) {
+	            self.unbindListeners();
+	            try {
+	                var result = Protocol.processHandshake(m);
+	                if (result.action === handshake_results_1.default.CONNECTED) {
+	                    self.finish("connected", {
+	                        connection: new connection_1.default(result.id, self.transport),
+	                        activityTimeout: result.activityTimeout
+	                    });
+	                }
+	                else {
+	                    self.finish(result.action, { error: result.error });
+	                    self.transport.close();
+	                }
+	            }
+	            catch (e) {
+	                self.finish("error", { error: e });
+	                self.transport.close();
+	            }
+	        };
+	        self.onClosed = function (closeEvent) {
+	            self.unbindListeners();
+	            var action = Protocol.getCloseAction(closeEvent) || "backoff";
+	            var error = Protocol.getCloseError(closeEvent);
+	            self.finish(action, { error: error });
+	        };
+	        self.transport.bind("message", self.onMessage);
+	        self.transport.bind("closed", self.onClosed);
+	    };
+	    /** @private */
+	    Handshake.prototype.unbindListeners = function () {
+	        this.transport.unbind("message", this.onMessage);
+	        this.transport.unbind("closed", this.onClosed);
+	    };
+	    /** @private */
+	    Handshake.prototype.finish = function (action, params) {
+	        this.callback(Collections.extend({ transport: this.transport, action: action }, params));
+	    };
+	    return Handshake;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Handshake;
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var internal_events_1 = __webpack_require__(34);
+	var handshake_results_1 = __webpack_require__(35);
+	/**
+	 * Provides functions for handling Pusher protocol-specific messages.
+	 */
+	/**
+	 * Decodes a message in a Pusher format.
+	 *
+	 * Throws errors when messages are not parse'able.
+	 *
+	 * @param  {Object} message
+	 * @return {Object}
+	 */
+	exports.decodeMessage = function (message) {
+	    try {
+	        var params = JSON.parse(message.data);
+	        if (typeof params.data === 'string') {
+	            try {
+	                params.data = JSON.parse(params.data);
+	            }
+	            catch (e) {
+	                if (!(e instanceof SyntaxError)) {
+	                    // TODO looks like unreachable code
+	                    // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
+	                    throw e;
+	                }
+	            }
+	        }
+	        return params;
+	    }
+	    catch (e) {
+	        throw { type: 'MessageParseError', error: e, data: message.data };
+	    }
+	};
+	/**
+	 * Encodes a message to be sent.
+	 *
+	 * @param  {Object} message
+	 * @return {String}
+	 */
+	exports.encodeMessage = function (message) {
+	    return JSON.stringify(message);
+	};
+	/** Processes a handshake message and returns appropriate actions.
+	 *
+	 * Returns an object with an 'action' and other action-specific properties.
+	 *
+	 * There are three outcomes when calling this function. First is a successful
+	 * connection attempt, when pusher:connection_established is received, which
+	 * results in a 'connected' action with an 'id' property. When passed a
+	 * pusher:error event, it returns a result with action appropriate to the
+	 * close code and an error. Otherwise, it raises an exception.
+	 *
+	 * @param {String} message
+	 * @result Object
+	 */
+	exports.processHandshake = function (message) {
+	    message = exports.decodeMessage(message);
+	    if (message.event === internal_events_1.default.CONNECTION_ESTABLISHED) {
+	        if (!message.data.activity_timeout) {
+	            throw "No activity timeout specified in handshake";
+	        }
+	        return {
+	            action: handshake_results_1.default.CONNECTED,
+	            id: message.data.socket_id,
+	            activityTimeout: message.data.activity_timeout * 1000
+	        };
+	    }
+	    else if (message.event === internal_events_1.default.ERROR) {
+	        // From protocol 6 close codes are sent only once, so this only
+	        // happens when connection does not support close codes
+	        return {
+	            action: this.getCloseAction(message.data),
+	            error: this.getCloseError(message.data)
+	        };
+	    }
+	    else {
+	        throw "Invalid handshake";
+	    }
+	};
+	/**
+	 * Dispatches the close event and returns an appropriate action name.
+	 *
+	 * See:
+	 * 1. https://developer.mozilla.org/en-US/docs/WebSockets/WebSockets_reference/CloseEvent
+	 * 2. http://pusher.com/docs/pusher_protocol
+	 *
+	 * @param  {CloseEvent} closeEvent
+	 * @return {String} close action name
+	 */
+	exports.getCloseAction = function (closeEvent) {
+	    if (closeEvent.code < 4000) {
+	        // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
+	        //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
+	        // ignore 1007...3999
+	        // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
+	        //        1004 CLOSE_TOO_LARGE
+	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
+	            return handshake_results_1.default.BACKOFF;
+	        }
+	        else {
+	            return null;
+	        }
+	    }
+	    else if (closeEvent.code === 4000) {
+	        return handshake_results_1.default.SSL_ONLY;
+	    }
+	    else if (closeEvent.code < 4100) {
+	        return handshake_results_1.default.REFUSED;
+	    }
+	    else if (closeEvent.code < 4200) {
+	        return handshake_results_1.default.BACKOFF;
+	    }
+	    else if (closeEvent.code < 4300) {
+	        return handshake_results_1.default.RETRY;
+	    }
+	    else {
+	        // unknown error
+	        return handshake_results_1.default.REFUSED;
+	    }
+	};
+	/**
+	 * Returns an error or null basing on the close event.
+	 *
+	 * Null is returned when connection was closed cleanly. Otherwise, an object
+	 * with error details is returned.
+	 *
+	 * @param  {CloseEvent} closeEvent
+	 * @return {Object} error object
+	 */
+	exports.getCloseError = function (closeEvent) {
+	    if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
+	        return {
+	            type: 'PusherError',
+	            data: {
+	                code: closeEvent.code,
+	                message: closeEvent.reason || closeEvent.message
+	            }
+	        };
+	    }
+	    else {
+	        return null;
+	    }
+	};
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var InternalEvents;
+	(function (InternalEvents) {
+	    InternalEvents[InternalEvents["CONNECTION_ESTABLISHED"] = "pusher:connection_established"] = "CONNECTION_ESTABLISHED";
+	    InternalEvents[InternalEvents["ERROR"] = "pusher:error"] = "ERROR";
+	})(InternalEvents || (InternalEvents = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = InternalEvents;
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var HandshakeResults;
+	(function (HandshakeResults) {
+	    HandshakeResults[HandshakeResults["CONNECTED"] = "connected"] = "CONNECTED";
+	    HandshakeResults[HandshakeResults["BACKOFF"] = "backoff"] = "BACKOFF";
+	    HandshakeResults[HandshakeResults["SSL_ONLY"] = "ssl_only"] = "SSL_ONLY";
+	    HandshakeResults[HandshakeResults["REFUSED"] = "refused"] = "REFUSED";
+	    HandshakeResults[HandshakeResults["RETRY"] = "retry"] = "RETRY";
+	})(HandshakeResults || (HandshakeResults = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HandshakeResults;
+
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var Collections = __webpack_require__(7);
+	var dispatcher_1 = __webpack_require__(15);
+	var Protocol = __webpack_require__(33);
+	var logger_1 = __webpack_require__(17);
+	/**
+	 * Provides Pusher protocol interface for transports.
+	 *
+	 * Emits following events:
+	 * - message - on received messages
+	 * - ping - on ping requests
+	 * - pong - on pong responses
+	 * - error - when the transport emits an error
+	 * - closed - after closing the transport
+	 *
+	 * It also emits more events when connection closes with a code.
+	 * See Protocol.getCloseAction to get more details.
+	 *
+	 * @param {Number} id
+	 * @param {AbstractTransport} transport
+	 */
+	var Connection = (function (_super) {
+	    __extends(Connection, _super);
+	    function Connection(id, transport) {
+	        _super.call(this);
+	        this.id = id;
+	        this.transport = transport;
+	        this.activityTimeout = transport.activityTimeout;
+	        this.bindListeners();
+	    }
+	    /** Returns whether used transport handles activity checks by itself
+	     *
+	     * @returns {Boolean} true if activity checks are handled by the transport
+	     */
+	    Connection.prototype.handlesActivityChecks = function () {
+	        return this.transport.handlesActivityChecks();
+	    };
+	    /** Sends raw data.
+	     *
+	     * @param {String} data
+	     */
+	    Connection.prototype.send = function (data) {
+	        return this.transport.send(data);
+	    };
+	    /** Sends an event.
+	     *
+	     * @param {String} name
+	     * @param {String} data
+	     * @param {String} [channel]
+	     * @returns {Boolean} whether message was sent or not
+	     */
+	    Connection.prototype.send_event = function (name, data, channel) {
+	        var message = { event: name, data: data };
+	        if (channel) {
+	            message.channel = channel;
+	        }
+	        logger_1.default.debug('Event sent', message);
+	        return this.send(Protocol.encodeMessage(message));
+	    };
+	    /** Sends a ping message to the server.
+	     *
+	     * Basing on the underlying transport, it might send either transport's
+	     * protocol-specific ping or pusher:ping event.
+	     */
+	    Connection.prototype.ping = function () {
+	        if (this.transport.supportsPing()) {
+	            this.transport.ping();
+	        }
+	        else {
+	            this.send_event('pusher:ping', {});
+	        }
+	    };
+	    /** Closes the connection. */
+	    Connection.prototype.close = function () {
+	        this.transport.close();
+	    };
+	    /** @private */
+	    Connection.prototype.bindListeners = function () {
+	        var self = this;
+	        var listeners = {
+	            message: function (m) {
+	                var message;
+	                try {
+	                    message = Protocol.decodeMessage(m);
+	                }
+	                catch (e) {
+	                    self.emit('error', {
+	                        type: 'MessageParseError',
+	                        error: e,
+	                        data: m.data
+	                    });
+	                }
+	                if (message !== undefined) {
+	                    logger_1.default.debug('Event recd', message);
+	                    switch (message.event) {
+	                        case 'pusher:error':
+	                            self.emit('error', { type: 'PusherError', data: message.data });
+	                            break;
+	                        case 'pusher:ping':
+	                            self.emit("ping");
+	                            break;
+	                        case 'pusher:pong':
+	                            self.emit("pong");
+	                            break;
+	                    }
+	                    self.emit('message', message);
+	                }
+	            },
+	            activity: function () {
+	                self.emit("activity");
+	            },
+	            error: function (error) {
+	                self.emit("error", { type: "WebSocketError", error: error });
+	            },
+	            closed: function (closeEvent) {
+	                unbindListeners();
+	                if (closeEvent && closeEvent.code) {
+	                    self.handleCloseEvent(closeEvent);
+	                }
+	                self.transport = null;
+	                self.emit("closed");
+	            }
+	        };
+	        var unbindListeners = function () {
+	            Collections.objectApply(listeners, function (listener, event) {
+	                self.transport.unbind(event, listener);
+	            });
+	        };
+	        Collections.objectApply(listeners, function (listener, event) {
+	            self.transport.bind(event, listener);
+	        });
+	    };
+	    /** @private */
+	    Connection.prototype.handleCloseEvent = function (closeEvent) {
+	        var action = Protocol.getCloseAction(closeEvent);
+	        var error = Protocol.getCloseError(closeEvent);
+	        if (error) {
+	            this.emit('error', error);
+	        }
+	        if (action) {
+	            this.emit(action);
+	        }
+	    };
+	    return Connection;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Connection;
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var logger_1 = __webpack_require__(17);
+	var factory_1 = __webpack_require__(30);
 	var authorizers = {
 	    ajax: function (socketId, callback) {
 	        var self = this, xhr;
@@ -2026,13 +2626,13 @@ var Pusher =
 
 
 /***/ },
-/* 29 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var util_1 = __webpack_require__(1);
-	var base64_1 = __webpack_require__(30);
+	var Collections = __webpack_require__(7);
+	var util_1 = __webpack_require__(6);
+	var base64_1 = __webpack_require__(39);
 	var TimelineSender = (function () {
 	    function TimelineSender(timeline, options) {
 	        this.timeline = timeline;
@@ -2076,7 +2676,7 @@ var Pusher =
 
 
 /***/ },
-/* 30 */
+/* 39 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2129,7 +2729,7 @@ var Pusher =
 
 
 /***/ },
-/* 31 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2138,9 +2738,9 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var private_channel_1 = __webpack_require__(32);
-	var logger_1 = __webpack_require__(12);
-	var members_1 = __webpack_require__(34);
+	var private_channel_1 = __webpack_require__(41);
+	var logger_1 = __webpack_require__(17);
+	var members_1 = __webpack_require__(43);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
 	    /** Adds presence channel functionality to private channels.
@@ -2212,7 +2812,7 @@ var Pusher =
 
 
 /***/ },
-/* 32 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2221,8 +2821,8 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var factory_1 = __webpack_require__(27);
-	var channel_1 = __webpack_require__(33);
+	var factory_1 = __webpack_require__(30);
+	var channel_1 = __webpack_require__(42);
 	/** Extends public channels to provide private channel interface.
 	 *
 	 * @param {String} name
@@ -2249,7 +2849,7 @@ var Pusher =
 
 
 /***/ },
-/* 33 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2258,9 +2858,9 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(10);
-	var Errors = __webpack_require__(26);
-	var logger_1 = __webpack_require__(12);
+	var dispatcher_1 = __webpack_require__(15);
+	var Errors = __webpack_require__(29);
+	var logger_1 = __webpack_require__(17);
 	/** Provides base public channel interface with an event emitter.
 	 *
 	 * Emits:
@@ -2343,11 +2943,11 @@ var Pusher =
 
 
 /***/ },
-/* 34 */
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
+	var Collections = __webpack_require__(7);
 	/** Represents a collection of members of a presence channel. */
 	var Members = (function () {
 	    function Members() {
@@ -2422,7 +3022,7 @@ var Pusher =
 
 
 /***/ },
-/* 35 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2431,12 +3031,12 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(10);
-	var timers_1 = __webpack_require__(3);
-	var net_info_1 = __webpack_require__(36);
-	var logger_1 = __webpack_require__(12);
-	var state_1 = __webpack_require__(13);
-	var Collections = __webpack_require__(2);
+	var dispatcher_1 = __webpack_require__(15);
+	var timers_1 = __webpack_require__(8);
+	var net_info_1 = __webpack_require__(45);
+	var logger_1 = __webpack_require__(17);
+	var state_1 = __webpack_require__(18);
+	var Collections = __webpack_require__(7);
 	/** Manages connection to Pusher.
 	 *
 	 * Uses a strategy (currently only default), timers and network availability
@@ -2783,7 +3383,7 @@ var Pusher =
 
 
 /***/ },
-/* 36 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2792,7 +3392,7 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(10);
+	var dispatcher_1 = __webpack_require__(15);
 	/** Really basic interface providing network availability info.
 	 *
 	 * Emits:
@@ -2837,12 +3437,12 @@ var Pusher =
 
 
 /***/ },
-/* 37 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var factory_1 = __webpack_require__(27);
+	var Collections = __webpack_require__(7);
+	var factory_1 = __webpack_require__(30);
 	/** Handles a channel map. */
 	var Channels = (function () {
 	    function Channels() {
@@ -2908,13 +3508,13 @@ var Pusher =
 
 
 /***/ },
-/* 38 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var util_1 = __webpack_require__(1);
-	var level_1 = __webpack_require__(39);
+	var Collections = __webpack_require__(7);
+	var util_1 = __webpack_require__(6);
+	var level_1 = __webpack_require__(48);
 	var Timeline = (function () {
 	    function Timeline(key, session, options) {
 	        this.key = key;
@@ -2978,7 +3578,7 @@ var Pusher =
 
 
 /***/ },
-/* 39 */
+/* 48 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2993,22 +3593,22 @@ var Pusher =
 
 
 /***/ },
-/* 40 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var util_1 = __webpack_require__(1);
-	var Transports = __webpack_require__(5);
-	var transport_manager_1 = __webpack_require__(41);
-	var Errors = __webpack_require__(26);
-	var transport_strategy_1 = __webpack_require__(43);
-	var sequential_strategy_1 = __webpack_require__(49);
-	var best_connected_ever_strategy_1 = __webpack_require__(50);
-	var cached_strategy_1 = __webpack_require__(51);
-	var delayed_strategy_1 = __webpack_require__(52);
-	var if_strategy_1 = __webpack_require__(53);
-	var first_connected_strategy_1 = __webpack_require__(54);
+	var Collections = __webpack_require__(7);
+	var util_1 = __webpack_require__(6);
+	var Transports = __webpack_require__(10);
+	var transport_manager_1 = __webpack_require__(50);
+	var Errors = __webpack_require__(29);
+	var transport_strategy_1 = __webpack_require__(51);
+	var sequential_strategy_1 = __webpack_require__(52);
+	var best_connected_ever_strategy_1 = __webpack_require__(53);
+	var cached_strategy_1 = __webpack_require__(54);
+	var delayed_strategy_1 = __webpack_require__(55);
+	var if_strategy_1 = __webpack_require__(56);
+	var first_connected_strategy_1 = __webpack_require__(57);
 	/** Transforms a JSON scheme to a strategy tree.
 	 *
 	 * @param {Array} scheme JSON strategy scheme
@@ -3178,11 +3778,11 @@ var Pusher =
 
 
 /***/ },
-/* 41 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var assistant_to_the_transport_manager_1 = __webpack_require__(42);
+	var factory_1 = __webpack_require__(30);
 	/** Keeps track of the number of lives left for a transport.
 	 *
 	 * In the beginning of a session, transports may be assigned a number of
@@ -3203,7 +3803,7 @@ var Pusher =
 	     * @returns {AssistantToTheTransportManager}
 	     */
 	    TransportManager.prototype.getAssistant = function (transport) {
-	        return new assistant_to_the_transport_manager_1.default(this, transport, {
+	        return factory_1.default.createAssistantToTheTransportManager(this, transport, {
 	            minPingDelay: this.options.minPingDelay,
 	            maxPingDelay: this.options.maxPingDelay
 	        });
@@ -3226,98 +3826,13 @@ var Pusher =
 
 
 /***/ },
-/* 42 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(1);
-	var Collections = __webpack_require__(2);
-	/** Creates transport connections monitored by a transport manager.
-	 *
-	 * When a transport is closed, it might mean the environment does not support
-	 * it. It's possible that messages get stuck in an intermediate buffer or
-	 * proxies terminate inactive connections. To combat these problems,
-	 * assistants monitor the connection lifetime, report unclean exits and
-	 * adjust ping timeouts to keep the connection active. The decision to disable
-	 * a transport is the manager's responsibility.
-	 *
-	 * @param {TransportManager} manager
-	 * @param {TransportConnection} transport
-	 * @param {Object} options
-	 */
-	var AssistantToTheTransportManager = (function () {
-	    function AssistantToTheTransportManager(manager, transport, options) {
-	        this.manager = manager;
-	        this.transport = transport;
-	        this.minPingDelay = options.minPingDelay;
-	        this.maxPingDelay = options.maxPingDelay;
-	        this.pingDelay = undefined;
-	    }
-	    /** Creates a transport connection.
-	     *
-	     * This function has the same API as Transport#createConnection.
-	     *
-	     * @param {String} name
-	     * @param {Number} priority
-	     * @param {String} key the application key
-	     * @param {Object} options
-	     * @returns {TransportConnection}
-	     */
-	    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
-	        var self = this;
-	        options = Collections.extend({}, options, {
-	            activityTimeout: self.pingDelay
-	        });
-	        var connection = self.transport.createConnection(name, priority, key, options);
-	        var openTimestamp = null;
-	        var onOpen = function () {
-	            connection.unbind("open", onOpen);
-	            connection.bind("closed", onClosed);
-	            openTimestamp = util_1.default.now();
-	        };
-	        var onClosed = function (closeEvent) {
-	            connection.unbind("closed", onClosed);
-	            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-	                // we don't want to use transports not obeying the protocol
-	                self.manager.reportDeath();
-	            }
-	            else if (!closeEvent.wasClean && openTimestamp) {
-	                // report deaths only for short-living transport
-	                var lifespan = util_1.default.now() - openTimestamp;
-	                if (lifespan < 2 * self.maxPingDelay) {
-	                    self.manager.reportDeath();
-	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
-	                }
-	            }
-	        };
-	        connection.bind("open", onOpen);
-	        return connection;
-	    };
-	    /** Returns whether the transport is supported in the environment.
-	     *
-	     * This function has the same API as Transport#isSupported. Might return false
-	     * when the manager decides to kill the transport.
-	     *
-	     * @param {Object} environment the environment details (encryption, settings)
-	     * @returns {Boolean} true when the transport is supported
-	     */
-	    AssistantToTheTransportManager.prototype.isSupported = function (environment) {
-	        return this.manager.isAlive() && this.transport.isSupported(environment);
-	    };
-	    return AssistantToTheTransportManager;
-	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = AssistantToTheTransportManager;
-
-
-/***/ },
-/* 43 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var util_1 = __webpack_require__(1);
-	var Errors = __webpack_require__(26);
-	var handshake_1 = __webpack_require__(44);
+	var factory_1 = __webpack_require__(30);
+	var util_1 = __webpack_require__(6);
+	var Errors = __webpack_require__(29);
 	/** Provides a strategy interface for transports.
 	 *
 	 * @param {String} name
@@ -3362,7 +3877,7 @@ var Pusher =
 	            transport.connect();
 	        };
 	        var onOpen = function () {
-	            handshake = new handshake_1.default(transport, function (result) {
+	            handshake = factory_1.default.createHandshake(transport, function (result) {
 	                connected = true;
 	                unbindListeners();
 	                callback(null, result);
@@ -3432,435 +3947,13 @@ var Pusher =
 
 
 /***/ },
-/* 44 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var Protocol = __webpack_require__(45);
-	var connection_1 = __webpack_require__(48);
-	var handshake_results_1 = __webpack_require__(47);
-	/**
-	 * Handles Pusher protocol handshakes for transports.
-	 *
-	 * Calls back with a result object after handshake is completed. Results
-	 * always have two fields:
-	 * - action - string describing action to be taken after the handshake
-	 * - transport - the transport object passed to the constructor
-	 *
-	 * Different actions can set different additional properties on the result.
-	 * In the case of 'connected' action, there will be a 'connection' property
-	 * containing a Connection object for the transport. Other actions should
-	 * carry an 'error' property.
-	 *
-	 * @param {AbstractTransport} transport
-	 * @param {Function} callback
-	 */
-	var Handshake = (function () {
-	    function Handshake(transport, callback) {
-	        this.transport = transport;
-	        this.callback = callback;
-	        this.bindListeners();
-	    }
-	    Handshake.prototype.close = function () {
-	        this.unbindListeners();
-	        this.transport.close();
-	    };
-	    /** @private */
-	    Handshake.prototype.bindListeners = function () {
-	        var self = this;
-	        self.onMessage = function (m) {
-	            self.unbindListeners();
-	            try {
-	                var result = Protocol.processHandshake(m);
-	                if (result.action === handshake_results_1.default.CONNECTED) {
-	                    self.finish("connected", {
-	                        connection: new connection_1.default(result.id, self.transport),
-	                        activityTimeout: result.activityTimeout
-	                    });
-	                }
-	                else {
-	                    self.finish(result.action, { error: result.error });
-	                    self.transport.close();
-	                }
-	            }
-	            catch (e) {
-	                self.finish("error", { error: e });
-	                self.transport.close();
-	            }
-	        };
-	        self.onClosed = function (closeEvent) {
-	            self.unbindListeners();
-	            var action = Protocol.getCloseAction(closeEvent) || "backoff";
-	            var error = Protocol.getCloseError(closeEvent);
-	            self.finish(action, { error: error });
-	        };
-	        self.transport.bind("message", self.onMessage);
-	        self.transport.bind("closed", self.onClosed);
-	    };
-	    /** @private */
-	    Handshake.prototype.unbindListeners = function () {
-	        this.transport.unbind("message", this.onMessage);
-	        this.transport.unbind("closed", this.onClosed);
-	    };
-	    /** @private */
-	    Handshake.prototype.finish = function (action, params) {
-	        this.callback(Collections.extend({ transport: this.transport, action: action }, params));
-	    };
-	    return Handshake;
-	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Handshake;
-
-
-/***/ },
-/* 45 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var internal_events_1 = __webpack_require__(46);
-	var handshake_results_1 = __webpack_require__(47);
-	/**
-	 * Provides functions for handling Pusher protocol-specific messages.
-	 */
-	/**
-	 * Decodes a message in a Pusher format.
-	 *
-	 * Throws errors when messages are not parse'able.
-	 *
-	 * @param  {Object} message
-	 * @return {Object}
-	 */
-	exports.decodeMessage = function (message) {
-	    try {
-	        var params = JSON.parse(message.data);
-	        if (typeof params.data === 'string') {
-	            try {
-	                params.data = JSON.parse(params.data);
-	            }
-	            catch (e) {
-	                if (!(e instanceof SyntaxError)) {
-	                    // TODO looks like unreachable code
-	                    // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
-	                    throw e;
-	                }
-	            }
-	        }
-	        return params;
-	    }
-	    catch (e) {
-	        throw { type: 'MessageParseError', error: e, data: message.data };
-	    }
-	};
-	/**
-	 * Encodes a message to be sent.
-	 *
-	 * @param  {Object} message
-	 * @return {String}
-	 */
-	exports.encodeMessage = function (message) {
-	    return JSON.stringify(message);
-	};
-	/** Processes a handshake message and returns appropriate actions.
-	 *
-	 * Returns an object with an 'action' and other action-specific properties.
-	 *
-	 * There are three outcomes when calling this function. First is a successful
-	 * connection attempt, when pusher:connection_established is received, which
-	 * results in a 'connected' action with an 'id' property. When passed a
-	 * pusher:error event, it returns a result with action appropriate to the
-	 * close code and an error. Otherwise, it raises an exception.
-	 *
-	 * @param {String} message
-	 * @result Object
-	 */
-	exports.processHandshake = function (message) {
-	    message = exports.decodeMessage(message);
-	    if (message.event === internal_events_1.default.CONNECTION_ESTABLISHED) {
-	        if (!message.data.activity_timeout) {
-	            throw "No activity timeout specified in handshake";
-	        }
-	        return {
-	            action: handshake_results_1.default.CONNECTED,
-	            id: message.data.socket_id,
-	            activityTimeout: message.data.activity_timeout * 1000
-	        };
-	    }
-	    else if (message.event === internal_events_1.default.ERROR) {
-	        // From protocol 6 close codes are sent only once, so this only
-	        // happens when connection does not support close codes
-	        return {
-	            action: this.getCloseAction(message.data),
-	            error: this.getCloseError(message.data)
-	        };
-	    }
-	    else {
-	        throw "Invalid handshake";
-	    }
-	};
-	/**
-	 * Dispatches the close event and returns an appropriate action name.
-	 *
-	 * See:
-	 * 1. https://developer.mozilla.org/en-US/docs/WebSockets/WebSockets_reference/CloseEvent
-	 * 2. http://pusher.com/docs/pusher_protocol
-	 *
-	 * @param  {CloseEvent} closeEvent
-	 * @return {String} close action name
-	 */
-	exports.getCloseAction = function (closeEvent) {
-	    if (closeEvent.code < 4000) {
-	        // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
-	        //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
-	        // ignore 1007...3999
-	        // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
-	        //        1004 CLOSE_TOO_LARGE
-	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-	            return handshake_results_1.default.BACKOFF;
-	        }
-	        else {
-	            return null;
-	        }
-	    }
-	    else if (closeEvent.code === 4000) {
-	        return handshake_results_1.default.SSL_ONLY;
-	    }
-	    else if (closeEvent.code < 4100) {
-	        return handshake_results_1.default.REFUSED;
-	    }
-	    else if (closeEvent.code < 4200) {
-	        return handshake_results_1.default.BACKOFF;
-	    }
-	    else if (closeEvent.code < 4300) {
-	        return handshake_results_1.default.RETRY;
-	    }
-	    else {
-	        // unknown error
-	        return handshake_results_1.default.REFUSED;
-	    }
-	};
-	/**
-	 * Returns an error or null basing on the close event.
-	 *
-	 * Null is returned when connection was closed cleanly. Otherwise, an object
-	 * with error details is returned.
-	 *
-	 * @param  {CloseEvent} closeEvent
-	 * @return {Object} error object
-	 */
-	exports.getCloseError = function (closeEvent) {
-	    if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
-	        return {
-	            type: 'PusherError',
-	            data: {
-	                code: closeEvent.code,
-	                message: closeEvent.reason || closeEvent.message
-	            }
-	        };
-	    }
-	    else {
-	        return null;
-	    }
-	};
-
-
-/***/ },
-/* 46 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var InternalEvents;
-	(function (InternalEvents) {
-	    InternalEvents[InternalEvents["CONNECTION_ESTABLISHED"] = "pusher:connection_established"] = "CONNECTION_ESTABLISHED";
-	    InternalEvents[InternalEvents["ERROR"] = "pusher:error"] = "ERROR";
-	})(InternalEvents || (InternalEvents = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = InternalEvents;
-
-
-/***/ },
-/* 47 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var HandshakeResults;
-	(function (HandshakeResults) {
-	    HandshakeResults[HandshakeResults["CONNECTED"] = "connected"] = "CONNECTED";
-	    HandshakeResults[HandshakeResults["BACKOFF"] = "backoff"] = "BACKOFF";
-	    HandshakeResults[HandshakeResults["SSL_ONLY"] = "ssl_only"] = "SSL_ONLY";
-	    HandshakeResults[HandshakeResults["REFUSED"] = "refused"] = "REFUSED";
-	    HandshakeResults[HandshakeResults["RETRY"] = "retry"] = "RETRY";
-	})(HandshakeResults || (HandshakeResults = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HandshakeResults;
-
-
-/***/ },
-/* 48 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var Collections = __webpack_require__(2);
-	var dispatcher_1 = __webpack_require__(10);
-	var Protocol = __webpack_require__(45);
-	var logger_1 = __webpack_require__(12);
-	/**
-	 * Provides Pusher protocol interface for transports.
-	 *
-	 * Emits following events:
-	 * - message - on received messages
-	 * - ping - on ping requests
-	 * - pong - on pong responses
-	 * - error - when the transport emits an error
-	 * - closed - after closing the transport
-	 *
-	 * It also emits more events when connection closes with a code.
-	 * See Protocol.getCloseAction to get more details.
-	 *
-	 * @param {Number} id
-	 * @param {AbstractTransport} transport
-	 */
-	var Connection = (function (_super) {
-	    __extends(Connection, _super);
-	    function Connection(id, transport) {
-	        _super.call(this);
-	        this.id = id;
-	        this.transport = transport;
-	        this.activityTimeout = transport.activityTimeout;
-	        this.bindListeners();
-	    }
-	    /** Returns whether used transport handles activity checks by itself
-	     *
-	     * @returns {Boolean} true if activity checks are handled by the transport
-	     */
-	    Connection.prototype.handlesActivityChecks = function () {
-	        return this.transport.handlesActivityChecks();
-	    };
-	    /** Sends raw data.
-	     *
-	     * @param {String} data
-	     */
-	    Connection.prototype.send = function (data) {
-	        return this.transport.send(data);
-	    };
-	    /** Sends an event.
-	     *
-	     * @param {String} name
-	     * @param {String} data
-	     * @param {String} [channel]
-	     * @returns {Boolean} whether message was sent or not
-	     */
-	    Connection.prototype.send_event = function (name, data, channel) {
-	        var message = { event: name, data: data };
-	        if (channel) {
-	            message.channel = channel;
-	        }
-	        logger_1.default.debug('Event sent', message);
-	        return this.send(Protocol.encodeMessage(message));
-	    };
-	    /** Sends a ping message to the server.
-	     *
-	     * Basing on the underlying transport, it might send either transport's
-	     * protocol-specific ping or pusher:ping event.
-	     */
-	    Connection.prototype.ping = function () {
-	        if (this.transport.supportsPing()) {
-	            this.transport.ping();
-	        }
-	        else {
-	            this.send_event('pusher:ping', {});
-	        }
-	    };
-	    /** Closes the connection. */
-	    Connection.prototype.close = function () {
-	        this.transport.close();
-	    };
-	    /** @private */
-	    Connection.prototype.bindListeners = function () {
-	        var self = this;
-	        var listeners = {
-	            message: function (m) {
-	                var message;
-	                try {
-	                    message = Protocol.decodeMessage(m);
-	                }
-	                catch (e) {
-	                    self.emit('error', {
-	                        type: 'MessageParseError',
-	                        error: e,
-	                        data: m.data
-	                    });
-	                }
-	                if (message !== undefined) {
-	                    logger_1.default.debug('Event recd', message);
-	                    switch (message.event) {
-	                        case 'pusher:error':
-	                            self.emit('error', { type: 'PusherError', data: message.data });
-	                            break;
-	                        case 'pusher:ping':
-	                            self.emit("ping");
-	                            break;
-	                        case 'pusher:pong':
-	                            self.emit("pong");
-	                            break;
-	                    }
-	                    self.emit('message', message);
-	                }
-	            },
-	            activity: function () {
-	                self.emit("activity");
-	            },
-	            error: function (error) {
-	                self.emit("error", { type: "WebSocketError", error: error });
-	            },
-	            closed: function (closeEvent) {
-	                unbindListeners();
-	                if (closeEvent && closeEvent.code) {
-	                    self.handleCloseEvent(closeEvent);
-	                }
-	                self.transport = null;
-	                self.emit("closed");
-	            }
-	        };
-	        var unbindListeners = function () {
-	            Collections.objectApply(listeners, function (listener, event) {
-	                self.transport.unbind(event, listener);
-	            });
-	        };
-	        Collections.objectApply(listeners, function (listener, event) {
-	            self.transport.bind(event, listener);
-	        });
-	    };
-	    /** @private */
-	    Connection.prototype.handleCloseEvent = function (closeEvent) {
-	        var action = Protocol.getCloseAction(closeEvent);
-	        var error = Protocol.getCloseError(closeEvent);
-	        if (error) {
-	            this.emit('error', error);
-	        }
-	        if (action) {
-	            this.emit(action);
-	        }
-	    };
-	    return Connection;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Connection;
-
-
-/***/ },
-/* 49 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Collections = __webpack_require__(2);
-	var util_1 = __webpack_require__(1);
-	var timers_1 = __webpack_require__(3);
+	var Collections = __webpack_require__(7);
+	var util_1 = __webpack_require__(6);
+	var timers_1 = __webpack_require__(8);
 	/** Loops through strategies with optional timeouts.
 	 *
 	 * Options:
@@ -3963,12 +4056,12 @@ var Pusher =
 
 
 /***/ },
-/* 50 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(2);
-	var util_1 = __webpack_require__(1);
+	var Collections = __webpack_require__(7);
+	var util_1 = __webpack_require__(6);
 	/** Launches all substrategies and emits prioritized connected transports.
 	 *
 	 * @param {Array} strategies
@@ -4041,12 +4134,12 @@ var Pusher =
 
 
 /***/ },
-/* 51 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(1);
-	var sequential_strategy_1 = __webpack_require__(49);
+	var util_1 = __webpack_require__(6);
+	var sequential_strategy_1 = __webpack_require__(52);
 	/** Caches last successful transport and uses it for following attempts.
 	 *
 	 * @param {Strategy} strategy
@@ -4160,11 +4253,11 @@ var Pusher =
 
 
 /***/ },
-/* 52 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var timers_1 = __webpack_require__(3);
+	var timers_1 = __webpack_require__(8);
 	/** Runs substrategy after specified delay.
 	 *
 	 * Options:
@@ -4210,7 +4303,7 @@ var Pusher =
 
 
 /***/ },
-/* 53 */
+/* 56 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4241,7 +4334,7 @@ var Pusher =
 
 
 /***/ },
-/* 54 */
+/* 57 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4272,11 +4365,11 @@ var Pusher =
 
 
 /***/ },
-/* 55 */
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Defaults = __webpack_require__(7);
+	var Defaults = __webpack_require__(12);
 	exports.getGlobalConfig = function () {
 	    return {
 	        wsHost: Defaults.host,

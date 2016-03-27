@@ -1,3 +1,4 @@
+import Runtime from "./runtimes/runtime";
 import Util from "./util";
 import * as Collections from './utils/collections';
 import Channels from './channels/channels';
@@ -208,7 +209,7 @@ export default class Pusher {
   }
 
   isEncrypted() : boolean {
-    if (Util.getProtocol() === "https:") {
+    if (Runtime.getProtocol() === "https:") {
       return true;
     } else {
       return Boolean(this.config.encrypted);
@@ -222,5 +223,6 @@ function checkAppKey(key) {
   }
 }
 
+Runtime.whenReady(Pusher.ready);
 // init Pusher:
 Pusher.ready()

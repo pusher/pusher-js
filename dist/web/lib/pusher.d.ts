@@ -9,6 +9,7 @@ export default class Pusher {
     static instances: Pusher[];
     static isReady: boolean;
     static ready(): void;
+    static logToConsole(): void;
     static setLogger(logger: Function): void;
     key: string;
     config: any;

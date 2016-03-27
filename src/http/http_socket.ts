@@ -8,6 +8,7 @@ import getXDR from "./http_xdomain_request";
 import Ajax from "./ajax";
 import HTTPRequest from "./http_request";
 import HTTP from './http';
+import Runtime from "../runtimes/runtime";
 
 var autoIncrement = 1;
 
@@ -228,9 +229,9 @@ function randomString(length : number) : string {
 }
 
 function createRequest(method : string, url : string) : HTTPRequest {
-  if (Util.isXHRSupported()) {
+  if (Runtime.isXHRSupported()) {
     return HTTP.createXHR(method, url);
-  } else if (Util.isXDRSupported(url.indexOf("https:") === 0)) {
+  } else if (Runtime.isXDRSupported(url.indexOf("https:") === 0)) {
     return HTTP.createXDR(method, url);
   } else {
     throw "Cross-origin HTTP requests are not supported";

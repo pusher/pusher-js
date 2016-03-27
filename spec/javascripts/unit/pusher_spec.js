@@ -8,6 +8,7 @@ var TimelineSender = require('timeline/timeline_sender').default;
 var Pusher = require('pusher').default;
 var Mocks = require('../helpers/mocks');
 var Factory = require('utils/factory').default;
+var Runtime = require('runtimes/runtime').default;
 
 describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
@@ -35,7 +36,7 @@ describe("Pusher", function() {
     spyOn(Factory, "createChannel").andCallFake(function(name, _) {
       return Mocks.getChannel(name);
     });
-    spyOn(Util, "getDocument").andReturn({
+    spyOn(Runtime, "getDocument").andReturn({
       location: {
         protocol: "http:"
       }
@@ -125,7 +126,7 @@ describe("Pusher", function() {
       });
 
       it("should be on when using https", function() {
-        Util.getDocument.andReturn({
+        Runtime.getDocument.andReturn({
           location: {
             protocol: "https:"
           }
@@ -211,7 +212,7 @@ describe("Pusher", function() {
       });
 
       it("should be encrypted when using HTTPS", function() {
-        Util.getDocument.andReturn({
+        Runtime.getDocument.andReturn({
           location: {
             protocol: "https:"
           }
