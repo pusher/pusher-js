@@ -1,5 +1,4 @@
 var Mocks = require("../../helpers/mocks");
-var WS = require('pusher-websocket-iso-externals-test/ws').default;
 var TransportConnection = require('transports/transport_connection').default;
 var Collections = require('utils/collections');
 var Timer = require('utils/timers').OneOffTimer;
@@ -30,7 +29,7 @@ describe("TransportConnection", function() {
         return (params.encrypted ? "wss" : "ws") + "://test/" + key;
       }
     };
-    socket = new WS();
+    socket = Mocks.getWebSocket();
     hooks = {
       urls: urls,
       supportsPing: false,

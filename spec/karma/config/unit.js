@@ -39,7 +39,7 @@ module.exports = function(config) {
         ),
         new NormalModuleReplacementPlugin(
           /^pusher-websocket-iso-externals-node\/xhr$/,
-          "pusher-websocket-iso-externals-test/xhr"
+          "pusher-websocket-iso-externals-web/xhr"
         ),
         new NormalModuleReplacementPlugin(
           /^pusher-websocket-iso-externals-node\/net_info$/,

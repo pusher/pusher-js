@@ -5,7 +5,8 @@ import Ajax from "./ajax";
 
 var hooks : RequestHooks = {
   getRequest: function(socket : HTTPRequest) : Ajax {
-    var xhr = new XHR();
+    var Constructor = XHR.getAPI();
+    var xhr = new Constructor();
     xhr.onreadystatechange = xhr.onprogress = function() {
       switch (xhr.readyState) {
         case 3:

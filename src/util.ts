@@ -52,7 +52,8 @@ export function getClientFeatures() : any[] {
 }
 
 export function isXHRSupported() : boolean {
-  return Boolean(XHR) && (new XHR()).withCredentials !== undefined;
+  var Constructor = XHR.getAPI();
+  return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
 }
 
 export function isXDRSupported(encrypted : boolean) : boolean {

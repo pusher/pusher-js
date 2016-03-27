@@ -16,7 +16,7 @@ import WS from 'pusher-websocket-iso-externals-node/ws';
 var Factory = {
 
   createXHR() : Ajax {
-    if (XHR){
+    if (XHR.getAPI()){
       return this.createXMLHttpRequest();
     } else {
       return this.createMicrosoftXHR();
@@ -24,7 +24,8 @@ var Factory = {
   },
 
   createXMLHttpRequest() : Ajax {
-    return new XHR();
+    var Constructor = XHR.getAPI();
+    return new Constructor();
   },
 
   createMicrosoftXHR() : Ajax {

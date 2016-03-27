@@ -186,8 +186,7 @@ describe("transports", function() {
         window.XMLHttpRequest = _XMLHttpRequest;
       });
 
-      // FIXME
-      xdescribe("isSupported hook", function() {
+      describe("isSupported hook", function() {
         it("should return true if window.XMLHttpRequest exists and its instances have a withCredentials property", function() {
           window.XMLHttpRequest = jasmine.createSpy().andCallFake(function() {
             this.withCredentials = false;

@@ -269,7 +269,8 @@ var Pusher =
 	}
 	exports.getClientFeatures = getClientFeatures;
 	function isXHRSupported() {
-	    return Boolean(xhr_1.default) && (new xhr_1.default()).withCredentials !== undefined;
+	    var Constructor = xhr_1.default.getAPI();
+	    return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
 	}
 	exports.isXHRSupported = isXHRSupported;
 	function isXDRSupported(encrypted) {
@@ -670,15 +671,13 @@ var Pusher =
 	    handlesActivityChecks: false,
 	    supportsPing: false,
 	    isInitialized: function () {
-	        return Boolean(ws_1.default);
+	        return Boolean(ws_1.default.getAPI());
 	    },
 	    isSupported: function () {
-	        return Boolean(ws_1.default);
+	        return Boolean(ws_1.default.getAPI());
 	    },
 	    getSocket: function (url) {
 	        return factory_1.default.newWebSocket(url);
-	        // var Constructor = WS;
-	        // return new Constructor(url);
 	    }
 	});
 	var httpConfiguration = {
@@ -1320,8 +1319,13 @@ var Pusher =
 /***/ function(module, exports) {
 
 	"use strict";
+	var WS = {
+	    getAPI: function () {
+	        return window.WebSocket || window.MozWebSocket;
+	    }
+	};
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = window.WebSocket || window.MozWebSocket;
+	exports.default = WS;
 
 
 /***/ },
@@ -1748,7 +1752,8 @@ var Pusher =
 	var xhr_1 = __webpack_require__(24);
 	var hooks = {
 	    getRequest: function (socket) {
-	        var xhr = new xhr_1.default();
+	        var Constructor = xhr_1.default.getAPI();
+	        var xhr = new Constructor();
 	        xhr.onreadystatechange = xhr.onprogress = function () {
 	            switch (xhr.readyState) {
 	                case 3:
@@ -1782,8 +1787,13 @@ var Pusher =
 /***/ function(module, exports) {
 
 	"use strict";
+	var XHR = {
+	    getAPI: function () {
+	        return window.XMLHttpRequest;
+	    }
+	};
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = window.XMLHttpRequest;
+	exports.default = XHR;
 
 
 /***/ },
@@ -1904,7 +1914,7 @@ var Pusher =
 	var ws_1 = __webpack_require__(14);
 	var Factory = {
 	    createXHR: function () {
-	        if (xhr_1.default) {
+	        if (xhr_1.default.getAPI()) {
 	            return this.createXMLHttpRequest();
 	        }
 	        else {
@@ -1912,7 +1922,8 @@ var Pusher =
 	        }
 	    },
 	    createXMLHttpRequest: function () {
-	        return new xhr_1.default();
+	        var Constructor = xhr_1.default.getAPI();
+	        return new Constructor();
 	    },
 	    createMicrosoftXHR: function () {
 	        return new ActiveXObject("Microsoft.XMLHTTP");
@@ -1943,7 +1954,8 @@ var Pusher =
 	        return net_info_1.Network;
 	    },
 	    newWebSocket: function (url) {
-	        return new ws_1.default(url);
+	        var Constructor = ws_1.default.getAPI();
+	        return new Constructor(url);
 	    }
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -1956,10 +1968,11 @@ var Pusher =
 
 	"use strict";
 	var logger_1 = __webpack_require__(12);
+	var factory_1 = __webpack_require__(27);
 	var authorizers = {
 	    ajax: function (socketId, callback) {
 	        var self = this, xhr;
-	        xhr = this.factory.createXHR();
+	        xhr = factory_1.default.createXHR();
 	        xhr.open("POST", self.options.authEndpoint, true);
 	        // add request headers
 	        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

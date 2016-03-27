@@ -1,5 +1,6 @@
 var Mocks = require('../../helpers/mocks');
 var Errors = require('errors');
+var Factory = require('utils/factory').default;
 
 describe("HTTP.getXDR", function() {
   var _XDomainRequest = window.XDomainRequest;
@@ -11,7 +12,9 @@ describe("HTTP.getXDR", function() {
   beforeEach(function() {
     HTTPFactory = require('http/http').default;
 
-    window.XDomainRequest = require('pusher-websocket-iso-externals-test/xhr').default;
+    window.XDomainRequest = jasmine.createSpy().andCallFake(
+      Mocks.getXHR
+    );;
 
     spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
       hooks = h;

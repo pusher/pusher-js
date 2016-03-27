@@ -10,6 +10,10 @@ describe("HTTP.getXHR", function() {
   beforeEach(function() {
     HTTPFactory = require('http/http').default;
 
+    window.XMLHttpRequest = jasmine.createSpy().andCallFake(
+      Mocks.getXHR
+    );
+
     spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
       hooks = h;
       return Mocks.getHTTPRequest(m, u);
