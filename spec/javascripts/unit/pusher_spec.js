@@ -1,4 +1,4 @@
-var Util = require('util');
+var Util = require('util').default;
 var Collections = require('utils/collections');
 var Logger = require('logger').default;
 var StrategyBuilder = require('strategies/strategy_builder');

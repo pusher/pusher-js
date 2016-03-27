@@ -1,4 +1,4 @@
-import * as Util from '../util';
+import Util from '../util';
 import * as Collections from '../utils/collections';
 import TransportManager from './transport_manager';
 import Transport from './transport';

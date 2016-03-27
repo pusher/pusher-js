@@ -10,7 +10,7 @@ describe("Host/Port Configuration", function() {
   var Transports;
 
   beforeEach(function() {
-    var Util = require('util');
+    var Util = require('util').default;
 
     spyOn(Factory, 'getNetwork').andCallFake(function(){
       var network = new NetInfo();

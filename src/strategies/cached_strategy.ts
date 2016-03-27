@@ -1,4 +1,4 @@
-import * as Util from '../util';
+import Util from '../util';
 import Strategy from './strategy';
 import SequentialStrategy from './sequential_strategy';
 import StrategyOptions from "./strategy_options";

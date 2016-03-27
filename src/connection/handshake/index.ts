@@ -1,4 +1,4 @@
-import * as Util from '../../util';
+import Util from '../../util';
 import * as Collections from '../../utils/collections';
 import * as Protocol from '../protocol/protocol';
 import Connection from '../connection';

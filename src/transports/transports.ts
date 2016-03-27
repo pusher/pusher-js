@@ -1,6 +1,6 @@
 import * as URLSchemes from "./url_schemes.ts";
 import Transport from "./transport.ts";
-import * as Util from "../util.ts";
+import Util from "../util.ts";
 import * as Collections from "../utils/collections.ts";
 import TransportHooks from "./transport_hooks.ts";
 import WS from 'pusher-websocket-iso-externals-node/ws';

@@ -1,5 +1,5 @@
 import * as Collections from '../utils/collections';
-import * as Util from '../util';
+import Util from '../util';
 import Strategy from './strategy';
 
 /** Launches all substrategies and emits prioritized connected transports.

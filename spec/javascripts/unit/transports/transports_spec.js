@@ -1,7 +1,7 @@
 var Mocks = require("../../helpers/mocks");
 var Factory = require('utils/factory').default;
 var transports = require('transports/transports');
-var Util = require('util');
+var Util = require('util').default;
 var Collections = require('utils/collections');
 var WS = require('pusher-websocket-iso-externals-web/ws');
 
@@ -217,8 +217,7 @@ describe("transports", function() {
         window.XDomainRequest = _XDomainRequest;
       });
 
-      // FIXME
-      xdescribe("isSupported hook", function() {
+      describe("isSupported hook", function() {
         it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
           spyOn(Util, "getDocument").andReturn({

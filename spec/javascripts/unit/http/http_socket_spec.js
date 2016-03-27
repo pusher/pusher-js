@@ -1,5 +1,5 @@
 var Mocks = require('../../helpers/mocks');
-var Util = require('util');
+var Util = require('util').default;
 var HTTPSocket = require('http/http_socket').default;
 
 describe("HTTP.Socket", function() {

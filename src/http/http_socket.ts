@@ -3,7 +3,7 @@ import URLLocation from "./url_location";
 import State from "./state";
 import Socket from "../socket/socket";
 import SocketHooks from "./socket_hooks";
-import * as Util from "../util";
+import Util from "../util";
 import getXHR from './http_xhr_request';
 import getXDR from "./http_xdomain_request";
 import Ajax from "./ajax";

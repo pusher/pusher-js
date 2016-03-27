@@ -1,5 +1,5 @@
 import Callback from "./callback";
-import * as Util from '../utils/collections';
+import * as Collections from '../utils/collections';
 import CallbackTable from "./callback_table";
 
 export default class CallbackRegistry {
@@ -28,11 +28,11 @@ export default class CallbackRegistry {
       return;
     }
 
-    var names = name ? [prefix(name)] : Util.keys(this._callbacks);
+    var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
 
     if (callback || context) {
-      Util.apply(names, function(name) {
-        this._callbacks[name] = Util.filter(
+      Collections.apply(names, function(name) {
+        this._callbacks[name] = Collections.filter(
           this._callbacks[name] || [],
           function(binding) {
             return (callback && callback !== binding.fn) ||
@@ -44,7 +44,7 @@ export default class CallbackRegistry {
         }
       }, this);
     } else {
-      Util.apply(names, function(name) {
+      Collections.apply(names, function(name) {
         delete this._callbacks[name];
       }, this);
     }

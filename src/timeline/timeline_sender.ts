@@ -1,5 +1,5 @@
 import * as Collections from "../utils/collections";
-import * as Util from "../util";
+import Util from "../util";
 import base64encode from "../base64";
 import Timeline from "./timeline";
 

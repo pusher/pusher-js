@@ -1,5 +1,5 @@
 import * as Collections from "../utils/collections";
-import * as Util from "../util";
+import Util from "../util";
 import * as Transports from "../transports/transports";
 import TransportManager from '../transports/transport_manager';
 import * as Errors from '../errors';

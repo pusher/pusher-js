@@ -46,7 +46,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var Collections = __webpack_require__(2);
 	var dispatcher_1 = __webpack_require__(10);
 	var timeline_1 = __webpack_require__(38);
@@ -70,7 +70,7 @@ var Pusher =
 	        this.sessionID = Math.floor(Math.random() * 1000000000);
 	        this.timeline = new timeline_1.default(this.key, this.sessionID, {
 	            cluster: this.config.cluster,
-	            features: Util.getClientFeatures(),
+	            features: util_1.default.getClientFeatures(),
 	            params: this.config.timelineParams || {},
 	            limit: 50,
 	            level: level_1.default.INFO,
@@ -190,7 +190,7 @@ var Pusher =
 	        return this.connection.send_event(event_name, data, channel);
 	    };
 	    Pusher.prototype.isEncrypted = function () {
-	        if (Util.getProtocol() === "https:") {
+	        if (util_1.default.getProtocol() === "https:") {
 	            return true;
 	        }
 	        else {
@@ -223,78 +223,73 @@ var Pusher =
 	var transports_1 = __webpack_require__(5);
 	var xhr_1 = __webpack_require__(24);
 	var global = Function("return this")();
-	function now() {
-	    if (Date.now) {
-	        return Date.now();
+	var Util = {
+	    now: function () {
+	        if (Date.now) {
+	            return Date.now();
+	        }
+	        else {
+	            return new Date().valueOf();
+	        }
+	    },
+	    defer: function (callback) {
+	        return new timers_1.OneOffTimer(0, callback);
+	    },
+	    /** Builds a function that will proxy a method call to its first argument.
+	    *
+	    * Allows partial application of arguments, so additional arguments are
+	    * prepended to the argument list.
+	    *
+	    * @param  {String} name method name
+	    * @return {Function} proxy function
+	    */
+	    method: function (name) {
+	        var args = [];
+	        for (var _i = 1; _i < arguments.length; _i++) {
+	            args[_i - 1] = arguments[_i];
+	        }
+	        var boundArguments = Array.prototype.slice.call(arguments, 1);
+	        return function (object) {
+	            return object[name].apply(object, boundArguments.concat(arguments));
+	        };
+	    },
+	    getLocalStorage: function () {
+	        try {
+	            return window.localStorage;
+	        }
+	        catch (e) {
+	            return undefined;
+	        }
+	    },
+	    getClientFeatures: function () {
+	        return Collections.keys(Collections.filterObject({ "ws": transports_1.WSTransport }, function (t) { return t.isSupported({}); }));
+	    },
+	    isXHRSupported: function () {
+	        var Constructor = xhr_1.default.getAPI();
+	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
+	    },
+	    isXDRSupported: function (encrypted) {
+	        var protocol = encrypted ? "https:" : "http:";
+	        var documentProtocol = this.getProtocol();
+	        return Boolean('XDomainRequest' in window) && documentProtocol === protocol;
+	    },
+	    getDocument: function () {
+	        try {
+	            return document || undefined;
+	        }
+	        catch (e) {
+	            return undefined;
+	        }
+	    },
+	    getProtocol: function () {
+	        if (this.getDocument() !== undefined) {
+	            return this.getDocument().location.protocol;
+	        }
+	        return "http:";
 	    }
-	    else {
-	        return new Date().valueOf();
-	    }
-	}
-	exports.now = now;
-	function defer(callback) {
-	    return new timers_1.OneOffTimer(0, callback);
-	}
-	exports.defer = defer;
-	/** Builds a function that will proxy a method call to its first argument.
-	*
-	* Allows partial application of arguments, so additional arguments are
-	* prepended to the argument list.
-	*
-	* @param  {String} name method name
-	* @return {Function} proxy function
-	*/
-	function method(name) {
-	    var args = [];
-	    for (var _i = 1; _i < arguments.length; _i++) {
-	        args[_i - 1] = arguments[_i];
-	    }
-	    var boundArguments = Array.prototype.slice.call(arguments, 1);
-	    return function (object) {
-	        return object[name].apply(object, boundArguments.concat(arguments));
-	    };
-	}
-	exports.method = method;
-	function getLocalStorage() {
-	    try {
-	        return window.localStorage;
-	    }
-	    catch (e) {
-	        return undefined;
-	    }
-	}
-	exports.getLocalStorage = getLocalStorage;
-	function getClientFeatures() {
-	    return Collections.keys(Collections.filterObject({ "ws": transports_1.WSTransport }, function (t) { return t.isSupported({}); }));
-	}
-	exports.getClientFeatures = getClientFeatures;
-	function isXHRSupported() {
-	    var Constructor = xhr_1.default.getAPI();
-	    return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
-	}
-	exports.isXHRSupported = isXHRSupported;
-	function isXDRSupported(encrypted) {
-	    var protocol = encrypted ? "https:" : "http:";
-	    var documentProtocol = getProtocol();
-	    return Boolean('XDomainRequest' in window) && documentProtocol === protocol;
-	}
-	exports.isXDRSupported = isXDRSupported;
-	function getDocument() {
-	    try {
-	        return document || undefined;
-	    }
-	    catch (e) {
-	        return undefined;
-	    }
-	}
-	exports.getDocument = getDocument;
-	function getProtocol() {
-	    if (getDocument() !== undefined) {
-	        return getDocument().location.protocol;
-	    }
-	    return "http:";
-	}
-	exports.getProtocol = getProtocol;
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Util;
 
 
 /***/ },
@@ -656,7 +651,7 @@ var Pusher =
 	"use strict";
 	var URLSchemes = __webpack_require__(6);
 	var transport_ts_1 = __webpack_require__(8);
-	var Util = __webpack_require__(1);
+	var util_ts_1 = __webpack_require__(1);
 	var Collections = __webpack_require__(2);
 	var ws_1 = __webpack_require__(14);
 	var http_1 = __webpack_require__(15);
@@ -698,12 +693,12 @@ var Pusher =
 	}, httpConfiguration);
 	var xhrConfiguration = {
 	    isSupported: function () {
-	        return Util.isXHRSupported();
+	        return util_ts_1.default.isXHRSupported();
 	    }
 	};
 	var xdrConfiguration = {
 	    isSupported: function (environment) {
-	        return Util.isXDRSupported(environment.encrypted);
+	        return util_ts_1.default.isXDRSupported(environment.encrypted);
 	    }
 	};
 	/** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
@@ -919,7 +914,7 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var Collections = __webpack_require__(2);
 	var dispatcher_1 = __webpack_require__(10);
 	var logger_1 = __webpack_require__(12);
@@ -1010,7 +1005,7 @@ var Pusher =
 	            self.socket = self.hooks.getSocket(url, self.options);
 	        }
 	        catch (e) {
-	            Util.defer(function () {
+	            util_1.default.defer(function () {
 	                self.onError(e);
 	                self.changeState(state_1.default.CLOSED);
 	            });
@@ -1043,7 +1038,7 @@ var Pusher =
 	        var self = this;
 	        if (self.state === state_1.default.OPEN) {
 	            // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
-	            Util.defer(function () {
+	            util_1.default.defer(function () {
 	                if (self.socket) {
 	                    self.socket.send(data);
 	                }
@@ -1150,7 +1145,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	// import * as Util from './util';
+	// import Util from './util';
 	var callback_registry_1 = __webpack_require__(11);
 	var global = Function("return this")();
 	/** Manages callback bindings and event emitting.
@@ -1206,7 +1201,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util = __webpack_require__(2);
+	var Collections = __webpack_require__(2);
 	var CallbackRegistry = (function () {
 	    function CallbackRegistry() {
 	        this._callbacks = {};
@@ -1227,10 +1222,10 @@ var Pusher =
 	            this._callbacks = {};
 	            return;
 	        }
-	        var names = name ? [prefix(name)] : Util.keys(this._callbacks);
+	        var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
 	        if (callback || context) {
-	            Util.apply(names, function (name) {
-	                this._callbacks[name] = Util.filter(this._callbacks[name] || [], function (binding) {
+	            Collections.apply(names, function (name) {
+	                this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {
 	                    return (callback && callback !== binding.fn) ||
 	                        (context && context !== binding.context);
 	                });
@@ -1240,7 +1235,7 @@ var Pusher =
 	            }, this);
 	        }
 	        else {
-	            Util.apply(names, function (name) {
+	            Collections.apply(names, function (name) {
 	                delete this._callbacks[name];
 	            }, this);
 	        }
@@ -1482,7 +1477,7 @@ var Pusher =
 
 	"use strict";
 	var state_1 = __webpack_require__(20);
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var autoIncrement = 1;
 	var HTTPSocket = (function () {
 	    function HTTPSocket(factory, hooks, url) {
@@ -1619,7 +1614,7 @@ var Pusher =
 	            self.stream.start();
 	        }
 	        catch (error) {
-	            Util.defer(function () {
+	            util_1.default.defer(function () {
 	                self.onError(error);
 	                self.onClose(1006, "Could not start streaming", false);
 	            });
@@ -1664,10 +1659,10 @@ var Pusher =
 	    return result.join('');
 	}
 	function createRequest(factory, method, url) {
-	    if (Util.isXHRSupported()) {
+	    if (util_1.default.isXHRSupported()) {
 	        return factory.createXHR(method, url);
 	    }
-	    else if (Util.isXDRSupported(url.indexOf("https:") === 0)) {
+	    else if (util_1.default.isXDRSupported(url.indexOf("https:") === 0)) {
 	        return factory.createXDR(method, url);
 	    }
 	    else {
@@ -2035,7 +2030,7 @@ var Pusher =
 
 	"use strict";
 	var Collections = __webpack_require__(2);
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var base64_1 = __webpack_require__(30);
 	var TimelineSender = (function () {
 	    function TimelineSender(timeline, options) {
@@ -2053,7 +2048,7 @@ var Pusher =
 	            var params = Collections.filterObject(data, function (value) {
 	                return value !== undefined;
 	            });
-	            var query = Collections.map(Collections.flatten(encodeParamsObject(params)), Util.method("join", "=")).join("&");
+	            var query = Collections.map(Collections.flatten(encodeParamsObject(params)), util_1.default.method("join", "=")).join("&");
 	            url += ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
 	            var xhr = this.factory.createXHR();
 	            xhr.open("GET", url, true);
@@ -2917,7 +2912,7 @@ var Pusher =
 
 	"use strict";
 	var Collections = __webpack_require__(2);
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var level_1 = __webpack_require__(39);
 	var Timeline = (function () {
 	    function Timeline(key, session, options) {
@@ -2930,7 +2925,7 @@ var Pusher =
 	    }
 	    Timeline.prototype.log = function (level, event) {
 	        if (level <= this.options.level) {
-	            this.events.push(Collections.extend({}, event, { timestamp: Util.now() }));
+	            this.events.push(Collections.extend({}, event, { timestamp: util_1.default.now() }));
 	            if (this.options.limit && this.events.length > this.options.limit) {
 	                this.events.shift();
 	            }
@@ -3002,7 +2997,7 @@ var Pusher =
 
 	"use strict";
 	var Collections = __webpack_require__(2);
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var Transports = __webpack_require__(5);
 	var transport_manager_1 = __webpack_require__(41);
 	var Errors = __webpack_require__(26);
@@ -3035,7 +3030,7 @@ var Pusher =
 	        return false;
 	    },
 	    connect: function (_, callback) {
-	        var deferred = Util.defer(function () {
+	        var deferred = util_1.default.defer(function () {
 	            callback(new Errors.UnsupportedStrategy());
 	        });
 	        return {
@@ -3234,7 +3229,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var Collections = __webpack_require__(2);
 	/** Creates transport connections monitored by a transport manager.
 	 *
@@ -3277,7 +3272,7 @@ var Pusher =
 	        var onOpen = function () {
 	            connection.unbind("open", onOpen);
 	            connection.bind("closed", onClosed);
-	            openTimestamp = Util.now();
+	            openTimestamp = util_1.default.now();
 	        };
 	        var onClosed = function (closeEvent) {
 	            connection.unbind("closed", onClosed);
@@ -3287,7 +3282,7 @@ var Pusher =
 	            }
 	            else if (!closeEvent.wasClean && openTimestamp) {
 	                // report deaths only for short-living transport
-	                var lifespan = Util.now() - openTimestamp;
+	                var lifespan = util_1.default.now() - openTimestamp;
 	                if (lifespan < 2 * self.maxPingDelay) {
 	                    self.manager.reportDeath();
 	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
@@ -3319,7 +3314,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var Errors = __webpack_require__(26);
 	var handshake_1 = __webpack_require__(44);
 	/** Provides a strategy interface for transports.
@@ -3425,7 +3420,7 @@ var Pusher =
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = TransportStrategy;
 	function failAttempt(error, callback) {
-	    Util.defer(function () {
+	    util_1.default.defer(function () {
 	        callback(error);
 	    });
 	    return {
@@ -3863,7 +3858,7 @@ var Pusher =
 
 	"use strict";
 	var Collections = __webpack_require__(2);
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var timers_1 = __webpack_require__(3);
 	/** Loops through strategies with optional timeouts.
 	 *
@@ -3884,7 +3879,7 @@ var Pusher =
 	        this.timeoutLimit = options.timeoutLimit;
 	    }
 	    SequentialStrategy.prototype.isSupported = function () {
-	        return Collections.any(this.strategies, Util.method("isSupported"));
+	        return Collections.any(this.strategies, util_1.default.method("isSupported"));
 	    };
 	    SequentialStrategy.prototype.connect = function (minPriority, callback) {
 	        var self = this;
@@ -3972,7 +3967,7 @@ var Pusher =
 
 	"use strict";
 	var Collections = __webpack_require__(2);
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	/** Launches all substrategies and emits prioritized connected transports.
 	 *
 	 * @param {Array} strategies
@@ -3982,7 +3977,7 @@ var Pusher =
 	        this.strategies = strategies;
 	    }
 	    BestConnectedEverStrategy.prototype.isSupported = function () {
-	        return Collections.any(this.strategies, Util.method("isSupported"));
+	        return Collections.any(this.strategies, util_1.default.method("isSupported"));
 	    };
 	    BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {
 	        return connect(this.strategies, minPriority, function (i, runners) {
@@ -4049,7 +4044,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Util = __webpack_require__(1);
+	var util_1 = __webpack_require__(1);
 	var sequential_strategy_1 = __webpack_require__(49);
 	/** Caches last successful transport and uses it for following attempts.
 	 *
@@ -4072,7 +4067,7 @@ var Pusher =
 	        var encrypted = this.encrypted;
 	        var info = fetchTransportCache(encrypted);
 	        var strategies = [this.strategy];
-	        if (info && info.timestamp + this.ttl >= Util.now()) {
+	        if (info && info.timestamp + this.ttl >= util_1.default.now()) {
 	            var transport = this.transports[info.transport];
 	            if (transport) {
 	                this.timeline.info({
@@ -4086,12 +4081,12 @@ var Pusher =
 	                }));
 	            }
 	        }
-	        var startTimestamp = Util.now();
+	        var startTimestamp = util_1.default.now();
 	        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {
 	            if (error) {
 	                flushTransportCache(encrypted);
 	                if (strategies.length > 0) {
-	                    startTimestamp = Util.now();
+	                    startTimestamp = util_1.default.now();
 	                    runner = strategies.pop().connect(minPriority, cb);
 	                }
 	                else {
@@ -4099,7 +4094,7 @@ var Pusher =
 	                }
 	            }
 	            else {
-	                storeTransportCache(encrypted, handshake.transport.name, Util.now() - startTimestamp);
+	                storeTransportCache(encrypted, handshake.transport.name, util_1.default.now() - startTimestamp);
 	                callback(null, handshake);
 	            }
 	        });
@@ -4123,7 +4118,7 @@ var Pusher =
 	    return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
 	}
 	function fetchTransportCache(encrypted) {
-	    var storage = Util.getLocalStorage();
+	    var storage = util_1.default.getLocalStorage();
 	    if (storage) {
 	        try {
 	            var serializedCache = storage[getTransportCacheKey(encrypted)];
@@ -4138,11 +4133,11 @@ var Pusher =
 	    return null;
 	}
 	function storeTransportCache(encrypted, transport, latency) {
-	    var storage = Util.getLocalStorage();
+	    var storage = util_1.default.getLocalStorage();
 	    if (storage) {
 	        try {
 	            storage[getTransportCacheKey(encrypted)] = JSON.stringify({
-	                timestamp: Util.now(),
+	                timestamp: util_1.default.now(),
 	                transport: transport,
 	                latency: latency
 	            });
@@ -4152,7 +4147,7 @@ var Pusher =
 	    }
 	}
 	function flushTransportCache(encrypted) {
-	    var storage = Util.getLocalStorage();
+	    var storage = util_1.default.getLocalStorage();
 	    if (storage) {
 	        try {
 	            delete storage[getTransportCacheKey(encrypted)];

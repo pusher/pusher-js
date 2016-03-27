@@ -1,7 +1,7 @@
 var Authorizer = require('pusher_authorizer').default;
 var Logger = require('logger');
 var Mocks = require('../helpers/mocks');
-var Util = require('util');
+var Util = require('util').default;
 var Factory = require('utils/factory').default;
 
 describe("Authorizer", function() {

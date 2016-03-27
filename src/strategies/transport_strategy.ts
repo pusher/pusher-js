@@ -1,4 +1,4 @@
-import * as Util from '../util';
+import Util from '../util';
 import * as Errors from '../errors';
 import Strategy from './strategy';
 import Transport from '../transports/transport';

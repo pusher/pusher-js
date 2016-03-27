@@ -1,5 +1,5 @@
 import * as Collections from "../utils/collections";
-import * as Util from "../util";
+import Util from "../util";
 import {default as Level} from "./level";
 
 export default class Timeline {

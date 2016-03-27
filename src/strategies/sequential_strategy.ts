@@ -1,5 +1,5 @@
 import * as Collections from '../utils/collections';
-import * as Util from '../util';
+import Util from '../util';
 import {OneOffTimer as Timer} from '../utils/timers';
 import Strategy from "./strategy";
 import StrategyOptions from "./strategy_options";
