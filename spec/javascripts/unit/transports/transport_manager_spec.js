@@ -1,11 +1,11 @@
 var Mocks = require("../../helpers/mocks");
+var Factory = require('utils/factory').default;
 
 var TransportManager = require('transports/transport_manager').default;
 var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager').default;
 
 describe("TransportManager", function() {
-  // FIXME
-  xit("should create an assistant for a transport class", function() {
+  it("should create an assistant for a transport class", function() {
     var transportClass = Mocks.getTransportClass(true);
     var assistant = Mocks.getAssistantToTheTransportManager();
     var manager = new TransportManager({
@@ -13,10 +13,10 @@ describe("TransportManager", function() {
       maxPingDelay: 2222
     });
 
-    spyOn(AssistantToTheTransportManager).andReturn(assistant);
+    spyOn(Factory, 'createAssistantToTheTransportManager').andReturn(assistant);
 
     expect(manager.getAssistant(transportClass)).toBe(assistant);
-    expect(AssistantToTheTransportManager).toHaveBeenCalledWith(
+    expect(Factory.createAssistantToTheTransportManager).toHaveBeenCalledWith(
       manager, transportClass, { minPingDelay: 1111, maxPingDelay: 2222 }
     );
   });

@@ -1,6 +1,7 @@
 import AssistantToTheTransportManager from './assistant_to_the_transport_manager';
 import Transport from "./Transport";
 import PingDelayOptions from "./ping_delay_options";
+import Factory from "../utils/factory";
 
 /** Keeps track of the number of lives left for a transport.
  *
@@ -26,7 +27,7 @@ export default class TransportManager {
    * @returns {AssistantToTheTransportManager}
    */
   getAssistant(transport : Transport) : AssistantToTheTransportManager {
-    return new AssistantToTheTransportManager(this, transport, <PingDelayOptions> {
+    return Factory.createAssistantToTheTransportManager(this, transport, <PingDelayOptions> {
       minPingDelay: this.options.minPingDelay,
       maxPingDelay: this.options.maxPingDelay
     });

@@ -1,3 +1,6 @@
+import AssistantToTheTransportManager from "../transports/assistant_to_the_transport_manager";
+import Transport from "../transports/Transport";
+import TransportManager from "../transports/transport_manager";
 import Handshake from "../connection/handshake";
 import TransportConnection from "../transports/transport_connection";
 import SocketHooks from "../http/socket_hooks";
@@ -74,14 +77,11 @@ var Factory = {
   newWebSocket(url : string) : any {
     var Constructor = WS.getAPI();
     return new Constructor(url);
+  },
+
+  createAssistantToTheTransportManager(manager : TransportManager, transport : Transport, options : any) : AssistantToTheTransportManager {
+    return new AssistantToTheTransportManager(manager, transport, options);
   }
-  // getLocalStorage() : any {
-  //   try {
-  //     return window.localStorage;
-  //   } catch (e) {
-  //     return undefined;
-  //   }
-  // }
 }
 
 export default Factory;
