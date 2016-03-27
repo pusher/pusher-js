@@ -125,3 +125,4 @@ export declare function any(array: any[], test: Function): boolean;
 * @param {Function} f
 */
 export declare function all(array: any[], test: Function): boolean;
+export declare function encodeParamsObject(data: any): string;

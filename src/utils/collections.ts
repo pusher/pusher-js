@@ -1,4 +1,5 @@
 var global = Function("return this")();
+import base64encode from '../base64';
 
 /** Merges multiple objects into the target argument.
 *
@@ -253,4 +254,13 @@ export function all(array : any[], test : Function) : boolean {
     }
   }
   return true;
+}
+
+export function encodeParamsObject(data) : string {
+  return mapObject(data, function(value) {
+    if (typeof value === "object") {
+      value = JSON.stringify(value);
+    }
+    return encodeURIComponent(base64encode(value.toString()));
+  });
 }

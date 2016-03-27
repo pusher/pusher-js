@@ -17,6 +17,7 @@ import XHR from "pusher-websocket-iso-externals-node/xhr";
 import Channels from "../channels/channels";
 import {Network, NetInfo} from "../node_modules/pusher-websocket-iso-externals-web/net_info";
 import WS from 'pusher-websocket-iso-externals-node/ws';
+import JSONPRequest from '../runtimes/dom/jsonp_request';
 
 var Factory = {
 
@@ -81,6 +82,10 @@ var Factory = {
 
   createAssistantToTheTransportManager(manager : TransportManager, transport : Transport, options : any) : AssistantToTheTransportManager {
     return new AssistantToTheTransportManager(manager, transport, options);
+  },
+
+  createJSONPRequest(url : string, data : any) : JSONPRequest {
+    return new JSONPRequest(url, data);
   }
 }
 

@@ -2,6 +2,8 @@ import Runtime from "./abstract_runtime";
 import XHR from "pusher-websocket-iso-externals-node/xhr";
 import {Dependencies} from './dom/dependencies';
 import {AuthTransports, ajax, jsonp} from '../auth_transports';
+import {TimelineTransport, jsonp as jsonpTimeline} from '../timeline/timeline_transports';
+import TimelineSender from '../timeline/timeline_sender';
 
 export default class Browser extends Runtime {
 
@@ -49,6 +51,10 @@ export default class Browser extends Runtime {
 
   getAuthorizers() : AuthTransports {
     return {ajax, jsonp};
+  }
+
+  getTimelineTransport(sender: TimelineSender, encrypted : boolean) : TimelineTransport {
+    return jsonpTimeline(sender, encrypted);
   }
 
   private onDocumentBody(callback : Function) {

@@ -1,4 +1,6 @@
 import { AuthTransports } from '../auth_transports';
+import { TimelineTransport } from '../timeline/timeline_transports';
+import TimelineSender from '../timeline/timeline_sender';
 declare abstract class Runtime {
     abstract whenReady(callback: Function): void;
     abstract getProtocol(): string;
@@ -10,5 +12,6 @@ declare abstract class Runtime {
     getLocalStorage(): any;
     getClientFeatures(): any[];
     getAuthorizers(): AuthTransports;
+    getTimelineTransport(sender: TimelineSender, encrypted: boolean): TimelineTransport;
 }
 export default Runtime;

@@ -1,22 +1,22 @@
 var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
-
+var TimelineLevel = require('timeline/level').default;
 var Timeline = require("timeline/timeline").default;
-var util = require("util");
+var util = require("util").default;
 
-xdescribe("Timeline", function() {
+describe("Timeline", function() {
   var sendJSONP, onSend, timeline;
 
   beforeEach(function() {
     sendJSONP = jasmine.createSpy("sendJSONP");
     onSend = jasmine.createSpy("onSend");
     timeline = new Timeline("foo", 666, {
-      level: Timeline.DEBUG
+      level: TimelineLevel.DEBUG
     });
   });
 
   it("should expose the key, session id and options", function() {
     var timeline = new Timeline("foobar", 666, {
-      level: Timeline.INFO,
+      level: TimelineLevel.INFO,
       cluster: "test",
       features: ["x", "y", "z"]
     });
@@ -31,7 +31,7 @@ xdescribe("Timeline", function() {
   });
 
   it("should not be empty after pushing an event", function() {
-    timeline.log(Timeline.INFO, {});
+    timeline.log(TimelineLevel.INFO, {});
     expect(timeline.isEmpty()).toBe(false);
   });
 
@@ -39,7 +39,7 @@ xdescribe("Timeline", function() {
     timeline = new Timeline("foo", 666, {
       level: Timeline.ERROR
     });
-    timeline.log(Timeline.INFO, {});
+    timeline.log(TimelineLevel.INFO, {});
     expect(timeline.isEmpty()).toBe(true);
   });
 
@@ -54,7 +54,7 @@ xdescribe("Timeline", function() {
 
     it("should include key, session id, cluster, features, version and params", function() {
       var timeline = new Timeline("foobar", 666, {
-        level: Timeline.INFO,
+        level: TimelineLevel.INFO,
         cluster: "test",
         features: ["x", "y", "z"],
         version: "6.6.6",
@@ -111,7 +111,7 @@ xdescribe("Timeline", function() {
     });
 
     it("should become empty again", function() {
-      timeline.log(Timeline.INFO, {});
+      timeline.log(TimelineLevel.INFO, {});
       timeline.send(sendJSONP, onSend);
       expect(timeline.isEmpty()).toBe(true);
     });
@@ -120,11 +120,11 @@ xdescribe("Timeline", function() {
       spyOn(util, "now").andReturn(123);
 
       var timeline = new Timeline("bar", 123, {
-        level: Timeline.INFO,
+        level: TimelineLevel.INFO,
         limit: 3
       });
       for (var i = 1; i <= 4; i++) {
-        timeline.log(Timeline.INFO, { i: i });
+        timeline.log(TimelineLevel.INFO, { i: i });
       }
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);

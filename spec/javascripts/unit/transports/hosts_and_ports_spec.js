@@ -28,9 +28,7 @@ describe("Host/Port Configuration", function() {
 
     beforeEach(function() {
       _WebSocket = window.WebSocket;
-      // window.WebSocket = jasmine.createSpy("WebSocket").andCallFake(function() {
-      //   return Mocks.getTransport();
-      // });
+
       spyOn(Factory, 'createWebSocket').andReturn(Mocks.getTransport());
 
       Transports = require('transports/transports');
@@ -40,7 +38,7 @@ describe("Host/Port Configuration", function() {
       spyOn(Transports.XHRStreamingTransport, "isSupported").andReturn(false);
       spyOn(Transports.XDRPollingTransport, "isSupported").andReturn(false);
       spyOn(Transports.XHRPollingTransport, "isSupported").andReturn(false);
-      // spyOn(Transports.SockJSTransport, "isSupported").andReturn(false);
+      spyOn(Transports.SockJSTransport, "isSupported").andReturn(false);
     });
 
     afterEach(function() {
@@ -84,8 +82,7 @@ describe("Host/Port Configuration", function() {
     });
   });
 
-  // TODO change to XHR
-  xdescribe("SockJS", function() {
+  describe("SockJS", function() {
     var _SockJS;
 
     beforeEach(function() {
@@ -113,7 +110,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "http://sockjs.pusher.com:80/pusher",
         null,
-        { js_path: '<CDN_HTTP>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: '<CDN_HTTP>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
           ignore_null_origin: undefined
         }
       );
@@ -126,7 +123,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "https://sockjs.pusher.com:443/pusher",
         null,
-        { js_path: '<CDN_HTTPS>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: '<CDN_HTTPS>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
           ignore_null_origin: undefined
         }
       );
@@ -139,7 +136,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "http://example.com:1999/pusher",
         null,
-        { js_path: '<CDN_HTTP>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: '<CDN_HTTP>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
           ignore_null_origin: undefined
         }
       );
@@ -152,7 +149,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "https://example.org:4444/pusher",
         null,
-        { js_path: '<CDN_HTTPS>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: '<CDN_HTTPS>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
           ignore_null_origin: undefined
         }
       );
@@ -165,7 +162,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "http://sockjs.pusher.com:80/test",
         null,
-        { js_path: '<CDN_HTTP>/<VERSION>/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: '<CDN_HTTP>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
           ignore_null_origin: undefined
         }
       );

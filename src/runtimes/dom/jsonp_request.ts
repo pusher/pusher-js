@@ -1,6 +1,6 @@
 import ScriptReceiver from './script_receiver';
 import ScriptRequest from './script_request';
-import * as Collection from '../../utils/collections';
+import * as Collections from '../../utils/collections';
 import Util from '../../util';
 
 /** Sends data via JSONP.
@@ -40,7 +40,7 @@ import Util from '../../util';
        return value !== undefined;
      });
      var query = Collections.map(
-       Collections.flatten(encodeParamsObject(params)),
+       Collections.flatten(Collections.encodeParamsObject(params)),
        Util.method("join", "=")
      ).join("&");
      var url = this.url + "/" + receiver.number + "?" + query;
@@ -56,12 +56,3 @@ import Util from '../../util';
      }
    }
  }
-
-function encodeParamsObject(data) : string {
-  return Collections.mapObject(data, function(value) {
-    if (typeof value === "object") {
-      value = JSON.stringify(value);
-    }
-    return encodeURIComponent(Pusher.Base64.encode(value.toString()));
-  });
-}

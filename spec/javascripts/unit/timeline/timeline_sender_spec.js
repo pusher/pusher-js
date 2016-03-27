@@ -1,8 +1,9 @@
 var Mocks = require('../../helpers/mocks');
 var TimelineSender = require('timeline/timeline_sender').default;
+var Factory = require('utils/factory').default;
+var ScriptReceivers = require('runtimes/dom/script_receiver_factory').ScriptReceivers;
 
-// FIXME
-xdescribe("TimelineSender", function() {
+describe("TimelineSender", function() {
   var jsonpRequest;
   var timeline, onSend, sender;
 
@@ -14,7 +15,7 @@ xdescribe("TimelineSender", function() {
     });
 
     onSend = jasmine.createSpy("onSend");
-    spyOn(Pusher, "JSONPRequest").andCallFake(function() {
+    spyOn(Factory, "createJSONPRequest").andCallFake(function() {
       // JSONPRequest and ScriptRequest have compatible interfaces
       jsonpRequest = Mocks.getScriptRequest();
       return jsonpRequest;
@@ -43,8 +44,8 @@ xdescribe("TimelineSender", function() {
     it("should send a non-empty timeline", function() {
       sender.send(false, onSend);
 
-      expect(JSONPRequest.calls.length).toEqual(1);
-      expect(JSONPRequest).toHaveBeenCalledWith(
+      expect(Factory.createJSONPRequest.calls.length).toEqual(1);
+      expect(Factory.createJSONPRequest).toHaveBeenCalledWith(
         "http://example.com/timeline",
         { "events": [1, 2, 3] }
       );
@@ -59,8 +60,8 @@ xdescribe("TimelineSender", function() {
       });
       sender.send(true, onSend);
 
-      expect(JSONPRequest.calls.length).toEqual(1);
-      expect(JSONPRequest).toHaveBeenCalledWith(
+      expect(Factory.createJSONPRequest.calls.length).toEqual(1);
+      expect(Factory.createJSONPRequest).toHaveBeenCalledWith(
         "https://example.com/timeline",
         { "events": [1, 2, 3] }
       );
@@ -111,7 +112,7 @@ xdescribe("TimelineSender", function() {
     it("should not send an empty timeline", function() {
       timeline.isEmpty.andReturn(true);
       sender.send(false, onSend);
-      expect(JSONPRequest).not.toHaveBeenCalled();
+      expect(Factory.createJSONPRequest).not.toHaveBeenCalled();
     });
 
     it("should use returned hostname for subsequent requests", function() {
@@ -121,7 +122,7 @@ xdescribe("TimelineSender", function() {
       jsonpReceiver.callback(null, { host: "returned.example.com" });
 
       sender.send(false);
-      expect(JSONPRequest).toHaveBeenCalledWith(
+      expect(Factory.createJSONPRequest).toHaveBeenCalledWith(
         "http://returned.example.com/timeline",
         { "events": [1, 2, 3] }
       );
