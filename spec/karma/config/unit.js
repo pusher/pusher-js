@@ -1,7 +1,6 @@
 var version = require('../../../package').version;
 var objectAssign = require('object-assign-deep');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
-
 var webpackConfig = require('../../../webpack/config.shared')
 
 module.exports = function(config) {

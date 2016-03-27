@@ -1,8 +1,9 @@
 var Mocks = require("../../helpers/mocks");
-
+var Factory = require('utils/factory').default;
 var transports = require('transports/transports');
 var Util = require('util');
 var Collections = require('utils/collections');
+var WS = require('pusher-websocket-iso-externals-web/ws');
 
 var VERSION = require('defaults').VERSION;
 
@@ -56,8 +57,7 @@ describe("transports", function() {
       expect(transports.WSTransport.hooks.beforeOpen).toBe(undefined);
     });
 
-    // FIXME
-    xdescribe("isSupported hook", function() {
+    describe("isSupported hook", function() {
       it("should return true if the WebSocket class is present", function() {
         window.WebSocket = {};
         window.MozWebSocket = undefined;
@@ -76,14 +76,11 @@ describe("transports", function() {
         window.WebSocket = undefined;
         window.MozWebSocket = undefined;
 
-        console.log(window.WebSocket, window.MozWebSocket);
-
         expect(transports.WSTransport.hooks.isSupported({})).toBe(false);
       });
     });
 
-    // FIXME
-    xdescribe("getSocket hook", function() {
+    describe("getSocket hook", function() {
       it("should return a new WebSocket object, if the class is present", function() {
         window.WebSocket = jasmine.createSpy().andCallFake(function(url) {
           this.url = url;
@@ -99,6 +96,7 @@ describe("transports", function() {
 
       it("should return a new MozWebSocket object, if the class is present and WebSocket class is absent", function() {
         window.WebSocket = undefined;
+
         window.MozWebSocket = jasmine.createSpy().andCallFake(function(url) {
           this.url = url;
         });

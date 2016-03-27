@@ -18,15 +18,13 @@ export var WSTransport = new Transport(<TransportHooks> {
   supportsPing: false,
 
   isInitialized: function() {
-    return Boolean(WS);
+    return Boolean(WS.getAPI());
   },
   isSupported: function() {
-    return Boolean(WS);
+    return Boolean(WS.getAPI());
   },
   getSocket: function(url) {
     return Factory.newWebSocket(url);
-    // var Constructor = WS;
-    // return new Constructor(url);
   }
 });
 

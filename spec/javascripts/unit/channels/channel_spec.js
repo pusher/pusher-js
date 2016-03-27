@@ -3,7 +3,7 @@ var Errors = require('errors');
 var Factory = require('utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
-xdescribe("Channel", function() {
+describe("Channel", function() {
   var pusher;
   var channel;
 

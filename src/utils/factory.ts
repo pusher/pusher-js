@@ -65,7 +65,8 @@ var Factory = {
   },
 
   newWebSocket(url : string) : any {
-    return new WS(url);
+    var Constructor = WS.getAPI();
+    return new Constructor(url);
   }
   // getLocalStorage() : any {
   //   try {
