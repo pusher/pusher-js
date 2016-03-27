@@ -1,13 +1,18 @@
 var Integration = require("../helpers/integration");
-
-var transports = require("transports/transports");
-var util = require("util");
-
-var Pusher = require("pusher");
+var Collections = require("utils/collections");
+var transports = require("transports/transports").default;
+var util = require("util").default;
+var Runtime = require('runtimes/runtime').default;
+var Dependencies = require('runtimes/dom/dependencies').Dependencies;
+var DependenciesReceivers = require('runtimes/dom/dependencies').DependenciesReceivers;
+var Defaults = require('defaults');
+var DependencyLoader = require('runtimes/dom/dependency_loader').default;
 
 Integration.describe("Cluster Configuration", function() {
+
   var TRANSPORTS = {
     "ws": transports.WSTransport,
+    "sockjs": transports.SockJSTransport,
     "xhr_streaming": transports.XHRStreamingTransport,
     "xhr_polling": transports.XHRPollingTransport,
     "xdr_streaming": transports.XDRStreamingTransport,
@@ -25,10 +30,23 @@ Integration.describe("Cluster Configuration", function() {
   var pusher;
 
   function describeClusterTest(options) {
+    var environment = { encrypted: options.encrypted };
+    if (!TRANSPORTS[options.transport].isSupported(environment)) {
+      return;
+    }
+
     describe("with " + options.transport + ", encrypted=" + options.encrypted, function() {
+      beforeEach(function() {
+        Collections.objectApply(TRANSPORTS, function(transport, name) {
+          spyOn(transport, "isSupported").andReturn(false);
+        });
+        TRANSPORTS[options.transport].isSupported.andReturn(true);
+        spyOn(Runtime, "getLocalStorage").andReturn({});
+      });
+
       it("should open a connection to the 'eu' cluster", function() {
         pusher = new Pusher("4d31fbea7080e3b4bf6d", {
-          enabledTransports: [options.transport],
+          authTransport: 'jsonp',
           authEndpoint: Integration.API_EU_URL + "/auth",
           cluster: "eu",
           encrypted: options.encrypted,
@@ -57,7 +75,7 @@ Integration.describe("Cluster Configuration", function() {
             received = message;
           });
           Integration.sendAPIMessage({
-            url: Integration.API_EU_URL + "/send",
+            url: Integration.API_EU_URL + "/v2/send",
             channel: channelName,
             event: eventName,
             data: data
@@ -78,13 +96,37 @@ Integration.describe("Cluster Configuration", function() {
     });
   }
 
+  var _VERSION;
+  var _channel_auth_transport;
+  var _channel_auth_endpoint;
+  var _Dependencies;
+
+  it("should prepare the global config", function() {
+    // TODO fix how versions work in unit tests
+    _VERSION = Defaults.VERSION;
+    _channel_auth_transport = Defaults.channel_auth_transport;
+    _channel_auth_endpoint = Defaults.channel_auth_endpoint;
+    _Dependencies = Dependencies;
+
+    Defaults.VERSION = "8.8.8";
+    Defaults.channel_auth_transport = "";
+    Defaults.channel_auth_endpoint = "";
+    Dependencies = new DependencyLoader({
+      cdn_http: Integration.JS_HOST,
+      cdn_https: Integration.JS_HOST,
+      version: Defaults.VERSION,
+      suffix: "",
+      receivers: DependenciesReceivers
+    });
+  });
+
   if (!/version\/5.*safari/i.test(navigator.userAgent)) {
     // Safari 5 uses hixie-75/76, which is not supported on EU
     describeClusterTest({ transport: "ws", encrypted: false});
     describeClusterTest({ transport: "ws", encrypted: true});
   }
 
-  if (util.isXHRSupported()) {
+  if (Runtime.isXHRSupported()) {
     // CORS-compatible browsers
     if (!/Android 2\./i.test(navigator.userAgent)) {
       // Android 2.x does a lot of buffering, which kills streaming
@@ -93,12 +135,17 @@ Integration.describe("Cluster Configuration", function() {
     }
     describeClusterTest({ transport: "xhr_polling", encrypted: false});
     describeClusterTest({ transport: "xhr_polling", encrypted: true});
-  } else if (util.isXDRSupported(false)) {
+  } else if (Runtime.isXDRSupported(false)) {
     describeClusterTest({ transport: "xdr_streaming", encrypted: false});
     describeClusterTest({ transport: "xdr_streaming", encrypted: true});
     describeClusterTest({ transport: "xdr_polling", encrypted: false});
     describeClusterTest({ transport: "xdr_polling", encrypted: true});
+    // IE can fall back to SockJS if protocols don't match
+    // No SockJS encrypted tests due to the way JS files are served
+    describeClusterTest({ transport: "sockjs", encrypted: false});
   } else {
-    throw new Error("this environment is not supported");
+    // Browsers using SockJS
+    describeClusterTest({ transport: "sockjs", encrypted: false});
+    describeClusterTest({ transport: "sockjs", encrypted: true});
   }
 });

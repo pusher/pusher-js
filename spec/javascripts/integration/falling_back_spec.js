@@ -1,12 +1,14 @@
+var Pusher = require('pusher_integration').default;
+window.Pusher = Pusher;
+
 var Integration = require("../helpers/integration");
 var Mocks = require("../helpers/mocks");
-
-var Pusher = require("pusher").default;
-
 var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
-var Timer = require("utils/timers").Timer;
-var transports = require("transports/transports");
-var util = require("util");
+var Timer = require("utils/timers").OneOffTimer;
+var transports = require("transports/transports").default;
+var util = require("util").default;
+var Runtime = require('runtimes/runtime').default;
+var Timer = require('utils/timers').OneOffTimer;
 
 Integration.describe("Falling back", function() {
   var pusher;
@@ -15,12 +17,13 @@ Integration.describe("Falling back", function() {
     spyOn(Network, "isOnline").andReturn(true);
 
     spyOn(transports.WSTransport, "isSupported").andReturn(false);
+    spyOn(transports.SockJSTransport, "isSupported").andReturn(false);
     spyOn(transports.XDRStreamingTransport, "isSupported").andReturn(false);
     spyOn(transports.XHRStreamingTransport, "isSupported").andReturn(false);
     spyOn(transports.XDRPollingTransport, "isSupported").andReturn(false);
     spyOn(transports.XHRPollingTransport, "isSupported").andReturn(false);
 
-    spyOn(util, "getLocalStorage").andReturn({});
+    spyOn(Runtime, "getLocalStorage").andReturn({});
   });
 
   afterEach(function() {
@@ -102,25 +105,25 @@ Integration.describe("Falling back", function() {
     });
   });
 
-  it("should not close established XHR connection when WebSocket is stuck in handshake", function() {
-    var wsTransport, xhrTransport;
+  it("should not close established SockJS connection when WebSocket is stuck in handshake", function() {
+    var wsTransport, sockjsTransport;
 
     function createWSConnection() {
       wsTransport = Mocks.getTransport(true);
       return wsTransport;
     }
-    function createXHRConnection() {
-      xhrTransport = Mocks.getTransport(true);
-      return xhrTransport;
+    function createSockJSConnection() {
+      sockjsTransport = Mocks.getTransport(true);
+      return sockjsTransport;
     }
 
     transports.WSTransport.isSupported.andReturn(true);
-    transports.XHRStreamingTransport.isSupported.andReturn(true);
+    transports.SockJSTransport.isSupported.andReturn(true);
     spyOn(transports.WSTransport, "createConnection").andCallFake(createWSConnection);
-    spyOn(transports.XHRStreamingTransport, "createConnection").andCallFake(createXHRConnection);
+    spyOn(transports.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
 
     runs(function() {
-      // Use encrypted to skip the WSS fallback
+      // use encrypted connection, to force sockjs to be the primary fallback
       pusher = new Pusher("foobar", { encrypted: true, disableStats: true });
       pusher.connect();
     });
@@ -140,19 +143,19 @@ Integration.describe("Falling back", function() {
       // start handshake, but don't do anything
     });
     waitsFor(function() {
-      return transports.XHRStreamingTransport.createConnection.calls.length === 1;
-    }, "XHR connection to be created", 3000);
+      return transports.SockJSTransport.createConnection.calls.length === 1;
+    }, "SockJS connection to be created", 3000);
     runs(function() {
-      xhrTransport.state = "initialized";
-      xhrTransport.emit("initialized");
+      sockjsTransport.state = "initialized";
+      sockjsTransport.emit("initialized");
     });
     waitsFor(function() {
-      return xhrTransport.connect.calls.length === 1;
-    }, "connect on XHR to be called", 500);
+      return sockjsTransport.connect.calls.length === 1;
+    }, "connect on SockJS to be called", 500);
     runs(function() {
-      xhrTransport.state = "open";
-      xhrTransport.emit("open");
-      xhrTransport.emit("message", {
+      sockjsTransport.state = "open";
+      sockjsTransport.emit("open");
+      sockjsTransport.emit("message", {
         data: JSON.stringify({
           event: "pusher:connection_established",
           data: {
@@ -168,7 +171,7 @@ Integration.describe("Falling back", function() {
 
     var timer;
     runs(function() {
-      // this causes a connection to be retried after 1s
+      // this caused a connection to be retried after 1s
       wsTransport.emit("closed", {
         code: 1000,
         wasClean: true,
@@ -180,7 +183,7 @@ Integration.describe("Falling back", function() {
       return !timer.isRunning();
     }, "timer to be called", 2500);
     runs(function() {
-      expect(xhrTransport.close).not.toHaveBeenCalled();
+      expect(sockjsTransport.close).not.toHaveBeenCalled();
     });
   });
 });

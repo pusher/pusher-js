@@ -1,12 +1,14 @@
+var Pusher = require('pusher_integration').default;
+window.Pusher = Pusher;
+
 var Integration = require("../helpers/integration");
 var Mocks = require("../helpers/mocks");
-
-var Pusher = require("pusher");
-
-var defaults = require("defaults");
+var defaults = require("defaults").default;
 var Network = require("pusher-websocket-iso-externals-node/net_info").Network;
-var transports = require("transports/transports");
-var util = require("util");
+var transports = require("transports/transports").default;
+var util = require("util").default;
+var Runtime = require('runtimes/runtime').default;
+var Defaults = require('defaults').default;
 
 Integration.describe("Timeout Configuration", function() {
   var transport;
@@ -14,8 +16,11 @@ Integration.describe("Timeout Configuration", function() {
 
   beforeEach(function() {
     spyOn(Network, "isOnline").andReturn(true);
+
     spyOn(transports.WSTransport, "isSupported").andReturn(true);
-    spyOn(util, "getLocalStorage").andReturn({});
+    spyOn(transports.SockJSTransport, "isSupported").andReturn(false);
+
+    spyOn(Runtime, "getLocalStorage").andReturn({});
 
     spyOn(transports.WSTransport, "createConnection").andCallFake(function() {
       transport = Mocks.getTransport(true);
@@ -36,7 +41,7 @@ Integration.describe("Timeout Configuration", function() {
     pusher.connect();
     pusher.connection.bind("unavailable", onUnavailable);
 
-    jasmine.Clock.tick(defaults.unavailable_timeout - 1);
+    jasmine.Clock.tick(Defaults.unavailable_timeout - 1);
     expect(onUnavailable).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
     expect(onUnavailable).toHaveBeenCalled();
@@ -81,7 +86,7 @@ Integration.describe("Timeout Configuration", function() {
     jasmine.Clock.tick(1);
     expect(firstTransport.send).toHaveBeenCalled();
 
-    jasmine.Clock.tick(defaults.pong_timeout - 1);
+    jasmine.Clock.tick(Defaults.pong_timeout - 1);
     expect(firstTransport.close).not.toHaveBeenCalled();
     jasmine.Clock.tick(1);
     expect(firstTransport.close).toHaveBeenCalled();

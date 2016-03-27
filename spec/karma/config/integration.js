@@ -1,25 +1,35 @@
 var version = require('../../../package').version;
-
+var objectAssign = require('object-assign-deep');
+var webpackConfig = require('../../../webpack/config.shared');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 
 module.exports = function(config) {
   config.set({
     basePath: '../../../',
     frameworks: ["jasmine"],
-
-    files: require(__dirname + "/../files/integration_tests"),
-    preprocessors: {
-      '**/spec/javascripts/integration/**/*.js': ['webpack']
+    client: {
+      useIframe: true,
+      captureConsole: true,
+      clearContext: true
     },
 
-    reporters: ['progress', 'coverage'],
+    // files: require(__dirname + "/../files/integration_tests"),
+    files: [
+      '**/spec/javascripts/integration/index.js'
+    ],
+    preprocessors: {
+      '**/spec/javascripts/integration/index.js': ['webpack'],
+      '**spec/javascripts/node_modules/**/*.ts': ['webpack']
+    },
+
+    reporters: ['progress', 'coverage', 'spec'],
 
     coverageReporter: {
       type : 'html',
       dir : 'coverage/'
     },
 
-    webpack: {
+    webpack: objectAssign(webpackConfig, {
       resolve: {
         root: [
           __dirname + '/../../../src',
@@ -43,7 +53,7 @@ module.exports = function(config) {
           "pusher-websocket-iso-externals-web/net_info"
         )
       ]
-    },
+    }),
 
     port: 9876,
     runnerPort: 9100,
@@ -53,7 +63,7 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+    browsers: ['Chrome'],
     captureTimeout: 120000,
 
     singleRun: true

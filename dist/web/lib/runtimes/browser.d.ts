@@ -3,8 +3,6 @@ import { AuthTransports } from '../auth_transports';
 import { TimelineTransport } from '../timeline/timeline_transports';
 import TimelineSender from '../timeline/timeline_sender';
 export default class Browser extends Runtime {
-    nextAuthCallbackID: number;
-    auth_callbacks: any;
     whenReady(callback: Function): void;
     getDocument(): any;
     getProtocol(): string;

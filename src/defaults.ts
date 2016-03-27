@@ -1,30 +1,32 @@
-export var VERSION = '4.0';
-export var PROTOCOL = 7;
+var Defaults : any = {};
+
+Defaults.VERSION = '4.0';
+Defaults.PROTOCOL = 7;
 
 // DEPRECATED: WS connection parameters
-export var host = 'ws.pusherapp.com';
-export var ws_port = 80;
-export var wss_port = 443;
+Defaults.host = 'ws.pusherapp.com';
+Defaults.ws_port = 80;
+Defaults.wss_port = 443;
 // DEPRECATED: SockJS fallback parameters
-export var sockjs_host = 'sockjs.pusher.com';
-export var sockjs_http_port = 80;
-export var sockjs_https_port = 443;
-export var sockjs_path = "/pusher";
+Defaults.sockjs_host = 'sockjs.pusher.com';
+Defaults.sockjs_http_port = 80;
+Defaults.sockjs_https_port = 443;
+Defaults.sockjs_path = "/pusher";
 // DEPRECATED: Stats
-export var stats_host = 'stats.pusher.com';
+Defaults.stats_host = 'stats.pusher.com';
 // DEPRECATED: Other settings
-export var channel_auth_endpoint = '/pusher/auth';
-export var channel_auth_transport = 'ajax';
-export var activity_timeout = 120000;
-export var pong_timeout = 30000;
-export var unavailable_timeout = 10000;
+Defaults.channel_auth_endpoint = '/pusher/auth';
+Defaults.channel_auth_transport = 'ajax';
+Defaults.activity_timeout = 120000;
+Defaults.pong_timeout = 30000;
+Defaults.unavailable_timeout = 10000;
 
 // CDN configuration
-export var cdn_http = '<CDN_HTTP>';
-export var cdn_https = '<CDN_HTTPS>';
-export var dependency_suffix = '<DEPENDENCY_SUFFIX>';
+Defaults.cdn_http = '<CDN_HTTP>';
+Defaults.cdn_https = '<CDN_HTTPS>';
+Defaults.dependency_suffix = '<DEPENDENCY_SUFFIX>';
 
-export var getDefaultStrategy = function(config : any) : any {
+Defaults.getDefaultStrategy = function(config : any) : any {
   var wsStrategy;
   if (config.encrypted) {
     wsStrategy = [
@@ -124,3 +126,5 @@ export var getDefaultStrategy = function(config : any) : any {
     ]
   ];
 };
+
+export default Defaults;

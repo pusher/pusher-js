@@ -1,6 +1,6 @@
-var WSTransport = require('transports/transports').WSTransport;
+var WSTransport = require('transports/transports').default.WSTransport;
 var StrategyBuilder = require('strategies/strategy_builder');
-var Defaults = require('defaults');
+var Defaults = require('defaults').default;
 var DefaultConfig = require('config');
 
 describe("Default", function() {

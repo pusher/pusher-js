@@ -1,4 +1,3 @@
-// import Util from './util';
 import CallbackRegistry from './callback_registry';
 import Callback from './callback';
 

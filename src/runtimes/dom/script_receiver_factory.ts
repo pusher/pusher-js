@@ -52,5 +52,5 @@ import ScriptReceiver from './script_receiver';
  }
 
  export var ScriptReceivers = new ScriptReceiverFactory(
-   "_pusher_script_", "Pusher.ScriptReceivers"
+   "_pusher_script_", "Pusher.Runtime.ScriptReceivers"
  );

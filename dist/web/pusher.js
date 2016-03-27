@@ -53,11 +53,11 @@ var Pusher =
 	var level_1 = __webpack_require__(55);
 	var StrategyBuilder = __webpack_require__(56);
 	var timers_1 = __webpack_require__(12);
-	var Defaults = __webpack_require__(8);
+	var defaults_1 = __webpack_require__(8);
 	var DefaultConfig = __webpack_require__(65);
 	var logger_1 = __webpack_require__(16);
 	var state_1 = __webpack_require__(17);
-	var factory_1 = __webpack_require__(34);
+	var factory_1 = __webpack_require__(21);
 	var Pusher = (function () {
 	    function Pusher(app_key, options) {
 	        checkAppKey(app_key);
@@ -74,7 +74,7 @@ var Pusher =
 	            params: this.config.timelineParams || {},
 	            limit: 50,
 	            level: level_1.default.INFO,
-	            version: Defaults.VERSION
+	            version: defaults_1.default.VERSION
 	        });
 	        if (!this.config.disableStats) {
 	            this.timelineSender = factory_1.default.createTimelineSender(this.timeline, {
@@ -84,7 +84,7 @@ var Pusher =
 	        }
 	        var getStrategy = function (options) {
 	            var config = Collections.extend({}, self.config, options);
-	            return StrategyBuilder.build(Defaults.getDefaultStrategy(config), config);
+	            return StrategyBuilder.build(defaults_1.default.getDefaultStrategy(config), config);
 	        };
 	        this.connection = factory_1.default.createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,
 	            timeline: this.timeline,
@@ -207,6 +207,8 @@ var Pusher =
 	    /*  STATIC PROPERTIES */
 	    Pusher.instances = [];
 	    Pusher.isReady = false;
+	    // for jsonp auth
+	    Pusher.Runtime = runtime_1.default;
 	    return Pusher;
 	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -251,17 +253,14 @@ var Pusher =
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var abstract_runtime_1 = __webpack_require__(3);
-	var xhr_1 = __webpack_require__(31);
+	var xhr_1 = __webpack_require__(37);
 	var dependencies_1 = __webpack_require__(18);
-	var auth_transports_1 = __webpack_require__(50);
-	var timeline_transports_1 = __webpack_require__(51);
+	var auth_transports_1 = __webpack_require__(51);
+	var timeline_transports_1 = __webpack_require__(52);
 	var Browser = (function (_super) {
 	    __extends(Browser, _super);
 	    function Browser() {
 	        _super.apply(this, arguments);
-	        // for jsonp auth
-	        this.nextAuthCallbackID = 1;
-	        this.auth_callbacks = {};
 	    }
 	    Browser.prototype.whenReady = function (callback) {
 	        var _this = this;
@@ -326,10 +325,17 @@ var Pusher =
 	"use strict";
 	var Collections = __webpack_require__(4);
 	var transports_1 = __webpack_require__(6);
-	var auth_transports_1 = __webpack_require__(50);
-	var timeline_transports_1 = __webpack_require__(51);
+	var auth_transports_1 = __webpack_require__(51);
+	var timeline_transports_1 = __webpack_require__(52);
+	var script_receiver_factory_1 = __webpack_require__(19);
+	var dependencies_1 = __webpack_require__(18);
 	var Runtime = (function () {
 	    function Runtime() {
+	        // for jsonp auth
+	        this.nextAuthCallbackID = 1;
+	        this.auth_callbacks = {};
+	        this.ScriptReceivers = script_receiver_factory_1.ScriptReceivers;
+	        this.DependenciesReceivers = dependencies_1.DependenciesReceivers;
 	    }
 	    Runtime.prototype.getLocalStorage = function () {
 	        try {
@@ -340,7 +346,7 @@ var Pusher =
 	        }
 	    };
 	    Runtime.prototype.getClientFeatures = function () {
-	        return Collections.keys(Collections.filterObject({ "ws": transports_1.WSTransport }, function (t) { return t.isSupported({}); }));
+	        return Collections.keys(Collections.filterObject({ "ws": transports_1.default.WSTransport }, function (t) { return t.isSupported({}); }));
 	    };
 	    Runtime.prototype.getAuthorizers = function () {
 	        return { ajaxAuth: auth_transports_1.ajax };
@@ -689,9 +695,9 @@ var Pusher =
 	var URLSchemes = __webpack_require__(7);
 	var transport_ts_1 = __webpack_require__(9);
 	var Collections = __webpack_require__(4);
-	var ws_1 = __webpack_require__(22);
-	var http_1 = __webpack_require__(23);
-	var factory_1 = __webpack_require__(34);
+	var ws_1 = __webpack_require__(39);
+	var http_1 = __webpack_require__(42);
+	var factory_1 = __webpack_require__(21);
 	var runtime_1 = __webpack_require__(1);
 	var dependencies_1 = __webpack_require__(18);
 	/** WebSocket transport.
@@ -699,7 +705,7 @@ var Pusher =
 	 * Uses native WebSocket implementation, including MozWebSocket supported by
 	 * earlier Firefox versions.
 	 */
-	exports.WSTransport = new transport_ts_1.default({
+	var WSTransport = new transport_ts_1.default({
 	    urls: URLSchemes.ws,
 	    handlesActivityChecks: false,
 	    supportsPing: false,
@@ -713,7 +719,7 @@ var Pusher =
 	        return factory_1.default.createWebSocket(url);
 	    }
 	});
-	exports.SockJSTransport = new transport_ts_1.default({
+	var SockJSTransport = new transport_ts_1.default({
 	    file: "sockjs",
 	    urls: URLSchemes.sockjs,
 	    handlesActivityChecks: true,
@@ -766,13 +772,23 @@ var Pusher =
 	    }
 	};
 	/** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
-	exports.XHRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xhrConfiguration));
+	var XHRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xhrConfiguration));
 	/** HTTP streaming transport using XDomainRequest (IE 8,9). */
-	exports.XDRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xdrConfiguration));
+	var XDRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xdrConfiguration));
 	/** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
-	exports.XHRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xhrConfiguration));
+	var XHRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xhrConfiguration));
 	/** HTTP long-polling transport using XDomainRequest (IE 8,9). */
-	exports.XDRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xdrConfiguration));
+	var XDRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xdrConfiguration));
+	var Transports = {
+	    WSTransport: WSTransport,
+	    SockJSTransport: SockJSTransport,
+	    XHRStreamingTransport: XHRStreamingTransport,
+	    XDRStreamingTransport: XDRStreamingTransport,
+	    XHRPollingTransport: XHRPollingTransport,
+	    XDRPollingTransport: XDRPollingTransport
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Transports;
 
 
 /***/ },
@@ -788,9 +804,9 @@ var Pusher =
 	}
 	function getGenericPath(key, queryString) {
 	    var path = "/app/" + key;
-	    var query = "?protocol=" + defaults_ts_1.PROTOCOL +
+	    var query = "?protocol=" + defaults_ts_1.default.PROTOCOL +
 	        "&client=js" +
-	        "&version=" + defaults_ts_1.VERSION +
+	        "&version=" + defaults_ts_1.default.VERSION +
 	        (queryString ? ("&" + queryString) : "");
 	    return path + query;
 	}
@@ -820,30 +836,31 @@ var Pusher =
 /***/ function(module, exports) {
 
 	"use strict";
-	exports.VERSION = '4.0';
-	exports.PROTOCOL = 7;
+	var Defaults = {};
+	Defaults.VERSION = '4.0';
+	Defaults.PROTOCOL = 7;
 	// DEPRECATED: WS connection parameters
-	exports.host = 'ws.pusherapp.com';
-	exports.ws_port = 80;
-	exports.wss_port = 443;
+	Defaults.host = 'ws.pusherapp.com';
+	Defaults.ws_port = 80;
+	Defaults.wss_port = 443;
 	// DEPRECATED: SockJS fallback parameters
-	exports.sockjs_host = 'sockjs.pusher.com';
-	exports.sockjs_http_port = 80;
-	exports.sockjs_https_port = 443;
-	exports.sockjs_path = "/pusher";
+	Defaults.sockjs_host = 'sockjs.pusher.com';
+	Defaults.sockjs_http_port = 80;
+	Defaults.sockjs_https_port = 443;
+	Defaults.sockjs_path = "/pusher";
 	// DEPRECATED: Stats
-	exports.stats_host = 'stats.pusher.com';
+	Defaults.stats_host = 'stats.pusher.com';
 	// DEPRECATED: Other settings
-	exports.channel_auth_endpoint = '/pusher/auth';
-	exports.channel_auth_transport = 'ajax';
-	exports.activity_timeout = 120000;
-	exports.pong_timeout = 30000;
-	exports.unavailable_timeout = 10000;
+	Defaults.channel_auth_endpoint = '/pusher/auth';
+	Defaults.channel_auth_transport = 'ajax';
+	Defaults.activity_timeout = 120000;
+	Defaults.pong_timeout = 30000;
+	Defaults.unavailable_timeout = 10000;
 	// CDN configuration
-	exports.cdn_http = '<CDN_HTTP>';
-	exports.cdn_https = '<CDN_HTTPS>';
-	exports.dependency_suffix = '<DEPENDENCY_SUFFIX>';
-	exports.getDefaultStrategy = function (config) {
+	Defaults.cdn_http = '<CDN_HTTP>';
+	Defaults.cdn_https = '<CDN_HTTPS>';
+	Defaults.dependency_suffix = '<DEPENDENCY_SUFFIX>';
+	Defaults.getDefaultStrategy = function (config) {
 	    var wsStrategy;
 	    if (config.encrypted) {
 	        wsStrategy = [
@@ -936,6 +953,8 @@ var Pusher =
 	        ]
 	    ];
 	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Defaults;
 
 
 /***/ },
@@ -1376,7 +1395,6 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	// import Util from './util';
 	var callback_registry_1 = __webpack_require__(15);
 	var global = Function("return this")();
 	/** Manages callback bindings and event emitting.
@@ -1547,14 +1565,14 @@ var Pusher =
 
 	"use strict";
 	var script_receiver_factory_1 = __webpack_require__(19);
-	var Defaults = __webpack_require__(8);
+	var defaults_1 = __webpack_require__(8);
 	var dependency_loader_1 = __webpack_require__(20);
-	exports.DependenciesReceivers = new script_receiver_factory_1.ScriptReceiverFactory("_pusher_dependencies", "Pusher.DependenciesReceivers");
+	exports.DependenciesReceivers = new script_receiver_factory_1.ScriptReceiverFactory("_pusher_dependencies", "Pusher.Runtime.DependenciesReceivers");
 	exports.Dependencies = new dependency_loader_1.default({
-	    cdn_http: Defaults.cdn_http,
-	    cdn_https: Defaults.cdn_https,
-	    version: Defaults.VERSION,
-	    suffix: Defaults.dependency_suffix,
+	    cdn_http: defaults_1.default.cdn_http,
+	    cdn_https: defaults_1.default.cdn_https,
+	    version: defaults_1.default.VERSION,
+	    suffix: defaults_1.default.dependency_suffix,
 	    receivers: exports.DependenciesReceivers
 	});
 
@@ -1584,6 +1602,7 @@ var Pusher =
 	    function ScriptReceiverFactory(prefix, name) {
 	        this.lastId = 0;
 	        this.prefix = prefix;
+	        console.log(name);
 	        this.name = name;
 	    }
 	    ScriptReceiverFactory.prototype.create = function (callback) {
@@ -1607,7 +1626,7 @@ var Pusher =
 	    return ScriptReceiverFactory;
 	}());
 	exports.ScriptReceiverFactory = ScriptReceiverFactory;
-	exports.ScriptReceivers = new ScriptReceiverFactory("_pusher_script_", "Pusher.ScriptReceivers");
+	exports.ScriptReceivers = new ScriptReceiverFactory("_pusher_script_", "Pusher.Runtime.ScriptReceivers");
 
 
 /***/ },
@@ -1617,7 +1636,7 @@ var Pusher =
 	"use strict";
 	var script_receiver_factory_1 = __webpack_require__(19);
 	var runtime_1 = __webpack_require__(1);
-	var script_request_1 = __webpack_require__(21);
+	var factory_1 = __webpack_require__(21);
 	/** Handles loading dependency files.
 	 *
 	 * Dependency loaders don't remember whether a resource has been loaded or
@@ -1651,7 +1670,7 @@ var Pusher =
 	        }
 	        else {
 	            self.loading[name] = [callback];
-	            var request = new script_request_1.default(self.getPath(name, options));
+	            var request = factory_1.default.createScriptRequest(self.getPath(name, options));
 	            var receiver = self.receivers.create(function (error) {
 	                self.receivers.remove(receiver);
 	                if (self.loading[name]) {
@@ -1699,672 +1718,23 @@ var Pusher =
 
 /***/ },
 /* 21 */
-/***/ function(module, exports) {
-
-	"use strict";
-	/** Sends a generic HTTP GET request using a script tag.
-	 *
-	 * By constructing URL in a specific way, it can be used for loading
-	 * JavaScript resources or JSONP requests. It can notify about errors, but
-	 * only in certain environments. Please take care of monitoring the state of
-	 * the request yourself.
-	 *
-	 * @param {String} src
-	 */
-	var ScriptRequest = (function () {
-	    function ScriptRequest(src) {
-	        this.src = src;
-	    }
-	    ScriptRequest.prototype.send = function (receiver) {
-	        var self = this;
-	        var errorString = "Error loading " + self.src;
-	        self.script = document.createElement("script");
-	        self.script.id = receiver.id;
-	        self.script.src = self.src;
-	        self.script.type = "text/javascript";
-	        self.script.charset = "UTF-8";
-	        if (self.script.addEventListener) {
-	            self.script.onerror = function () {
-	                receiver.callback(errorString);
-	            };
-	            self.script.onload = function () {
-	                receiver.callback(null);
-	            };
-	        }
-	        else {
-	            self.script.onreadystatechange = function () {
-	                if (self.script.readyState === 'loaded' ||
-	                    self.script.readyState === 'complete') {
-	                    receiver.callback(null);
-	                }
-	            };
-	        }
-	        // Opera<11.6 hack for missing onerror callback
-	        if (self.script.async === undefined && document.attachEvent &&
-	            /opera/i.test(navigator.userAgent)) {
-	            self.errorScript = document.createElement("script");
-	            self.errorScript.id = receiver.id + "_error";
-	            self.errorScript.text = receiver.name + "('" + errorString + "');";
-	            self.script.async = self.errorScript.async = false;
-	        }
-	        else {
-	            self.script.async = true;
-	        }
-	        var head = document.getElementsByTagName('head')[0];
-	        head.insertBefore(self.script, head.firstChild);
-	        if (self.errorScript) {
-	            head.insertBefore(self.errorScript, self.script.nextSibling);
-	        }
-	    };
-	    /** Cleans up the DOM remains of the script request. */
-	    ScriptRequest.prototype.cleanup = function () {
-	        if (this.script) {
-	            this.script.onload = this.script.onerror = null;
-	            this.script.onreadystatechange = null;
-	        }
-	        if (this.script && this.script.parentNode) {
-	            this.script.parentNode.removeChild(this.script);
-	        }
-	        if (this.errorScript && this.errorScript.parentNode) {
-	            this.errorScript.parentNode.removeChild(this.errorScript);
-	        }
-	        this.script = null;
-	        this.errorScript = null;
-	    };
-	    return ScriptRequest;
-	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = ScriptRequest;
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var WS = {
-	    getAPI: function () {
-	        return window.WebSocket || window.MozWebSocket;
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = WS;
-
-
-/***/ },
-/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var http_request_1 = __webpack_require__(24);
-	var http_socket_1 = __webpack_require__(26);
-	var http_streaming_socket_1 = __webpack_require__(28);
-	var http_polling_socket_1 = __webpack_require__(29);
-	var http_xhr_request_1 = __webpack_require__(30);
-	var http_xdomain_request_1 = __webpack_require__(32);
-	var HTTP = {
-	    createStreamingSocket: function (url) {
-	        return this.createSocket(http_streaming_socket_1.default, url);
-	    },
-	    createPollingSocket: function (url) {
-	        return this.createSocket(http_polling_socket_1.default, url);
-	    },
-	    createSocket: function (hooks, url) {
-	        return new http_socket_1.default(hooks, url);
-	    },
-	    createXHR: function (method, url) {
-	        return this.createRequest(http_xhr_request_1.default, method, url);
-	    },
-	    createXDR: function (method, url) {
-	        return this.createRequest(http_xdomain_request_1.default, method, url);
-	    },
-	    createRequest: function (hooks, method, url) {
-	        return new http_request_1.default(hooks, method, url);
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTP;
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var App = __webpack_require__(25);
-	var dispatcher_1 = __webpack_require__(14);
-	var MAX_BUFFER_LENGTH = 256 * 1024;
-	var HTTPRequest = (function (_super) {
-	    __extends(HTTPRequest, _super);
-	    function HTTPRequest(hooks, method, url) {
-	        _super.call(this);
-	        this.hooks = hooks;
-	        this.method = method;
-	        this.url = url;
-	    }
-	    HTTPRequest.prototype.start = function (payload) {
-	        var self = this;
-	        self.position = 0;
-	        self.xhr = self.hooks.getRequest(self);
-	        self.unloader = function () {
-	            self.close();
-	        };
-	        App.addUnloadListener(self.unloader);
-	        self.xhr.open(self.method, self.url, true);
-	        self.xhr.send(payload);
-	    };
-	    HTTPRequest.prototype.close = function () {
-	        if (this.unloader) {
-	            App.removeUnloadListener(this.unloader);
-	            this.unloader = null;
-	        }
-	        if (this.xhr) {
-	            this.hooks.abortRequest(this.xhr);
-	            this.xhr = null;
-	        }
-	    };
-	    HTTPRequest.prototype.onChunk = function (status, data) {
-	        while (true) {
-	            var chunk = this.advanceBuffer(data);
-	            if (chunk) {
-	                this.emit("chunk", { status: status, data: chunk });
-	            }
-	            else {
-	                break;
-	            }
-	        }
-	        if (this.isBufferTooLong(data)) {
-	            this.emit("buffer_too_long");
-	        }
-	    };
-	    HTTPRequest.prototype.advanceBuffer = function (buffer) {
-	        var unreadData = buffer.slice(this.position);
-	        var endOfLinePosition = unreadData.indexOf("\n");
-	        if (endOfLinePosition !== -1) {
-	            this.position += endOfLinePosition + 1;
-	            return unreadData.slice(0, endOfLinePosition);
-	        }
-	        else {
-	            // chunk is not finished yet, don't move the buffer pointer
-	            return null;
-	        }
-	    };
-	    HTTPRequest.prototype.isBufferTooLong = function (buffer) {
-	        return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
-	    };
-	    return HTTPRequest;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTPRequest;
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports) {
-
-	"use strict";
-	exports.addUnloadListener = function (listener) {
-	    if (window.addEventListener !== undefined) {
-	        window.addEventListener("unload", listener, false);
-	    }
-	    else if (window.attachEvent !== undefined) {
-	        window.attachEvent("onunload", listener);
-	    }
-	};
-	exports.removeUnloadListener = function (listener) {
-	    if (window.addEventListener !== undefined) {
-	        window.removeEventListener("unload", listener, false);
-	    }
-	    else if (window.detachEvent !== undefined) {
-	        window.detachEvent("onunload", listener);
-	    }
-	};
-
-
-/***/ },
-/* 26 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var state_1 = __webpack_require__(27);
-	var util_1 = __webpack_require__(11);
-	var http_1 = __webpack_require__(23);
-	var runtime_1 = __webpack_require__(1);
-	var autoIncrement = 1;
-	var HTTPSocket = (function () {
-	    function HTTPSocket(hooks, url) {
-	        this.hooks = hooks;
-	        this.session = randomNumber(1000) + "/" + randomString(8);
-	        this.location = getLocation(url);
-	        this.readyState = state_1.default.CONNECTING;
-	        this.openStream();
-	    }
-	    HTTPSocket.prototype.send = function (payload) {
-	        return this.sendRaw(JSON.stringify([payload]));
-	    };
-	    HTTPSocket.prototype.ping = function () {
-	        this.hooks.sendHeartbeat(this);
-	    };
-	    HTTPSocket.prototype.close = function (code, reason) {
-	        this.onClose(code, reason, true);
-	    };
-	    /** For internal use only */
-	    HTTPSocket.prototype.sendRaw = function (payload) {
-	        if (this.readyState === state_1.default.OPEN) {
-	            try {
-	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
-	                return true;
-	            }
-	            catch (e) {
-	                return false;
-	            }
-	        }
-	        else {
-	            return false;
-	        }
-	    };
-	    /** For internal use only */
-	    HTTPSocket.prototype.reconnect = function () {
-	        this.closeStream();
-	        this.openStream();
-	    };
-	    ;
-	    /** For internal use only */
-	    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
-	        this.closeStream();
-	        this.readyState = state_1.default.CLOSED;
-	        if (this.onclose) {
-	            this.onclose({
-	                code: code,
-	                reason: reason,
-	                wasClean: wasClean
-	            });
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.onChunk = function (chunk) {
-	        if (chunk.status !== 200) {
-	            return;
-	        }
-	        if (this.readyState === state_1.default.OPEN) {
-	            this.onActivity();
-	        }
-	        var payload;
-	        var type = chunk.data.slice(0, 1);
-	        switch (type) {
-	            case 'o':
-	                payload = JSON.parse(chunk.data.slice(1) || '{}');
-	                this.onOpen(payload);
-	                break;
-	            case 'a':
-	                payload = JSON.parse(chunk.data.slice(1) || '[]');
-	                for (var i = 0; i < payload.length; i++) {
-	                    this.onEvent(payload[i]);
-	                }
-	                break;
-	            case 'm':
-	                payload = JSON.parse(chunk.data.slice(1) || 'null');
-	                this.onEvent(payload);
-	                break;
-	            case 'h':
-	                this.hooks.onHeartbeat(this);
-	                break;
-	            case 'c':
-	                payload = JSON.parse(chunk.data.slice(1) || '[]');
-	                this.onClose(payload[0], payload[1], true);
-	                break;
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.onOpen = function (options) {
-	        if (this.readyState === state_1.default.CONNECTING) {
-	            if (options && options.hostname) {
-	                this.location.base = replaceHost(this.location.base, options.hostname);
-	            }
-	            this.readyState = state_1.default.OPEN;
-	            if (this.onopen) {
-	                this.onopen();
-	            }
-	        }
-	        else {
-	            this.onClose(1006, "Server lost session", true);
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.onEvent = function (event) {
-	        if (this.readyState === state_1.default.OPEN && this.onmessage) {
-	            this.onmessage({ data: event });
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.onActivity = function () {
-	        if (this.onactivity) {
-	            this.onactivity();
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.onError = function (error) {
-	        if (this.onerror) {
-	            this.onerror(error);
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.openStream = function () {
-	        var self = this;
-	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
-	        self.stream.bind("chunk", function (chunk) {
-	            self.onChunk(chunk);
-	        });
-	        self.stream.bind("finished", function (status) {
-	            self.hooks.onFinished(self, status);
-	        });
-	        self.stream.bind("buffer_too_long", function () {
-	            self.reconnect();
-	        });
-	        try {
-	            self.stream.start();
-	        }
-	        catch (error) {
-	            util_1.default.defer(function () {
-	                self.onError(error);
-	                self.onClose(1006, "Could not start streaming", false);
-	            });
-	        }
-	    };
-	    /** @private */
-	    HTTPSocket.prototype.closeStream = function () {
-	        if (this.stream) {
-	            this.stream.unbind_all();
-	            this.stream.close();
-	            this.stream = null;
-	        }
-	    };
-	    return HTTPSocket;
-	}());
-	function getLocation(url) {
-	    var parts = /([^\?]*)\/*(\??.*)/.exec(url);
-	    return {
-	        base: parts[1],
-	        queryString: parts[2]
-	    };
-	}
-	function getSendURL(url, session) {
-	    return url.base + "/" + session + "/xhr_send";
-	}
-	function getUniqueURL(url) {
-	    var separator = (url.indexOf('?') === -1) ? "?" : "&";
-	    return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
-	}
-	function replaceHost(url, hostname) {
-	    var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
-	    return urlParts[1] + hostname + urlParts[3];
-	}
-	function randomNumber(max) {
-	    return Math.floor(Math.random() * max);
-	}
-	function randomString(length) {
-	    var result = [];
-	    for (var i = 0; i < length; i++) {
-	        result.push(randomNumber(32).toString(32));
-	    }
-	    return result.join('');
-	}
-	function createRequest(method, url) {
-	    if (runtime_1.default.isXHRSupported()) {
-	        return http_1.default.createXHR(method, url);
-	    }
-	    else if (runtime_1.default.isXDRSupported(url.indexOf("https:") === 0)) {
-	        return http_1.default.createXDR(method, url);
-	    }
-	    else {
-	        throw "Cross-origin HTTP requests are not supported";
-	    }
-	}
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTPSocket;
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var State;
-	(function (State) {
-	    State[State["CONNECTING"] = 0] = "CONNECTING";
-	    State[State["OPEN"] = 1] = "OPEN";
-	    State[State["CLOSED"] = 3] = "CLOSED";
-	})(State || (State = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = State;
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var hooks = {
-	    getReceiveURL: function (url, session) {
-	        return url.base + "/" + session + "/xhr_streaming" + url.queryString;
-	    },
-	    onHeartbeat: function (socket) {
-	        socket.sendRaw("[]");
-	    },
-	    sendHeartbeat: function (socket) {
-	        socket.sendRaw("[]");
-	    },
-	    onFinished: function (socket, status) {
-	        socket.onClose(1006, "Connection interrupted (" + status + ")", false);
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
-
-
-/***/ },
-/* 29 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var hooks = {
-	    getReceiveURL: function (url, session) {
-	        return url.base + "/" + session + "/xhr" + url.queryString;
-	    },
-	    onHeartbeat: function () {
-	        // next HTTP request will reset server's activity timer
-	    },
-	    sendHeartbeat: function (socket) {
-	        socket.sendRaw("[]");
-	    },
-	    onFinished: function (socket, status) {
-	        if (status === 200) {
-	            socket.reconnect();
-	        }
-	        else {
-	            socket.onClose(1006, "Connection interrupted (" + status + ")", false);
-	        }
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
-
-
-/***/ },
-/* 30 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var xhr_1 = __webpack_require__(31);
-	var hooks = {
-	    getRequest: function (socket) {
-	        var Constructor = xhr_1.default.getAPI();
-	        var xhr = new Constructor();
-	        xhr.onreadystatechange = xhr.onprogress = function () {
-	            switch (xhr.readyState) {
-	                case 3:
-	                    if (xhr.responseText && xhr.responseText.length > 0) {
-	                        socket.onChunk(xhr.status, xhr.responseText);
-	                    }
-	                    break;
-	                case 4:
-	                    // this happens only on errors, never after calling close
-	                    if (xhr.responseText && xhr.responseText.length > 0) {
-	                        socket.onChunk(xhr.status, xhr.responseText);
-	                    }
-	                    socket.emit("finished", xhr.status);
-	                    socket.close();
-	                    break;
-	            }
-	        };
-	        return xhr;
-	    },
-	    abortRequest: function (xhr) {
-	        xhr.onreadystatechange = null;
-	        xhr.abort();
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
-
-
-/***/ },
-/* 31 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var XHR = {
-	    getAPI: function () {
-	        return window.XMLHttpRequest;
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = XHR;
-
-
-/***/ },
-/* 32 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Errors = __webpack_require__(33);
-	var hooks = {
-	    getRequest: function (socket) {
-	        var xdr = new window.XDomainRequest();
-	        xdr.ontimeout = function () {
-	            socket.emit("error", new Errors.RequestTimedOut());
-	            socket.close();
-	        };
-	        xdr.onerror = function (e) {
-	            socket.emit("error", e);
-	            socket.close();
-	        };
-	        xdr.onprogress = function () {
-	            if (xdr.responseText && xdr.responseText.length > 0) {
-	                socket.onChunk(200, xdr.responseText);
-	            }
-	        };
-	        xdr.onload = function () {
-	            if (xdr.responseText && xdr.responseText.length > 0) {
-	                socket.onChunk(200, xdr.responseText);
-	            }
-	            socket.emit("finished", 200);
-	            socket.close();
-	        };
-	        return xdr;
-	    },
-	    abortRequest: function (xdr) {
-	        xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
-	        xdr.abort();
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	/** Error classes used throughout the library. */
-	var BadEventName = (function (_super) {
-	    __extends(BadEventName, _super);
-	    function BadEventName() {
-	        _super.apply(this, arguments);
-	    }
-	    return BadEventName;
-	}(Error));
-	exports.BadEventName = BadEventName;
-	var RequestTimedOut = (function (_super) {
-	    __extends(RequestTimedOut, _super);
-	    function RequestTimedOut() {
-	        _super.apply(this, arguments);
-	    }
-	    return RequestTimedOut;
-	}(Error));
-	exports.RequestTimedOut = RequestTimedOut;
-	var TransportPriorityTooLow = (function (_super) {
-	    __extends(TransportPriorityTooLow, _super);
-	    function TransportPriorityTooLow() {
-	        _super.apply(this, arguments);
-	    }
-	    return TransportPriorityTooLow;
-	}(Error));
-	exports.TransportPriorityTooLow = TransportPriorityTooLow;
-	var TransportClosed = (function (_super) {
-	    __extends(TransportClosed, _super);
-	    function TransportClosed() {
-	        _super.apply(this, arguments);
-	    }
-	    return TransportClosed;
-	}(Error));
-	exports.TransportClosed = TransportClosed;
-	var UnsupportedTransport = (function (_super) {
-	    __extends(UnsupportedTransport, _super);
-	    function UnsupportedTransport() {
-	        _super.apply(this, arguments);
-	    }
-	    return UnsupportedTransport;
-	}(Error));
-	exports.UnsupportedTransport = UnsupportedTransport;
-	var UnsupportedStrategy = (function (_super) {
-	    __extends(UnsupportedStrategy, _super);
-	    function UnsupportedStrategy() {
-	        _super.apply(this, arguments);
-	    }
-	    return UnsupportedStrategy;
-	}(Error));
-	exports.UnsupportedStrategy = UnsupportedStrategy;
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var assistant_to_the_transport_manager_1 = __webpack_require__(35);
-	var handshake_1 = __webpack_require__(36);
-	var pusher_authorizer_1 = __webpack_require__(41);
-	var timeline_sender_1 = __webpack_require__(42);
-	var presence_channel_1 = __webpack_require__(43);
-	var private_channel_1 = __webpack_require__(44);
-	var channel_1 = __webpack_require__(45);
-	var connection_manager_1 = __webpack_require__(47);
-	var xhr_1 = __webpack_require__(31);
-	var channels_1 = __webpack_require__(49);
-	var net_info_1 = __webpack_require__(48);
-	var ws_1 = __webpack_require__(22);
+	var assistant_to_the_transport_manager_1 = __webpack_require__(22);
+	var handshake_1 = __webpack_require__(23);
+	var pusher_authorizer_1 = __webpack_require__(28);
+	var timeline_sender_1 = __webpack_require__(29);
+	var presence_channel_1 = __webpack_require__(30);
+	var private_channel_1 = __webpack_require__(31);
+	var channel_1 = __webpack_require__(32);
+	var connection_manager_1 = __webpack_require__(35);
+	var xhr_1 = __webpack_require__(37);
+	var channels_1 = __webpack_require__(38);
+	var net_info_1 = __webpack_require__(36);
+	var ws_1 = __webpack_require__(39);
+	var jsonp_request_1 = __webpack_require__(40);
+	var script_request_1 = __webpack_require__(41);
 	var Factory = {
 	    createXHR: function () {
 	        if (xhr_1.default.getAPI()) {
@@ -2415,6 +1785,12 @@ var Pusher =
 	    },
 	    createAssistantToTheTransportManager: function (manager, transport, options) {
 	        return new assistant_to_the_transport_manager_1.default(manager, transport, options);
+	    },
+	    createJSONPRequest: function (url, data) {
+	        return new jsonp_request_1.default(url, data);
+	    },
+	    createScriptRequest: function (src) {
+	        return new script_request_1.default(src);
 	    }
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -2422,7 +1798,7 @@ var Pusher =
 
 
 /***/ },
-/* 35 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2507,14 +1883,14 @@ var Pusher =
 
 
 /***/ },
-/* 36 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(4);
-	var Protocol = __webpack_require__(37);
-	var connection_1 = __webpack_require__(40);
-	var handshake_results_1 = __webpack_require__(39);
+	var Protocol = __webpack_require__(24);
+	var connection_1 = __webpack_require__(27);
+	var handshake_results_1 = __webpack_require__(26);
 	/**
 	 * Handles Pusher protocol handshakes for transports.
 	 *
@@ -2589,12 +1965,12 @@ var Pusher =
 
 
 /***/ },
-/* 37 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var internal_events_1 = __webpack_require__(38);
-	var handshake_results_1 = __webpack_require__(39);
+	var internal_events_1 = __webpack_require__(25);
+	var handshake_results_1 = __webpack_require__(26);
 	/**
 	 * Provides functions for handling Pusher protocol-specific messages.
 	 */
@@ -2740,7 +2116,7 @@ var Pusher =
 
 
 /***/ },
-/* 38 */
+/* 25 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2754,7 +2130,7 @@ var Pusher =
 
 
 /***/ },
-/* 39 */
+/* 26 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2771,7 +2147,7 @@ var Pusher =
 
 
 /***/ },
-/* 40 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2782,7 +2158,7 @@ var Pusher =
 	};
 	var Collections = __webpack_require__(4);
 	var dispatcher_1 = __webpack_require__(14);
-	var Protocol = __webpack_require__(37);
+	var Protocol = __webpack_require__(24);
 	var logger_1 = __webpack_require__(16);
 	/**
 	 * Provides Pusher protocol interface for transports.
@@ -2929,7 +2305,7 @@ var Pusher =
 
 
 /***/ },
-/* 41 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2960,7 +2336,7 @@ var Pusher =
 
 
 /***/ },
-/* 42 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2984,7 +2360,7 @@ var Pusher =
 
 
 /***/ },
-/* 43 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2993,9 +2369,9 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var private_channel_1 = __webpack_require__(44);
+	var private_channel_1 = __webpack_require__(31);
 	var logger_1 = __webpack_require__(16);
-	var members_1 = __webpack_require__(46);
+	var members_1 = __webpack_require__(34);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
 	    /** Adds presence channel functionality to private channels.
@@ -3067,7 +2443,7 @@ var Pusher =
 
 
 /***/ },
-/* 44 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3076,8 +2452,8 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var factory_1 = __webpack_require__(34);
-	var channel_1 = __webpack_require__(45);
+	var factory_1 = __webpack_require__(21);
+	var channel_1 = __webpack_require__(32);
 	/** Extends public channels to provide private channel interface.
 	 *
 	 * @param {String} name
@@ -3104,7 +2480,7 @@ var Pusher =
 
 
 /***/ },
-/* 45 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3198,7 +2574,68 @@ var Pusher =
 
 
 /***/ },
-/* 46 */
+/* 33 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	/** Error classes used throughout the library. */
+	var BadEventName = (function (_super) {
+	    __extends(BadEventName, _super);
+	    function BadEventName() {
+	        _super.apply(this, arguments);
+	    }
+	    return BadEventName;
+	}(Error));
+	exports.BadEventName = BadEventName;
+	var RequestTimedOut = (function (_super) {
+	    __extends(RequestTimedOut, _super);
+	    function RequestTimedOut() {
+	        _super.apply(this, arguments);
+	    }
+	    return RequestTimedOut;
+	}(Error));
+	exports.RequestTimedOut = RequestTimedOut;
+	var TransportPriorityTooLow = (function (_super) {
+	    __extends(TransportPriorityTooLow, _super);
+	    function TransportPriorityTooLow() {
+	        _super.apply(this, arguments);
+	    }
+	    return TransportPriorityTooLow;
+	}(Error));
+	exports.TransportPriorityTooLow = TransportPriorityTooLow;
+	var TransportClosed = (function (_super) {
+	    __extends(TransportClosed, _super);
+	    function TransportClosed() {
+	        _super.apply(this, arguments);
+	    }
+	    return TransportClosed;
+	}(Error));
+	exports.TransportClosed = TransportClosed;
+	var UnsupportedTransport = (function (_super) {
+	    __extends(UnsupportedTransport, _super);
+	    function UnsupportedTransport() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedTransport;
+	}(Error));
+	exports.UnsupportedTransport = UnsupportedTransport;
+	var UnsupportedStrategy = (function (_super) {
+	    __extends(UnsupportedStrategy, _super);
+	    function UnsupportedStrategy() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedStrategy;
+	}(Error));
+	exports.UnsupportedStrategy = UnsupportedStrategy;
+
+
+/***/ },
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3277,7 +2714,7 @@ var Pusher =
 
 
 /***/ },
-/* 47 */
+/* 35 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3288,7 +2725,7 @@ var Pusher =
 	};
 	var dispatcher_1 = __webpack_require__(14);
 	var timers_1 = __webpack_require__(12);
-	var net_info_1 = __webpack_require__(48);
+	var net_info_1 = __webpack_require__(36);
 	var logger_1 = __webpack_require__(16);
 	var state_1 = __webpack_require__(17);
 	var Collections = __webpack_require__(4);
@@ -3639,7 +3076,7 @@ var Pusher =
 
 
 /***/ },
-/* 48 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3693,12 +3130,26 @@ var Pusher =
 
 
 /***/ },
-/* 49 */
+/* 37 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var XHR = {
+	    getAPI: function () {
+	        return window.XMLHttpRequest;
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = XHR;
+
+
+/***/ },
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(4);
-	var factory_1 = __webpack_require__(34);
+	var factory_1 = __webpack_require__(21);
 	/** Handles a channel map. */
 	var Channels = (function () {
 	    function Channels() {
@@ -3764,12 +3215,643 @@ var Pusher =
 
 
 /***/ },
+/* 39 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var WS = {
+	    getAPI: function () {
+	        return window.WebSocket || window.MozWebSocket;
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = WS;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(4);
+	var util_1 = __webpack_require__(11);
+	var factory_1 = __webpack_require__(21);
+	/** Sends data via JSONP.
+	 *
+	 * Data is a key-value map. Its values are JSON-encoded and then passed
+	 * through base64. Finally, keys and encoded values are appended to the query
+	 * string.
+	 *
+	 * The class itself does not guarantee raising errors on failures, as it's not
+	 * possible to support such feature on all browsers. Instead, JSONP endpoint
+	 * should call back in a way that's easy to distinguish from browser calls,
+	 * for example by passing a second argument to the receiver.
+	 *
+	 * @param {String} url
+	 * @param {Object} data key-value map of data to be submitted
+	 */
+	var JSONPRequest = (function () {
+	    function JSONPRequest(url, data) {
+	        this.url = url;
+	        this.data = data;
+	    }
+	    /** Sends the actual JSONP request.
+	     *
+	     * @param {ScriptReceiver} receiver
+	     */
+	    JSONPRequest.prototype.send = function (receiver) {
+	        if (this.request) {
+	            return;
+	        }
+	        var params = Collections.filterObject(this.data, function (value) {
+	            return value !== undefined;
+	        });
+	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1.default.method("join", "=")).join("&");
+	        var url = this.url + "/" + receiver.number + "?" + query;
+	        this.request = factory_1.default.createScriptRequest(url);
+	        this.request.send(receiver);
+	    };
+	    /** Cleans up the DOM remains of the JSONP request. */
+	    JSONPRequest.prototype.cleanup = function () {
+	        if (this.request) {
+	            this.request.cleanup();
+	        }
+	    };
+	    return JSONPRequest;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = JSONPRequest;
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports) {
+
+	"use strict";
+	/** Sends a generic HTTP GET request using a script tag.
+	 *
+	 * By constructing URL in a specific way, it can be used for loading
+	 * JavaScript resources or JSONP requests. It can notify about errors, but
+	 * only in certain environments. Please take care of monitoring the state of
+	 * the request yourself.
+	 *
+	 * @param {String} src
+	 */
+	var ScriptRequest = (function () {
+	    function ScriptRequest(src) {
+	        this.src = src;
+	    }
+	    ScriptRequest.prototype.send = function (receiver) {
+	        var self = this;
+	        var errorString = "Error loading " + self.src;
+	        self.script = document.createElement("script");
+	        self.script.id = receiver.id;
+	        self.script.src = self.src;
+	        self.script.type = "text/javascript";
+	        self.script.charset = "UTF-8";
+	        if (self.script.addEventListener) {
+	            self.script.onerror = function () {
+	                receiver.callback(errorString);
+	            };
+	            self.script.onload = function () {
+	                receiver.callback(null);
+	            };
+	        }
+	        else {
+	            self.script.onreadystatechange = function () {
+	                if (self.script.readyState === 'loaded' ||
+	                    self.script.readyState === 'complete') {
+	                    receiver.callback(null);
+	                }
+	            };
+	        }
+	        // Opera<11.6 hack for missing onerror callback
+	        if (self.script.async === undefined && document.attachEvent &&
+	            /opera/i.test(navigator.userAgent)) {
+	            self.errorScript = document.createElement("script");
+	            self.errorScript.id = receiver.id + "_error";
+	            self.errorScript.text = receiver.name + "('" + errorString + "');";
+	            self.script.async = self.errorScript.async = false;
+	        }
+	        else {
+	            self.script.async = true;
+	        }
+	        var head = document.getElementsByTagName('head')[0];
+	        head.insertBefore(self.script, head.firstChild);
+	        if (self.errorScript) {
+	            head.insertBefore(self.errorScript, self.script.nextSibling);
+	        }
+	    };
+	    /** Cleans up the DOM remains of the script request. */
+	    ScriptRequest.prototype.cleanup = function () {
+	        if (this.script) {
+	            this.script.onload = this.script.onerror = null;
+	            this.script.onreadystatechange = null;
+	        }
+	        if (this.script && this.script.parentNode) {
+	            this.script.parentNode.removeChild(this.script);
+	        }
+	        if (this.errorScript && this.errorScript.parentNode) {
+	            this.errorScript.parentNode.removeChild(this.errorScript);
+	        }
+	        this.script = null;
+	        this.errorScript = null;
+	    };
+	    return ScriptRequest;
+	}());
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = ScriptRequest;
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var http_request_1 = __webpack_require__(43);
+	var http_socket_1 = __webpack_require__(45);
+	var http_streaming_socket_1 = __webpack_require__(47);
+	var http_polling_socket_1 = __webpack_require__(48);
+	var http_xhr_request_1 = __webpack_require__(49);
+	var http_xdomain_request_1 = __webpack_require__(50);
+	var HTTP = {
+	    createStreamingSocket: function (url) {
+	        return this.createSocket(http_streaming_socket_1.default, url);
+	    },
+	    createPollingSocket: function (url) {
+	        return this.createSocket(http_polling_socket_1.default, url);
+	    },
+	    createSocket: function (hooks, url) {
+	        return new http_socket_1.default(hooks, url);
+	    },
+	    createXHR: function (method, url) {
+	        return this.createRequest(http_xhr_request_1.default, method, url);
+	    },
+	    createXDR: function (method, url) {
+	        return this.createRequest(http_xdomain_request_1.default, method, url);
+	    },
+	    createRequest: function (hooks, method, url) {
+	        return new http_request_1.default(hooks, method, url);
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HTTP;
+
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var App = __webpack_require__(44);
+	var dispatcher_1 = __webpack_require__(14);
+	var MAX_BUFFER_LENGTH = 256 * 1024;
+	var HTTPRequest = (function (_super) {
+	    __extends(HTTPRequest, _super);
+	    function HTTPRequest(hooks, method, url) {
+	        _super.call(this);
+	        this.hooks = hooks;
+	        this.method = method;
+	        this.url = url;
+	    }
+	    HTTPRequest.prototype.start = function (payload) {
+	        var self = this;
+	        self.position = 0;
+	        self.xhr = self.hooks.getRequest(self);
+	        self.unloader = function () {
+	            self.close();
+	        };
+	        App.addUnloadListener(self.unloader);
+	        self.xhr.open(self.method, self.url, true);
+	        self.xhr.send(payload);
+	    };
+	    HTTPRequest.prototype.close = function () {
+	        if (this.unloader) {
+	            App.removeUnloadListener(this.unloader);
+	            this.unloader = null;
+	        }
+	        if (this.xhr) {
+	            this.hooks.abortRequest(this.xhr);
+	            this.xhr = null;
+	        }
+	    };
+	    HTTPRequest.prototype.onChunk = function (status, data) {
+	        while (true) {
+	            var chunk = this.advanceBuffer(data);
+	            if (chunk) {
+	                this.emit("chunk", { status: status, data: chunk });
+	            }
+	            else {
+	                break;
+	            }
+	        }
+	        if (this.isBufferTooLong(data)) {
+	            this.emit("buffer_too_long");
+	        }
+	    };
+	    HTTPRequest.prototype.advanceBuffer = function (buffer) {
+	        var unreadData = buffer.slice(this.position);
+	        var endOfLinePosition = unreadData.indexOf("\n");
+	        if (endOfLinePosition !== -1) {
+	            this.position += endOfLinePosition + 1;
+	            return unreadData.slice(0, endOfLinePosition);
+	        }
+	        else {
+	            // chunk is not finished yet, don't move the buffer pointer
+	            return null;
+	        }
+	    };
+	    HTTPRequest.prototype.isBufferTooLong = function (buffer) {
+	        return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
+	    };
+	    return HTTPRequest;
+	}(dispatcher_1.default));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HTTPRequest;
+
+
+/***/ },
+/* 44 */
+/***/ function(module, exports) {
+
+	"use strict";
+	exports.addUnloadListener = function (listener) {
+	    if (window.addEventListener !== undefined) {
+	        window.addEventListener("unload", listener, false);
+	    }
+	    else if (window.attachEvent !== undefined) {
+	        window.attachEvent("onunload", listener);
+	    }
+	};
+	exports.removeUnloadListener = function (listener) {
+	    if (window.addEventListener !== undefined) {
+	        window.removeEventListener("unload", listener, false);
+	    }
+	    else if (window.detachEvent !== undefined) {
+	        window.detachEvent("onunload", listener);
+	    }
+	};
+
+
+/***/ },
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var state_1 = __webpack_require__(46);
+	var util_1 = __webpack_require__(11);
+	var http_1 = __webpack_require__(42);
+	var runtime_1 = __webpack_require__(1);
+	var autoIncrement = 1;
+	var HTTPSocket = (function () {
+	    function HTTPSocket(hooks, url) {
+	        this.hooks = hooks;
+	        this.session = randomNumber(1000) + "/" + randomString(8);
+	        this.location = getLocation(url);
+	        this.readyState = state_1.default.CONNECTING;
+	        this.openStream();
+	    }
+	    HTTPSocket.prototype.send = function (payload) {
+	        return this.sendRaw(JSON.stringify([payload]));
+	    };
+	    HTTPSocket.prototype.ping = function () {
+	        this.hooks.sendHeartbeat(this);
+	    };
+	    HTTPSocket.prototype.close = function (code, reason) {
+	        this.onClose(code, reason, true);
+	    };
+	    /** For internal use only */
+	    HTTPSocket.prototype.sendRaw = function (payload) {
+	        if (this.readyState === state_1.default.OPEN) {
+	            try {
+	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+	                return true;
+	            }
+	            catch (e) {
+	                return false;
+	            }
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    /** For internal use only */
+	    HTTPSocket.prototype.reconnect = function () {
+	        this.closeStream();
+	        this.openStream();
+	    };
+	    ;
+	    /** For internal use only */
+	    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
+	        this.closeStream();
+	        this.readyState = state_1.default.CLOSED;
+	        if (this.onclose) {
+	            this.onclose({
+	                code: code,
+	                reason: reason,
+	                wasClean: wasClean
+	            });
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onChunk = function (chunk) {
+	        if (chunk.status !== 200) {
+	            return;
+	        }
+	        if (this.readyState === state_1.default.OPEN) {
+	            this.onActivity();
+	        }
+	        var payload;
+	        var type = chunk.data.slice(0, 1);
+	        switch (type) {
+	            case 'o':
+	                payload = JSON.parse(chunk.data.slice(1) || '{}');
+	                this.onOpen(payload);
+	                break;
+	            case 'a':
+	                payload = JSON.parse(chunk.data.slice(1) || '[]');
+	                for (var i = 0; i < payload.length; i++) {
+	                    this.onEvent(payload[i]);
+	                }
+	                break;
+	            case 'm':
+	                payload = JSON.parse(chunk.data.slice(1) || 'null');
+	                this.onEvent(payload);
+	                break;
+	            case 'h':
+	                this.hooks.onHeartbeat(this);
+	                break;
+	            case 'c':
+	                payload = JSON.parse(chunk.data.slice(1) || '[]');
+	                this.onClose(payload[0], payload[1], true);
+	                break;
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onOpen = function (options) {
+	        if (this.readyState === state_1.default.CONNECTING) {
+	            if (options && options.hostname) {
+	                this.location.base = replaceHost(this.location.base, options.hostname);
+	            }
+	            this.readyState = state_1.default.OPEN;
+	            if (this.onopen) {
+	                this.onopen();
+	            }
+	        }
+	        else {
+	            this.onClose(1006, "Server lost session", true);
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onEvent = function (event) {
+	        if (this.readyState === state_1.default.OPEN && this.onmessage) {
+	            this.onmessage({ data: event });
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onActivity = function () {
+	        if (this.onactivity) {
+	            this.onactivity();
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.onError = function (error) {
+	        if (this.onerror) {
+	            this.onerror(error);
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.openStream = function () {
+	        var self = this;
+	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
+	        self.stream.bind("chunk", function (chunk) {
+	            self.onChunk(chunk);
+	        });
+	        self.stream.bind("finished", function (status) {
+	            self.hooks.onFinished(self, status);
+	        });
+	        self.stream.bind("buffer_too_long", function () {
+	            self.reconnect();
+	        });
+	        try {
+	            self.stream.start();
+	        }
+	        catch (error) {
+	            util_1.default.defer(function () {
+	                self.onError(error);
+	                self.onClose(1006, "Could not start streaming", false);
+	            });
+	        }
+	    };
+	    /** @private */
+	    HTTPSocket.prototype.closeStream = function () {
+	        if (this.stream) {
+	            this.stream.unbind_all();
+	            this.stream.close();
+	            this.stream = null;
+	        }
+	    };
+	    return HTTPSocket;
+	}());
+	function getLocation(url) {
+	    var parts = /([^\?]*)\/*(\??.*)/.exec(url);
+	    return {
+	        base: parts[1],
+	        queryString: parts[2]
+	    };
+	}
+	function getSendURL(url, session) {
+	    return url.base + "/" + session + "/xhr_send";
+	}
+	function getUniqueURL(url) {
+	    var separator = (url.indexOf('?') === -1) ? "?" : "&";
+	    return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
+	}
+	function replaceHost(url, hostname) {
+	    var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
+	    return urlParts[1] + hostname + urlParts[3];
+	}
+	function randomNumber(max) {
+	    return Math.floor(Math.random() * max);
+	}
+	function randomString(length) {
+	    var result = [];
+	    for (var i = 0; i < length; i++) {
+	        result.push(randomNumber(32).toString(32));
+	    }
+	    return result.join('');
+	}
+	function createRequest(method, url) {
+	    if (runtime_1.default.isXHRSupported()) {
+	        return http_1.default.createXHR(method, url);
+	    }
+	    else if (runtime_1.default.isXDRSupported(url.indexOf("https:") === 0)) {
+	        return http_1.default.createXDR(method, url);
+	    }
+	    else {
+	        throw "Cross-origin HTTP requests are not supported";
+	    }
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = HTTPSocket;
+
+
+/***/ },
+/* 46 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var State;
+	(function (State) {
+	    State[State["CONNECTING"] = 0] = "CONNECTING";
+	    State[State["OPEN"] = 1] = "OPEN";
+	    State[State["CLOSED"] = 3] = "CLOSED";
+	})(State || (State = {}));
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = State;
+
+
+/***/ },
+/* 47 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var hooks = {
+	    getReceiveURL: function (url, session) {
+	        return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+	    },
+	    onHeartbeat: function (socket) {
+	        socket.sendRaw("[]");
+	    },
+	    sendHeartbeat: function (socket) {
+	        socket.sendRaw("[]");
+	    },
+	    onFinished: function (socket, status) {
+	        socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = hooks;
+
+
+/***/ },
+/* 48 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var hooks = {
+	    getReceiveURL: function (url, session) {
+	        return url.base + "/" + session + "/xhr" + url.queryString;
+	    },
+	    onHeartbeat: function () {
+	        // next HTTP request will reset server's activity timer
+	    },
+	    sendHeartbeat: function (socket) {
+	        socket.sendRaw("[]");
+	    },
+	    onFinished: function (socket, status) {
+	        if (status === 200) {
+	            socket.reconnect();
+	        }
+	        else {
+	            socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+	        }
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = hooks;
+
+
+/***/ },
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var xhr_1 = __webpack_require__(37);
+	var hooks = {
+	    getRequest: function (socket) {
+	        var Constructor = xhr_1.default.getAPI();
+	        var xhr = new Constructor();
+	        xhr.onreadystatechange = xhr.onprogress = function () {
+	            switch (xhr.readyState) {
+	                case 3:
+	                    if (xhr.responseText && xhr.responseText.length > 0) {
+	                        socket.onChunk(xhr.status, xhr.responseText);
+	                    }
+	                    break;
+	                case 4:
+	                    // this happens only on errors, never after calling close
+	                    if (xhr.responseText && xhr.responseText.length > 0) {
+	                        socket.onChunk(xhr.status, xhr.responseText);
+	                    }
+	                    socket.emit("finished", xhr.status);
+	                    socket.close();
+	                    break;
+	            }
+	        };
+	        return xhr;
+	    },
+	    abortRequest: function (xhr) {
+	        xhr.onreadystatechange = null;
+	        xhr.abort();
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = hooks;
+
+
+/***/ },
 /* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var Errors = __webpack_require__(33);
+	var hooks = {
+	    getRequest: function (socket) {
+	        var xdr = new window.XDomainRequest();
+	        xdr.ontimeout = function () {
+	            socket.emit("error", new Errors.RequestTimedOut());
+	            socket.close();
+	        };
+	        xdr.onerror = function (e) {
+	            socket.emit("error", e);
+	            socket.close();
+	        };
+	        xdr.onprogress = function () {
+	            if (xdr.responseText && xdr.responseText.length > 0) {
+	                socket.onChunk(200, xdr.responseText);
+	            }
+	        };
+	        xdr.onload = function () {
+	            if (xdr.responseText && xdr.responseText.length > 0) {
+	                socket.onChunk(200, xdr.responseText);
+	            }
+	            socket.emit("finished", 200);
+	            socket.close();
+	        };
+	        return xdr;
+	    },
+	    abortRequest: function (xdr) {
+	        xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
+	        xdr.abort();
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = hooks;
+
+
+/***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
 	var logger_1 = __webpack_require__(16);
-	var factory_1 = __webpack_require__(34);
+	var factory_1 = __webpack_require__(21);
 	var ajax = function (context, socketId, callback) {
 	    var self = this, xhr;
 	    xhr = factory_1.default.createXHR();
@@ -3816,7 +3898,7 @@ var Pusher =
 	    context.auth_callbacks[callbackName] = function (data) {
 	        callback(false, data);
 	    };
-	    var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
+	    var callback_name = "Pusher.Runtime.auth_callbacks['" + callbackName + "']";
 	    script.src = this.options.authEndpoint +
 	        '?callback=' +
 	        encodeURIComponent(callback_name) +
@@ -3829,20 +3911,20 @@ var Pusher =
 
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var jsonp_request_1 = __webpack_require__(52);
 	var script_receiver_factory_1 = __webpack_require__(19);
 	var logger_1 = __webpack_require__(16);
 	var Collections = __webpack_require__(4);
 	var util_1 = __webpack_require__(11);
+	var factory_1 = __webpack_require__(21);
 	var jsonp = function (sender, encrypted) {
 	    return function (data, callback) {
 	        var scheme = "http" + (encrypted ? "s" : "") + "://";
 	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
-	        var request = new jsonp_request_1.default(url, data);
+	        var request = factory_1.default.createJSONPRequest(url, data);
 	        var receiver = script_receiver_factory_1.ScriptReceivers.create(function (error, result) {
 	            script_receiver_factory_1.ScriptReceivers.remove(receiver);
 	            request.cleanup();
@@ -3877,61 +3959,6 @@ var Pusher =
 	    };
 	};
 	exports.xhr = xhr;
-
-
-/***/ },
-/* 52 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var script_request_1 = __webpack_require__(21);
-	var Collections = __webpack_require__(4);
-	var util_1 = __webpack_require__(11);
-	/** Sends data via JSONP.
-	 *
-	 * Data is a key-value map. Its values are JSON-encoded and then passed
-	 * through base64. Finally, keys and encoded values are appended to the query
-	 * string.
-	 *
-	 * The class itself does not guarantee raising errors on failures, as it's not
-	 * possible to support such feature on all browsers. Instead, JSONP endpoint
-	 * should call back in a way that's easy to distinguish from browser calls,
-	 * for example by passing a second argument to the receiver.
-	 *
-	 * @param {String} url
-	 * @param {Object} data key-value map of data to be submitted
-	 */
-	var JSONPRequest = (function () {
-	    function JSONPRequest(url, data) {
-	        this.url = url;
-	        this.data = data;
-	    }
-	    /** Sends the actual JSONP request.
-	     *
-	     * @param {ScriptReceiver} receiver
-	     */
-	    JSONPRequest.prototype.send = function (receiver) {
-	        if (this.request) {
-	            return;
-	        }
-	        var params = Collections.filterObject(this.data, function (value) {
-	            return value !== undefined;
-	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1.default.method("join", "=")).join("&");
-	        var url = this.url + "/" + receiver.number + "?" + query;
-	        this.request = new script_request_1.default(url);
-	        this.request.send(receiver);
-	    };
-	    /** Cleans up the DOM remains of the JSONP request. */
-	    JSONPRequest.prototype.cleanup = function () {
-	        if (this.request) {
-	            this.request.cleanup();
-	        }
-	    };
-	    return JSONPRequest;
-	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = JSONPRequest;
 
 
 /***/ },
@@ -4069,7 +4096,7 @@ var Pusher =
 	"use strict";
 	var Collections = __webpack_require__(4);
 	var util_1 = __webpack_require__(11);
-	var Transports = __webpack_require__(6);
+	var transports_1 = __webpack_require__(6);
 	var transport_manager_1 = __webpack_require__(57);
 	var Errors = __webpack_require__(33);
 	var transport_strategy_1 = __webpack_require__(58);
@@ -4090,12 +4117,12 @@ var Pusher =
 	    return evaluate(scheme, context)[1].strategy;
 	};
 	var transports = {
-	    ws: Transports.WSTransport,
-	    sockjs: Transports.SockJSTransport,
-	    xhr_streaming: Transports.XHRStreamingTransport,
-	    xdr_streaming: Transports.XDRStreamingTransport,
-	    xhr_polling: Transports.XHRPollingTransport,
-	    xdr_polling: Transports.XDRPollingTransport
+	    ws: transports_1.default.WSTransport,
+	    sockjs: transports_1.default.SockJSTransport,
+	    xhr_streaming: transports_1.default.XHRStreamingTransport,
+	    xdr_streaming: transports_1.default.XDRStreamingTransport,
+	    xhr_polling: transports_1.default.XHRPollingTransport,
+	    xdr_polling: transports_1.default.XDRPollingTransport
 	};
 	var UnsupportedStrategy = {
 	    isSupported: function () {
@@ -4253,7 +4280,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var factory_1 = __webpack_require__(34);
+	var factory_1 = __webpack_require__(21);
 	/** Keeps track of the number of lives left for a transport.
 	 *
 	 * In the beginning of a session, transports may be assigned a number of
@@ -4301,7 +4328,7 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var factory_1 = __webpack_require__(34);
+	var factory_1 = __webpack_require__(21);
 	var util_1 = __webpack_require__(11);
 	var Errors = __webpack_require__(33);
 	/** Provides a strategy interface for transports.
@@ -4841,23 +4868,23 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Defaults = __webpack_require__(8);
+	var defaults_1 = __webpack_require__(8);
 	exports.getGlobalConfig = function () {
 	    return {
-	        wsHost: Defaults.host,
-	        wsPort: Defaults.ws_port,
-	        wssPort: Defaults.wss_port,
-	        httpHost: Defaults.sockjs_host,
-	        httpPort: Defaults.sockjs_http_port,
-	        httpsPort: Defaults.sockjs_https_port,
-	        httpPath: Defaults.sockjs_path,
-	        statsHost: Defaults.stats_host,
-	        authEndpoint: Defaults.channel_auth_endpoint,
-	        authTransport: Defaults.channel_auth_transport,
+	        wsHost: defaults_1.default.host,
+	        wsPort: defaults_1.default.ws_port,
+	        wssPort: defaults_1.default.wss_port,
+	        httpHost: defaults_1.default.sockjs_host,
+	        httpPort: defaults_1.default.sockjs_http_port,
+	        httpsPort: defaults_1.default.sockjs_https_port,
+	        httpPath: defaults_1.default.sockjs_path,
+	        statsHost: defaults_1.default.stats_host,
+	        authEndpoint: defaults_1.default.channel_auth_endpoint,
+	        authTransport: defaults_1.default.channel_auth_transport,
 	        // TODO make this consistent with other options in next major version
-	        activity_timeout: Defaults.activity_timeout,
-	        pong_timeout: Defaults.pong_timeout,
-	        unavailable_timeout: Defaults.unavailable_timeout
+	        activity_timeout: defaults_1.default.activity_timeout,
+	        pong_timeout: defaults_1.default.pong_timeout,
+	        unavailable_timeout: defaults_1.default.unavailable_timeout
 	    };
 	};
 	exports.getClusterConfig = function (clusterName) {

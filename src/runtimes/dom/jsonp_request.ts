@@ -40,12 +40,12 @@ import Factory from '../../utils/factory';
      var params = Collections.filterObject(this.data, function(value) {
        return value !== undefined;
      });
+
      var query = Collections.map(
        Collections.flatten(Collections.encodeParamsObject(params)),
        Util.method("join", "=")
      ).join("&");
      var url = this.url + "/" + receiver.number + "?" + query;
-
      this.request = Factory.createScriptRequest(url);
      this.request.send(receiver);
    }

@@ -1,4 +1,5 @@
 import Runtime from "./runtimes/runtime";
+import AbstractRuntime from "./runtimes/abstract_runtime";
 import Util from "./util";
 import * as Collections from './utils/collections';
 import Channels from './channels/channels';
@@ -10,7 +11,7 @@ import TimelineLevel from './timeline/level';
 import * as StrategyBuilder from './strategies/strategy_builder';
 import ConnectionManager from './connection/connection_manager';
 import {PeriodicTimer} from './utils/timers';
-import * as Defaults from './defaults';
+import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import ConnectionState from './connection/state';
@@ -21,6 +22,10 @@ export default class Pusher {
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
   static isReady : boolean = false;
+  // for jsonp
+  static Runtime : any = Runtime;
+  static ScriptReceivers : any  = Runtime.ScriptReceivers;
+  static DependenciesReceivers : any = Runtime.DependenciesReceivers;
 
   static ready() {
     Pusher.isReady = true;

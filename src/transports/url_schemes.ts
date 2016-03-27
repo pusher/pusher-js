@@ -1,4 +1,4 @@
-import {PROTOCOL, VERSION} from "../defaults.ts";
+import Defaults from "../defaults.ts";
 import URLScheme from "./url_scheme.ts";
 
 function getGenericURL(baseScheme : string, params : any, path : string): string {
@@ -10,9 +10,9 @@ function getGenericURL(baseScheme : string, params : any, path : string): string
 function getGenericPath(key : string, queryString?:string) : string {
   var path = "/app/" + key;
   var query =
-    "?protocol=" + PROTOCOL +
+    "?protocol=" + Defaults.PROTOCOL +
     "&client=js" +
-    "&version=" + VERSION +
+    "&version=" + Defaults.VERSION +
     (queryString ? ("&" + queryString) : "");
   return path + query;
 }

@@ -1,6 +1,6 @@
+var Integration = require('../../../helpers/integration');
 var Mocks = require('../../../helpers/mocks');
 var Runtime = require('runtimes/runtime').default;
-var Integration = require('../../../helpers/integration');
 var Factory = require('utils/factory').default;
 var DependencyLoader = require('runtimes/dom/dependency_loader').default;
 

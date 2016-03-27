@@ -5,6 +5,7 @@ import TimelineSender from '../timeline/timeline_sender'
 import * as Collections from '../utils/collections';
 import Util from '../util';
 import Factory from '../utils/factory';
+import Runtime from '../runtimes/runtime';
 
 interface TimelineTransport {
   (data : any, callback : Function) : void;
@@ -16,7 +17,7 @@ var jsonp = function(sender : TimelineSender, encrypted : boolean): TimelineTran
     var url = scheme + (sender.host || sender.options.host) + sender.options.path;
     var request = Factory.createJSONPRequest(url, data);
 
-    var receiver = ScriptReceivers.create(function(error, result){
+    var receiver = Runtime.ScriptReceivers.create(function(error, result){
       ScriptReceivers.remove(receiver);
       request.cleanup();
 

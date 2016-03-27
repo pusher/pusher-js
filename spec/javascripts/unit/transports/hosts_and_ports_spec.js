@@ -1,7 +1,7 @@
 var Pusher = require('pusher').default;
 var NetInfo  = require('pusher-websocket-iso-externals-web/net_info');
 var Mocks = require('../../helpers/mocks');
-var version = require('defaults').VERSION;
+var version = require('defaults').default.VERSION;
 var Factory  = require('utils/factory').default;
 var Runtime = require('runtimes/runtime').default;
 
@@ -31,7 +31,7 @@ describe("Host/Port Configuration", function() {
 
       spyOn(Factory, 'createWebSocket').andReturn(Mocks.getTransport());
 
-      Transports = require('transports/transports');
+      Transports = require('transports/transports').default;
 
       spyOn(Transports.WSTransport, "isSupported").andReturn(true);
       spyOn(Transports.XDRStreamingTransport, "isSupported").andReturn(false);

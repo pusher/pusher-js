@@ -13,6 +13,8 @@ import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
 import Channels from "../channels/channels";
 import { NetInfo } from "../node_modules/pusher-websocket-iso-externals-web/net_info";
+import JSONPRequest from '../runtimes/dom/jsonp_request';
+import ScriptRequest from '../runtimes/dom/script_request';
 declare var Factory: {
     createXHR(): Ajax;
     createXMLHttpRequest(): Ajax;
@@ -28,5 +30,7 @@ declare var Factory: {
     getNetwork(): NetInfo;
     createWebSocket(url: string): any;
     createAssistantToTheTransportManager(manager: TransportManager, transport: Transport, options: any): AssistantToTheTransportManager;
+    createJSONPRequest(url: string, data: any): JSONPRequest;
+    createScriptRequest(src: string): ScriptRequest;
 };
 export default Factory;

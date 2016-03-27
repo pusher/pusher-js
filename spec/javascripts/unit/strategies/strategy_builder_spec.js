@@ -7,7 +7,7 @@ var FirstConnectedStrategy = require('strategies/first_connected_strategy').defa
 var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy').default;
 var IfStrategy = require('strategies/if_strategy').default;
 var Errors = require('errors');
-var Transports = require('transports/transports');
+var Transports = require('transports/transports').default;
 var XHRStreamingTransport = Transports.XHRStreamingTransport;
 var WSTransport = Transports.WSTransport;
 

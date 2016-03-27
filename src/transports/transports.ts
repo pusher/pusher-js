@@ -14,7 +14,7 @@ import {Dependencies} from '../runtimes/dom/dependencies';
  * Uses native WebSocket implementation, including MozWebSocket supported by
  * earlier Firefox versions.
  */
-export var WSTransport = new Transport(<TransportHooks> {
+var WSTransport = new Transport(<TransportHooks> {
   urls: URLSchemes.ws,
   handlesActivityChecks: false,
   supportsPing: false,
@@ -30,7 +30,7 @@ export var WSTransport = new Transport(<TransportHooks> {
   }
 });
 
-export var SockJSTransport = new Transport(<TransportHooks>{
+var SockJSTransport = new Transport(<TransportHooks>{
   file: "sockjs",
   urls: URLSchemes.sockjs,
   handlesActivityChecks: true,
@@ -94,18 +94,29 @@ var xdrConfiguration = {
 };
 
 /** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
-export var XHRStreamingTransport = new Transport(
+var XHRStreamingTransport = new Transport(
   <TransportHooks> Collections.extend({}, streamingConfiguration, xhrConfiguration)
 );
 /** HTTP streaming transport using XDomainRequest (IE 8,9). */
-export var XDRStreamingTransport = new Transport(
+var XDRStreamingTransport = new Transport(
   <TransportHooks> Collections.extend({}, streamingConfiguration, xdrConfiguration)
 );
 /** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
-export var XHRPollingTransport = new Transport(
+var XHRPollingTransport = new Transport(
   <TransportHooks> Collections.extend({}, pollingConfiguration, xhrConfiguration)
 );
 /** HTTP long-polling transport using XDomainRequest (IE 8,9). */
-export var XDRPollingTransport = new Transport(
+var XDRPollingTransport = new Transport(
   <TransportHooks> Collections.extend({}, pollingConfiguration, xdrConfiguration)
 );
+
+var Transports = {
+  WSTransport,
+  SockJSTransport,
+  XHRStreamingTransport,
+  XDRStreamingTransport,
+  XHRPollingTransport,
+  XDRPollingTransport
+}
+
+export default Transports;

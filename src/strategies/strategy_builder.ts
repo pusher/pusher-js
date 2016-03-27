@@ -1,6 +1,6 @@
 import * as Collections from "../utils/collections";
 import Util from "../util";
-import * as Transports from "../transports/transports";
+import Transports from "../transports/transports";
 import TransportManager from '../transports/transport_manager';
 import * as Errors from '../errors';
 import Strategy from './strategy';

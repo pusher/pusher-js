@@ -1,9 +1,16 @@
-var Integration = require("../helpers/integration");
+var Pusher = require('pusher_integration').default;
+window.Pusher = Pusher;
 
-var Pusher = require("pusher");
-var transports = require("transports/transports");
-var util = require("util");
-var Timer = require("utils/timers").Timer;
+var Integration = require("../helpers/integration");
+var DependencyLoader = require('runtimes/dom/dependency_loader').default;
+var transports = require("transports/transports").default;
+var util = require("util").default;
+var Timer = require("utils/timers").OneOffTimer;
+var DependenciesReceivers = require('runtimes/dom/dependencies').DependenciesReceivers;
+var Dependencies = require('runtimes/dom/dependencies').Dependencies;
+var Collections = require('utils/collections');
+var Defaults = require('defaults').default;
+var Runtime = require('runtimes/runtime').default;
 
 Integration.describe("Pusher", function() {
   // Integration tests in Jasmine need to have setup and teardown phases as
@@ -13,8 +20,16 @@ Integration.describe("Pusher", function() {
   // Ideally, we'd have a separate connection per spec, but this introduces
   // significant delays and triggers security mechanisms in some browsers.
 
+  function canRunTwoConnections(transport, encrypted) {
+    if (transport !== "sockjs") {
+      return true;
+    }
+    return !/(MSIE [67])|(Version\/(4|5\.0).*Safari)/.test(navigator.userAgent);
+  }
+
   var TRANSPORTS = {
     "ws": transports.WSTransport,
+    "sockjs": transports.SockJSTransport,
     "xhr_streaming": transports.XHRStreamingTransport,
     "xhr_polling": transports.XHRPollingTransport,
     "xdr_streaming": transports.XDRStreamingTransport,
@@ -49,7 +64,7 @@ Integration.describe("Pusher", function() {
           received = message;
         });
         Integration.sendAPIMessage({
-          url: Integration.API_URL + "/send",
+          url: Integration.API_URL + "/v2/send",
           channel: channelName,
           event: eventName,
           data: data
@@ -84,7 +99,7 @@ Integration.describe("Pusher", function() {
         });
         pusher.unsubscribe(channelName);
         Integration.sendAPIMessage({
-          url: Integration.API_URL + "/send",
+          url: Integration.API_URL + "/v2/send",
           channel: channelName,
           event: eventName,
           data: {}
@@ -407,26 +422,31 @@ Integration.describe("Pusher", function() {
     describe("with " + (transport ? transport + ", " : "") + "encrypted=" + encrypted, function() {
       var pusher1, pusher2;
 
+      beforeEach(function() {
+        Collections.objectApply(TRANSPORTS, function(t, name) {
+          spyOn(t, "isSupported").andReturn(false);
+        });
+        TRANSPORTS[transport].isSupported.andReturn(true);
+      });
+
       describe("setup", function() {
         it("should open connections", function() {
           pusher1 = new Pusher("7324d55a5eeb8f554761", {
-            enabledTransports: [transport],
             encrypted: encrypted,
-            authEndpoint: Integration.API_URL + "/auth",
             disableStats: true
           });
-          pusher2 = new Pusher("7324d55a5eeb8f554761", {
-            enabledTransports: [transport],
-            encrypted: encrypted,
-            authEndpoint: Integration.API_URL + "/auth",
-            disableStats: true
-          });
+          if (canRunTwoConnections(transport, encrypted)) {
+            pusher2 = new Pusher("7324d55a5eeb8f554761", {
+              encrypted: encrypted,
+              disableStats: true
+            });
+            waitsFor(function() {
+              return pusher2.connection.state === "connected";
+            }, "second connection to be established", 20000);
+          }
           waitsFor(function() {
             return pusher1.connection.state === "connected";
           }, "first connection to be established", 20000);
-          waitsFor(function() {
-            return pusher2.connection.state === "connected";
-          }, "second connection to be established", 20000);
         });
 
       });
@@ -444,43 +464,74 @@ Integration.describe("Pusher", function() {
         buildPublicChannelTests(
           function() { return pusher1; }
         );
-        buildClientEventsTests(
-          function() { return pusher1; },
-          function() { return pusher2; },
-          "private-"
-        );
+        if (canRunTwoConnections(transport, encrypted)) {
+          buildClientEventsTests(
+            function() { return pusher1; },
+            function() { return pusher2; },
+            "private-"
+          );
+        }
       });
 
       describe("with a presence channel", function() {
         buildPublicChannelTests(
           function() { return pusher1; }
         );
-        buildClientEventsTests(
-          function() { return pusher1; },
-          function() { return pusher2; },
-          "presence-"
-        );
-        buildPresenceChannelTests(
-          function() { return pusher1; },
-          function() { return pusher2; }
-        );
+        if (canRunTwoConnections(transport, encrypted)) {
+          buildClientEventsTests(
+            function() { return pusher1; },
+            function() { return pusher2; },
+            "presence-"
+          );
+          buildPresenceChannelTests(
+            function() { return pusher1; },
+            function() { return pusher2; }
+          );
+        }
       });
 
       describe("teardown", function() {
+        if (canRunTwoConnections(transport, encrypted)) {
+          it("should disconnect second connection", function() {
+            pusher2.disconnect();
+          });
+        }
+
         it("should disconnect first connection", function() {
           pusher1.disconnect();
-        });
-        it("should disconnect second connection", function() {
-          pusher2.disconnect();
         });
       });
     });
   }
 
+  var _VERSION;
+  var _channel_auth_transport;
+  var _channel_auth_endpoint;
+  var _Dependencies;
+
+  it("should prepare the global config", function() {
+    // TODO fix how versions work in unit tests
+    _VERSION = Defaults.VERSION;
+    _channel_auth_transport = Defaults.channel_auth_transport;
+    _channel_auth_endpoint = Defaults.channel_auth_endpoint;
+    _Dependencies = Dependencies;
+
+    Defaults.VERSION = "8.8.8";
+    Defaults.channel_auth_transport = 'jsonp';
+    Defaults.channel_auth_endpoint = Integration.API_URL + "/auth";
+    Dependencies = new DependencyLoader({
+      cdn_http: Integration.JS_HOST,
+      cdn_https: Integration.JS_HOST,
+      version: Defaults.VERSION,
+      suffix: "",
+      receivers: DependenciesReceivers
+    });
+  });
+
   buildIntegrationTests("ws", false);
   buildIntegrationTests("ws", true);
 
-  if (util.isXHRSupported()) {
+  if (Runtime.isXHRSupported()) {
     // CORS-compatible browsers
     if (!/Android 2\./i.test(navigator.userAgent)) {
       // Android 2.x does a lot of buffering, which kills streaming
@@ -489,12 +540,24 @@ Integration.describe("Pusher", function() {
     }
     buildIntegrationTests("xhr_polling", false);
     buildIntegrationTests("xhr_polling", true);
-  } else if (util.isXDRSupported(false)) {
+  } else if (Runtime.isXDRSupported(false)) {
     buildIntegrationTests("xdr_streaming", false);
     buildIntegrationTests("xdr_streaming", true);
     buildIntegrationTests("xdr_polling", false);
     buildIntegrationTests("xdr_polling", true);
+    // IE can fall back to SockJS if protocols don't match
+    // No SockJS encrypted tests due to the way JS files are served
+    buildIntegrationTests("sockjs", false);
   } else {
-    throw new Error("this environment is not supported");
+    // Browsers using SockJS
+    buildIntegrationTests("sockjs", false);
+    buildIntegrationTests("sockjs", true);
   }
+
+  it("should restore the global config", function() {
+    Dependencies = _Dependencies;
+    Defaults.channel_auth_endpoint = _channel_auth_endpoint;
+    Defaults.channel_auth_transport = _channel_auth_transport;
+    Defaults.VERSION = _VERSION;
+  });
 });

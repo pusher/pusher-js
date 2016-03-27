@@ -9,6 +9,10 @@ declare abstract class Runtime {
     abstract isSockJSSupported(): boolean;
     abstract getDocument(): any;
     abstract getGlobal(): any;
+    nextAuthCallbackID: number;
+    auth_callbacks: any;
+    ScriptReceivers: any;
+    DependenciesReceivers: any;
     getLocalStorage(): any;
     getClientFeatures(): any[];
     getAuthorizers(): AuthTransports;

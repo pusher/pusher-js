@@ -2,6 +2,7 @@ import Logger from './logger';
 import AbstractRuntime from './runtimes/abstract_runtime';
 import Browser from './runtimes/browser';
 import Factory from './utils/factory';
+import Pusher from './pusher';
 
 interface AuthTransport {
   (context : AbstractRuntime, socketId : string, callback : Function) : void
@@ -64,7 +65,7 @@ var jsonp : AuthTransport = function(context : Browser, socketId, callback){
     callback(false, data);
   };
 
-  var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
+  var callback_name = "Pusher.Runtime.auth_callbacks['" + callbackName + "']";
   script.src = this.options.authEndpoint +
     '?callback=' +
     encodeURIComponent(callback_name) +

@@ -1,9 +1,9 @@
 import {ScriptReceiverFactory} from './script_receiver_factory';
-import * as Defaults from '../../defaults';
+import Defaults from '../../defaults';
 import DependencyLoader from './dependency_loader';
 
 export var DependenciesReceivers = new ScriptReceiverFactory(
-  "_pusher_dependencies", "Pusher.DependenciesReceivers"
+  "_pusher_dependencies", "Pusher.Runtime.DependenciesReceivers"
 );
 
 export var Dependencies = new DependencyLoader({

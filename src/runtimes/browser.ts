@@ -7,10 +7,6 @@ import TimelineSender from '../timeline/timeline_sender';
 
 export default class Browser extends Runtime {
 
-  // for jsonp auth
-  nextAuthCallbackID: number = 1;
-  auth_callbacks: any = {};
-
   whenReady(callback : Function) : void {
     var initializeOnDocumentBody = ()=> {
         this.onDocumentBody(callback);

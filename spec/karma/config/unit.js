@@ -1,7 +1,7 @@
 var version = require('../../../package').version;
 var objectAssign = require('object-assign-deep');
+var webpackConfig = require('../../../webpack/config.shared');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
-var webpackConfig = require('../../../webpack/config.shared')
 
 module.exports = function(config) {
   config.set({
@@ -26,8 +26,7 @@ module.exports = function(config) {
       resolve: {
         root: [
           __dirname + '/../../../src',
-          __dirname + '/../../../src/node_modules',
-          __dirname + '/../../node_modules'
+          __dirname + '/../../../src/node_modules'
         ]
       },
       externals: {
