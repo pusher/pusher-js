@@ -1,3 +1,5 @@
+import Handshake from "../connection/handshake";
+import TransportConnection from "../transports/transport_connection";
 import SocketHooks from "../http/socket_hooks";
 import HTTPSocket from "../http/http_socket";
 import Authorizer from "../pusher_authorizer";
@@ -58,6 +60,10 @@ var Factory = {
 
   createAuthorizer(channel : Channel, options : any) : Authorizer {
     return new Authorizer(channel, options);
+  },
+
+  createHandshake(transport : TransportConnection, callback : (HandshakePayload)=>void) : Handshake {
+    return new Handshake(transport, callback);
   },
 
   /* RETRIEVE APIS */

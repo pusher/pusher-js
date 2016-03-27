@@ -1,9 +1,10 @@
-var TransportStrategy = require('strategies/transport_strategy').defaul;
+var TransportStrategy = require('strategies/transport_strategy').default;
 var Errors = require('errors');
 var Handshake = require('connection/handshake').default;
+var Mocks = require('../../helpers/mocks');
+var Factory = require('utils/factory').default;
 
-// FIXME
-xdescribe("TransportStrategy", function() {
+describe("TransportStrategy", function() {
   var transport, transportClass, handshake;
   var callback;
   var strategy;
@@ -12,7 +13,7 @@ xdescribe("TransportStrategy", function() {
     transport = Mocks.getTransport(true);
     transportClass = Mocks.getTransportClass(true, transport);
 
-    spyOn(Handshake).andCallFake(function(transport, callback) {
+    spyOn(Factory, 'createHandshake').andCallFake(function(transport, callback) {
       handshake = Mocks.getHandshake(transport, callback);
       return handshake;
     });

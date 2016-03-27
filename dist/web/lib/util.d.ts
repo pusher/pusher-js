@@ -7,7 +7,7 @@ declare var Util: {
     getLocalStorage(): any;
     getClientFeatures(): any[];
     isXHRSupported(): boolean;
-    isXDRSupported(encrypted: boolean): boolean;
+    isXDRSupported(encrypted?: boolean): boolean;
     getDocument(): any;
     getProtocol(): string;
 };

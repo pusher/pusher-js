@@ -1,3 +1,4 @@
+import Factory from "../utils/factory";
 import Util from '../util';
 import * as Errors from '../errors';
 import Strategy from './strategy';
@@ -60,7 +61,7 @@ export default class TransportStrategy implements Strategy {
       transport.connect();
     };
     var onOpen = function() {
-      handshake = new Handshake(transport, function(result) {
+      handshake = Factory.createHandshake(transport, function(result) {
         connected = true;
         unbindListeners();
         callback(null, result);

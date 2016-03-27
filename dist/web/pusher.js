@@ -271,7 +271,7 @@ var Pusher =
 	    isXDRSupported: function (encrypted) {
 	        var protocol = encrypted ? "https:" : "http:";
 	        var documentProtocol = this.getProtocol();
-	        return Boolean('XDomainRequest' in window) && documentProtocol === protocol;
+	        return Boolean((window['XDomainRequest'])) && documentProtocol === protocol;
 	    },
 	    getDocument: function () {
 	        try {
@@ -698,7 +698,8 @@ var Pusher =
 	};
 	var xdrConfiguration = {
 	    isSupported: function (environment) {
-	        return util_ts_1.default.isXDRSupported(environment.encrypted);
+	        var yes = util_ts_1.default.isXDRSupported(environment.encrypted);
+	        return yes;
 	    }
 	};
 	/** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
