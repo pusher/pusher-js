@@ -32,7 +32,7 @@ describe("Host/Port Configuration", function() {
       // window.WebSocket = jasmine.createSpy("WebSocket").andCallFake(function() {
       //   return Mocks.getTransport();
       // });
-      spyOn(Factory, 'newWebSocket').andReturn(Mocks.getTransport());
+      spyOn(Factory, 'createWebSocket').andReturn(Mocks.getTransport());
 
       Transports = require('transports/transports');
 
@@ -52,7 +52,7 @@ describe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar");
       pusher.connect();
 
-      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+      expect(Factory.createWebSocket).toHaveBeenCalledWith(
         "ws://ws.pusherapp.com:80/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
@@ -61,7 +61,7 @@ describe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar", { encrypted: true });
       pusher.connect();
 
-      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+      expect(Factory.createWebSocket).toHaveBeenCalledWith(
         "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
@@ -70,7 +70,7 @@ describe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar", { wsHost: "example.com", wsPort: 1999 });
       pusher.connect();
 
-      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+      expect(Factory.createWebSocket).toHaveBeenCalledWith(
         "ws://example.com:1999/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
@@ -79,7 +79,7 @@ describe("Host/Port Configuration", function() {
       pusher = new Pusher("foobar", { wsHost: "example.org", wssPort: 4444, encrypted: true });
       pusher.connect();
 
-      expect(Factory.newWebSocket).toHaveBeenCalledWith(
+      expect(Factory.createWebSocket).toHaveBeenCalledWith(
         "wss://example.org:4444/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });

@@ -24,7 +24,7 @@ export var WSTransport = new Transport(<TransportHooks> {
     return Boolean(WS.getAPI());
   },
   getSocket: function(url) {
-    return Factory.newWebSocket(url);
+    return Factory.createWebSocket(url);
   }
 });
 

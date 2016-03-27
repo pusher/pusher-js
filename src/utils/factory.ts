@@ -74,7 +74,7 @@ var Factory = {
     return Network;
   },
 
-  newWebSocket(url : string) : any {
+  createWebSocket(url : string) : any {
     var Constructor = WS.getAPI();
     return new Constructor(url);
   },

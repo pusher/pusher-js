@@ -35,7 +35,7 @@ describe("HTTP.Socket", function() {
       sendHeartbeat: jasmine.createSpy(),
       onFinished: jasmine.createSpy()
     };
-    socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com/pusher");
+    socket = new HTTPSocket(hooks, "http://example.com/pusher");
 
     onOpen = jasmine.createSpy("onOpen");
     onMessage = jasmine.createSpy("onMessage");
@@ -56,7 +56,7 @@ describe("HTTP.Socket", function() {
     Util.isXHRSupported.andReturn(true);
     Util.isXDRSupported.andReturn(false);
 
-    var socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+    var socket = new HTTPSocket(hooks, "http://example.com");
     expect(HTTPFactory.createXHR).toHaveBeenCalled();
     socket.close();
   });
@@ -65,14 +65,14 @@ describe("HTTP.Socket", function() {
     Util.isXHRSupported.andReturn(false);
     Util.isXDRSupported.andReturn(true);
 
-    var socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+    var socket = new HTTPSocket(hooks, "http://example.com");
     expect(HTTPFactory.createXDR).toHaveBeenCalled();
 
     socket.close();
   });
 
   it("should send a POST request to the URL constructed with getReceiveURL", function() {
-    var socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com/x?arg=val");
+    var socket = new HTTPSocket(hooks, "http://example.com/x?arg=val");
 
     expect(lastXHR.method).toEqual("POST");
     expect(lastXHR.url).toMatch(
@@ -87,9 +87,9 @@ describe("HTTP.Socket", function() {
   });
 
   it("should start streaming from different URLs", function() {
-    var socket1 = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+    var socket1 = new HTTPSocket(hooks, "http://example.com");
     var url1 = lastXHR.url;
-    var socket2 = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+    var socket2 = new HTTPSocket(hooks, "http://example.com");
     var url2 = lastXHR.url;
 
     expect(url1).not.toEqual(url2);
@@ -112,7 +112,7 @@ describe("HTTP.Socket", function() {
       onError = jasmine.createSpy("onError");
       onClose = jasmine.createSpy("onClose");
 
-      socket = new HTTPSocket(HTTPFactory, hooks, "http://example.com");
+      socket = new HTTPSocket(hooks, "http://example.com");
       socket.onerror = onError;
       socket.onclose = onClose;
     });

@@ -121,6 +121,7 @@ describe("TransportConnection", function() {
       });
 
       xit("should transition to 'initializing' immediately", function() {
+        pending();
         var onInitializing = jasmine.createSpy("onInitializing");
         transport.bind("initializing", onInitializing);
 

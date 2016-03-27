@@ -1,4 +1,3 @@
-import HTTPFactory from "./http_factory";
 import URLLocation from "./url_location";
 import State from "./state";
 import Socket from "../socket/socket";
@@ -8,6 +7,7 @@ import getXHR from './http_xhr_request';
 import getXDR from "./http_xdomain_request";
 import Ajax from "./ajax";
 import HTTPRequest from "./http_request";
+import HTTP from './http';
 
 var autoIncrement = 1;
 
@@ -17,7 +17,6 @@ class HTTPSocket implements Socket {
     location: URLLocation;
     readyState: State;
     stream: HTTPRequest;
-    factory : HTTPFactory;
 
     onopen:() => void;
     onerror:(error : any) => void;
@@ -25,8 +24,7 @@ class HTTPSocket implements Socket {
     onmessage:(message : any) => void;
     onactivity:() => void;
 
-    constructor(factory : HTTPFactory, hooks : SocketHooks, url : string) {
-        this.factory = factory;
+    constructor(hooks : SocketHooks, url : string) {
         this.hooks = hooks;
         this.session = randomNumber(1000) + "/" + randomString(8);
         this.location = getLocation(url);
@@ -51,7 +49,7 @@ class HTTPSocket implements Socket {
         if (this.readyState === State.OPEN) {
             try {
             createRequest(
-                this.factory, "POST", getUniqueURL(getSendURL(this.location, this.session))
+                "POST", getUniqueURL(getSendURL(this.location, this.session))
             ).start(payload);
             return true;
             } catch(e) {
@@ -160,7 +158,6 @@ class HTTPSocket implements Socket {
       var self = this;
 
       self.stream = createRequest(
-        self.factory,
         "POST",
         getUniqueURL(self.hooks.getReceiveURL(self.location, self.session))
       );
@@ -230,11 +227,11 @@ function randomString(length : number) : string {
   return result.join('');
 }
 
-function createRequest(factory : HTTPFactory, method : string, url : string) : HTTPRequest {
+function createRequest(method : string, url : string) : HTTPRequest {
   if (Util.isXHRSupported()) {
-    return factory.createXHR(method, url);
+    return HTTP.createXHR(method, url);
   } else if (Util.isXDRSupported(url.indexOf("https:") === 0)) {
-    return factory.createXDR(method, url);
+    return HTTP.createXDR(method, url);
   } else {
     throw "Cross-origin HTTP requests are not supported";
   }

@@ -1,5 +1,4 @@
 import SocketHooks from "./socket_hooks";
-import HTTPFactory from "./http_factory";
 import HTTPSocket from "./http_socket";
 
 var hooks : SocketHooks = {
