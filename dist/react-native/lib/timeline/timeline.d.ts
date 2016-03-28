@@ -11,6 +11,6 @@ export default class Timeline {
     info(event: any): void;
     debug(event: any): void;
     isEmpty(): boolean;
-    send(sendXHR: any, callback: any): boolean;
+    send(sendfn: any, callback: any): boolean;
     generateUniqueID(): number;
 }

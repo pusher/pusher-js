@@ -14,7 +14,7 @@ interface TimelineTransport {
 var jsonp = function(sender : TimelineSender, encrypted : boolean): TimelineTransport {
   return function(data : any, callback : Function) {
     var scheme = "http" + (encrypted ? "s" : "") + "://";
-    var url = scheme + (sender.host || sender.options.host) + sender.options.path;
+    var url = scheme + (sender.host || sender.options.host) + sender.options.path + "/jsonp";
     var request = Factory.createJSONPRequest(url, data);
 
     var receiver = Runtime.ScriptReceivers.create(function(error, result){
@@ -34,10 +34,8 @@ var jsonp = function(sender : TimelineSender, encrypted : boolean): TimelineTran
 
 var xhr = function(sender : TimelineSender, encrypted : boolean) : TimelineTransport {
   return function(data : any, callback : Function) {
-    Logger.warn('XHR timelines not yet supported');
-
     var scheme = "http" + (encrypted ? "s" : "") + "://";
-    var url = scheme + (sender.options.host) + sender.options.path;
+    var url = scheme + (sender.options.host) + sender.options.path + "/xhr";
     var params = Collections.filterObject(data, function(value) {
       return value !== undefined;
     });
@@ -47,18 +45,20 @@ var xhr = function(sender : TimelineSender, encrypted : boolean) : TimelineTrans
       Util.method("join", "=")
     ).join("&");
 
-    url += ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
+    url += ("/" + 2 + "?" + query);
 
-    var xhr = this.factory.createXHR();
+    var xhr = Factory.createXHR();
     xhr.open("GET", url, true);
 
     xhr.onreadystatechange = function(){
       if (xhr.readyState === 4) {
-        // TODO: handle response
+        if (xhr.status !== 200) {
+          Logger.debug("TimelineSender Error: received " + xhr.status + " from stats.pusher.com")
+        }
       }
     }
 
-    xhr.send()
+    xhr.send();
   }
 };
 

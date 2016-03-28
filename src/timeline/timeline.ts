@@ -46,7 +46,7 @@ export default class Timeline {
     return this.events.length === 0;
   }
 
-  send(sendXHR, callback) {
+  send(sendfn, callback) {
     var self = this;
 
     var data = Collections.extend({
@@ -61,7 +61,7 @@ export default class Timeline {
     }, self.options.params);
 
     self.events = [];
-    sendXHR(data, function(error, result) {
+    sendfn(data, function(error, result) {
       if (!error) {
         self.sent++;
       }

@@ -83,10 +83,10 @@ export default class Pusher {
       level: TimelineLevel.INFO,
       version: Defaults.VERSION
     });
-    if (!this.config.disableStats && Runtime instanceof Browser) {
+    if (!this.config.disableStats) {
       this.timelineSender = Factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
-        path: "/timeline/v2/jsonp"
+        path: "/timeline/v2"
       });
     }
 
