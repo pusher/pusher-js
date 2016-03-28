@@ -1,6 +1,7 @@
 var path = require("path");
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var version = require('../package').version;
+var objectAssign = require('object-assign-deep');
 
 //////////////////////////////////////
 // The worker build uses:           //
@@ -8,7 +9,7 @@ var version = require('../package').version;
 // XHR: platforms/web/xhr           //
 // NetInfo: platforms/node/net_info //
 //////////////////////////////////////
-module.exports = {
+module.exports = objectAssign(require('./config.shared'),{
   entry: "./src/pusher",
   output: {
     library: "Pusher",
@@ -28,4 +29,4 @@ module.exports = {
       "pusher-websocket-iso-externals-worker/xhr"
     )
   ]
-}
+})

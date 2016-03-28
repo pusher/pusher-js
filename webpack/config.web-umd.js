@@ -1,12 +1,13 @@
 var path = require("path");
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var version = require('../package').version;
+var objectAssign = require('object-assign-deep');
 
 ///////////////////////////////////////////////////
 // The web build uses:                           //
 // XHR, WebSocket and NetInfo in platforms/web/* //
 ///////////////////////////////////////////////////
-module.exports = {
+module.exports = objectAssign(require('./config.shared'), {
   entry: "./src/pusher",
   output: {
     library: "Pusher",
@@ -35,4 +36,4 @@ module.exports = {
       "pusher-websocket-iso-externals-web/net_info"
     )
   ]
-}
+});
