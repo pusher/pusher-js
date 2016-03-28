@@ -47,7 +47,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 46);
+/******/ 	return __webpack_require__(__webpack_require__.s = 47);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -56,7 +56,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var global = Function("return this")();
-	var base64_1 = __webpack_require__(29);
+	var base64_1 = __webpack_require__(28);
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -249,20 +249,20 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var assistant_to_the_transport_manager_1 = __webpack_require__(60);
-	var handshake_1 = __webpack_require__(35);
-	var pusher_authorizer_1 = __webpack_require__(47);
-	var timeline_sender_1 = __webpack_require__(59);
-	var presence_channel_1 = __webpack_require__(32);
+	var assistant_to_the_transport_manager_1 = __webpack_require__(61);
+	var handshake_1 = __webpack_require__(34);
+	var pusher_authorizer_1 = __webpack_require__(48);
+	var timeline_sender_1 = __webpack_require__(60);
+	var presence_channel_1 = __webpack_require__(31);
 	var private_channel_1 = __webpack_require__(16);
 	var channel_1 = __webpack_require__(15);
-	var connection_manager_1 = __webpack_require__(34);
+	var connection_manager_1 = __webpack_require__(33);
 	var xhr_1 = __webpack_require__(12);
-	var channels_1 = __webpack_require__(30);
-	var net_info_1 = __webpack_require__(20);
-	var ws_1 = __webpack_require__(21);
-	var jsonp_request_1 = __webpack_require__(50);
-	var script_request_1 = __webpack_require__(51);
+	var channels_1 = __webpack_require__(29);
+	var net_info_1 = __webpack_require__(44);
+	var ws_1 = __webpack_require__(20);
+	var jsonp_request_1 = __webpack_require__(51);
+	var script_request_1 = __webpack_require__(52);
 	var Factory = {
 	    createXHR: function () {
 	        if (xhr_1.default.getAPI()) {
@@ -329,65 +329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var collections_1 = __webpack_require__(0);
-	var Logger = {
-	    log: null,
-	    debug: function () {
-	        var args = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            args[_i - 0] = arguments[_i];
-	        }
-	        if (!this.log) {
-	            return;
-	        }
-	        this.log(collections_1.stringify.apply(this, arguments));
-	    },
-	    warn: function () {
-	        var args = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            args[_i - 0] = arguments[_i];
-	        }
-	        var message = collections_1.stringify.apply(this, arguments);
-	        if (console.warn) {
-	            console.warn(message);
-	        }
-	        else if (console.log) {
-	            console.log(message);
-	        }
-	        if (this.log) {
-	            this.log(message);
-	        }
-	    }
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Logger;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var browser_1 = __webpack_require__(48);
-	var isomorphic_1 = __webpack_require__(52);
-	function decide() {
-	    if (typeof (window) !== 'undefined' && typeof ((window).document) !== 'undefined') {
-	        return new browser_1.default();
-	    }
-	    else {
-	        return new isomorphic_1.default();
-	    }
-	}
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = decide();
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var callback_registry_1 = __webpack_require__(37);
+	var callback_registry_1 = __webpack_require__(36);
 	var global = Function("return this")();
 	var Dispatcher = (function () {
 	    function Dispatcher(failThrough) {
@@ -434,6 +376,64 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var collections_1 = __webpack_require__(0);
+	var Logger = {
+	    log: null,
+	    debug: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        if (!this.log) {
+	            return;
+	        }
+	        this.log(collections_1.stringify.apply(this, arguments));
+	    },
+	    warn: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        var message = collections_1.stringify.apply(this, arguments);
+	        if (console.warn) {
+	            console.warn(message);
+	        }
+	        else if (console.log) {
+	            console.log(message);
+	        }
+	        if (this.log) {
+	            this.log(message);
+	        }
+	    }
+	};
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = Logger;
+
+
+/***/ },
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var browser_1 = __webpack_require__(49);
+	var isomorphic_1 = __webpack_require__(53);
+	function decide() {
+	    if (typeof (window) !== 'undefined' && typeof ((window).document) !== 'undefined') {
+	        return new browser_1.default();
+	    }
+	    else {
+	        return new isomorphic_1.default();
+	    }
+	}
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.default = decide();
+
+
+/***/ },
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -443,7 +443,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var abstract_timer_1 = __webpack_require__(65);
+	var abstract_timer_1 = __webpack_require__(66);
 	var global = Function("return this")();
 	function clearTimeout(timer) {
 	    global.clearTimeout(timer);
@@ -663,7 +663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var script_receiver_factory_1 = __webpack_require__(10);
 	var defaults_1 = __webpack_require__(7);
-	var dependency_loader_1 = __webpack_require__(49);
+	var dependency_loader_1 = __webpack_require__(50);
 	exports.DependenciesReceivers = new script_receiver_factory_1.ScriptReceiverFactory("_pusher_dependencies", "Pusher.Runtime.DependenciesReceivers");
 	exports.Dependencies = new dependency_loader_1.default({
 	    cdn_http: defaults_1.default.cdn_http,
@@ -765,7 +765,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var logger_1 = __webpack_require__(3);
+	var logger_1 = __webpack_require__(4);
 	var factory_1 = __webpack_require__(2);
 	var ajax = function (context, socketId, callback) {
 	    var self = this, xhr;
@@ -833,9 +833,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(5);
+	var dispatcher_1 = __webpack_require__(3);
 	var Errors = __webpack_require__(8);
-	var logger_1 = __webpack_require__(3);
+	var logger_1 = __webpack_require__(4);
 	var Channel = (function (_super) {
 	    __extends(Channel, _super);
 	    function Channel(name, pusher) {
@@ -944,7 +944,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var internal_events_1 = __webpack_require__(36);
+	var internal_events_1 = __webpack_require__(35);
 	var handshake_results_1 = __webpack_require__(17);
 	exports.decodeMessage = function (message) {
 	    try {
@@ -1036,12 +1036,12 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var http_request_1 = __webpack_require__(39);
-	var http_socket_1 = __webpack_require__(40);
-	var http_streaming_socket_1 = __webpack_require__(41);
-	var http_polling_socket_1 = __webpack_require__(38);
-	var http_xhr_request_1 = __webpack_require__(43);
-	var http_xdomain_request_1 = __webpack_require__(42);
+	var http_request_1 = __webpack_require__(38);
+	var http_socket_1 = __webpack_require__(39);
+	var http_streaming_socket_1 = __webpack_require__(40);
+	var http_polling_socket_1 = __webpack_require__(37);
+	var http_xhr_request_1 = __webpack_require__(42);
+	var http_xdomain_request_1 = __webpack_require__(41);
 	var HTTP = {
 	    createStreamingSocket: function (url) {
 	        return this.createSocket(http_streaming_socket_1.default, url);
@@ -1068,45 +1068,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var dispatcher_1 = __webpack_require__(5);
-	var NetInfo = (function (_super) {
-	    __extends(NetInfo, _super);
-	    function NetInfo() {
-	        _super.call(this);
-	        var self = this;
-	        if (window.addEventListener !== undefined) {
-	            window.addEventListener("online", function () {
-	                self.emit('online');
-	            }, false);
-	            window.addEventListener("offline", function () {
-	                self.emit('offline');
-	            }, false);
-	        }
-	    }
-	    NetInfo.prototype.isOnline = function () {
-	        if (window.navigator.onLine === undefined) {
-	            return true;
-	        }
-	        else {
-	            return window.navigator.onLine;
-	        }
-	    };
-	    return NetInfo;
-	}(dispatcher_1.default));
-	exports.NetInfo = NetInfo;
-	exports.Network = new NetInfo();
-
-
-/***/ },
-/* 21 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1120,14 +1081,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 22 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(0);
-	var transports_1 = __webpack_require__(25);
+	var transports_1 = __webpack_require__(24);
 	var auth_transports_1 = __webpack_require__(14);
-	var timeline_transports_1 = __webpack_require__(24);
+	var timeline_transports_1 = __webpack_require__(23);
 	var script_receiver_factory_1 = __webpack_require__(10);
 	var dependencies_1 = __webpack_require__(9);
 	var Runtime = (function () {
@@ -1161,7 +1122,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 23 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1258,16 +1219,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 24 */
+/* 23 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var script_receiver_factory_1 = __webpack_require__(10);
-	var logger_1 = __webpack_require__(3);
+	var logger_1 = __webpack_require__(4);
 	var Collections = __webpack_require__(0);
 	var util_1 = __webpack_require__(1);
 	var factory_1 = __webpack_require__(2);
-	var runtime_1 = __webpack_require__(4);
+	var runtime_1 = __webpack_require__(5);
 	var jsonp = function (sender, encrypted) {
 	    return function (data, callback) {
 	        var scheme = "http" + (encrypted ? "s" : "") + "://";
@@ -1312,17 +1273,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 25 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var URLSchemes = __webpack_require__(64);
-	var transport_ts_1 = __webpack_require__(61);
+	var URLSchemes = __webpack_require__(65);
+	var transport_ts_1 = __webpack_require__(62);
 	var Collections = __webpack_require__(0);
-	var ws_1 = __webpack_require__(21);
+	var ws_1 = __webpack_require__(20);
 	var http_1 = __webpack_require__(19);
 	var factory_1 = __webpack_require__(2);
-	var runtime_1 = __webpack_require__(4);
+	var runtime_1 = __webpack_require__(5);
 	var dependencies_1 = __webpack_require__(9);
 	var WSTransport = new transport_ts_1.default({
 	    urls: URLSchemes.ws,
@@ -1407,7 +1368,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 26 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1438,22 +1399,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 27 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(0);
 	var util_1 = __webpack_require__(1);
-	var transports_1 = __webpack_require__(25);
-	var transport_manager_1 = __webpack_require__(63);
+	var transports_1 = __webpack_require__(24);
+	var transport_manager_1 = __webpack_require__(64);
 	var Errors = __webpack_require__(8);
-	var transport_strategy_1 = __webpack_require__(58);
-	var sequential_strategy_1 = __webpack_require__(23);
-	var best_connected_ever_strategy_1 = __webpack_require__(53);
-	var cached_strategy_1 = __webpack_require__(54);
-	var delayed_strategy_1 = __webpack_require__(55);
-	var if_strategy_1 = __webpack_require__(57);
-	var first_connected_strategy_1 = __webpack_require__(56);
+	var transport_strategy_1 = __webpack_require__(59);
+	var sequential_strategy_1 = __webpack_require__(22);
+	var best_connected_ever_strategy_1 = __webpack_require__(54);
+	var cached_strategy_1 = __webpack_require__(55);
+	var delayed_strategy_1 = __webpack_require__(56);
+	var if_strategy_1 = __webpack_require__(58);
+	var first_connected_strategy_1 = __webpack_require__(57);
 	exports.build = function (scheme, options) {
 	    var context = Collections.extend({}, globalContext, options);
 	    return evaluate(scheme, context)[1].strategy;
@@ -1615,7 +1576,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 28 */
+/* 27 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1685,7 +1646,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 29 */
+/* 28 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1738,7 +1699,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1788,7 +1749,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1850,7 +1811,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 32 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1860,8 +1821,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var private_channel_1 = __webpack_require__(16);
-	var logger_1 = __webpack_require__(3);
-	var members_1 = __webpack_require__(31);
+	var logger_1 = __webpack_require__(4);
+	var members_1 = __webpack_require__(30);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
 	    function PresenceChannel(name, pusher) {
@@ -1917,7 +1878,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 33 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1927,9 +1888,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var Collections = __webpack_require__(0);
-	var dispatcher_1 = __webpack_require__(5);
+	var dispatcher_1 = __webpack_require__(3);
 	var Protocol = __webpack_require__(18);
-	var logger_1 = __webpack_require__(3);
+	var logger_1 = __webpack_require__(4);
 	var Connection = (function (_super) {
 	    __extends(Connection, _super);
 	    function Connection(id, transport) {
@@ -2036,7 +1997,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2045,10 +2006,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(5);
+	var dispatcher_1 = __webpack_require__(3);
 	var timers_1 = __webpack_require__(6);
-	var net_info_1 = __webpack_require__(20);
-	var logger_1 = __webpack_require__(3);
+	var net_info_1 = __webpack_require__(46);
+	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(11);
 	var Collections = __webpack_require__(0);
 	var ConnectionManager = (function (_super) {
@@ -2332,13 +2293,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(0);
 	var Protocol = __webpack_require__(18);
-	var connection_1 = __webpack_require__(33);
+	var connection_1 = __webpack_require__(32);
 	var handshake_results_1 = __webpack_require__(17);
 	var Handshake = (function () {
 	    function Handshake(transport, callback) {
@@ -2395,7 +2356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 35 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2409,7 +2370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2462,7 +2423,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 37 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2489,7 +2450,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2499,7 +2460,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var App = __webpack_require__(45);
-	var dispatcher_1 = __webpack_require__(5);
+	var dispatcher_1 = __webpack_require__(3);
 	var MAX_BUFFER_LENGTH = 256 * 1024;
 	var HTTPRequest = (function (_super) {
 	    __extends(HTTPRequest, _super);
@@ -2565,14 +2526,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 40 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var state_1 = __webpack_require__(44);
+	var state_1 = __webpack_require__(43);
 	var util_1 = __webpack_require__(1);
 	var http_1 = __webpack_require__(19);
-	var runtime_1 = __webpack_require__(4);
+	var runtime_1 = __webpack_require__(5);
 	var autoIncrement = 1;
 	var HTTPSocket = (function () {
 	    function HTTPSocket(hooks, url) {
@@ -2758,7 +2719,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 41 */
+/* 40 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2781,7 +2742,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 42 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2821,7 +2782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 43 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2858,7 +2819,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 44 */
+/* 43 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2870,6 +2831,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(State || (State = {}));
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = State;
+
+
+/***/ },
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var dispatcher_1 = __webpack_require__(3);
+	var NetInfo = (function (_super) {
+	    __extends(NetInfo, _super);
+	    function NetInfo() {
+	        _super.apply(this, arguments);
+	    }
+	    NetInfo.prototype.isOnline = function () {
+	        return true;
+	    };
+	    return NetInfo;
+	}(dispatcher_1.default));
+	exports.NetInfo = NetInfo;
+	exports.Network = new NetInfo();
 
 
 /***/ },
@@ -2900,16 +2886,55 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var runtime_1 = __webpack_require__(4);
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var dispatcher_1 = __webpack_require__(3);
+	var NetInfo = (function (_super) {
+	    __extends(NetInfo, _super);
+	    function NetInfo() {
+	        _super.call(this);
+	        var self = this;
+	        if (window.addEventListener !== undefined) {
+	            window.addEventListener("online", function () {
+	                self.emit('online');
+	            }, false);
+	            window.addEventListener("offline", function () {
+	                self.emit('offline');
+	            }, false);
+	        }
+	    }
+	    NetInfo.prototype.isOnline = function () {
+	        if (window.navigator.onLine === undefined) {
+	            return true;
+	        }
+	        else {
+	            return window.navigator.onLine;
+	        }
+	    };
+	    return NetInfo;
+	}(dispatcher_1.default));
+	exports.NetInfo = NetInfo;
+	exports.Network = new NetInfo();
+
+
+/***/ },
+/* 47 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var runtime_1 = __webpack_require__(5);
 	var Collections = __webpack_require__(0);
-	var dispatcher_1 = __webpack_require__(5);
-	var timeline_1 = __webpack_require__(28);
+	var dispatcher_1 = __webpack_require__(3);
+	var timeline_1 = __webpack_require__(27);
 	var level_1 = __webpack_require__(13);
-	var StrategyBuilder = __webpack_require__(27);
+	var StrategyBuilder = __webpack_require__(26);
 	var timers_1 = __webpack_require__(6);
 	var defaults_1 = __webpack_require__(7);
-	var DefaultConfig = __webpack_require__(26);
-	var logger_1 = __webpack_require__(3);
+	var DefaultConfig = __webpack_require__(25);
+	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(11);
 	var factory_1 = __webpack_require__(2);
 	var Pusher = (function () {
@@ -3076,11 +3101,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 47 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var runtime_1 = __webpack_require__(4);
+	var runtime_1 = __webpack_require__(5);
 	var Authorizer = (function () {
 	    function Authorizer(channel, options) {
 	        this.channel = channel;
@@ -3107,7 +3132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3116,11 +3141,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var abstract_runtime_1 = __webpack_require__(22);
+	var abstract_runtime_1 = __webpack_require__(21);
 	var xhr_1 = __webpack_require__(12);
 	var dependencies_1 = __webpack_require__(9);
 	var auth_transports_1 = __webpack_require__(14);
-	var timeline_transports_1 = __webpack_require__(24);
+	var timeline_transports_1 = __webpack_require__(23);
 	var Browser = (function (_super) {
 	    __extends(Browser, _super);
 	    function Browser() {
@@ -3183,12 +3208,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var script_receiver_factory_1 = __webpack_require__(10);
-	var runtime_1 = __webpack_require__(4);
+	var runtime_1 = __webpack_require__(5);
 	var factory_1 = __webpack_require__(2);
 	var DependencyLoader = (function () {
 	    function DependencyLoader(options) {
@@ -3244,7 +3269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3280,7 +3305,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3349,7 +3374,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3358,7 +3383,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var abstract_runtime_1 = __webpack_require__(22);
+	var abstract_runtime_1 = __webpack_require__(21);
 	var Isomorphic = (function (_super) {
 	    __extends(Isomorphic, _super);
 	    function Isomorphic() {
@@ -3392,7 +3417,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3455,13 +3480,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 54 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(1);
-	var runtime_1 = __webpack_require__(4);
-	var sequential_strategy_1 = __webpack_require__(23);
+	var runtime_1 = __webpack_require__(5);
+	var sequential_strategy_1 = __webpack_require__(22);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
 	        this.strategy = strategy;
@@ -3569,7 +3594,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3611,7 +3636,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 56 */
+/* 57 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3638,7 +3663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 57 */
+/* 58 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3663,7 +3688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 58 */
+/* 59 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3767,11 +3792,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 59 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var runtime_1 = __webpack_require__(4);
+	var runtime_1 = __webpack_require__(5);
 	var TimelineSender = (function () {
 	    function TimelineSender(timeline, options) {
 	        this.timeline = timeline;
@@ -3791,7 +3816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 60 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3843,11 +3868,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 61 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var transport_connection_1 = __webpack_require__(62);
+	var transport_connection_1 = __webpack_require__(63);
 	var Transport = (function () {
 	    function Transport(hooks) {
 	        this.hooks = hooks;
@@ -3865,7 +3890,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 62 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3876,8 +3901,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	var util_1 = __webpack_require__(1);
 	var Collections = __webpack_require__(0);
-	var dispatcher_1 = __webpack_require__(5);
-	var logger_1 = __webpack_require__(3);
+	var dispatcher_1 = __webpack_require__(3);
+	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(11);
 	var dependencies_1 = __webpack_require__(9);
 	var TransportConnection = (function (_super) {
@@ -4055,7 +4080,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 63 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -4084,7 +4109,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 64 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -4124,7 +4149,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 65 */
+/* 66 */
 /***/ function(module, exports) {
 
 	"use strict";

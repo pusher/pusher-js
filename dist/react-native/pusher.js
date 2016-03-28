@@ -250,7 +250,7 @@ module.exports =
 	var connection_manager_1 = __webpack_require__(33);
 	var xhr_1 = __webpack_require__(12);
 	var channels_1 = __webpack_require__(29);
-	var net_info_1 = __webpack_require__(46);
+	var net_info_1 = __webpack_require__(45);
 	var ws_1 = __webpack_require__(20);
 	var jsonp_request_1 = __webpack_require__(51);
 	var script_request_1 = __webpack_require__(52);
@@ -1999,7 +1999,7 @@ module.exports =
 	};
 	var dispatcher_1 = __webpack_require__(3);
 	var timers_1 = __webpack_require__(6);
-	var net_info_1 = __webpack_require__(45);
+	var net_info_1 = __webpack_require__(46);
 	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(11);
 	var Collections = __webpack_require__(0);
@@ -2845,6 +2845,31 @@ module.exports =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
+	var dispatcher_1 = __webpack_require__(3);
+	var NetInfo = (function (_super) {
+	    __extends(NetInfo, _super);
+	    function NetInfo() {
+	        _super.apply(this, arguments);
+	    }
+	    NetInfo.prototype.isOnline = function () {
+	        return true;
+	    };
+	    return NetInfo;
+	}(dispatcher_1.default));
+	exports.NetInfo = NetInfo;
+	exports.Network = new NetInfo();
+
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
 	var react_native_1 = __webpack_require__(67);
 	var dispatcher_1 = __webpack_require__(3);
 	function hasOnlineConnectionState(connectionState) {
@@ -2874,45 +2899,6 @@ module.exports =
 	    }
 	    NetInfo.prototype.isOnline = function () {
 	        return this.online;
-	    };
-	    return NetInfo;
-	}(dispatcher_1.default));
-	exports.NetInfo = NetInfo;
-	exports.Network = new NetInfo();
-
-
-/***/ },
-/* 46 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var dispatcher_1 = __webpack_require__(3);
-	var NetInfo = (function (_super) {
-	    __extends(NetInfo, _super);
-	    function NetInfo() {
-	        _super.call(this);
-	        var self = this;
-	        if (window.addEventListener !== undefined) {
-	            window.addEventListener("online", function () {
-	                self.emit('online');
-	            }, false);
-	            window.addEventListener("offline", function () {
-	                self.emit('offline');
-	            }, false);
-	        }
-	    }
-	    NetInfo.prototype.isOnline = function () {
-	        if (window.navigator.onLine === undefined) {
-	            return true;
-	        }
-	        else {
-	            return window.navigator.onLine;
-	        }
 	    };
 	    return NetInfo;
 	}(dispatcher_1.default));

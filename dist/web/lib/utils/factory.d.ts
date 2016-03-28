@@ -12,7 +12,7 @@ import Channel from "../channels/channel";
 import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
 import Channels from "../channels/channels";
-import { NetInfo } from "../node_modules/pusher-websocket-iso-externals-web/net_info";
+import { NetInfo } from "../node_modules/pusher-websocket-iso-externals-node/net_info";
 import JSONPRequest from '../runtimes/dom/jsonp_request';
 import ScriptRequest from '../runtimes/dom/script_request';
 declare var Factory: {

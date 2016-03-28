@@ -15,7 +15,7 @@ import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
 import XHR from "pusher-websocket-iso-externals-node/xhr";
 import Channels from "../channels/channels";
-import {Network, NetInfo} from "../node_modules/pusher-websocket-iso-externals-web/net_info";
+import {Network, NetInfo} from "../node_modules/pusher-websocket-iso-externals-node/net_info";
 import WS from 'pusher-websocket-iso-externals-node/ws';
 import JSONPRequest from '../runtimes/dom/jsonp_request';
 import ScriptRequest from '../runtimes/dom/script_request';
