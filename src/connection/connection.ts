@@ -1,4 +1,3 @@
-import Util from '../util';
 import * as Collections from '../utils/collections';
 import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Protocol from './protocol/protocol';

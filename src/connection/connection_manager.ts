@@ -7,7 +7,6 @@ import HandshakePayload from './handshake/handshake_payload';
 import Connection from "./connection";
 import Strategy from "../strategies/strategy";
 import StrategyRunner from "../strategies/strategy_runner";
-import HandshakeResults from "./handshake/handshake_results";
 import * as Collections from "../utils/collections";
 
 /** Manages connection to Pusher.

@@ -1,6 +1,4 @@
 import Channel from "./channel";
-import PresenceChannel from './presence_channel';
-import PrivateChannel from './private_channel';
 import * as Collections from '../utils/collections';
 import ChannelTable from './channel_table';
 import Factory from '../utils/factory';

@@ -1,5 +1,4 @@
 import {default as EventsDispatcher} from '../events/dispatcher';
-import * as Collections from '../utils/collections';
 import * as Errors from '../errors';
 import Logger from '../logger';
 import Pusher from "../pusher";

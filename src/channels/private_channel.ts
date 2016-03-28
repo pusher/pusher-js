@@ -1,6 +1,5 @@
 import Factory from "../utils/factory";
 import Channel from './channel';
-import Authorizer from '../pusher_authorizer';
 
 /** Extends public channels to provide private channel interface.
  *
