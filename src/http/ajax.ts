@@ -3,7 +3,7 @@ interface Ajax {
   send(payload?: any) : Function;
   onreadystatechange : Function;
   readyState : number;
-  status: number;
+  responseText: string;
 
   ontimeout: Function;
   onerror: Function;

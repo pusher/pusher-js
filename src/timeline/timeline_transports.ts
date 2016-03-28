@@ -52,8 +52,10 @@ var xhr = function(sender : TimelineSender, encrypted : boolean) : TimelineTrans
 
     xhr.onreadystatechange = function(){
       if (xhr.readyState === 4) {
-        if (xhr.status !== 200) {
-          Logger.debug("TimelineSender Error: received " + xhr.status + " from stats.pusher.com")
+        // The reason for not checking the status is that XDomainRequests
+        // do not allow access to status code
+        if (xhr.responseText !== "OK") {
+          Logger.debug("TimelineSender Error: received from stats.pusher.com")
         }
       }
     }

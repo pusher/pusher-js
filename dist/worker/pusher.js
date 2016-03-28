@@ -1517,8 +1517,10 @@ var Pusher =
 	        xhr.open("GET", url, true);
 	        xhr.onreadystatechange = function () {
 	            if (xhr.readyState === 4) {
-	                if (xhr.status !== 200) {
-	                    logger_1.default.debug("TimelineSender Error: received " + xhr.status + " from stats.pusher.com");
+	                // The reason for not checking the status is that XDomainRequests
+	                // do not allow access to status code
+	                if (xhr.responseText !== "OK") {
+	                    logger_1.default.debug("TimelineSender Error: received from stats.pusher.com");
 	                }
 	            }
 	        };
