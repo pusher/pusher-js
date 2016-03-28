@@ -1,5 +1,6 @@
 var path = require("path");
-var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
+var webpack = require('webpack');
+var NormalModuleReplacementPlugin = webpack.NormalModuleReplacementPlugin;
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 

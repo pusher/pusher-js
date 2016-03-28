@@ -1,5 +1,6 @@
 import Runtime from "./runtimes/runtime";
 import AbstractRuntime from "./runtimes/abstract_runtime";
+import Browser from './runtimes/browser';
 import Util from "./util";
 import * as Collections from './utils/collections';
 import Channels from './channels/channels';
@@ -82,7 +83,7 @@ export default class Pusher {
       level: TimelineLevel.INFO,
       version: Defaults.VERSION
     });
-    if (!this.config.disableStats) {
+    if (!this.config.disableStats && Runtime instanceof Browser) {
       this.timelineSender = Factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
         path: "/timeline/v2/jsonp"

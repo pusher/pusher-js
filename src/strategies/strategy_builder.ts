@@ -198,7 +198,6 @@ function evaluateArray(expression, context) {
 }
 
 function evaluate(expression, context) {
-  var expressionType = typeof expression;
   if (typeof expression === "string") {
     return evaluateString(expression, context);
   } else if (typeof expression === "object") {
