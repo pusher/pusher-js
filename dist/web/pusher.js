@@ -207,8 +207,10 @@ var Pusher =
 	    /*  STATIC PROPERTIES */
 	    Pusher.instances = [];
 	    Pusher.isReady = false;
-	    // for jsonp auth
+	    // for jsonp
 	    Pusher.Runtime = runtime_1.default;
+	    Pusher.ScriptReceivers = runtime_1.default.ScriptReceivers;
+	    Pusher.DependenciesReceivers = runtime_1.default.DependenciesReceivers;
 	    return Pusher;
 	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
@@ -1602,7 +1604,6 @@ var Pusher =
 	    function ScriptReceiverFactory(prefix, name) {
 	        this.lastId = 0;
 	        this.prefix = prefix;
-	        console.log(name);
 	        this.name = name;
 	    }
 	    ScriptReceiverFactory.prototype.create = function (callback) {
@@ -2849,7 +2850,6 @@ var Pusher =
 	            }
 	            else {
 	                if (handshake.action === "error") {
-	                    console.log(handshake);
 	                    self.emit("error", { type: "HandshakeError", error: handshake.error });
 	                    self.timeline.error({ handshakeError: handshake.error });
 	                }
@@ -3920,12 +3920,13 @@ var Pusher =
 	var Collections = __webpack_require__(4);
 	var util_1 = __webpack_require__(11);
 	var factory_1 = __webpack_require__(21);
+	var runtime_1 = __webpack_require__(1);
 	var jsonp = function (sender, encrypted) {
 	    return function (data, callback) {
 	        var scheme = "http" + (encrypted ? "s" : "") + "://";
 	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
 	        var request = factory_1.default.createJSONPRequest(url, data);
-	        var receiver = script_receiver_factory_1.ScriptReceivers.create(function (error, result) {
+	        var receiver = runtime_1.default.ScriptReceivers.create(function (error, result) {
 	            script_receiver_factory_1.ScriptReceivers.remove(receiver);
 	            request.cleanup();
 	            if (result && result.host) {

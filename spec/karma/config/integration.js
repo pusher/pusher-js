@@ -19,7 +19,7 @@ module.exports = function(config) {
     ],
     preprocessors: {
       '**/spec/javascripts/integration/index.js': ['webpack'],
-      '**spec/javascripts/node_modules/**/*.ts': ['webpack']
+      '**/spec/javascripts/node_modules/**/*.ts': ['webpack']
     },
 
     reporters: ['progress', 'coverage', 'spec'],

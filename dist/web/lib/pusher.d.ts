@@ -1,4 +1,3 @@
-import AbstractRuntime from "./runtimes/abstract_runtime";
 import Channels from './channels/channels';
 import Channel from './channels/channel';
 import { default as EventsDispatcher } from './events/dispatcher';
@@ -9,7 +8,9 @@ import { PeriodicTimer } from './utils/timers';
 export default class Pusher {
     static instances: Pusher[];
     static isReady: boolean;
-    static Runtime: AbstractRuntime;
+    static Runtime: any;
+    static ScriptReceivers: any;
+    static DependenciesReceivers: any;
     static ready(): void;
     static logToConsole(): void;
     static setLogger(logger: Function): void;

@@ -1,4 +1,4 @@
-var Integration = require('../../../helpers/integration');
+var Pusher = require('pusher').default;
 var Mocks = require('../../../helpers/mocks');
 var Runtime = require('runtimes/runtime').default;
 var Factory = require('utils/factory').default;
@@ -28,7 +28,7 @@ describe("DependencyLoader", function() {
       cdn_https: "https://example.com",
       version: "6.6.6",
       suffix: "-test",
-      receivers: Integration.ScriptReceivers
+      receivers: Pusher.ScriptReceivers
     });
   });
 
@@ -60,7 +60,7 @@ describe("DependencyLoader", function() {
         cdn_https: "https://example.com/",
         version: "6.6.6",
         suffix: "-test",
-        receivers: Integration.ScriptReceivers
+        receivers: Pusher.ScriptReceivers
       });
       expect(loader.getRoot()).toEqual(
         "http://example.com/6.6.6"
@@ -96,7 +96,7 @@ describe("DependencyLoader", function() {
         cdn_https: "https://example.com/",
         version: "6.6.6",
         suffix: "-test",
-        receivers: Integration.ScriptReceivers
+        receivers: Pusher.ScriptReceivers
       });
       expect(loader.getPath("something_else")).toEqual(
         "http://example.com/6.6.6/something_else-test.js"
@@ -153,7 +153,7 @@ describe("DependencyLoader", function() {
     it("should register a receiver", function() {
       loader.load("resource", {}, onLoaded);
       var receiver = scriptRequest.send.calls[0].args[0];
-      expect(Integration.ScriptReceivers[receiver.number]).toBe(
+      expect(Pusher.ScriptReceivers[receiver.number]).toBe(
         receiver.callback
       );
     });
@@ -214,7 +214,7 @@ describe("DependencyLoader", function() {
       });
 
       it("should remove the receiver", function() {
-        expect(Integration.ScriptReceivers[receiver.number]).toBe(
+        expect(Pusher.ScriptReceivers[receiver.number]).toBe(
           undefined
         );
       });

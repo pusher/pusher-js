@@ -1,6 +1,6 @@
 var JSONPRequest = require('runtimes/dom/jsonp_request').default;
 var Factory = require('utils/factory').default;
-var Integration = require('../../../helpers/integration');
+var Pusher = require('pusher').default;;
 var Mocks = require('../../../helpers/mocks');
 
 describe("JSONPRequest", function() {
@@ -14,7 +14,7 @@ describe("JSONPRequest", function() {
       return scriptRequest;
     });
     callback = jasmine.createSpy();
-    receiver = Integration.ScriptReceivers.create(callback);
+    receiver = Pusher.ScriptReceivers.create(callback);
   });
 
   describe("#send", function() {
