@@ -1,8 +1,4 @@
 import Strategy from './strategy';
-/** Launches all substrategies and emits prioritized connected transports.
- *
- * @param {Array} strategies
- */
 export default class BestConnectedEverStrategy implements Strategy {
     strategies: Strategy[];
     constructor(strategies: Strategy[]);

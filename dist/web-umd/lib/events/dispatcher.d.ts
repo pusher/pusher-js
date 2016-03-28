@@ -1,8 +1,4 @@
 import CallbackRegistry from './callback_registry';
-/** Manages callback bindings and event emitting.
- *
- * @param Function failThrough called when no listeners are bound to an event
- */
 export default class Dispatcher {
     callbacks: CallbackRegistry;
     global_callbacks: Function[];

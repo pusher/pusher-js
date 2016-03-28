@@ -18,25 +18,15 @@ declare class HTTPSocket implements Socket {
     send(payload: any): boolean;
     ping(): void;
     close(code: any, reason: any): void;
-    /** For internal use only */
     sendRaw(payload: any): boolean;
-    /** For internal use only */
     reconnect(): void;
-    /** For internal use only */
     onClose(code: any, reason: any, wasClean: any): void;
-    /** @private */
     onChunk(chunk: any): void;
-    /** @private */
     onOpen(options: any): void;
-    /** @private */
     onEvent(event: any): void;
-    /** @private */
     onActivity(): void;
-    /** @private */
     onError(error: any): void;
-    /** @private */
     openStream(): void;
-    /** @private */
     closeStream(): void;
 }
 export default HTTPSocket;

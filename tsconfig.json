@@ -4,7 +4,8 @@
     "outDir": "lib/",
     "declaration": true,
     "sourceMap": true,
-    "target": "es5"
+    "target": "es5",
+    "removeComments": true
   },
   "files": [
     "src/d.ts/faye-websocket/faye-websocket.d.ts",

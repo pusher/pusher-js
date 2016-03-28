@@ -48,20 +48,6 @@ module.exports =
 	"use strict";
 	var global = Function("return this")();
 	var base64_1 = __webpack_require__(28);
-	/** Merges multiple objects into the target argument.
-	*
-	* For properties that are plain Objects, performs a deep-merge. For the
-	* rest it just copies the value of the property.
-	*
-	* To extend prototypes use it as following:
-	*   Pusher.Util.extend(Target.prototype, Base.prototype)
-	*
-	* You can also use it to merge objects without altering them:
-	*   Pusher.Util.extend({}, object1, object2)
-	*
-	* @param  {Object} target
-	* @return {Object} the target argument
-	*/
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -112,16 +98,6 @@ module.exports =
 	    return -1;
 	}
 	exports.arrayIndexOf = arrayIndexOf;
-	/** Applies a function f to all properties of an object.
-	*
-	* Function f gets 3 arguments passed:
-	* - element from the object
-	* - key of the element
-	* - reference to the object
-	*
-	* @param {Object} object
-	* @param {Function} f
-	*/
 	function objectApply(object, f) {
 	    for (var key in object) {
 	        if (Object.prototype.hasOwnProperty.call(object, key)) {
@@ -130,11 +106,6 @@ module.exports =
 	    }
 	}
 	exports.objectApply = objectApply;
-	/** Return a list of objects own proerty keys
-	*
-	* @param {Object} object
-	* @returns {Array}
-	*/
 	function keys(object) {
 	    var keys = [];
 	    objectApply(object, function (_, key) {
@@ -143,11 +114,6 @@ module.exports =
 	    return keys;
 	}
 	exports.keys = keys;
-	/** Return a list of object's own property values
-	*
-	* @param {Object} object
-	* @returns {Array}
-	*/
 	function values(object) {
 	    var values = [];
 	    objectApply(object, function (value) {
@@ -156,33 +122,12 @@ module.exports =
 	    return values;
 	}
 	exports.values = values;
-	/** Applies a function f to all elements of an array.
-	*
-	* Function f gets 3 arguments passed:
-	* - element from the array
-	* - index of the element
-	* - reference to the array
-	*
-	* @param {Array} array
-	* @param {Function} f
-	*/
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
 	        f.call(context || global, array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
-	/** Maps all elements of the array and returns the result.
-	*
-	* Function f gets 4 arguments passed:
-	* - element from the array
-	* - index of the element
-	* - reference to the source array
-	* - reference to the destination array
-	*
-	* @param {Array} array
-	* @param {Function} f
-	*/
 	function map(array, f) {
 	    var result = [];
 	    for (var i = 0; i < array.length; i++) {
@@ -191,17 +136,6 @@ module.exports =
 	    return result;
 	}
 	exports.map = map;
-	/** Maps all elements of the object and returns the result.
-	*
-	* Function f gets 4 arguments passed:
-	* - element from the object
-	* - key of the element
-	* - reference to the source object
-	* - reference to the destination object
-	*
-	* @param {Object} object
-	* @param {Function} f
-	*/
 	function mapObject(object, f) {
 	    var result = {};
 	    objectApply(object, function (value, key) {
@@ -210,17 +144,6 @@ module.exports =
 	    return result;
 	}
 	exports.mapObject = mapObject;
-	/** Filters elements of the array using a test function.
-	*
-	* Function test gets 4 arguments passed:
-	* - element from the array
-	* - index of the element
-	* - reference to the source array
-	* - reference to the destination array
-	*
-	* @param {Array} array
-	* @param {Function} f
-	*/
 	function filter(array, test) {
 	    test = test || function (value) { return !!value; };
 	    var result = [];
@@ -232,17 +155,6 @@ module.exports =
 	    return result;
 	}
 	exports.filter = filter;
-	/** Filters properties of the object using a test function.
-	*
-	* Function test gets 4 arguments passed:
-	* - element from the object
-	* - key of the element
-	* - reference to the source object
-	* - reference to the destination object
-	*
-	* @param {Object} object
-	* @param {Function} f
-	*/
 	function filterObject(object, test) {
 	    var result = {};
 	    objectApply(object, function (value, key) {
@@ -253,11 +165,6 @@ module.exports =
 	    return result;
 	}
 	exports.filterObject = filterObject;
-	/** Flattens an object into a two-dimensional array.
-	*
-	* @param  {Object} object
-	* @return {Array} resulting array of [key, value] pairs
-	*/
 	function flatten(object) {
 	    var result = [];
 	    objectApply(object, function (value, key) {
@@ -266,16 +173,6 @@ module.exports =
 	    return result;
 	}
 	exports.flatten = flatten;
-	/** Checks whether any element of the array passes the test.
-	*
-	* Function test gets 3 arguments passed:
-	* - element from the array
-	* - index of the element
-	* - reference to the source array
-	*
-	* @param {Array} array
-	* @param {Function} f
-	*/
 	function any(array, test) {
 	    for (var i = 0; i < array.length; i++) {
 	        if (test(array[i], i, array)) {
@@ -285,16 +182,6 @@ module.exports =
 	    return false;
 	}
 	exports.any = any;
-	/** Checks whether all elements of the array pass the test.
-	*
-	* Function test gets 3 arguments passed:
-	* - element from the array
-	* - index of the element
-	* - reference to the source array
-	*
-	* @param {Array} array
-	* @param {Function} f
-	*/
 	function all(array, test) {
 	    for (var i = 0; i < array.length; i++) {
 	        if (!test(array[i], i, array)) {
@@ -333,14 +220,6 @@ module.exports =
 	    defer: function (callback) {
 	        return new timers_1.OneOffTimer(0, callback);
 	    },
-	    /** Builds a function that will proxy a method call to its first argument.
-	    *
-	    * Allows partial application of arguments, so additional arguments are
-	    * prepended to the argument list.
-	    *
-	    * @param  {String} name method name
-	    * @return {Function} proxy function
-	    */
 	    method: function (name) {
 	        var args = [];
 	        for (var _i = 1; _i < arguments.length; _i++) {
@@ -415,7 +294,6 @@ module.exports =
 	    createHandshake: function (transport, callback) {
 	        return new handshake_1.default(transport, callback);
 	    },
-	    /* RETRIEVE APIS */
 	    getNetwork: function () {
 	        return net_info_1.Network;
 	    },
@@ -444,10 +322,6 @@ module.exports =
 	"use strict";
 	var callback_registry_1 = __webpack_require__(36);
 	var global = Function("return this")();
-	/** Manages callback bindings and event emitting.
-	 *
-	 * @param Function failThrough called when no listeners are bound to an event
-	 */
 	var Dispatcher = (function () {
 	    function Dispatcher(failThrough) {
 	        this.callbacks = new callback_registry_1.default();
@@ -562,18 +436,12 @@ module.exports =
 	};
 	var abstract_timer_1 = __webpack_require__(66);
 	var global = Function("return this")();
-	// We need to bind clear functions this way to avoid exceptions on IE8
 	function clearTimeout(timer) {
 	    global.clearTimeout(timer);
 	}
 	function clearInterval(timer) {
 	    global.clearInterval(timer);
 	}
-	/** Cross-browser compatible one-off timer abstraction.
-	 *
-	 * @param {Number} delay
-	 * @param {Function} callback
-	 */
 	var OneOffTimer = (function (_super) {
 	    __extends(OneOffTimer, _super);
 	    function OneOffTimer(delay, callback) {
@@ -585,11 +453,6 @@ module.exports =
 	    return OneOffTimer;
 	}(abstract_timer_1.default));
 	exports.OneOffTimer = OneOffTimer;
-	/** Cross-browser compatible periodic timer abstraction.
-	 *
-	 * @param {Number} delay
-	 * @param {Function} callback
-	 */
 	var PeriodicTimer = (function (_super) {
 	    __extends(PeriodicTimer, _super);
 	    function PeriodicTimer(delay, callback) {
@@ -611,24 +474,19 @@ module.exports =
 	var Defaults = {};
 	Defaults.VERSION = '4.0';
 	Defaults.PROTOCOL = 7;
-	// DEPRECATED: WS connection parameters
 	Defaults.host = 'ws.pusherapp.com';
 	Defaults.ws_port = 80;
 	Defaults.wss_port = 443;
-	// DEPRECATED: SockJS fallback parameters
 	Defaults.sockjs_host = 'sockjs.pusher.com';
 	Defaults.sockjs_http_port = 80;
 	Defaults.sockjs_https_port = 443;
 	Defaults.sockjs_path = "/pusher";
-	// DEPRECATED: Stats
 	Defaults.stats_host = 'stats.pusher.com';
-	// DEPRECATED: Other settings
 	Defaults.channel_auth_endpoint = '/pusher/auth';
 	Defaults.channel_auth_transport = 'ajax';
 	Defaults.activity_timeout = 120000;
 	Defaults.pong_timeout = 30000;
 	Defaults.unavailable_timeout = 10000;
-	// CDN configuration
 	Defaults.cdn_http = '<CDN_HTTP>';
 	Defaults.cdn_https = '<CDN_HTTPS>';
 	Defaults.dependency_suffix = '<DEPENDENCY_SUFFIX>';
@@ -739,7 +597,6 @@ module.exports =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	/** Error classes used throughout the library. */
 	var BadEventName = (function (_super) {
 	    __extends(BadEventName, _super);
 	    function BadEventName() {
@@ -813,22 +670,6 @@ module.exports =
 /***/ function(module, exports) {
 
 	"use strict";
-	/** Builds receivers for JSONP and Script requests.
-	 *
-	 * Each receiver is an object with following fields:
-	 * - number - unique (for the factory instance), numerical id of the receiver
-	 * - id - a string ID that can be used in DOM attributes
-	 * - name - name of the function triggering the receiver
-	 * - callback - callback function
-	 *
-	 * Receivers are triggered only once, on the first callback call.
-	 *
-	 * Receivers can be called by their name or by accessing factory object
-	 * by the number key.
-	 *
-	 * @param {String} prefix the prefix used in ids
-	 * @param {String} name the name of the object
-	 */
 	var ScriptReceiverFactory = (function () {
 	    function ScriptReceiverFactory(prefix, name) {
 	        this.lastId = 0;
@@ -921,7 +762,6 @@ module.exports =
 	    var self = this, xhr;
 	    xhr = factory_1.default.createXHR();
 	    xhr.open("POST", self.options.authEndpoint, true);
-	    // add request headers
 	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	    for (var headerName in this.authOptions.headers) {
 	        xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
@@ -959,7 +799,6 @@ module.exports =
 	    context.nextAuthCallbackID++;
 	    var document = context.getDocument();
 	    var script = document.createElement("script");
-	    // Hacked wrapper.
 	    context.auth_callbacks[callbackName] = function (data) {
 	        callback(false, data);
 	    };
@@ -988,15 +827,6 @@ module.exports =
 	var dispatcher_1 = __webpack_require__(3);
 	var Errors = __webpack_require__(8);
 	var logger_1 = __webpack_require__(4);
-	/** Provides base public channel interface with an event emitter.
-	 *
-	 * Emits:
-	 * - pusher:subscription_succeeded - after subscribing successfully
-	 * - other non-internal events
-	 *
-	 * @param {String} name
-	 * @param {Pusher} pusher
-	 */
 	var Channel = (function (_super) {
 	    __extends(Channel, _super);
 	    function Channel(name, pusher) {
@@ -1007,29 +837,18 @@ module.exports =
 	        this.pusher = pusher;
 	        this.subscribed = false;
 	    }
-	    /** Skips authorization, since public channels don't require it.
-	     *
-	     * @param {Function} callback
-	     */
 	    Channel.prototype.authorize = function (socketId, callback) {
 	        return callback(false, {});
 	    };
-	    /** Triggers an event */
 	    Channel.prototype.trigger = function (event, data) {
 	        if (event.indexOf("client-") !== 0) {
 	            throw new Errors.BadEventName("Event '" + event + "' does not start with 'client-'");
 	        }
 	        return this.pusher.send_event(event, data, this.name);
 	    };
-	    /** Signals disconnection to the channel. For internal use only. */
 	    Channel.prototype.disconnect = function () {
 	        this.subscribed = false;
 	    };
-	    /** Handles an event. For internal use only.
-	     *
-	     * @param {String} event
-	     * @param {*} data
-	     */
 	    Channel.prototype.handleEvent = function (event, data) {
 	        if (event.indexOf("pusher_internal:") === 0) {
 	            if (event === "pusher_internal:subscription_succeeded") {
@@ -1041,7 +860,6 @@ module.exports =
 	            this.emit(event, data);
 	        }
 	    };
-	    /** Sends a subscription request. For internal use only. */
 	    Channel.prototype.subscribe = function () {
 	        var _this = this;
 	        this.authorize(this.pusher.connection.socket_id, function (error, data) {
@@ -1057,7 +875,6 @@ module.exports =
 	            }
 	        });
 	    };
-	    /** Sends an unsubscription request. For internal use only. */
 	    Channel.prototype.unsubscribe = function () {
 	        this.pusher.send_event('pusher:unsubscribe', {
 	            channel: this.name
@@ -1081,21 +898,11 @@ module.exports =
 	};
 	var factory_1 = __webpack_require__(2);
 	var channel_1 = __webpack_require__(15);
-	/** Extends public channels to provide private channel interface.
-	 *
-	 * @param {String} name
-	 * @param {Pusher} pusher
-	 */
 	var PrivateChannel = (function (_super) {
 	    __extends(PrivateChannel, _super);
 	    function PrivateChannel() {
 	        _super.apply(this, arguments);
 	    }
-	    /** Authorizes the connection to use the channel.
-	     *
-	     * @param  {String} socketId
-	     * @param  {Function} callback
-	     */
 	    PrivateChannel.prototype.authorize = function (socketId, callback) {
 	        var authorizer = factory_1.default.createAuthorizer(this, this.pusher.config);
 	        return authorizer.authorize(socketId, callback);
@@ -1130,17 +937,6 @@ module.exports =
 	"use strict";
 	var internal_events_1 = __webpack_require__(35);
 	var handshake_results_1 = __webpack_require__(17);
-	/**
-	 * Provides functions for handling Pusher protocol-specific messages.
-	 */
-	/**
-	 * Decodes a message in a Pusher format.
-	 *
-	 * Throws errors when messages are not parse'able.
-	 *
-	 * @param  {Object} message
-	 * @return {Object}
-	 */
 	exports.decodeMessage = function (message) {
 	    try {
 	        var params = JSON.parse(message.data);
@@ -1150,8 +946,6 @@ module.exports =
 	            }
 	            catch (e) {
 	                if (!(e instanceof SyntaxError)) {
-	                    // TODO looks like unreachable code
-	                    // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
 	                    throw e;
 	                }
 	            }
@@ -1162,28 +956,9 @@ module.exports =
 	        throw { type: 'MessageParseError', error: e, data: message.data };
 	    }
 	};
-	/**
-	 * Encodes a message to be sent.
-	 *
-	 * @param  {Object} message
-	 * @return {String}
-	 */
 	exports.encodeMessage = function (message) {
 	    return JSON.stringify(message);
 	};
-	/** Processes a handshake message and returns appropriate actions.
-	 *
-	 * Returns an object with an 'action' and other action-specific properties.
-	 *
-	 * There are three outcomes when calling this function. First is a successful
-	 * connection attempt, when pusher:connection_established is received, which
-	 * results in a 'connected' action with an 'id' property. When passed a
-	 * pusher:error event, it returns a result with action appropriate to the
-	 * close code and an error. Otherwise, it raises an exception.
-	 *
-	 * @param {String} message
-	 * @result Object
-	 */
 	exports.processHandshake = function (message) {
 	    message = exports.decodeMessage(message);
 	    if (message.event === internal_events_1.default.CONNECTION_ESTABLISHED) {
@@ -1197,8 +972,6 @@ module.exports =
 	        };
 	    }
 	    else if (message.event === internal_events_1.default.ERROR) {
-	        // From protocol 6 close codes are sent only once, so this only
-	        // happens when connection does not support close codes
 	        return {
 	            action: this.getCloseAction(message.data),
 	            error: this.getCloseError(message.data)
@@ -1208,23 +981,8 @@ module.exports =
 	        throw "Invalid handshake";
 	    }
 	};
-	/**
-	 * Dispatches the close event and returns an appropriate action name.
-	 *
-	 * See:
-	 * 1. https://developer.mozilla.org/en-US/docs/WebSockets/WebSockets_reference/CloseEvent
-	 * 2. http://pusher.com/docs/pusher_protocol
-	 *
-	 * @param  {CloseEvent} closeEvent
-	 * @return {String} close action name
-	 */
 	exports.getCloseAction = function (closeEvent) {
 	    if (closeEvent.code < 4000) {
-	        // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
-	        //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
-	        // ignore 1007...3999
-	        // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
-	        //        1004 CLOSE_TOO_LARGE
 	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
 	            return handshake_results_1.default.BACKOFF;
 	        }
@@ -1245,19 +1003,9 @@ module.exports =
 	        return handshake_results_1.default.RETRY;
 	    }
 	    else {
-	        // unknown error
 	        return handshake_results_1.default.REFUSED;
 	    }
 	};
-	/**
-	 * Returns an error or null basing on the close event.
-	 *
-	 * Null is returned when connection was closed cleanly. Otherwise, an object
-	 * with error details is returned.
-	 *
-	 * @param  {CloseEvent} closeEvent
-	 * @return {Object} error object
-	 */
 	exports.getCloseError = function (closeEvent) {
 	    if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
 	        return {
@@ -1336,7 +1084,6 @@ module.exports =
 	var dependencies_1 = __webpack_require__(9);
 	var Runtime = (function () {
 	    function Runtime() {
-	        // for jsonp auth
 	        this.nextAuthCallbackID = 1;
 	        this.auth_callbacks = {};
 	        this.ScriptReceivers = script_receiver_factory_1.ScriptReceivers;
@@ -1373,16 +1120,6 @@ module.exports =
 	var Collections = __webpack_require__(0);
 	var util_1 = __webpack_require__(1);
 	var timers_1 = __webpack_require__(6);
-	/** Loops through strategies with optional timeouts.
-	 *
-	 * Options:
-	 * - loop - whether it should loop through the substrategy list
-	 * - timeout - initial timeout for a single substrategy
-	 * - timeoutLimit - maximum timeout
-	 *
-	 * @param {Strategy[]} strategies
-	 * @param {Object} options
-	 */
 	var SequentialStrategy = (function () {
 	    function SequentialStrategy(strategies, options) {
 	        this.strategies = strategies;
@@ -1436,7 +1173,6 @@ module.exports =
 	            }
 	        };
 	    };
-	    /** @private */
 	    SequentialStrategy.prototype.tryStrategy = function (strategy, minPriority, options, callback) {
 	        var timer = null;
 	        var runner = null;
@@ -1448,7 +1184,6 @@ module.exports =
 	        }
 	        runner = strategy.connect(minPriority, function (error, handshake) {
 	            if (error && timer && timer.isRunning() && !options.failFast) {
-	                // advance to the next strategy after the timeout
 	                return;
 	            }
 	            if (timer) {
@@ -1517,8 +1252,6 @@ module.exports =
 	        xhr.open("GET", url, true);
 	        xhr.onreadystatechange = function () {
 	            if (xhr.readyState === 4) {
-	                // The reason for not checking the status is that XDomainRequests
-	                // do not allow access to status code
 	                if (xhr.responseText !== "OK") {
 	                    logger_1.default.debug("TimelineSender Error: received from stats.pusher.com");
 	                }
@@ -1543,11 +1276,6 @@ module.exports =
 	var factory_1 = __webpack_require__(2);
 	var runtime_1 = __webpack_require__(5);
 	var dependencies_1 = __webpack_require__(9);
-	/** WebSocket transport.
-	 *
-	 * Uses native WebSocket implementation, including MozWebSocket supported by
-	 * earlier Firefox versions.
-	 */
 	var WSTransport = new transport_ts_1.default({
 	    urls: URLSchemes.ws,
 	    handlesActivityChecks: false,
@@ -1614,13 +1342,9 @@ module.exports =
 	        return yes;
 	    }
 	};
-	/** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
 	var XHRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xhrConfiguration));
-	/** HTTP streaming transport using XDomainRequest (IE 8,9). */
 	var XDRStreamingTransport = new transport_ts_1.default(Collections.extend({}, streamingConfiguration, xdrConfiguration));
-	/** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
 	var XHRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xhrConfiguration));
-	/** HTTP long-polling transport using XDomainRequest (IE 8,9). */
 	var XDRPollingTransport = new transport_ts_1.default(Collections.extend({}, pollingConfiguration, xdrConfiguration));
 	var Transports = {
 	    WSTransport: WSTransport,
@@ -1652,7 +1376,6 @@ module.exports =
 	        statsHost: defaults_1.default.stats_host,
 	        authEndpoint: defaults_1.default.channel_auth_endpoint,
 	        authTransport: defaults_1.default.channel_auth_transport,
-	        // TODO make this consistent with other options in next major version
 	        activity_timeout: defaults_1.default.activity_timeout,
 	        pong_timeout: defaults_1.default.pong_timeout,
 	        unavailable_timeout: defaults_1.default.unavailable_timeout
@@ -1683,12 +1406,6 @@ module.exports =
 	var delayed_strategy_1 = __webpack_require__(56);
 	var if_strategy_1 = __webpack_require__(58);
 	var first_connected_strategy_1 = __webpack_require__(57);
-	/** Transforms a JSON scheme to a strategy tree.
-	 *
-	 * @param {Array} scheme JSON strategy scheme
-	 * @param {Object} options a hash of symbols to be included in the scheme
-	 * @returns {Strategy} strategy tree that's represented by the scheme
-	 */
 	exports.build = function (scheme, options) {
 	    var context = Collections.extend({}, globalContext, options);
 	    return evaluate(scheme, context)[1].strategy;
@@ -1717,7 +1434,6 @@ module.exports =
 	        };
 	    }
 	};
-	// DSL bindings
 	function returnWithOriginalContext(f) {
 	    return function (context) {
 	        return [f.apply(this, arguments), context];
@@ -1793,7 +1509,6 @@ module.exports =
 	        };
 	    })
 	};
-	// DSL interpreter
 	function isSymbol(expression) {
 	    return (typeof expression === "string") && expression.charAt(0) === ":";
 	}
@@ -1981,48 +1696,27 @@ module.exports =
 	"use strict";
 	var Collections = __webpack_require__(0);
 	var factory_1 = __webpack_require__(2);
-	/** Handles a channel map. */
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
 	    }
-	    /** Creates or retrieves an existing channel by its name.
-	     *
-	     * @param {String} name
-	     * @param {Pusher} pusher
-	     * @return {Channel}
-	     */
 	    Channels.prototype.add = function (name, pusher) {
 	        if (!this.channels[name]) {
 	            this.channels[name] = createChannel(name, pusher);
 	        }
 	        return this.channels[name];
 	    };
-	    /** Returns a list of all channels
-	     *
-	     * @return {Array}
-	     */
 	    Channels.prototype.all = function () {
 	        return Collections.values(this.channels);
 	    };
-	    /** Finds a channel by its name.
-	     *
-	     * @param {String} name
-	     * @return {Channel} channel or null if it doesn't exist
-	     */
 	    Channels.prototype.find = function (name) {
 	        return this.channels[name];
 	    };
-	    /** Removes a channel from the map.
-	     *
-	     * @param {String} name
-	     */
 	    Channels.prototype.remove = function (name) {
 	        var channel = this.channels[name];
 	        delete this.channels[name];
 	        return channel;
 	    };
-	    /** Proxies disconnection signal to all channels. */
 	    Channels.prototype.disconnect = function () {
 	        Collections.objectApply(this.channels, function (channel) {
 	            channel.disconnect();
@@ -2051,18 +1745,10 @@ module.exports =
 
 	"use strict";
 	var Collections = __webpack_require__(0);
-	/** Represents a collection of members of a presence channel. */
 	var Members = (function () {
 	    function Members() {
 	        this.reset();
 	    }
-	    /** Returns member's info for given id.
-	     *
-	     * Resulting object containts two fields - id and info.
-	     *
-	     * @param {Number} id
-	     * @return {Object} member's info or null
-	     */
 	    Members.prototype.get = function (id) {
 	        if (Object.prototype.hasOwnProperty.call(this.members, id)) {
 	            return {
@@ -2074,27 +1760,20 @@ module.exports =
 	            return null;
 	        }
 	    };
-	    /** Calls back for each member in unspecified order.
-	     *
-	     * @param  {Function} callback
-	     */
 	    Members.prototype.each = function (callback) {
 	        var _this = this;
 	        Collections.objectApply(this.members, function (member, id) {
 	            callback(_this.get(id));
 	        });
 	    };
-	    /** Updates the id for connected member. For internal use only. */
 	    Members.prototype.setMyID = function (id) {
 	        this.myID = id;
 	    };
-	    /** Handles subscription data. For internal use only. */
 	    Members.prototype.onSubscription = function (subscriptionData) {
 	        this.members = subscriptionData.presence.hash;
 	        this.count = subscriptionData.presence.count;
 	        this.me = this.get(this.myID);
 	    };
-	    /** Adds a new member to the collection. For internal use only. */
 	    Members.prototype.addMember = function (memberData) {
 	        if (this.get(memberData.user_id) === null) {
 	            this.count++;
@@ -2102,7 +1781,6 @@ module.exports =
 	        this.members[memberData.user_id] = memberData.user_info;
 	        return this.get(memberData.user_id);
 	    };
-	    /** Adds a member from the collection. For internal use only. */
 	    Members.prototype.removeMember = function (memberData) {
 	        var member = this.get(memberData.user_id);
 	        if (member) {
@@ -2111,7 +1789,6 @@ module.exports =
 	        }
 	        return member;
 	    };
-	    /** Resets the collection to the initial state. For internal use only. */
 	    Members.prototype.reset = function () {
 	        this.members = {};
 	        this.count = 0;
@@ -2139,20 +1816,10 @@ module.exports =
 	var members_1 = __webpack_require__(30);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
-	    /** Adds presence channel functionality to private channels.
-	     *
-	     * @param {String} name
-	     * @param {Pusher} pusher
-	     */
 	    function PresenceChannel(name, pusher) {
 	        _super.call(this, name, pusher);
 	        this.members = new members_1.default();
 	    }
-	    /** Authenticates the connection as a member of the channel.
-	     *
-	     * @param  {String} socketId
-	     * @param  {Function} callback
-	     */
 	    PresenceChannel.prototype.authorize = function (socketId, callback) {
 	        var self = this;
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
@@ -2170,11 +1837,6 @@ module.exports =
 	            callback(error, authData);
 	        });
 	    };
-	    /** Handles presence and subscription events. For internal use only.
-	     *
-	     * @param {String} event
-	     * @param {*} data
-	     */
 	    PresenceChannel.prototype.handleEvent = function (event, data) {
 	        switch (event) {
 	            case "pusher_internal:subscription_succeeded":
@@ -2196,7 +1858,6 @@ module.exports =
 	                private_channel_1.default.prototype.handleEvent.call(this, event, data);
 	        }
 	    };
-	    /** Resets the channel state, including members map. For internal use only. */
 	    PresenceChannel.prototype.disconnect = function () {
 	        this.members.reset();
 	        _super.prototype.disconnect.call(this);
@@ -2221,22 +1882,6 @@ module.exports =
 	var dispatcher_1 = __webpack_require__(3);
 	var Protocol = __webpack_require__(18);
 	var logger_1 = __webpack_require__(4);
-	/**
-	 * Provides Pusher protocol interface for transports.
-	 *
-	 * Emits following events:
-	 * - message - on received messages
-	 * - ping - on ping requests
-	 * - pong - on pong responses
-	 * - error - when the transport emits an error
-	 * - closed - after closing the transport
-	 *
-	 * It also emits more events when connection closes with a code.
-	 * See Protocol.getCloseAction to get more details.
-	 *
-	 * @param {Number} id
-	 * @param {AbstractTransport} transport
-	 */
 	var Connection = (function (_super) {
 	    __extends(Connection, _super);
 	    function Connection(id, transport) {
@@ -2246,27 +1891,12 @@ module.exports =
 	        this.activityTimeout = transport.activityTimeout;
 	        this.bindListeners();
 	    }
-	    /** Returns whether used transport handles activity checks by itself
-	     *
-	     * @returns {Boolean} true if activity checks are handled by the transport
-	     */
 	    Connection.prototype.handlesActivityChecks = function () {
 	        return this.transport.handlesActivityChecks();
 	    };
-	    /** Sends raw data.
-	     *
-	     * @param {String} data
-	     */
 	    Connection.prototype.send = function (data) {
 	        return this.transport.send(data);
 	    };
-	    /** Sends an event.
-	     *
-	     * @param {String} name
-	     * @param {String} data
-	     * @param {String} [channel]
-	     * @returns {Boolean} whether message was sent or not
-	     */
 	    Connection.prototype.send_event = function (name, data, channel) {
 	        var message = { event: name, data: data };
 	        if (channel) {
@@ -2275,11 +1905,6 @@ module.exports =
 	        logger_1.default.debug('Event sent', message);
 	        return this.send(Protocol.encodeMessage(message));
 	    };
-	    /** Sends a ping message to the server.
-	     *
-	     * Basing on the underlying transport, it might send either transport's
-	     * protocol-specific ping or pusher:ping event.
-	     */
 	    Connection.prototype.ping = function () {
 	        if (this.transport.supportsPing()) {
 	            this.transport.ping();
@@ -2288,11 +1913,9 @@ module.exports =
 	            this.send_event('pusher:ping', {});
 	        }
 	    };
-	    /** Closes the connection. */
 	    Connection.prototype.close = function () {
 	        this.transport.close();
 	    };
-	    /** @private */
 	    Connection.prototype.bindListeners = function () {
 	        var self = this;
 	        var listeners = {
@@ -2348,7 +1971,6 @@ module.exports =
 	            self.transport.bind(event, listener);
 	        });
 	    };
-	    /** @private */
 	    Connection.prototype.handleCloseEvent = function (closeEvent) {
 	        var action = Protocol.getCloseAction(closeEvent);
 	        var error = Protocol.getCloseError(closeEvent);
@@ -2381,32 +2003,6 @@ module.exports =
 	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(11);
 	var Collections = __webpack_require__(0);
-	/** Manages connection to Pusher.
-	 *
-	 * Uses a strategy (currently only default), timers and network availability
-	 * info to establish a connection and export its state. In case of failures,
-	 * manages reconnection attempts.
-	 *
-	 * Exports state changes as following events:
-	 * - "state_change", { previous: p, current: state }
-	 * - state
-	 *
-	 * States:
-	 * - initialized - initial state, never transitioned to
-	 * - connecting - connection is being established
-	 * - connected - connection has been fully established
-	 * - disconnected - on requested disconnection
-	 * - unavailable - after connection timeout or when there's no network
-	 * - failed - when the connection strategy is not supported
-	 *
-	 * Options:
-	 * - unavailableTimeout - time to transition to unavailable state
-	 * - activityTimeout - time after which ping message should be sent
-	 * - pongTimeout - time for Pusher to respond with pong before reconnecting
-	 *
-	 * @param {String} key application key
-	 * @param {Object} options
-	 */
 	var ConnectionManager = (function (_super) {
 	    __extends(ConnectionManager, _super);
 	    function ConnectionManager(key, options) {
@@ -2435,11 +2031,6 @@ module.exports =
 	        });
 	        this.updateStrategy();
 	    }
-	    /** Establishes a connection to Pusher.
-	     *
-	     * Does nothing when connection is already established. See top-level doc
-	     * to find events emitted on connection attempts.
-	     */
 	    ConnectionManager.prototype.connect = function () {
 	        if (this.connection || this.runner) {
 	            return;
@@ -2453,10 +2044,6 @@ module.exports =
 	        this.setUnavailableTimer();
 	    };
 	    ;
-	    /** Sends raw data.
-	     *
-	     * @param {String} data
-	     */
 	    ConnectionManager.prototype.send = function (data) {
 	        if (this.connection) {
 	            return this.connection.send(data);
@@ -2466,13 +2053,6 @@ module.exports =
 	        }
 	    };
 	    ;
-	    /** Sends an event.
-	     *
-	     * @param {String} name
-	     * @param {String} data
-	     * @param {String} [channel]
-	     * @returns {Boolean} whether message was sent or not
-	     */
 	    ConnectionManager.prototype.send_event = function (name, data, channel) {
 	        if (this.connection) {
 	            return this.connection.send_event(name, data, channel);
@@ -2482,7 +2062,6 @@ module.exports =
 	        }
 	    };
 	    ;
-	    /** Closes the connection. */
 	    ConnectionManager.prototype.disconnect = function () {
 	        this.disconnectInternally();
 	        this.updateState(state_1.default.DISCONNECTED);
@@ -2492,7 +2071,6 @@ module.exports =
 	        return this.encrypted;
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.startConnecting = function () {
 	        var self = this;
 	        var callback = function (error, handshake) {
@@ -2505,7 +2083,7 @@ module.exports =
 	                    self.timeline.error({ handshakeError: handshake.error });
 	                }
 	                else {
-	                    self.abortConnecting(); // we don't support switching connections yet
+	                    self.abortConnecting();
 	                    self.handshakeCallbacks[handshake.action](handshake);
 	                }
 	            }
@@ -2513,7 +2091,6 @@ module.exports =
 	        self.runner = self.strategy.connect(0, callback);
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.abortConnecting = function () {
 	        if (this.runner) {
 	            this.runner.abort();
@@ -2521,7 +2098,6 @@ module.exports =
 	        }
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.disconnectInternally = function () {
 	        this.abortConnecting();
 	        this.clearRetryTimer();
@@ -2532,7 +2108,6 @@ module.exports =
 	        }
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.updateStrategy = function () {
 	        this.strategy = this.options.getStrategy({
 	            key: this.key,
@@ -2541,7 +2116,6 @@ module.exports =
 	        });
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.retryIn = function (delay) {
 	        var self = this;
 	        self.timeline.info({ action: "retry", delay: delay });
@@ -2554,7 +2128,6 @@ module.exports =
 	        });
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.clearRetryTimer = function () {
 	        if (this.retryTimer) {
 	            this.retryTimer.ensureAborted();
@@ -2562,7 +2135,6 @@ module.exports =
 	        }
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.setUnavailableTimer = function () {
 	        var self = this;
 	        self.unavailableTimer = new timers_1.OneOffTimer(self.options.unavailableTimeout, function () {
@@ -2570,30 +2142,25 @@ module.exports =
 	        });
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.clearUnavailableTimer = function () {
 	        if (this.unavailableTimer) {
 	            this.unavailableTimer.ensureAborted();
 	        }
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.sendActivityCheck = function () {
 	        var self = this;
 	        self.stopActivityCheck();
 	        self.connection.ping();
-	        // wait for pong response
 	        self.activityTimer = new timers_1.OneOffTimer(self.options.pongTimeout, function () {
 	            self.timeline.error({ pong_timed_out: self.options.pongTimeout });
 	            self.retryIn(0);
 	        });
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.resetActivityCheck = function () {
 	        var self = this;
 	        self.stopActivityCheck();
-	        // send ping after inactivity
 	        if (!self.connection.handlesActivityChecks()) {
 	            self.activityTimer = new timers_1.OneOffTimer(self.activityTimeout, function () {
 	                self.sendActivityCheck();
@@ -2601,19 +2168,16 @@ module.exports =
 	        }
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.stopActivityCheck = function () {
 	        if (this.activityTimer) {
 	            this.activityTimer.ensureAborted();
 	        }
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.buildConnectionCallbacks = function () {
 	        var self = this;
 	        return {
 	            message: function (message) {
-	                // includes pong messages from server
 	                self.resetActivityCheck();
 	                self.emit('message', message);
 	            },
@@ -2624,7 +2188,6 @@ module.exports =
 	                self.resetActivityCheck();
 	            },
 	            error: function (error) {
-	                // just emit error to user - socket will already be closed by browser
 	                self.emit("error", { type: "WebSocketError", error: error });
 	            },
 	            closed: function () {
@@ -2636,7 +2199,6 @@ module.exports =
 	        };
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
 	        var self = this;
 	        return Collections.extend({}, errorCallbacks, {
@@ -2650,7 +2212,6 @@ module.exports =
 	        });
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.buildErrorCallbacks = function () {
 	        var self = this;
 	        function withErrorEmitted(callback) {
@@ -2679,7 +2240,6 @@ module.exports =
 	        };
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.setConnection = function (connection) {
 	        this.connection = connection;
 	        for (var event in this.connectionCallbacks) {
@@ -2688,7 +2248,6 @@ module.exports =
 	        this.resetActivityCheck();
 	    };
 	    ;
-	    /** @private */
 	    ConnectionManager.prototype.abandonConnection = function () {
 	        if (!this.connection) {
 	            return;
@@ -2701,7 +2260,6 @@ module.exports =
 	        this.connection = null;
 	        return connection;
 	    };
-	    /** @private */
 	    ConnectionManager.prototype.updateState = function (newState, data) {
 	        var previousState = this.state;
 	        this.state = newState;
@@ -2716,7 +2274,6 @@ module.exports =
 	            this.emit(newState, data);
 	        }
 	    };
-	    /** @private */
 	    ConnectionManager.prototype.shouldRetry = function () {
 	        return (this.state) === "connecting" || (this.state) === "connected";
 	    };
@@ -2735,22 +2292,6 @@ module.exports =
 	var Protocol = __webpack_require__(18);
 	var connection_1 = __webpack_require__(32);
 	var handshake_results_1 = __webpack_require__(17);
-	/**
-	 * Handles Pusher protocol handshakes for transports.
-	 *
-	 * Calls back with a result object after handshake is completed. Results
-	 * always have two fields:
-	 * - action - string describing action to be taken after the handshake
-	 * - transport - the transport object passed to the constructor
-	 *
-	 * Different actions can set different additional properties on the result.
-	 * In the case of 'connected' action, there will be a 'connection' property
-	 * containing a Connection object for the transport. Other actions should
-	 * carry an 'error' property.
-	 *
-	 * @param {AbstractTransport} transport
-	 * @param {Function} callback
-	 */
 	var Handshake = (function () {
 	    function Handshake(transport, callback) {
 	        this.transport = transport;
@@ -2761,7 +2302,6 @@ module.exports =
 	        this.unbindListeners();
 	        this.transport.close();
 	    };
-	    /** @private */
 	    Handshake.prototype.bindListeners = function () {
 	        var self = this;
 	        self.onMessage = function (m) {
@@ -2793,12 +2333,10 @@ module.exports =
 	        self.transport.bind("message", self.onMessage);
 	        self.transport.bind("closed", self.onClosed);
 	    };
-	    /** @private */
 	    Handshake.prototype.unbindListeners = function () {
 	        this.transport.unbind("message", this.onMessage);
 	        this.transport.unbind("closed", this.onClosed);
 	    };
-	    /** @private */
 	    Handshake.prototype.finish = function (action, params) {
 	        this.callback(Collections.extend({ transport: this.transport, action: action }, params));
 	    };
@@ -2885,7 +2423,6 @@ module.exports =
 	        return url.base + "/" + session + "/xhr" + url.queryString;
 	    },
 	    onHeartbeat: function () {
-	        // next HTTP request will reset server's activity timer
 	    },
 	    sendHeartbeat: function (socket) {
 	        socket.sendRaw("[]");
@@ -2967,7 +2504,6 @@ module.exports =
 	            return unreadData.slice(0, endOfLinePosition);
 	        }
 	        else {
-	            // chunk is not finished yet, don't move the buffer pointer
 	            return null;
 	        }
 	    };
@@ -3007,7 +2543,6 @@ module.exports =
 	    HTTPSocket.prototype.close = function (code, reason) {
 	        this.onClose(code, reason, true);
 	    };
-	    /** For internal use only */
 	    HTTPSocket.prototype.sendRaw = function (payload) {
 	        if (this.readyState === state_1.default.OPEN) {
 	            try {
@@ -3022,13 +2557,11 @@ module.exports =
 	            return false;
 	        }
 	    };
-	    /** For internal use only */
 	    HTTPSocket.prototype.reconnect = function () {
 	        this.closeStream();
 	        this.openStream();
 	    };
 	    ;
-	    /** For internal use only */
 	    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
 	        this.closeStream();
 	        this.readyState = state_1.default.CLOSED;
@@ -3040,7 +2573,6 @@ module.exports =
 	            });
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.onChunk = function (chunk) {
 	        if (chunk.status !== 200) {
 	            return;
@@ -3074,7 +2606,6 @@ module.exports =
 	                break;
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.onOpen = function (options) {
 	        if (this.readyState === state_1.default.CONNECTING) {
 	            if (options && options.hostname) {
@@ -3089,25 +2620,21 @@ module.exports =
 	            this.onClose(1006, "Server lost session", true);
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.onEvent = function (event) {
 	        if (this.readyState === state_1.default.OPEN && this.onmessage) {
 	            this.onmessage({ data: event });
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.onActivity = function () {
 	        if (this.onactivity) {
 	            this.onactivity();
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.onError = function (error) {
 	        if (this.onerror) {
 	            this.onerror(error);
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.openStream = function () {
 	        var self = this;
 	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
@@ -3130,7 +2657,6 @@ module.exports =
 	            });
 	        }
 	    };
-	    /** @private */
 	    HTTPSocket.prototype.closeStream = function () {
 	        if (this.stream) {
 	            this.stream.unbind_all();
@@ -3264,7 +2790,6 @@ module.exports =
 	                    }
 	                    break;
 	                case 4:
-	                    // this happens only on errors, never after calling close
 	                    if (xhr.responseText && xhr.responseText.length > 0) {
 	                        socket.onChunk(xhr.status, xhr.responseText);
 	                    }
@@ -3305,10 +2830,8 @@ module.exports =
 
 	"use strict";
 	exports.addUnloadListener = function (listener) {
-	    // there is no "unload" callback in this environment
 	};
 	exports.removeUnloadListener = function (listener) {
-	    // there is no "unload" callback in this environment
 	};
 
 
@@ -3338,9 +2861,6 @@ module.exports =
 	        });
 	        react_native_1.NetInfo.addEventListener('change', function (connectionState) {
 	            var isNowOnline = hasOnlineConnectionState(connectionState);
-	            // React Native counts the switch from Wi-Fi to Cellular
-	            // as a state change. Return if current and previous states
-	            // are both online/offline
 	            if (_this.online === isNowOnline)
 	                return;
 	            _this.online = isNowOnline;
@@ -3372,18 +2892,11 @@ module.exports =
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var dispatcher_1 = __webpack_require__(3);
-	/** Really basic interface providing network availability info.
-	 *
-	 * Emits:
-	 * - online - when browser goes online
-	 * - offline - when browser goes offline
-	 */
 	var NetInfo = (function (_super) {
 	    __extends(NetInfo, _super);
 	    function NetInfo() {
 	        _super.call(this);
 	        var self = this;
-	        // This is okay, as IE doesn't support this stuff anyway.
 	        if (window.addEventListener !== undefined) {
 	            window.addEventListener("online", function () {
 	                self.emit('online');
@@ -3393,14 +2906,6 @@ module.exports =
 	            }, false);
 	        }
 	    }
-	    /** Returns whether browser is online or not
-	     *
-	     * Offline means definitely offline (no connection to router).
-	     * Inverse does NOT mean definitely online (only currently supported in Safari
-	     * and even there only means the device has a connection to the router).
-	     *
-	     * @return {Boolean}
-	     */
 	    NetInfo.prototype.isOnline = function () {
 	        if (window.navigator.onLine === undefined) {
 	            return true;
@@ -3480,7 +2985,6 @@ module.exports =
 	                    channel.handleEvent(params.event, params.data);
 	                }
 	            }
-	            // Emit globally [deprecated]
 	            if (!internal) {
 	                self.global_emitter.emit(params.event, params.data);
 	            }
@@ -3578,10 +3082,8 @@ module.exports =
 	            return Boolean(this.config.encrypted);
 	        }
 	    };
-	    /*  STATIC PROPERTIES */
 	    Pusher.instances = [];
 	    Pusher.isReady = false;
-	    // for jsonp
 	    Pusher.Runtime = runtime_1.default;
 	    Pusher.ScriptReceivers = runtime_1.default.ScriptReceivers;
 	    Pusher.DependenciesReceivers = runtime_1.default.DependenciesReceivers;
@@ -3595,7 +3097,6 @@ module.exports =
 	    }
 	}
 	runtime_1.default.whenReady(Pusher.ready);
-	// init Pusher:
 	Pusher.ready();
 
 
@@ -3714,32 +3215,12 @@ module.exports =
 	var script_receiver_factory_1 = __webpack_require__(10);
 	var runtime_1 = __webpack_require__(5);
 	var factory_1 = __webpack_require__(2);
-	/** Handles loading dependency files.
-	 *
-	 * Dependency loaders don't remember whether a resource has been loaded or
-	 * not. It is caller's responsibility to make sure the resource is not loaded
-	 * twice. This is because it's impossible to detect resource loading status
-	 * without knowing its content.
-	 *
-	 * Options:
-	 * - cdn_http - url to HTTP CND
-	 * - cdn_https - url to HTTPS CDN
-	 * - version - version of pusher-js
-	 * - suffix - suffix appended to all names of dependency files
-	 *
-	 * @param {Object} options
-	 */
 	var DependencyLoader = (function () {
 	    function DependencyLoader(options) {
 	        this.options = options;
 	        this.receivers = options.receivers || script_receiver_factory_1.ScriptReceivers;
 	        this.loading = {};
 	    }
-	    /** Loads the dependency from CDN.
-	     *
-	     * @param  {String} name
-	     * @param  {Function} callback
-	     */
 	    DependencyLoader.prototype.load = function (name, options, callback) {
 	        var self = this;
 	        if (self.loading[name] && self.loading[name].length > 0) {
@@ -3775,14 +3256,8 @@ module.exports =
 	        else {
 	            cdn = this.options.cdn_http;
 	        }
-	        // make sure there are no double slashes
 	        return cdn.replace(/\/*$/, "") + "/" + this.options.version;
 	    };
-	    /** Returns a full path to a dependency file.
-	     *
-	     * @param {String} name
-	     * @returns {String}
-	     */
 	    DependencyLoader.prototype.getPath = function (name, options) {
 	        return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
 	    };
@@ -3801,29 +3276,11 @@ module.exports =
 	var Collections = __webpack_require__(0);
 	var util_1 = __webpack_require__(1);
 	var factory_1 = __webpack_require__(2);
-	/** Sends data via JSONP.
-	 *
-	 * Data is a key-value map. Its values are JSON-encoded and then passed
-	 * through base64. Finally, keys and encoded values are appended to the query
-	 * string.
-	 *
-	 * The class itself does not guarantee raising errors on failures, as it's not
-	 * possible to support such feature on all browsers. Instead, JSONP endpoint
-	 * should call back in a way that's easy to distinguish from browser calls,
-	 * for example by passing a second argument to the receiver.
-	 *
-	 * @param {String} url
-	 * @param {Object} data key-value map of data to be submitted
-	 */
 	var JSONPRequest = (function () {
 	    function JSONPRequest(url, data) {
 	        this.url = url;
 	        this.data = data;
 	    }
-	    /** Sends the actual JSONP request.
-	     *
-	     * @param {ScriptReceiver} receiver
-	     */
 	    JSONPRequest.prototype.send = function (receiver) {
 	        if (this.request) {
 	            return;
@@ -3836,7 +3293,6 @@ module.exports =
 	        this.request = factory_1.default.createScriptRequest(url);
 	        this.request.send(receiver);
 	    };
-	    /** Cleans up the DOM remains of the JSONP request. */
 	    JSONPRequest.prototype.cleanup = function () {
 	        if (this.request) {
 	            this.request.cleanup();
@@ -3853,15 +3309,6 @@ module.exports =
 /***/ function(module, exports) {
 
 	"use strict";
-	/** Sends a generic HTTP GET request using a script tag.
-	 *
-	 * By constructing URL in a specific way, it can be used for loading
-	 * JavaScript resources or JSONP requests. It can notify about errors, but
-	 * only in certain environments. Please take care of monitoring the state of
-	 * the request yourself.
-	 *
-	 * @param {String} src
-	 */
 	var ScriptRequest = (function () {
 	    function ScriptRequest(src) {
 	        this.src = src;
@@ -3890,7 +3337,6 @@ module.exports =
 	                }
 	            };
 	        }
-	        // Opera<11.6 hack for missing onerror callback
 	        if (self.script.async === undefined && document.attachEvent &&
 	            /opera/i.test(navigator.userAgent)) {
 	            self.errorScript = document.createElement("script");
@@ -3907,7 +3353,6 @@ module.exports =
 	            head.insertBefore(self.errorScript, self.script.nextSibling);
 	        }
 	    };
-	    /** Cleans up the DOM remains of the script request. */
 	    ScriptRequest.prototype.cleanup = function () {
 	        if (this.script) {
 	            this.script.onload = this.script.onerror = null;
@@ -3978,10 +3423,6 @@ module.exports =
 	"use strict";
 	var Collections = __webpack_require__(0);
 	var util_1 = __webpack_require__(1);
-	/** Launches all substrategies and emits prioritized connected transports.
-	 *
-	 * @param {Array} strategies
-	 */
 	var BestConnectedEverStrategy = (function () {
 	    function BestConnectedEverStrategy(strategies) {
 	        this.strategies = strategies;
@@ -4010,17 +3451,6 @@ module.exports =
 	}());
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = BestConnectedEverStrategy;
-	/** Connects to all strategies in parallel.
-	 *
-	 * Callback builder should be a function that takes two arguments: index
-	 * and a list of runners. It should return another function that will be
-	 * passed to the substrategy with given index. Runners can be aborted using
-	 * abortRunner(s) functions from this class.
-	 *
-	 * @param  {Array} strategies
-	 * @param  {Function} callbackBuilder
-	 * @return {Object} strategy runner
-	 */
 	function connect(strategies, minPriority, callbackBuilder) {
 	    var runners = Collections.map(strategies, function (strategy, i, _, rs) {
 	        return strategy.connect(minPriority, callbackBuilder(i, rs));
@@ -4057,12 +3487,6 @@ module.exports =
 	var util_1 = __webpack_require__(1);
 	var runtime_1 = __webpack_require__(5);
 	var sequential_strategy_1 = __webpack_require__(22);
-	/** Caches last successful transport and uses it for following attempts.
-	 *
-	 * @param {Strategy} strategy
-	 * @param {Object} transports
-	 * @param {Object} options
-	 */
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
 	        this.strategy = strategy;
@@ -4175,14 +3599,6 @@ module.exports =
 
 	"use strict";
 	var timers_1 = __webpack_require__(6);
-	/** Runs substrategy after specified delay.
-	 *
-	 * Options:
-	 * - delay - time in miliseconds to delay the substrategy attempt
-	 *
-	 * @param {Strategy} strategy
-	 * @param {Object} options
-	 */
 	var DelayedStrategy = (function () {
 	    function DelayedStrategy(strategy, _a) {
 	        var number = _a.delay;
@@ -4224,10 +3640,6 @@ module.exports =
 /***/ function(module, exports) {
 
 	"use strict";
-	/** Launches the substrategy and terminates on the first open connection.
-	 *
-	 * @param {Strategy} strategy
-	 */
 	var FirstConnectedStrategy = (function () {
 	    function FirstConnectedStrategy(strategy) {
 	        this.strategy = strategy;
@@ -4255,12 +3667,6 @@ module.exports =
 /***/ function(module, exports) {
 
 	"use strict";
-	/** Proxies method calls to one of substrategies basing on the test function.
-	 *
-	 * @param {Function} test
-	 * @param {Strategy} trueBranch strategy used when test returns true
-	 * @param {Strategy} falseBranch strategy used when test returns false
-	 */
 	var IfStrategy = (function () {
 	    function IfStrategy(test, trueBranch, falseBranch) {
 	        this.test = test;
@@ -4289,13 +3695,6 @@ module.exports =
 	var factory_1 = __webpack_require__(2);
 	var util_1 = __webpack_require__(1);
 	var Errors = __webpack_require__(8);
-	/** Provides a strategy interface for transports.
-	 *
-	 * @param {String} name
-	 * @param {Number} priority
-	 * @param {Class} transport
-	 * @param {Object} options
-	 */
 	var TransportStrategy = (function () {
 	    function TransportStrategy(name, priority, transport, options) {
 	        this.name = name;
@@ -4303,20 +3702,11 @@ module.exports =
 	        this.transport = transport;
 	        this.options = options || {};
 	    }
-	    /** Returns whether the transport is supported in the browser.
-	     *
-	     * @returns {Boolean}
-	     */
 	    TransportStrategy.prototype.isSupported = function () {
 	        return this.transport.isSupported({
 	            encrypted: this.options.encrypted
 	        });
 	    };
-	    /** Launches a connection attempt and returns a strategy runner.
-	     *
-	     * @param  {Function} callback
-	     * @return {Object} strategy runner
-	     */
 	    TransportStrategy.prototype.connect = function (minPriority, callback) {
 	        if (!this.isSupported()) {
 	            return failAttempt(new Errors.UnsupportedStrategy(), callback);
@@ -4357,7 +3747,6 @@ module.exports =
 	        transport.bind("open", onOpen);
 	        transport.bind("error", onError);
 	        transport.bind("closed", onClosed);
-	        // connect will be called automatically after initialization
 	        transport.initialize();
 	        return {
 	            abort: function () {
@@ -4433,19 +3822,6 @@ module.exports =
 	"use strict";
 	var util_1 = __webpack_require__(1);
 	var Collections = __webpack_require__(0);
-	/** Creates transport connections monitored by a transport manager.
-	 *
-	 * When a transport is closed, it might mean the environment does not support
-	 * it. It's possible that messages get stuck in an intermediate buffer or
-	 * proxies terminate inactive connections. To combat these problems,
-	 * assistants monitor the connection lifetime, report unclean exits and
-	 * adjust ping timeouts to keep the connection active. The decision to disable
-	 * a transport is the manager's responsibility.
-	 *
-	 * @param {TransportManager} manager
-	 * @param {TransportConnection} transport
-	 * @param {Object} options
-	 */
 	var AssistantToTheTransportManager = (function () {
 	    function AssistantToTheTransportManager(manager, transport, options) {
 	        this.manager = manager;
@@ -4454,16 +3830,6 @@ module.exports =
 	        this.maxPingDelay = options.maxPingDelay;
 	        this.pingDelay = undefined;
 	    }
-	    /** Creates a transport connection.
-	     *
-	     * This function has the same API as Transport#createConnection.
-	     *
-	     * @param {String} name
-	     * @param {Number} priority
-	     * @param {String} key the application key
-	     * @param {Object} options
-	     * @returns {TransportConnection}
-	     */
 	    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
 	        var self = this;
 	        options = Collections.extend({}, options, {
@@ -4479,11 +3845,9 @@ module.exports =
 	        var onClosed = function (closeEvent) {
 	            connection.unbind("closed", onClosed);
 	            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-	                // we don't want to use transports not obeying the protocol
 	                self.manager.reportDeath();
 	            }
 	            else if (!closeEvent.wasClean && openTimestamp) {
-	                // report deaths only for short-living transport
 	                var lifespan = util_1.default.now() - openTimestamp;
 	                if (lifespan < 2 * self.maxPingDelay) {
 	                    self.manager.reportDeath();
@@ -4494,14 +3858,6 @@ module.exports =
 	        connection.bind("open", onOpen);
 	        return connection;
 	    };
-	    /** Returns whether the transport is supported in the environment.
-	     *
-	     * This function has the same API as Transport#isSupported. Might return false
-	     * when the manager decides to kill the transport.
-	     *
-	     * @param {Object} environment the environment details (encryption, settings)
-	     * @returns {Boolean} true when the transport is supported
-	     */
 	    AssistantToTheTransportManager.prototype.isSupported = function (environment) {
 	        return this.manager.isAlive() && this.transport.isSupported(environment);
 	    };
@@ -4517,42 +3873,13 @@ module.exports =
 
 	"use strict";
 	var transport_connection_1 = __webpack_require__(63);
-	/** Provides interface for transport connection instantiation.
-	 *
-	 * Takes transport-specific hooks as the only argument, which allow checking
-	 * for transport support and creating its connections.
-	 *
-	 * Supported hooks: * - file - the name of the file to be fetched during initialization
-	 * - urls - URL scheme to be used by transport
-	 * - handlesActivityCheck - true when the transport handles activity checks
-	 * - supportsPing - true when the transport has a ping/activity API
-	 * - isSupported - tells whether the transport is supported in the environment
-	 * - getSocket - creates a WebSocket-compatible transport socket
-	 *
-	 * See transports.js for specific implementations.
-	 *
-	 * @param {Object} hooks object containing all needed transport hooks
-	 */
 	var Transport = (function () {
 	    function Transport(hooks) {
 	        this.hooks = hooks;
 	    }
-	    /** Returns whether the transport is supported in the environment.
-	     *
-	     * @param {Object} envronment te environment details (encryption, settings)
-	     * @returns {Boolean} true when the transport is supported
-	     */
 	    Transport.prototype.isSupported = function (environment) {
 	        return this.hooks.isSupported(environment);
 	    };
-	    /** Creates a transport connection.
-	     *
-	     * @param {String} name
-	     * @param {Number} priority
-	     * @param {String} key the application key
-	     * @param {Object} options
-	     * @returns {TransportConnection}
-	     */
 	    Transport.prototype.createConnection = function (name, priority, key, options) {
 	        return new transport_connection_1.default(this.hooks, name, priority, key, options);
 	    };
@@ -4578,34 +3905,6 @@ module.exports =
 	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(11);
 	var dependencies_1 = __webpack_require__(9);
-	/** Provides universal API for transport connections.
-	 *
-	 * Transport connection is a low-level object that wraps a connection method
-	 * and exposes a simple evented interface for the connection state and
-	 * messaging. It does not implement Pusher-specific WebSocket protocol.
-	 *
-	 * Additionally, it fetches resources needed for transport to work and exposes
-	 * an interface for querying transport features.
-	 *
-	 * States:
-	 * - new - initial state after constructing the object
-	 * - initializing - during initialization phase, usually fetching resources
-	 * - intialized - ready to establish a connection
-	 * - connection - when connection is being established
-	 * - open - when connection ready to be used
-	 * - closed - after connection was closed be either side
-	 *
-	 * Emits:
-	 * - error - after the connection raised an error
-	 *
-	 * Options:
-	 * - encrypted - whether connection should use ssl
-	 * - hostEncrypted - host to connect to when connection is encrypted
-	 * - hostUnencrypted - host to connect to when connection is not encrypted
-	 *
-	 * @param {String} key application key
-	 * @param {Object} options
-	 */
 	var TransportConnection = (function (_super) {
 	    __extends(TransportConnection, _super);
 	    function TransportConnection(hooks, name, priority, key, options) {
@@ -4620,24 +3919,12 @@ module.exports =
 	        this.activityTimeout = options.activityTimeout;
 	        this.id = this.timeline.generateUniqueID();
 	    }
-	    /** Checks whether the transport handles activity checks by itself.
-	     *
-	     * @return {Boolean}
-	     */
 	    TransportConnection.prototype.handlesActivityChecks = function () {
 	        return Boolean(this.hooks.handlesActivityChecks);
 	    };
-	    /** Checks whether the transport supports the ping/pong API.
-	     *
-	     * @return {Boolean}
-	     */
 	    TransportConnection.prototype.supportsPing = function () {
 	        return Boolean(this.hooks.supportsPing);
 	    };
-	    /** Initializes the transport.
-	     *
-	     * Fetches resources if needed and then transitions to initialized.
-	     */
 	    TransportConnection.prototype.initialize = function () {
 	        var self = this;
 	        self.timeline.info(self.buildTimelineMessage({
@@ -4666,10 +3953,6 @@ module.exports =
 	            self.onClose();
 	        }
 	    };
-	    /** Tries to establish a connection.
-	     *
-	     * @returns {Boolean} false if transport is in invalid state
-	     */
 	    TransportConnection.prototype.connect = function () {
 	        var self = this;
 	        if (self.socket || self.state !== state_1.default.INITIALIZED) {
@@ -4691,10 +3974,6 @@ module.exports =
 	        self.changeState(state_1.default.CONNECTING);
 	        return true;
 	    };
-	    /** Closes the connection.
-	     *
-	     * @return {Boolean} true if there was a connection to close
-	     */
 	    TransportConnection.prototype.close = function () {
 	        if (this.socket) {
 	            this.socket.close();
@@ -4704,15 +3983,9 @@ module.exports =
 	            return false;
 	        }
 	    };
-	    /** Sends data over the open connection.
-	     *
-	     * @param {String} data
-	     * @return {Boolean} true only when in the "open" state
-	     */
 	    TransportConnection.prototype.send = function (data) {
 	        var self = this;
 	        if (self.state === state_1.default.OPEN) {
-	            // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
 	            util_1.default.defer(function () {
 	                if (self.socket) {
 	                    self.socket.send(data);
@@ -4724,13 +3997,11 @@ module.exports =
 	            return false;
 	        }
 	    };
-	    /** Sends a ping if the connection is open and transport supports it. */
 	    TransportConnection.prototype.ping = function () {
 	        if (this.state === state_1.default.OPEN && this.supportsPing()) {
 	            this.socket.ping();
 	        }
 	    };
-	    /** @private */
 	    TransportConnection.prototype.onOpen = function () {
 	        if (this.hooks.beforeOpen) {
 	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
@@ -4738,12 +4009,10 @@ module.exports =
 	        this.changeState(state_1.default.OPEN);
 	        this.socket.onopen = undefined;
 	    };
-	    /** @private */
 	    TransportConnection.prototype.onError = function (error) {
 	        this.emit("error", { type: 'WebSocketError', error: error });
 	        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
 	    };
-	    /** @private */
 	    TransportConnection.prototype.onClose = function (closeEvent) {
 	        if (closeEvent) {
 	            this.changeState(state_1.default.CLOSED, {
@@ -4758,15 +4027,12 @@ module.exports =
 	        this.unbindListeners();
 	        this.socket = undefined;
 	    };
-	    /** @private */
 	    TransportConnection.prototype.onMessage = function (message) {
 	        this.emit("message", message);
 	    };
-	    /** @private */
 	    TransportConnection.prototype.onActivity = function () {
 	        this.emit("activity");
 	    };
-	    /** @private */
 	    TransportConnection.prototype.bindListeners = function () {
 	        var self = this;
 	        self.socket.onopen = function () {
@@ -4785,7 +4051,6 @@ module.exports =
 	            self.socket.onactivity = function () { self.onActivity(); };
 	        }
 	    };
-	    /** @private */
 	    TransportConnection.prototype.unbindListeners = function () {
 	        if (this.socket) {
 	            this.socket.onopen = undefined;
@@ -4797,7 +4062,6 @@ module.exports =
 	            }
 	        }
 	    };
-	    /** @private */
 	    TransportConnection.prototype.changeState = function (state, params) {
 	        this.state = state;
 	        this.timeline.info(this.buildTimelineMessage({
@@ -4821,39 +4085,20 @@ module.exports =
 
 	"use strict";
 	var factory_1 = __webpack_require__(2);
-	/** Keeps track of the number of lives left for a transport.
-	 *
-	 * In the beginning of a session, transports may be assigned a number of
-	 * lives. When an AssistantToTheTransportManager instance reports a transport
-	 * connection closed uncleanly, the transport loses a life. When the number
-	 * of lives drops to zero, the transport gets disabled by its manager.
-	 *
-	 * @param {Object} options
-	 */
 	var TransportManager = (function () {
 	    function TransportManager(options) {
 	        this.options = options || [];
 	        this.livesLeft = this.options.lives || Infinity;
 	    }
-	    /** Creates a assistant for the transport.
-	     *
-	     * @param {Transport} transport
-	     * @returns {AssistantToTheTransportManager}
-	     */
 	    TransportManager.prototype.getAssistant = function (transport) {
 	        return factory_1.default.createAssistantToTheTransportManager(this, transport, {
 	            minPingDelay: this.options.minPingDelay,
 	            maxPingDelay: this.options.maxPingDelay
 	        });
 	    };
-	    /** Returns whether the transport has any lives left.
-	     *
-	     * @returns {Boolean}
-	     */
 	    TransportManager.prototype.isAlive = function () {
 	        return this.livesLeft > 0;
 	    };
-	    /** Takes one life from the transport. */
 	    TransportManager.prototype.reportDeath = function () {
 	        this.livesLeft -= 1;
 	    };
@@ -4918,14 +4163,9 @@ module.exports =
 	            }
 	        }, delay);
 	    }
-	    /** Returns whether the timer is still running.
-	     *
-	     * @return {Boolean}
-	     */
 	    Timer.prototype.isRunning = function () {
 	        return this.timer !== null;
 	    };
-	    /** Aborts a timer when it's running. */
 	    Timer.prototype.ensureAborted = function () {
 	        if (this.timer) {
 	            this.clear(this.timer);

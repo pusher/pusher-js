@@ -1,4 +1,3 @@
-/** Error classes used throughout the library. */
 export declare class BadEventName extends Error {
 }
 export declare class RequestTimedOut extends Error {
