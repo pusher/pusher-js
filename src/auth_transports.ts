@@ -2,7 +2,6 @@ import Logger from './logger';
 import AbstractRuntime from './runtimes/abstract_runtime';
 import Browser from './runtimes/browser';
 import Factory from './utils/factory';
-import Pusher from './pusher';
 
 interface AuthTransport {
   (context : AbstractRuntime, socketId : string, callback : Function) : void

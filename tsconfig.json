@@ -15,6 +15,7 @@
     "src/d.ts/window/sockjs.d.ts",
     "src/d.ts/window/events.d.ts",
     "src/d.ts/react-native/react-native.d.ts",
+    "src/d.ts/module/module.d.ts",
     "src/pusher.ts",
     "src/node_modules/pusher-websocket-iso-externals-web/net_info.ts",
     "src/node_modules/pusher-websocket-iso-externals-web/ws.ts",

@@ -18,7 +18,7 @@ import Logger from './logger';
 import ConnectionState from './connection/state';
 import Factory from './utils/factory';
 
-export default class Pusher {
+class Pusher {
 
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
@@ -230,5 +230,6 @@ function checkAppKey(key) {
 }
 
 Runtime.whenReady(Pusher.ready);
-// init Pusher:
-Pusher.ready()
+
+// required so we don't have to do require('pusher').default etc.
+module.exports = Pusher;

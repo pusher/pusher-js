@@ -1,10 +1,9 @@
 import { default as EventsDispatcher } from '../events/dispatcher';
-import Pusher from "../pusher";
 export default class Channel extends EventsDispatcher {
     name: string;
     pusher: any;
     subscribed: boolean;
-    constructor(name: string, pusher: Pusher);
+    constructor(name: string, pusher: any);
     authorize(socketId: string, callback: Function): any;
     trigger(event: string, data: any): any;
     disconnect(): void;

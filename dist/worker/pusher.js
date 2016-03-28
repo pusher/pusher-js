@@ -3029,15 +3029,13 @@ var Pusher =
 	    Pusher.DependenciesReceivers = runtime_1.default.DependenciesReceivers;
 	    return Pusher;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Pusher;
 	function checkAppKey(key) {
 	    if (key === null || key === undefined) {
 	        throw "You must pass your app key when you instantiate Pusher.";
 	    }
 	}
 	runtime_1.default.whenReady(Pusher.ready);
-	Pusher.ready();
+	module.e = Pusher;
 
 
 /***/ },
