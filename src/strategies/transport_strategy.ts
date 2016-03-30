@@ -2,7 +2,7 @@ import Factory from "../utils/factory";
 import Util from '../util';
 import * as Errors from '../errors';
 import Strategy from './strategy';
-import Transport from '../transports/transport';
+import Transport from 'shared/transport';
 import StrategyOptions from './strategy_options';
 import Handshake from "../connection/handshake";
 

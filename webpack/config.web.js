@@ -18,24 +18,27 @@ var config = objectAssign(require('./config.shared'),{
   externals: {
     '../package': '{version: "'+ version +'"}'
   },
-  plugins: [
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/app$/,
-      "pusher-websocket-iso-externals-web/app"
-    ),
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/ws$/,
-      "pusher-websocket-iso-externals-web/ws"
-    ),
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/xhr$/,
-      "pusher-websocket-iso-externals-web/xhr"
-    ),
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/net_info$/,
-      "pusher-websocket-iso-externals-web/net_info"
-    )
-  ]
+  resolve: {
+    modulesDirectories: ['node_modules', 'web_modules', 'src/runtimes/web', 'src/runtimes/shared']
+  }
+  // plugins: [
+  //   new NormalModuleReplacementPlugin(
+  //     /^node\/app$/,
+  //     "web/app"
+  //   ),
+  //   new NormalModuleReplacementPlugin(
+  //     /^node\/ws$/,
+  //     "web/ws"
+  //   ),
+  //   new NormalModuleReplacementPlugin(
+  //     /^node\/xhr$/,
+  //     "web/xhr"
+  //   ),
+  //   new NormalModuleReplacementPlugin(
+  //     /^node\/net_info$/,
+  //     "web/net_info"
+  //   )
+  // ]
 });
 
 module.exports = config;

@@ -1,5 +1,5 @@
 import AssistantToTheTransportManager from './assistant_to_the_transport_manager';
-import Transport from "./Transport";
+import Transport from "shared/transport";
 import PingDelayOptions from "./ping_delay_options";
 import Factory from "../utils/factory";
 

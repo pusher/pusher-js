@@ -1,6 +1,6 @@
 import URLLocation from "./url_location";
 import State from "./state";
-import Socket from "../socket/socket";
+import Socket from "../socket";
 import SocketHooks from "./socket_hooks";
 import HTTPRequest from "./http_request";
 declare class HTTPSocket implements Socket {

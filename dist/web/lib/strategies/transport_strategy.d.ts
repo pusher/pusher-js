@@ -1,5 +1,5 @@
 import Strategy from './strategy';
-import Transport from '../transports/transport';
+import Transport from 'shared/transport';
 import StrategyOptions from './strategy_options';
 export default class TransportStrategy implements Strategy {
     name: string;

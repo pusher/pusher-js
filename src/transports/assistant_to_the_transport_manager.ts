@@ -1,7 +1,7 @@
 import Util from '../util';
 import * as Collections from '../utils/collections';
 import TransportManager from './transport_manager';
-import Transport from './transport';
+import Transport from 'shared/transport';
 import PingDelayOptions from './ping_delay_options';
 
 /** Creates transport connections monitored by a transport manager.

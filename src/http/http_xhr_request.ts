@@ -1,5 +1,5 @@
 import HTTPRequest from './http_request';
-import XHR from 'pusher-websocket-iso-externals-node/xhr';
+import XHR from 'xhr';
 import RequestHooks from "./request_hooks";
 import Ajax from "./ajax";
 

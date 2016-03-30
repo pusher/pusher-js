@@ -1,6 +1,6 @@
 import Factory from "../utils/factory";
-import URLScheme from "./url_scheme.ts";
-import Socket from "../socket/socket.ts";
+import URLScheme from "./url_scheme";
+import Socket from "../socket";
 
 interface TransportHooks {
   file?: string;

@@ -1,5 +1,5 @@
 import AssistantToTheTransportManager from './assistant_to_the_transport_manager';
-import Transport from "./Transport";
+import Transport from "shared/transport";
 export default class TransportManager {
     options: any;
     livesLeft: number;

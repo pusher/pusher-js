@@ -1,6 +1,6 @@
 import URLLocation from "./url_location";
 import State from "./state";
-import Socket from "../socket/socket";
+import Socket from "../socket";
 import SocketHooks from "./socket_hooks";
 import Util from "../util";
 import getXHR from './http_xhr_request';
@@ -8,7 +8,7 @@ import getXDR from "./http_xdomain_request";
 import Ajax from "./ajax";
 import HTTPRequest from "./http_request";
 import HTTP from './http';
-import Runtime from "../runtimes/runtime";
+import Runtime from "runtime";
 
 var autoIncrement = 1;
 

@@ -1,5 +1,5 @@
 import TransportManager from './transport_manager';
-import Transport from './transport';
+import Transport from 'shared/transport';
 import PingDelayOptions from './ping_delay_options';
 export default class AssistantToTheTransportManager implements PingDelayOptions {
     manager: TransportManager;

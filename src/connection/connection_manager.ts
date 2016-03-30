@@ -1,6 +1,6 @@
 import {default as EventsDispatcher} from '../events/dispatcher';
 import {OneOffTimer as Timer} from '../utils/timers';
-import {Network} from 'pusher-websocket-iso-externals-node/net_info';
+import {Network} from 'node/net_info';
 import Logger from '../logger';
 import ConnectionState from './state';
 import HandshakePayload from './handshake/handshake_payload';

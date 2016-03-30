@@ -1,5 +1,5 @@
 import Channel from './channels/channel';
-import { AuthTransports } from './auth_transports';
+import { AuthTransports } from 'shared/auth_transports';
 export default class Authorizer {
     static authorizers: AuthTransports;
     channel: Channel;

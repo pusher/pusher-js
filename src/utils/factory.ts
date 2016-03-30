@@ -1,8 +1,8 @@
 import AssistantToTheTransportManager from "../transports/assistant_to_the_transport_manager";
-import Transport from "../transports/Transport";
+import Transport from "shared/transport";
 import TransportManager from "../transports/transport_manager";
 import Handshake from "../connection/handshake";
-import TransportConnection from "../transports/transport_connection";
+import TransportConnection from "node/transport_connection";
 import SocketHooks from "../http/socket_hooks";
 import HTTPSocket from "../http/http_socket";
 import Authorizer from "../pusher_authorizer";
@@ -13,12 +13,10 @@ import PrivateChannel from "../channels/private_channel";
 import Channel from "../channels/channel";
 import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
-import XHR from "pusher-websocket-iso-externals-node/xhr";
+import XHR from "xhr";
 import Channels from "../channels/channels";
-import {Network, NetInfo} from "../node_modules/pusher-websocket-iso-externals-node/net_info";
-import WS from 'pusher-websocket-iso-externals-node/ws';
-import JSONPRequest from '../runtimes/dom/jsonp_request';
-import ScriptRequest from '../runtimes/dom/script_request';
+import {Network, NetInfo} from "node/net_info";
+import WS from 'ws';
 
 var Factory = {
 
@@ -83,15 +81,8 @@ var Factory = {
 
   createAssistantToTheTransportManager(manager : TransportManager, transport : Transport, options : any) : AssistantToTheTransportManager {
     return new AssistantToTheTransportManager(manager, transport, options);
-  },
-
-  createJSONPRequest(url : string, data : any) : JSONPRequest {
-    return new JSONPRequest(url, data);
-  },
-
-  createScriptRequest(src : string) : ScriptRequest {
-    return new ScriptRequest(src);
   }
+
 }
 
 export default Factory;

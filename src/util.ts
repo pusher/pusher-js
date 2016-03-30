@@ -1,7 +1,6 @@
 import * as Collections from "./utils/collections";
 import TimedCallback from "./utils/timers/timed_callback";
 import {OneOffTimer, PeriodicTimer} from "./utils/timers";
-import XHR from "pusher-websocket-iso-externals-node/xhr";
 
 var Util = {
   now() : number {

@@ -1,5 +1,5 @@
 import Util from '../util';
-import Runtime from '../runtimes/runtime';
+import Runtime from 'runtime';
 import Strategy from './strategy';
 import SequentialStrategy from './sequential_strategy';
 import StrategyOptions from "./strategy_options";

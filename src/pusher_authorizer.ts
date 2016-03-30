@@ -1,8 +1,8 @@
 import Logger from './logger';
 import Channel from './channels/channel';
 import Factory from './utils/factory';
-import Runtime from './runtimes/runtime';
-import {AuthTransports} from './auth_transports';
+import Runtime from 'runtime';
+import {AuthTransports} from 'shared/auth_transports';
 
 export default class Authorizer {
   static authorizers : AuthTransports;

@@ -5,18 +5,18 @@ cd "$(dirname "$0")"/..
 
 echo "Browser Release:"
 node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
-
-echo "Browser Minified Release:"
-node_modules/webpack/bin/webpack.js --config=webpack/config.web.min.js
-
-echo "React Native Release:"
-node_modules/webpack/bin/webpack.js --config=webpack/config.react-native.js
-
-echo "NodeJS Release":
-node_modules/webpack/bin/webpack.js --config=webpack/config.node.js
-
-echo "Web Worker Release:"
-node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
-
-echo "Web UMD Release:"
-node_modules/webpack/bin/webpack.js --config=webpack/config.web-umd.js
+# 
+# echo "Browser Minified Release:"
+# node_modules/webpack/bin/webpack.js --config=webpack/config.web.min.js
+#
+# echo "React Native Release:"
+# node_modules/webpack/bin/webpack.js --config=webpack/config.react-native.js
+#
+# echo "NodeJS Release":
+# node_modules/webpack/bin/webpack.js --config=webpack/config.node.js
+#
+# echo "Web Worker Release:"
+# node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
+#
+# echo "Web UMD Release:"
+# node_modules/webpack/bin/webpack.js --config=webpack/config.web-umd.js

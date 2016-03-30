@@ -1,4 +1,4 @@
-import TransportConnection from "../../transports/transport_connection";
+import TransportConnection from "node/transport_connection";
 export default class Handshake {
     transport: TransportConnection;
     callback: (HandshakePayload) => void;

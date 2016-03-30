@@ -1,6 +1,4 @@
-import Runtime from "./runtimes/runtime";
-import AbstractRuntime from "./runtimes/abstract_runtime";
-import Browser from './runtimes/browser';
+import Runtime from "runtime";
 import Util from "./util";
 import * as Collections from './utils/collections';
 import Channels from './channels/channels';
@@ -25,8 +23,8 @@ class Pusher {
   static isReady : boolean = false;
   // for jsonp
   static Runtime : any = Runtime;
-  static ScriptReceivers : any  = Runtime.ScriptReceivers;
-  static DependenciesReceivers : any = Runtime.DependenciesReceivers;
+  static ScriptReceivers : any  = (<any>Runtime).ScriptReceivers;
+  static DependenciesReceivers : any = (<any>Runtime).DependenciesReceivers;
 
   static ready() {
     Pusher.isReady = true;

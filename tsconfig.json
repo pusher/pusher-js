@@ -17,10 +17,13 @@
     "src/d.ts/react-native/react-native.d.ts",
     "src/d.ts/module/module.d.ts",
     "src/pusher.ts",
-    "src/node_modules/pusher-websocket-iso-externals-web/net_info.ts",
-    "src/node_modules/pusher-websocket-iso-externals-web/ws.ts",
-    "src/node_modules/pusher-websocket-iso-externals-web/xhr.ts",
-    "src/node_modules/pusher-websocket-iso-externals-web/app.ts",
-    "src/node_modules/pusher-websocket-iso-externals-react-native/net_info.ts"
+    "src/runtimes/web/net_info.ts",
+    "src/runtimes/web/ws.ts",
+    "src/runtimes/web/xhr.ts",
+    "src/runtimes/web/app.ts",
+    "src/runtimes/react-native/net_info.ts"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }

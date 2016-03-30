@@ -1,4 +1,4 @@
-import * as App from "pusher-websocket-iso-externals-node/app";
+import * as App from "node/app";
 import RequestHooks from "./request_hooks";
 import Ajax from "./ajax";
 import {default as EventsDispatcher} from "../events/dispatcher";

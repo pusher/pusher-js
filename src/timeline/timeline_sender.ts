@@ -2,7 +2,7 @@ import * as Collections from "../utils/collections";
 import Util from "../util";
 import base64encode from "../base64";
 import Timeline from "./timeline";
-import Runtime from '../runtimes/runtime';
+import Runtime from 'runtime';
 
 export default class TimelineSender {
   timeline: Timeline;
