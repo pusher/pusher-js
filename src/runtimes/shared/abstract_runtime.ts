@@ -1,6 +1,6 @@
-import {AuthTransports} from 'shared/auth_transports';
-import TimelineSender from '../../timeline/timeline_sender';
-import TimelineTransport from 'shared/timeline_transport';
+import {AuthTransports} from 'shared/auth/auth_transports';
+import TimelineSender from 'core/timeline/timeline_sender';
+import TimelineTransport from 'shared/timeline/timeline_transport';
 
 interface Runtime {
   whenReady(callback : Function) : void;

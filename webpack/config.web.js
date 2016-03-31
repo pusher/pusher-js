@@ -9,7 +9,7 @@ var objectAssign = require('object-assign-deep');
 // XHR, WebSocket and NetInfo in platforms/web/* //
 ///////////////////////////////////////////////////
 var config = objectAssign(require('./config.shared'),{
-  entry: "./src/pusher",
+  entry: "./src/core/pusher",
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
@@ -19,7 +19,7 @@ var config = objectAssign(require('./config.shared'),{
     '../package': '{version: "'+ version +'"}'
   },
   resolve: {
-    modulesDirectories: ['node_modules', 'web_modules', 'src/runtimes/web', 'src/runtimes/shared']
+    modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/web', 'src/runtimes']
   }
   // plugins: [
   //   new NormalModuleReplacementPlugin(

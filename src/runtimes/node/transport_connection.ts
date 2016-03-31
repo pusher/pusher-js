@@ -1,2 +1,2 @@
-import TransportConnection from 'shared/transport_connection';
+import TransportConnection from 'shared/transports/transport_connection';
 export default TransportConnection;

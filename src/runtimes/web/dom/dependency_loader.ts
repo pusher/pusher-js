@@ -1,7 +1,6 @@
 import {ScriptReceivers, ScriptReceiverFactory} from './script_receiver_factory';
-import Runtime from '../runtime';
+import Runtime from 'runtime';
 import ScriptRequest from './script_request';
-import Factory from '../../utils/factory';
 
 /** Handles loading dependency files.
  *
@@ -42,7 +41,7 @@ export default class DependencyLoader {
      } else {
        self.loading[name] = [callback];
 
-       var request = Factory.createScriptRequest(self.getPath(name, options));
+       var request = Runtime.createScriptRequest(self.getPath(name, options));
        var receiver = self.receivers.create(function(error) {
          self.receivers.remove(receiver);
 

@@ -1,8 +1,8 @@
 import ScriptReceiver from './script_receiver';
 import ScriptRequest from './script_request';
-import * as Collections from '../../utils/collections';
-import Util from '../../util';
-import Factory from '../../utils/factory';
+import * as Collections from 'core/utils/collections';
+import Util from 'core/util';
+import Runtime from '../runtime';
 
 /** Sends data via JSONP.
  *
@@ -46,7 +46,7 @@ import Factory from '../../utils/factory';
        Util.method("join", "=")
      ).join("&");
      var url = this.url + "/" + receiver.number + "?" + query;
-     this.request = Factory.createScriptRequest(url);
+     this.request = Runtime.createScriptRequest(url);
      this.request.send(receiver);
    }
 

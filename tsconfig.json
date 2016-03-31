@@ -8,6 +8,7 @@
     "removeComments": true
   },
   "files": [
+    "src/core/pusher.ts",
     "src/d.ts/faye-websocket/faye-websocket.d.ts",
     "src/d.ts/xmlhttprequest/xmlhttprequest.d.ts",
     "src/d.ts/window/websocket.d.ts",
@@ -16,7 +17,6 @@
     "src/d.ts/window/events.d.ts",
     "src/d.ts/react-native/react-native.d.ts",
     "src/d.ts/module/module.d.ts",
-    "src/pusher.ts",
     "src/runtimes/web/net_info.ts",
     "src/runtimes/web/ws.ts",
     "src/runtimes/web/xhr.ts",

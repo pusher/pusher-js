@@ -1,6 +1,6 @@
 import {NetInfo as NativeNetInfo} from 'react-native';
-import EventsDispatcher from '../../events/dispatcher';
-import Util from '../../util';
+import EventsDispatcher from 'core/events/dispatcher';
+import Util from 'core/util';
 
 function hasOnlineConnectionState(connectionState) : boolean{
   return connectionState.toLowerCase() !== "none";

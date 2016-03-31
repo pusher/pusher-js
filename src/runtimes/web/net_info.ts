@@ -1,4 +1,4 @@
-import {default as EventsDispatcher} from '../../events/dispatcher'
+import {default as EventsDispatcher} from 'core/events/dispatcher'
 
 /** Really basic interface providing network availability info.
  *

@@ -1,14 +1,22 @@
-import Runtime from "./abstract_runtime";
-import XHR from "pusher-websocket-iso-externals-xhr";
-import {Dependencies} from './dom/dependencies';
-import {AuthTransports, ajax, jsonp} from '../auth_transports';
-import TimelineTransport from '../shared/timeline_transport';
-import TimelineSender from '../timeline/timeline_sender';
+import Browser from "./browser";
+import XHR from "./xhr";
+import {Dependencies, DependenciesReceivers} from './dom/dependencies';
+import {AuthTransport, AuthTransports} from 'shared/auth/auth_transports';
+import xhrAuth from 'shared/auth/xhr_auth';
+import jsonpAuth from './auth/jsonp_auth';
+import TimelineTransport from 'shared/timeline/timeline_transport';
+import TimelineSender from 'core/timeline/timeline_sender';
+import ScriptRequest from './dom/script_request';
+import JSONPRequest from './dom/jsonp_request';
+import * as Collections from 'core/utils/collections';
+import {ScriptReceivers} from './dom/script_receiver_factory';
+import jsonpTimeline from './timeline/jsonp_timeline';
+import Transports from './transports/transports';
 
-var Browser : Runtime = {
+var Runtime : Browser = {
 
   // for jsonp auth
-  nextAuthCallbackID: 1;
+  nextAuthCallbackID: 1,
   auth_callbacks: {},
   ScriptReceivers,
   DependenciesReceivers,
@@ -22,7 +30,7 @@ var Browser : Runtime = {
     } else {
       initializeOnDocumentBody();
     }
-  }
+  },
 
   getDocument() : any {
     return document;
@@ -52,7 +60,7 @@ var Browser : Runtime = {
   },
 
   getAuthorizers() : AuthTransports {
-    return {ajax, jsonp};
+    return {ajax: xhrAuth, jsonp: jsonpAuth};
   },
 
   getTimelineTransport(sender: TimelineSender, encrypted : boolean) : TimelineTransport {
@@ -84,7 +92,15 @@ var Browser : Runtime = {
         function (t) { return t.isSupported({}); }
       )
     );
+  },
+
+  getLocalStorage() {
+    try {
+      return window.localStorage;
+    } catch (e) {
+      return undefined;
+    }
   }
 }
 
-export default Browser;
+export default Runtime;

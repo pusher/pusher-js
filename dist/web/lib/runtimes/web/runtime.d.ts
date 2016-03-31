@@ -1,3 +1,3 @@
-import Runtime from "./abstract_runtime";
-declare var Browser: Runtime;
-export default Browser;
+import Browser from "./browser";
+declare var Runtime: Browser;
+export default Runtime;
