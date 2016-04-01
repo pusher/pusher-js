@@ -1,4 +1,4 @@
-import Runtime from "./abstract_runtime";
+import Runtime from "./runtime_interface";
 import xhrTimeline from './xhr_timeline';
 import TimelineTransport from './timeline_transport';
 import xhrAuth from './xhr_auth';

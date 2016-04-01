@@ -2,7 +2,7 @@ import Browser from '../browser';
 import Logger from 'core/logger';
 import JSONPRequest from '../dom/jsonp_request';
 import {ScriptReceivers} from '../dom/script_receiver_factory';
-import AbstractRuntime from 'shared/abstract_runtime';
+import AbstractRuntime from 'shared/runtime_interface';
 import {AuthTransport} from 'shared/auth/auth_transports';
 
 var jsonp : AuthTransport = function(context : Browser, socketId, callback){
