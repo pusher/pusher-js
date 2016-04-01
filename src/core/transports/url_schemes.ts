@@ -1,5 +1,5 @@
-import Defaults from "../defaults.ts";
-import URLScheme from "./url_scheme.ts";
+import Defaults from "defaults";
+import URLScheme from "./url_scheme";
 
 function getGenericURL(baseScheme : string, params : any, path : string): string {
   var scheme = baseScheme + (params.encrypted ? "s" : "");

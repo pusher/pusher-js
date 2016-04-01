@@ -1,7 +1,7 @@
 var Mocks = require("../../helpers/mocks");
 var TransportConnection = require('transports/transport_connection').default;
-var Collections = require('utils/collections');
-var Timer = require('utils/timers').OneOffTimer;
+var Collections = require('core/utils/collections');
+var Timer = require('core/utils/timers').OneOffTimer;
 
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {

@@ -83,11 +83,11 @@ var XDRPollingTransport = new Transport(
 );
 
 var Transports = {
-  WSTransport,
-  XHRStreamingTransport,
-  XDRStreamingTransport,
-  XHRPollingTransport,
-  XDRPollingTransport
+  ws: WSTransport,
+  xhr_streaming: XHRStreamingTransport,
+  xdr_streaming: XDRStreamingTransport,
+  xhr_polling: XHRPollingTransport,
+  xdr_polling: XDRPollingTransport
 }
 
 export default Transports;

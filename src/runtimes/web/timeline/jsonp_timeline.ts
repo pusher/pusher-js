@@ -4,10 +4,10 @@ import Browser from 'runtime';
 import {AuthTransport} from 'shared/auth/auth_transports';
 import {ScriptReceivers} from '../dom/script_receiver_factory';
 
-var jsonp = function(sender : TimelineSender, encrypted : boolean): TimelineTransport {
+var getAgent = function(sender : TimelineSender, encrypted : boolean) {
   return function(data : any, callback : Function) {
     var scheme = "http" + (encrypted ? "s" : "") + "://";
-    var url = scheme + (sender.host || sender.options.host) + sender.options.path + "/jsonp";
+    var url = scheme + (sender.host || sender.options.host) + sender.options.path;
     var request = Browser.createJSONPRequest(url, data);
 
     var receiver = Browser.ScriptReceivers.create(function(error, result){
@@ -24,5 +24,10 @@ var jsonp = function(sender : TimelineSender, encrypted : boolean): TimelineTran
     request.send(receiver);
   }
 };
+
+var jsonp = {
+  name: 'jsonp',
+  getAgent
+}
 
 export default jsonp;

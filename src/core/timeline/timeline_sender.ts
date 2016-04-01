@@ -21,6 +21,6 @@ export default class TimelineSender {
       return;
     }
 
-    self.timeline.send(Runtime.getTimelineTransport(this, encrypted), callback);
+    self.timeline.send(Runtime.TimelineTransport.getAgent(this, encrypted), callback);
   }
 }

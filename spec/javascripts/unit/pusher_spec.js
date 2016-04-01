@@ -1,14 +1,14 @@
-var Util = require('util').default;
-var Collections = require('utils/collections');
-var Logger = require('logger').default;
-var StrategyBuilder = require('strategies/strategy_builder');
+var Util = require('core/util').default;
+var Collections = require('core/utils/collections');
+var Logger = require('core/logger').default;
+var StrategyBuilder = require('core/strategies/strategy_builder');
 var Defaults = require('defaults').default;
-var DefaultConfig = require('config');
-var TimelineSender = require('timeline/timeline_sender').default;
-var Pusher = require('pusher').default;
+var DefaultConfig = require('core/config');
+var TimelineSender = require('core/timeline/timeline_sender').default;
+var Pusher = require('core/pusher');
 var Mocks = require('../helpers/mocks');
-var Factory = require('utils/factory').default;
-var Runtime = require('runtimes/runtime').default;
+var Factory = require('core/utils/factory').default;
+var Runtime = require('runtime').default;
 
 describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;

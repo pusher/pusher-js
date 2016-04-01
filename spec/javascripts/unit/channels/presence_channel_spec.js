@@ -1,9 +1,9 @@
-var PresenceChannel = require('channels/presence_channel').default;
-var Channel = require('channels/channel').default;
-var Members = require('channels/members').default;
-var Authorizer = require('pusher_authorizer').default;
-var Errors = require('errors');
-var Factory = require('utils/factory').default;
+var PresenceChannel = require('core/channels/presence_channel').default;
+var Channel = require('core/channels/channel').default;
+var Members = require('core/channels/members').default;
+var Authorizer = require('core/pusher_authorizer').default;
+var Errors = require('core/errors');
+var Factory = require('core/utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
 describe("PresenceChannel", function() {

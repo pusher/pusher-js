@@ -21,6 +21,8 @@ var Runtime : Browser = {
   ScriptReceivers,
   DependenciesReceivers,
 
+  TimelineTransport: jsonpTimeline,
+
   whenReady(callback : Function) : void {
     var initializeOnDocumentBody = ()=> {
         this.onDocumentBody(callback);
@@ -63,10 +65,6 @@ var Runtime : Browser = {
     return {ajax: xhrAuth, jsonp: jsonpAuth};
   },
 
-  getTimelineTransport(sender: TimelineSender, encrypted : boolean) : TimelineTransport {
-    return jsonpTimeline(sender, encrypted);
-  },
-
   onDocumentBody(callback : Function) {
     if (document.body) {
       callback();
@@ -88,7 +86,7 @@ var Runtime : Browser = {
   getClientFeatures() : any[] {
     return Collections.keys(
       Collections.filterObject(
-        { "ws": Transports.WSTransport },
+        { "ws": Transports.ws },
         function (t) { return t.isSupported({}); }
       )
     );

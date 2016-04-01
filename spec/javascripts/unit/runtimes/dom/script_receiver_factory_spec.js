@@ -1,4 +1,4 @@
-var ScriptReceiverFactory = require('runtimes/dom/script_receiver_factory').ScriptReceiverFactory;
+var ScriptReceiverFactory = require('dom/script_receiver_factory').ScriptReceiverFactory;
 
 describe("ScriptReceiverFactory", function() {
   var receivers;

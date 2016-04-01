@@ -1,4 +1,4 @@
-var timers = require('utils/timers');
+var timers = require('core/utils/timers');
 
 describe("timers", function() {
   describe("Timer", function() {

@@ -1,15 +1,15 @@
-var StrategyBuilder = require('strategies/strategy_builder');
-var TransportStrategy = require('strategies/transport_strategy').default;
-var DelayedStrategy = require('strategies/delayed_strategy').default;
-var SequentialStrategy = require('strategies/sequential_strategy').default;
-var CachedStrategy = require('strategies/cached_strategy').default;
-var FirstConnectedStrategy = require('strategies/first_connected_strategy').default;
-var BestConnectedEverStrategy = require('strategies/best_connected_ever_strategy').default;
-var IfStrategy = require('strategies/if_strategy').default;
-var Errors = require('errors');
+var StrategyBuilder = require('core/strategies/strategy_builder');
+var TransportStrategy = require('core/strategies/transport_strategy').default;
+var DelayedStrategy = require('core/strategies/delayed_strategy').default;
+var SequentialStrategy = require('core/strategies/sequential_strategy').default;
+var CachedStrategy = require('core/strategies/cached_strategy').default;
+var FirstConnectedStrategy = require('core/strategies/first_connected_strategy').default;
+var BestConnectedEverStrategy = require('core/strategies/best_connected_ever_strategy').default;
+var IfStrategy = require('core/strategies/if_strategy').default;
+var Errors = require('core/errors');
 var Transports = require('transports/transports').default;
-var XHRStreamingTransport = Transports.XHRStreamingTransport;
-var WSTransport = Transports.WSTransport;
+var XHRStreamingTransport = Transports.xhr_streaming;
+var WSTransport = Transports.ws;
 
 describe("StrategyBuilder", function() {
   it("should construct a transport strategy", function() {

@@ -1,7 +1,7 @@
 var Mocks = require("../../helpers/mocks");
-var Runtime = require('runtimes/runtime').default;
-var CachedStrategy = require('strategies/cached_strategy').default;
-var Util = require('util').default;
+var Runtime = require('runtime').default;
+var CachedStrategy = require('core/strategies/cached_strategy').default;
+var Util = require('core/util').default;
 
 describe("CachedStrategy", function() {
   beforeEach(function() {

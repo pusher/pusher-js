@@ -1,5 +1,5 @@
-var Pusher = require('pusher').default;
-var Logger = require('logger').default;
+var Pusher = require('core/pusher');
+var Logger = require('core/logger').default;
 
 describe("Pusher.logToConsole", function() {
 

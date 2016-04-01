@@ -32,6 +32,6 @@ var SockJSTransport = new Transport(<TransportHooks>{
   }
 });
 
-(<any>Transports).SockJSTransport = SockJSTransport;
+(<any>Transports).sockjs = SockJSTransport;
 
 export default Transports;

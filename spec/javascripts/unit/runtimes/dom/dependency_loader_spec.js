@@ -1,8 +1,8 @@
-var Pusher = require('pusher').default;
+var Pusher = require('core/pusher');
 var Mocks = require('../../../helpers/mocks');
-var Runtime = require('runtimes/runtime').default;
-var Factory = require('utils/factory').default;
-var DependencyLoader = require('runtimes/dom/dependency_loader').default;
+var Runtime = require('runtime').default;
+var Factory = require('core/utils/factory').default;
+var DependencyLoader = require('dom/dependency_loader').default;
 
 describe("DependencyLoader", function() {
   var doc;
@@ -16,7 +16,7 @@ describe("DependencyLoader", function() {
     doc.location.protocol = "http:";
 
     spyOn(Runtime, "getDocument").andReturn(doc);
-    spyOn(Factory, "createScriptRequest").andCallFake(function() {
+    spyOn(Runtime, "createScriptRequest").andCallFake(function() {
       scriptRequest = Mocks.getScriptRequest();
       return scriptRequest;
     });
@@ -108,8 +108,8 @@ describe("DependencyLoader", function() {
     it("should send an unencrypted script request when served via http", function() {
       doc.location.protocol = "http:";
       loader.load("resource", {}, onLoaded);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource-test.js"
       );
     });
@@ -117,8 +117,8 @@ describe("DependencyLoader", function() {
     it("should send an encrypted script request when served via https", function() {
       doc.location.protocol = "https:";
       loader.load("resource", {}, onLoaded);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "https://example.com/6.6.6/resource-test.js"
       );
     });
@@ -126,26 +126,26 @@ describe("DependencyLoader", function() {
     it("should send an encrypted script request when served via http, but passed encrypted via options", function() {
       doc.location.protocol = "http:";
       loader.load("resource", { encrypted: true }, onLoaded);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "https://example.com/6.6.6/resource-test.js"
       );
     });
 
     it("should only send one script request per resource at a time", function() {
-      expect(Factory.createScriptRequest.calls.length).toEqual(0);
+      expect(Runtime.createScriptRequest.calls.length).toEqual(0);
 
       loader.load("resource", {}, function() {});
       loader.load("resource", {}, function() {});
       loader.load("resource", {}, function() {});
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource-test.js"
       );
 
       loader.load("resource2", {}, function() {});
-      expect(Factory.createScriptRequest.calls.length).toEqual(2);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest.calls.length).toEqual(2);
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.com/6.6.6/resource2-test.js"
       );
     });

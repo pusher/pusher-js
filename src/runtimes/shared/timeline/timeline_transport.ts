@@ -1,5 +1,8 @@
+import TimelineSender from "core/timeline/timeline_sender";
+
 interface TimelineTransport {
-  (data : any, callback : Function) : void;
+  name: string;
+  getAgent:(sender: TimelineSender, encrypted : boolean)=>(data : any, callback : Function) => void;
 }
 
 export default TimelineTransport;

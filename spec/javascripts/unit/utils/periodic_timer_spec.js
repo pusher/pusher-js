@@ -1,4 +1,4 @@
-var Timers = require('utils/timers');
+var Timers = require('core/utils/timers');
 var PeriodicTimer = Timers.PeriodicTimer;
 
 describe("PeriodicTimer", function() {

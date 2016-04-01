@@ -1,6 +1,6 @@
-var Channel = require('channels/channel').default;
-var Errors = require('errors');
-var Factory = require('utils/factory').default;
+var Channel = require('core/channels/channel').default;
+var Errors = require('core/errors');
+var Factory = require('core/utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
 describe("Channel", function() {

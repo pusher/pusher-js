@@ -1,15 +1,14 @@
 var Mocks = require("../../helpers/mocks");
-var Factory = require('utils/factory').default;
+var Factory = require('core/utils/factory').default;
 var Transports = require('transports/transports').default;
-var Collections = require('utils/collections');
-var WS = require('pusher-websocket-iso-externals-web/ws');
-var HTTP = require('http/http').default;
-var Runtime = require('runtimes/runtime').default;
-
+var Collections = require('core/utils/collections');
+var WS = require('ws');
+var HTTP = require('core/http/http').default;
+var Runtime = require('runtime').default;
 var VERSION = require('defaults').default.VERSION;
 
 describe("Transports", function() {
-  describe("WSTransport", function() {
+  describe("ws", function() {
     var _WebSocket = window.WebSocket;
     var _MozWebSocket = window.MozWebSocket;
 
@@ -19,7 +18,7 @@ describe("Transports", function() {
     });
 
     it("should generate correct unencrypted URLs", function() {
-      var url = Transports.WSTransport.hooks.urls.getInitial("foobar", {
+      var url = Transports.ws.hooks.urls.getInitial("foobar", {
         encrypted: false,
         hostUnencrypted: "example.com:123"
       });
@@ -29,7 +28,7 @@ describe("Transports", function() {
     });
 
     it("should generate correct encrypted URLs", function() {
-      var url = Transports.WSTransport.hooks.urls.getInitial("foobar", {
+      var url = Transports.ws.hooks.urls.getInitial("foobar", {
         encrypted: true,
         hostEncrypted: "example.org:321"
       });
@@ -39,23 +38,23 @@ describe("Transports", function() {
     });
 
     it("should not have a resource file", function() {
-      expect(Transports.WSTransport.hooks.file).toBe(undefined);
+      expect(Transports.ws.hooks.file).toBe(undefined);
     });
 
     it("should not expose the URL path generator", function() {
-      expect(Transports.WSTransport.hooks.urls.getPath).toBe(undefined);
+      expect(Transports.ws.hooks.urls.getPath).toBe(undefined);
     });
 
     it("should not handle activity checks", function() {
-      expect(Transports.WSTransport.hooks.handlesActivityChecks).toBe(false);
+      expect(Transports.ws.hooks.handlesActivityChecks).toBe(false);
     });
 
     it("should not support ping", function() {
-      expect(Transports.WSTransport.hooks.supportsPing).toBe(false);
+      expect(Transports.ws.hooks.supportsPing).toBe(false);
     });
 
     it("should not have a beforeOpen hook", function() {
-      expect(Transports.WSTransport.hooks.beforeOpen).toBe(undefined);
+      expect(Transports.ws.hooks.beforeOpen).toBe(undefined);
     });
 
     describe("isSupported hook", function() {
@@ -63,21 +62,21 @@ describe("Transports", function() {
         window.WebSocket = {};
         window.MozWebSocket = undefined;
 
-        expect(Transports.WSTransport.hooks.isSupported({})).toBe(true);
+        expect(Transports.ws.hooks.isSupported({})).toBe(true);
       });
 
       it("should return true if the MozWebSocket class is present and WebSocket class is absent", function() {
         window.WebSocket = undefined;
         window.MozWebSocket = {};
 
-        expect(Transports.WSTransport.hooks.isSupported({})).toBe(true);
+        expect(Transports.ws.hooks.isSupported({})).toBe(true);
       });
 
       it("should return false if WebSocket and MozWebSocket classes are absent", function() {
         window.WebSocket = undefined;
         window.MozWebSocket = undefined;
 
-        expect(Transports.WSTransport.hooks.isSupported({})).toBe(false);
+        expect(Transports.ws.hooks.isSupported({})).toBe(false);
       });
     });
 
@@ -88,7 +87,7 @@ describe("Transports", function() {
         });
         window.MozWebSocket = undefined;
 
-        var socket = Transports.WSTransport.hooks.getSocket("testurl");
+        var socket = Transports.ws.hooks.getSocket("testurl");
         expect(window.WebSocket.calls.length).toEqual(1);
         expect(window.WebSocket).toHaveBeenCalledWith("testurl");
         expect(socket).toEqual(jasmine.any(window.WebSocket));
@@ -102,7 +101,7 @@ describe("Transports", function() {
           this.url = url;
         });
 
-        var socket = Transports.WSTransport.hooks.getSocket("moztesturl");
+        var socket = Transports.ws.hooks.getSocket("moztesturl");
         expect(window.MozWebSocket.calls.length).toEqual(1);
         expect(window.MozWebSocket).toHaveBeenCalledWith("moztesturl");
         expect(socket).toEqual(jasmine.any(window.MozWebSocket));
@@ -111,10 +110,10 @@ describe("Transports", function() {
     });
   });
 
-  var XHR_TRANSPORTS = ["XHRStreamingTransport", "XHRPollingTransport"];
-  var XDR_TRANSPORTS = ["XDRStreamingTransport", "XDRPollingTransport"];
-  var STREAMING_TRANSPORTS = ["XHRStreamingTransport", "XDRStreamingTransport"];
-  var POLLING_TRANSPORTS = ["XHRPollingTransport", "XDRPollingTransport"];
+  var XHR_TRANSPORTS = ["xhr_streaming", "xhr_polling"];
+  var XDR_TRANSPORTS = ["xdr_streaming", "xdr_polling"];
+  var STREAMING_TRANSPORTS = ["xhr_streaming", "xdr_streaming"];
+  var POLLING_TRANSPORTS = ["xhr_polling", "xdr_polling"];
   var HTTP_TRANSPORTS = [].concat(XHR_TRANSPORTS, XDR_TRANSPORTS);
 
   Collections.apply(HTTP_TRANSPORTS, function(transport) {

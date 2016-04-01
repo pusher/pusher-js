@@ -1,6 +1,6 @@
-var ConnectionManager = require('connection/connection_manager').default;
-var Collections = require('utils/collections');
-var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
+var ConnectionManager = require('core/connection/connection_manager').default;
+var Collections = require('core/utils/collections');
+var Network = require('net_info').Network;
 
 var Mocks = require("../../helpers/mocks");
 

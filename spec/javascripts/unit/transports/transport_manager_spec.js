@@ -1,8 +1,7 @@
 var Mocks = require("../../helpers/mocks");
-var Factory = require('utils/factory').default;
-
-var TransportManager = require('transports/transport_manager').default;
-var AssistantToTheTransportManager = require('transports/assistant_to_the_transport_manager').default;
+var Factory = require('core/utils/factory').default;
+var TransportManager = require('core/transports/transport_manager').default;
+var AssistantToTheTransportManager = require('core/transports/assistant_to_the_transport_manager').default;
 
 describe("TransportManager", function() {
   it("should create an assistant for a transport class", function() {

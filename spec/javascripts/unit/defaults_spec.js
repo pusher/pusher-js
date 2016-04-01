@@ -1,7 +1,7 @@
-var WSTransport = require('transports/transports').default.WSTransport;
-var StrategyBuilder = require('strategies/strategy_builder');
+var WSTransport = require('transports/transports').default.ws;
+var StrategyBuilder = require('core/strategies/strategy_builder');
 var Defaults = require('defaults').default;
-var DefaultConfig = require('config');
+var DefaultConfig = require('core/config');
 
 describe("Default", function() {
   describe("strategy", function() {

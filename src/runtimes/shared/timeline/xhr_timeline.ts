@@ -9,7 +9,7 @@ import TimelineTransport from 'shared/timeline_transport';
 var xhr = function(sender : TimelineSender, encrypted : boolean) : TimelineTransport {
   return function(data : any, callback : Function) {
     var scheme = "http" + (encrypted ? "s" : "") + "://";
-    var url = scheme + (sender.options.host) + sender.options.path + "/xhr";
+    var url = scheme + (sender.options.host) + sender.options.path;
     var params = Collections.filterObject(data, function(value) {
       return value !== undefined;
     });

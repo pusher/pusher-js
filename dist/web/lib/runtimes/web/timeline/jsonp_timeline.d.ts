@@ -1,4 +1,6 @@
 import TimelineSender from 'core/timeline/timeline_sender';
-import TimelineTransport from 'shared/timeline/timeline_transport';
-declare var jsonp: (sender: TimelineSender, encrypted: boolean) => TimelineTransport;
+declare var jsonp: {
+    name: string;
+    getAgent: (sender: TimelineSender, encrypted: boolean) => (data: any, callback: Function) => void;
+};
 export default jsonp;

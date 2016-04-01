@@ -1,4 +1,4 @@
-import URLScheme from "./url_scheme.ts";
+import URLScheme from "./url_scheme";
 export declare var ws: URLScheme;
 export declare var http: URLScheme;
 export declare var sockjs: URLScheme;

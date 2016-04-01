@@ -23,14 +23,7 @@ export var build = function(scheme, options) {
   return evaluate(scheme, context)[1].strategy;
 }
 
-var transports = {
-  ws: Transports.WSTransport,
-  sockjs: Transports.SockJSTransport,
-  xhr_streaming: Transports.XHRStreamingTransport,
-  xdr_streaming: Transports.XDRStreamingTransport,
-  xhr_polling: Transports.XHRPollingTransport,
-  xdr_polling: Transports.XDRPollingTransport
-};
+var transports = Transports;
 
 var UnsupportedStrategy : Strategy = {
   isSupported: function() {

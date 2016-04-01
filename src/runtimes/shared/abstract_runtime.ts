@@ -11,9 +11,10 @@ interface Runtime {
   getDocument() : any;
   getGlobal() : any;
   getAuthorizers() : AuthTransports;
-  getTimelineTransport(sender : TimelineSender, encrypted : boolean): TimelineTransport;
   getLocalStorage() : any;
   getClientFeatures() : any[];
+  TimelineTransport: TimelineTransport;
+  // getTimelineTransport(sender: TimelineSender, encrypted : boolean) : (data : any, callback : Function) => void;
 }
 
 export default Runtime;

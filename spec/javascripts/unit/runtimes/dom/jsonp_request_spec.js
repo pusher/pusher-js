@@ -1,6 +1,6 @@
-var JSONPRequest = require('runtimes/dom/jsonp_request').default;
-var Factory = require('utils/factory').default;
-var Pusher = require('pusher').default;;
+var JSONPRequest = require('dom/jsonp_request').default;
+var Runtime = require('runtime').default;
+var Pusher = require('core/pusher');;
 var Mocks = require('../../../helpers/mocks');
 
 describe("JSONPRequest", function() {
@@ -9,7 +9,7 @@ describe("JSONPRequest", function() {
   var scriptRequest;
 
   beforeEach(function() {
-    spyOn(Factory, "createScriptRequest").andCallFake(function() {
+    spyOn(Runtime, "createScriptRequest").andCallFake(function() {
       scriptRequest = Mocks.getScriptRequest();
       return scriptRequest;
     });
@@ -21,8 +21,8 @@ describe("JSONPRequest", function() {
     it("should send the script request to a correct URL", function() {
       var request = new JSONPRequest("http://example.com", {});
       request.send(receiver);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.com/" + receiver.number + "?"
       );
       expect(scriptRequest.send).toHaveBeenCalledWith(receiver);
@@ -44,7 +44,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      var url = Factory.createScriptRequest.calls[0].args[0];
+      var url = Runtime.createScriptRequest.calls[0].args[0];
       var queryString = url.match(/http:\/\/example.org\/[0-9]+\?(.*)$/)[1];
       var queryStringPairs = queryString.split("&");
       expect(queryStringPairs.length).toEqual(3);
@@ -59,7 +59,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.org/" + receiver.number + "?"
       );
     });
@@ -70,7 +70,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.org/" + receiver.number + "?test=Zm9vIGZvbw%3D%3D"
       );
     });
@@ -81,7 +81,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.org/" + receiver.number + "?something=MTExMQ%3D%3D"
       );
     });
@@ -92,7 +92,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.org/" + receiver.number + "?arrr=WzEsMiwic3RyaW5nIiwxMjMuNDU2XQ%3D%3D"
       );
     });
@@ -103,7 +103,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      expect(Factory.createScriptRequest).toHaveBeenCalledWith(
+      expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.org/" + receiver.number + "?obj=eyJrZXkiOiJ2YWwiLCJudW0iOjEyMywiZmwiOjY2Ni45OTl9"
       );
     });
@@ -111,9 +111,9 @@ describe("JSONPRequest", function() {
     it("should be idempotent", function() {
       var request = new JSONPRequest("http://example.org", {});
       request.send(receiver);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
       request.send(receiver);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
     });
   });
 
@@ -121,7 +121,7 @@ describe("JSONPRequest", function() {
     it("should call cleanup on the script request", function() {
       var request = new JSONPRequest("http://example.com", {});
       request.send(receiver);
-      expect(Factory.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
       expect(scriptRequest.cleanup).not.toHaveBeenCalled();
       request.cleanup();
       expect(scriptRequest.cleanup).toHaveBeenCalled();

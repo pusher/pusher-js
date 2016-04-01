@@ -1,6 +1,5 @@
 var Mocks = require("../../helpers/mocks");
-
-var SequentialStrategy = require('strategies/sequential_strategy').default;
+var SequentialStrategy = require('core/strategies/sequential_strategy').default;
 
 describe("SequentialStrategy", function() {
   beforeEach(function() {

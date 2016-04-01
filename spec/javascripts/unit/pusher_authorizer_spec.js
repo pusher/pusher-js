@@ -1,10 +1,10 @@
-var Authorizer = require('pusher_authorizer').default;
-var Logger = require('logger');
+var Authorizer = require('core/pusher_authorizer').default;
+var Logger = require('core/logger');
 var Mocks = require('../helpers/mocks');
-var Util = require('util').default;
-var Factory = require('utils/factory').default;
-var Logger = require('logger').default;
-var Runtime = require('runtimes/runtime').default;
+var Util = require('core/util').default;
+var Factory = require('core/utils/factory').default;
+var Logger = require('core/logger').default;
+var Runtime = require('runtime').default;
 
 describe("Authorizer", function() {
   describe("#composeQuery", function() {

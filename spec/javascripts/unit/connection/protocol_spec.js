@@ -1,4 +1,4 @@
-var Protocol = require('connection/protocol/protocol');
+var Protocol = require('core/connection/protocol/protocol');
 
 describe("Protocol", function() {
   describe("#decodeMessage", function() {

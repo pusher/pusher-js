@@ -24,28 +24,31 @@ module.exports = function(config) {
 
     webpack: objectAssign(webpackConfig,{
       resolve: {
-        root: [
-          __dirname + '/../../../src',
-          __dirname + '/../../../src/node_modules'
-        ]
-      },
-      externals: {
-        '../package': '{version: "'+ version +'"}'
-      },
-      plugins: [
-        new NormalModuleReplacementPlugin(
-          /^pusher-websocket-iso-externals-node\/ws$/,
-          "pusher-websocket-iso-externals-web/ws"
-        ),
-        new NormalModuleReplacementPlugin(
-          /^pusher-websocket-iso-externals-node\/xhr$/,
-          "pusher-websocket-iso-externals-web/xhr"
-        ),
-        new NormalModuleReplacementPlugin(
-          /^pusher-websocket-iso-externals-node\/net_info$/,
-          "pusher-websocket-iso-externals-web/net_info"
-        )
-      ]
+        // root: [
+        //   __dirname + '/../../../src/core',
+        //   __dirname + '/../../../src/runtimes/web',
+        //   __dirname + '/../../../src/runtimes'
+        // ],
+        modulesDirectories: ['node_modules', 'web_modules', 'src', 'src/runtimes/web', 'src/runtimes']
+      }
+      // ,
+      // externals: {
+      //   '../package': '{version: "'+ version +'"}'
+      // },
+      // plugins: [
+      //   new NormalModuleReplacementPlugin(
+      //     /^pusher-websocket-iso-externals-node\/ws$/,
+      //     "pusher-websocket-iso-externals-web/ws"
+      //   ),
+      //   new NormalModuleReplacementPlugin(
+      //     /^pusher-websocket-iso-externals-node\/xhr$/,
+      //     "pusher-websocket-iso-externals-web/xhr"
+      //   ),
+      //   new NormalModuleReplacementPlugin(
+      //     /^pusher-websocket-iso-externals-node\/net_info$/,
+      //     "pusher-websocket-iso-externals-web/net_info"
+      //   )
+      // ]
     }),
 
     port: 9876,

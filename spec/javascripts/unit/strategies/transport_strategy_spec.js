@@ -1,8 +1,8 @@
-var TransportStrategy = require('strategies/transport_strategy').default;
-var Errors = require('errors');
-var Handshake = require('connection/handshake').default;
+var TransportStrategy = require('core/strategies/transport_strategy').default;
+var Errors = require('core/errors');
+var Handshake = require('core/connection/handshake').default;
 var Mocks = require('../../helpers/mocks');
-var Factory = require('utils/factory').default;
+var Factory = require('core/utils/factory').default;
 
 describe("TransportStrategy", function() {
   var transport, transportClass, handshake;

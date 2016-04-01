@@ -8,7 +8,7 @@ describe("HTTP.getXHR", function() {
   var HTTPFactory;
 
   beforeEach(function() {
-    HTTPFactory = require('http/http').default;
+    HTTPFactory = require('core/http/http').default;
 
     window.XMLHttpRequest = jasmine.createSpy().andCallFake(
       Mocks.getXHR

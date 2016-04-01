@@ -1,7 +1,7 @@
 var Mocks = require('../../helpers/mocks');
-var Util = require('util').default;
-var HTTPSocket = require('http/http_socket').default;
-var Runtime = require('runtimes/runtime').default;
+var Util = require('core/util').default;
+var HTTPSocket = require('core/http/http_socket').default;
+var Runtime = require('runtime').default;
 
 describe("HTTP.Socket", function() {
   var onOpen, onMessage, onActivity, onClose;
@@ -13,7 +13,7 @@ describe("HTTP.Socket", function() {
   var HTTPFactory;
 
   beforeEach(function() {
-    HTTPFactory = require('http/http').default;
+    HTTPFactory = require('core/http/http').default;
     jasmine.Clock.useMock();
 
     spyOn(HTTPFactory, "createXHR").andCallFake(function(method, url) {

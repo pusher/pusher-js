@@ -1,5 +1,5 @@
-var EventsDispatcher = require('events/dispatcher').default;
-var Collections = require('utils/collections');
+var EventsDispatcher = require('core/events/dispatcher').default;
+var Collections = require('core/utils/collections');
 
 describe("EventsDispatcher", function() {
   var dispatcher;

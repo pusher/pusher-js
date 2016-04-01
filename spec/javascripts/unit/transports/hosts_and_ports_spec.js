@@ -1,9 +1,9 @@
-var Pusher = require('pusher').default;
-var NetInfo  = require('pusher-websocket-iso-externals-web/net_info');
+var Pusher = require('core/pusher');
+var NetInfo  = require('net_info');
 var Mocks = require('../../helpers/mocks');
 var version = require('defaults').default.VERSION;
-var Factory  = require('utils/factory').default;
-var Runtime = require('runtimes/runtime').default;
+var Factory  = require('core/utils/factory').default;
+var Runtime = require('runtime').default;
 
 describe("Host/Port Configuration", function() {
   var transport;
@@ -33,12 +33,12 @@ describe("Host/Port Configuration", function() {
 
       Transports = require('transports/transports').default;
 
-      spyOn(Transports.WSTransport, "isSupported").andReturn(true);
-      spyOn(Transports.XDRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XHRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XDRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XHRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.SockJSTransport, "isSupported").andReturn(false);
+      spyOn(Transports.ws, "isSupported").andReturn(true);
+      spyOn(Transports.xdr_streaming, "isSupported").andReturn(false);
+      spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);
+      spyOn(Transports.xdr_polling, "isSupported").andReturn(false);
+      spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
+      spyOn(Transports.sockjs, "isSupported").andReturn(false);
     });
 
     afterEach(function() {
@@ -86,12 +86,12 @@ describe("Host/Port Configuration", function() {
     var _SockJS;
 
     beforeEach(function() {
-      spyOn(Transports.WSTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XDRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XHRStreamingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XDRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.XHRPollingTransport, "isSupported").andReturn(false);
-      spyOn(Transports.SockJSTransport, "isSupported").andReturn(true);
+      spyOn(Transports.ws, "isSupported").andReturn(false);
+      spyOn(Transports.xdr_streaming, "isSupported").andReturn(false);
+      spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);
+      spyOn(Transports.xdr_polling, "isSupported").andReturn(false);
+      spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
+      spyOn(Transports.sockjs, "isSupported").andReturn(true);
 
       _SockJS = window.WebSocket;
       window.SockJS = jasmine.createSpy("WebSocket").andCallFake(function() {

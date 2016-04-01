@@ -1,8 +1,8 @@
-var Channels = require('channels/channels').default;
-var Channel = require('channels/channel').default;
-var PrivateChannel = require('channels/private_channel').default;
-var PresenceChannel = require('channels/presence_channel').default;
-var Factory = require('utils/factory').default;
+var Channels = require('core/channels/channels').default;
+var Channel = require('core/channels/channel').default;
+var PrivateChannel = require('core/channels/private_channel').default;
+var PresenceChannel = require('core/channels/presence_channel').default;
+var Factory = require('core/utils/factory').default;
 var Mocks = require("../../helpers/mocks");
 
 describe("Channels", function() {

@@ -1,5 +1,5 @@
 var Mocks = require('../../helpers/mocks');
-var HTTPFactory = require('http/http').default;
+var HTTPFactory = require('core/http/http').default;
 
 describe("HTTP.createPollingSocket", function() {
   var hooks;
