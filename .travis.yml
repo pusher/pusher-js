@@ -1,0 +1,7 @@
+language: ruby
+rvm: 2.0.0
+before_script:
+  - bundle install
+  - npm install
+script:
+  - ./bin/karma-unit

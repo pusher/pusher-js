@@ -28,7 +28,36 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+    // for dev testing
+    // browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+
+    browserStack: {
+      startTunnel: true
+    },
+    customLaunchers: {
+      bs_ie8: {
+        base: 'BrowserStack',
+        browser: 'ie',
+        browser_version: '8.0',
+        os: "Windows",
+        os_version: '7'
+      },
+      bs_firefox_mac: {
+        base: 'BrowserStack',
+        browser: 'firefox',
+        browser_version: '21.0',
+        os: 'OS X',
+        os_version: 'Mountain Lion'
+      },
+      bs_iphone5: {
+        base: 'BrowserStack',
+        device: 'iPhone 5',
+        os: 'ios',
+        os_version: '6.0'
+      }
+    },
+
+    browsers: ['bs_ie8', 'bs_firefox_mac', 'bs_iphone5'],
     captureTimeout: 60000,
 
     singleRun: true
