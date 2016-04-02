@@ -1,9 +1,9 @@
-var base64encode = require('base64').default;
-var util = require('util').default;
-var ScriptReceiverFactory = require('runtimes/dom/script_receiver_factory').ScriptReceiverFactory;
-var Collections = require('utils/collections');
-var JSONPRequest = require('runtimes/dom/jsonp_request').default;
-var ScriptReceivers = require('runtimes/dom/script_receiver_factory').ScriptReceivers;
+var base64encode = require('core/base64').default;
+var util = require('core/util').default;
+var ScriptReceiverFactory = require('dom/script_receiver_factory').ScriptReceiverFactory;
+var Collections = require('core/utils/collections');
+var JSONPRequest = require('dom/jsonp_request').default;
+var ScriptReceivers = require('dom/script_receiver_factory').ScriptReceivers;
 var Pusher = require('pusher_integration').default;
 
 exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";

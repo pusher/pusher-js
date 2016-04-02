@@ -1,23 +1,16 @@
 var Integration = require("../helpers/integration");
-var Collections = require("utils/collections");
+var Collections = require("core/utils/collections");
 var transports = require("transports/transports").default;
-var util = require("util").default;
-var Runtime = require('runtimes/runtime').default;
-var Dependencies = require('runtimes/dom/dependencies').Dependencies;
-var DependenciesReceivers = require('runtimes/dom/dependencies').DependenciesReceivers;
-var Defaults = require('defaults');
-var DependencyLoader = require('runtimes/dom/dependency_loader').default;
+var util = require("core/util").default;
+var Runtime = require('runtime').default;
+var Dependencies = require('dom/dependencies').Dependencies;
+var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
+var Defaults = require('defaults').default;
+var DependencyLoader = require('dom/dependency_loader').default;
 
 Integration.describe("Cluster Configuration", function() {
 
-  var TRANSPORTS = {
-    "ws": transports.WSTransport,
-    "sockjs": transports.SockJSTransport,
-    "xhr_streaming": transports.XHRStreamingTransport,
-    "xhr_polling": transports.XHRPollingTransport,
-    "xdr_streaming": transports.XDRStreamingTransport,
-    "xdr_polling": transports.XDRPollingTransport
-  };
+  var TRANSPORTS = transports;
 
   function subscribe(pusher, channelName, callback) {
     var channel = pusher.subscribe(channelName);

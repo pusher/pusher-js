@@ -3,12 +3,12 @@ window.Pusher = Pusher;
 
 var Integration = require("../helpers/integration");
 var Mocks = require("../helpers/mocks");
-var Network = require('pusher-websocket-iso-externals-node/net_info').Network;
-var Timer = require("utils/timers").OneOffTimer;
+var Network = require('net_info').Network;
+var Timer = require("core/utils/timers").OneOffTimer;
 var transports = require("transports/transports").default;
-var util = require("util").default;
-var Runtime = require('runtimes/runtime').default;
-var Timer = require('utils/timers').OneOffTimer;
+var util = require("core/util").default;
+var Runtime = require('runtime').default;
+var Timer = require('core/utils/timers').OneOffTimer;
 
 Integration.describe("Falling back", function() {
   var pusher;
@@ -16,12 +16,12 @@ Integration.describe("Falling back", function() {
   beforeEach(function() {
     spyOn(Network, "isOnline").andReturn(true);
 
-    spyOn(transports.WSTransport, "isSupported").andReturn(false);
-    spyOn(transports.SockJSTransport, "isSupported").andReturn(false);
-    spyOn(transports.XDRStreamingTransport, "isSupported").andReturn(false);
-    spyOn(transports.XHRStreamingTransport, "isSupported").andReturn(false);
-    spyOn(transports.XDRPollingTransport, "isSupported").andReturn(false);
-    spyOn(transports.XHRPollingTransport, "isSupported").andReturn(false);
+    spyOn(transports.ws, "isSupported").andReturn(false);
+    spyOn(transports.sockjs, "isSupported").andReturn(false);
+    spyOn(transports.xdr_streaming, "isSupported").andReturn(false);
+    spyOn(transports.xhr_streaming, "isSupported").andReturn(false);
+    spyOn(transports.xdr_polling, "isSupported").andReturn(false);
+    spyOn(transports.xhr_polling, "isSupported").andReturn(false);
 
     spyOn(Runtime, "getLocalStorage").andReturn({});
   });
@@ -38,8 +38,8 @@ Integration.describe("Falling back", function() {
       return transport;
     }
 
-    transports.WSTransport.isSupported.andReturn(true);
-    spyOn(transports.WSTransport, "createConnection").andCallFake(createConnection);
+    transports.ws.isSupported.andReturn(true);
+    spyOn(transports.ws, "createConnection").andCallFake(createConnection);
 
     var timer;
     runs(function() {
@@ -47,7 +47,7 @@ Integration.describe("Falling back", function() {
       pusher.connect();
     });
     waitsFor(function() {
-      return transports.WSTransport.createConnection.calls.length === 1;
+      return transports.ws.createConnection.calls.length === 1;
     }, "WS connection to be created", 500);
     runs(function() {
       transport.state = "initialized";
@@ -69,7 +69,7 @@ Integration.describe("Falling back", function() {
       });
     });
     waitsFor(function() {
-      return transports.WSTransport.createConnection.calls.length === 2;
+      return transports.ws.createConnection.calls.length === 2;
     }, "WS connection to be created", 1500);
     runs(function() {
       transport.state = "initialized";
@@ -100,7 +100,7 @@ Integration.describe("Falling back", function() {
       return !timer.isRunning();
     }, "a while", 600);
     runs(function() {
-      expect(transports.WSTransport.createConnection.calls.length).toEqual(2);
+      expect(transports.ws.createConnection.calls.length).toEqual(2);
       pusher.disconnect();
     });
   });
@@ -117,10 +117,10 @@ Integration.describe("Falling back", function() {
       return sockjsTransport;
     }
 
-    transports.WSTransport.isSupported.andReturn(true);
-    transports.SockJSTransport.isSupported.andReturn(true);
-    spyOn(transports.WSTransport, "createConnection").andCallFake(createWSConnection);
-    spyOn(transports.SockJSTransport, "createConnection").andCallFake(createSockJSConnection);
+    transports.ws.isSupported.andReturn(true);
+    transports.sockjs.isSupported.andReturn(true);
+    spyOn(transports.ws, "createConnection").andCallFake(createWSConnection);
+    spyOn(transports.sockjs, "createConnection").andCallFake(createSockJSConnection);
 
     runs(function() {
       // use encrypted connection, to force sockjs to be the primary fallback
@@ -128,7 +128,7 @@ Integration.describe("Falling back", function() {
       pusher.connect();
     });
     waitsFor(function() {
-      return transports.WSTransport.createConnection.calls.length === 1;
+      return transports.ws.createConnection.calls.length === 1;
     }, "WS connection to be created", 500);
     runs(function() {
       wsTransport.state = "initialized";
@@ -143,7 +143,7 @@ Integration.describe("Falling back", function() {
       // start handshake, but don't do anything
     });
     waitsFor(function() {
-      return transports.SockJSTransport.createConnection.calls.length === 1;
+      return transports.sockjs.createConnection.calls.length === 1;
     }, "SockJS connection to be created", 3000);
     runs(function() {
       sockjsTransport.state = "initialized";

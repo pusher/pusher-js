@@ -2,15 +2,15 @@ var Pusher = require('pusher_integration').default;
 window.Pusher = Pusher;
 
 var Integration = require("../helpers/integration");
-var DependencyLoader = require('runtimes/dom/dependency_loader').default;
+var DependencyLoader = require('dom/dependency_loader').default;
 var transports = require("transports/transports").default;
-var util = require("util").default;
-var Timer = require("utils/timers").OneOffTimer;
-var DependenciesReceivers = require('runtimes/dom/dependencies').DependenciesReceivers;
-var Dependencies = require('runtimes/dom/dependencies').Dependencies;
-var Collections = require('utils/collections');
+var util = require("core/util").default;
+var Timer = require("core/utils/timers").OneOffTimer;
+var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
+var Dependencies = require('dom/dependencies').Dependencies;
+var Collections = require('core/utils/collections');
 var Defaults = require('defaults').default;
-var Runtime = require('runtimes/runtime').default;
+var Runtime = require('runtime').default;
 
 Integration.describe("Pusher", function() {
   // Integration tests in Jasmine need to have setup and teardown phases as
@@ -27,14 +27,7 @@ Integration.describe("Pusher", function() {
     return !/(MSIE [67])|(Version\/(4|5\.0).*Safari)/.test(navigator.userAgent);
   }
 
-  var TRANSPORTS = {
-    "ws": transports.WSTransport,
-    "sockjs": transports.SockJSTransport,
-    "xhr_streaming": transports.XHRStreamingTransport,
-    "xhr_polling": transports.XHRPollingTransport,
-    "xdr_streaming": transports.XDRStreamingTransport,
-    "xdr_polling": transports.XDRPollingTransport
-  };
+  var TRANSPORTS = transports;
 
   function subscribe(pusher, channelName, callback) {
     var channel = pusher.subscribe(channelName);

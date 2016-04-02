@@ -31,10 +31,11 @@ module.exports = function(config) {
 
     webpack: objectAssign(webpackConfig, {
       resolve: {
-        root: [
-          __dirname + '/../../../src',
-          __dirname + '/../../../src/node_modules'
-        ]
+        // root: [
+        //   __dirname + '/../../../src',
+        //   __dirname + '/../../../src/node_modules'
+        // ]
+        modulesDirectories: ['node_modules', 'web_modules', 'src', 'src/runtimes/web', 'src/runtimes']
       },
       externals: {
         '../package': '{version: "'+ version +'"}'

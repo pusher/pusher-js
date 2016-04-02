@@ -2,7 +2,7 @@ var Pusher = require('pusher_integration').default;
 window.Pusher = Pusher;
 
 var Integration = require('../../helpers/integration');
-var ScriptRequest = require('runtimes/dom/script_request').default;
+var ScriptRequest = require('dom/script_request').default;
 
 
 Integration.describe("ScriptRequest", function() {

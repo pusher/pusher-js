@@ -3,22 +3,22 @@ window.Pusher = Pusher;
 var Integration = require("../helpers/integration");
 var Mocks = require("../helpers/mocks");
 var defaults = require("defaults").default;
-var Network = require("pusher-websocket-iso-externals-node/net_info").Network;
+var Network = require("net_info").Network;
 var transports = require("transports/transports").default;
 
 Integration.describe("Transport lists", function() {
   var _isReady = Pusher.isReady;
 
   beforeEach(function() {
-    spyOn(transports.WSTransport, "isSupported").andReturn(true);
-    spyOn(transports.XHRStreamingTransport, "isSupported").andReturn(true);
-    spyOn(transports.SockJSTransport, "isSupported").andReturn(true);
+    spyOn(transports.ws, "isSupported").andReturn(true);
+    spyOn(transports.xhr_streaming, "isSupported").andReturn(true);
+    spyOn(transports.sockjs, "isSupported").andReturn(true);
 
-    spyOn(transports.WSTransport, "createConnection")
+    spyOn(transports.ws, "createConnection")
       .andCallFake(Mocks.getTransport);
-    spyOn(transports.XHRStreamingTransport, "createConnection")
+    spyOn(transports.xhr_streaming, "createConnection")
       .andCallFake(Mocks.getTransport);
-    spyOn(transports.SockJSTransport, "createConnection")
+    spyOn(transports.sockjs, "createConnection")
       .andCallFake(Mocks.getTransport);
 
     spyOn(defaults, "getDefaultStrategy").andCallFake(function() {
@@ -40,9 +40,9 @@ Integration.describe("Transport lists", function() {
 
   it("should use all transports if the whitelist is not specified", function() {
     var pusher = new Pusher("asdf", { disableStats: true });
-    expect(transports.WSTransport.createConnection).toHaveBeenCalled();
-    expect(transports.XHRStreamingTransport.createConnection).toHaveBeenCalled();
-    expect(transports.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(transports.ws.createConnection).toHaveBeenCalled();
+    expect(transports.xhr_streaming.createConnection).toHaveBeenCalled();
+    expect(transports.sockjs.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -51,9 +51,9 @@ Integration.describe("Transport lists", function() {
       disableStats: true,
       enabledTransports: []
     });
-    expect(transports.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.SockJSTransport.createConnection).not.toHaveBeenCalled();
+    expect(transports.ws.createConnection).not.toHaveBeenCalled();
+    expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
+    expect(transports.sockjs.createConnection).not.toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -62,9 +62,9 @@ Integration.describe("Transport lists", function() {
       disableStats: true,
       enabledTransports: ["a", "c"]
     });
-    expect(transports.WSTransport.createConnection).toHaveBeenCalled();
-    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(transports.ws.createConnection).toHaveBeenCalled();
+    expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
+    expect(transports.sockjs.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -73,9 +73,9 @@ Integration.describe("Transport lists", function() {
       disableStats: true,
       disabledTransports: ["a", "b"]
     });
-    expect(transports.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(transports.ws.createConnection).not.toHaveBeenCalled();
+    expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
+    expect(transports.sockjs.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -85,9 +85,9 @@ Integration.describe("Transport lists", function() {
       enabledTransports: ["b", "c"],
       disabledTransports: ["b"]
     });
-    expect(transports.WSTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.XHRStreamingTransport.createConnection).not.toHaveBeenCalled();
-    expect(transports.SockJSTransport.createConnection).toHaveBeenCalled();
+    expect(transports.ws.createConnection).not.toHaveBeenCalled();
+    expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
+    expect(transports.sockjs.createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 });

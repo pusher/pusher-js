@@ -4,10 +4,10 @@ window.Pusher = Pusher;
 var Integration = require("../helpers/integration");
 var Mocks = require("../helpers/mocks");
 var defaults = require("defaults").default;
-var Network = require("pusher-websocket-iso-externals-node/net_info").Network;
+var Network = require("net_info").Network;
 var transports = require("transports/transports").default;
-var util = require("util").default;
-var Runtime = require('runtimes/runtime').default;
+var util = require("core/util").default;
+var Runtime = require('runtime').default;
 var Defaults = require('defaults').default;
 
 Integration.describe("Timeout Configuration", function() {
@@ -17,12 +17,12 @@ Integration.describe("Timeout Configuration", function() {
   beforeEach(function() {
     spyOn(Network, "isOnline").andReturn(true);
 
-    spyOn(transports.WSTransport, "isSupported").andReturn(true);
-    spyOn(transports.SockJSTransport, "isSupported").andReturn(false);
+    spyOn(transports.ws, "isSupported").andReturn(true);
+    spyOn(transports.sockjs, "isSupported").andReturn(false);
 
     spyOn(Runtime, "getLocalStorage").andReturn({});
 
-    spyOn(transports.WSTransport, "createConnection").andCallFake(function() {
+    spyOn(transports.ws, "createConnection").andCallFake(function() {
       transport = Mocks.getTransport(true);
       transport.supportsPing.andReturn(false);
       return transport;
