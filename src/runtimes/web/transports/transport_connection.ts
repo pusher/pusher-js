@@ -1,5 +1,5 @@
 import {Dependencies} from '../dom/dependencies';
-import IsomorphicTransportConnection from 'shared/transports/transport_connection';
+import BaseTransportConnection from 'shared/transports/transport_connection';
 import ConnectionState from 'core/connection/state';
 
 /** Provides universal API for transport connections.
@@ -30,7 +30,7 @@ import ConnectionState from 'core/connection/state';
  * @param {String} key application key
  * @param {Object} options
  */
-export default class BrowserTransportConnection extends IsomorphicTransportConnection {
+export default class BrowserTransportConnection extends BaseTransportConnection {
 
   /** Initializes the transport.
    *

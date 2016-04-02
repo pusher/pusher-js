@@ -34,7 +34,7 @@ import Socket from 'core/socket';
  * @param {String} key application key
  * @param {Object} options
  */
-export default class IsomorphicTransportConnection extends EventsDispatcher {
+export default class BaseTransportConnection extends EventsDispatcher {
   hooks: TransportHooks;
   name: string;
   priority: number;

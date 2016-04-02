@@ -2266,7 +2266,7 @@ module.exports =
 
 	"use strict";
 	var Defaults = {};
-	Defaults.VERSION = '4.0';
+	Defaults.VERSION = '3.0';
 	Defaults.PROTOCOL = 7;
 	Defaults.host = 'ws.pusherapp.com';
 	Defaults.ws_port = 80;
@@ -2281,9 +2281,9 @@ module.exports =
 	Defaults.activity_timeout = 120000;
 	Defaults.pong_timeout = 30000;
 	Defaults.unavailable_timeout = 10000;
-	Defaults.cdn_http = '<CDN_HTTP>';
-	Defaults.cdn_https = '<CDN_HTTPS>';
-	Defaults.dependency_suffix = '<DEPENDENCY_SUFFIX>';
+	Defaults.cdn_http = 'http://js.pusher.com/';
+	Defaults.cdn_https = 'https://js.pusher.com/';
+	Defaults.dependency_suffix = '';
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Defaults;
 
@@ -2335,9 +2335,9 @@ module.exports =
 	var dispatcher_1 = __webpack_require__(17);
 	var logger_1 = __webpack_require__(4);
 	var state_1 = __webpack_require__(29);
-	var IsomorphicTransportConnection = (function (_super) {
-	    __extends(IsomorphicTransportConnection, _super);
-	    function IsomorphicTransportConnection(hooks, name, priority, key, options) {
+	var BaseTransportConnection = (function (_super) {
+	    __extends(BaseTransportConnection, _super);
+	    function BaseTransportConnection(hooks, name, priority, key, options) {
 	        _super.call(this);
 	        this.hooks = hooks;
 	        this.name = name;
@@ -2349,13 +2349,13 @@ module.exports =
 	        this.activityTimeout = options.activityTimeout;
 	        this.id = this.timeline.generateUniqueID();
 	    }
-	    IsomorphicTransportConnection.prototype.handlesActivityChecks = function () {
+	    BaseTransportConnection.prototype.handlesActivityChecks = function () {
 	        return Boolean(this.hooks.handlesActivityChecks);
 	    };
-	    IsomorphicTransportConnection.prototype.supportsPing = function () {
+	    BaseTransportConnection.prototype.supportsPing = function () {
 	        return Boolean(this.hooks.supportsPing);
 	    };
-	    IsomorphicTransportConnection.prototype.initialize = function () {
+	    BaseTransportConnection.prototype.initialize = function () {
 	        var self = this;
 	        self.timeline.info(self.buildTimelineMessage({
 	            transport: self.name + (self.options.encrypted ? "s" : "")
@@ -2367,7 +2367,7 @@ module.exports =
 	            self.onClose();
 	        }
 	    };
-	    IsomorphicTransportConnection.prototype.connect = function () {
+	    BaseTransportConnection.prototype.connect = function () {
 	        var self = this;
 	        if (self.socket || self.state !== state_1.default.INITIALIZED) {
 	            return false;
@@ -2388,7 +2388,7 @@ module.exports =
 	        self.changeState(state_1.default.CONNECTING);
 	        return true;
 	    };
-	    IsomorphicTransportConnection.prototype.close = function () {
+	    BaseTransportConnection.prototype.close = function () {
 	        if (this.socket) {
 	            this.socket.close();
 	            return true;
@@ -2397,7 +2397,7 @@ module.exports =
 	            return false;
 	        }
 	    };
-	    IsomorphicTransportConnection.prototype.send = function (data) {
+	    BaseTransportConnection.prototype.send = function (data) {
 	        var self = this;
 	        if (self.state === state_1.default.OPEN) {
 	            util_1.default.defer(function () {
@@ -2411,23 +2411,23 @@ module.exports =
 	            return false;
 	        }
 	    };
-	    IsomorphicTransportConnection.prototype.ping = function () {
+	    BaseTransportConnection.prototype.ping = function () {
 	        if (this.state === state_1.default.OPEN && this.supportsPing()) {
 	            this.socket.ping();
 	        }
 	    };
-	    IsomorphicTransportConnection.prototype.onOpen = function () {
+	    BaseTransportConnection.prototype.onOpen = function () {
 	        if (this.hooks.beforeOpen) {
 	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
 	        }
 	        this.changeState(state_1.default.OPEN);
 	        this.socket.onopen = undefined;
 	    };
-	    IsomorphicTransportConnection.prototype.onError = function (error) {
+	    BaseTransportConnection.prototype.onError = function (error) {
 	        this.emit("error", { type: 'WebSocketError', error: error });
 	        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
 	    };
-	    IsomorphicTransportConnection.prototype.onClose = function (closeEvent) {
+	    BaseTransportConnection.prototype.onClose = function (closeEvent) {
 	        if (closeEvent) {
 	            this.changeState(state_1.default.CLOSED, {
 	                code: closeEvent.code,
@@ -2441,13 +2441,13 @@ module.exports =
 	        this.unbindListeners();
 	        this.socket = undefined;
 	    };
-	    IsomorphicTransportConnection.prototype.onMessage = function (message) {
+	    BaseTransportConnection.prototype.onMessage = function (message) {
 	        this.emit("message", message);
 	    };
-	    IsomorphicTransportConnection.prototype.onActivity = function () {
+	    BaseTransportConnection.prototype.onActivity = function () {
 	        this.emit("activity");
 	    };
-	    IsomorphicTransportConnection.prototype.bindListeners = function () {
+	    BaseTransportConnection.prototype.bindListeners = function () {
 	        var self = this;
 	        self.socket.onopen = function () {
 	            self.onOpen();
@@ -2465,7 +2465,7 @@ module.exports =
 	            self.socket.onactivity = function () { self.onActivity(); };
 	        }
 	    };
-	    IsomorphicTransportConnection.prototype.unbindListeners = function () {
+	    BaseTransportConnection.prototype.unbindListeners = function () {
 	        if (this.socket) {
 	            this.socket.onopen = undefined;
 	            this.socket.onerror = undefined;
@@ -2476,7 +2476,7 @@ module.exports =
 	            }
 	        }
 	    };
-	    IsomorphicTransportConnection.prototype.changeState = function (state, params) {
+	    BaseTransportConnection.prototype.changeState = function (state, params) {
 	        this.state = state;
 	        this.timeline.info(this.buildTimelineMessage({
 	            state: state,
@@ -2484,13 +2484,13 @@ module.exports =
 	        }));
 	        this.emit(state, params);
 	    };
-	    IsomorphicTransportConnection.prototype.buildTimelineMessage = function (message) {
+	    BaseTransportConnection.prototype.buildTimelineMessage = function (message) {
 	        return Collections.extend({ cid: this.id }, message);
 	    };
-	    return IsomorphicTransportConnection;
+	    return BaseTransportConnection;
 	}(dispatcher_1.default));
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = IsomorphicTransportConnection;
+	exports.default = BaseTransportConnection;
 
 
 /***/ },

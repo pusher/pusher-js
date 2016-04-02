@@ -1,7 +1,11 @@
 var Pusher = require('core/pusher');
 var NetInfo  = require('net_info');
 var Mocks = require('../../helpers/mocks');
-var version = require('defaults').default.VERSION;
+var Defaults = require('defaults').default;
+var version = Defaults.VERSION;
+var cdn_http = Defaults.cdn_http;
+var cdn_https = Defaults.cdn_https;
+var dependency_suffix = Defaults.dependency_suffix;
 var Factory  = require('core/utils/factory').default;
 var Runtime = require('runtime').default;
 
@@ -110,7 +114,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "http://sockjs.pusher.com:80/pusher",
         null,
-        { js_path: '<CDN_HTTP>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: cdn_http + '/'+version+'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
@@ -123,7 +127,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "https://sockjs.pusher.com:443/pusher",
         null,
-        { js_path: '<CDN_HTTPS>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: cdn_https + '/'+version+'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
@@ -136,7 +140,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "http://example.com:1999/pusher",
         null,
-        { js_path: '<CDN_HTTP>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: cdn_http + '/'+version+'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
@@ -149,7 +153,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "https://example.org:4444/pusher",
         null,
-        { js_path: '<CDN_HTTPS>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: cdn_https + '/'+version+'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
@@ -162,7 +166,7 @@ describe("Host/Port Configuration", function() {
       expect(window.SockJS).toHaveBeenCalledWith(
         "http://sockjs.pusher.com:80/test",
         null,
-        { js_path: '<CDN_HTTP>/'+version+'/sockjs<DEPENDENCY_SUFFIX>.js',
+        { js_path: cdn_http + '/'+version+'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );

@@ -1,6 +1,6 @@
 var Defaults : any = {};
 
-Defaults.VERSION = '4.0';
+Defaults.VERSION = '3.0';
 Defaults.PROTOCOL = 7;
 
 // DEPRECATED: WS connection parameters
@@ -22,8 +22,8 @@ Defaults.pong_timeout = 30000;
 Defaults.unavailable_timeout = 10000;
 
 // CDN configuration
-Defaults.cdn_http = '<CDN_HTTP>';
-Defaults.cdn_https = '<CDN_HTTPS>';
-Defaults.dependency_suffix = '<DEPENDENCY_SUFFIX>';
+Defaults.cdn_http = 'http://js.pusher.com';
+Defaults.cdn_https = 'https://js.pusher.com';
+Defaults.dependency_suffix = '';
 
 export default Defaults;

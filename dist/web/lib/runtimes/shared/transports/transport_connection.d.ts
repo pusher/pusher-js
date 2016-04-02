@@ -2,7 +2,7 @@ import { default as EventsDispatcher } from "core/events/dispatcher";
 import ConnectionState from 'core/connection/state';
 import TransportHooks from 'core/transports/transport_hooks';
 import Socket from 'core/socket';
-export default class IsomorphicTransportConnection extends EventsDispatcher {
+export default class BaseTransportConnection extends EventsDispatcher {
     hooks: TransportHooks;
     name: string;
     priority: number;
