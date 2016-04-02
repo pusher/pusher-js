@@ -1,4 +1,4 @@
-all: web web-min web-umd react-native node worker
+build_all: web web-min web-umd react-native node worker
 
 web:
 	echo "Browser Release:"
@@ -24,4 +24,17 @@ worker:
 	echo "Web Worker Release:"
 	node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
 
-.PHONY: all
+web_unit:
+	node_modules/karma/bin/karma start spec/config/karma/unit.js
+
+web_integration:
+	node_modules/karma/bin/karma start spec/config/karma/integration.js
+
+node_unit:
+	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/unit.js && \
+	node_modules/jasmine-node/bin/jasmine-node tmp/node_unit
+
+node_integration:
+	echo "NotYetImplemented"
+
+.PHONY: build_all

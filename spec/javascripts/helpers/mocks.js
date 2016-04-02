@@ -29,7 +29,6 @@ var Mocks = {
     };
   },
 
-  // TODO: Remove getXHR and getWebSocket
   getXHR: function() {
     return {
       open: jasmine.createSpy("open"),

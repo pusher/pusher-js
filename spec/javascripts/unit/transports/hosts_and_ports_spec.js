@@ -1,6 +1,6 @@
 var Pusher = require('core/pusher');
 var NetInfo  = require('net_info');
-var Mocks = require('../../helpers/mocks');
+var Mocks = require('mocks');
 var Defaults = require('defaults').default;
 var version = Defaults.VERSION;
 var cdn_http = Defaults.cdn_http;

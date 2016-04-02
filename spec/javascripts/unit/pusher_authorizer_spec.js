@@ -1,6 +1,6 @@
 var Authorizer = require('core/pusher_authorizer').default;
 var Logger = require('core/logger');
-var Mocks = require('../helpers/mocks');
+var Mocks = require('mocks');
 var Util = require('core/util').default;
 var Factory = require('core/utils/factory').default;
 var Logger = require('core/logger').default;

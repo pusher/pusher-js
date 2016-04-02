@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/pusher-community/pusher-websocket-js-iso",
   "devDependencies": {
+    "jasmine-node": "^1.14.5",
     "jshint": "~2.6.3",
     "karma": "^0.13.18",
     "karma-chrome-launcher": "^0.1.7",

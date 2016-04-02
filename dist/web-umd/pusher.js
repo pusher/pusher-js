@@ -509,8 +509,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	Defaults.activity_timeout = 120000;
 	Defaults.pong_timeout = 30000;
 	Defaults.unavailable_timeout = 10000;
-	Defaults.cdn_http = 'http://js.pusher.com/';
-	Defaults.cdn_https = 'https://js.pusher.com/';
+	Defaults.cdn_http = 'http://js.pusher.com';
+	Defaults.cdn_https = 'https://js.pusher.com';
 	Defaults.dependency_suffix = '';
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = Defaults;
