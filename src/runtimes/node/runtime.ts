@@ -1,2 +1,2 @@
-import Isomorphic from 'shared/isomorphic';
+import Isomorphic from 'isomorphic/runtime';
 export default Isomorphic;

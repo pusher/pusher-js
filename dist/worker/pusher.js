@@ -224,9 +224,9 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var isomorphic_1 = __webpack_require__(2);
+	var runtime_1 = __webpack_require__(2);
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = isomorphic_1.default;
+	exports.default = runtime_1.default;
 
 
 /***/ },
@@ -2134,9 +2134,9 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var isomorphic_defaults_1 = __webpack_require__(37);
+	var defaults_1 = __webpack_require__(37);
 	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = isomorphic_defaults_1.default;
+	exports.default = defaults_1.default;
 
 
 /***/ },

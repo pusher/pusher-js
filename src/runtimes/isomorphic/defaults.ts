@@ -1,4 +1,4 @@
-import Defaults from './defaults';
+import Defaults from 'shared/defaults';
 
 Defaults.getDefaultStrategy = function(config) {
   var wsStrategy;

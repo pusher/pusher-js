@@ -1,5 +1,5 @@
-import Runtime from "./runtime_interface";
-import xhrTimeline from 'shared/timeline/xhr_timeline';
+import Runtime from "shared/runtime_interface";
+import xhrTimeline from './timeline/xhr_timeline';
 import TimelineTransport from 'shared/timeline/timeline_transport';
 import xhrAuth from 'shared/auth/xhr_auth';
 import * as Collections from 'core/utils/collections';
