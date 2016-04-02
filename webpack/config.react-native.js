@@ -10,7 +10,7 @@ var objectAssign = require('object-assign-deep');
 // NetInfo: platforms/react-native/net_info //
 //////////////////////////////////////////////
 module.exports = objectAssign(require('./config.shared'),{
-  entry: "./src/pusher",
+  entry: "./src/core/pusher",
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",
@@ -22,18 +22,7 @@ module.exports = objectAssign(require('./config.shared'),{
     "react-native": "react-native",
     '../package': 'var {version: "'+ version +'"}'
   },
-  plugins: [
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/ws$/,
-      "pusher-websocket-iso-externals-react-native/ws"
-    ),
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/xhr$/,
-      "pusher-websocket-iso-externals-react-native/xhr"
-    ),
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/net_info$/,
-      "pusher-websocket-iso-externals-react-native/net_info"
-    )
-  ]
+  resolve: {
+    modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/react-native', 'src/runtimes']
+  },
 })

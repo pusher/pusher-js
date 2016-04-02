@@ -14,7 +14,6 @@ interface Runtime {
   getLocalStorage() : any;
   getClientFeatures() : any[];
   TimelineTransport: TimelineTransport;
-  // getTimelineTransport(sender: TimelineSender, encrypted : boolean) : (data : any, callback : Function) => void;
 }
 
 export default Runtime;

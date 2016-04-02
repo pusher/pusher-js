@@ -21,24 +21,6 @@ var config = objectAssign(require('./config.shared'),{
   resolve: {
     modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/web', 'src/runtimes']
   }
-  // plugins: [
-  //   new NormalModuleReplacementPlugin(
-  //     /^node\/app$/,
-  //     "web/app"
-  //   ),
-  //   new NormalModuleReplacementPlugin(
-  //     /^node\/ws$/,
-  //     "web/ws"
-  //   ),
-  //   new NormalModuleReplacementPlugin(
-  //     /^node\/xhr$/,
-  //     "web/xhr"
-  //   ),
-  //   new NormalModuleReplacementPlugin(
-  //     /^node\/net_info$/,
-  //     "web/net_info"
-  //   )
-  // ]
 });
 
 module.exports = config;

@@ -10,7 +10,7 @@ var objectAssign = require('object-assign-deep');
 // NetInfo: platforms/node/net_info //
 //////////////////////////////////////
 module.exports = objectAssign(require('./config.shared'),{
-  entry: "./src/pusher",
+  entry: "./src/core/pusher",
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/worker"),
@@ -19,14 +19,7 @@ module.exports = objectAssign(require('./config.shared'),{
   externals: {
     '../package': '{version: "'+ version +'"}'
   },
-  plugins: [
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/ws$/,
-      "pusher-websocket-iso-externals-worker/ws"
-    ),
-    new NormalModuleReplacementPlugin(
-      /^pusher-websocket-iso-externals-node\/xhr$/,
-      "pusher-websocket-iso-externals-worker/xhr"
-    )
-  ]
+  resolve: {
+    modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/worker', 'src/runtimes']
+  }
 })

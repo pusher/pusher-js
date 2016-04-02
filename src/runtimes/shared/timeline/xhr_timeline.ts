@@ -1,12 +1,11 @@
-import Logger from '../../logger';
-import TimelineSender from '../../timeline/timeline_sender'
-import * as Collections from '../../utils/collections';
-import Util from '../../util';
-import Factory from '../../utils/factory';
-import Runtime from 'runtime';
-import TimelineTransport from 'shared/timeline_transport';
+import Logger from 'core/logger';
+import TimelineSender from 'core/timeline/timeline_sender'
+import * as Collections from 'core/utils/collections';
+import Util from 'core/util';
+import Factory from 'core/utils/factory';
+import TimelineTransport from 'shared/timeline/timeline_transport';
 
-var xhr = function(sender : TimelineSender, encrypted : boolean) : TimelineTransport {
+var getAgent = function(sender : TimelineSender, encrypted : boolean) {
   return function(data : any, callback : Function) {
     var scheme = "http" + (encrypted ? "s" : "") + "://";
     var url = scheme + (sender.options.host) + sender.options.path;
@@ -37,5 +36,10 @@ var xhr = function(sender : TimelineSender, encrypted : boolean) : TimelineTrans
     xhr.send();
   }
 };
+
+var xhr = {
+  name: 'xhr',
+  getAgent
+}
 
 export default xhr;
