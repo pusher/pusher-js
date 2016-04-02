@@ -236,6 +236,8 @@ for (var i = 0; i < channels.length; i++) {
 console.groupEnd();
 ```
 
+Private and presence channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
+
 ## Unsubscribing from channels
 
 To unsubscribe from a channel, invoke the `unsubscribe` method of your socket object:
