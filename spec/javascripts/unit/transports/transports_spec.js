@@ -6,6 +6,7 @@ var WS = require('ws');
 var HTTP = require('core/http/http').default;
 var Runtime = require('runtime').default;
 var VERSION = require('defaults').default.VERSION;
+var Dependencies = require('dom/dependencies').Dependencies;
 
 describe("Transports", function() {
   describe("ws", function() {
@@ -106,6 +107,113 @@ describe("Transports", function() {
         expect(window.MozWebSocket).toHaveBeenCalledWith("moztesturl");
         expect(socket).toEqual(jasmine.any(window.MozWebSocket));
         expect(socket.url).toEqual("moztesturl");
+      });
+    });
+  });
+
+  describe("SockJSTransport", function() {
+    var _SockJS = window.SockJS;
+
+    afterEach(function() {
+      window.SockJS = _SockJS;
+    });
+
+    it("should have a 'sockjs' resource file", function() {
+      expect(Transports.sockjs.hooks.file).toEqual("sockjs");
+    });
+
+    it("should generate correct unencrypted URLs", function() {
+      var url = Transports.sockjs.hooks.urls.getInitial("foobar", {
+        encrypted: false,
+        hostUnencrypted: "example.com:111"
+      });
+      expect(url).toEqual("http://example.com:111/pusher");
+    });
+
+    it("should generate correct encrypted URLs", function() {
+      var url = Transports.sockjs.hooks.urls.getInitial("foobar", {
+        encrypted: true,
+        hostEncrypted: "example.com:222"
+      });
+      expect(url).toEqual("https://example.com:222/pusher");
+    });
+
+    it("should generate correct paths", function() {
+      var path = Transports.sockjs.hooks.urls.getPath("asdf", {});
+      expect(path).toEqual("/app/asdf?protocol=7&client=js&version="+VERSION);
+    });
+
+    it("should handle activity checks", function() {
+      expect(Transports.sockjs.hooks.handlesActivityChecks).toBe(true);
+    });
+
+    it("should not support ping", function() {
+      expect(Transports.sockjs.hooks.supportsPing).toBe(false);
+    });
+
+    describe("beforeOpen hook", function() {
+      it("should send the path over the socket", function() {
+        // SockJS objects have WebSocket-compatible interface
+        var socket = Mocks.getWebSocket();
+        Transports.sockjs.hooks.beforeOpen(socket, "test/path");
+
+        expect(socket.send.calls.length).toEqual(1);
+        var pathMessage = JSON.parse(socket.send.calls[0].args[0]);
+        expect(pathMessage).toEqual({ path: "test/path" });
+      });
+    });
+
+    describe("isSupported hook", function() {
+      it("should always return true", function() {
+        expect(Transports.sockjs.hooks.isSupported({})).toBe(true);
+      });
+    });
+
+    describe("getSocket hook", function() {
+      beforeEach(function() {
+        Dependencies.load = jasmine.createSpy("load");
+        Dependencies.getRoot = jasmine.createSpy("getRoot");
+        Dependencies.getPath = jasmine.createSpy("getPath");
+        Dependencies.getPath.andCallFake(function(file, options) {
+          return (options.encrypted ? "https" : "http") + "://host/" + file;
+        });
+      });
+
+      it("should pass ignoreNullOrigin to the SockJS constructor", function() {
+        window.SockJS = jasmine.createSpy();
+
+        var socket = Transports.sockjs.hooks.getSocket(
+          "url", { encrypted: false, ignoreNullOrigin: true }
+        );
+        expect(window.SockJS).toHaveBeenCalledWith(
+          "url",
+          null,
+          { js_path: "http://host/sockjs", ignore_null_origin: true }
+        );
+      });
+
+      it("should generate a correct JS path", function() {
+        window.SockJS = jasmine.createSpy();
+
+        var socket = Transports.sockjs.hooks.getSocket(
+          "url", { encrypted: true }
+        );
+        expect(window.SockJS).toHaveBeenCalledWith(
+          "url", null, { js_path: "https://host/sockjs" }
+        );
+      });
+
+      it("should return a new SockJS object", function() {
+        window.SockJS = jasmine.createSpy().andCallFake(function(url) {
+          this.url = url;
+        });
+
+        var socket = Transports.sockjs.hooks.getSocket(
+          "sock_test", { encrypted: false }
+        );
+        expect(window.SockJS.calls.length).toEqual(1);
+        expect(socket).toEqual(jasmine.any(window.SockJS));
+        expect(socket.url).toEqual("sock_test");
       });
     });
   });

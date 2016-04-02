@@ -4,7 +4,7 @@
 *.swp
 coverage
 node_modules
-./lib
+lib/
 
 !/dist/*
 !/src/node_modules
