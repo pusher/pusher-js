@@ -12,6 +12,9 @@ import * as Collections from 'core/utils/collections';
 import {ScriptReceivers} from './dom/script_receiver_factory';
 import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
+import Ajax from "core/http/ajax";
+import WS from 'ws';
+import {NetInfo, Network} from 'net_info'
 
 var Runtime : Browser = {
 
@@ -98,7 +101,33 @@ var Runtime : Browser = {
     } catch (e) {
       return undefined;
     }
-  }
+  },
+
+  createXHR() : Ajax {
+    if (XHR.getAPI()){
+      return this.createXMLHttpRequest();
+    } else {
+      return this.createMicrosoftXHR();
+    }
+  },
+
+  createXMLHttpRequest() : Ajax {
+    var Constructor = XHR.getAPI();
+    return new Constructor();
+  },
+
+  createMicrosoftXHR() : Ajax {
+    return new ActiveXObject("Microsoft.XMLHTTP");
+  },
+
+  getNetwork() : NetInfo {
+    return Network;
+  },
+
+  createWebSocket(url : string) : any {
+    var Constructor = WS.getAPI();
+    return new Constructor(url);
+  },
 }
 
 export default Runtime;

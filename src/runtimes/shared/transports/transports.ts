@@ -5,7 +5,6 @@ import * as Collections from "core/utils/collections.ts";
 import TransportHooks from "core/transports/transport_hooks.ts";
 import WS from 'ws';
 import HTTPFactory from 'core/http/http';
-import Factory from 'core/utils/factory';
 import Runtime from 'runtime';
 
 /** WebSocket transport.
@@ -25,7 +24,7 @@ var WSTransport = new Transport(<TransportHooks> {
     return Boolean(WS.getAPI());
   },
   getSocket: function(url) {
-    return Factory.createWebSocket(url);
+    return Runtime.createWebSocket(url);
   }
 });
 

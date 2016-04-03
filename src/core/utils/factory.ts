@@ -13,29 +13,9 @@ import PrivateChannel from "../channels/private_channel";
 import Channel from "../channels/channel";
 import ConnectionManager from "../connection/connection_manager";
 import Ajax from "../http/ajax";
-import XHR from "xhr";
 import Channels from "../channels/channels";
-import {Network, NetInfo} from "net_info";
-import WS from 'ws';
 
 var Factory = {
-
-  createXHR() : Ajax {
-    if (XHR.getAPI()){
-      return this.createXMLHttpRequest();
-    } else {
-      return this.createMicrosoftXHR();
-    }
-  },
-
-  createXMLHttpRequest() : Ajax {
-    var Constructor = XHR.getAPI();
-    return new Constructor();
-  },
-
-  createMicrosoftXHR() : Ajax {
-    return new ActiveXObject("Microsoft.XMLHTTP");
-  },
 
   createChannels() : Channels {
     return new Channels();
@@ -67,16 +47,6 @@ var Factory = {
 
   createHandshake(transport : TransportConnection, callback : (HandshakePayload)=>void) : Handshake {
     return new Handshake(transport, callback);
-  },
-
-  /* RETRIEVE APIS */
-  getNetwork() : NetInfo {
-    return Network;
-  },
-
-  createWebSocket(url : string) : any {
-    var Constructor = WS.getAPI();
-    return new Constructor(url);
   },
 
   createAssistantToTheTransportManager(manager : TransportManager, transport : Transport, options : any) : AssistantToTheTransportManager {

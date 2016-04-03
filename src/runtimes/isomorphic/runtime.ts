@@ -6,6 +6,10 @@ import * as Collections from 'core/utils/collections';
 import Transports from "transports/transports";
 import {AuthTransports} from 'shared/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
+import Ajax from 'core/http/ajax';
+import XHR from 'xhr';
+import WS from 'ws';
+import {NetInfo, Network} from 'net_info'
 
 var Isomorphic : Runtime = {
 
@@ -54,7 +58,25 @@ var Isomorphic : Runtime = {
         function (t) { return t.isSupported({}); }
       )
     );
-  }
+  },
+
+  createXHR() : Ajax {
+    return this.createXMLHttpRequest();
+  },
+
+  createXMLHttpRequest() : Ajax {
+    var Constructor = XHR.getAPI();
+    return new Constructor();
+  },
+
+  getNetwork() : NetInfo {
+    return Network;
+  },
+
+  createWebSocket(url : string) : any {
+    var Constructor = WS.getAPI();
+    return new Constructor(url);
+  },
 }
 
 export default Isomorphic;

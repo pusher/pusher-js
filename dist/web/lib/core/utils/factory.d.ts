@@ -10,13 +10,8 @@ import PresenceChannel from "../channels/presence_channel";
 import PrivateChannel from "../channels/private_channel";
 import Channel from "../channels/channel";
 import ConnectionManager from "../connection/connection_manager";
-import Ajax from "../http/ajax";
 import Channels from "../channels/channels";
-import { NetInfo } from "net_info";
 declare var Factory: {
-    createXHR(): Ajax;
-    createXMLHttpRequest(): Ajax;
-    createMicrosoftXHR(): Ajax;
     createChannels(): Channels;
     createConnectionManager(key: string, options: any): ConnectionManager;
     createChannel(name: string, pusher: any): Channel;
@@ -25,8 +20,6 @@ declare var Factory: {
     createTimelineSender(timeline: Timeline, options: any): TimelineSender;
     createAuthorizer(channel: Channel, options: any): Authorizer;
     createHandshake(transport: TransportConnection, callback: (HandshakePayload: any) => void): Handshake;
-    getNetwork(): NetInfo;
-    createWebSocket(url: string): any;
     createAssistantToTheTransportManager(manager: TransportManager, transport: Transport, options: any): AssistantToTheTransportManager;
 };
 export default Factory;

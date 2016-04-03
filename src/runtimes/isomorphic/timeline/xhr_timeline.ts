@@ -2,7 +2,7 @@ import Logger from 'core/logger';
 import TimelineSender from 'core/timeline/timeline_sender'
 import * as Collections from 'core/utils/collections';
 import Util from 'core/util';
-import Factory from 'core/utils/factory';
+import Runtime from 'runtime';
 import TimelineTransport from 'shared/timeline/timeline_transport';
 
 var getAgent = function(sender : TimelineSender, encrypted : boolean) {
@@ -20,7 +20,7 @@ var getAgent = function(sender : TimelineSender, encrypted : boolean) {
 
     url += ("/" + 2 + "?" + query);
 
-    var xhr = Factory.createXHR();
+    var xhr = Runtime.createXHR();
     xhr.open("GET", url, true);
 
     xhr.onreadystatechange = function(){

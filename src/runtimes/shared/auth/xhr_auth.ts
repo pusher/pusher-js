@@ -2,7 +2,6 @@ import Logger from 'core/logger';
 import TimelineSender from 'core/timeline/timeline_sender'
 import * as Collections from 'core/utils/collections';
 import Util from 'core/util';
-import Factory from 'core/utils/factory';
 import Runtime from 'runtime';
 import {AuthTransport} from 'shared/auth/auth_transports';
 import AbstractRuntime from 'shared/runtime_interface';
@@ -10,7 +9,7 @@ import AbstractRuntime from 'shared/runtime_interface';
 var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callback){
   var self = this, xhr;
 
-  xhr = Factory.createXHR();
+  xhr = Runtime.createXHR();
   xhr.open("POST", self.options.authEndpoint, true);
 
   // add request headers

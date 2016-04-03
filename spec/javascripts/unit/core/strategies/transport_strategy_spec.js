@@ -134,7 +134,7 @@ describe("TransportStrategy", function() {
       });
       waitsFor(function() {
         return callback.calls.length > 0;
-      }, "callback to be called", 200);
+      }, "callback to be called");
       runs(function() {
         expect(callback).toHaveBeenCalledWith(
           jasmine.any(Errors.TransportPriorityTooLow)

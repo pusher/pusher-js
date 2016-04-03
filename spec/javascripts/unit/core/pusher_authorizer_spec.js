@@ -1,3 +1,4 @@
+var TestEnv = require('testenv');
 var Authorizer = require('core/pusher_authorizer').default;
 var Logger = require('core/logger');
 var Mocks = require('mocks');
@@ -8,14 +9,14 @@ var Runtime = require('runtime').default;
 
 describe("Authorizer", function() {
   describe("#composeQuery", function() {
-    it("should return str with just socket id and channel name if no auth query options", function(test) {
+    it("should return str with just socket id and channel name if no auth query options", function() {
       var authorizer = new Authorizer({ name: "chan" }, {});
 
       expect(authorizer.composeQuery("1.1"))
         .toEqual("socket_id=1.1&channel_name=chan");
     });
 
-    it("should add query params specified in options object", function(test) {
+    it("should add query params specified in options object", function() {
       var authorizer = new Authorizer(
         { name: "chan" },
         { auth: {
@@ -36,10 +37,11 @@ describe("AJAX Authorizer", function() {
 
   beforeEach(function() {
     xhr = new Mocks.getXHR();
-    if (window.XMLHttpRequest) {
-      spyOn(Factory, "createXMLHttpRequest").andReturn(xhr);
+
+    if (TestEnv === "web" && !window.XMLHttpRequest) {
+      spyOn(Runtime, "createMicrosoftXHR").andReturn(xhr);
     } else {
-      spyOn(Factory, "createMicrosoftXHR").andReturn(xhr);
+      spyOn(Runtime, "createXMLHttpRequest").andReturn(xhr);
     }
   });
 
@@ -81,7 +83,7 @@ describe("AJAX Authorizer", function() {
     );
   });
 
-  it("should call back with auth result on success", function(test) {
+  it("should call back with auth result on success", function() {
     var authorizer = new Authorizer(
       { name: "chan" },
       { authTransport: "ajax" }
@@ -93,10 +95,10 @@ describe("AJAX Authorizer", function() {
     var callback = jasmine.createSpy("callback");
     authorizer.authorize("1.23", callback);
 
-    if (window.XMLHttpRequest) {
-      expect(Factory.createXMLHttpRequest.calls.length).toEqual(1);
+    if (TestEnv === "web" && !window.XMLHttpRequest) {
+      expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
     } else {
-      expect(Factory.createMicrosoftXHR.calls.length).toEqual(1);
+      expect(Runtime.createXMLHttpRequest.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;
@@ -108,7 +110,7 @@ describe("AJAX Authorizer", function() {
     expect(callback).toHaveBeenCalledWith(false, data);
   });
 
-  it("should call back with an error if JSON in xhr.responseText is invalid", function(test) {
+  it("should call back with an error if JSON in xhr.responseText is invalid", function() {
     var authorizer = new Authorizer(
       { name: "chan" },
       { authTransport: "ajax" }
@@ -117,10 +119,10 @@ describe("AJAX Authorizer", function() {
     var callback = jasmine.createSpy("callback");
     authorizer.authorize("1.23", callback);
 
-    if (window.XMLHttpRequest) {
-      expect(Factory.createXMLHttpRequest.calls.length).toEqual(1);
+    if (TestEnv === "web" && !window.XMLHttpRequest) {
+      expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
     } else {
-      expect(Factory.createMicrosoftXHR.calls.length).toEqual(1);
+      expect(Runtime.createXMLHttpRequest.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;
@@ -134,37 +136,6 @@ describe("AJAX Authorizer", function() {
       "JSON returned from webapp was invalid, yet status code was 200. " +
         "Data was: " +
         invalidJSON
-    );
-  });
-});
-
-describe("JSONP Authorizer", function() {
-  it("should raise a warning if headers are passed", function() {
-    var headers = { "foo": "bar", "n": 42 };
-    var authorizer = new Authorizer(
-      { name: "chan" },
-      { authTransport: "jsonp",
-        auth: {
-          headers: headers
-        }
-      }
-    );
-
-    var document = Mocks.getDocument();
-    var script = Mocks.getDocumentElement();
-    var documentElement = Mocks.getDocumentElement();
-
-    document.createElement.andReturn(script);
-    document.getElementsByTagName.andReturn([]);
-    document.documentElement = documentElement;
-    spyOn(Runtime, "getDocument").andReturn(document);
-
-    spyOn(Logger, "warn");
-    authorizer.authorize("1.23", function() {});
-
-    expect(Logger.warn).toHaveBeenCalledWith(
-      "Warn",
-      "To send headers with the auth request, you must use AJAX, rather than JSONP."
     );
   });
 });

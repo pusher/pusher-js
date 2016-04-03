@@ -1,7 +1,6 @@
 var Mocks = require('mocks');
 var TimelineSender = require('core/timeline/timeline_sender').default;
 var Runtime = require('runtime').default;
-var Factory = require('core/utils/factory').default;
 
 describe("TimelineSender", function() {
   var xhrRequest;
@@ -15,7 +14,7 @@ describe("TimelineSender", function() {
     });
 
     onSend = jasmine.createSpy("onSend");
-    spyOn(Factory, "createXHR").andCallFake(function() {
+    spyOn(Runtime, "createXHR").andCallFake(function() {
       xhrRequest = Mocks.getXHR();
       return xhrRequest;
     });
@@ -44,7 +43,7 @@ describe("TimelineSender", function() {
     it("should send a non-empty timeline", function() {
       sender.send(false, onSend);
 
-      expect(Factory.createXHR.calls.length).toEqual(1);
+      expect(Runtime.createXHR.calls.length).toEqual(1);
       var encodedParams = 'WzEsMiwzXQ%3D%3D';
 
       expect(xhrRequest.open).toHaveBeenCalledWith(
@@ -55,7 +54,7 @@ describe("TimelineSender", function() {
       expect(xhrRequest.send).toHaveBeenCalled();
     });
 
-    it("should send secure JSONP requests when encrypted", function() {
+    it("should send secure XHR requests when encrypted", function() {
       var sender = new TimelineSender(timeline, {
         encrypted: true,
         host: "example.com",
@@ -63,7 +62,7 @@ describe("TimelineSender", function() {
       });
       sender.send(true, onSend);
 
-      expect(Factory.createXHR.calls.length).toEqual(1);
+      expect(Runtime.createXHR.calls.length).toEqual(1);
       expect(xhrRequest.open).toHaveBeenCalledWith(
         "GET",
         'https://example.com/timeline/2?events=WzEsMiwzXQ%3D%3D',
@@ -73,7 +72,7 @@ describe("TimelineSender", function() {
     it("should not send an empty timeline", function() {
       timeline.isEmpty.andReturn(true);
       sender.send(false, onSend);
-      expect(Factory.createXHR).not.toHaveBeenCalled();
+      expect(Runtime.createXHR).not.toHaveBeenCalled();
     });
   });
 });
