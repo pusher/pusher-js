@@ -31,11 +31,11 @@ web_integration:
 	node_modules/karma/bin/karma start spec/config/karma/integration.js
 
 node_unit:
-	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/unit.js && \
-	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose tmp/node_unit
+	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.unit.js && \
+	node spec/config/jasmine-node/jasmine.unit.js
 
 node_integration:
-	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/integration.js && \
-	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose tmp/node_integration
+	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.integration.js && \
+	node spec/config/jasmine-node/jasmine.integration.js
 
 .PHONY: build_all
