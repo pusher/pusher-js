@@ -1,14 +1,22 @@
-var Pusher = require('pusher_integration').default;
-window.Pusher = Pusher;
+var Pusher = require('pusher_integration');
+var TestEnv = require('testenv');
 
-var Integration = require("../helpers/integration");
-var Mocks = require("../helpers/mocks");
+if (TestEnv === "web") window.Pusher = Pusher;
+
+var Integration = require("integration");
+var Mocks = require("mocks");
 var defaults = require("defaults").default;
 var Network = require("net_info").Network;
 var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Runtime = require('runtime').default;
 var Defaults = require('defaults').default;
+
+if (TestEnv == "web") {
+  var BASE_FALLBACK = "sockjs"
+} else {
+  var BASE_FALLBACK = "xhr_polling"
+}
 
 Integration.describe("Timeout Configuration", function() {
   var transport;
@@ -18,7 +26,7 @@ Integration.describe("Timeout Configuration", function() {
     spyOn(Network, "isOnline").andReturn(true);
 
     spyOn(transports.ws, "isSupported").andReturn(true);
-    spyOn(transports.sockjs, "isSupported").andReturn(false);
+    spyOn(transports[BASE_FALLBACK], "isSupported").andReturn(false);
 
     spyOn(Runtime, "getLocalStorage").andReturn({});
 

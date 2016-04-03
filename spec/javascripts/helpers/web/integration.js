@@ -4,7 +4,6 @@ var ScriptReceiverFactory = require('dom/script_receiver_factory').ScriptReceive
 var Collections = require('core/utils/collections');
 var JSONPRequest = require('dom/jsonp_request').default;
 var ScriptReceivers = require('dom/script_receiver_factory').ScriptReceivers;
-var Pusher = require('pusher_integration').default;
 
 exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";
 exports.API_EU_URL = "http://pusher-js-integration-api-eu.herokuapp.com";
@@ -23,6 +22,7 @@ exports.getRandomName = function(prefix) {
 };
 
 exports.sendAPIMessage = function(request) {
+  var Pusher = window.Pusher;
   var jsonpRequest = new JSONPRequest(request.url, {
     channel: request.channel,
     event: request.event,
@@ -33,25 +33,6 @@ exports.sendAPIMessage = function(request) {
   });
   jsonpRequest.send(receiver);
 };
-
-// // FIXME implement an XHR endpoint
-// exports.sendAPIMessage = function(request) {
-//   var params = {
-//     channel: request.channel,
-//     event: request.event,
-//     data: request.data
-//   };
-//   var query = Collections.map(
-//     Collections.flatten(encodeParamsObject(params)),
-//     Collections.method("join", "=")
-//   ).join("&");
-//
-//   url = request.url + ("/" + 2 + "?" + query); // TODO: check what to do in lieu of receiver number
-//
-//   var xhr = util.createXHR();
-//   xhr.open("GET", url, true);
-//   xhr.send()
-// };
 
 function encodeParamsObject(data) {
   return Collections.mapObject(data, function(value) {

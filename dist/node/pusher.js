@@ -274,6 +274,9 @@ module.exports =
 	        return Collections.keys(Collections.filterObject({ "ws": transports_1.default.ws }, function (t) { return t.isSupported({}); }));
 	    },
 	    createXHR: function () {
+	        return this.createXMLHttpRequest();
+	    },
+	    createXMLHttpRequest: function () {
 	        var Constructor = xhr_1.default.getAPI();
 	        return new Constructor();
 	    },

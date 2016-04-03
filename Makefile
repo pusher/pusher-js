@@ -32,9 +32,10 @@ web_integration:
 
 node_unit:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/unit.js && \
-	node_modules/jasmine-node/bin/jasmine-node tmp/node_unit
+	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose tmp/node_unit
 
 node_integration:
-	echo "NotYetImplemented"
+	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/integration.js && \
+	node_modules/jasmine-node/bin/jasmine-node --captureExceptions --verbose tmp/node_integration
 
 .PHONY: build_all

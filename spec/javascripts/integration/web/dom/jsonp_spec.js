@@ -1,7 +1,7 @@
-var Pusher = require('pusher_integration').default;
+var Pusher = require('pusher_integration');
 window.Pusher = Pusher;
 
-var Integration = require("../helpers/integration");
+var Integration = require("integration");
 var JSONPRequest = require('dom/jsonp_request').default;
 
 Integration.describe("JSONP", function() {

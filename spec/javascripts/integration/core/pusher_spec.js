@@ -1,13 +1,17 @@
-var Pusher = require('pusher_integration').default;
-window.Pusher = Pusher;
+var Pusher = require('pusher_integration');
+var TestEnv = require('testenv');
 
-var Integration = require("../helpers/integration");
-var DependencyLoader = require('dom/dependency_loader').default;
+if (TestEnv === "web") {
+  window.Pusher = Pusher;
+  var DependencyLoader = require('dom/dependency_loader').default;
+  var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
+  var Dependencies = require('dom/dependencies').Dependencies;
+}
+
+var Integration = require("integration");
 var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Timer = require("core/utils/timers").OneOffTimer;
-var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
-var Dependencies = require('dom/dependencies').Dependencies;
 var Collections = require('core/utils/collections');
 var Defaults = require('defaults').default;
 var Runtime = require('runtime').default;
@@ -510,15 +514,17 @@ Integration.describe("Pusher", function() {
     _Dependencies = Dependencies;
 
     Defaults.VERSION = "8.8.8";
-    Defaults.channel_auth_transport = 'jsonp';
+    Defaults.channel_auth_transport = (TestEnv === 'web') ? 'jsonp' : 'ajax';
     Defaults.channel_auth_endpoint = Integration.API_URL + "/auth";
-    Dependencies = new DependencyLoader({
-      cdn_http: Integration.JS_HOST,
-      cdn_https: Integration.JS_HOST,
-      version: Defaults.VERSION,
-      suffix: "",
-      receivers: DependenciesReceivers
-    });
+    if (TestEnv === "web") {
+      Dependencies = new DependencyLoader({
+        cdn_http: Integration.JS_HOST,
+        cdn_https: Integration.JS_HOST,
+        version: Defaults.VERSION,
+        suffix: "",
+        receivers: DependenciesReceivers
+      });
+    }
   });
 
   buildIntegrationTests("ws", false);
@@ -526,7 +532,7 @@ Integration.describe("Pusher", function() {
 
   if (Runtime.isXHRSupported()) {
     // CORS-compatible browsers
-    if (!/Android 2\./i.test(navigator.userAgent)) {
+    if (TestEnv !== "web" || !/Android 2\./i.test(navigator.userAgent)) {
       // Android 2.x does a lot of buffering, which kills streaming
       buildIntegrationTests("xhr_streaming", false);
       buildIntegrationTests("xhr_streaming", true);

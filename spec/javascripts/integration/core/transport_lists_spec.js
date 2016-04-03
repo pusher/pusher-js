@@ -1,10 +1,17 @@
-var Pusher = require('pusher_integration').default;
-window.Pusher = Pusher;
-var Integration = require("../helpers/integration");
-var Mocks = require("../helpers/mocks");
+var TestEnv = require('testenv');
+var Pusher = require('pusher_integration');
+if (TestEnv === "web") window.Pusher = Pusher;
+var Integration = require("integration");
+var Mocks = require("mocks");
 var defaults = require("defaults").default;
 var Network = require("net_info").Network;
 var transports = require("transports/transports").default;
+
+if (TestEnv == "web") {
+  var BASE_FALLBACK = "sockjs"
+} else {
+  var BASE_FALLBACK = "xhr_polling"
+}
 
 Integration.describe("Transport lists", function() {
   var _isReady = Pusher.isReady;
@@ -12,20 +19,20 @@ Integration.describe("Transport lists", function() {
   beforeEach(function() {
     spyOn(transports.ws, "isSupported").andReturn(true);
     spyOn(transports.xhr_streaming, "isSupported").andReturn(true);
-    spyOn(transports.sockjs, "isSupported").andReturn(true);
+    spyOn(transports[BASE_FALLBACK], "isSupported").andReturn(true);
 
     spyOn(transports.ws, "createConnection")
       .andCallFake(Mocks.getTransport);
     spyOn(transports.xhr_streaming, "createConnection")
       .andCallFake(Mocks.getTransport);
-    spyOn(transports.sockjs, "createConnection")
+    spyOn(transports[BASE_FALLBACK], "createConnection")
       .andCallFake(Mocks.getTransport);
 
     spyOn(defaults, "getDefaultStrategy").andCallFake(function() {
       return [
         [":def_transport", "a", "ws", 1, {}],
         [":def_transport", "b", "xhr_streaming", 2, {}],
-        [":def_transport", "c", "sockjs", 3, {}],
+        [":def_transport", "c", BASE_FALLBACK, 3, {}],
         [":def", "strategy", [":best_connected_ever", ":a", ":b", ":c"]]
       ];
     });
@@ -42,7 +49,7 @@ Integration.describe("Transport lists", function() {
     var pusher = new Pusher("asdf", { disableStats: true });
     expect(transports.ws.createConnection).toHaveBeenCalled();
     expect(transports.xhr_streaming.createConnection).toHaveBeenCalled();
-    expect(transports.sockjs.createConnection).toHaveBeenCalled();
+    expect(transports[BASE_FALLBACK].createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -53,7 +60,7 @@ Integration.describe("Transport lists", function() {
     });
     expect(transports.ws.createConnection).not.toHaveBeenCalled();
     expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
-    expect(transports.sockjs.createConnection).not.toHaveBeenCalled();
+    expect(transports[BASE_FALLBACK].createConnection).not.toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -64,7 +71,7 @@ Integration.describe("Transport lists", function() {
     });
     expect(transports.ws.createConnection).toHaveBeenCalled();
     expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
-    expect(transports.sockjs.createConnection).toHaveBeenCalled();
+    expect(transports[BASE_FALLBACK].createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -75,7 +82,7 @@ Integration.describe("Transport lists", function() {
     });
     expect(transports.ws.createConnection).not.toHaveBeenCalled();
     expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
-    expect(transports.sockjs.createConnection).toHaveBeenCalled();
+    expect(transports[BASE_FALLBACK].createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 
@@ -87,7 +94,7 @@ Integration.describe("Transport lists", function() {
     });
     expect(transports.ws.createConnection).not.toHaveBeenCalled();
     expect(transports.xhr_streaming.createConnection).not.toHaveBeenCalled();
-    expect(transports.sockjs.createConnection).toHaveBeenCalled();
+    expect(transports[BASE_FALLBACK].createConnection).toHaveBeenCalled();
     pusher.disconnect();
   });
 });

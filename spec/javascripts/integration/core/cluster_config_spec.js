@@ -1,12 +1,19 @@
-var Integration = require("../helpers/integration");
+var TestEnv = require('testenv');
+var Pusher = require('pusher_integration');
+
+if (TestEnv === "web") {
+  window.Pusher = Pusher;
+  var Dependencies = require('dom/dependencies').Dependencies;
+  var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
+  var DependencyLoader = require('dom/dependency_loader').default;
+}
+
+var Integration = require("integration");
 var Collections = require("core/utils/collections");
 var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Runtime = require('runtime').default;
-var Dependencies = require('dom/dependencies').Dependencies;
-var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
 var Defaults = require('defaults').default;
-var DependencyLoader = require('dom/dependency_loader').default;
 
 Integration.describe("Cluster Configuration", function() {
 
@@ -38,8 +45,11 @@ Integration.describe("Cluster Configuration", function() {
       });
 
       it("should open a connection to the 'eu' cluster", function() {
+
+        var authTransport = (TestEnv === "web") ? 'jsonp' : 'ajax';
+
         pusher = new Pusher("4d31fbea7080e3b4bf6d", {
-          authTransport: 'jsonp',
+          authTransport: authTransport,
           authEndpoint: Integration.API_EU_URL + "/auth",
           cluster: "eu",
           encrypted: options.encrypted,
@@ -104,16 +114,19 @@ Integration.describe("Cluster Configuration", function() {
     Defaults.VERSION = "8.8.8";
     Defaults.channel_auth_transport = "";
     Defaults.channel_auth_endpoint = "";
-    Dependencies = new DependencyLoader({
-      cdn_http: Integration.JS_HOST,
-      cdn_https: Integration.JS_HOST,
-      version: Defaults.VERSION,
-      suffix: "",
-      receivers: DependenciesReceivers
-    });
+
+    if (TestEnv === "web") {
+      Dependencies = new DependencyLoader({
+        cdn_http: Integration.JS_HOST,
+        cdn_https: Integration.JS_HOST,
+        version: Defaults.VERSION,
+        suffix: "",
+        receivers: DependenciesReceivers
+      });
+    }
   });
 
-  if (!/version\/5.*safari/i.test(navigator.userAgent)) {
+  if (TestEnv !== "web" || !/version\/5.*safari/i.test(navigator.userAgent)) {
     // Safari 5 uses hixie-75/76, which is not supported on EU
     describeClusterTest({ transport: "ws", encrypted: false});
     describeClusterTest({ transport: "ws", encrypted: true});
@@ -121,7 +134,7 @@ Integration.describe("Cluster Configuration", function() {
 
   if (Runtime.isXHRSupported()) {
     // CORS-compatible browsers
-    if (!/Android 2\./i.test(navigator.userAgent)) {
+    if (TestEnv !== "web" || !/Android 2\./i.test(navigator.userAgent)) {
       // Android 2.x does a lot of buffering, which kills streaming
       describeClusterTest({ transport: "xhr_streaming", encrypted: false});
       describeClusterTest({ transport: "xhr_streaming", encrypted: true});

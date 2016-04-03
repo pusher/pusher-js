@@ -13,10 +13,10 @@ module.exports = function(config) {
       clearContext: true
     },
     files: [
-      '**/spec/javascripts/integration/index.js'
+      '**/spec/javascripts/integration/index.web.js'
     ],
     preprocessors: {
-      '**/spec/javascripts/integration/index.js': ['webpack'],
+      '**/spec/javascripts/integration/index.web.js': ['webpack'],
       '**/spec/javascripts/node_modules/**/*.ts': ['webpack']
     },
 
@@ -36,10 +36,14 @@ module.exports = function(config) {
           'src/runtimes/web',
           'src/runtimes',
           'spec/javascripts/helpers'
-        ]
+        ],
+        alias: {
+          integration: 'web/integration'
+        }
       },
       externals: {
-        '../package': '{version: "'+ version +'"}'
+        '../package': '{version: "'+ version +'"}',
+        testenv: "'web'"
       }
     }),
 
