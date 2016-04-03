@@ -9,11 +9,15 @@ var objectAssign = require('object-assign-deep');
 // XHR, WebSocket and NetInfo in platforms/web/* //
 ///////////////////////////////////////////////////
 var config = objectAssign(require('./config.shared'),{
-  entry: "./src/core/pusher",
+  entry: {
+    pusher: "./src/core/pusher",
+    sockjs: "./src/runtimes/web/dom/sockjs/sockjs",
+    json2: './src/runtimes/web/dom/json2'
+  },
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
-    filename: "pusher.js"
+    filename: "[name].js"
   },
   externals: {
     '../package': '{version: "'+ version +'"}'
