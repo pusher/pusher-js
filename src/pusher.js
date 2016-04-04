@@ -115,15 +115,14 @@
 
   Pusher.warn = function() {
     var message = Pusher.Util.stringify.apply(this, arguments);
-    if (window.console) {
+    if (Pusher.log) {
+      Pusher.log(message);
+    } else if (window.console) {
       if (window.console.warn) {
         window.console.warn(message);
       } else if (window.console.log) {
         window.console.log(message);
       }
-    }
-    if (Pusher.log) {
-      Pusher.log(message);
     }
   };
 
