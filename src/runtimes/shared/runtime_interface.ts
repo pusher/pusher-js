@@ -10,7 +10,6 @@ interface Runtime {
   isXHRSupported() : boolean;
   isXDRSupported(encrypted?: boolean) : boolean;
   isSockJSSupported() : boolean;
-  getDocument() : any;
   getGlobal() : any;
   getAuthorizers() : AuthTransports;
   getLocalStorage() : any;

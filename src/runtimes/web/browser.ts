@@ -11,6 +11,7 @@ interface Browser extends AbstractRuntime {
   ScriptReceivers: ScriptReceiverFactory;
   DependenciesReceivers: ScriptReceiverFactory;
   onDocumentBody(callback : Function);
+  getDocument() : any;
 
   createJSONPRequest(url : string, data : any) : JSONPRequest;
   createScriptRequest(src : string) : ScriptRequest;

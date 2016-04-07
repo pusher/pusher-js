@@ -39,10 +39,6 @@ var Isomorphic : Runtime = {
     return Function("return this")();
   },
 
-  getDocument() : any {
-    throw("Isomorphic runtime detected, but getDocument alled. Please raise an issue on pusher/pusher-websocket-js-iso");
-  },
-
   getAuthorizers() : AuthTransports {
     return {ajax: xhrAuth};
   },
