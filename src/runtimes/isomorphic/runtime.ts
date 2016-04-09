@@ -31,10 +31,6 @@ var Isomorphic : Runtime = {
     return false;
   },
 
-  isSockJSSupported() : boolean {
-    return false;
-  },
-
   getGlobal() : any {
     return Function("return this")();
   },
@@ -57,10 +53,6 @@ var Isomorphic : Runtime = {
   },
 
   createXHR() : Ajax {
-    return this.createXMLHttpRequest();
-  },
-
-  createXMLHttpRequest() : Ajax {
     var Constructor = XHR.getAPI();
     return new Constructor();
   },

@@ -50,10 +50,6 @@ var Runtime : Browser = {
     return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
   },
 
-  isSockJSSupported() : boolean {
-    return true;
-  },
-
   isXDRSupported(encrypted?: boolean) : boolean {
     var protocol = encrypted ? "https:" : "http:";
     var documentProtocol = this.getProtocol();

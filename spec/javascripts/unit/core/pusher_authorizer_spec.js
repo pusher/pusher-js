@@ -41,7 +41,7 @@ describe("AJAX Authorizer", function() {
     if (TestEnv === "web" && !window.XMLHttpRequest) {
       spyOn(Runtime, "createMicrosoftXHR").andReturn(xhr);
     } else {
-      spyOn(Runtime, "createXMLHttpRequest").andReturn(xhr);
+      spyOn(Runtime, "createXHR").andReturn(xhr);
     }
   });
 
@@ -98,7 +98,7 @@ describe("AJAX Authorizer", function() {
     if (TestEnv === "web" && !window.XMLHttpRequest) {
       expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
     } else {
-      expect(Runtime.createXMLHttpRequest.calls.length).toEqual(1);
+      expect(Runtime.createXHR.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;
@@ -122,7 +122,7 @@ describe("AJAX Authorizer", function() {
     if (TestEnv === "web" && !window.XMLHttpRequest) {
       expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
     } else {
-      expect(Runtime.createXMLHttpRequest.calls.length).toEqual(1);
+      expect(Runtime.createXHR.calls.length).toEqual(1);
     }
 
     xhr.readyState = 4;

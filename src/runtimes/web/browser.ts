@@ -15,6 +15,8 @@ interface Browser extends AbstractRuntime {
 
   createJSONPRequest(url : string, data : any) : JSONPRequest;
   createScriptRequest(src : string) : ScriptRequest;
+
+  createXMLHttpRequest() : Ajax;
   createMicrosoftXHR() : Ajax;
 }
 

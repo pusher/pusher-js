@@ -12,7 +12,7 @@ var SockJSTransport = new Transport(<TransportHooks>{
   supportsPing: false,
 
   isSupported: function() {
-    return Runtime.isSockJSSupported();
+    return true;
   },
   isInitialized: function() {
     return window.SockJS !== undefined;

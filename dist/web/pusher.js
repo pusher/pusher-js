@@ -264,9 +264,6 @@ var Pusher =
 	        var Constructor = xhr_1.default.getAPI();
 	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
 	    },
-	    isSockJSSupported: function () {
-	        return true;
-	    },
 	    isXDRSupported: function (encrypted) {
 	        var protocol = encrypted ? "https:" : "http:";
 	        var documentProtocol = this.getProtocol();
@@ -1168,7 +1165,6 @@ var Pusher =
 	var transports_1 = __webpack_require__(20);
 	var transport_1 = __webpack_require__(22);
 	var URLSchemes = __webpack_require__(21);
-	var runtime_1 = __webpack_require__(1);
 	var dependencies_1 = __webpack_require__(3);
 	var SockJSTransport = new transport_1.default({
 	    file: "sockjs",
@@ -1176,7 +1172,7 @@ var Pusher =
 	    handlesActivityChecks: true,
 	    supportsPing: false,
 	    isSupported: function () {
-	        return runtime_1.default.isSockJSSupported();
+	        return true;
 	    },
 	    isInitialized: function () {
 	        return window.SockJS !== undefined;

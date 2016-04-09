@@ -9,14 +9,12 @@ interface Runtime {
   getProtocol() : string;
   isXHRSupported() : boolean;
   isXDRSupported(encrypted?: boolean) : boolean;
-  isSockJSSupported() : boolean;
   getGlobal() : any;
   getAuthorizers() : AuthTransports;
   getLocalStorage() : any;
   getClientFeatures() : any[];
   TimelineTransport: TimelineTransport;
   createXHR() : Ajax;
-  createXMLHttpRequest() : Ajax;
   createWebSocket(url : string) : any;
   getNetwork() : NetInfo;
 }

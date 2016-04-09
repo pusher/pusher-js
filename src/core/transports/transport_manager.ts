@@ -1,7 +1,7 @@
 import AssistantToTheTransportManager from './assistant_to_the_transport_manager';
 import Transport from "./transport";
 import PingDelayOptions from "./ping_delay_options";
-import Factory from "core/utils/factory";
+import Factory from "../utils/factory";
 
 /** Keeps track of the number of lives left for a transport.
  *

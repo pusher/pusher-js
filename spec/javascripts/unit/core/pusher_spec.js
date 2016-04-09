@@ -48,11 +48,14 @@ describe("Pusher", function() {
     spyOn(Factory, "createChannel").andCallFake(function(name, _) {
       return Mocks.getChannel(name);
     });
-    spyOn(Runtime, "getDocument").andReturn({
-      location: {
-        protocol: "http:"
-      }
-    });
+
+    if (TestEnv === "web") {
+      spyOn(Runtime, "getDocument").andReturn({
+        location: {
+          protocol: "http:"
+        }
+      });
+    }
   });
 
   afterEach(function() {
@@ -225,15 +228,17 @@ describe("Pusher", function() {
         expect(pusher.connection.options.encrypted).toBe(true);
       });
 
-      it("should be encrypted when using HTTPS", function() {
-        Runtime.getDocument.andReturn({
-          location: {
-            protocol: "https:"
-          }
-        });
-        var pusher = new Pusher("foo", { encrypted: true });
-        expect(pusher.connection.options.encrypted).toBe(true);
-      });
+      if (TestEnv === "web") {
+        it("should be encrypted when using HTTPS", function() {
+          Runtime.getDocument.andReturn({
+            location: {
+              protocol: "https:"
+            }
+          });
+          var pusher = new Pusher("foo", { encrypted: true });
+          expect(pusher.connection.options.encrypted).toBe(true);
+        });  
+      }
     });
   });
 
