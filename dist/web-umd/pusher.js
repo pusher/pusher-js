@@ -273,9 +273,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var Constructor = xhr_1.default.getAPI();
 	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
 	    },
-	    isSockJSSupported: function () {
-	        return true;
-	    },
 	    isXDRSupported: function (encrypted) {
 	        var protocol = encrypted ? "https:" : "http:";
 	        var documentProtocol = this.getProtocol();
@@ -687,8 +684,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var global = Function("return this")();
 	var base64_1 = __webpack_require__(11);
+	var runtime_1 = __webpack_require__(1);
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -765,7 +762,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || global, array[i], i, array);
+	        f.call(context || runtime_1.default.getGlobal(), array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
@@ -1177,7 +1174,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var transports_1 = __webpack_require__(20);
 	var transport_1 = __webpack_require__(22);
 	var URLSchemes = __webpack_require__(21);
-	var runtime_1 = __webpack_require__(1);
 	var dependencies_1 = __webpack_require__(3);
 	var SockJSTransport = new transport_1.default({
 	    file: "sockjs",
@@ -1185,7 +1181,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    handlesActivityChecks: true,
 	    supportsPing: false,
 	    isSupported: function () {
-	        return runtime_1.default.isSockJSSupported();
+	        return true;
 	    },
 	    isInitialized: function () {
 	        return window.SockJS !== undefined;

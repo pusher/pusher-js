@@ -1,5 +1,5 @@
-var global = Function("return this")();
 import base64encode from '../base64';
+import Runtime from "runtime";
 
 /** Merges multiple objects into the target argument.
 *
@@ -119,7 +119,7 @@ export function values(object : any) : any[] {
 */
 export function apply(array : any[], f : Function, context?: any) {
   for (var i = 0; i < array.length; i++) {
-    f.call(context || global, array[i], i, array);
+    f.call(context || Runtime.getGlobal(), array[i], i, array);
   }
 }
 

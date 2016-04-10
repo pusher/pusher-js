@@ -675,8 +675,8 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var global = Function("return this")();
 	var base64_1 = __webpack_require__(11);
+	var runtime_1 = __webpack_require__(1);
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -753,7 +753,7 @@ var Pusher =
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || global, array[i], i, array);
+	        f.call(context || runtime_1.default.getGlobal(), array[i], i, array);
 	    }
 	}
 	exports.apply = apply;

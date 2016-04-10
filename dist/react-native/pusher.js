@@ -255,14 +255,8 @@ module.exports =
 	    isXDRSupported: function (encrypted) {
 	        return false;
 	    },
-	    isSockJSSupported: function () {
-	        return false;
-	    },
 	    getGlobal: function () {
 	        return Function("return this")();
-	    },
-	    getDocument: function () {
-	        throw ("Isomorphic runtime detected, but getDocument alled. Please raise an issue on pusher/pusher-websocket-js-iso");
 	    },
 	    getAuthorizers: function () {
 	        return { ajax: xhr_auth_1.default };
@@ -274,9 +268,6 @@ module.exports =
 	        return Collections.keys(Collections.filterObject({ "ws": transports_1.default.ws }, function (t) { return t.isSupported({}); }));
 	    },
 	    createXHR: function () {
-	        return this.createXMLHttpRequest();
-	    },
-	    createXMLHttpRequest: function () {
 	        var Constructor = xhr_1.default.getAPI();
 	        return new Constructor();
 	    },
@@ -374,8 +365,8 @@ module.exports =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var global = Function("return this")();
 	var base64_1 = __webpack_require__(6);
+	var runtime_1 = __webpack_require__(1);
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -452,7 +443,7 @@ module.exports =
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || global, array[i], i, array);
+	        f.call(context || runtime_1.default.getGlobal(), array[i], i, array);
 	    }
 	}
 	exports.apply = apply;

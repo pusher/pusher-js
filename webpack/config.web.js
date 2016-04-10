@@ -11,8 +11,6 @@ var objectAssign = require('object-assign-deep');
 var config = objectAssign(require('./config.shared'),{
   entry: {
     pusher: "./src/core/pusher",
-    sockjs: "./src/runtimes/web/dom/sockjs/sockjs",
-    json2: './src/runtimes/web/dom/json2'
   },
   output: {
     library: "Pusher",
