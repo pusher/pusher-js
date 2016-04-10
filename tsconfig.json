@@ -4,7 +4,7 @@
     "outDir": "lib/",
     "declaration": true,
     "sourceMap": true,
-    "target": "es5",
+    "target": "es3",
     "removeComments": true
   },
   "files": [

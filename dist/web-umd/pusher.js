@@ -74,28 +74,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var self = this;
 	        this.key = app_key;
 	        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
-	        this.channels = factory_1.default.createChannels();
-	        this.global_emitter = new dispatcher_1.default();
+	        this.channels = factory_1["default"].createChannels();
+	        this.global_emitter = new dispatcher_1["default"]();
 	        this.sessionID = Math.floor(Math.random() * 1000000000);
-	        this.timeline = new timeline_1.default(this.key, this.sessionID, {
+	        this.timeline = new timeline_1["default"](this.key, this.sessionID, {
 	            cluster: this.config.cluster,
-	            features: runtime_1.default.getClientFeatures(),
+	            features: runtime_1["default"].getClientFeatures(),
 	            params: this.config.timelineParams || {},
 	            limit: 50,
-	            level: level_1.default.INFO,
-	            version: defaults_1.default.VERSION
+	            level: level_1["default"].INFO,
+	            version: defaults_1["default"].VERSION
 	        });
 	        if (!this.config.disableStats) {
-	            this.timelineSender = factory_1.default.createTimelineSender(this.timeline, {
+	            this.timelineSender = factory_1["default"].createTimelineSender(this.timeline, {
 	                host: this.config.statsHost,
-	                path: "/timeline/v2/" + runtime_1.default.TimelineTransport.name
+	                path: "/timeline/v2/" + runtime_1["default"].TimelineTransport.name
 	            });
 	        }
 	        var getStrategy = function (options) {
 	            var config = Collections.extend({}, self.config, options);
-	            return StrategyBuilder.build(defaults_1.default.getDefaultStrategy(config), config);
+	            return StrategyBuilder.build(defaults_1["default"].getDefaultStrategy(config), config);
 	        };
-	        this.connection = factory_1.default.createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,
+	        this.connection = factory_1["default"].createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,
 	            timeline: this.timeline,
 	            activityTimeout: this.config.activity_timeout,
 	            pongTimeout: this.config.pong_timeout,
@@ -123,7 +123,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            self.channels.disconnect();
 	        });
 	        this.connection.bind('error', function (err) {
-	            logger_1.default.warn('Error', err);
+	            logger_1["default"].warn('Error', err);
 	        });
 	        Pusher.instances.push(this);
 	        this.timeline.info({ instances: Pusher.instances.length });
@@ -145,7 +145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    };
 	    Pusher.setLogger = function (logger) {
-	        logger_1.default.log = logger;
+	        logger_1["default"].log = logger;
 	    };
 	    Pusher.prototype.channel = function (name) {
 	        return this.channels.find(name);
@@ -190,14 +190,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    Pusher.prototype.subscribe = function (channel_name) {
 	        var channel = this.channels.add(channel_name, this);
-	        if (this.connection.state === state_1.default.CONNECTED) {
+	        if (this.connection.state === state_1["default"].CONNECTED) {
 	            channel.subscribe();
 	        }
 	        return channel;
 	    };
 	    Pusher.prototype.unsubscribe = function (channel_name) {
 	        var channel = this.channels.remove(channel_name);
-	        if (channel && this.connection.state === state_1.default.CONNECTED) {
+	        if (channel && this.connection.state === state_1["default"].CONNECTED) {
 	            channel.unsubscribe();
 	        }
 	    };
@@ -205,7 +205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.connection.send_event(event_name, data, channel);
 	    };
 	    Pusher.prototype.isEncrypted = function () {
-	        if (runtime_1.default.getProtocol() === "https:") {
+	        if (runtime_1["default"].getProtocol() === "https:") {
 	            return true;
 	        }
 	        else {
@@ -214,9 +214,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    Pusher.instances = [];
 	    Pusher.isReady = false;
-	    Pusher.Runtime = runtime_1.default;
-	    Pusher.ScriptReceivers = runtime_1.default.ScriptReceivers;
-	    Pusher.DependenciesReceivers = runtime_1.default.DependenciesReceivers;
+	    Pusher.Runtime = runtime_1["default"];
+	    Pusher.ScriptReceivers = runtime_1["default"].ScriptReceivers;
+	    Pusher.DependenciesReceivers = runtime_1["default"].DependenciesReceivers;
 	    return Pusher;
 	}());
 	function checkAppKey(key) {
@@ -224,7 +224,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw "You must pass your app key when you instantiate Pusher.";
 	    }
 	}
-	runtime_1.default.whenReady(Pusher.ready);
+	runtime_1["default"].whenReady(Pusher.ready);
 	module.exports = Pusher;
 
 
@@ -250,7 +250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    auth_callbacks: {},
 	    ScriptReceivers: script_receiver_factory_1.ScriptReceivers,
 	    DependenciesReceivers: dependencies_1.DependenciesReceivers,
-	    TimelineTransport: jsonp_timeline_1.default,
+	    TimelineTransport: jsonp_timeline_1["default"],
 	    whenReady: function (callback) {
 	        var _this = this;
 	        var initializeOnDocumentBody = function () {
@@ -270,7 +270,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.getDocument().location.protocol;
 	    },
 	    isXHRSupported: function () {
-	        var Constructor = xhr_1.default.getAPI();
+	        var Constructor = xhr_1["default"].getAPI();
 	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
 	    },
 	    isXDRSupported: function (encrypted) {
@@ -282,7 +282,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return window;
 	    },
 	    getAuthorizers: function () {
-	        return { ajax: xhr_auth_1.default, jsonp: jsonp_auth_1.default };
+	        return { ajax: xhr_auth_1["default"], jsonp: jsonp_auth_1["default"] };
 	    },
 	    onDocumentBody: function (callback) {
 	        var _this = this;
@@ -296,13 +296,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    createJSONPRequest: function (url, data) {
-	        return new jsonp_request_1.default(url, data);
+	        return new jsonp_request_1["default"](url, data);
 	    },
 	    createScriptRequest: function (src) {
-	        return new script_request_1.default(src);
+	        return new script_request_1["default"](src);
 	    },
 	    getClientFeatures: function () {
-	        return Collections.keys(Collections.filterObject({ "ws": transports_1.default.ws }, function (t) { return t.isSupported({}); }));
+	        return Collections.keys(Collections.filterObject({ "ws": transports_1["default"].ws }, function (t) { return t.isSupported({}); }));
 	    },
 	    getLocalStorage: function () {
 	        try {
@@ -313,7 +313,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    createXHR: function () {
-	        if (xhr_1.default.getAPI()) {
+	        if (xhr_1["default"].getAPI()) {
 	            return this.createXMLHttpRequest();
 	        }
 	        else {
@@ -321,7 +321,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    createXMLHttpRequest: function () {
-	        var Constructor = xhr_1.default.getAPI();
+	        var Constructor = xhr_1["default"].getAPI();
 	        return new Constructor();
 	    },
 	    createMicrosoftXHR: function () {
@@ -331,12 +331,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return net_info_1.Network;
 	    },
 	    createWebSocket: function (url) {
-	        var Constructor = ws_1.default.getAPI();
+	        var Constructor = ws_1["default"].getAPI();
 	        return new Constructor(url);
-	    },
+	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Runtime;
+	exports.__esModule = true;
+	exports["default"] = Runtime;
 
 
 /***/ },
@@ -349,8 +349,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return window.XMLHttpRequest;
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = XHR;
+	exports.__esModule = true;
+	exports["default"] = XHR;
 
 
 /***/ },
@@ -362,11 +362,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defaults_1 = __webpack_require__(5);
 	var dependency_loader_1 = __webpack_require__(7);
 	exports.DependenciesReceivers = new script_receiver_factory_1.ScriptReceiverFactory("_pusher_dependencies", "Pusher.Runtime.DependenciesReceivers");
-	exports.Dependencies = new dependency_loader_1.default({
-	    cdn_http: defaults_1.default.cdn_http,
-	    cdn_https: defaults_1.default.cdn_https,
-	    version: defaults_1.default.VERSION,
-	    suffix: defaults_1.default.dependency_suffix,
+	exports.Dependencies = new dependency_loader_1["default"]({
+	    cdn_http: defaults_1["default"].cdn_http,
+	    cdn_https: defaults_1["default"].cdn_https,
+	    version: defaults_1["default"].VERSION,
+	    suffix: defaults_1["default"].dependency_suffix,
 	    receivers: exports.DependenciesReceivers
 	});
 
@@ -412,7 +412,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var defaults_1 = __webpack_require__(6);
-	defaults_1.default.getDefaultStrategy = function (config) {
+	defaults_1["default"].getDefaultStrategy = function (config) {
 	    var wsStrategy;
 	    if (config.encrypted) {
 	        wsStrategy = [
@@ -505,8 +505,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        ]
 	    ];
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = defaults_1.default;
+	exports.__esModule = true;
+	exports["default"] = defaults_1["default"];
 
 
 /***/ },
@@ -533,8 +533,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	Defaults.cdn_http = 'http://js.pusher.com';
 	Defaults.cdn_https = 'https://js.pusher.com';
 	Defaults.dependency_suffix = '';
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Defaults;
+	exports.__esModule = true;
+	exports["default"] = Defaults;
 
 
 /***/ },
@@ -557,7 +557,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        else {
 	            self.loading[name] = [callback];
-	            var request = runtime_1.default.createScriptRequest(self.getPath(name, options));
+	            var request = runtime_1["default"].createScriptRequest(self.getPath(name, options));
 	            var receiver = self.receivers.create(function (error) {
 	                self.receivers.remove(receiver);
 	                if (self.loading[name]) {
@@ -578,7 +578,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    DependencyLoader.prototype.getRoot = function (options) {
 	        var cdn;
-	        var protocol = runtime_1.default.getDocument().location.protocol;
+	        var protocol = runtime_1["default"].getDocument().location.protocol;
 	        if ((options && options.encrypted) || protocol === "https:") {
 	            cdn = this.options.cdn_https;
 	        }
@@ -593,8 +593,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ;
 	    return DependencyLoader;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = DependencyLoader;
+	exports.__esModule = true;
+	exports["default"] = DependencyLoader;
 
 
 /***/ },
@@ -606,7 +606,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var runtime_1 = __webpack_require__(1);
 	var ajax = function (context, socketId, callback) {
 	    var self = this, xhr;
-	    xhr = runtime_1.default.createXHR();
+	    xhr = runtime_1["default"].createXHR();
 	    xhr.open("POST", self.options.authEndpoint, true);
 	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 	    for (var headerName in this.authOptions.headers) {
@@ -628,7 +628,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	            else {
-	                logger_1.default.warn("Couldn't get auth info from your webapp", xhr.status);
+	                logger_1["default"].warn("Couldn't get auth info from your webapp", xhr.status);
 	                callback(true, xhr.status);
 	            }
 	        }
@@ -636,8 +636,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    xhr.send(this.composeQuery(socketId));
 	    return xhr;
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = ajax;
+	exports.__esModule = true;
+	exports["default"] = ajax;
 
 
 /***/ },
@@ -675,8 +675,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Logger;
+	exports.__esModule = true;
+	exports["default"] = Logger;
 
 
 /***/ },
@@ -762,7 +762,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || runtime_1.default.getGlobal(), array[i], i, array);
+	        f.call(context || runtime_1["default"].getGlobal(), array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
@@ -834,7 +834,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (typeof value === "object") {
 	            value = JSON.stringify(value);
 	        }
-	        return encodeURIComponent(base64_1.default(value.toString()));
+	        return encodeURIComponent(base64_1["default"](value.toString()));
 	    });
 	}
 	exports.encodeParamsObject = encodeParamsObject;
@@ -849,8 +849,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function encode(s) {
 	    return btoa(utob(s));
 	}
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = encode;
+	exports.__esModule = true;
+	exports["default"] = encode;
 	var fromCharCode = String.fromCharCode;
 	var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	var b64tab = {};
@@ -901,7 +901,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var logger_1 = __webpack_require__(9);
 	var jsonp = function (context, socketId, callback) {
 	    if (this.authOptions.headers !== undefined) {
-	        logger_1.default.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
+	        logger_1["default"].warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
 	    }
 	    var callbackName = context.nextAuthCallbackID.toString();
 	    context.nextAuthCallbackID++;
@@ -919,8 +919,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var head = document.getElementsByTagName("head")[0] || document.documentElement;
 	    head.insertBefore(script, head.firstChild);
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = jsonp;
+	exports.__esModule = true;
+	exports["default"] = jsonp;
 
 
 /***/ },
@@ -988,8 +988,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return ScriptRequest;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = ScriptRequest;
+	exports.__esModule = true;
+	exports["default"] = ScriptRequest;
 
 
 /***/ },
@@ -1012,9 +1012,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var params = Collections.filterObject(this.data, function (value) {
 	            return value !== undefined;
 	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1.default.method("join", "=")).join("&");
+	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
 	        var url = this.url + "/" + receiver.number + "?" + query;
-	        this.request = runtime_1.default.createScriptRequest(url);
+	        this.request = runtime_1["default"].createScriptRequest(url);
 	        this.request.send(receiver);
 	    };
 	    JSONPRequest.prototype.cleanup = function () {
@@ -1024,8 +1024,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return JSONPRequest;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = JSONPRequest;
+	exports.__esModule = true;
+	exports["default"] = JSONPRequest;
 
 
 /***/ },
@@ -1057,8 +1057,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Util;
+	exports.__esModule = true;
+	exports["default"] = Util;
 
 
 /***/ },
@@ -1088,7 +1088,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 	    return OneOffTimer;
-	}(abstract_timer_1.default));
+	}(abstract_timer_1["default"]));
 	exports.OneOffTimer = OneOffTimer;
 	var PeriodicTimer = (function (_super) {
 	    __extends(PeriodicTimer, _super);
@@ -1099,7 +1099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    }
 	    return PeriodicTimer;
-	}(abstract_timer_1.default));
+	}(abstract_timer_1["default"]));
 	exports.PeriodicTimer = PeriodicTimer;
 
 
@@ -1129,8 +1129,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return Timer;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Timer;
+	exports.__esModule = true;
+	exports["default"] = Timer;
 
 
 /***/ },
@@ -1144,8 +1144,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return function (data, callback) {
 	        var scheme = "http" + (encrypted ? "s" : "") + "://";
 	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
-	        var request = runtime_1.default.createJSONPRequest(url, data);
-	        var receiver = runtime_1.default.ScriptReceivers.create(function (error, result) {
+	        var request = runtime_1["default"].createJSONPRequest(url, data);
+	        var receiver = runtime_1["default"].ScriptReceivers.create(function (error, result) {
 	            script_receiver_factory_1.ScriptReceivers.remove(receiver);
 	            request.cleanup();
 	            if (result && result.host) {
@@ -1162,8 +1162,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    name: 'jsonp',
 	    getAgent: getAgent
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = jsonp;
+	exports.__esModule = true;
+	exports["default"] = jsonp;
 
 
 /***/ },
@@ -1175,7 +1175,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var transport_1 = __webpack_require__(22);
 	var URLSchemes = __webpack_require__(21);
 	var dependencies_1 = __webpack_require__(3);
-	var SockJSTransport = new transport_1.default({
+	var SockJSTransport = new transport_1["default"]({
 	    file: "sockjs",
 	    urls: URLSchemes.sockjs,
 	    handlesActivityChecks: true,
@@ -1200,9 +1200,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }));
 	    }
 	});
-	transports_1.default.sockjs = SockJSTransport;
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = transports_1.default;
+	transports_1["default"].sockjs = SockJSTransport;
+	exports.__esModule = true;
+	exports["default"] = transports_1["default"];
 
 
 /***/ },
@@ -1216,18 +1216,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	var ws_1 = __webpack_require__(28);
 	var http_1 = __webpack_require__(29);
 	var runtime_1 = __webpack_require__(1);
-	var WSTransport = new transport_1.default({
+	var WSTransport = new transport_1["default"]({
 	    urls: URLSchemes.ws,
 	    handlesActivityChecks: false,
 	    supportsPing: false,
 	    isInitialized: function () {
-	        return Boolean(ws_1.default.getAPI());
+	        return Boolean(ws_1["default"].getAPI());
 	    },
 	    isSupported: function () {
-	        return Boolean(ws_1.default.getAPI());
+	        return Boolean(ws_1["default"].getAPI());
 	    },
 	    getSocket: function (url) {
-	        return runtime_1.default.createWebSocket(url);
+	        return runtime_1["default"].createWebSocket(url);
 	    }
 	});
 	var httpConfiguration = {
@@ -1239,28 +1239,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	};
 	var streamingConfiguration = Collections.extend({ getSocket: function (url) {
-	        return http_1.default.createStreamingSocket(url);
+	        return http_1["default"].createStreamingSocket(url);
 	    }
 	}, httpConfiguration);
 	var pollingConfiguration = Collections.extend({ getSocket: function (url) {
-	        return http_1.default.createPollingSocket(url);
+	        return http_1["default"].createPollingSocket(url);
 	    }
 	}, httpConfiguration);
 	var xhrConfiguration = {
 	    isSupported: function () {
-	        return runtime_1.default.isXHRSupported();
+	        return runtime_1["default"].isXHRSupported();
 	    }
 	};
 	var xdrConfiguration = {
 	    isSupported: function (environment) {
-	        var yes = runtime_1.default.isXDRSupported(environment.encrypted);
+	        var yes = runtime_1["default"].isXDRSupported(environment.encrypted);
 	        return yes;
 	    }
 	};
-	var XHRStreamingTransport = new transport_1.default(Collections.extend({}, streamingConfiguration, xhrConfiguration));
-	var XDRStreamingTransport = new transport_1.default(Collections.extend({}, streamingConfiguration, xdrConfiguration));
-	var XHRPollingTransport = new transport_1.default(Collections.extend({}, pollingConfiguration, xhrConfiguration));
-	var XDRPollingTransport = new transport_1.default(Collections.extend({}, pollingConfiguration, xdrConfiguration));
+	var XHRStreamingTransport = new transport_1["default"](Collections.extend({}, streamingConfiguration, xhrConfiguration));
+	var XDRStreamingTransport = new transport_1["default"](Collections.extend({}, streamingConfiguration, xdrConfiguration));
+	var XHRPollingTransport = new transport_1["default"](Collections.extend({}, pollingConfiguration, xhrConfiguration));
+	var XDRPollingTransport = new transport_1["default"](Collections.extend({}, pollingConfiguration, xdrConfiguration));
 	var Transports = {
 	    ws: WSTransport,
 	    xhr_streaming: XHRStreamingTransport,
@@ -1268,8 +1268,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    xhr_polling: XHRPollingTransport,
 	    xdr_polling: XDRPollingTransport
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Transports;
+	exports.__esModule = true;
+	exports["default"] = Transports;
 
 
 /***/ },
@@ -1285,9 +1285,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	function getGenericPath(key, queryString) {
 	    var path = "/app/" + key;
-	    var query = "?protocol=" + defaults_1.default.PROTOCOL +
+	    var query = "?protocol=" + defaults_1["default"].PROTOCOL +
 	        "&client=js" +
-	        "&version=" + defaults_1.default.VERSION +
+	        "&version=" + defaults_1["default"].VERSION +
 	        (queryString ? ("&" + queryString) : "");
 	    return path + query;
 	}
@@ -1326,12 +1326,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.hooks.isSupported(environment);
 	    };
 	    Transport.prototype.createConnection = function (name, priority, key, options) {
-	        return new transport_connection_1.default(this.hooks, name, priority, key, options);
+	        return new transport_connection_1["default"](this.hooks, name, priority, key, options);
 	    };
 	    return Transport;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Transport;
+	exports.__esModule = true;
+	exports["default"] = Transport;
 
 
 /***/ },
@@ -1358,13 +1358,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            transport: self.name + (self.options.encrypted ? "s" : "")
 	        }));
 	        if (self.hooks.isInitialized()) {
-	            self.changeState(state_1.default.INITIALIZED);
+	            self.changeState(state_1["default"].INITIALIZED);
 	        }
 	        else if (self.hooks.file) {
-	            self.changeState(state_1.default.INITIALIZING);
+	            self.changeState(state_1["default"].INITIALIZING);
 	            dependencies_1.Dependencies.load(self.hooks.file, { encrypted: self.options.encrypted }, function (error, callback) {
 	                if (self.hooks.isInitialized()) {
-	                    self.changeState(state_1.default.INITIALIZED);
+	                    self.changeState(state_1["default"].INITIALIZED);
 	                    callback(true);
 	                }
 	                else {
@@ -1381,9 +1381,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    return BrowserTransportConnection;
-	}(transport_connection_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = BrowserTransportConnection;
+	}(transport_connection_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = BrowserTransportConnection;
 
 
 /***/ },
@@ -1410,7 +1410,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.priority = priority;
 	        this.key = key;
 	        this.options = options;
-	        this.state = state_1.default.NEW;
+	        this.state = state_1["default"].NEW;
 	        this.timeline = options.timeline;
 	        this.activityTimeout = options.activityTimeout;
 	        this.id = this.timeline.generateUniqueID();
@@ -1427,7 +1427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            transport: self.name + (self.options.encrypted ? "s" : "")
 	        }));
 	        if (self.hooks.isInitialized()) {
-	            self.changeState(state_1.default.INITIALIZED);
+	            self.changeState(state_1["default"].INITIALIZED);
 	        }
 	        else {
 	            self.onClose();
@@ -1435,7 +1435,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    BaseTransportConnection.prototype.connect = function () {
 	        var self = this;
-	        if (self.socket || self.state !== state_1.default.INITIALIZED) {
+	        if (self.socket || self.state !== state_1["default"].INITIALIZED) {
 	            return false;
 	        }
 	        var url = self.hooks.urls.getInitial(self.key, self.options);
@@ -1443,15 +1443,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	            self.socket = self.hooks.getSocket(url, self.options);
 	        }
 	        catch (e) {
-	            util_1.default.defer(function () {
+	            util_1["default"].defer(function () {
 	                self.onError(e);
-	                self.changeState(state_1.default.CLOSED);
+	                self.changeState(state_1["default"].CLOSED);
 	            });
 	            return false;
 	        }
 	        self.bindListeners();
-	        logger_1.default.debug("Connecting", { transport: self.name, url: url });
-	        self.changeState(state_1.default.CONNECTING);
+	        logger_1["default"].debug("Connecting", { transport: self.name, url: url });
+	        self.changeState(state_1["default"].CONNECTING);
 	        return true;
 	    };
 	    BaseTransportConnection.prototype.close = function () {
@@ -1465,8 +1465,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    BaseTransportConnection.prototype.send = function (data) {
 	        var self = this;
-	        if (self.state === state_1.default.OPEN) {
-	            util_1.default.defer(function () {
+	        if (self.state === state_1["default"].OPEN) {
+	            util_1["default"].defer(function () {
 	                if (self.socket) {
 	                    self.socket.send(data);
 	                }
@@ -1478,7 +1478,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    BaseTransportConnection.prototype.ping = function () {
-	        if (this.state === state_1.default.OPEN && this.supportsPing()) {
+	        if (this.state === state_1["default"].OPEN && this.supportsPing()) {
 	            this.socket.ping();
 	        }
 	    };
@@ -1486,7 +1486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.hooks.beforeOpen) {
 	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
 	        }
-	        this.changeState(state_1.default.OPEN);
+	        this.changeState(state_1["default"].OPEN);
 	        this.socket.onopen = undefined;
 	    };
 	    BaseTransportConnection.prototype.onError = function (error) {
@@ -1495,14 +1495,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    BaseTransportConnection.prototype.onClose = function (closeEvent) {
 	        if (closeEvent) {
-	            this.changeState(state_1.default.CLOSED, {
+	            this.changeState(state_1["default"].CLOSED, {
 	                code: closeEvent.code,
 	                reason: closeEvent.reason,
 	                wasClean: closeEvent.wasClean
 	            });
 	        }
 	        else {
-	            this.changeState(state_1.default.CLOSED);
+	            this.changeState(state_1["default"].CLOSED);
 	        }
 	        this.unbindListeners();
 	        this.socket = undefined;
@@ -1554,9 +1554,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return Collections.extend({ cid: this.id }, message);
 	    };
 	    return BaseTransportConnection;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = BaseTransportConnection;
+	}(dispatcher_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = BaseTransportConnection;
 
 
 /***/ },
@@ -1568,7 +1568,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var global = Function("return this")();
 	var Dispatcher = (function () {
 	    function Dispatcher(failThrough) {
-	        this.callbacks = new callback_registry_1.default();
+	        this.callbacks = new callback_registry_1["default"]();
 	        this.global_callbacks = [];
 	        this.failThrough = failThrough;
 	    }
@@ -1606,8 +1606,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return Dispatcher;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Dispatcher;
+	exports.__esModule = true;
+	exports["default"] = Dispatcher;
 
 
 /***/ },
@@ -1656,8 +1656,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return CallbackRegistry;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = CallbackRegistry;
+	exports.__esModule = true;
+	exports["default"] = CallbackRegistry;
 	function prefix(name) {
 	    return "_" + name;
 	}
@@ -1681,8 +1681,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ConnectionState[ConnectionState["UNAVAILABLE"] = "unavailable"] = "UNAVAILABLE";
 	    ConnectionState[ConnectionState["CONNECTED"] = "connected"] = "CONNECTED";
 	})(ConnectionState || (ConnectionState = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = ConnectionState;
+	exports.__esModule = true;
+	exports["default"] = ConnectionState;
 
 
 /***/ },
@@ -1695,8 +1695,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return window.WebSocket || window.MozWebSocket;
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = WS;
+	exports.__esModule = true;
+	exports["default"] = WS;
 
 
 /***/ },
@@ -1712,26 +1712,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	var http_xdomain_request_1 = __webpack_require__(37);
 	var HTTP = {
 	    createStreamingSocket: function (url) {
-	        return this.createSocket(http_streaming_socket_1.default, url);
+	        return this.createSocket(http_streaming_socket_1["default"], url);
 	    },
 	    createPollingSocket: function (url) {
-	        return this.createSocket(http_polling_socket_1.default, url);
+	        return this.createSocket(http_polling_socket_1["default"], url);
 	    },
 	    createSocket: function (hooks, url) {
-	        return new http_socket_1.default(hooks, url);
+	        return new http_socket_1["default"](hooks, url);
 	    },
 	    createXHR: function (method, url) {
-	        return this.createRequest(http_xhr_request_1.default, method, url);
+	        return this.createRequest(http_xhr_request_1["default"], method, url);
 	    },
 	    createXDR: function (method, url) {
-	        return this.createRequest(http_xdomain_request_1.default, method, url);
+	        return this.createRequest(http_xdomain_request_1["default"], method, url);
 	    },
 	    createRequest: function (hooks, method, url) {
-	        return new http_request_1.default(hooks, method, url);
+	        return new http_request_1["default"](hooks, method, url);
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTP;
+	exports.__esModule = true;
+	exports["default"] = HTTP;
 
 
 /***/ },
@@ -1805,9 +1805,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
 	    };
 	    return HTTPRequest;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTPRequest;
+	}(dispatcher_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = HTTPRequest;
 
 
 /***/ },
@@ -1848,7 +1848,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.hooks = hooks;
 	        this.session = randomNumber(1000) + "/" + randomString(8);
 	        this.location = getLocation(url);
-	        this.readyState = state_1.default.CONNECTING;
+	        this.readyState = state_1["default"].CONNECTING;
 	        this.openStream();
 	    }
 	    HTTPSocket.prototype.send = function (payload) {
@@ -1861,7 +1861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.onClose(code, reason, true);
 	    };
 	    HTTPSocket.prototype.sendRaw = function (payload) {
-	        if (this.readyState === state_1.default.OPEN) {
+	        if (this.readyState === state_1["default"].OPEN) {
 	            try {
 	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
 	                return true;
@@ -1881,7 +1881,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ;
 	    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
 	        this.closeStream();
-	        this.readyState = state_1.default.CLOSED;
+	        this.readyState = state_1["default"].CLOSED;
 	        if (this.onclose) {
 	            this.onclose({
 	                code: code,
@@ -1894,7 +1894,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (chunk.status !== 200) {
 	            return;
 	        }
-	        if (this.readyState === state_1.default.OPEN) {
+	        if (this.readyState === state_1["default"].OPEN) {
 	            this.onActivity();
 	        }
 	        var payload;
@@ -1924,11 +1924,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    HTTPSocket.prototype.onOpen = function (options) {
-	        if (this.readyState === state_1.default.CONNECTING) {
+	        if (this.readyState === state_1["default"].CONNECTING) {
 	            if (options && options.hostname) {
 	                this.location.base = replaceHost(this.location.base, options.hostname);
 	            }
-	            this.readyState = state_1.default.OPEN;
+	            this.readyState = state_1["default"].OPEN;
 	            if (this.onopen) {
 	                this.onopen();
 	            }
@@ -1938,7 +1938,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    HTTPSocket.prototype.onEvent = function (event) {
-	        if (this.readyState === state_1.default.OPEN && this.onmessage) {
+	        if (this.readyState === state_1["default"].OPEN && this.onmessage) {
 	            this.onmessage({ data: event });
 	        }
 	    };
@@ -1968,7 +1968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            self.stream.start();
 	        }
 	        catch (error) {
-	            util_1.default.defer(function () {
+	            util_1["default"].defer(function () {
 	                self.onError(error);
 	                self.onClose(1006, "Could not start streaming", false);
 	            });
@@ -2012,18 +2012,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return result.join('');
 	}
 	function createRequest(method, url) {
-	    if (runtime_1.default.isXHRSupported()) {
-	        return http_1.default.createXHR(method, url);
+	    if (runtime_1["default"].isXHRSupported()) {
+	        return http_1["default"].createXHR(method, url);
 	    }
-	    else if (runtime_1.default.isXDRSupported(url.indexOf("https:") === 0)) {
-	        return http_1.default.createXDR(method, url);
+	    else if (runtime_1["default"].isXDRSupported(url.indexOf("https:") === 0)) {
+	        return http_1["default"].createXDR(method, url);
 	    }
 	    else {
 	        throw "Cross-origin HTTP requests are not supported";
 	    }
 	}
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HTTPSocket;
+	exports.__esModule = true;
+	exports["default"] = HTTPSocket;
 
 
 /***/ },
@@ -2037,8 +2037,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    State[State["OPEN"] = 1] = "OPEN";
 	    State[State["CLOSED"] = 3] = "CLOSED";
 	})(State || (State = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = State;
+	exports.__esModule = true;
+	exports["default"] = State;
 
 
 /***/ },
@@ -2060,8 +2060,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        socket.onClose(1006, "Connection interrupted (" + status + ")", false);
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
+	exports.__esModule = true;
+	exports["default"] = hooks;
 
 
 /***/ },
@@ -2087,8 +2087,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
+	exports.__esModule = true;
+	exports["default"] = hooks;
 
 
 /***/ },
@@ -2099,7 +2099,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var xhr_1 = __webpack_require__(2);
 	var hooks = {
 	    getRequest: function (socket) {
-	        var Constructor = xhr_1.default.getAPI();
+	        var Constructor = xhr_1["default"].getAPI();
 	        var xhr = new Constructor();
 	        xhr.onreadystatechange = xhr.onprogress = function () {
 	            switch (xhr.readyState) {
@@ -2124,8 +2124,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        xhr.abort();
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
+	exports.__esModule = true;
+	exports["default"] = hooks;
 
 
 /***/ },
@@ -2164,8 +2164,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        xdr.abort();
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = hooks;
+	exports.__esModule = true;
+	exports["default"] = hooks;
 
 
 /***/ },
@@ -2262,7 +2262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    return NetInfo;
-	}(dispatcher_1.default));
+	}(dispatcher_1["default"]));
 	exports.NetInfo = NetInfo;
 	exports.Network = new NetInfo();
 
@@ -2286,20 +2286,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    Timeline.prototype.log = function (level, event) {
 	        if (level <= this.options.level) {
-	            this.events.push(Collections.extend({}, event, { timestamp: util_1.default.now() }));
+	            this.events.push(Collections.extend({}, event, { timestamp: util_1["default"].now() }));
 	            if (this.options.limit && this.events.length > this.options.limit) {
 	                this.events.shift();
 	            }
 	        }
 	    };
 	    Timeline.prototype.error = function (event) {
-	        this.log(level_1.default.ERROR, event);
+	        this.log(level_1["default"].ERROR, event);
 	    };
 	    Timeline.prototype.info = function (event) {
-	        this.log(level_1.default.INFO, event);
+	        this.log(level_1["default"].INFO, event);
 	    };
 	    Timeline.prototype.debug = function (event) {
-	        this.log(level_1.default.DEBUG, event);
+	        this.log(level_1["default"].DEBUG, event);
 	    };
 	    Timeline.prototype.isEmpty = function () {
 	        return this.events.length === 0;
@@ -2333,8 +2333,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return Timeline;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Timeline;
+	exports.__esModule = true;
+	exports["default"] = Timeline;
 
 
 /***/ },
@@ -2348,8 +2348,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    TimelineLevel[TimelineLevel["INFO"] = 6] = "INFO";
 	    TimelineLevel[TimelineLevel["DEBUG"] = 7] = "DEBUG";
 	})(TimelineLevel || (TimelineLevel = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = TimelineLevel;
+	exports.__esModule = true;
+	exports["default"] = TimelineLevel;
 
 
 /***/ },
@@ -2373,13 +2373,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var context = Collections.extend({}, globalContext, options);
 	    return evaluate(scheme, context)[1].strategy;
 	};
-	var transports = transports_1.default;
+	var transports = transports_1["default"];
 	var UnsupportedStrategy = {
 	    isSupported: function () {
 	        return false;
 	    },
 	    connect: function (_, callback) {
-	        var deferred = util_1.default.defer(function () {
+	        var deferred = util_1["default"].defer(function () {
 	            callback(new Errors.UnsupportedStrategy());
 	        });
 	        return {
@@ -2417,7 +2417,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                Collections.arrayIndexOf(context.disabledTransports, name) === -1);
 	        var transport;
 	        if (enabled) {
-	            transport = new transport_strategy_1.default(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, Collections.extend({
+	            transport = new transport_strategy_1["default"](name, priority, manager ? manager.getAssistant(transportClass) : transportClass, Collections.extend({
 	                key: context.key,
 	                encrypted: context.encrypted,
 	                timeline: context.timeline,
@@ -2433,31 +2433,31 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return [undefined, newContext];
 	    },
 	    transport_manager: returnWithOriginalContext(function (_, options) {
-	        return new transport_manager_1.default(options);
+	        return new transport_manager_1["default"](options);
 	    }),
 	    sequential: returnWithOriginalContext(function (_, options) {
 	        var strategies = Array.prototype.slice.call(arguments, 2);
-	        return new sequential_strategy_1.default(strategies, options);
+	        return new sequential_strategy_1["default"](strategies, options);
 	    }),
 	    cached: returnWithOriginalContext(function (context, ttl, strategy) {
-	        return new cached_strategy_1.default(strategy, context.transports, {
+	        return new cached_strategy_1["default"](strategy, context.transports, {
 	            ttl: ttl,
 	            timeline: context.timeline,
 	            encrypted: context.encrypted
 	        });
 	    }),
 	    first_connected: returnWithOriginalContext(function (_, strategy) {
-	        return new first_connected_strategy_1.default(strategy);
+	        return new first_connected_strategy_1["default"](strategy);
 	    }),
 	    best_connected_ever: returnWithOriginalContext(function () {
 	        var strategies = Array.prototype.slice.call(arguments, 1);
-	        return new best_connected_ever_strategy_1.default(strategies);
+	        return new best_connected_ever_strategy_1["default"](strategies);
 	    }),
 	    delayed: returnWithOriginalContext(function (_, delay, strategy) {
-	        return new delayed_strategy_1.default(strategy, { delay: delay });
+	        return new delayed_strategy_1["default"](strategy, { delay: delay });
 	    }),
 	    "if": returnWithOriginalContext(function (_, test, trueBranch, falseBranch) {
-	        return new if_strategy_1.default(test, trueBranch, falseBranch);
+	        return new if_strategy_1["default"](test, trueBranch, falseBranch);
 	    }),
 	    is_supported: returnWithOriginalContext(function (_, strategy) {
 	        return function () {
@@ -2534,7 +2534,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.livesLeft = this.options.lives || Infinity;
 	    }
 	    TransportManager.prototype.getAssistant = function (transport) {
-	        return factory_1.default.createAssistantToTheTransportManager(this, transport, {
+	        return factory_1["default"].createAssistantToTheTransportManager(this, transport, {
 	            minPingDelay: this.options.minPingDelay,
 	            maxPingDelay: this.options.maxPingDelay
 	        });
@@ -2547,8 +2547,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return TransportManager;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = TransportManager;
+	exports.__esModule = true;
+	exports["default"] = TransportManager;
 
 
 /***/ },
@@ -2567,35 +2567,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	var channels_1 = __webpack_require__(58);
 	var Factory = {
 	    createChannels: function () {
-	        return new channels_1.default();
+	        return new channels_1["default"]();
 	    },
 	    createConnectionManager: function (key, options) {
-	        return new connection_manager_1.default(key, options);
+	        return new connection_manager_1["default"](key, options);
 	    },
 	    createChannel: function (name, pusher) {
-	        return new channel_1.default(name, pusher);
+	        return new channel_1["default"](name, pusher);
 	    },
 	    createPrivateChannel: function (name, pusher) {
-	        return new private_channel_1.default(name, pusher);
+	        return new private_channel_1["default"](name, pusher);
 	    },
 	    createPresenceChannel: function (name, pusher) {
-	        return new presence_channel_1.default(name, pusher);
+	        return new presence_channel_1["default"](name, pusher);
 	    },
 	    createTimelineSender: function (timeline, options) {
-	        return new timeline_sender_1.default(timeline, options);
+	        return new timeline_sender_1["default"](timeline, options);
 	    },
 	    createAuthorizer: function (channel, options) {
-	        return new pusher_authorizer_1.default(channel, options);
+	        return new pusher_authorizer_1["default"](channel, options);
 	    },
 	    createHandshake: function (transport, callback) {
-	        return new handshake_1.default(transport, callback);
+	        return new handshake_1["default"](transport, callback);
 	    },
 	    createAssistantToTheTransportManager: function (manager, transport, options) {
-	        return new assistant_to_the_transport_manager_1.default(manager, transport, options);
+	        return new assistant_to_the_transport_manager_1["default"](manager, transport, options);
 	    }
 	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Factory;
+	exports.__esModule = true;
+	exports["default"] = Factory;
 
 
 /***/ },
@@ -2623,7 +2623,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var onOpen = function () {
 	            connection.unbind("open", onOpen);
 	            connection.bind("closed", onClosed);
-	            openTimestamp = util_1.default.now();
+	            openTimestamp = util_1["default"].now();
 	        };
 	        var onClosed = function (closeEvent) {
 	            connection.unbind("closed", onClosed);
@@ -2631,7 +2631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                self.manager.reportDeath();
 	            }
 	            else if (!closeEvent.wasClean && openTimestamp) {
-	                var lifespan = util_1.default.now() - openTimestamp;
+	                var lifespan = util_1["default"].now() - openTimestamp;
 	                if (lifespan < 2 * self.maxPingDelay) {
 	                    self.manager.reportDeath();
 	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
@@ -2646,8 +2646,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return AssistantToTheTransportManager;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = AssistantToTheTransportManager;
+	exports.__esModule = true;
+	exports["default"] = AssistantToTheTransportManager;
 
 
 /***/ },
@@ -2675,9 +2675,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            self.unbindListeners();
 	            try {
 	                var result = Protocol.processHandshake(m);
-	                if (result.action === handshake_results_1.default.CONNECTED) {
+	                if (result.action === handshake_results_1["default"].CONNECTED) {
 	                    self.finish("connected", {
-	                        connection: new connection_1.default(result.id, self.transport),
+	                        connection: new connection_1["default"](result.id, self.transport),
 	                        activityTimeout: result.activityTimeout
 	                    });
 	                }
@@ -2709,8 +2709,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return Handshake;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Handshake;
+	exports.__esModule = true;
+	exports["default"] = Handshake;
 
 
 /***/ },
@@ -2744,17 +2744,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.processHandshake = function (message) {
 	    message = exports.decodeMessage(message);
-	    if (message.event === internal_events_1.default.CONNECTION_ESTABLISHED) {
+	    if (message.event === internal_events_1["default"].CONNECTION_ESTABLISHED) {
 	        if (!message.data.activity_timeout) {
 	            throw "No activity timeout specified in handshake";
 	        }
 	        return {
-	            action: handshake_results_1.default.CONNECTED,
+	            action: handshake_results_1["default"].CONNECTED,
 	            id: message.data.socket_id,
 	            activityTimeout: message.data.activity_timeout * 1000
 	        };
 	    }
-	    else if (message.event === internal_events_1.default.ERROR) {
+	    else if (message.event === internal_events_1["default"].ERROR) {
 	        return {
 	            action: this.getCloseAction(message.data),
 	            error: this.getCloseError(message.data)
@@ -2767,26 +2767,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getCloseAction = function (closeEvent) {
 	    if (closeEvent.code < 4000) {
 	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-	            return handshake_results_1.default.BACKOFF;
+	            return handshake_results_1["default"].BACKOFF;
 	        }
 	        else {
 	            return null;
 	        }
 	    }
 	    else if (closeEvent.code === 4000) {
-	        return handshake_results_1.default.SSL_ONLY;
+	        return handshake_results_1["default"].SSL_ONLY;
 	    }
 	    else if (closeEvent.code < 4100) {
-	        return handshake_results_1.default.REFUSED;
+	        return handshake_results_1["default"].REFUSED;
 	    }
 	    else if (closeEvent.code < 4200) {
-	        return handshake_results_1.default.BACKOFF;
+	        return handshake_results_1["default"].BACKOFF;
 	    }
 	    else if (closeEvent.code < 4300) {
-	        return handshake_results_1.default.RETRY;
+	        return handshake_results_1["default"].RETRY;
 	    }
 	    else {
-	        return handshake_results_1.default.REFUSED;
+	        return handshake_results_1["default"].REFUSED;
 	    }
 	};
 	exports.getCloseError = function (closeEvent) {
@@ -2815,8 +2815,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    InternalEvents[InternalEvents["CONNECTION_ESTABLISHED"] = "pusher:connection_established"] = "CONNECTION_ESTABLISHED";
 	    InternalEvents[InternalEvents["ERROR"] = "pusher:error"] = "ERROR";
 	})(InternalEvents || (InternalEvents = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = InternalEvents;
+	exports.__esModule = true;
+	exports["default"] = InternalEvents;
 
 
 /***/ },
@@ -2832,8 +2832,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    HandshakeResults[HandshakeResults["REFUSED"] = "refused"] = "REFUSED";
 	    HandshakeResults[HandshakeResults["RETRY"] = "retry"] = "RETRY";
 	})(HandshakeResults || (HandshakeResults = {}));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = HandshakeResults;
+	exports.__esModule = true;
+	exports["default"] = HandshakeResults;
 
 
 /***/ },
@@ -2870,7 +2870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (channel) {
 	            message.channel = channel;
 	        }
-	        logger_1.default.debug('Event sent', message);
+	        logger_1["default"].debug('Event sent', message);
 	        return this.send(Protocol.encodeMessage(message));
 	    };
 	    Connection.prototype.ping = function () {
@@ -2900,7 +2900,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    });
 	                }
 	                if (message !== undefined) {
-	                    logger_1.default.debug('Event recd', message);
+	                    logger_1["default"].debug('Event recd', message);
 	                    switch (message.event) {
 	                        case 'pusher:error':
 	                            self.emit('error', { type: 'PusherError', data: message.data });
@@ -2950,9 +2950,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    return Connection;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Connection;
+	}(dispatcher_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = Connection;
 
 
 /***/ },
@@ -2977,13 +2977,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return query;
 	    };
 	    Authorizer.prototype.authorize = function (socketId, callback) {
-	        Authorizer.authorizers = Authorizer.authorizers || runtime_1.default.getAuthorizers();
-	        return Authorizer.authorizers[this.type].call(this, runtime_1.default, socketId, callback);
+	        Authorizer.authorizers = Authorizer.authorizers || runtime_1["default"].getAuthorizers();
+	        return Authorizer.authorizers[this.type].call(this, runtime_1["default"], socketId, callback);
 	    };
 	    return Authorizer;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Authorizer;
+	exports.__esModule = true;
+	exports["default"] = Authorizer;
 
 
 /***/ },
@@ -3002,12 +3002,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (self.timeline.isEmpty()) {
 	            return;
 	        }
-	        self.timeline.send(runtime_1.default.TimelineTransport.getAgent(this, encrypted), callback);
+	        self.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, encrypted), callback);
 	    };
 	    return TimelineSender;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = TimelineSender;
+	exports.__esModule = true;
+	exports["default"] = TimelineSender;
 
 
 /***/ },
@@ -3027,14 +3027,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    __extends(PresenceChannel, _super);
 	    function PresenceChannel(name, pusher) {
 	        _super.call(this, name, pusher);
-	        this.members = new members_1.default();
+	        this.members = new members_1["default"]();
 	    }
 	    PresenceChannel.prototype.authorize = function (socketId, callback) {
 	        var self = this;
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            if (!error) {
 	                if (authData.channel_data === undefined) {
-	                    logger_1.default.warn("Invalid auth response for channel '" +
+	                    logger_1["default"].warn("Invalid auth response for channel '" +
 	                        self.name +
 	                        "', expected 'channel_data' field");
 	                    callback("Invalid auth response");
@@ -3064,7 +3064,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	                break;
 	            default:
-	                private_channel_1.default.prototype.handleEvent.call(this, event, data);
+	                private_channel_1["default"].prototype.handleEvent.call(this, event, data);
 	        }
 	    };
 	    PresenceChannel.prototype.disconnect = function () {
@@ -3072,9 +3072,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _super.prototype.disconnect.call(this);
 	    };
 	    return PresenceChannel;
-	}(private_channel_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = PresenceChannel;
+	}(private_channel_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = PresenceChannel;
 
 
 /***/ },
@@ -3095,13 +3095,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _super.apply(this, arguments);
 	    }
 	    PrivateChannel.prototype.authorize = function (socketId, callback) {
-	        var authorizer = factory_1.default.createAuthorizer(this, this.pusher.config);
+	        var authorizer = factory_1["default"].createAuthorizer(this, this.pusher.config);
 	        return authorizer.authorize(socketId, callback);
 	    };
 	    return PrivateChannel;
-	}(channel_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = PrivateChannel;
+	}(channel_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = PrivateChannel;
 
 
 /***/ },
@@ -3121,7 +3121,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    __extends(Channel, _super);
 	    function Channel(name, pusher) {
 	        _super.call(this, function (event, data) {
-	            logger_1.default.debug('No callbacks on ' + name + ' for ' + event);
+	            logger_1["default"].debug('No callbacks on ' + name + ' for ' + event);
 	        });
 	        this.name = name;
 	        this.pusher = pusher;
@@ -3171,9 +3171,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    };
 	    return Channel;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Channel;
+	}(dispatcher_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = Channel;
 
 
 /***/ },
@@ -3234,8 +3234,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return Members;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Members;
+	exports.__esModule = true;
+	exports["default"] = Members;
 
 
 /***/ },
@@ -3260,7 +3260,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _super.call(this);
 	        this.key = key;
 	        this.options = options || {};
-	        this.state = state_1.default.INITIALIZED;
+	        this.state = state_1["default"].INITIALIZED;
 	        this.connection = null;
 	        this.encrypted = !!options.encrypted;
 	        this.timeline = this.options.timeline;
@@ -3287,10 +3287,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 	        if (!this.strategy.isSupported()) {
-	            this.updateState(state_1.default.FAILED);
+	            this.updateState(state_1["default"].FAILED);
 	            return;
 	        }
-	        this.updateState(state_1.default.CONNECTING);
+	        this.updateState(state_1["default"].CONNECTING);
 	        this.startConnecting();
 	        this.setUnavailableTimer();
 	    };
@@ -3315,7 +3315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ;
 	    ConnectionManager.prototype.disconnect = function () {
 	        this.disconnectInternally();
-	        this.updateState(state_1.default.DISCONNECTED);
+	        this.updateState(state_1["default"].DISCONNECTED);
 	    };
 	    ;
 	    ConnectionManager.prototype.isEncrypted = function () {
@@ -3389,7 +3389,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ConnectionManager.prototype.setUnavailableTimer = function () {
 	        var self = this;
 	        self.unavailableTimer = new timers_1.OneOffTimer(self.options.unavailableTimeout, function () {
-	            self.updateState(state_1.default.UNAVAILABLE);
+	            self.updateState(state_1["default"].UNAVAILABLE);
 	        });
 	    };
 	    ;
@@ -3458,7 +3458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                self.clearUnavailableTimer();
 	                self.setConnection(handshake.connection);
 	                self.socket_id = self.connection.id;
-	                self.updateState(state_1.default.CONNECTED, { socket_id: self.socket_id });
+	                self.updateState(state_1["default"].CONNECTED, { socket_id: self.socket_id });
 	            }
 	        });
 	    };
@@ -3519,7 +3519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (newStateDescription === "connected") {
 	                newStateDescription += " with new socket ID " + data.socket_id;
 	            }
-	            logger_1.default.debug('State changed', previousState + ' -> ' + newStateDescription);
+	            logger_1["default"].debug('State changed', previousState + ' -> ' + newStateDescription);
 	            this.timeline.info({ state: newState, params: data });
 	            this.emit('state_change', { previous: previousState, current: newState });
 	            this.emit(newState, data);
@@ -3529,9 +3529,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return (this.state) === "connecting" || (this.state) === "connected";
 	    };
 	    return ConnectionManager;
-	}(dispatcher_1.default));
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = ConnectionManager;
+	}(dispatcher_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = ConnectionManager;
 
 
 /***/ },
@@ -3569,17 +3569,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return Channels;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = Channels;
+	exports.__esModule = true;
+	exports["default"] = Channels;
 	function createChannel(name, pusher) {
 	    if (name.indexOf('private-') === 0) {
-	        return factory_1.default.createPrivateChannel(name, pusher);
+	        return factory_1["default"].createPrivateChannel(name, pusher);
 	    }
 	    else if (name.indexOf('presence-') === 0) {
-	        return factory_1.default.createPresenceChannel(name, pusher);
+	        return factory_1["default"].createPresenceChannel(name, pusher);
 	    }
 	    else {
-	        return factory_1.default.createChannel(name, pusher);
+	        return factory_1["default"].createChannel(name, pusher);
 	    }
 	}
 
@@ -3620,7 +3620,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            transport.connect();
 	        };
 	        var onOpen = function () {
-	            handshake = factory_1.default.createHandshake(transport, function (result) {
+	            handshake = factory_1["default"].createHandshake(transport, function (result) {
 	                connected = true;
 	                unbindListeners();
 	                callback(null, result);
@@ -3675,10 +3675,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return TransportStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = TransportStrategy;
+	exports.__esModule = true;
+	exports["default"] = TransportStrategy;
 	function failAttempt(error, callback) {
-	    util_1.default.defer(function () {
+	    util_1["default"].defer(function () {
 	        callback(error);
 	    });
 	    return {
@@ -3705,7 +3705,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.timeoutLimit = options.timeoutLimit;
 	    }
 	    SequentialStrategy.prototype.isSupported = function () {
-	        return Collections.any(this.strategies, util_1.default.method("isSupported"));
+	        return Collections.any(this.strategies, util_1["default"].method("isSupported"));
 	    };
 	    SequentialStrategy.prototype.connect = function (minPriority, callback) {
 	        var self = this;
@@ -3781,8 +3781,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return SequentialStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = SequentialStrategy;
+	exports.__esModule = true;
+	exports["default"] = SequentialStrategy;
 
 
 /***/ },
@@ -3797,7 +3797,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.strategies = strategies;
 	    }
 	    BestConnectedEverStrategy.prototype.isSupported = function () {
-	        return Collections.any(this.strategies, util_1.default.method("isSupported"));
+	        return Collections.any(this.strategies, util_1["default"].method("isSupported"));
 	    };
 	    BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {
 	        return connect(this.strategies, minPriority, function (i, runners) {
@@ -3818,8 +3818,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return BestConnectedEverStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = BestConnectedEverStrategy;
+	exports.__esModule = true;
+	exports["default"] = BestConnectedEverStrategy;
 	function connect(strategies, minPriority, callbackBuilder) {
 	    var runners = Collections.map(strategies, function (strategy, i, _, rs) {
 	        return strategy.connect(minPriority, callbackBuilder(i, rs));
@@ -3871,7 +3871,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var encrypted = this.encrypted;
 	        var info = fetchTransportCache(encrypted);
 	        var strategies = [this.strategy];
-	        if (info && info.timestamp + this.ttl >= util_1.default.now()) {
+	        if (info && info.timestamp + this.ttl >= util_1["default"].now()) {
 	            var transport = this.transports[info.transport];
 	            if (transport) {
 	                this.timeline.info({
@@ -3879,18 +3879,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    transport: info.transport,
 	                    latency: info.latency
 	                });
-	                strategies.push(new sequential_strategy_1.default([transport], {
+	                strategies.push(new sequential_strategy_1["default"]([transport], {
 	                    timeout: info.latency * 2 + 1000,
 	                    failFast: true
 	                }));
 	            }
 	        }
-	        var startTimestamp = util_1.default.now();
+	        var startTimestamp = util_1["default"].now();
 	        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {
 	            if (error) {
 	                flushTransportCache(encrypted);
 	                if (strategies.length > 0) {
-	                    startTimestamp = util_1.default.now();
+	                    startTimestamp = util_1["default"].now();
 	                    runner = strategies.pop().connect(minPriority, cb);
 	                }
 	                else {
@@ -3898,7 +3898,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	            else {
-	                storeTransportCache(encrypted, handshake.transport.name, util_1.default.now() - startTimestamp);
+	                storeTransportCache(encrypted, handshake.transport.name, util_1["default"].now() - startTimestamp);
 	                callback(null, handshake);
 	            }
 	        });
@@ -3916,13 +3916,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return CachedStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = CachedStrategy;
+	exports.__esModule = true;
+	exports["default"] = CachedStrategy;
 	function getTransportCacheKey(encrypted) {
 	    return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
 	}
 	function fetchTransportCache(encrypted) {
-	    var storage = runtime_1.default.getLocalStorage();
+	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
 	            var serializedCache = storage[getTransportCacheKey(encrypted)];
@@ -3937,11 +3937,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return null;
 	}
 	function storeTransportCache(encrypted, transport, latency) {
-	    var storage = runtime_1.default.getLocalStorage();
+	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
 	            storage[getTransportCacheKey(encrypted)] = JSON.stringify({
-	                timestamp: util_1.default.now(),
+	                timestamp: util_1["default"].now(),
 	                transport: transport,
 	                latency: latency
 	            });
@@ -3951,7 +3951,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 	function flushTransportCache(encrypted) {
-	    var storage = runtime_1.default.getLocalStorage();
+	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
 	            delete storage[getTransportCacheKey(encrypted)];
@@ -4000,8 +4000,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return DelayedStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = DelayedStrategy;
+	exports.__esModule = true;
+	exports["default"] = DelayedStrategy;
 
 
 /***/ },
@@ -4025,8 +4025,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return IfStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = IfStrategy;
+	exports.__esModule = true;
+	exports["default"] = IfStrategy;
 
 
 /***/ },
@@ -4052,8 +4052,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return FirstConnectedStrategy;
 	}());
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.default = FirstConnectedStrategy;
+	exports.__esModule = true;
+	exports["default"] = FirstConnectedStrategy;
 
 
 /***/ },
@@ -4064,19 +4064,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	var defaults_1 = __webpack_require__(5);
 	exports.getGlobalConfig = function () {
 	    return {
-	        wsHost: defaults_1.default.host,
-	        wsPort: defaults_1.default.ws_port,
-	        wssPort: defaults_1.default.wss_port,
-	        httpHost: defaults_1.default.sockjs_host,
-	        httpPort: defaults_1.default.sockjs_http_port,
-	        httpsPort: defaults_1.default.sockjs_https_port,
-	        httpPath: defaults_1.default.sockjs_path,
-	        statsHost: defaults_1.default.stats_host,
-	        authEndpoint: defaults_1.default.channel_auth_endpoint,
-	        authTransport: defaults_1.default.channel_auth_transport,
-	        activity_timeout: defaults_1.default.activity_timeout,
-	        pong_timeout: defaults_1.default.pong_timeout,
-	        unavailable_timeout: defaults_1.default.unavailable_timeout
+	        wsHost: defaults_1["default"].host,
+	        wsPort: defaults_1["default"].ws_port,
+	        wssPort: defaults_1["default"].wss_port,
+	        httpHost: defaults_1["default"].sockjs_host,
+	        httpPort: defaults_1["default"].sockjs_http_port,
+	        httpsPort: defaults_1["default"].sockjs_https_port,
+	        httpPath: defaults_1["default"].sockjs_path,
+	        statsHost: defaults_1["default"].stats_host,
+	        authEndpoint: defaults_1["default"].channel_auth_endpoint,
+	        authTransport: defaults_1["default"].channel_auth_transport,
+	        activity_timeout: defaults_1["default"].activity_timeout,
+	        pong_timeout: defaults_1["default"].pong_timeout,
+	        unavailable_timeout: defaults_1["default"].unavailable_timeout
 	    };
 	};
 	exports.getClusterConfig = function (clusterName) {
