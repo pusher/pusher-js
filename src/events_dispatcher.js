@@ -20,6 +20,19 @@
     return this;
   };
 
+  prototype.bind_pattern = function(pattern, userCallback){
+    if (!(pattern instanceof(RegExp))) {
+      Pusher.warn("::bind_pattern expects a RegExp");
+      return;
+    }
+    var callback = function(eventName, data){
+      if (pattern.test(eventName)) {
+        userCallback(data, eventName);
+      }
+    };
+    this.bind_all(callback);
+  };
+
   prototype.unbind = function(eventName, callback, context) {
     this.callbacks.remove(eventName, callback, context);
     return this;
