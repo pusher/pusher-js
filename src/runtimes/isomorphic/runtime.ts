@@ -1,19 +1,21 @@
-import Runtime from "shared/runtime_interface";
+import Runtime from "../interface";
 import xhrTimeline from './timeline/xhr_timeline';
-import TimelineTransport from 'shared/timeline/timeline_transport';
-import xhrAuth from 'shared/auth/xhr_auth';
+import TimelineTransport from 'core/timeline/timeline_transport';
+import xhrAuth from 'isomorphic/auth/xhr_auth';
 import * as Collections from 'core/utils/collections';
 import Transports from "transports/transports";
-import {AuthTransports} from 'shared/auth/auth_transports';
+import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
 import Ajax from 'core/http/ajax';
 import XHR from 'xhr';
 import WS from 'ws';
-import {NetInfo, Network} from 'net_info'
+import {NetInfo, Network} from 'net_info';
+import getDefaultStrategy from './default_strategy';
 
 var Isomorphic : Runtime = {
 
   TimelineTransport: xhrTimeline,
+  getDefaultStrategy,
 
   whenReady(callback : Function) : void {
     callback();

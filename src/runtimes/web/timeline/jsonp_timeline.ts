@@ -1,7 +1,7 @@
 import TimelineSender from 'core/timeline/timeline_sender';
-import TimelineTransport from 'shared/timeline/timeline_transport';
+import TimelineTransport from 'core/timeline/timeline_transport';
 import Browser from 'runtime';
-import {AuthTransport} from 'shared/auth/auth_transports';
+import {AuthTransport} from 'core/auth/auth_transports';
 import {ScriptReceivers} from '../dom/script_receiver_factory';
 
 var getAgent = function(sender : TimelineSender, encrypted : boolean) {

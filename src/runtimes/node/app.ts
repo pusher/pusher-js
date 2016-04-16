@@ -1,2 +1,2 @@
-import {addUnloadListener, removeUnloadListener} from 'shared/app';
+import {addUnloadListener, removeUnloadListener} from 'isomorphic/app';
 export {addUnloadListener, removeUnloadListener};

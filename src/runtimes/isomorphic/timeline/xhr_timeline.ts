@@ -3,7 +3,7 @@ import TimelineSender from 'core/timeline/timeline_sender'
 import * as Collections from 'core/utils/collections';
 import Util from 'core/util';
 import Runtime from 'runtime';
-import TimelineTransport from 'shared/timeline/timeline_transport';
+import TimelineTransport from 'core/timeline/timeline_transport';
 
 var getAgent = function(sender : TimelineSender, encrypted : boolean) {
   return function(data : any, callback : Function) {

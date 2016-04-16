@@ -3,8 +3,8 @@ import TimelineSender from 'core/timeline/timeline_sender'
 import * as Collections from 'core/utils/collections';
 import Util from 'core/util';
 import Runtime from 'runtime';
-import {AuthTransport} from 'shared/auth/auth_transports';
-import AbstractRuntime from 'shared/runtime_interface';
+import {AuthTransport} from 'core/auth/auth_transports';
+import AbstractRuntime from 'runtimes/interface';
 
 var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callback){
   var self = this, xhr;

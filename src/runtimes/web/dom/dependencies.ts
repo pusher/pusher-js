@@ -1,5 +1,5 @@
 import {ScriptReceiverFactory} from './script_receiver_factory';
-import Defaults from 'defaults';
+import Defaults from 'core/defaults';
 import DependencyLoader from './dependency_loader';
 
 export var DependenciesReceivers = new ScriptReceiverFactory(

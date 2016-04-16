@@ -1,4 +1,4 @@
-import AbstractRuntime from "shared/runtime_interface";
+import AbstractRuntime from "runtimes/interface";
 import {ScriptReceiverFactory} from './dom/script_receiver_factory';
 import ScriptRequest from './dom/script_request';
 import JSONPRequest from './dom/jsonp_request';

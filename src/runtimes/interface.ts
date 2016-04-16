@@ -1,6 +1,6 @@
-import {AuthTransports} from 'shared/auth/auth_transports';
+import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
-import TimelineTransport from 'shared/timeline/timeline_transport';
+import TimelineTransport from 'core/timeline/timeline_transport';
 import Ajax from 'core/http/ajax';
 import {NetInfo} from 'net_info';
 
@@ -17,6 +17,7 @@ interface Runtime {
   createXHR() : Ajax;
   createWebSocket(url : string) : any;
   getNetwork() : NetInfo;
+  getDefaultStrategy(config : any) : any;
 }
 
 export default Runtime;

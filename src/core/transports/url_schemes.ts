@@ -1,4 +1,4 @@
-import Defaults from "defaults";
+import Defaults from "../defaults";
 import URLScheme from "./url_scheme";
 
 function getGenericURL(baseScheme : string, params : any, path : string): string {

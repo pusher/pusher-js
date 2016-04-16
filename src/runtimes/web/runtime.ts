@@ -1,10 +1,10 @@
 import Browser from "./browser";
 import XHR from "./xhr";
 import {Dependencies, DependenciesReceivers} from './dom/dependencies';
-import {AuthTransport, AuthTransports} from 'shared/auth/auth_transports';
-import xhrAuth from 'shared/auth/xhr_auth';
+import {AuthTransport, AuthTransports} from 'core/auth/auth_transports';
+import xhrAuth from 'isomorphic/auth/xhr_auth';
 import jsonpAuth from './auth/jsonp_auth';
-import TimelineTransport from 'shared/timeline/timeline_transport';
+import TimelineTransport from 'core/timeline/timeline_transport';
 import TimelineSender from 'core/timeline/timeline_sender';
 import ScriptRequest from './dom/script_request';
 import JSONPRequest from './dom/jsonp_request';
@@ -14,7 +14,8 @@ import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
 import Ajax from "core/http/ajax";
 import WS from 'ws';
-import {NetInfo, Network} from 'net_info'
+import {NetInfo, Network} from 'net_info';
+import getDefaultStrategy from './default_strategy';
 
 var Runtime : Browser = {
 
@@ -23,6 +24,7 @@ var Runtime : Browser = {
   auth_callbacks: {},
   ScriptReceivers,
   DependenciesReceivers,
+  getDefaultStrategy,
 
   TimelineTransport: jsonpTimeline,
 

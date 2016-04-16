@@ -1,6 +1,4 @@
-import Defaults from 'shared/defaults';
-
-Defaults.getDefaultStrategy = function(config) {
+var getDefaultStrategy = function(config) {
   var wsStrategy;
   if (config.encrypted) {
     wsStrategy = [
@@ -91,4 +89,4 @@ Defaults.getDefaultStrategy = function(config) {
   ];
 };
 
-export default Defaults;
+export default getDefaultStrategy;

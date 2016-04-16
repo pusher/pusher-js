@@ -1,4 +1,4 @@
-import Transports from 'shared/transports/transports';
+import Transports from 'isomorphic/transports/transports';
 import Transport from 'core/transports/transport';
 import TransportHooks from 'core/transports/transport_hooks';
 import * as URLSchemes from 'core/transports/url_schemes';

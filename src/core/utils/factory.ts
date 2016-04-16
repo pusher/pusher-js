@@ -5,7 +5,7 @@ import Handshake from "../connection/handshake";
 import TransportConnection from "transports/transport_connection";
 import SocketHooks from "../http/socket_hooks";
 import HTTPSocket from "../http/http_socket";
-import Authorizer from "../pusher_authorizer";
+import Authorizer from "../auth/pusher_authorizer";
 import Timeline from "../timeline/timeline";
 import TimelineSender from "../timeline/timeline_sender";
 import PresenceChannel from "../channels/presence_channel";

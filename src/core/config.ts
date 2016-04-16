@@ -1,4 +1,4 @@
-import Defaults from 'defaults';
+import Defaults from './defaults';
 
 export var getGlobalConfig = function() {
   return {

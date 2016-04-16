@@ -1,5 +1,5 @@
 import {Dependencies} from '../dom/dependencies';
-import BaseTransportConnection from 'shared/transports/transport_connection';
+import BaseTransportConnection from 'isomorphic/transports/transport_connection';
 import ConnectionState from 'core/connection/state';
 
 /** Provides universal API for transport connections.

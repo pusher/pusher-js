@@ -10,7 +10,7 @@ import TimelineLevel from './timeline/level';
 import * as StrategyBuilder from './strategies/strategy_builder';
 import ConnectionManager from './connection/connection_manager';
 import {PeriodicTimer} from './utils/timers';
-import Defaults from 'defaults';
+import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import ConnectionState from './connection/state';
