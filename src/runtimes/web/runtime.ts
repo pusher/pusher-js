@@ -25,6 +25,7 @@ var Runtime : Browser = {
   ScriptReceivers,
   DependenciesReceivers,
   getDefaultStrategy,
+  Transports,
 
   TimelineTransport: jsonpTimeline,
 

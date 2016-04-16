@@ -3,7 +3,7 @@ import xhrTimeline from './timeline/xhr_timeline';
 import TimelineTransport from 'core/timeline/timeline_transport';
 import xhrAuth from 'isomorphic/auth/xhr_auth';
 import * as Collections from 'core/utils/collections';
-import Transports from "transports/transports";
+import Transports from "isomorphic/transports/transports";
 import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
 import Ajax from 'core/http/ajax';
@@ -16,6 +16,7 @@ var Isomorphic : Runtime = {
 
   TimelineTransport: xhrTimeline,
   getDefaultStrategy,
+  Transports,
 
   whenReady(callback : Function) : void {
     callback();

@@ -1,6 +1,5 @@
 import * as Collections from "../utils/collections";
 import Util from "../util";
-import Transports from "transports/transports";
 import TransportManager from '../transports/transport_manager';
 import * as Errors from '../errors';
 import Strategy from './strategy';
@@ -11,6 +10,7 @@ import CachedStrategy from './cached_strategy';
 import DelayedStrategy from './delayed_strategy';
 import IfStrategy from './if_strategy';
 import FirstConnectedStrategy from './first_connected_strategy';
+import Runtime from "runtime";
 
 /** Transforms a JSON scheme to a strategy tree.
  *
@@ -23,7 +23,7 @@ export var build = function(scheme, options) {
   return evaluate(scheme, context)[1].strategy;
 }
 
-var transports = Transports;
+var transports = Runtime.Transports;
 
 var UnsupportedStrategy : Strategy = {
   isSupported: function() {

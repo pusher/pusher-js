@@ -1,8 +1,9 @@
 import * as URLSchemes from "core/transports/url_schemes";
-import Transport from "core/transports//transport";
+import Transport from "core/transports/transport";
 import Util from "core/util";
-import * as Collections from "core/utils/collections.ts";
-import TransportHooks from "core/transports/transport_hooks.ts";
+import * as Collections from "core/utils/collections";
+import TransportHooks from "core/transports/transport_hooks";
+import TransportsTable from 'core/transports/transports_table';
 import WS from 'ws';
 import HTTPFactory from 'core/http/http';
 import Runtime from 'runtime';
@@ -81,7 +82,7 @@ var XDRPollingTransport = new Transport(
   <TransportHooks> Collections.extend({}, pollingConfiguration, xdrConfiguration)
 );
 
-var Transports = {
+var Transports : TransportsTable = {
   ws: WSTransport,
   xhr_streaming: XHRStreamingTransport,
   xdr_streaming: XDRStreamingTransport,
