@@ -1,4 +1,4 @@
-var Authorizer = require('core/pusher_authorizer').default;
+var Authorizer = require('core/auth/pusher_authorizer').default;
 var Errors = require('core/errors');
 var PrivateChannel = require('core/channels/private_channel').default;
 var Factory = require('core/utils/factory').default;

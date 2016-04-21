@@ -1,5 +1,5 @@
 var TestEnv = require('testenv');
-var Authorizer = require('core/pusher_authorizer').default;
+var Authorizer = require('core/auth/pusher_authorizer').default;
 var Logger = require('core/logger');
 var Mocks = require('mocks');
 var Util = require('core/util').default;

@@ -3,7 +3,7 @@ var Util = require('core/util').default;
 var Collections = require('core/utils/collections');
 var Logger = require('core/logger').default;
 var StrategyBuilder = require('core/strategies/strategy_builder');
-var Defaults = require('defaults').default;
+var Defaults = require('core/defaults').default;
 var DefaultConfig = require('core/config');
 var TimelineSender = require('core/timeline/timeline_sender').default;
 var Pusher = require('core/pusher');
@@ -170,7 +170,7 @@ describe("Pusher", function() {
         var getStrategy = pusher.connection.options.getStrategy;
         expect(getStrategy().options).toEqual(expectedConfig);
         expect(getStrategy().definition).toEqual(
-          Defaults.getDefaultStrategy(expectedConfig)
+          Runtime.getDefaultStrategy(expectedConfig)
         );
       });
 
@@ -185,7 +185,7 @@ describe("Pusher", function() {
           expectedConfig
         );
         expect(getStrategy({ encrypted: true }).definition).toEqual(
-          Defaults.getDefaultStrategy(expectedConfig)
+          Runtime.getDefaultStrategy(expectedConfig)
         );
       });
     });
@@ -237,7 +237,7 @@ describe("Pusher", function() {
           });
           var pusher = new Pusher("foo", { encrypted: true });
           expect(pusher.connection.options.encrypted).toBe(true);
-        });  
+        });
       }
     });
   });

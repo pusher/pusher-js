@@ -91,7 +91,7 @@ class Pusher {
     var getStrategy = function(options) {
       var config = Collections.extend({}, self.config, options);
       return StrategyBuilder.build(
-        Defaults.getDefaultStrategy(config), config
+        Runtime.getDefaultStrategy(config), config
       );
     };
 

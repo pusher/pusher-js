@@ -21,7 +21,7 @@ interface Runtime {
   getNetwork() : NetInfo;
   getDefaultStrategy(config : any) : any;
   Transports: TransportsTable;
-  WebSocket: new(url: string) => Socket;
+  getWebSocketAPI() : new(url: string) => Socket;
 }
 
 export default Runtime;

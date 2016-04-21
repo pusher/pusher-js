@@ -18,10 +18,10 @@ var WSTransport = new Transport(<TransportHooks> {
   supportsPing: false,
 
   isInitialized: function() {
-    return Boolean(Runtime.WebSocket);
+    return Boolean(Runtime.getWebSocketAPI());
   },
   isSupported: function() : boolean {
-    return Boolean(Runtime.WebSocket);
+    return Boolean(Runtime.getWebSocketAPI());
   },
   getSocket: function(url) {
     return Runtime.createWebSocket(url);

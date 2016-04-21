@@ -1,5 +1,3 @@
-import Runtime from "runtime";
-
 export interface DefaultConfig {
   VERSION: string;
   PROTOCOL: number;
@@ -16,7 +14,6 @@ export interface DefaultConfig {
   activity_timeout: number;
   pong_timeout: number;
   unavailable_timeout: number;
-  getDefaultStrategy: Function;
 
   cdn_http?: string;
   cdn_https?: string;
@@ -48,9 +45,7 @@ var Defaults : DefaultConfig = {
   // CDN configuration
   cdn_http: 'http://js.pusher.com',
   cdn_https: 'https://js.pusher.com',
-  dependency_suffix: '',
-
-  getDefaultStrategy: Runtime.getDefaultStrategy
+  dependency_suffix: ''
 }
 
 export default Defaults;

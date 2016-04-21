@@ -27,7 +27,10 @@ var Runtime : Browser = {
   Transports,
 
   TimelineTransport: jsonpTimeline,
-  WebSocket: window.WebSocket || window.MozWebSocket,
+
+  getWebSocketAPI() {
+    return window.WebSocket || window.MozWebSocket;
+  },
 
   whenReady(callback : Function) : void {
     var initializeOnDocumentBody = ()=> {
@@ -124,7 +127,7 @@ var Runtime : Browser = {
   },
 
   createWebSocket(url : string) : any {
-    var Constructor = this.WebSocket();
+    var Constructor = this.getWebSocketAPI();
     return new Constructor(url);
   },
 }
