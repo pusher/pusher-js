@@ -4,6 +4,7 @@ import TimelineTransport from 'core/timeline/timeline_transport';
 import Ajax from 'core/http/ajax';
 import {NetInfo} from 'net_info';
 import TransportsTable from 'core/transports/transports_table';
+import Socket from 'core/socket';
 
 interface Runtime {
   whenReady(callback : Function) : void;
@@ -16,10 +17,11 @@ interface Runtime {
   getClientFeatures() : any[];
   TimelineTransport: TimelineTransport;
   createXHR() : Ajax;
-  createWebSocket(url : string) : any;
+  createWebSocket(url : string) : Socket;
   getNetwork() : NetInfo;
   getDefaultStrategy(config : any) : any;
   Transports: TransportsTable;
+  WebSocket: new(url: string) => Socket;
 }
 
 export default Runtime;

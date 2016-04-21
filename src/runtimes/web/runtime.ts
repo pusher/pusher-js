@@ -13,7 +13,6 @@ import {ScriptReceivers} from './dom/script_receiver_factory';
 import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
 import Ajax from "core/http/ajax";
-import WS from 'ws';
 import {NetInfo, Network} from 'net_info';
 import getDefaultStrategy from './default_strategy';
 
@@ -28,6 +27,7 @@ var Runtime : Browser = {
   Transports,
 
   TimelineTransport: jsonpTimeline,
+  WebSocket: window.WebSocket || window.MozWebSocket,
 
   whenReady(callback : Function) : void {
     var initializeOnDocumentBody = ()=> {
@@ -124,7 +124,7 @@ var Runtime : Browser = {
   },
 
   createWebSocket(url : string) : any {
-    var Constructor = WS.getAPI();
+    var Constructor = this.WebSocket();
     return new Constructor(url);
   },
 }

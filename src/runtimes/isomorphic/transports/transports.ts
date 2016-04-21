@@ -4,7 +4,6 @@ import Util from "core/util";
 import * as Collections from "core/utils/collections";
 import TransportHooks from "core/transports/transport_hooks";
 import TransportsTable from 'core/transports/transports_table';
-import WS from 'ws';
 import HTTPFactory from 'core/http/http';
 import Runtime from 'runtime';
 
@@ -19,10 +18,10 @@ var WSTransport = new Transport(<TransportHooks> {
   supportsPing: false,
 
   isInitialized: function() {
-    return Boolean(WS.getAPI());
+    return Boolean(Runtime.WebSocket);
   },
   isSupported: function() : boolean {
-    return Boolean(WS.getAPI());
+    return Boolean(Runtime.WebSocket);
   },
   getSocket: function(url) {
     return Runtime.createWebSocket(url);

@@ -18,7 +18,6 @@
     "src/d.ts/react-native/react-native.d.ts",
     "src/d.ts/module/module.d.ts",
     "src/runtimes/web/net_info.ts",
-    "src/runtimes/web/ws.ts",
     "src/runtimes/web/xhr.ts",
     "src/runtimes/web/app.ts",
     "src/runtimes/react-native/net_info.ts"
