@@ -3,12 +3,12 @@ import Runtime from "../interface";
 import {Network} from './net_info';
 import fetchAuth from './auth/fetch_auth';
 import {AuthTransports} from 'core/auth/auth_transports';
+import fetchTimeline from './timeline/fetch_timeline';
 
 // Very verbose but until unavoidable until
 // TypeScript 2.1, when spread attributes will be
 // supported
 const {
-  TimelineTransport,
   getDefaultStrategy,
   Transports,
   whenReady,
@@ -26,7 +26,6 @@ const {
 } = Isomorphic;
 
 const Worker : Runtime = {
-  TimelineTransport,
   getDefaultStrategy,
   Transports,
   whenReady,
@@ -41,6 +40,8 @@ const Worker : Runtime = {
   addUnloadListener,
   removeUnloadListener,
   transportConnectionInitializer,
+
+  TimelineTransport: fetchTimeline,
 
   getAuthorizers() : AuthTransports {
     return {ajax: fetchAuth};
