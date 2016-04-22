@@ -2,7 +2,6 @@ import * as App from "app";
 import RequestHooks from "./request_hooks";
 import Ajax from "./ajax";
 import {default as EventsDispatcher} from "../events/dispatcher";
-import Status from "./status";
 
 const MAX_BUFFER_LENGTH = 256*1024;
 
@@ -47,7 +46,7 @@ export default class HTTPRequest extends EventsDispatcher {
     }
   }
 
-  onChunk(status : Status, data : any) {
+  onChunk(status : number, data : any) {
     while (true) {
       var chunk = this.advanceBuffer(data);
       if (chunk) {

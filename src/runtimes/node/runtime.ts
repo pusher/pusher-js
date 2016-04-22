@@ -1,5 +1,6 @@
 import Isomorphic from 'isomorphic/runtime';
 import {Client as WebSocket} from "faye-websocket";
+import {XMLHttpRequest} from "xmlhttprequest";
 import Runtime from "../interface";
 
 // Very verbose but until unavoidable until
@@ -40,6 +41,10 @@ const NodeJS : Runtime = {
 
   getWebSocketAPI() {
     return WebSocket;
+  },
+
+  getXHRAPI() {
+    return XMLHttpRequest;
   }
 };
 

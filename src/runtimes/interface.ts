@@ -22,6 +22,7 @@ interface Runtime {
   getDefaultStrategy(config : any) : any;
   Transports: TransportsTable;
   getWebSocketAPI() : new(url: string) => Socket;
+  getXHRAPI() : new() => Ajax;
 }
 
 export default Runtime;

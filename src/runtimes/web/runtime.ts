@@ -1,5 +1,4 @@
 import Browser from "./browser";
-import XHR from "./xhr";
 import {Dependencies, DependenciesReceivers} from './dom/dependencies';
 import {AuthTransport, AuthTransports} from 'core/auth/auth_transports';
 import xhrAuth from 'isomorphic/auth/xhr_auth';
@@ -32,6 +31,10 @@ var Runtime : Browser = {
     return window.WebSocket || window.MozWebSocket;
   },
 
+  getXHRAPI() {
+    return window.XMLHttpRequest
+  },
+
   whenReady(callback : Function) : void {
     var initializeOnDocumentBody = ()=> {
         this.onDocumentBody(callback);
@@ -52,7 +55,7 @@ var Runtime : Browser = {
   },
 
   isXHRSupported() : boolean {
-    var Constructor = XHR.getAPI();
+    var Constructor = this.getXHRAPI();
     return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
   },
 
@@ -106,7 +109,7 @@ var Runtime : Browser = {
   },
 
   createXHR() : Ajax {
-    if (XHR.getAPI()){
+    if (this.getXHRAPI()){
       return this.createXMLHttpRequest();
     } else {
       return this.createMicrosoftXHR();
@@ -114,7 +117,7 @@ var Runtime : Browser = {
   },
 
   createXMLHttpRequest() : Ajax {
-    var Constructor = XHR.getAPI();
+    var Constructor = this.getXHRAPI();
     return new Constructor();
   },
 

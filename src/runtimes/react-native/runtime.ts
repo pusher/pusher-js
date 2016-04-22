@@ -39,6 +39,10 @@ const ReactNative : Runtime = {
 
   getWebSocketAPI() {
     return WebSocket;
+  },
+
+  getXHRAPI() {
+    return XMLHttpRequest;
   }
 };
 

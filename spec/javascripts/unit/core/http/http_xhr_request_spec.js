@@ -1,8 +1,7 @@
 var Mocks = require('mocks');
-var XHR = require('xhr').default;
+var Runtime = require('runtime').default;
 
 describe("HTTP.getXHR", function() {
-  // var _XMLHttpRequest = window.XMLHttpRequest;
 
   var hooks;
   var request;
@@ -11,11 +10,7 @@ describe("HTTP.getXHR", function() {
   beforeEach(function() {
     HTTPFactory = require('core/http/http').default;
 
-    // window.XMLHttpRequest = jasmine.createSpy().andCallFake(
-    //   Mocks.getXHR
-    // );
-
-    spyOn(XHR, 'getAPI').andReturn(Mocks.getXHR);
+    spyOn(Runtime, 'getXHRAPI').andReturn(Mocks.getXHR);
 
     spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
       hooks = h;
@@ -24,10 +19,6 @@ describe("HTTP.getXHR", function() {
 
     request = HTTPFactory.createXHR("OPTIONS", "http://example.org");
   });
-
-  // afterEach(function() {
-  //   window.XMLHttpRequest = _XMLHttpRequest;
-  // });
 
   it("should pass the correct method to the request", function() {
     expect(request.method).toEqual("OPTIONS");

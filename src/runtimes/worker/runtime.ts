@@ -39,6 +39,10 @@ const Worker : Runtime = {
 
   getWebSocketAPI() {
     return WebSocket;
+  },
+
+  getXHRAPI() {
+    return XMLHttpRequest;
   }
 };
 

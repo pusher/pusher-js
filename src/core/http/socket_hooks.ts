@@ -1,5 +1,4 @@
 import Socket from "../socket";
-import Status from "./status";
 import URLLocation from "./url_location";
 
 interface SocketHooks {

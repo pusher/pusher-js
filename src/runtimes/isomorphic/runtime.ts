@@ -6,7 +6,6 @@ import Transports from "isomorphic/transports/transports";
 import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
 import Ajax from 'core/http/ajax';
-import XHR from 'xhr';
 import {NetInfo, Network} from 'net_info';
 import getDefaultStrategy from './default_strategy';
 import TransportsTable from "core/transports/transports_table";
@@ -55,7 +54,7 @@ var Isomorphic : any = {
   },
 
   createXHR() : Ajax {
-    var Constructor = XHR.getAPI();
+    var Constructor = this.getXHRAPI();
     return new Constructor();
   },
 
