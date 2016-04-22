@@ -1,6 +1,8 @@
 import Isomorphic from 'isomorphic/runtime';
 import Runtime from "../interface";
 import {Network} from './net_info';
+import fetchAuth from './auth/fetch_auth';
+import {AuthTransports} from 'core/auth/auth_transports';
 
 // Very verbose but until unavoidable until
 // TypeScript 2.1, when spread attributes will be
@@ -14,7 +16,6 @@ const {
   isXHRSupported,
   isXDRSupported,
   getGlobal,
-  getAuthorizers,
   getLocalStorage,
   getClientFeatures,
   createXHR,
@@ -33,7 +34,6 @@ const Worker : Runtime = {
   isXHRSupported,
   isXDRSupported,
   getGlobal,
-  getAuthorizers,
   getLocalStorage,
   getClientFeatures,
   createXHR,
@@ -41,6 +41,10 @@ const Worker : Runtime = {
   addUnloadListener,
   removeUnloadListener,
   transportConnectionInitializer,
+
+  getAuthorizers() : AuthTransports {
+    return {ajax: fetchAuth};
+  },
 
   getWebSocketAPI() {
     return WebSocket;
