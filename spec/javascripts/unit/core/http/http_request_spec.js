@@ -1,7 +1,7 @@
 var Mocks = require("mocks");
 
 var HTTPRequest = require("core/http/http_request").default;
-var App = require("app");
+var Runtime = require("runtime").default;
 
 describe("HTTPRequest", function() {
   var xhr;
@@ -19,8 +19,8 @@ describe("HTTPRequest", function() {
       abortRequest: jasmine.createSpy()
     };
 
-    spyOn(App, "addUnloadListener");
-    spyOn(App, "removeUnloadListener");
+    spyOn(Runtime, "addUnloadListener");
+    spyOn(Runtime, "removeUnloadListener");
 
     request = new HTTPRequest(hooks, "GET", "http://example.com");
   });
@@ -44,7 +44,7 @@ describe("HTTPRequest", function() {
     it("should register an unloader", function() {
       request.start("test payload");
 
-      expect(App.addUnloadListener).toHaveBeenCalledWith(
+      expect(Runtime.addUnloadListener).toHaveBeenCalledWith(
         jasmine.any(Function)
       );
     });
@@ -84,9 +84,9 @@ describe("HTTPRequest", function() {
     });
 
     it("should unregister the unloader", function() {
-      var unloader = App.addUnloadListener.calls[0].args[0];
+      var unloader = Runtime.addUnloadListener.calls[0].args[0];
       request.close();
-      expect(App.removeUnloadListener).toHaveBeenCalledWith(unloader);
+      expect(Runtime.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
   });
 
@@ -171,7 +171,7 @@ describe("HTTPRequest", function() {
 
     beforeEach(function() {
       request.start("test payload");
-      unloader = App.addUnloadListener.calls[0].args[0];
+      unloader = Runtime.addUnloadListener.calls[0].args[0];
     });
 
     it("should abort the request using the abortRequest hook", function() {
@@ -182,7 +182,7 @@ describe("HTTPRequest", function() {
 
     it("should unregister the unloader", function() {
       unloader();
-      expect(App.removeUnloadListener).toHaveBeenCalledWith(unloader);
+      expect(Runtime.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
   });
 });

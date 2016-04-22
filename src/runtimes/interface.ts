@@ -23,6 +23,8 @@ interface Runtime {
   Transports: TransportsTable;
   getWebSocketAPI() : new(url: string) => Socket;
   getXHRAPI() : new() => Ajax;
+  addUnloadListener(listener : Function) : void;
+  removeUnloadListener(listener : Function) : void;
 }
 
 export default Runtime;

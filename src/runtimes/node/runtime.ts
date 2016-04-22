@@ -20,7 +20,9 @@ const {
   getClientFeatures,
   createXHR,
   getNetwork,
-  createWebSocket
+  createWebSocket,
+  addUnloadListener,
+  removeUnloadListener
 } = Isomorphic;
 
 const NodeJS : Runtime = {
@@ -38,6 +40,8 @@ const NodeJS : Runtime = {
   createXHR,
   getNetwork,
   createWebSocket,
+  addUnloadListener,
+  removeUnloadListener,
 
   getWebSocketAPI() {
     return WebSocket;

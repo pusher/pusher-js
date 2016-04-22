@@ -65,7 +65,10 @@ var Isomorphic : any = {
   createWebSocket(url : string) : any {
     var Constructor = this.getWebSocketAPI();
     return new Constructor(url);
-  }
+  },
+
+  addUnloadListener(listener : any) {},
+  removeUnloadListener(listener : any) {}
 }
 
 export default Isomorphic;

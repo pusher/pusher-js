@@ -1,4 +1,4 @@
-import * as App from "app";
+import Runtime from "runtime";
 import RequestHooks from "./request_hooks";
 import Ajax from "./ajax";
 import {default as EventsDispatcher} from "../events/dispatcher";
@@ -29,7 +29,7 @@ export default class HTTPRequest extends EventsDispatcher {
     self.unloader = function() {
       self.close();
     };
-    App.addUnloadListener(self.unloader);
+    Runtime.addUnloadListener(self.unloader);
 
     self.xhr.open(self.method, self.url, true);
     self.xhr.send(payload);
@@ -37,7 +37,7 @@ export default class HTTPRequest extends EventsDispatcher {
 
   close() {
     if (this.unloader) {
-      App.removeUnloadListener(this.unloader);
+      Runtime.removeUnloadListener(this.unloader);
       this.unloader = null;
     }
     if (this.xhr) {

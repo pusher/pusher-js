@@ -133,6 +133,22 @@ var Runtime : Browser = {
     var Constructor = this.getWebSocketAPI();
     return new Constructor(url);
   },
+
+  addUnloadListener(listener : any) {
+    if (window.addEventListener !== undefined) {
+     window.addEventListener("unload", listener, false);
+    } else if (window.attachEvent !== undefined) {
+     window.attachEvent("onunload", listener);
+    }
+  },
+
+  removeUnloadListener(listener : any) {
+    if (window.addEventListener !== undefined) {
+      window.removeEventListener("unload", listener, false);
+    } else if (window.detachEvent !== undefined) {
+      window.detachEvent("onunload", listener);
+    }
+  }
 }
 
 export default Runtime;

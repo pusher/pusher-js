@@ -18,7 +18,9 @@ const {
   getClientFeatures,
   createXHR,
   getNetwork,
-  createWebSocket
+  createWebSocket,
+  addUnloadListener,
+  removeUnloadListener
 } = Isomorphic;
 
 const ReactNative : Runtime = {
@@ -36,6 +38,8 @@ const ReactNative : Runtime = {
   createXHR,
   getNetwork,
   createWebSocket,
+  addUnloadListener,
+  removeUnloadListener,
 
   getWebSocketAPI() {
     return WebSocket;
