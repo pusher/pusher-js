@@ -2,10 +2,9 @@ var Mocks = require("mocks");
 var Factory = require('core/utils/factory').default;
 var Transports = require('transports/transports').default;
 var Collections = require('core/utils/collections');
-var WS = require('ws').default;
 var HTTP = require('core/http/http').default;
 var Runtime = require('runtime').default;
-var VERSION = require('defaults').default.VERSION;
+var VERSION = require('core/defaults').default.VERSION;
 
 describe("Transports", function() {
   describe("ws", function() {
@@ -60,9 +59,9 @@ describe("Transports", function() {
         var FakeWebSocket = function(url) {
           this.url = url;
         }
-        spyOn(WS, 'getAPI').andReturn(FakeWebSocket);
+        spyOn(Runtime, 'getWebSocketAPI').andReturn(FakeWebSocket);
         var socket = Transports.ws.hooks.getSocket("testurl");
-        expect(WS.getAPI.calls.length).toEqual(1);
+        expect(Runtime.getWebSocketAPI.calls.length).toEqual(1);
         expect(socket).toEqual(jasmine.any(FakeWebSocket));
         expect(socket.url).toEqual("testurl");
       });

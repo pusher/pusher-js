@@ -1,4 +1,3 @@
-import Runtime from "../interface";
 import xhrTimeline from './timeline/xhr_timeline';
 import TimelineTransport from 'core/timeline/timeline_transport';
 import xhrAuth from 'isomorphic/auth/xhr_auth';
@@ -8,15 +7,15 @@ import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
 import Ajax from 'core/http/ajax';
 import XHR from 'xhr';
-import WS from 'ws';
 import {NetInfo, Network} from 'net_info';
 import getDefaultStrategy from './default_strategy';
+import TransportsTable from "core/transports/transports_table";
 
-var Isomorphic : Runtime = {
+var Isomorphic : any = {
 
   TimelineTransport: xhrTimeline,
   getDefaultStrategy,
-  Transports,
+  Transports: <TransportsTable> Transports,
 
   whenReady(callback : Function) : void {
     callback();
@@ -65,9 +64,9 @@ var Isomorphic : Runtime = {
   },
 
   createWebSocket(url : string) : any {
-    var Constructor = WS.getAPI();
+    var Constructor = this.getWebSocketAPI();
     return new Constructor(url);
-  },
+  }
 }
 
 export default Isomorphic;
