@@ -5,6 +5,7 @@ import Logger from 'core/logger';
 import ConnectionState from 'core/connection/state';
 import TransportHooks from 'core/transports/transport_hooks';
 import Socket from 'core/socket';
+import Runtime from 'runtime';
 
 /** Provides universal API for transport connections.
  *
@@ -34,7 +35,7 @@ import Socket from 'core/socket';
  * @param {String} key application key
  * @param {Object} options
  */
-export default class BaseTransportConnection extends EventsDispatcher {
+export default class TransportConnection extends EventsDispatcher {
   hooks: TransportHooks;
   name: string;
   priority: number;
@@ -46,9 +47,11 @@ export default class BaseTransportConnection extends EventsDispatcher {
   id: string;
   socket: Socket;
   beforeOpen: Function;
+  initialize: Function;
 
   constructor(hooks : TransportHooks, name : string, priority : number, key : string, options : any) {
     super();
+    this.initialize = Runtime.transportConnectionInitializer;
     this.hooks = hooks;
     this.name = name;
     this.priority = priority;
@@ -75,24 +78,6 @@ export default class BaseTransportConnection extends EventsDispatcher {
    */
   supportsPing() : boolean {
     return Boolean(this.hooks.supportsPing);
-  }
-
-  /** Initializes the transport.
-   *
-   * Fetches resources if needed and then transitions to initialized.
-   */
-  initialize() {
-    var self = this;
-
-    self.timeline.info(self.buildTimelineMessage({
-      transport: self.name + (self.options.encrypted ? "s" : "")
-    }));
-
-    if (self.hooks.isInitialized()) {
-      self.changeState(ConnectionState.INITIALIZED);
-    } else {
-      self.onClose();
-    }
   }
 
   /** Tries to establish a connection.

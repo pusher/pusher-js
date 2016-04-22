@@ -33,7 +33,7 @@ describe("Host/Port Configuration", function() {
     beforeEach(function() {
       spyOn(Runtime, 'createWebSocket').andReturn(Mocks.getTransport());
 
-      Transports = require('transports/transports').default;
+      var Transports = Runtime.Transports;
 
       spyOn(Transports.ws, "isSupported").andReturn(true);
       spyOn(Transports.xdr_streaming, "isSupported").andReturn(false);

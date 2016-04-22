@@ -2,7 +2,7 @@ import AssistantToTheTransportManager from "../transports/assistant_to_the_trans
 import Transport from "../transports/transport";
 import TransportManager from "../transports/transport_manager";
 import Handshake from "../connection/handshake";
-import TransportConnection from "transports/transport_connection";
+import TransportConnection from "../transports/transport_connection";
 import SocketHooks from "../http/socket_hooks";
 import HTTPSocket from "../http/http_socket";
 import Authorizer from "../auth/pusher_authorizer";

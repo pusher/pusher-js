@@ -25,6 +25,7 @@ interface Runtime {
   getXHRAPI() : new() => Ajax;
   addUnloadListener(listener : Function) : void;
   removeUnloadListener(listener : Function) : void;
+  transportConnectionInitializer: Function;
 }
 
 export default Runtime;

@@ -8,12 +8,14 @@ import TimelineSender from 'core/timeline/timeline_sender';
 import Ajax from 'core/http/ajax';
 import getDefaultStrategy from './default_strategy';
 import TransportsTable from "core/transports/transports_table";
+import transportConnectionInitializer from './transports/transport_connection_initializer';
 
 var Isomorphic : any = {
 
   TimelineTransport: xhrTimeline,
   getDefaultStrategy,
   Transports: <TransportsTable> Transports,
+  transportConnectionInitializer,
 
   whenReady(callback : Function) : void {
     callback();

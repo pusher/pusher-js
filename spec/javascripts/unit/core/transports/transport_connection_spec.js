@@ -1,6 +1,6 @@
 var TestEnv = require('testenv');
 var Mocks = require("mocks");
-var TransportConnection = require('transports/transport_connection').default;
+var TransportConnection = require('core/transports/transport_connection').default;
 var Collections = require('core/utils/collections');
 var Timer = require('core/utils/timers').OneOffTimer;
 

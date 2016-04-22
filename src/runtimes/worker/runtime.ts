@@ -20,7 +20,8 @@ const {
   createXHR,
   createWebSocket,
   addUnloadListener,
-  removeUnloadListener
+  removeUnloadListener,
+  transportConnectionInitializer
 } = Isomorphic;
 
 const Worker : Runtime = {
@@ -39,6 +40,7 @@ const Worker : Runtime = {
   createWebSocket,
   addUnloadListener,
   removeUnloadListener,
+  transportConnectionInitializer,
 
   getWebSocketAPI() {
     return WebSocket;

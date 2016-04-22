@@ -14,6 +14,7 @@ import Transports from './transports/transports';
 import Ajax from "core/http/ajax";
 import {Network} from './net_info';
 import getDefaultStrategy from './default_strategy';
+import transportConnectionInitializer from './transports/transport_connection_initializer';
 
 var Runtime : Browser = {
 
@@ -24,6 +25,7 @@ var Runtime : Browser = {
   DependenciesReceivers,
   getDefaultStrategy,
   Transports,
+  transportConnectionInitializer,
 
   TimelineTransport: jsonpTimeline,
 

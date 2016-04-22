@@ -3,7 +3,7 @@ import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Protocol from './protocol/protocol';
 import Message from './protocol/message';
 import Logger from '../logger';
-import TransportConnection from "transports/transport_connection";
+import TransportConnection from "../transports/transport_connection";
 import Socket from "../socket";
 /**
  * Provides Pusher protocol interface for transports.

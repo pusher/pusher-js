@@ -20,7 +20,8 @@ const {
   createXHR,
   createWebSocket,
   addUnloadListener,
-  removeUnloadListener
+  removeUnloadListener,
+  transportConnectionInitializer
 } = Isomorphic;
 
 const ReactNative : Runtime = {
@@ -39,6 +40,7 @@ const ReactNative : Runtime = {
   createWebSocket,
   addUnloadListener,
   removeUnloadListener,
+  transportConnectionInitializer,
 
   getWebSocketAPI() {
     return WebSocket;

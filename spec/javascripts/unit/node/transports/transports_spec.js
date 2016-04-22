@@ -1,10 +1,10 @@
 var Mocks = require("mocks");
 var Factory = require('core/utils/factory').default;
-var Transports = require('transports/transports').default;
 var Collections = require('core/utils/collections');
 var HTTP = require('core/http/http').default;
 var Runtime = require('runtime').default;
 var VERSION = require('core/defaults').default.VERSION;
+var Transports = Runtime.Transports;
 
 describe("Transports", function() {
   describe("ws", function() {

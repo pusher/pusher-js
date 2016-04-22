@@ -22,7 +22,8 @@ const {
   createXHR,
   createWebSocket,
   addUnloadListener,
-  removeUnloadListener
+  removeUnloadListener,
+  transportConnectionInitializer
 } = Isomorphic;
 
 const NodeJS : Runtime = {
@@ -41,6 +42,7 @@ const NodeJS : Runtime = {
   createWebSocket,
   addUnloadListener,
   removeUnloadListener,
+  transportConnectionInitializer,
 
   getWebSocketAPI() {
     return WebSocket;

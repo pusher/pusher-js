@@ -1,4 +1,4 @@
-var WSTransport = require('transports/transports').default.ws;
+var WSTransport = require('runtime').default.Transports.ws;
 var StrategyBuilder = require('core/strategies/strategy_builder');
 var Runtime = require('runtime').default;
 var DefaultConfig = require('core/config');
