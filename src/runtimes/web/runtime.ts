@@ -12,7 +12,7 @@ import {ScriptReceivers} from './dom/script_receiver_factory';
 import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
 import Ajax from "core/http/ajax";
-import {NetInfo, Network} from 'net_info';
+import {Network} from './net_info';
 import getDefaultStrategy from './default_strategy';
 
 var Runtime : Browser = {
@@ -125,7 +125,7 @@ var Runtime : Browser = {
     return new ActiveXObject("Microsoft.XMLHTTP");
   },
 
-  getNetwork() : NetInfo {
+  getNetwork() {
     return Network;
   },
 

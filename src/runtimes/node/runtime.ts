@@ -2,6 +2,7 @@ import Isomorphic from 'isomorphic/runtime';
 import {Client as WebSocket} from "faye-websocket";
 import {XMLHttpRequest} from "xmlhttprequest";
 import Runtime from "../interface";
+import {Network} from './net_info';
 
 // Very verbose but until unavoidable until
 // TypeScript 2.1, when spread attributes will be
@@ -19,7 +20,6 @@ const {
   getLocalStorage,
   getClientFeatures,
   createXHR,
-  getNetwork,
   createWebSocket,
   addUnloadListener,
   removeUnloadListener
@@ -38,7 +38,6 @@ const NodeJS : Runtime = {
   getLocalStorage,
   getClientFeatures,
   createXHR,
-  getNetwork,
   createWebSocket,
   addUnloadListener,
   removeUnloadListener,
@@ -49,6 +48,10 @@ const NodeJS : Runtime = {
 
   getXHRAPI() {
     return XMLHttpRequest;
+  },
+
+  getNetwork() {
+    return Network;
   }
 };
 
