@@ -4,7 +4,7 @@ interface Socket {
    close(code?: any, reason?:any);
    sendRaw?(payload : any) : boolean;
 
-   onopen?() : void;
+   onopen?(evt?: any) : void;
    onerror?(error : any) : void;
    onclose?(closeEvent : any) : void;
    onmessage?(message : any) : void;
