@@ -3,9 +3,9 @@ var Pusher = require('pusher_integration');
 if (TestEnv === "web") window.Pusher = Pusher;
 var Integration = require("integration");
 var Mocks = require("mocks");
-var defaults = require("defaults").default;
+var Runtime = require('runtime').default;
 var Network = require("net_info").Network;
-var transports = require("transports/transports").default;
+var transports = Runtime.Transports;
 
 if (TestEnv == "web") {
   var BASE_FALLBACK = "sockjs"
@@ -28,7 +28,7 @@ Integration.describe("Transport lists", function() {
     spyOn(transports[BASE_FALLBACK], "createConnection")
       .andCallFake(Mocks.getTransport);
 
-    spyOn(defaults, "getDefaultStrategy").andCallFake(function() {
+    spyOn(Runtime, "getDefaultStrategy").andCallFake(function() {
       return [
         [":def_transport", "a", "ws", 1, {}],
         [":def_transport", "b", "xhr_streaming", 2, {}],

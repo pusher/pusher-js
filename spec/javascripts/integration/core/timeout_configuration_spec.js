@@ -5,12 +5,11 @@ if (TestEnv === "web") window.Pusher = Pusher;
 
 var Integration = require("integration");
 var Mocks = require("mocks");
-var defaults = require("defaults").default;
 var Network = require("net_info").Network;
-var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Runtime = require('runtime').default;
-var Defaults = require('defaults').default;
+var transports = Runtime.Transports;
+var Defaults = require('core/defaults').default;
 
 if (TestEnv == "web") {
   var BASE_FALLBACK = "sockjs"

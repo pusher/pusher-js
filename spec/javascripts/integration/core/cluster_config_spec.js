@@ -10,10 +10,10 @@ if (TestEnv === "web") {
 
 var Integration = require("integration");
 var Collections = require("core/utils/collections");
-var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Runtime = require('runtime').default;
-var Defaults = require('defaults').default;
+var Defaults = require('core/defaults').default;
+var transports = Runtime.Transports;
 
 Integration.describe("Cluster Configuration", function() {
 

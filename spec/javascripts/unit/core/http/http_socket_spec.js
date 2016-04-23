@@ -1,3 +1,4 @@
+var TestEnv = require('testenv');
 var Mocks = require('mocks');
 var Util = require('core/util').default;
 var HTTPSocket = require('core/http/http_socket').default;
@@ -20,13 +21,16 @@ describe("HTTP.Socket", function() {
       lastXHR = Mocks.getHTTPRequest(method, url);
       return lastXHR;
     });
-    spyOn(HTTPFactory, "createXDR").andCallFake(function(method, url) {
-      lastXHR = Mocks.getHTTPRequest(method, url);
-      return lastXHR;
-    });
+
+    if (TestEnv === "web") {
+      spyOn(HTTPFactory, "createXDR").andCallFake(function(method, url) {
+        lastXHR = Mocks.getHTTPRequest(method, url);
+        return lastXHR;
+      });
+    }
 
     spyOn(Runtime, "isXHRSupported").andReturn(true);
-    spyOn(Runtime, "isXDRSupported").andReturn(false);
+    if (TestEnv === "web") spyOn(Runtime, "isXDRSupported").andReturn(false);
 
     hooks = {
       getReceiveURL: jasmine.createSpy().andCallFake(function(url, session) {
@@ -55,22 +59,24 @@ describe("HTTP.Socket", function() {
 
   it("should use XHR if it's supported", function() {
     Runtime.isXHRSupported.andReturn(true);
-    Runtime.isXDRSupported.andReturn(false);
+    if (TestEnv === "web" ) Runtime.isXDRSupported.andReturn(false);
 
     var socket = new HTTPSocket(hooks, "http://example.com");
     expect(HTTPFactory.createXHR).toHaveBeenCalled();
     socket.close();
   });
 
-  it("should use XDR if it's supported", function() {
-    Runtime.isXHRSupported.andReturn(false);
-    Runtime.isXDRSupported.andReturn(true);
+  if (TestEnv === "web") {
+    it("should use XDR if it's supported", function() {
+      Runtime.isXHRSupported.andReturn(false);
+      Runtime.isXDRSupported.andReturn(true);
 
-    var socket = new HTTPSocket(hooks, "http://example.com");
-    expect(HTTPFactory.createXDR).toHaveBeenCalled();
+      var socket = new HTTPSocket(hooks, "http://example.com");
+      expect(HTTPFactory.createXDR).toHaveBeenCalled();
 
-    socket.close();
-  });
+      socket.close();
+    });
+  }
 
   it("should send a POST request to the URL constructed with getReceiveURL", function() {
     var socket = new HTTPSocket(hooks, "http://example.com/x?arg=val");

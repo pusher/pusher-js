@@ -7,9 +7,9 @@ var Integration = require("integration");
 var Mocks = require("mocks");
 var Network = require('net_info').Network;
 var Timer = require("core/utils/timers").OneOffTimer;
-var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Runtime = require('runtime').default;
+var transports = Runtime.Transports;
 var Timer = require('core/utils/timers').OneOffTimer;
 
 Integration.describe("Falling back", function() {
@@ -19,11 +19,14 @@ Integration.describe("Falling back", function() {
     spyOn(Network, "isOnline").andReturn(true);
 
     spyOn(transports.ws, "isSupported").andReturn(false);
-    if (TestEnv === "web") spyOn(transports.sockjs, "isSupported").andReturn(false);
-    spyOn(transports.xdr_streaming, "isSupported").andReturn(false);
     spyOn(transports.xhr_streaming, "isSupported").andReturn(false);
-    spyOn(transports.xdr_polling, "isSupported").andReturn(false);
     spyOn(transports.xhr_polling, "isSupported").andReturn(false);
+
+    if (TestEnv === "web") {
+      spyOn(transports.sockjs, "isSupported").andReturn(false);
+      spyOn(transports.xdr_streaming, "isSupported").andReturn(false);
+      spyOn(transports.xdr_polling, "isSupported").andReturn(false);
+    }
 
     spyOn(Runtime, "getLocalStorage").andReturn({});
   });

@@ -36,9 +36,7 @@ describe("Host/Port Configuration", function() {
       var Transports = Runtime.Transports;
 
       spyOn(Transports.ws, "isSupported").andReturn(true);
-      spyOn(Transports.xdr_streaming, "isSupported").andReturn(false);
       spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);
-      spyOn(Transports.xdr_polling, "isSupported").andReturn(false);
       spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
     });
 

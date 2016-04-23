@@ -9,12 +9,12 @@ if (TestEnv === "web") {
 }
 
 var Integration = require("integration");
-var transports = require("transports/transports").default;
 var util = require("core/util").default;
 var Timer = require("core/utils/timers").OneOffTimer;
 var Collections = require('core/utils/collections');
-var Defaults = require('defaults').default;
+var Defaults = require('core/defaults').default;
 var Runtime = require('runtime').default;
+var transports = Runtime.Transports;
 
 Integration.describe("Pusher", function() {
   // Integration tests in Jasmine need to have setup and teardown phases as
