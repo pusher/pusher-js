@@ -1,9 +1,5 @@
-import xhrTimeline from './timeline/xhr_timeline';
-import TimelineTransport from 'core/timeline/timeline_transport';
-import xhrAuth from 'isomorphic/auth/xhr_auth';
 import * as Collections from 'core/utils/collections';
 import Transports from "isomorphic/transports/transports";
-import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
 import Ajax from 'core/http/ajax';
 import getDefaultStrategy from './default_strategy';
@@ -11,8 +7,6 @@ import TransportsTable from "core/transports/transports_table";
 import transportConnectionInitializer from './transports/transport_connection_initializer';
 
 var Isomorphic : any = {
-
-  TimelineTransport: xhrTimeline,
   getDefaultStrategy,
   Transports: <TransportsTable> Transports,
   transportConnectionInitializer,
@@ -35,10 +29,6 @@ var Isomorphic : any = {
 
   getGlobal() : any {
     return Function("return this")();
-  },
-
-  getAuthorizers() : AuthTransports {
-    return {ajax: xhrAuth};
   },
 
   getLocalStorage() : any {
