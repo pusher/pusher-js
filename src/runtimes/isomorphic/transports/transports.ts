@@ -4,7 +4,6 @@ import Util from "core/util";
 import * as Collections from "core/utils/collections";
 import TransportHooks from "core/transports/transport_hooks";
 import TransportsTable from 'core/transports/transports_table';
-import HTTPFactory from 'core/http/http';
 import Runtime from 'runtime';
 
 /** WebSocket transport.
@@ -37,16 +36,16 @@ var httpConfiguration = {
   }
 };
 
-var streamingConfiguration = Collections.extend(
+export var streamingConfiguration = Collections.extend(
   { getSocket: function(url) {
-      return HTTPFactory.createStreamingSocket(url);
+      return Runtime.HTTPFactory.createStreamingSocket(url);
     }
   },
   httpConfiguration
 );
-var pollingConfiguration = Collections.extend(
+export var pollingConfiguration = Collections.extend(
   { getSocket: function(url) {
-      return HTTPFactory.createPollingSocket(url);
+      return Runtime.HTTPFactory.createPollingSocket(url);
     }
   },
   httpConfiguration
@@ -54,13 +53,7 @@ var pollingConfiguration = Collections.extend(
 
 var xhrConfiguration = {
   isSupported: function() : boolean {
-    return Runtime.isXHRSupported()
-  }
-};
-var xdrConfiguration = {
-  isSupported: function(environment) : boolean {
-    var yes = Runtime.isXDRSupported(environment.encrypted);
-    return yes;
+    return Runtime.isXHRSupported();
   }
 };
 
@@ -68,25 +61,16 @@ var xdrConfiguration = {
 var XHRStreamingTransport = new Transport(
   <TransportHooks> Collections.extend({}, streamingConfiguration, xhrConfiguration)
 );
-/** HTTP streaming transport using XDomainRequest (IE 8,9). */
-var XDRStreamingTransport = new Transport(
-  <TransportHooks> Collections.extend({}, streamingConfiguration, xdrConfiguration)
-);
+
 /** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
 var XHRPollingTransport = new Transport(
   <TransportHooks> Collections.extend({}, pollingConfiguration, xhrConfiguration)
-);
-/** HTTP long-polling transport using XDomainRequest (IE 8,9). */
-var XDRPollingTransport = new Transport(
-  <TransportHooks> Collections.extend({}, pollingConfiguration, xdrConfiguration)
 );
 
 var Transports : TransportsTable = {
   ws: WSTransport,
   xhr_streaming: XHRStreamingTransport,
-  xdr_streaming: XDRStreamingTransport,
-  xhr_polling: XHRPollingTransport,
-  xdr_polling: XDRPollingTransport
+  xhr_polling: XHRPollingTransport
 }
 
 export default Transports;

@@ -48,25 +48,13 @@ var getDefaultStrategy = function(config) {
     [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
     [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
     [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
-    [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":http_options", ":streaming_manager"],
     [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
-    [":def_transport", "xdr_polling", "xdr_polling", 1, ":http_options"],
 
     [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
     [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
 
-    [":def", "streaming_loop", [":sequential", ":timeouts",
-      [":if", [":is_supported", ":xhr_streaming"],
-        ":xhr_streaming",
-        ":xdr_streaming"
-      ]
-    ]],
-    [":def", "polling_loop", [":sequential", ":timeouts",
-      [":if", [":is_supported", ":xhr_polling"],
-        ":xhr_polling",
-        ":xdr_polling"
-      ]
-    ]],
+    [":def", "streaming_loop", [":sequential", ":timeouts", ":xhr_streaming"]],
+    [":def", "polling_loop", [":sequential", ":timeouts", ":xhr_polling"]],
 
     [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
       ":best_connected_ever",

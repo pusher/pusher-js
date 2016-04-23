@@ -1,13 +1,13 @@
-import HTTPRequest from "./http_request";
-import HTTPSocket from "./http_socket";
-import SocketHooks from "./socket_hooks";
-import RequestHooks from "./request_hooks";
-import streamingHooks from './http_streaming_socket';
-import pollingHooks from './http_polling_socket';
+import HTTPRequest from "core/http/http_request";
+import HTTPSocket from "core/http/http_socket";
+import SocketHooks from "core/http/socket_hooks";
+import RequestHooks from "core/http/request_hooks";
+import streamingHooks from 'core/http/http_streaming_socket';
+import pollingHooks from 'core/http/http_polling_socket';
 import xhrHooks from './http_xhr_request';
-import xdrHooks from './http_xdomain_request';
+import HTTPFactory from 'core/http/http_factory';
 
-var HTTP = {
+var HTTP : HTTPFactory = {
 
   createStreamingSocket(url : string) : HTTPSocket {
     return this.createSocket(streamingHooks, url);
@@ -23,10 +23,6 @@ var HTTP = {
 
   createXHR(method : string, url : string) : HTTPRequest {
     return this.createRequest(xhrHooks, method, url);
-  },
-
-  createXDR(method : string, url : string) : HTTPRequest {
-    return this.createRequest(xdrHooks, method, url);
   },
 
   createRequest(hooks : RequestHooks, method : string, url : string) : HTTPRequest {

@@ -13,7 +13,7 @@ describe("HTTP.Socket", function() {
   var HTTPFactory;
 
   beforeEach(function() {
-    HTTPFactory = require('core/http/http').default;
+    HTTPFactory = require('runtime').default.HTTPFactory;
     jasmine.Clock.useMock();
 
     spyOn(HTTPFactory, "createXHR").andCallFake(function(method, url) {

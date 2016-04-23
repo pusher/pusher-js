@@ -5,6 +5,7 @@ interface Ajax {
   readyState : number;
   responseText: string;
   status: number;
+  withCredentials?: boolean;
 
   ontimeout: Function;
   onerror: Function;

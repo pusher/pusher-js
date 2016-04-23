@@ -10,7 +10,8 @@ describe("HTTP.getXDR", function() {
   var HTTPFactory;
 
   beforeEach(function() {
-    HTTPFactory = require('core/http/http').default;
+    HTTPFactory = require('runtime').default.HTTPFactory;
+
 
     window.XDomainRequest = jasmine.createSpy().andCallFake(
       Mocks.getXHR

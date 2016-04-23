@@ -16,24 +16,6 @@ const {
   whenReady,
   getProtocol,
   isXHRSupported,
-  isXDRSupported,
-  getGlobal,
-  getLocalStorage,
-  getClientFeatures,
-  createXHR,
-  createWebSocket,
-  addUnloadListener,
-  removeUnloadListener,
-  transportConnectionInitializer
-} = Isomorphic;
-
-const NodeJS : Runtime = {
-  getDefaultStrategy,
-  Transports,
-  whenReady,
-  getProtocol,
-  isXHRSupported,
-  isXDRSupported,
   getGlobal,
   getLocalStorage,
   getClientFeatures,
@@ -42,6 +24,26 @@ const NodeJS : Runtime = {
   addUnloadListener,
   removeUnloadListener,
   transportConnectionInitializer,
+  createSocketRequest,
+  HTTPFactory
+} = Isomorphic;
+
+const NodeJS : Runtime = {
+  getDefaultStrategy,
+  Transports,
+  whenReady,
+  getProtocol,
+  isXHRSupported,
+  createSocketRequest,
+  getGlobal,
+  getLocalStorage,
+  getClientFeatures,
+  createXHR,
+  createWebSocket,
+  addUnloadListener,
+  removeUnloadListener,
+  transportConnectionInitializer,
+  HTTPFactory,
 
   TimelineTransport: xhrTimeline,
 

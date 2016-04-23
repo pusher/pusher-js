@@ -3,11 +3,8 @@ import State from "./state";
 import Socket from "../socket";
 import SocketHooks from "./socket_hooks";
 import Util from "../util";
-import getXHR from './http_xhr_request';
-import getXDR from "./http_xdomain_request";
 import Ajax from "./ajax";
 import HTTPRequest from "./http_request";
-import HTTP from './http';
 import Runtime from "runtime";
 
 var autoIncrement = 1;
@@ -49,7 +46,7 @@ class HTTPSocket implements Socket {
     sendRaw(payload : any) : boolean {
         if (this.readyState === State.OPEN) {
             try {
-            createRequest(
+            Runtime.createSocketRequest(
                 "POST", getUniqueURL(getSendURL(this.location, this.session))
             ).start(payload);
             return true;
@@ -158,7 +155,7 @@ class HTTPSocket implements Socket {
     openStream() {
       var self = this;
 
-      self.stream = createRequest(
+      self.stream = Runtime.createSocketRequest(
         "POST",
         getUniqueURL(self.hooks.getReceiveURL(self.location, self.session))
       );
@@ -226,16 +223,6 @@ function randomString(length : number) : string {
     result.push(randomNumber(32).toString(32));
   }
   return result.join('');
-}
-
-function createRequest(method : string, url : string) : HTTPRequest {
-  if (Runtime.isXHRSupported()) {
-    return HTTP.createXHR(method, url);
-  } else if (Runtime.isXDRSupported(url.indexOf("https:") === 0)) {
-    return HTTP.createXDR(method, url);
-  } else {
-    throw "Cross-origin HTTP requests are not supported";
-  }
 }
 
 export default HTTPSocket;

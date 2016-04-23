@@ -8,7 +8,7 @@ describe("HTTP.getXHR", function() {
   var HTTPFactory;
 
   beforeEach(function() {
-    HTTPFactory = require('core/http/http').default;
+    HTTPFactory = require('runtime').default.HTTPFactory;
 
     spyOn(Runtime, 'getXHRAPI').andReturn(Mocks.getXHR);
 

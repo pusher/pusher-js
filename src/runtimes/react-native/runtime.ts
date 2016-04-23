@@ -14,24 +14,6 @@ const {
   whenReady,
   getProtocol,
   isXHRSupported,
-  isXDRSupported,
-  getGlobal,
-  getLocalStorage,
-  getClientFeatures,
-  createXHR,
-  createWebSocket,
-  addUnloadListener,
-  removeUnloadListener,
-  transportConnectionInitializer
-} = Isomorphic;
-
-const ReactNative : Runtime = {
-  getDefaultStrategy,
-  Transports,
-  whenReady,
-  getProtocol,
-  isXHRSupported,
-  isXDRSupported,
   getGlobal,
   getLocalStorage,
   getClientFeatures,
@@ -40,6 +22,26 @@ const ReactNative : Runtime = {
   addUnloadListener,
   removeUnloadListener,
   transportConnectionInitializer,
+  createSocketRequest,
+  HTTPFactory
+} = Isomorphic;
+
+const ReactNative : Runtime = {
+  getDefaultStrategy,
+  Transports,
+  whenReady,
+  getProtocol,
+  isXHRSupported,
+  getGlobal,
+  getLocalStorage,
+  getClientFeatures,
+  createXHR,
+  createWebSocket,
+  addUnloadListener,
+  removeUnloadListener,
+  transportConnectionInitializer,
+  createSocketRequest,
+  HTTPFactory,
 
   TimelineTransport: xhrTimeline,
 

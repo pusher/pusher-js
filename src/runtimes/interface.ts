@@ -5,12 +5,12 @@ import Ajax from 'core/http/ajax';
 import {NetInfo} from 'net_info';
 import TransportsTable from 'core/transports/transports_table';
 import Socket from 'core/socket';
+import HTTPFactory from 'core/http/http_factory';
+import HTTPRequest from 'core/http/http_request';
 
 interface Runtime {
   whenReady(callback : Function) : void;
   getProtocol() : string;
-  isXHRSupported() : boolean;
-  isXDRSupported(encrypted?: boolean) : boolean;
   getGlobal() : any;
   getAuthorizers() : AuthTransports;
   getLocalStorage() : any;
@@ -26,6 +26,9 @@ interface Runtime {
   addUnloadListener(listener : Function) : void;
   removeUnloadListener(listener : Function) : void;
   transportConnectionInitializer: Function;
+  HTTPFactory: HTTPFactory;
+  isXHRSupported() : boolean;
+  createSocketRequest(method : string, url : string) : HTTPRequest;
 }
 
 export default Runtime;

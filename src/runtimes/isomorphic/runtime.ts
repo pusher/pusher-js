@@ -5,26 +5,16 @@ import Ajax from 'core/http/ajax';
 import getDefaultStrategy from './default_strategy';
 import TransportsTable from "core/transports/transports_table";
 import transportConnectionInitializer from './transports/transport_connection_initializer';
+import HTTPFactory from './http/http';
 
 var Isomorphic : any = {
   getDefaultStrategy,
   Transports: <TransportsTable> Transports,
   transportConnectionInitializer,
+  HTTPFactory,
 
   whenReady(callback : Function) : void {
     callback();
-  },
-
-  getProtocol() : string {
-    return "http:";
-  },
-
-  isXHRSupported() : boolean {
-    return true;
-  },
-
-  isXDRSupported(encrypted?: boolean) : boolean {
-    return false;
   },
 
   getGlobal() : any {
@@ -42,6 +32,22 @@ var Isomorphic : any = {
         function (t) { return t.isSupported({}); }
       )
     );
+  },
+
+  getProtocol() : string {
+    return "http:";
+  },
+
+  isXHRSupported() : boolean {
+    return true;
+  },
+
+  createSocketRequest(method : string, url : string) {
+    if (this.isXHRSupported()) {
+      return this.HTTPFactory.createXHR(method, url);
+    } else {
+      throw "Cross-origin HTTP requests are not supported";
+    }
   },
 
   createXHR() : Ajax {

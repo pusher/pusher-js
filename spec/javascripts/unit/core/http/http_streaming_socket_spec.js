@@ -1,5 +1,5 @@
 var Mocks = require('mocks');
-var HTTPFactory = require('core/http/http').default;
+var HTTPFactory = require('runtime').default.HTTPFactory;
 
 describe("HTTP.getStreamingSocket", function() {
   var hooks;

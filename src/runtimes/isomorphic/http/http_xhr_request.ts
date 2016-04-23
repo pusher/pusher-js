@@ -1,6 +1,6 @@
-import HTTPRequest from './http_request';
-import RequestHooks from "./request_hooks";
-import Ajax from "./ajax";
+import HTTPRequest from 'core/http/http_request';
+import RequestHooks from "core/http/request_hooks";
+import Ajax from "core/http/ajax";
 import Runtime from "runtime";
 
 var hooks : RequestHooks = {

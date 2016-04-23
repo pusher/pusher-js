@@ -15,6 +15,8 @@ import Ajax from "core/http/ajax";
 import {Network} from './net_info';
 import getDefaultStrategy from './default_strategy';
 import transportConnectionInitializer from './transports/transport_connection_initializer';
+import HTTPFactory from './http/http';
+import HTTPRequest from 'core/http/http_request';
 
 var Runtime : Browser = {
 
@@ -26,15 +28,16 @@ var Runtime : Browser = {
   getDefaultStrategy,
   Transports,
   transportConnectionInitializer,
+  HTTPFactory,
 
   TimelineTransport: jsonpTimeline,
 
-  getWebSocketAPI() {
-    return window.WebSocket || window.MozWebSocket;
-  },
-
   getXHRAPI() {
     return window.XMLHttpRequest
+  },
+
+  getWebSocketAPI() {
+    return window.WebSocket || window.MozWebSocket;
   },
 
   whenReady(callback : Function) : void {
@@ -54,17 +57,6 @@ var Runtime : Browser = {
 
   getProtocol() : string {
     return this.getDocument().location.protocol;
-  },
-
-  isXHRSupported() : boolean {
-    var Constructor = this.getXHRAPI();
-    return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
-  },
-
-  isXDRSupported(encrypted?: boolean) : boolean {
-    var protocol = encrypted ? "https:" : "http:";
-    var documentProtocol = this.getProtocol();
-    return Boolean(<any>(window['XDomainRequest'])) && documentProtocol === protocol;
   },
 
   getGlobal() : any {
@@ -134,6 +126,27 @@ var Runtime : Browser = {
   createWebSocket(url : string) : any {
     var Constructor = this.getWebSocketAPI();
     return new Constructor(url);
+  },
+
+  createSocketRequest(method : string, url : string) : HTTPRequest {
+    if (this.isXHRSupported()) {
+      return this.HTTPFactory.createXHR(method, url);
+    } else if (this.isXDRSupported(url.indexOf("https:") === 0)) {
+      return this.HTTPFactory.createXDR(method, url);
+    } else {
+      throw "Cross-origin HTTP requests are not supported";
+    }
+  },
+
+  isXHRSupported() : boolean {
+    var Constructor = this.getXHRAPI();
+    return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
+  },
+
+  isXDRSupported(encrypted?: boolean) : boolean {
+    var protocol = encrypted ? "https:" : "http:";
+    var documentProtocol = this.getProtocol();
+    return Boolean(<any>(window['XDomainRequest'])) && documentProtocol === protocol;
   },
 
   addUnloadListener(listener : any) {
