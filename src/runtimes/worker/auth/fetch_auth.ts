@@ -17,10 +17,9 @@ var fetchAuth : AuthTransport = function(context, socketId, callback){
     method: "POST",
   });
 
-  fetch(request).then((response)=>{
+  return fetch(request).then((response)=>{
     let {status} = response;
     if (status === 200) {
-      var data, parsed = false;
       return response.text();
     } else {
       Logger.warn("Couldn't get auth info from your webapp", status);

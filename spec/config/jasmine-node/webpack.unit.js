@@ -12,4 +12,7 @@ baseConfig.output = {
 baseConfig.externals.testenv = "'node'";
 baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
 
+baseConfig.externals["fetch-mock"] = "commonjs fetch-mock";
+baseConfig.externals["isomorphic-fetch"] = "commonjs isomorphic-fetch"
+
 module.exports = baseConfig;

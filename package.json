@@ -27,6 +27,8 @@
   },
   "homepage": "https://github.com/pusher-community/pusher-websocket-js-iso",
   "devDependencies": {
+    "fetch-mock": "^4.4.0",
+    "isomorphic-fetch": "^2.2.1",
     "jasmine-node": "^1.14.5",
     "jasmine-spec-reporter": "^1.2.0",
     "jshint": "~2.6.3",
