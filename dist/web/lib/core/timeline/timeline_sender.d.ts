@@ -1,8 +1,13 @@
 import Timeline from "./timeline";
+export interface TimelineSenderOptions {
+    host?: string;
+    port?: number;
+    path?: string;
+}
 export default class TimelineSender {
     timeline: Timeline;
-    options: any;
+    options: TimelineSenderOptions;
     host: string;
-    constructor(timeline: Timeline, options: any);
+    constructor(timeline: Timeline, options: TimelineSenderOptions);
     send(encrypted: boolean, callback?: Function): void;
 }

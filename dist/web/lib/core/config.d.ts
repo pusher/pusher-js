@@ -1,17 +1,17 @@
 export declare var getGlobalConfig: () => {
-    wsHost: any;
-    wsPort: any;
-    wssPort: any;
-    httpHost: any;
-    httpPort: any;
-    httpsPort: any;
-    httpPath: any;
-    statsHost: any;
-    authEndpoint: any;
-    authTransport: any;
-    activity_timeout: any;
-    pong_timeout: any;
-    unavailable_timeout: any;
+    wsHost: string;
+    wsPort: number;
+    wssPort: number;
+    httpHost: string;
+    httpPort: number;
+    httpsPort: number;
+    httpPath: string;
+    statsHost: string;
+    authEndpoint: string;
+    authTransport: string;
+    activity_timeout: number;
+    pong_timeout: number;
+    unavailable_timeout: number;
 };
 export declare var getClusterConfig: (clusterName: any) => {
     wsHost: string;

@@ -1,7 +1,9 @@
 import Strategy from './strategy';
 export default class DelayedStrategy implements Strategy {
     strategy: Strategy;
-    options: any;
+    options: {
+        delay: number;
+    };
     constructor(strategy: Strategy, {delay: number}: {
         delay: any;
     });

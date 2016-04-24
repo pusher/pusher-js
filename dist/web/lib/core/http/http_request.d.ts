@@ -1,7 +1,6 @@
 import RequestHooks from "./request_hooks";
 import Ajax from "./ajax";
 import { default as EventsDispatcher } from "../events/dispatcher";
-import Status from "./status";
 export default class HTTPRequest extends EventsDispatcher {
     hooks: RequestHooks;
     method: string;
@@ -12,7 +11,7 @@ export default class HTTPRequest extends EventsDispatcher {
     constructor(hooks: RequestHooks, method: string, url: string);
     start(payload?: any): void;
     close(): void;
-    onChunk(status: Status, data: any): void;
-    advanceBuffer(buffer: any[]): any;
-    isBufferTooLong(buffer: any): boolean;
+    onChunk(status: number, data: any): void;
+    private advanceBuffer(buffer);
+    private isBufferTooLong(buffer);
 }

@@ -12,8 +12,5 @@ export default class SequentialStrategy implements Strategy {
         abort: () => void;
         forceMinPriority: (p: any) => void;
     };
-    tryStrategy(strategy: Strategy, minPriority: number, options: StrategyOptions, callback: Function): {
-        abort: () => void;
-        forceMinPriority: (p: any) => void;
-    };
+    private tryStrategy(strategy, minPriority, options, callback);
 }

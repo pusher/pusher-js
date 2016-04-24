@@ -1,5 +1,5 @@
 import { default as EventsDispatcher } from '../events/dispatcher';
-import TransportConnection from "transports/transport_connection";
+import TransportConnection from "../transports/transport_connection";
 import Socket from "../socket";
 export default class Connection extends EventsDispatcher implements Socket {
     id: string;
@@ -11,6 +11,6 @@ export default class Connection extends EventsDispatcher implements Socket {
     send_event(name: string, data: any, channel?: string): boolean;
     ping(): void;
     close(): void;
-    bindListeners(): void;
-    handleCloseEvent(closeEvent: any): void;
+    private bindListeners();
+    private handleCloseEvent(closeEvent);
 }

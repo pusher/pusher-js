@@ -5,7 +5,7 @@ export default class TransportStrategy implements Strategy {
     name: string;
     priority: number;
     transport: Transport;
-    options: any;
+    options: StrategyOptions;
     constructor(name: string, priority: number, transport: Transport, options: StrategyOptions);
     isSupported(): boolean;
     connect(minPriority: number, callback: Function): {

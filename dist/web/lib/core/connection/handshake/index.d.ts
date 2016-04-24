@@ -1,4 +1,4 @@
-import TransportConnection from "transports/transport_connection";
+import TransportConnection from "../../transports/transport_connection";
 export default class Handshake {
     transport: TransportConnection;
     callback: (HandshakePayload) => void;
@@ -6,7 +6,7 @@ export default class Handshake {
     onClosed: Function;
     constructor(transport: TransportConnection, callback: (HandshakePayload) => void);
     close(): void;
-    bindListeners(): void;
-    unbindListeners(): void;
-    finish(action: any, params: any): void;
+    private bindListeners();
+    private unbindListeners();
+    private finish(action, params);
 }

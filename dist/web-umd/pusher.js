@@ -56,22 +56,21 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var runtime_1 = __webpack_require__(1);
-	var Collections = __webpack_require__(10);
-	var dispatcher_1 = __webpack_require__(25);
-	var timeline_1 = __webpack_require__(40);
-	var level_1 = __webpack_require__(41);
-	var StrategyBuilder = __webpack_require__(42);
-	var timers_1 = __webpack_require__(16);
-	var defaults_1 = __webpack_require__(5);
-	var DefaultConfig = __webpack_require__(66);
-	var logger_1 = __webpack_require__(9);
-	var state_1 = __webpack_require__(27);
-	var factory_1 = __webpack_require__(44);
+	var Collections = __webpack_require__(8);
+	var dispatcher_1 = __webpack_require__(22);
+	var timeline_1 = __webpack_require__(36);
+	var level_1 = __webpack_require__(37);
+	var StrategyBuilder = __webpack_require__(38);
+	var timers_1 = __webpack_require__(11);
+	var defaults_1 = __webpack_require__(4);
+	var DefaultConfig = __webpack_require__(60);
+	var logger_1 = __webpack_require__(7);
+	var factory_1 = __webpack_require__(40);
 	var Pusher = (function () {
 	    function Pusher(app_key, options) {
+	        var _this = this;
 	        checkAppKey(app_key);
 	        options = options || {};
-	        var self = this;
 	        this.key = app_key;
 	        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
 	        this.channels = factory_1["default"].createChannels();
@@ -92,8 +91,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	        var getStrategy = function (options) {
-	            var config = Collections.extend({}, self.config, options);
-	            return StrategyBuilder.build(defaults_1["default"].getDefaultStrategy(config), config);
+	            var config = Collections.extend({}, _this.config, options);
+	            return StrategyBuilder.build(runtime_1["default"].getDefaultStrategy(config), config);
 	        };
 	        this.connection = factory_1["default"].createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,
 	            timeline: this.timeline,
@@ -102,25 +101,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	            unavailableTimeout: this.config.unavailable_timeout
 	        }, this.config, { encrypted: this.isEncrypted() }));
 	        this.connection.bind('connected', function () {
-	            self.subscribeAll();
-	            if (self.timelineSender) {
-	                self.timelineSender.send(self.connection.isEncrypted());
+	            _this.subscribeAll();
+	            if (_this.timelineSender) {
+	                _this.timelineSender.send(_this.connection.isEncrypted());
 	            }
 	        });
 	        this.connection.bind('message', function (params) {
 	            var internal = (params.event.indexOf('pusher_internal:') === 0);
 	            if (params.channel) {
-	                var channel = self.channel(params.channel);
+	                var channel = _this.channel(params.channel);
 	                if (channel) {
 	                    channel.handleEvent(params.event, params.data);
 	                }
 	            }
 	            if (!internal) {
-	                self.global_emitter.emit(params.event, params.data);
+	                _this.global_emitter.emit(params.event, params.data);
 	            }
 	        });
 	        this.connection.bind('disconnected', function () {
-	            self.channels.disconnect();
+	            _this.channels.disconnect();
 	        });
 	        this.connection.bind('error', function (err) {
 	            logger_1["default"].warn('Error', err);
@@ -128,7 +127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        Pusher.instances.push(this);
 	        this.timeline.info({ instances: Pusher.instances.length });
 	        if (Pusher.isReady) {
-	            self.connect();
+	            this.connect();
 	        }
 	    }
 	    Pusher.ready = function () {
@@ -190,14 +189,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    Pusher.prototype.subscribe = function (channel_name) {
 	        var channel = this.channels.add(channel_name, this);
-	        if (this.connection.state === state_1["default"].CONNECTED) {
+	        if (this.connection.state === "connected") {
 	            channel.subscribe();
 	        }
 	        return channel;
 	    };
 	    Pusher.prototype.unsubscribe = function (channel_name) {
 	        var channel = this.channels.remove(channel_name);
-	        if (channel && this.connection.state === state_1["default"].CONNECTED) {
+	        if (channel && this.connection.state === "connected") {
 	            channel.unsubscribe();
 	        }
 	    };
@@ -233,24 +232,35 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var xhr_1 = __webpack_require__(2);
-	var dependencies_1 = __webpack_require__(3);
-	var xhr_auth_1 = __webpack_require__(8);
-	var jsonp_auth_1 = __webpack_require__(12);
-	var script_request_1 = __webpack_require__(13);
-	var jsonp_request_1 = __webpack_require__(14);
-	var Collections = __webpack_require__(10);
-	var script_receiver_factory_1 = __webpack_require__(4);
-	var jsonp_timeline_1 = __webpack_require__(18);
-	var transports_1 = __webpack_require__(19);
-	var ws_1 = __webpack_require__(28);
-	var net_info_1 = __webpack_require__(39);
+	var dependencies_1 = __webpack_require__(2);
+	var xhr_auth_1 = __webpack_require__(6);
+	var jsonp_auth_1 = __webpack_require__(13);
+	var script_request_1 = __webpack_require__(14);
+	var jsonp_request_1 = __webpack_require__(15);
+	var Collections = __webpack_require__(8);
+	var script_receiver_factory_1 = __webpack_require__(3);
+	var jsonp_timeline_1 = __webpack_require__(16);
+	var transports_1 = __webpack_require__(17);
+	var net_info_1 = __webpack_require__(24);
+	var default_strategy_1 = __webpack_require__(25);
+	var transport_connection_initializer_1 = __webpack_require__(26);
+	var http_1 = __webpack_require__(27);
 	var Runtime = {
 	    nextAuthCallbackID: 1,
 	    auth_callbacks: {},
 	    ScriptReceivers: script_receiver_factory_1.ScriptReceivers,
 	    DependenciesReceivers: dependencies_1.DependenciesReceivers,
+	    getDefaultStrategy: default_strategy_1["default"],
+	    Transports: transports_1["default"],
+	    transportConnectionInitializer: transport_connection_initializer_1["default"],
+	    HTTPFactory: http_1["default"],
 	    TimelineTransport: jsonp_timeline_1["default"],
+	    getXHRAPI: function () {
+	        return window.XMLHttpRequest;
+	    },
+	    getWebSocketAPI: function () {
+	        return window.WebSocket || window.MozWebSocket;
+	    },
 	    whenReady: function (callback) {
 	        var _this = this;
 	        var initializeOnDocumentBody = function () {
@@ -268,15 +278,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    getProtocol: function () {
 	        return this.getDocument().location.protocol;
-	    },
-	    isXHRSupported: function () {
-	        var Constructor = xhr_1["default"].getAPI();
-	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
-	    },
-	    isXDRSupported: function (encrypted) {
-	        var protocol = encrypted ? "https:" : "http:";
-	        var documentProtocol = this.getProtocol();
-	        return Boolean((window['XDomainRequest'])) && documentProtocol === protocol;
 	    },
 	    getGlobal: function () {
 	        return window;
@@ -313,7 +314,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    createXHR: function () {
-	        if (xhr_1["default"].getAPI()) {
+	        if (this.getXHRAPI()) {
 	            return this.createXMLHttpRequest();
 	        }
 	        else {
@@ -321,7 +322,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    createXMLHttpRequest: function () {
-	        var Constructor = xhr_1["default"].getAPI();
+	        var Constructor = this.getXHRAPI();
 	        return new Constructor();
 	    },
 	    createMicrosoftXHR: function () {
@@ -331,8 +332,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return net_info_1.Network;
 	    },
 	    createWebSocket: function (url) {
-	        var Constructor = ws_1["default"].getAPI();
+	        var Constructor = this.getWebSocketAPI();
 	        return new Constructor(url);
+	    },
+	    createSocketRequest: function (method, url) {
+	        if (this.isXHRSupported()) {
+	            return this.HTTPFactory.createXHR(method, url);
+	        }
+	        else if (this.isXDRSupported(url.indexOf("https:") === 0)) {
+	            return this.HTTPFactory.createXDR(method, url);
+	        }
+	        else {
+	            throw "Cross-origin HTTP requests are not supported";
+	        }
+	    },
+	    isXHRSupported: function () {
+	        var Constructor = this.getXHRAPI();
+	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
+	    },
+	    isXDRSupported: function (encrypted) {
+	        var protocol = encrypted ? "https:" : "http:";
+	        var documentProtocol = this.getProtocol();
+	        return Boolean((window['XDomainRequest'])) && documentProtocol === protocol;
+	    },
+	    addUnloadListener: function (listener) {
+	        if (window.addEventListener !== undefined) {
+	            window.addEventListener("unload", listener, false);
+	        }
+	        else if (window.attachEvent !== undefined) {
+	            window.attachEvent("onunload", listener);
+	        }
+	    },
+	    removeUnloadListener: function (listener) {
+	        if (window.addEventListener !== undefined) {
+	            window.removeEventListener("unload", listener, false);
+	        }
+	        else if (window.detachEvent !== undefined) {
+	            window.detachEvent("onunload", listener);
+	        }
 	    }
 	};
 	exports.__esModule = true;
@@ -341,26 +378,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var XHR = {
-	    getAPI: function () {
-	        return window.XMLHttpRequest;
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = XHR;
-
-
-/***/ },
-/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var script_receiver_factory_1 = __webpack_require__(4);
-	var defaults_1 = __webpack_require__(5);
-	var dependency_loader_1 = __webpack_require__(7);
+	var script_receiver_factory_1 = __webpack_require__(3);
+	var defaults_1 = __webpack_require__(4);
+	var dependency_loader_1 = __webpack_require__(5);
 	exports.DependenciesReceivers = new script_receiver_factory_1.ScriptReceiverFactory("_pusher_dependencies", "Pusher.Runtime.DependenciesReceivers");
 	exports.Dependencies = new dependency_loader_1["default"]({
 	    cdn_http: defaults_1["default"].cdn_http,
@@ -372,7 +395,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 4 */
+/* 3 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -407,12 +430,1146 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var Defaults = {
+	    VERSION: '3.0',
+	    PROTOCOL: 7,
+	    host: 'ws.pusherapp.com',
+	    ws_port: 80,
+	    wss_port: 443,
+	    sockjs_host: 'sockjs.pusher.com',
+	    sockjs_http_port: 80,
+	    sockjs_https_port: 443,
+	    sockjs_path: "/pusher",
+	    stats_host: 'stats.pusher.com',
+	    channel_auth_endpoint: '/pusher/auth',
+	    channel_auth_transport: 'ajax',
+	    activity_timeout: 120000,
+	    pong_timeout: 30000,
+	    unavailable_timeout: 10000,
+	    cdn_http: 'http://js.pusher.com',
+	    cdn_https: 'https://js.pusher.com',
+	    dependency_suffix: ''
+	};
+	exports.__esModule = true;
+	exports["default"] = Defaults;
+
+
+/***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var defaults_1 = __webpack_require__(6);
-	defaults_1["default"].getDefaultStrategy = function (config) {
+	var script_receiver_factory_1 = __webpack_require__(3);
+	var runtime_1 = __webpack_require__(1);
+	var DependencyLoader = (function () {
+	    function DependencyLoader(options) {
+	        this.options = options;
+	        this.receivers = options.receivers || script_receiver_factory_1.ScriptReceivers;
+	        this.loading = {};
+	    }
+	    DependencyLoader.prototype.load = function (name, options, callback) {
+	        var self = this;
+	        if (self.loading[name] && self.loading[name].length > 0) {
+	            self.loading[name].push(callback);
+	        }
+	        else {
+	            self.loading[name] = [callback];
+	            var request = runtime_1["default"].createScriptRequest(self.getPath(name, options));
+	            var receiver = self.receivers.create(function (error) {
+	                self.receivers.remove(receiver);
+	                if (self.loading[name]) {
+	                    var callbacks = self.loading[name];
+	                    delete self.loading[name];
+	                    var successCallback = function (wasSuccessful) {
+	                        if (!wasSuccessful) {
+	                            request.cleanup();
+	                        }
+	                    };
+	                    for (var i = 0; i < callbacks.length; i++) {
+	                        callbacks[i](error, successCallback);
+	                    }
+	                }
+	            });
+	            request.send(receiver);
+	        }
+	    };
+	    DependencyLoader.prototype.getRoot = function (options) {
+	        var cdn;
+	        var protocol = runtime_1["default"].getDocument().location.protocol;
+	        if ((options && options.encrypted) || protocol === "https:") {
+	            cdn = this.options.cdn_https;
+	        }
+	        else {
+	            cdn = this.options.cdn_http;
+	        }
+	        return cdn.replace(/\/*$/, "") + "/" + this.options.version;
+	    };
+	    DependencyLoader.prototype.getPath = function (name, options) {
+	        return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
+	    };
+	    ;
+	    return DependencyLoader;
+	}());
+	exports.__esModule = true;
+	exports["default"] = DependencyLoader;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var logger_1 = __webpack_require__(7);
+	var runtime_1 = __webpack_require__(1);
+	var ajax = function (context, socketId, callback) {
+	    var self = this, xhr;
+	    xhr = runtime_1["default"].createXHR();
+	    xhr.open("POST", self.options.authEndpoint, true);
+	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	    for (var headerName in this.authOptions.headers) {
+	        xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
+	    }
+	    xhr.onreadystatechange = function () {
+	        if (xhr.readyState === 4) {
+	            if (xhr.status === 200) {
+	                var data, parsed = false;
+	                try {
+	                    data = JSON.parse(xhr.responseText);
+	                    parsed = true;
+	                }
+	                catch (e) {
+	                    callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
+	                }
+	                if (parsed) {
+	                    callback(false, data);
+	                }
+	            }
+	            else {
+	                logger_1["default"].warn("Couldn't get auth info from your webapp", xhr.status);
+	                callback(true, xhr.status);
+	            }
+	        }
+	    };
+	    xhr.send(this.composeQuery(socketId));
+	    return xhr;
+	};
+	exports.__esModule = true;
+	exports["default"] = ajax;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var collections_1 = __webpack_require__(8);
+	var Logger = {
+	    log: null,
+	    debug: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        if (!this.log) {
+	            return;
+	        }
+	        this.log(collections_1.stringify.apply(this, arguments));
+	    },
+	    warn: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        var message = collections_1.stringify.apply(this, arguments);
+	        if (console.warn) {
+	            console.warn(message);
+	        }
+	        else if (console.log) {
+	            console.log(message);
+	        }
+	        if (this.log) {
+	            this.log(message);
+	        }
+	    }
+	};
+	exports.__esModule = true;
+	exports["default"] = Logger;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var base64_1 = __webpack_require__(9);
+	var util_1 = __webpack_require__(10);
+	function extend(target) {
+	    var sources = [];
+	    for (var _i = 1; _i < arguments.length; _i++) {
+	        sources[_i - 1] = arguments[_i];
+	    }
+	    var self = this;
+	    for (var i = 0; i < sources.length; i++) {
+	        var extensions = sources[i];
+	        for (var property in extensions) {
+	            if (extensions[property] && extensions[property].constructor &&
+	                extensions[property].constructor === Object) {
+	                target[property] = self.extend(target[property] || {}, extensions[property]);
+	            }
+	            else {
+	                target[property] = extensions[property];
+	            }
+	        }
+	    }
+	    return target;
+	}
+	exports.extend = extend;
+	function stringify() {
+	    var m = ["Pusher"];
+	    for (var i = 0; i < arguments.length; i++) {
+	        if (typeof arguments[i] === "string") {
+	            m.push(arguments[i]);
+	        }
+	        else {
+	            m.push(JSON.stringify(arguments[i]));
+	        }
+	    }
+	    return m.join(" : ");
+	}
+	exports.stringify = stringify;
+	function arrayIndexOf(array, item) {
+	    var nativeIndexOf = Array.prototype.indexOf;
+	    if (array === null) {
+	        return -1;
+	    }
+	    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
+	        return array.indexOf(item);
+	    }
+	    for (var i = 0, l = array.length; i < l; i++) {
+	        if (array[i] === item) {
+	            return i;
+	        }
+	    }
+	    return -1;
+	}
+	exports.arrayIndexOf = arrayIndexOf;
+	function objectApply(object, f) {
+	    for (var key in object) {
+	        if (Object.prototype.hasOwnProperty.call(object, key)) {
+	            f(object[key], key, object);
+	        }
+	    }
+	}
+	exports.objectApply = objectApply;
+	function keys(object) {
+	    var keys = [];
+	    objectApply(object, function (_, key) {
+	        keys.push(key);
+	    });
+	    return keys;
+	}
+	exports.keys = keys;
+	function values(object) {
+	    var values = [];
+	    objectApply(object, function (value) {
+	        values.push(value);
+	    });
+	    return values;
+	}
+	exports.values = values;
+	function apply(array, f, context) {
+	    for (var i = 0; i < array.length; i++) {
+	        f.call(context || util_1["default"].getGlobal(), array[i], i, array);
+	    }
+	}
+	exports.apply = apply;
+	function map(array, f) {
+	    var result = [];
+	    for (var i = 0; i < array.length; i++) {
+	        result.push(f(array[i], i, array, result));
+	    }
+	    return result;
+	}
+	exports.map = map;
+	function mapObject(object, f) {
+	    var result = {};
+	    objectApply(object, function (value, key) {
+	        result[key] = f(value);
+	    });
+	    return result;
+	}
+	exports.mapObject = mapObject;
+	function filter(array, test) {
+	    test = test || function (value) { return !!value; };
+	    var result = [];
+	    for (var i = 0; i < array.length; i++) {
+	        if (test(array[i], i, array, result)) {
+	            result.push(array[i]);
+	        }
+	    }
+	    return result;
+	}
+	exports.filter = filter;
+	function filterObject(object, test) {
+	    var result = {};
+	    objectApply(object, function (value, key) {
+	        if ((test && test(value, key, object, result)) || Boolean(value)) {
+	            result[key] = value;
+	        }
+	    });
+	    return result;
+	}
+	exports.filterObject = filterObject;
+	function flatten(object) {
+	    var result = [];
+	    objectApply(object, function (value, key) {
+	        result.push([key, value]);
+	    });
+	    return result;
+	}
+	exports.flatten = flatten;
+	function any(array, test) {
+	    for (var i = 0; i < array.length; i++) {
+	        if (test(array[i], i, array)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	exports.any = any;
+	function all(array, test) {
+	    for (var i = 0; i < array.length; i++) {
+	        if (!test(array[i], i, array)) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+	exports.all = all;
+	function encodeParamsObject(data) {
+	    return mapObject(data, function (value) {
+	        if (typeof value === "object") {
+	            value = JSON.stringify(value);
+	        }
+	        return encodeURIComponent(base64_1["default"](value.toString()));
+	    });
+	}
+	exports.encodeParamsObject = encodeParamsObject;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var util_1 = __webpack_require__(10);
+	var global = util_1["default"].getGlobal();
+	function encode(s) {
+	    return btoa(utob(s));
+	}
+	exports.__esModule = true;
+	exports["default"] = encode;
+	var fromCharCode = String.fromCharCode;
+	var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+	var b64tab = {};
+	for (var i = 0, l = b64chars.length; i < l; i++) {
+	    b64tab[b64chars.charAt(i)] = i;
+	}
+	var cb_utob = function (c) {
+	    var cc = c.charCodeAt(0);
+	    return cc < 0x80 ? c
+	        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +
+	            fromCharCode(0x80 | (cc & 0x3f))
+	            : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +
+	                fromCharCode(0x80 | ((cc >>> 6) & 0x3f)) +
+	                fromCharCode(0x80 | (cc & 0x3f));
+	};
+	var utob = function (u) {
+	    return u.replace(/[^\x00-\x7F]/g, cb_utob);
+	};
+	var cb_encode = function (ccc) {
+	    var padlen = [0, 2, 1][ccc.length % 3];
+	    var ord = ccc.charCodeAt(0) << 16
+	        | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+	        | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0));
+	    var chars = [
+	        b64chars.charAt(ord >>> 18),
+	        b64chars.charAt((ord >>> 12) & 63),
+	        padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+	        padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+	    ];
+	    return chars.join('');
+	};
+	var btoa;
+	if (global && global.btoa) {
+	    btoa = global.btoa;
+	}
+	else {
+	    btoa = function (b) {
+	        return b.replace(/[\s\S]{1,3}/g, cb_encode);
+	    };
+	}
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var timers_1 = __webpack_require__(11);
+	var Util = {
+	    getGlobal: function () {
+	        return Function("return this")();
+	    },
+	    now: function () {
+	        if (Date.now) {
+	            return Date.now();
+	        }
+	        else {
+	            return new Date().valueOf();
+	        }
+	    },
+	    defer: function (callback) {
+	        return new timers_1.OneOffTimer(0, callback);
+	    },
+	    method: function (name) {
+	        var args = [];
+	        for (var _i = 1; _i < arguments.length; _i++) {
+	            args[_i - 1] = arguments[_i];
+	        }
+	        var boundArguments = Array.prototype.slice.call(arguments, 1);
+	        return function (object) {
+	            return object[name].apply(object, boundArguments.concat(arguments));
+	        };
+	    }
+	};
+	exports.__esModule = true;
+	exports["default"] = Util;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var abstract_timer_1 = __webpack_require__(12);
+	var global = Function("return this")();
+	function clearTimeout(timer) {
+	    global.clearTimeout(timer);
+	}
+	function clearInterval(timer) {
+	    global.clearInterval(timer);
+	}
+	var OneOffTimer = (function (_super) {
+	    __extends(OneOffTimer, _super);
+	    function OneOffTimer(delay, callback) {
+	        _super.call(this, setTimeout, clearTimeout, delay, function (timer) {
+	            callback();
+	            return null;
+	        });
+	    }
+	    return OneOffTimer;
+	}(abstract_timer_1["default"]));
+	exports.OneOffTimer = OneOffTimer;
+	var PeriodicTimer = (function (_super) {
+	    __extends(PeriodicTimer, _super);
+	    function PeriodicTimer(delay, callback) {
+	        _super.call(this, setInterval, clearInterval, delay, function (timer) {
+	            callback();
+	            return timer;
+	        });
+	    }
+	    return PeriodicTimer;
+	}(abstract_timer_1["default"]));
+	exports.PeriodicTimer = PeriodicTimer;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var Timer = (function () {
+	    function Timer(set, clear, delay, callback) {
+	        var _this = this;
+	        this.clear = clear;
+	        this.timer = set(function () {
+	            if (_this.timer) {
+	                _this.timer = callback(_this.timer);
+	            }
+	        }, delay);
+	    }
+	    Timer.prototype.isRunning = function () {
+	        return this.timer !== null;
+	    };
+	    Timer.prototype.ensureAborted = function () {
+	        if (this.timer) {
+	            this.clear(this.timer);
+	            this.timer = null;
+	        }
+	    };
+	    return Timer;
+	}());
+	exports.__esModule = true;
+	exports["default"] = Timer;
+
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var logger_1 = __webpack_require__(7);
+	var jsonp = function (context, socketId, callback) {
+	    if (this.authOptions.headers !== undefined) {
+	        logger_1["default"].warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
+	    }
+	    var callbackName = context.nextAuthCallbackID.toString();
+	    context.nextAuthCallbackID++;
+	    var document = context.getDocument();
+	    var script = document.createElement("script");
+	    context.auth_callbacks[callbackName] = function (data) {
+	        callback(false, data);
+	    };
+	    var callback_name = "Pusher.Runtime.auth_callbacks['" + callbackName + "']";
+	    script.src = this.options.authEndpoint +
+	        '?callback=' +
+	        encodeURIComponent(callback_name) +
+	        '&' +
+	        this.composeQuery(socketId);
+	    var head = document.getElementsByTagName("head")[0] || document.documentElement;
+	    head.insertBefore(script, head.firstChild);
+	};
+	exports.__esModule = true;
+	exports["default"] = jsonp;
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var ScriptRequest = (function () {
+	    function ScriptRequest(src) {
+	        this.src = src;
+	    }
+	    ScriptRequest.prototype.send = function (receiver) {
+	        var self = this;
+	        var errorString = "Error loading " + self.src;
+	        self.script = document.createElement("script");
+	        self.script.id = receiver.id;
+	        self.script.src = self.src;
+	        self.script.type = "text/javascript";
+	        self.script.charset = "UTF-8";
+	        if (self.script.addEventListener) {
+	            self.script.onerror = function () {
+	                receiver.callback(errorString);
+	            };
+	            self.script.onload = function () {
+	                receiver.callback(null);
+	            };
+	        }
+	        else {
+	            self.script.onreadystatechange = function () {
+	                if (self.script.readyState === 'loaded' ||
+	                    self.script.readyState === 'complete') {
+	                    receiver.callback(null);
+	                }
+	            };
+	        }
+	        if (self.script.async === undefined && document.attachEvent &&
+	            /opera/i.test(navigator.userAgent)) {
+	            self.errorScript = document.createElement("script");
+	            self.errorScript.id = receiver.id + "_error";
+	            self.errorScript.text = receiver.name + "('" + errorString + "');";
+	            self.script.async = self.errorScript.async = false;
+	        }
+	        else {
+	            self.script.async = true;
+	        }
+	        var head = document.getElementsByTagName('head')[0];
+	        head.insertBefore(self.script, head.firstChild);
+	        if (self.errorScript) {
+	            head.insertBefore(self.errorScript, self.script.nextSibling);
+	        }
+	    };
+	    ScriptRequest.prototype.cleanup = function () {
+	        if (this.script) {
+	            this.script.onload = this.script.onerror = null;
+	            this.script.onreadystatechange = null;
+	        }
+	        if (this.script && this.script.parentNode) {
+	            this.script.parentNode.removeChild(this.script);
+	        }
+	        if (this.errorScript && this.errorScript.parentNode) {
+	            this.errorScript.parentNode.removeChild(this.errorScript);
+	        }
+	        this.script = null;
+	        this.errorScript = null;
+	    };
+	    return ScriptRequest;
+	}());
+	exports.__esModule = true;
+	exports["default"] = ScriptRequest;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(8);
+	var util_1 = __webpack_require__(10);
+	var runtime_1 = __webpack_require__(1);
+	var JSONPRequest = (function () {
+	    function JSONPRequest(url, data) {
+	        this.url = url;
+	        this.data = data;
+	    }
+	    JSONPRequest.prototype.send = function (receiver) {
+	        if (this.request) {
+	            return;
+	        }
+	        var params = Collections.filterObject(this.data, function (value) {
+	            return value !== undefined;
+	        });
+	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	        var url = this.url + "/" + receiver.number + "?" + query;
+	        this.request = runtime_1["default"].createScriptRequest(url);
+	        this.request.send(receiver);
+	    };
+	    JSONPRequest.prototype.cleanup = function () {
+	        if (this.request) {
+	            this.request.cleanup();
+	        }
+	    };
+	    return JSONPRequest;
+	}());
+	exports.__esModule = true;
+	exports["default"] = JSONPRequest;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var runtime_1 = __webpack_require__(1);
+	var script_receiver_factory_1 = __webpack_require__(3);
+	var getAgent = function (sender, encrypted) {
+	    return function (data, callback) {
+	        var scheme = "http" + (encrypted ? "s" : "") + "://";
+	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
+	        var request = runtime_1["default"].createJSONPRequest(url, data);
+	        var receiver = runtime_1["default"].ScriptReceivers.create(function (error, result) {
+	            script_receiver_factory_1.ScriptReceivers.remove(receiver);
+	            request.cleanup();
+	            if (result && result.host) {
+	                sender.host = result.host;
+	            }
+	            if (callback) {
+	                callback(error, result);
+	            }
+	        });
+	        request.send(receiver);
+	    };
+	};
+	var jsonp = {
+	    name: 'jsonp',
+	    getAgent: getAgent
+	};
+	exports.__esModule = true;
+	exports["default"] = jsonp;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var transports_1 = __webpack_require__(18);
+	var transport_1 = __webpack_require__(20);
+	var URLSchemes = __webpack_require__(19);
+	var runtime_1 = __webpack_require__(1);
+	var dependencies_1 = __webpack_require__(2);
+	var Collections = __webpack_require__(8);
+	var SockJSTransport = new transport_1["default"]({
+	    file: "sockjs",
+	    urls: URLSchemes.sockjs,
+	    handlesActivityChecks: true,
+	    supportsPing: false,
+	    isSupported: function () {
+	        return true;
+	    },
+	    isInitialized: function () {
+	        return window.SockJS !== undefined;
+	    },
+	    getSocket: function (url, options) {
+	        return new window.SockJS(url, null, {
+	            js_path: dependencies_1.Dependencies.getPath("sockjs", {
+	                encrypted: options.encrypted
+	            }),
+	            ignore_null_origin: options.ignoreNullOrigin
+	        });
+	    },
+	    beforeOpen: function (socket, path) {
+	        socket.send(JSON.stringify({
+	            path: path
+	        }));
+	    }
+	});
+	var xdrConfiguration = {
+	    isSupported: function (environment) {
+	        var yes = runtime_1["default"].isXDRSupported(environment.encrypted);
+	        return yes;
+	    }
+	};
+	var XDRStreamingTransport = new transport_1["default"](Collections.extend({}, transports_1.streamingConfiguration, xdrConfiguration));
+	var XDRPollingTransport = new transport_1["default"](Collections.extend({}, transports_1.pollingConfiguration, xdrConfiguration));
+	transports_1["default"].xdr_streaming = XDRStreamingTransport;
+	transports_1["default"].xdr_polling = XDRPollingTransport;
+	transports_1["default"].sockjs = SockJSTransport;
+	exports.__esModule = true;
+	exports["default"] = transports_1["default"];
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var URLSchemes = __webpack_require__(19);
+	var transport_1 = __webpack_require__(20);
+	var Collections = __webpack_require__(8);
+	var runtime_1 = __webpack_require__(1);
+	var WSTransport = new transport_1["default"]({
+	    urls: URLSchemes.ws,
+	    handlesActivityChecks: false,
+	    supportsPing: false,
+	    isInitialized: function () {
+	        return Boolean(runtime_1["default"].getWebSocketAPI());
+	    },
+	    isSupported: function () {
+	        return Boolean(runtime_1["default"].getWebSocketAPI());
+	    },
+	    getSocket: function (url) {
+	        return runtime_1["default"].createWebSocket(url);
+	    }
+	});
+	var httpConfiguration = {
+	    urls: URLSchemes.http,
+	    handlesActivityChecks: false,
+	    supportsPing: true,
+	    isInitialized: function () {
+	        return true;
+	    }
+	};
+	exports.streamingConfiguration = Collections.extend({ getSocket: function (url) {
+	        return runtime_1["default"].HTTPFactory.createStreamingSocket(url);
+	    }
+	}, httpConfiguration);
+	exports.pollingConfiguration = Collections.extend({ getSocket: function (url) {
+	        return runtime_1["default"].HTTPFactory.createPollingSocket(url);
+	    }
+	}, httpConfiguration);
+	var xhrConfiguration = {
+	    isSupported: function () {
+	        return runtime_1["default"].isXHRSupported();
+	    }
+	};
+	var XHRStreamingTransport = new transport_1["default"](Collections.extend({}, exports.streamingConfiguration, xhrConfiguration));
+	var XHRPollingTransport = new transport_1["default"](Collections.extend({}, exports.pollingConfiguration, xhrConfiguration));
+	var Transports = {
+	    ws: WSTransport,
+	    xhr_streaming: XHRStreamingTransport,
+	    xhr_polling: XHRPollingTransport
+	};
+	exports.__esModule = true;
+	exports["default"] = Transports;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var defaults_1 = __webpack_require__(4);
+	function getGenericURL(baseScheme, params, path) {
+	    var scheme = baseScheme + (params.encrypted ? "s" : "");
+	    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
+	    return scheme + "://" + host + path;
+	}
+	function getGenericPath(key, queryString) {
+	    var path = "/app/" + key;
+	    var query = "?protocol=" + defaults_1["default"].PROTOCOL +
+	        "&client=js" +
+	        "&version=" + defaults_1["default"].VERSION +
+	        (queryString ? ("&" + queryString) : "");
+	    return path + query;
+	}
+	exports.ws = {
+	    getInitial: function (key, params) {
+	        return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
+	    }
+	};
+	exports.http = {
+	    getInitial: function (key, params) {
+	        var path = (params.httpPath || "/pusher") + getGenericPath(key);
+	        return getGenericURL("http", params, path);
+	    }
+	};
+	exports.sockjs = {
+	    getInitial: function (key, params) {
+	        return getGenericURL("http", params, params.httpPath || "/pusher");
+	    },
+	    getPath: function (key, params) {
+	        return getGenericPath(key);
+	    }
+	};
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var transport_connection_1 = __webpack_require__(21);
+	var Transport = (function () {
+	    function Transport(hooks) {
+	        this.hooks = hooks;
+	    }
+	    Transport.prototype.isSupported = function (environment) {
+	        return this.hooks.isSupported(environment);
+	    };
+	    Transport.prototype.createConnection = function (name, priority, key, options) {
+	        return new transport_connection_1["default"](this.hooks, name, priority, key, options);
+	    };
+	    return Transport;
+	}());
+	exports.__esModule = true;
+	exports["default"] = Transport;
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var util_1 = __webpack_require__(10);
+	var Collections = __webpack_require__(8);
+	var dispatcher_1 = __webpack_require__(22);
+	var logger_1 = __webpack_require__(7);
+	var runtime_1 = __webpack_require__(1);
+	var TransportConnection = (function (_super) {
+	    __extends(TransportConnection, _super);
+	    function TransportConnection(hooks, name, priority, key, options) {
+	        _super.call(this);
+	        this.initialize = runtime_1["default"].transportConnectionInitializer;
+	        this.hooks = hooks;
+	        this.name = name;
+	        this.priority = priority;
+	        this.key = key;
+	        this.options = options;
+	        this.state = "new";
+	        this.timeline = options.timeline;
+	        this.activityTimeout = options.activityTimeout;
+	        this.id = this.timeline.generateUniqueID();
+	    }
+	    TransportConnection.prototype.handlesActivityChecks = function () {
+	        return Boolean(this.hooks.handlesActivityChecks);
+	    };
+	    TransportConnection.prototype.supportsPing = function () {
+	        return Boolean(this.hooks.supportsPing);
+	    };
+	    TransportConnection.prototype.connect = function () {
+	        var _this = this;
+	        if (this.socket || this.state !== "initialized") {
+	            return false;
+	        }
+	        var url = this.hooks.urls.getInitial(this.key, this.options);
+	        try {
+	            this.socket = this.hooks.getSocket(url, this.options);
+	        }
+	        catch (e) {
+	            util_1["default"].defer(function () {
+	                _this.onError(e);
+	                _this.changeState("closed");
+	            });
+	            return false;
+	        }
+	        this.bindListeners();
+	        logger_1["default"].debug("Connecting", { transport: this.name, url: url });
+	        this.changeState("connecting");
+	        return true;
+	    };
+	    TransportConnection.prototype.close = function () {
+	        if (this.socket) {
+	            this.socket.close();
+	            return true;
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    TransportConnection.prototype.send = function (data) {
+	        var _this = this;
+	        if (this.state === "open") {
+	            util_1["default"].defer(function () {
+	                if (_this.socket) {
+	                    _this.socket.send(data);
+	                }
+	            });
+	            return true;
+	        }
+	        else {
+	            return false;
+	        }
+	    };
+	    TransportConnection.prototype.ping = function () {
+	        if (this.state === "open" && this.supportsPing()) {
+	            this.socket.ping();
+	        }
+	    };
+	    TransportConnection.prototype.onOpen = function () {
+	        if (this.hooks.beforeOpen) {
+	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
+	        }
+	        this.changeState("open");
+	        this.socket.onopen = undefined;
+	    };
+	    TransportConnection.prototype.onError = function (error) {
+	        this.emit("error", { type: 'WebSocketError', error: error });
+	        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
+	    };
+	    TransportConnection.prototype.onClose = function (closeEvent) {
+	        if (closeEvent) {
+	            this.changeState("closed", {
+	                code: closeEvent.code,
+	                reason: closeEvent.reason,
+	                wasClean: closeEvent.wasClean
+	            });
+	        }
+	        else {
+	            this.changeState("closed");
+	        }
+	        this.unbindListeners();
+	        this.socket = undefined;
+	    };
+	    TransportConnection.prototype.onMessage = function (message) {
+	        this.emit("message", message);
+	    };
+	    TransportConnection.prototype.onActivity = function () {
+	        this.emit("activity");
+	    };
+	    TransportConnection.prototype.bindListeners = function () {
+	        var _this = this;
+	        this.socket.onopen = function () {
+	            _this.onOpen();
+	        };
+	        this.socket.onerror = function (error) {
+	            _this.onError(error);
+	        };
+	        this.socket.onclose = function (closeEvent) {
+	            _this.onClose(closeEvent);
+	        };
+	        this.socket.onmessage = function (message) {
+	            _this.onMessage(message);
+	        };
+	        if (this.supportsPing()) {
+	            this.socket.onactivity = function () { _this.onActivity(); };
+	        }
+	    };
+	    TransportConnection.prototype.unbindListeners = function () {
+	        if (this.socket) {
+	            this.socket.onopen = undefined;
+	            this.socket.onerror = undefined;
+	            this.socket.onclose = undefined;
+	            this.socket.onmessage = undefined;
+	            if (this.supportsPing()) {
+	                this.socket.onactivity = undefined;
+	            }
+	        }
+	    };
+	    TransportConnection.prototype.changeState = function (state, params) {
+	        this.state = state;
+	        this.timeline.info(this.buildTimelineMessage({
+	            state: state,
+	            params: params
+	        }));
+	        this.emit(state, params);
+	    };
+	    TransportConnection.prototype.buildTimelineMessage = function (message) {
+	        return Collections.extend({ cid: this.id }, message);
+	    };
+	    return TransportConnection;
+	}(dispatcher_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = TransportConnection;
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var callback_registry_1 = __webpack_require__(23);
+	var global = Function("return this")();
+	var Dispatcher = (function () {
+	    function Dispatcher(failThrough) {
+	        this.callbacks = new callback_registry_1["default"]();
+	        this.global_callbacks = [];
+	        this.failThrough = failThrough;
+	    }
+	    Dispatcher.prototype.bind = function (eventName, callback, context) {
+	        this.callbacks.add(eventName, callback, context);
+	        return this;
+	    };
+	    Dispatcher.prototype.bind_all = function (callback) {
+	        this.global_callbacks.push(callback);
+	        return this;
+	    };
+	    Dispatcher.prototype.unbind = function (eventName, callback, context) {
+	        this.callbacks.remove(eventName, callback, context);
+	        return this;
+	    };
+	    Dispatcher.prototype.unbind_all = function (eventName, callback) {
+	        this.callbacks.remove(eventName, callback);
+	        return this;
+	    };
+	    Dispatcher.prototype.emit = function (eventName, data) {
+	        var i;
+	        for (i = 0; i < this.global_callbacks.length; i++) {
+	            this.global_callbacks[i](eventName, data);
+	        }
+	        var callbacks = this.callbacks.get(eventName);
+	        if (callbacks && callbacks.length > 0) {
+	            for (i = 0; i < callbacks.length; i++) {
+	                callbacks[i].fn.call(callbacks[i].context || global, data);
+	            }
+	        }
+	        else if (this.failThrough) {
+	            this.failThrough(eventName, data);
+	        }
+	        return this;
+	    };
+	    return Dispatcher;
+	}());
+	exports.__esModule = true;
+	exports["default"] = Dispatcher;
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(8);
+	var CallbackRegistry = (function () {
+	    function CallbackRegistry() {
+	        this._callbacks = {};
+	    }
+	    CallbackRegistry.prototype.get = function (name) {
+	        return this._callbacks[prefix(name)];
+	    };
+	    CallbackRegistry.prototype.add = function (name, callback, context) {
+	        var prefixedEventName = prefix(name);
+	        this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
+	        this._callbacks[prefixedEventName].push({
+	            fn: callback,
+	            context: context
+	        });
+	    };
+	    CallbackRegistry.prototype.remove = function (name, callback, context) {
+	        if (!name && !callback && !context) {
+	            this._callbacks = {};
+	            return;
+	        }
+	        var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
+	        if (callback || context) {
+	            Collections.apply(names, function (name) {
+	                this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {
+	                    return (callback && callback !== binding.fn) ||
+	                        (context && context !== binding.context);
+	                });
+	                if (this._callbacks[name].length === 0) {
+	                    delete this._callbacks[name];
+	                }
+	            }, this);
+	        }
+	        else {
+	            Collections.apply(names, function (name) {
+	                delete this._callbacks[name];
+	            }, this);
+	        }
+	    };
+	    return CallbackRegistry;
+	}());
+	exports.__esModule = true;
+	exports["default"] = CallbackRegistry;
+	function prefix(name) {
+	    return "_" + name;
+	}
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var dispatcher_1 = __webpack_require__(22);
+	var NetInfo = (function (_super) {
+	    __extends(NetInfo, _super);
+	    function NetInfo() {
+	        _super.call(this);
+	        var self = this;
+	        if (window.addEventListener !== undefined) {
+	            window.addEventListener("online", function () {
+	                self.emit('online');
+	            }, false);
+	            window.addEventListener("offline", function () {
+	                self.emit('offline');
+	            }, false);
+	        }
+	    }
+	    NetInfo.prototype.isOnline = function () {
+	        if (window.navigator.onLine === undefined) {
+	            return true;
+	        }
+	        else {
+	            return window.navigator.onLine;
+	        }
+	    };
+	    return NetInfo;
+	}(dispatcher_1["default"]));
+	exports.NetInfo = NetInfo;
+	exports.Network = new NetInfo();
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var getDefaultStrategy = function (config) {
 	    var wsStrategy;
 	    if (config.encrypted) {
 	        wsStrategy = [
@@ -506,1108 +1663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ];
 	};
 	exports.__esModule = true;
-	exports["default"] = defaults_1["default"];
-
-
-/***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var Defaults = {};
-	Defaults.VERSION = '3.0';
-	Defaults.PROTOCOL = 7;
-	Defaults.host = 'ws.pusherapp.com';
-	Defaults.ws_port = 80;
-	Defaults.wss_port = 443;
-	Defaults.sockjs_host = 'sockjs.pusher.com';
-	Defaults.sockjs_http_port = 80;
-	Defaults.sockjs_https_port = 443;
-	Defaults.sockjs_path = "/pusher";
-	Defaults.stats_host = 'stats.pusher.com';
-	Defaults.channel_auth_endpoint = '/pusher/auth';
-	Defaults.channel_auth_transport = 'ajax';
-	Defaults.activity_timeout = 120000;
-	Defaults.pong_timeout = 30000;
-	Defaults.unavailable_timeout = 10000;
-	Defaults.cdn_http = 'http://js.pusher.com';
-	Defaults.cdn_https = 'https://js.pusher.com';
-	Defaults.dependency_suffix = '';
-	exports.__esModule = true;
-	exports["default"] = Defaults;
-
-
-/***/ },
-/* 7 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var script_receiver_factory_1 = __webpack_require__(4);
-	var runtime_1 = __webpack_require__(1);
-	var DependencyLoader = (function () {
-	    function DependencyLoader(options) {
-	        this.options = options;
-	        this.receivers = options.receivers || script_receiver_factory_1.ScriptReceivers;
-	        this.loading = {};
-	    }
-	    DependencyLoader.prototype.load = function (name, options, callback) {
-	        var self = this;
-	        if (self.loading[name] && self.loading[name].length > 0) {
-	            self.loading[name].push(callback);
-	        }
-	        else {
-	            self.loading[name] = [callback];
-	            var request = runtime_1["default"].createScriptRequest(self.getPath(name, options));
-	            var receiver = self.receivers.create(function (error) {
-	                self.receivers.remove(receiver);
-	                if (self.loading[name]) {
-	                    var callbacks = self.loading[name];
-	                    delete self.loading[name];
-	                    var successCallback = function (wasSuccessful) {
-	                        if (!wasSuccessful) {
-	                            request.cleanup();
-	                        }
-	                    };
-	                    for (var i = 0; i < callbacks.length; i++) {
-	                        callbacks[i](error, successCallback);
-	                    }
-	                }
-	            });
-	            request.send(receiver);
-	        }
-	    };
-	    DependencyLoader.prototype.getRoot = function (options) {
-	        var cdn;
-	        var protocol = runtime_1["default"].getDocument().location.protocol;
-	        if ((options && options.encrypted) || protocol === "https:") {
-	            cdn = this.options.cdn_https;
-	        }
-	        else {
-	            cdn = this.options.cdn_http;
-	        }
-	        return cdn.replace(/\/*$/, "") + "/" + this.options.version;
-	    };
-	    DependencyLoader.prototype.getPath = function (name, options) {
-	        return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
-	    };
-	    ;
-	    return DependencyLoader;
-	}());
-	exports.__esModule = true;
-	exports["default"] = DependencyLoader;
-
-
-/***/ },
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var logger_1 = __webpack_require__(9);
-	var runtime_1 = __webpack_require__(1);
-	var ajax = function (context, socketId, callback) {
-	    var self = this, xhr;
-	    xhr = runtime_1["default"].createXHR();
-	    xhr.open("POST", self.options.authEndpoint, true);
-	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	    for (var headerName in this.authOptions.headers) {
-	        xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
-	    }
-	    xhr.onreadystatechange = function () {
-	        if (xhr.readyState === 4) {
-	            if (xhr.status === 200) {
-	                var data, parsed = false;
-	                try {
-	                    data = JSON.parse(xhr.responseText);
-	                    parsed = true;
-	                }
-	                catch (e) {
-	                    callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
-	                }
-	                if (parsed) {
-	                    callback(false, data);
-	                }
-	            }
-	            else {
-	                logger_1["default"].warn("Couldn't get auth info from your webapp", xhr.status);
-	                callback(true, xhr.status);
-	            }
-	        }
-	    };
-	    xhr.send(this.composeQuery(socketId));
-	    return xhr;
-	};
-	exports.__esModule = true;
-	exports["default"] = ajax;
-
-
-/***/ },
-/* 9 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var collections_1 = __webpack_require__(10);
-	var Logger = {
-	    log: null,
-	    debug: function () {
-	        var args = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            args[_i - 0] = arguments[_i];
-	        }
-	        if (!this.log) {
-	            return;
-	        }
-	        this.log(collections_1.stringify.apply(this, arguments));
-	    },
-	    warn: function () {
-	        var args = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            args[_i - 0] = arguments[_i];
-	        }
-	        var message = collections_1.stringify.apply(this, arguments);
-	        if (console.warn) {
-	            console.warn(message);
-	        }
-	        else if (console.log) {
-	            console.log(message);
-	        }
-	        if (this.log) {
-	            this.log(message);
-	        }
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = Logger;
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var base64_1 = __webpack_require__(11);
-	var runtime_1 = __webpack_require__(1);
-	function extend(target) {
-	    var sources = [];
-	    for (var _i = 1; _i < arguments.length; _i++) {
-	        sources[_i - 1] = arguments[_i];
-	    }
-	    var self = this;
-	    for (var i = 0; i < sources.length; i++) {
-	        var extensions = sources[i];
-	        for (var property in extensions) {
-	            if (extensions[property] && extensions[property].constructor &&
-	                extensions[property].constructor === Object) {
-	                target[property] = self.extend(target[property] || {}, extensions[property]);
-	            }
-	            else {
-	                target[property] = extensions[property];
-	            }
-	        }
-	    }
-	    return target;
-	}
-	exports.extend = extend;
-	function stringify() {
-	    var m = ["Pusher"];
-	    for (var i = 0; i < arguments.length; i++) {
-	        if (typeof arguments[i] === "string") {
-	            m.push(arguments[i]);
-	        }
-	        else {
-	            m.push(JSON.stringify(arguments[i]));
-	        }
-	    }
-	    return m.join(" : ");
-	}
-	exports.stringify = stringify;
-	function arrayIndexOf(array, item) {
-	    var nativeIndexOf = Array.prototype.indexOf;
-	    if (array === null) {
-	        return -1;
-	    }
-	    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
-	        return array.indexOf(item);
-	    }
-	    for (var i = 0, l = array.length; i < l; i++) {
-	        if (array[i] === item) {
-	            return i;
-	        }
-	    }
-	    return -1;
-	}
-	exports.arrayIndexOf = arrayIndexOf;
-	function objectApply(object, f) {
-	    for (var key in object) {
-	        if (Object.prototype.hasOwnProperty.call(object, key)) {
-	            f(object[key], key, object);
-	        }
-	    }
-	}
-	exports.objectApply = objectApply;
-	function keys(object) {
-	    var keys = [];
-	    objectApply(object, function (_, key) {
-	        keys.push(key);
-	    });
-	    return keys;
-	}
-	exports.keys = keys;
-	function values(object) {
-	    var values = [];
-	    objectApply(object, function (value) {
-	        values.push(value);
-	    });
-	    return values;
-	}
-	exports.values = values;
-	function apply(array, f, context) {
-	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || runtime_1["default"].getGlobal(), array[i], i, array);
-	    }
-	}
-	exports.apply = apply;
-	function map(array, f) {
-	    var result = [];
-	    for (var i = 0; i < array.length; i++) {
-	        result.push(f(array[i], i, array, result));
-	    }
-	    return result;
-	}
-	exports.map = map;
-	function mapObject(object, f) {
-	    var result = {};
-	    objectApply(object, function (value, key) {
-	        result[key] = f(value);
-	    });
-	    return result;
-	}
-	exports.mapObject = mapObject;
-	function filter(array, test) {
-	    test = test || function (value) { return !!value; };
-	    var result = [];
-	    for (var i = 0; i < array.length; i++) {
-	        if (test(array[i], i, array, result)) {
-	            result.push(array[i]);
-	        }
-	    }
-	    return result;
-	}
-	exports.filter = filter;
-	function filterObject(object, test) {
-	    var result = {};
-	    objectApply(object, function (value, key) {
-	        if ((test && test(value, key, object, result)) || Boolean(value)) {
-	            result[key] = value;
-	        }
-	    });
-	    return result;
-	}
-	exports.filterObject = filterObject;
-	function flatten(object) {
-	    var result = [];
-	    objectApply(object, function (value, key) {
-	        result.push([key, value]);
-	    });
-	    return result;
-	}
-	exports.flatten = flatten;
-	function any(array, test) {
-	    for (var i = 0; i < array.length; i++) {
-	        if (test(array[i], i, array)) {
-	            return true;
-	        }
-	    }
-	    return false;
-	}
-	exports.any = any;
-	function all(array, test) {
-	    for (var i = 0; i < array.length; i++) {
-	        if (!test(array[i], i, array)) {
-	            return false;
-	        }
-	    }
-	    return true;
-	}
-	exports.all = all;
-	function encodeParamsObject(data) {
-	    return mapObject(data, function (value) {
-	        if (typeof value === "object") {
-	            value = JSON.stringify(value);
-	        }
-	        return encodeURIComponent(base64_1["default"](value.toString()));
-	    });
-	}
-	exports.encodeParamsObject = encodeParamsObject;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var global = Function("return this")();
-	function encode(s) {
-	    return btoa(utob(s));
-	}
-	exports.__esModule = true;
-	exports["default"] = encode;
-	var fromCharCode = String.fromCharCode;
-	var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-	var b64tab = {};
-	for (var i = 0, l = b64chars.length; i < l; i++) {
-	    b64tab[b64chars.charAt(i)] = i;
-	}
-	var cb_utob = function (c) {
-	    var cc = c.charCodeAt(0);
-	    return cc < 0x80 ? c
-	        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +
-	            fromCharCode(0x80 | (cc & 0x3f))
-	            : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +
-	                fromCharCode(0x80 | ((cc >>> 6) & 0x3f)) +
-	                fromCharCode(0x80 | (cc & 0x3f));
-	};
-	var utob = function (u) {
-	    return u.replace(/[^\x00-\x7F]/g, cb_utob);
-	};
-	var cb_encode = function (ccc) {
-	    var padlen = [0, 2, 1][ccc.length % 3];
-	    var ord = ccc.charCodeAt(0) << 16
-	        | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
-	        | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0));
-	    var chars = [
-	        b64chars.charAt(ord >>> 18),
-	        b64chars.charAt((ord >>> 12) & 63),
-	        padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
-	        padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
-	    ];
-	    return chars.join('');
-	};
-	var btoa;
-	if (global && global.btoa) {
-	    btoa = global.btoa;
-	}
-	else {
-	    btoa = function (b) {
-	        return b.replace(/[\s\S]{1,3}/g, cb_encode);
-	    };
-	}
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var logger_1 = __webpack_require__(9);
-	var jsonp = function (context, socketId, callback) {
-	    if (this.authOptions.headers !== undefined) {
-	        logger_1["default"].warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
-	    }
-	    var callbackName = context.nextAuthCallbackID.toString();
-	    context.nextAuthCallbackID++;
-	    var document = context.getDocument();
-	    var script = document.createElement("script");
-	    context.auth_callbacks[callbackName] = function (data) {
-	        callback(false, data);
-	    };
-	    var callback_name = "Pusher.Runtime.auth_callbacks['" + callbackName + "']";
-	    script.src = this.options.authEndpoint +
-	        '?callback=' +
-	        encodeURIComponent(callback_name) +
-	        '&' +
-	        this.composeQuery(socketId);
-	    var head = document.getElementsByTagName("head")[0] || document.documentElement;
-	    head.insertBefore(script, head.firstChild);
-	};
-	exports.__esModule = true;
-	exports["default"] = jsonp;
-
-
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var ScriptRequest = (function () {
-	    function ScriptRequest(src) {
-	        this.src = src;
-	    }
-	    ScriptRequest.prototype.send = function (receiver) {
-	        var self = this;
-	        var errorString = "Error loading " + self.src;
-	        self.script = document.createElement("script");
-	        self.script.id = receiver.id;
-	        self.script.src = self.src;
-	        self.script.type = "text/javascript";
-	        self.script.charset = "UTF-8";
-	        if (self.script.addEventListener) {
-	            self.script.onerror = function () {
-	                receiver.callback(errorString);
-	            };
-	            self.script.onload = function () {
-	                receiver.callback(null);
-	            };
-	        }
-	        else {
-	            self.script.onreadystatechange = function () {
-	                if (self.script.readyState === 'loaded' ||
-	                    self.script.readyState === 'complete') {
-	                    receiver.callback(null);
-	                }
-	            };
-	        }
-	        if (self.script.async === undefined && document.attachEvent &&
-	            /opera/i.test(navigator.userAgent)) {
-	            self.errorScript = document.createElement("script");
-	            self.errorScript.id = receiver.id + "_error";
-	            self.errorScript.text = receiver.name + "('" + errorString + "');";
-	            self.script.async = self.errorScript.async = false;
-	        }
-	        else {
-	            self.script.async = true;
-	        }
-	        var head = document.getElementsByTagName('head')[0];
-	        head.insertBefore(self.script, head.firstChild);
-	        if (self.errorScript) {
-	            head.insertBefore(self.errorScript, self.script.nextSibling);
-	        }
-	    };
-	    ScriptRequest.prototype.cleanup = function () {
-	        if (this.script) {
-	            this.script.onload = this.script.onerror = null;
-	            this.script.onreadystatechange = null;
-	        }
-	        if (this.script && this.script.parentNode) {
-	            this.script.parentNode.removeChild(this.script);
-	        }
-	        if (this.errorScript && this.errorScript.parentNode) {
-	            this.errorScript.parentNode.removeChild(this.errorScript);
-	        }
-	        this.script = null;
-	        this.errorScript = null;
-	    };
-	    return ScriptRequest;
-	}());
-	exports.__esModule = true;
-	exports["default"] = ScriptRequest;
-
-
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Collections = __webpack_require__(10);
-	var util_1 = __webpack_require__(15);
-	var runtime_1 = __webpack_require__(1);
-	var JSONPRequest = (function () {
-	    function JSONPRequest(url, data) {
-	        this.url = url;
-	        this.data = data;
-	    }
-	    JSONPRequest.prototype.send = function (receiver) {
-	        if (this.request) {
-	            return;
-	        }
-	        var params = Collections.filterObject(this.data, function (value) {
-	            return value !== undefined;
-	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
-	        var url = this.url + "/" + receiver.number + "?" + query;
-	        this.request = runtime_1["default"].createScriptRequest(url);
-	        this.request.send(receiver);
-	    };
-	    JSONPRequest.prototype.cleanup = function () {
-	        if (this.request) {
-	            this.request.cleanup();
-	        }
-	    };
-	    return JSONPRequest;
-	}());
-	exports.__esModule = true;
-	exports["default"] = JSONPRequest;
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var timers_1 = __webpack_require__(16);
-	var Util = {
-	    now: function () {
-	        if (Date.now) {
-	            return Date.now();
-	        }
-	        else {
-	            return new Date().valueOf();
-	        }
-	    },
-	    defer: function (callback) {
-	        return new timers_1.OneOffTimer(0, callback);
-	    },
-	    method: function (name) {
-	        var args = [];
-	        for (var _i = 1; _i < arguments.length; _i++) {
-	            args[_i - 1] = arguments[_i];
-	        }
-	        var boundArguments = Array.prototype.slice.call(arguments, 1);
-	        return function (object) {
-	            return object[name].apply(object, boundArguments.concat(arguments));
-	        };
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = Util;
-
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var abstract_timer_1 = __webpack_require__(17);
-	var global = Function("return this")();
-	function clearTimeout(timer) {
-	    global.clearTimeout(timer);
-	}
-	function clearInterval(timer) {
-	    global.clearInterval(timer);
-	}
-	var OneOffTimer = (function (_super) {
-	    __extends(OneOffTimer, _super);
-	    function OneOffTimer(delay, callback) {
-	        _super.call(this, setTimeout, clearTimeout, delay, function (timer) {
-	            callback();
-	            return null;
-	        });
-	    }
-	    return OneOffTimer;
-	}(abstract_timer_1["default"]));
-	exports.OneOffTimer = OneOffTimer;
-	var PeriodicTimer = (function (_super) {
-	    __extends(PeriodicTimer, _super);
-	    function PeriodicTimer(delay, callback) {
-	        _super.call(this, setInterval, clearInterval, delay, function (timer) {
-	            callback();
-	            return timer;
-	        });
-	    }
-	    return PeriodicTimer;
-	}(abstract_timer_1["default"]));
-	exports.PeriodicTimer = PeriodicTimer;
-
-
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var Timer = (function () {
-	    function Timer(set, clear, delay, callback) {
-	        var _this = this;
-	        this.clear = clear;
-	        this.timer = set(function () {
-	            if (_this.timer) {
-	                _this.timer = callback(_this.timer);
-	            }
-	        }, delay);
-	    }
-	    Timer.prototype.isRunning = function () {
-	        return this.timer !== null;
-	    };
-	    Timer.prototype.ensureAborted = function () {
-	        if (this.timer) {
-	            this.clear(this.timer);
-	            this.timer = null;
-	        }
-	    };
-	    return Timer;
-	}());
-	exports.__esModule = true;
-	exports["default"] = Timer;
-
-
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var runtime_1 = __webpack_require__(1);
-	var script_receiver_factory_1 = __webpack_require__(4);
-	var getAgent = function (sender, encrypted) {
-	    return function (data, callback) {
-	        var scheme = "http" + (encrypted ? "s" : "") + "://";
-	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
-	        var request = runtime_1["default"].createJSONPRequest(url, data);
-	        var receiver = runtime_1["default"].ScriptReceivers.create(function (error, result) {
-	            script_receiver_factory_1.ScriptReceivers.remove(receiver);
-	            request.cleanup();
-	            if (result && result.host) {
-	                sender.host = result.host;
-	            }
-	            if (callback) {
-	                callback(error, result);
-	            }
-	        });
-	        request.send(receiver);
-	    };
-	};
-	var jsonp = {
-	    name: 'jsonp',
-	    getAgent: getAgent
-	};
-	exports.__esModule = true;
-	exports["default"] = jsonp;
-
-
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var transports_1 = __webpack_require__(20);
-	var transport_1 = __webpack_require__(22);
-	var URLSchemes = __webpack_require__(21);
-	var dependencies_1 = __webpack_require__(3);
-	var SockJSTransport = new transport_1["default"]({
-	    file: "sockjs",
-	    urls: URLSchemes.sockjs,
-	    handlesActivityChecks: true,
-	    supportsPing: false,
-	    isSupported: function () {
-	        return true;
-	    },
-	    isInitialized: function () {
-	        return window.SockJS !== undefined;
-	    },
-	    getSocket: function (url, options) {
-	        return new window.SockJS(url, null, {
-	            js_path: dependencies_1.Dependencies.getPath("sockjs", {
-	                encrypted: options.encrypted
-	            }),
-	            ignore_null_origin: options.ignoreNullOrigin
-	        });
-	    },
-	    beforeOpen: function (socket, path) {
-	        socket.send(JSON.stringify({
-	            path: path
-	        }));
-	    }
-	});
-	transports_1["default"].sockjs = SockJSTransport;
-	exports.__esModule = true;
-	exports["default"] = transports_1["default"];
-
-
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var URLSchemes = __webpack_require__(21);
-	var transport_1 = __webpack_require__(22);
-	var Collections = __webpack_require__(10);
-	var ws_1 = __webpack_require__(28);
-	var http_1 = __webpack_require__(29);
-	var runtime_1 = __webpack_require__(1);
-	var WSTransport = new transport_1["default"]({
-	    urls: URLSchemes.ws,
-	    handlesActivityChecks: false,
-	    supportsPing: false,
-	    isInitialized: function () {
-	        return Boolean(ws_1["default"].getAPI());
-	    },
-	    isSupported: function () {
-	        return Boolean(ws_1["default"].getAPI());
-	    },
-	    getSocket: function (url) {
-	        return runtime_1["default"].createWebSocket(url);
-	    }
-	});
-	var httpConfiguration = {
-	    urls: URLSchemes.http,
-	    handlesActivityChecks: false,
-	    supportsPing: true,
-	    isInitialized: function () {
-	        return true;
-	    }
-	};
-	var streamingConfiguration = Collections.extend({ getSocket: function (url) {
-	        return http_1["default"].createStreamingSocket(url);
-	    }
-	}, httpConfiguration);
-	var pollingConfiguration = Collections.extend({ getSocket: function (url) {
-	        return http_1["default"].createPollingSocket(url);
-	    }
-	}, httpConfiguration);
-	var xhrConfiguration = {
-	    isSupported: function () {
-	        return runtime_1["default"].isXHRSupported();
-	    }
-	};
-	var xdrConfiguration = {
-	    isSupported: function (environment) {
-	        var yes = runtime_1["default"].isXDRSupported(environment.encrypted);
-	        return yes;
-	    }
-	};
-	var XHRStreamingTransport = new transport_1["default"](Collections.extend({}, streamingConfiguration, xhrConfiguration));
-	var XDRStreamingTransport = new transport_1["default"](Collections.extend({}, streamingConfiguration, xdrConfiguration));
-	var XHRPollingTransport = new transport_1["default"](Collections.extend({}, pollingConfiguration, xhrConfiguration));
-	var XDRPollingTransport = new transport_1["default"](Collections.extend({}, pollingConfiguration, xdrConfiguration));
-	var Transports = {
-	    ws: WSTransport,
-	    xhr_streaming: XHRStreamingTransport,
-	    xdr_streaming: XDRStreamingTransport,
-	    xhr_polling: XHRPollingTransport,
-	    xdr_polling: XDRPollingTransport
-	};
-	exports.__esModule = true;
-	exports["default"] = Transports;
-
-
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var defaults_1 = __webpack_require__(5);
-	function getGenericURL(baseScheme, params, path) {
-	    var scheme = baseScheme + (params.encrypted ? "s" : "");
-	    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
-	    return scheme + "://" + host + path;
-	}
-	function getGenericPath(key, queryString) {
-	    var path = "/app/" + key;
-	    var query = "?protocol=" + defaults_1["default"].PROTOCOL +
-	        "&client=js" +
-	        "&version=" + defaults_1["default"].VERSION +
-	        (queryString ? ("&" + queryString) : "");
-	    return path + query;
-	}
-	exports.ws = {
-	    getInitial: function (key, params) {
-	        return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
-	    }
-	};
-	exports.http = {
-	    getInitial: function (key, params) {
-	        var path = (params.httpPath || "/pusher") + getGenericPath(key);
-	        return getGenericURL("http", params, path);
-	    }
-	};
-	exports.sockjs = {
-	    getInitial: function (key, params) {
-	        return getGenericURL("http", params, params.httpPath || "/pusher");
-	    },
-	    getPath: function (key, params) {
-	        return getGenericPath(key);
-	    }
-	};
-
-
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var transport_connection_1 = __webpack_require__(23);
-	var Transport = (function () {
-	    function Transport(hooks) {
-	        this.hooks = hooks;
-	    }
-	    Transport.prototype.isSupported = function (environment) {
-	        return this.hooks.isSupported(environment);
-	    };
-	    Transport.prototype.createConnection = function (name, priority, key, options) {
-	        return new transport_connection_1["default"](this.hooks, name, priority, key, options);
-	    };
-	    return Transport;
-	}());
-	exports.__esModule = true;
-	exports["default"] = Transport;
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var dependencies_1 = __webpack_require__(3);
-	var transport_connection_1 = __webpack_require__(24);
-	var state_1 = __webpack_require__(27);
-	var BrowserTransportConnection = (function (_super) {
-	    __extends(BrowserTransportConnection, _super);
-	    function BrowserTransportConnection() {
-	        _super.apply(this, arguments);
-	    }
-	    BrowserTransportConnection.prototype.initialize = function () {
-	        var self = this;
-	        self.timeline.info(self.buildTimelineMessage({
-	            transport: self.name + (self.options.encrypted ? "s" : "")
-	        }));
-	        if (self.hooks.isInitialized()) {
-	            self.changeState(state_1["default"].INITIALIZED);
-	        }
-	        else if (self.hooks.file) {
-	            self.changeState(state_1["default"].INITIALIZING);
-	            dependencies_1.Dependencies.load(self.hooks.file, { encrypted: self.options.encrypted }, function (error, callback) {
-	                if (self.hooks.isInitialized()) {
-	                    self.changeState(state_1["default"].INITIALIZED);
-	                    callback(true);
-	                }
-	                else {
-	                    if (error) {
-	                        self.onError(error);
-	                    }
-	                    self.onClose();
-	                    callback(false);
-	                }
-	            });
-	        }
-	        else {
-	            self.onClose();
-	        }
-	    };
-	    return BrowserTransportConnection;
-	}(transport_connection_1["default"]));
-	exports.__esModule = true;
-	exports["default"] = BrowserTransportConnection;
-
-
-/***/ },
-/* 24 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var util_1 = __webpack_require__(15);
-	var Collections = __webpack_require__(10);
-	var dispatcher_1 = __webpack_require__(25);
-	var logger_1 = __webpack_require__(9);
-	var state_1 = __webpack_require__(27);
-	var BaseTransportConnection = (function (_super) {
-	    __extends(BaseTransportConnection, _super);
-	    function BaseTransportConnection(hooks, name, priority, key, options) {
-	        _super.call(this);
-	        this.hooks = hooks;
-	        this.name = name;
-	        this.priority = priority;
-	        this.key = key;
-	        this.options = options;
-	        this.state = state_1["default"].NEW;
-	        this.timeline = options.timeline;
-	        this.activityTimeout = options.activityTimeout;
-	        this.id = this.timeline.generateUniqueID();
-	    }
-	    BaseTransportConnection.prototype.handlesActivityChecks = function () {
-	        return Boolean(this.hooks.handlesActivityChecks);
-	    };
-	    BaseTransportConnection.prototype.supportsPing = function () {
-	        return Boolean(this.hooks.supportsPing);
-	    };
-	    BaseTransportConnection.prototype.initialize = function () {
-	        var self = this;
-	        self.timeline.info(self.buildTimelineMessage({
-	            transport: self.name + (self.options.encrypted ? "s" : "")
-	        }));
-	        if (self.hooks.isInitialized()) {
-	            self.changeState(state_1["default"].INITIALIZED);
-	        }
-	        else {
-	            self.onClose();
-	        }
-	    };
-	    BaseTransportConnection.prototype.connect = function () {
-	        var self = this;
-	        if (self.socket || self.state !== state_1["default"].INITIALIZED) {
-	            return false;
-	        }
-	        var url = self.hooks.urls.getInitial(self.key, self.options);
-	        try {
-	            self.socket = self.hooks.getSocket(url, self.options);
-	        }
-	        catch (e) {
-	            util_1["default"].defer(function () {
-	                self.onError(e);
-	                self.changeState(state_1["default"].CLOSED);
-	            });
-	            return false;
-	        }
-	        self.bindListeners();
-	        logger_1["default"].debug("Connecting", { transport: self.name, url: url });
-	        self.changeState(state_1["default"].CONNECTING);
-	        return true;
-	    };
-	    BaseTransportConnection.prototype.close = function () {
-	        if (this.socket) {
-	            this.socket.close();
-	            return true;
-	        }
-	        else {
-	            return false;
-	        }
-	    };
-	    BaseTransportConnection.prototype.send = function (data) {
-	        var self = this;
-	        if (self.state === state_1["default"].OPEN) {
-	            util_1["default"].defer(function () {
-	                if (self.socket) {
-	                    self.socket.send(data);
-	                }
-	            });
-	            return true;
-	        }
-	        else {
-	            return false;
-	        }
-	    };
-	    BaseTransportConnection.prototype.ping = function () {
-	        if (this.state === state_1["default"].OPEN && this.supportsPing()) {
-	            this.socket.ping();
-	        }
-	    };
-	    BaseTransportConnection.prototype.onOpen = function () {
-	        if (this.hooks.beforeOpen) {
-	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
-	        }
-	        this.changeState(state_1["default"].OPEN);
-	        this.socket.onopen = undefined;
-	    };
-	    BaseTransportConnection.prototype.onError = function (error) {
-	        this.emit("error", { type: 'WebSocketError', error: error });
-	        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
-	    };
-	    BaseTransportConnection.prototype.onClose = function (closeEvent) {
-	        if (closeEvent) {
-	            this.changeState(state_1["default"].CLOSED, {
-	                code: closeEvent.code,
-	                reason: closeEvent.reason,
-	                wasClean: closeEvent.wasClean
-	            });
-	        }
-	        else {
-	            this.changeState(state_1["default"].CLOSED);
-	        }
-	        this.unbindListeners();
-	        this.socket = undefined;
-	    };
-	    BaseTransportConnection.prototype.onMessage = function (message) {
-	        this.emit("message", message);
-	    };
-	    BaseTransportConnection.prototype.onActivity = function () {
-	        this.emit("activity");
-	    };
-	    BaseTransportConnection.prototype.bindListeners = function () {
-	        var self = this;
-	        self.socket.onopen = function () {
-	            self.onOpen();
-	        };
-	        self.socket.onerror = function (error) {
-	            self.onError(error);
-	        };
-	        self.socket.onclose = function (closeEvent) {
-	            self.onClose(closeEvent);
-	        };
-	        self.socket.onmessage = function (message) {
-	            self.onMessage(message);
-	        };
-	        if (self.supportsPing()) {
-	            self.socket.onactivity = function () { self.onActivity(); };
-	        }
-	    };
-	    BaseTransportConnection.prototype.unbindListeners = function () {
-	        if (this.socket) {
-	            this.socket.onopen = undefined;
-	            this.socket.onerror = undefined;
-	            this.socket.onclose = undefined;
-	            this.socket.onmessage = undefined;
-	            if (this.supportsPing()) {
-	                this.socket.onactivity = undefined;
-	            }
-	        }
-	    };
-	    BaseTransportConnection.prototype.changeState = function (state, params) {
-	        this.state = state;
-	        this.timeline.info(this.buildTimelineMessage({
-	            state: state,
-	            params: params
-	        }));
-	        this.emit(state, params);
-	    };
-	    BaseTransportConnection.prototype.buildTimelineMessage = function (message) {
-	        return Collections.extend({ cid: this.id }, message);
-	    };
-	    return BaseTransportConnection;
-	}(dispatcher_1["default"]));
-	exports.__esModule = true;
-	exports["default"] = BaseTransportConnection;
-
-
-/***/ },
-/* 25 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var callback_registry_1 = __webpack_require__(26);
-	var global = Function("return this")();
-	var Dispatcher = (function () {
-	    function Dispatcher(failThrough) {
-	        this.callbacks = new callback_registry_1["default"]();
-	        this.global_callbacks = [];
-	        this.failThrough = failThrough;
-	    }
-	    Dispatcher.prototype.bind = function (eventName, callback, context) {
-	        this.callbacks.add(eventName, callback, context);
-	        return this;
-	    };
-	    Dispatcher.prototype.bind_all = function (callback) {
-	        this.global_callbacks.push(callback);
-	        return this;
-	    };
-	    Dispatcher.prototype.unbind = function (eventName, callback, context) {
-	        this.callbacks.remove(eventName, callback, context);
-	        return this;
-	    };
-	    Dispatcher.prototype.unbind_all = function (eventName, callback) {
-	        this.callbacks.remove(eventName, callback);
-	        return this;
-	    };
-	    Dispatcher.prototype.emit = function (eventName, data) {
-	        var i;
-	        for (i = 0; i < this.global_callbacks.length; i++) {
-	            this.global_callbacks[i](eventName, data);
-	        }
-	        var callbacks = this.callbacks.get(eventName);
-	        if (callbacks && callbacks.length > 0) {
-	            for (i = 0; i < callbacks.length; i++) {
-	                callbacks[i].fn.call(callbacks[i].context || global, data);
-	            }
-	        }
-	        else if (this.failThrough) {
-	            this.failThrough(eventName, data);
-	        }
-	        return this;
-	    };
-	    return Dispatcher;
-	}());
-	exports.__esModule = true;
-	exports["default"] = Dispatcher;
+	exports["default"] = getDefaultStrategy;
 
 
 /***/ },
@@ -1615,101 +1671,50 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
-	var CallbackRegistry = (function () {
-	    function CallbackRegistry() {
-	        this._callbacks = {};
+	var dependencies_1 = __webpack_require__(2);
+	function default_1() {
+	    var self = this;
+	    self.timeline.info(self.buildTimelineMessage({
+	        transport: self.name + (self.options.encrypted ? "s" : "")
+	    }));
+	    if (self.hooks.isInitialized()) {
+	        self.changeState("initialized");
 	    }
-	    CallbackRegistry.prototype.get = function (name) {
-	        return this._callbacks[prefix(name)];
-	    };
-	    CallbackRegistry.prototype.add = function (name, callback, context) {
-	        var prefixedEventName = prefix(name);
-	        this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
-	        this._callbacks[prefixedEventName].push({
-	            fn: callback,
-	            context: context
-	        });
-	    };
-	    CallbackRegistry.prototype.remove = function (name, callback, context) {
-	        if (!name && !callback && !context) {
-	            this._callbacks = {};
-	            return;
-	        }
-	        var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
-	        if (callback || context) {
-	            Collections.apply(names, function (name) {
-	                this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {
-	                    return (callback && callback !== binding.fn) ||
-	                        (context && context !== binding.context);
-	                });
-	                if (this._callbacks[name].length === 0) {
-	                    delete this._callbacks[name];
+	    else if (self.hooks.file) {
+	        self.changeState("initializing");
+	        dependencies_1.Dependencies.load(self.hooks.file, { encrypted: self.options.encrypted }, function (error, callback) {
+	            if (self.hooks.isInitialized()) {
+	                self.changeState("initialized");
+	                callback(true);
+	            }
+	            else {
+	                if (error) {
+	                    self.onError(error);
 	                }
-	            }, this);
-	        }
-	        else {
-	            Collections.apply(names, function (name) {
-	                delete this._callbacks[name];
-	            }, this);
-	        }
-	    };
-	    return CallbackRegistry;
-	}());
-	exports.__esModule = true;
-	exports["default"] = CallbackRegistry;
-	function prefix(name) {
-	    return "_" + name;
+	                self.onClose();
+	                callback(false);
+	            }
+	        });
+	    }
+	    else {
+	        self.onClose();
+	    }
 	}
+	exports.__esModule = true;
+	exports["default"] = default_1;
 
 
 /***/ },
 /* 27 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var ConnectionState;
-	(function (ConnectionState) {
-	    ConnectionState[ConnectionState["OPEN"] = "open"] = "OPEN";
-	    ConnectionState[ConnectionState["CLOSED"] = "closed"] = "CLOSED";
-	    ConnectionState[ConnectionState["NEW"] = "new"] = "NEW";
-	    ConnectionState[ConnectionState["INITIALIZED"] = "initialized"] = "INITIALIZED";
-	    ConnectionState[ConnectionState["INITIALIZING"] = "initializing"] = "INITIALIZING";
-	    ConnectionState[ConnectionState["CONNECTING"] = "connecting"] = "CONNECTING";
-	    ConnectionState[ConnectionState["FAILED"] = "failed"] = "FAILED";
-	    ConnectionState[ConnectionState["DISCONNECTED"] = "disconnected"] = "DISCONNECTED";
-	    ConnectionState[ConnectionState["UNAVAILABLE"] = "unavailable"] = "UNAVAILABLE";
-	    ConnectionState[ConnectionState["CONNECTED"] = "connected"] = "CONNECTED";
-	})(ConnectionState || (ConnectionState = {}));
-	exports.__esModule = true;
-	exports["default"] = ConnectionState;
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var WS = {
-	    getAPI: function () {
-	        return window.WebSocket || window.MozWebSocket;
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = WS;
-
-
-/***/ },
-/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var http_request_1 = __webpack_require__(30);
-	var http_socket_1 = __webpack_require__(32);
-	var http_streaming_socket_1 = __webpack_require__(34);
-	var http_polling_socket_1 = __webpack_require__(35);
-	var http_xhr_request_1 = __webpack_require__(36);
-	var http_xdomain_request_1 = __webpack_require__(37);
+	var http_request_1 = __webpack_require__(28);
+	var http_socket_1 = __webpack_require__(29);
+	var http_streaming_socket_1 = __webpack_require__(31);
+	var http_polling_socket_1 = __webpack_require__(32);
+	var http_xhr_request_1 = __webpack_require__(33);
+	var http_xdomain_request_1 = __webpack_require__(34);
 	var HTTP = {
 	    createStreamingSocket: function (url) {
 	        return this.createSocket(http_streaming_socket_1["default"], url);
@@ -1735,7 +1740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 30 */
+/* 28 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1744,8 +1749,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var App = __webpack_require__(31);
-	var dispatcher_1 = __webpack_require__(25);
+	var runtime_1 = __webpack_require__(1);
+	var dispatcher_1 = __webpack_require__(22);
 	var MAX_BUFFER_LENGTH = 256 * 1024;
 	var HTTPRequest = (function (_super) {
 	    __extends(HTTPRequest, _super);
@@ -1756,19 +1761,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.url = url;
 	    }
 	    HTTPRequest.prototype.start = function (payload) {
-	        var self = this;
-	        self.position = 0;
-	        self.xhr = self.hooks.getRequest(self);
-	        self.unloader = function () {
-	            self.close();
+	        var _this = this;
+	        this.position = 0;
+	        this.xhr = this.hooks.getRequest(this);
+	        this.unloader = function () {
+	            _this.close();
 	        };
-	        App.addUnloadListener(self.unloader);
-	        self.xhr.open(self.method, self.url, true);
-	        self.xhr.send(payload);
+	        runtime_1["default"].addUnloadListener(this.unloader);
+	        this.xhr.open(this.method, this.url, true);
+	        this.xhr.send(payload);
 	    };
 	    HTTPRequest.prototype.close = function () {
 	        if (this.unloader) {
-	            App.removeUnloadListener(this.unloader);
+	            runtime_1["default"].removeUnloadListener(this.unloader);
 	            this.unloader = null;
 	        }
 	        if (this.xhr) {
@@ -1811,36 +1816,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 31 */
-/***/ function(module, exports) {
-
-	"use strict";
-	exports.addUnloadListener = function (listener) {
-	    if (window.addEventListener !== undefined) {
-	        window.addEventListener("unload", listener, false);
-	    }
-	    else if (window.attachEvent !== undefined) {
-	        window.attachEvent("onunload", listener);
-	    }
-	};
-	exports.removeUnloadListener = function (listener) {
-	    if (window.addEventListener !== undefined) {
-	        window.removeEventListener("unload", listener, false);
-	    }
-	    else if (window.detachEvent !== undefined) {
-	        window.detachEvent("onunload", listener);
-	    }
-	};
-
-
-/***/ },
-/* 32 */
+/* 29 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var state_1 = __webpack_require__(33);
-	var util_1 = __webpack_require__(15);
-	var http_1 = __webpack_require__(29);
+	var state_1 = __webpack_require__(30);
+	var util_1 = __webpack_require__(10);
 	var runtime_1 = __webpack_require__(1);
 	var autoIncrement = 1;
 	var HTTPSocket = (function () {
@@ -1863,7 +1844,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    HTTPSocket.prototype.sendRaw = function (payload) {
 	        if (this.readyState === state_1["default"].OPEN) {
 	            try {
-	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+	                runtime_1["default"].createSocketRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
 	                return true;
 	            }
 	            catch (e) {
@@ -1953,24 +1934,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    HTTPSocket.prototype.openStream = function () {
-	        var self = this;
-	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
-	        self.stream.bind("chunk", function (chunk) {
-	            self.onChunk(chunk);
+	        var _this = this;
+	        this.stream = runtime_1["default"].createSocketRequest("POST", getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
+	        this.stream.bind("chunk", function (chunk) {
+	            _this.onChunk(chunk);
 	        });
-	        self.stream.bind("finished", function (status) {
-	            self.hooks.onFinished(self, status);
+	        this.stream.bind("finished", function (status) {
+	            _this.hooks.onFinished(_this, status);
 	        });
-	        self.stream.bind("buffer_too_long", function () {
-	            self.reconnect();
+	        this.stream.bind("buffer_too_long", function () {
+	            _this.reconnect();
 	        });
 	        try {
-	            self.stream.start();
+	            this.stream.start();
 	        }
 	        catch (error) {
 	            util_1["default"].defer(function () {
-	                self.onError(error);
-	                self.onClose(1006, "Could not start streaming", false);
+	                _this.onError(error);
+	                _this.onClose(1006, "Could not start streaming", false);
 	            });
 	        }
 	    };
@@ -2011,23 +1992,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return result.join('');
 	}
-	function createRequest(method, url) {
-	    if (runtime_1["default"].isXHRSupported()) {
-	        return http_1["default"].createXHR(method, url);
-	    }
-	    else if (runtime_1["default"].isXDRSupported(url.indexOf("https:") === 0)) {
-	        return http_1["default"].createXDR(method, url);
-	    }
-	    else {
-	        throw "Cross-origin HTTP requests are not supported";
-	    }
-	}
 	exports.__esModule = true;
 	exports["default"] = HTTPSocket;
 
 
 /***/ },
-/* 33 */
+/* 30 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2042,7 +2012,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 34 */
+/* 31 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2065,7 +2035,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 35 */
+/* 32 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2092,14 +2062,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 36 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var xhr_1 = __webpack_require__(2);
+	var runtime_1 = __webpack_require__(1);
 	var hooks = {
 	    getRequest: function (socket) {
-	        var Constructor = xhr_1["default"].getAPI();
+	        var Constructor = runtime_1["default"].getXHRAPI();
 	        var xhr = new Constructor();
 	        xhr.onreadystatechange = xhr.onprogress = function () {
 	            switch (xhr.readyState) {
@@ -2129,11 +2099,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 37 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Errors = __webpack_require__(38);
+	var Errors = __webpack_require__(35);
 	var hooks = {
 	    getRequest: function (socket) {
 	        var xdr = new window.XDomainRequest();
@@ -2169,7 +2139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 38 */
+/* 35 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2229,52 +2199,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 39 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var dispatcher_1 = __webpack_require__(25);
-	var NetInfo = (function (_super) {
-	    __extends(NetInfo, _super);
-	    function NetInfo() {
-	        _super.call(this);
-	        var self = this;
-	        if (window.addEventListener !== undefined) {
-	            window.addEventListener("online", function () {
-	                self.emit('online');
-	            }, false);
-	            window.addEventListener("offline", function () {
-	                self.emit('offline');
-	            }, false);
-	        }
-	    }
-	    NetInfo.prototype.isOnline = function () {
-	        if (window.navigator.onLine === undefined) {
-	            return true;
-	        }
-	        else {
-	            return window.navigator.onLine;
-	        }
-	    };
-	    return NetInfo;
-	}(dispatcher_1["default"]));
-	exports.NetInfo = NetInfo;
-	exports.Network = new NetInfo();
-
-
-/***/ },
-/* 40 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Collections = __webpack_require__(10);
-	var util_1 = __webpack_require__(15);
-	var level_1 = __webpack_require__(41);
+	var Collections = __webpack_require__(8);
+	var util_1 = __webpack_require__(10);
+	var level_1 = __webpack_require__(37);
 	var Timeline = (function () {
 	    function Timeline(key, session, options) {
 	        this.key = key;
@@ -2305,21 +2236,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.events.length === 0;
 	    };
 	    Timeline.prototype.send = function (sendfn, callback) {
-	        var self = this;
+	        var _this = this;
 	        var data = Collections.extend({
-	            session: self.session,
-	            bundle: self.sent + 1,
-	            key: self.key,
+	            session: this.session,
+	            bundle: this.sent + 1,
+	            key: this.key,
 	            lib: "js",
-	            version: self.options.version,
-	            cluster: self.options.cluster,
-	            features: self.options.features,
-	            timeline: self.events
-	        }, self.options.params);
-	        self.events = [];
+	            version: this.options.version,
+	            cluster: this.options.cluster,
+	            features: this.options.features,
+	            timeline: this.events
+	        }, this.options.params);
+	        this.events = [];
 	        sendfn(data, function (error, result) {
 	            if (!error) {
-	                self.sent++;
+	                _this.sent++;
 	            }
 	            if (callback) {
 	                callback(error, result);
@@ -2338,7 +2269,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 41 */
+/* 37 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2353,27 +2284,27 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 42 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
-	var util_1 = __webpack_require__(15);
-	var transports_1 = __webpack_require__(19);
-	var transport_manager_1 = __webpack_require__(43);
-	var Errors = __webpack_require__(38);
-	var transport_strategy_1 = __webpack_require__(59);
-	var sequential_strategy_1 = __webpack_require__(60);
-	var best_connected_ever_strategy_1 = __webpack_require__(61);
-	var cached_strategy_1 = __webpack_require__(62);
-	var delayed_strategy_1 = __webpack_require__(63);
-	var if_strategy_1 = __webpack_require__(64);
-	var first_connected_strategy_1 = __webpack_require__(65);
+	var Collections = __webpack_require__(8);
+	var util_1 = __webpack_require__(10);
+	var transport_manager_1 = __webpack_require__(39);
+	var Errors = __webpack_require__(35);
+	var transport_strategy_1 = __webpack_require__(53);
+	var sequential_strategy_1 = __webpack_require__(54);
+	var best_connected_ever_strategy_1 = __webpack_require__(55);
+	var cached_strategy_1 = __webpack_require__(56);
+	var delayed_strategy_1 = __webpack_require__(57);
+	var if_strategy_1 = __webpack_require__(58);
+	var first_connected_strategy_1 = __webpack_require__(59);
+	var runtime_1 = __webpack_require__(1);
+	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
 	    var context = Collections.extend({}, globalContext, options);
 	    return evaluate(scheme, context)[1].strategy;
 	};
-	var transports = transports_1["default"];
 	var UnsupportedStrategy = {
 	    isSupported: function () {
 	        return false;
@@ -2407,7 +2338,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return [undefined, context];
 	    },
 	    def_transport: function (context, name, type, priority, options, manager) {
-	        var transportClass = transports[type];
+	        var transportClass = Transports[type];
 	        if (!transportClass) {
 	            throw new Errors.UnsupportedTransport(type);
 	        }
@@ -2428,8 +2359,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            transport = UnsupportedStrategy;
 	        }
 	        var newContext = context.def(context, name, transport)[1];
-	        newContext.transports = context.transports || {};
-	        newContext.transports[name] = transport;
+	        newContext.Transports = context.Transports || {};
+	        newContext.Transports[name] = transport;
 	        return [undefined, newContext];
 	    },
 	    transport_manager: returnWithOriginalContext(function (_, options) {
@@ -2440,7 +2371,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return new sequential_strategy_1["default"](strategies, options);
 	    }),
 	    cached: returnWithOriginalContext(function (context, ttl, strategy) {
-	        return new cached_strategy_1["default"](strategy, context.transports, {
+	        return new cached_strategy_1["default"](strategy, context.Transports, {
 	            ttl: ttl,
 	            timeline: context.timeline,
 	            encrypted: context.encrypted
@@ -2523,14 +2454,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 43 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var factory_1 = __webpack_require__(44);
+	var factory_1 = __webpack_require__(40);
 	var TransportManager = (function () {
 	    function TransportManager(options) {
-	        this.options = options || [];
+	        this.options = options || {};
 	        this.livesLeft = this.options.lives || Infinity;
 	    }
 	    TransportManager.prototype.getAssistant = function (transport) {
@@ -2552,19 +2483,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 44 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var assistant_to_the_transport_manager_1 = __webpack_require__(45);
-	var handshake_1 = __webpack_require__(46);
-	var pusher_authorizer_1 = __webpack_require__(51);
-	var timeline_sender_1 = __webpack_require__(52);
-	var presence_channel_1 = __webpack_require__(53);
-	var private_channel_1 = __webpack_require__(54);
-	var channel_1 = __webpack_require__(55);
-	var connection_manager_1 = __webpack_require__(57);
-	var channels_1 = __webpack_require__(58);
+	var assistant_to_the_transport_manager_1 = __webpack_require__(41);
+	var handshake_1 = __webpack_require__(42);
+	var pusher_authorizer_1 = __webpack_require__(45);
+	var timeline_sender_1 = __webpack_require__(46);
+	var presence_channel_1 = __webpack_require__(47);
+	var private_channel_1 = __webpack_require__(48);
+	var channel_1 = __webpack_require__(49);
+	var connection_manager_1 = __webpack_require__(51);
+	var channels_1 = __webpack_require__(52);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2599,12 +2530,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 45 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(15);
-	var Collections = __webpack_require__(10);
+	var util_1 = __webpack_require__(10);
+	var Collections = __webpack_require__(8);
 	var AssistantToTheTransportManager = (function () {
 	    function AssistantToTheTransportManager(manager, transport, options) {
 	        this.manager = manager;
@@ -2614,11 +2545,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.pingDelay = undefined;
 	    }
 	    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
-	        var self = this;
+	        var _this = this;
 	        options = Collections.extend({}, options, {
-	            activityTimeout: self.pingDelay
+	            activityTimeout: this.pingDelay
 	        });
-	        var connection = self.transport.createConnection(name, priority, key, options);
+	        var connection = this.transport.createConnection(name, priority, key, options);
 	        var openTimestamp = null;
 	        var onOpen = function () {
 	            connection.unbind("open", onOpen);
@@ -2628,13 +2559,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var onClosed = function (closeEvent) {
 	            connection.unbind("closed", onClosed);
 	            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-	                self.manager.reportDeath();
+	                _this.manager.reportDeath();
 	            }
 	            else if (!closeEvent.wasClean && openTimestamp) {
 	                var lifespan = util_1["default"].now() - openTimestamp;
-	                if (lifespan < 2 * self.maxPingDelay) {
-	                    self.manager.reportDeath();
-	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
+	                if (lifespan < 2 * _this.maxPingDelay) {
+	                    _this.manager.reportDeath();
+	                    _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);
 	                }
 	            }
 	        };
@@ -2651,14 +2582,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 46 */
+/* 42 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
-	var Protocol = __webpack_require__(47);
-	var connection_1 = __webpack_require__(50);
-	var handshake_results_1 = __webpack_require__(49);
+	var Collections = __webpack_require__(8);
+	var Protocol = __webpack_require__(43);
+	var connection_1 = __webpack_require__(44);
 	var Handshake = (function () {
 	    function Handshake(transport, callback) {
 	        this.transport = transport;
@@ -2670,35 +2600,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.transport.close();
 	    };
 	    Handshake.prototype.bindListeners = function () {
-	        var self = this;
-	        self.onMessage = function (m) {
-	            self.unbindListeners();
+	        var _this = this;
+	        this.onMessage = function (m) {
+	            _this.unbindListeners();
 	            try {
 	                var result = Protocol.processHandshake(m);
-	                if (result.action === handshake_results_1["default"].CONNECTED) {
-	                    self.finish("connected", {
-	                        connection: new connection_1["default"](result.id, self.transport),
+	                if (result.action === "connected") {
+	                    _this.finish("connected", {
+	                        connection: new connection_1["default"](result.id, _this.transport),
 	                        activityTimeout: result.activityTimeout
 	                    });
 	                }
 	                else {
-	                    self.finish(result.action, { error: result.error });
-	                    self.transport.close();
+	                    _this.finish(result.action, { error: result.error });
+	                    _this.transport.close();
 	                }
 	            }
 	            catch (e) {
-	                self.finish("error", { error: e });
-	                self.transport.close();
+	                _this.finish("error", { error: e });
+	                _this.transport.close();
 	            }
 	        };
-	        self.onClosed = function (closeEvent) {
-	            self.unbindListeners();
+	        this.onClosed = function (closeEvent) {
+	            _this.unbindListeners();
 	            var action = Protocol.getCloseAction(closeEvent) || "backoff";
 	            var error = Protocol.getCloseError(closeEvent);
-	            self.finish(action, { error: error });
+	            _this.finish(action, { error: error });
 	        };
-	        self.transport.bind("message", self.onMessage);
-	        self.transport.bind("closed", self.onClosed);
+	        this.transport.bind("message", this.onMessage);
+	        this.transport.bind("closed", this.onClosed);
 	    };
 	    Handshake.prototype.unbindListeners = function () {
 	        this.transport.unbind("message", this.onMessage);
@@ -2714,12 +2644,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 47 */
-/***/ function(module, exports, __webpack_require__) {
+/* 43 */
+/***/ function(module, exports) {
 
 	"use strict";
-	var internal_events_1 = __webpack_require__(48);
-	var handshake_results_1 = __webpack_require__(49);
 	exports.decodeMessage = function (message) {
 	    try {
 	        var params = JSON.parse(message.data);
@@ -2744,17 +2672,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	exports.processHandshake = function (message) {
 	    message = exports.decodeMessage(message);
-	    if (message.event === internal_events_1["default"].CONNECTION_ESTABLISHED) {
+	    if (message.event === "pusher:connection_established") {
 	        if (!message.data.activity_timeout) {
 	            throw "No activity timeout specified in handshake";
 	        }
 	        return {
-	            action: handshake_results_1["default"].CONNECTED,
+	            action: "connected",
 	            id: message.data.socket_id,
 	            activityTimeout: message.data.activity_timeout * 1000
 	        };
 	    }
-	    else if (message.event === internal_events_1["default"].ERROR) {
+	    else if (message.event === "pusher:error") {
 	        return {
 	            action: this.getCloseAction(message.data),
 	            error: this.getCloseError(message.data)
@@ -2767,26 +2695,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.getCloseAction = function (closeEvent) {
 	    if (closeEvent.code < 4000) {
 	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-	            return handshake_results_1["default"].BACKOFF;
+	            return "backoff";
 	        }
 	        else {
 	            return null;
 	        }
 	    }
 	    else if (closeEvent.code === 4000) {
-	        return handshake_results_1["default"].SSL_ONLY;
+	        return "ssl_only";
 	    }
 	    else if (closeEvent.code < 4100) {
-	        return handshake_results_1["default"].REFUSED;
+	        return "refused";
 	    }
 	    else if (closeEvent.code < 4200) {
-	        return handshake_results_1["default"].BACKOFF;
+	        return "backoff";
 	    }
 	    else if (closeEvent.code < 4300) {
-	        return handshake_results_1["default"].RETRY;
+	        return "retry";
 	    }
 	    else {
-	        return handshake_results_1["default"].REFUSED;
+	        return "refused";
 	    }
 	};
 	exports.getCloseError = function (closeEvent) {
@@ -2806,38 +2734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 48 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var InternalEvents;
-	(function (InternalEvents) {
-	    InternalEvents[InternalEvents["CONNECTION_ESTABLISHED"] = "pusher:connection_established"] = "CONNECTION_ESTABLISHED";
-	    InternalEvents[InternalEvents["ERROR"] = "pusher:error"] = "ERROR";
-	})(InternalEvents || (InternalEvents = {}));
-	exports.__esModule = true;
-	exports["default"] = InternalEvents;
-
-
-/***/ },
-/* 49 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var HandshakeResults;
-	(function (HandshakeResults) {
-	    HandshakeResults[HandshakeResults["CONNECTED"] = "connected"] = "CONNECTED";
-	    HandshakeResults[HandshakeResults["BACKOFF"] = "backoff"] = "BACKOFF";
-	    HandshakeResults[HandshakeResults["SSL_ONLY"] = "ssl_only"] = "SSL_ONLY";
-	    HandshakeResults[HandshakeResults["REFUSED"] = "refused"] = "REFUSED";
-	    HandshakeResults[HandshakeResults["RETRY"] = "retry"] = "RETRY";
-	})(HandshakeResults || (HandshakeResults = {}));
-	exports.__esModule = true;
-	exports["default"] = HandshakeResults;
-
-
-/***/ },
-/* 50 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2846,10 +2743,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var Collections = __webpack_require__(10);
-	var dispatcher_1 = __webpack_require__(25);
-	var Protocol = __webpack_require__(47);
-	var logger_1 = __webpack_require__(9);
+	var Collections = __webpack_require__(8);
+	var dispatcher_1 = __webpack_require__(22);
+	var Protocol = __webpack_require__(43);
+	var logger_1 = __webpack_require__(7);
 	var Connection = (function (_super) {
 	    __extends(Connection, _super);
 	    function Connection(id, transport) {
@@ -2885,7 +2782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.transport.close();
 	    };
 	    Connection.prototype.bindListeners = function () {
-	        var self = this;
+	        var _this = this;
 	        var listeners = {
 	            message: function (m) {
 	                var message;
@@ -2893,7 +2790,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    message = Protocol.decodeMessage(m);
 	                }
 	                catch (e) {
-	                    self.emit('error', {
+	                    _this.emit('error', {
 	                        type: 'MessageParseError',
 	                        error: e,
 	                        data: m.data
@@ -2903,40 +2800,40 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    logger_1["default"].debug('Event recd', message);
 	                    switch (message.event) {
 	                        case 'pusher:error':
-	                            self.emit('error', { type: 'PusherError', data: message.data });
+	                            _this.emit('error', { type: 'PusherError', data: message.data });
 	                            break;
 	                        case 'pusher:ping':
-	                            self.emit("ping");
+	                            _this.emit("ping");
 	                            break;
 	                        case 'pusher:pong':
-	                            self.emit("pong");
+	                            _this.emit("pong");
 	                            break;
 	                    }
-	                    self.emit('message', message);
+	                    _this.emit('message', message);
 	                }
 	            },
 	            activity: function () {
-	                self.emit("activity");
+	                _this.emit("activity");
 	            },
 	            error: function (error) {
-	                self.emit("error", { type: "WebSocketError", error: error });
+	                _this.emit("error", { type: "WebSocketError", error: error });
 	            },
 	            closed: function (closeEvent) {
 	                unbindListeners();
 	                if (closeEvent && closeEvent.code) {
-	                    self.handleCloseEvent(closeEvent);
+	                    _this.handleCloseEvent(closeEvent);
 	                }
-	                self.transport = null;
-	                self.emit("closed");
+	                _this.transport = null;
+	                _this.emit("closed");
 	            }
 	        };
 	        var unbindListeners = function () {
 	            Collections.objectApply(listeners, function (listener, event) {
-	                self.transport.unbind(event, listener);
+	                _this.transport.unbind(event, listener);
 	            });
 	        };
 	        Collections.objectApply(listeners, function (listener, event) {
-	            self.transport.bind(event, listener);
+	            _this.transport.bind(event, listener);
 	        });
 	    };
 	    Connection.prototype.handleCloseEvent = function (closeEvent) {
@@ -2956,7 +2853,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 51 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2964,7 +2861,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Authorizer = (function () {
 	    function Authorizer(channel, options) {
 	        this.channel = channel;
-	        this.type = options.authTransport;
+	        var authTransport = options.authTransport;
+	        if (typeof runtime_1["default"].getAuthorizers()[authTransport] === "undefined") {
+	            throw "'" + authTransport + "' is not a recognized auth transport";
+	        }
+	        this.type = authTransport;
 	        this.options = options;
 	        this.authOptions = (options || {}).auth || {};
 	    }
@@ -2987,7 +2888,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 52 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2998,11 +2899,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.options = options || {};
 	    }
 	    TimelineSender.prototype.send = function (encrypted, callback) {
-	        var self = this;
-	        if (self.timeline.isEmpty()) {
+	        if (this.timeline.isEmpty()) {
 	            return;
 	        }
-	        self.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, encrypted), callback);
+	        this.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, encrypted), callback);
 	    };
 	    return TimelineSender;
 	}());
@@ -3011,7 +2911,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 53 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3020,9 +2920,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var private_channel_1 = __webpack_require__(54);
-	var logger_1 = __webpack_require__(9);
-	var members_1 = __webpack_require__(56);
+	var private_channel_1 = __webpack_require__(48);
+	var logger_1 = __webpack_require__(7);
+	var members_1 = __webpack_require__(50);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
 	    function PresenceChannel(name, pusher) {
@@ -3030,18 +2930,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.members = new members_1["default"]();
 	    }
 	    PresenceChannel.prototype.authorize = function (socketId, callback) {
-	        var self = this;
+	        var _this = this;
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            if (!error) {
 	                if (authData.channel_data === undefined) {
 	                    logger_1["default"].warn("Invalid auth response for channel '" +
-	                        self.name +
+	                        _this.name +
 	                        "', expected 'channel_data' field");
 	                    callback("Invalid auth response");
 	                    return;
 	                }
 	                var channelData = JSON.parse(authData.channel_data);
-	                self.members.setMyID(channelData.user_id);
+	                _this.members.setMyID(channelData.user_id);
 	            }
 	            callback(error, authData);
 	        });
@@ -3078,7 +2978,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 54 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3087,8 +2987,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var factory_1 = __webpack_require__(44);
-	var channel_1 = __webpack_require__(55);
+	var factory_1 = __webpack_require__(40);
+	var channel_1 = __webpack_require__(49);
 	var PrivateChannel = (function (_super) {
 	    __extends(PrivateChannel, _super);
 	    function PrivateChannel() {
@@ -3105,7 +3005,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 55 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3114,9 +3014,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(25);
-	var Errors = __webpack_require__(38);
-	var logger_1 = __webpack_require__(9);
+	var dispatcher_1 = __webpack_require__(22);
+	var Errors = __webpack_require__(35);
+	var logger_1 = __webpack_require__(7);
 	var Channel = (function (_super) {
 	    __extends(Channel, _super);
 	    function Channel(name, pusher) {
@@ -3177,11 +3077,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 56 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
+	var Collections = __webpack_require__(8);
 	var Members = (function () {
 	    function Members() {
 	        this.reset();
@@ -3239,7 +3139,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 57 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3248,36 +3148,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(25);
-	var timers_1 = __webpack_require__(16);
-	var net_info_1 = __webpack_require__(39);
-	var logger_1 = __webpack_require__(9);
-	var state_1 = __webpack_require__(27);
-	var Collections = __webpack_require__(10);
+	var dispatcher_1 = __webpack_require__(22);
+	var timers_1 = __webpack_require__(11);
+	var logger_1 = __webpack_require__(7);
+	var Collections = __webpack_require__(8);
+	var runtime_1 = __webpack_require__(1);
 	var ConnectionManager = (function (_super) {
 	    __extends(ConnectionManager, _super);
 	    function ConnectionManager(key, options) {
+	        var _this = this;
 	        _super.call(this);
 	        this.key = key;
 	        this.options = options || {};
-	        this.state = state_1["default"].INITIALIZED;
+	        this.state = "initialized";
 	        this.connection = null;
 	        this.encrypted = !!options.encrypted;
 	        this.timeline = this.options.timeline;
 	        this.connectionCallbacks = this.buildConnectionCallbacks();
 	        this.errorCallbacks = this.buildErrorCallbacks();
 	        this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
-	        var self = this;
-	        net_info_1.Network.bind("online", function () {
-	            self.timeline.info({ netinfo: "online" });
-	            if ((self.state) === "connecting" || (self.state) === "unavailable") {
-	                self.retryIn(0);
+	        var Network = runtime_1["default"].getNetwork();
+	        Network.bind("online", function () {
+	            _this.timeline.info({ netinfo: "online" });
+	            if (_this.state === "connecting" || _this.state === "unavailable") {
+	                _this.retryIn(0);
 	            }
 	        });
-	        net_info_1.Network.bind("offline", function () {
-	            self.timeline.info({ netinfo: "offline" });
-	            if (self.connection) {
-	                self.sendActivityCheck();
+	        Network.bind("offline", function () {
+	            _this.timeline.info({ netinfo: "offline" });
+	            if (_this.connection) {
+	                _this.sendActivityCheck();
 	            }
 	        });
 	        this.updateStrategy();
@@ -3287,10 +3187,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        }
 	        if (!this.strategy.isSupported()) {
-	            this.updateState(state_1["default"].FAILED);
+	            this.updateState("failed");
 	            return;
 	        }
-	        this.updateState(state_1["default"].CONNECTING);
+	        this.updateState("connecting");
 	        this.startConnecting();
 	        this.setUnavailableTimer();
 	    };
@@ -3315,7 +3215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ;
 	    ConnectionManager.prototype.disconnect = function () {
 	        this.disconnectInternally();
-	        this.updateState(state_1["default"].DISCONNECTED);
+	        this.updateState("disconnected");
 	    };
 	    ;
 	    ConnectionManager.prototype.isEncrypted = function () {
@@ -3323,23 +3223,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    ;
 	    ConnectionManager.prototype.startConnecting = function () {
-	        var self = this;
+	        var _this = this;
 	        var callback = function (error, handshake) {
 	            if (error) {
-	                self.runner = self.strategy.connect(0, callback);
+	                _this.runner = _this.strategy.connect(0, callback);
 	            }
 	            else {
 	                if (handshake.action === "error") {
-	                    self.emit("error", { type: "HandshakeError", error: handshake.error });
-	                    self.timeline.error({ handshakeError: handshake.error });
+	                    _this.emit("error", { type: "HandshakeError", error: handshake.error });
+	                    _this.timeline.error({ handshakeError: handshake.error });
 	                }
 	                else {
-	                    self.abortConnecting();
-	                    self.handshakeCallbacks[handshake.action](handshake);
+	                    _this.abortConnecting();
+	                    _this.handshakeCallbacks[handshake.action](handshake);
 	                }
 	            }
 	        };
-	        self.runner = self.strategy.connect(0, callback);
+	        this.runner = this.strategy.connect(0, callback);
 	    };
 	    ;
 	    ConnectionManager.prototype.abortConnecting = function () {
@@ -3368,14 +3268,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    ;
 	    ConnectionManager.prototype.retryIn = function (delay) {
-	        var self = this;
-	        self.timeline.info({ action: "retry", delay: delay });
+	        var _this = this;
+	        this.timeline.info({ action: "retry", delay: delay });
 	        if (delay > 0) {
-	            self.emit("connecting_in", Math.round(delay / 1000));
+	            this.emit("connecting_in", Math.round(delay / 1000));
 	        }
-	        self.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {
-	            self.disconnectInternally();
-	            self.connect();
+	        this.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {
+	            _this.disconnectInternally();
+	            _this.connect();
 	        });
 	    };
 	    ;
@@ -3387,9 +3287,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    ;
 	    ConnectionManager.prototype.setUnavailableTimer = function () {
-	        var self = this;
-	        self.unavailableTimer = new timers_1.OneOffTimer(self.options.unavailableTimeout, function () {
-	            self.updateState(state_1["default"].UNAVAILABLE);
+	        var _this = this;
+	        this.unavailableTimer = new timers_1.OneOffTimer(this.options.unavailableTimeout, function () {
+	            _this.updateState("unavailable");
 	        });
 	    };
 	    ;
@@ -3400,21 +3300,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    ;
 	    ConnectionManager.prototype.sendActivityCheck = function () {
-	        var self = this;
-	        self.stopActivityCheck();
-	        self.connection.ping();
-	        self.activityTimer = new timers_1.OneOffTimer(self.options.pongTimeout, function () {
-	            self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-	            self.retryIn(0);
+	        var _this = this;
+	        this.stopActivityCheck();
+	        this.connection.ping();
+	        this.activityTimer = new timers_1.OneOffTimer(this.options.pongTimeout, function () {
+	            _this.timeline.error({ pong_timed_out: _this.options.pongTimeout });
+	            _this.retryIn(0);
 	        });
 	    };
 	    ;
 	    ConnectionManager.prototype.resetActivityCheck = function () {
-	        var self = this;
-	        self.stopActivityCheck();
-	        if (!self.connection.handlesActivityChecks()) {
-	            self.activityTimer = new timers_1.OneOffTimer(self.activityTimeout, function () {
-	                self.sendActivityCheck();
+	        var _this = this;
+	        this.stopActivityCheck();
+	        if (!this.connection.handlesActivityChecks()) {
+	            this.activityTimer = new timers_1.OneOffTimer(this.activityTimeout, function () {
+	                _this.sendActivityCheck();
 	            });
 	        }
 	    };
@@ -3426,67 +3326,67 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    ;
 	    ConnectionManager.prototype.buildConnectionCallbacks = function () {
-	        var self = this;
+	        var _this = this;
 	        return {
 	            message: function (message) {
-	                self.resetActivityCheck();
-	                self.emit('message', message);
+	                _this.resetActivityCheck();
+	                _this.emit('message', message);
 	            },
 	            ping: function () {
-	                self.send_event('pusher:pong', {});
+	                _this.send_event('pusher:pong', {});
 	            },
 	            activity: function () {
-	                self.resetActivityCheck();
+	                _this.resetActivityCheck();
 	            },
 	            error: function (error) {
-	                self.emit("error", { type: "WebSocketError", error: error });
+	                _this.emit("error", { type: "WebSocketError", error: error });
 	            },
 	            closed: function () {
-	                self.abandonConnection();
-	                if (self.shouldRetry()) {
-	                    self.retryIn(1000);
+	                _this.abandonConnection();
+	                if (_this.shouldRetry()) {
+	                    _this.retryIn(1000);
 	                }
 	            }
 	        };
 	    };
 	    ;
 	    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
-	        var self = this;
+	        var _this = this;
 	        return Collections.extend({}, errorCallbacks, {
 	            connected: function (handshake) {
-	                self.activityTimeout = Math.min(self.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
-	                self.clearUnavailableTimer();
-	                self.setConnection(handshake.connection);
-	                self.socket_id = self.connection.id;
-	                self.updateState(state_1["default"].CONNECTED, { socket_id: self.socket_id });
+	                _this.activityTimeout = Math.min(_this.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
+	                _this.clearUnavailableTimer();
+	                _this.setConnection(handshake.connection);
+	                _this.socket_id = _this.connection.id;
+	                _this.updateState("connected", { socket_id: _this.socket_id });
 	            }
 	        });
 	    };
 	    ;
 	    ConnectionManager.prototype.buildErrorCallbacks = function () {
-	        var self = this;
-	        function withErrorEmitted(callback) {
+	        var _this = this;
+	        var withErrorEmitted = function (callback) {
 	            return function (result) {
 	                if (result.error) {
-	                    self.emit("error", { type: "WebSocketError", error: result.error });
+	                    _this.emit("error", { type: "WebSocketError", error: result.error });
 	                }
 	                callback(result);
 	            };
-	        }
+	        };
 	        return {
 	            ssl_only: withErrorEmitted(function () {
-	                self.encrypted = true;
-	                self.updateStrategy();
-	                self.retryIn(0);
+	                _this.encrypted = true;
+	                _this.updateStrategy();
+	                _this.retryIn(0);
 	            }),
 	            refused: withErrorEmitted(function () {
-	                self.disconnect();
+	                _this.disconnect();
 	            }),
 	            backoff: withErrorEmitted(function () {
-	                self.retryIn(1000);
+	                _this.retryIn(1000);
 	            }),
 	            retry: withErrorEmitted(function () {
-	                self.retryIn(0);
+	                _this.retryIn(0);
 	            })
 	        };
 	    };
@@ -3526,7 +3426,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    };
 	    ConnectionManager.prototype.shouldRetry = function () {
-	        return (this.state) === "connecting" || (this.state) === "connected";
+	        return this.state === "connecting" || this.state === "connected";
 	    };
 	    return ConnectionManager;
 	}(dispatcher_1["default"]));
@@ -3535,12 +3435,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 58 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
-	var factory_1 = __webpack_require__(44);
+	var Collections = __webpack_require__(8);
+	var factory_1 = __webpack_require__(40);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -3585,13 +3485,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 59 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var factory_1 = __webpack_require__(44);
-	var util_1 = __webpack_require__(15);
-	var Errors = __webpack_require__(38);
+	var factory_1 = __webpack_require__(40);
+	var util_1 = __webpack_require__(10);
+	var Errors = __webpack_require__(35);
 	var TransportStrategy = (function () {
 	    function TransportStrategy(name, priority, transport, options) {
 	        this.name = name;
@@ -3605,13 +3505,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    };
 	    TransportStrategy.prototype.connect = function (minPriority, callback) {
+	        var _this = this;
 	        if (!this.isSupported()) {
 	            return failAttempt(new Errors.UnsupportedStrategy(), callback);
 	        }
 	        else if (this.priority < minPriority) {
 	            return failAttempt(new Errors.TransportPriorityTooLow(), callback);
 	        }
-	        var self = this;
 	        var connected = false;
 	        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
 	        var handshake = null;
@@ -3662,7 +3562,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (connected) {
 	                    return;
 	                }
-	                if (self.priority < p) {
+	                if (_this.priority < p) {
 	                    if (handshake) {
 	                        handshake.close();
 	                    }
@@ -3689,13 +3589,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 60 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
-	var util_1 = __webpack_require__(15);
-	var timers_1 = __webpack_require__(16);
+	var Collections = __webpack_require__(8);
+	var util_1 = __webpack_require__(10);
+	var timers_1 = __webpack_require__(11);
 	var SequentialStrategy = (function () {
 	    function SequentialStrategy(strategies, options) {
 	        this.strategies = strategies;
@@ -3708,7 +3608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return Collections.any(this.strategies, util_1["default"].method("isSupported"));
 	    };
 	    SequentialStrategy.prototype.connect = function (minPriority, callback) {
-	        var self = this;
+	        var _this = this;
 	        var strategies = this.strategies;
 	        var current = 0;
 	        var timeout = this.timeout;
@@ -3719,17 +3619,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            else {
 	                current = current + 1;
-	                if (self.loop) {
+	                if (_this.loop) {
 	                    current = current % strategies.length;
 	                }
 	                if (current < strategies.length) {
 	                    if (timeout) {
 	                        timeout = timeout * 2;
-	                        if (self.timeoutLimit) {
-	                            timeout = Math.min(timeout, self.timeoutLimit);
+	                        if (_this.timeoutLimit) {
+	                            timeout = Math.min(timeout, _this.timeoutLimit);
 	                        }
 	                    }
-	                    runner = self.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: self.failFast }, tryNextStrategy);
+	                    runner = _this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: _this.failFast }, tryNextStrategy);
 	                }
 	                else {
 	                    callback(true);
@@ -3786,12 +3686,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 61 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(10);
-	var util_1 = __webpack_require__(15);
+	var Collections = __webpack_require__(8);
+	var util_1 = __webpack_require__(10);
 	var BestConnectedEverStrategy = (function () {
 	    function BestConnectedEverStrategy(strategies) {
 	        this.strategies = strategies;
@@ -3849,13 +3749,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 62 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(15);
+	var util_1 = __webpack_require__(10);
 	var runtime_1 = __webpack_require__(1);
-	var sequential_strategy_1 = __webpack_require__(60);
+	var sequential_strategy_1 = __webpack_require__(54);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
 	        this.strategy = strategy;
@@ -3963,11 +3863,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 63 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var timers_1 = __webpack_require__(16);
+	var timers_1 = __webpack_require__(11);
 	var DelayedStrategy = (function () {
 	    function DelayedStrategy(strategy, _a) {
 	        var number = _a.delay;
@@ -4005,7 +3905,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 64 */
+/* 58 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4030,7 +3930,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 65 */
+/* 59 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -4057,11 +3957,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 66 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var defaults_1 = __webpack_require__(5);
+	var defaults_1 = __webpack_require__(4);
 	exports.getGlobalConfig = function () {
 	    return {
 	        wsHost: defaults_1["default"].host,

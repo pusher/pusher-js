@@ -1,4 +1,4 @@
-export declare function extend(target: any, ...sources: any[]): any;
+export declare function extend<T>(target: any, ...sources: any[]): T;
 export declare function stringify(): string;
 export declare function arrayIndexOf(array: any[], item: any): number;
 export declare function objectApply(object: any, f: Function): void;

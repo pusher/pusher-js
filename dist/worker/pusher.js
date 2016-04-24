@@ -47,22 +47,21 @@ var Pusher =
 
 	"use strict";
 	var runtime_1 = __webpack_require__(1);
-	var Collections = __webpack_require__(5);
-	var dispatcher_1 = __webpack_require__(20);
-	var timeline_1 = __webpack_require__(37);
-	var level_1 = __webpack_require__(38);
-	var StrategyBuilder = __webpack_require__(39);
-	var timers_1 = __webpack_require__(8);
-	var defaults_1 = __webpack_require__(14);
-	var DefaultConfig = __webpack_require__(63);
-	var logger_1 = __webpack_require__(4);
-	var state_1 = __webpack_require__(22);
-	var factory_1 = __webpack_require__(41);
+	var Collections = __webpack_require__(3);
+	var dispatcher_1 = __webpack_require__(13);
+	var timeline_1 = __webpack_require__(28);
+	var level_1 = __webpack_require__(29);
+	var StrategyBuilder = __webpack_require__(30);
+	var timers_1 = __webpack_require__(6);
+	var defaults_1 = __webpack_require__(10);
+	var DefaultConfig = __webpack_require__(53);
+	var logger_1 = __webpack_require__(15);
+	var factory_1 = __webpack_require__(32);
 	var Pusher = (function () {
 	    function Pusher(app_key, options) {
+	        var _this = this;
 	        checkAppKey(app_key);
 	        options = options || {};
-	        var self = this;
 	        this.key = app_key;
 	        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
 	        this.channels = factory_1["default"].createChannels();
@@ -83,8 +82,8 @@ var Pusher =
 	            });
 	        }
 	        var getStrategy = function (options) {
-	            var config = Collections.extend({}, self.config, options);
-	            return StrategyBuilder.build(defaults_1["default"].getDefaultStrategy(config), config);
+	            var config = Collections.extend({}, _this.config, options);
+	            return StrategyBuilder.build(runtime_1["default"].getDefaultStrategy(config), config);
 	        };
 	        this.connection = factory_1["default"].createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,
 	            timeline: this.timeline,
@@ -93,25 +92,25 @@ var Pusher =
 	            unavailableTimeout: this.config.unavailable_timeout
 	        }, this.config, { encrypted: this.isEncrypted() }));
 	        this.connection.bind('connected', function () {
-	            self.subscribeAll();
-	            if (self.timelineSender) {
-	                self.timelineSender.send(self.connection.isEncrypted());
+	            _this.subscribeAll();
+	            if (_this.timelineSender) {
+	                _this.timelineSender.send(_this.connection.isEncrypted());
 	            }
 	        });
 	        this.connection.bind('message', function (params) {
 	            var internal = (params.event.indexOf('pusher_internal:') === 0);
 	            if (params.channel) {
-	                var channel = self.channel(params.channel);
+	                var channel = _this.channel(params.channel);
 	                if (channel) {
 	                    channel.handleEvent(params.event, params.data);
 	                }
 	            }
 	            if (!internal) {
-	                self.global_emitter.emit(params.event, params.data);
+	                _this.global_emitter.emit(params.event, params.data);
 	            }
 	        });
 	        this.connection.bind('disconnected', function () {
-	            self.channels.disconnect();
+	            _this.channels.disconnect();
 	        });
 	        this.connection.bind('error', function (err) {
 	            logger_1["default"].warn('Error', err);
@@ -119,7 +118,7 @@ var Pusher =
 	        Pusher.instances.push(this);
 	        this.timeline.info({ instances: Pusher.instances.length });
 	        if (Pusher.isReady) {
-	            self.connect();
+	            this.connect();
 	        }
 	    }
 	    Pusher.ready = function () {
@@ -181,14 +180,14 @@ var Pusher =
 	    };
 	    Pusher.prototype.subscribe = function (channel_name) {
 	        var channel = this.channels.add(channel_name, this);
-	        if (this.connection.state === state_1["default"].CONNECTED) {
+	        if (this.connection.state === "connected") {
 	            channel.subscribe();
 	        }
 	        return channel;
 	    };
 	    Pusher.prototype.unsubscribe = function (channel_name) {
 	        var channel = this.channels.remove(channel_name);
-	        if (channel && this.connection.state === state_1["default"].CONNECTED) {
+	        if (channel && this.connection.state === "connected") {
 	            channel.unsubscribe();
 	        }
 	    };
@@ -225,8 +224,42 @@ var Pusher =
 
 	"use strict";
 	var runtime_1 = __webpack_require__(2);
+	var net_info_1 = __webpack_require__(25);
+	var fetch_auth_1 = __webpack_require__(26);
+	var fetch_timeline_1 = __webpack_require__(27);
+	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, whenReady = runtime_1["default"].whenReady, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getGlobal = runtime_1["default"].getGlobal, getLocalStorage = runtime_1["default"].getLocalStorage, getClientFeatures = runtime_1["default"].getClientFeatures, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
+	var Worker = {
+	    getDefaultStrategy: getDefaultStrategy,
+	    Transports: Transports,
+	    whenReady: whenReady,
+	    getProtocol: getProtocol,
+	    isXHRSupported: isXHRSupported,
+	    getGlobal: getGlobal,
+	    getLocalStorage: getLocalStorage,
+	    getClientFeatures: getClientFeatures,
+	    createXHR: createXHR,
+	    createWebSocket: createWebSocket,
+	    addUnloadListener: addUnloadListener,
+	    removeUnloadListener: removeUnloadListener,
+	    transportConnectionInitializer: transportConnectionInitializer,
+	    createSocketRequest: createSocketRequest,
+	    HTTPFactory: HTTPFactory,
+	    TimelineTransport: fetch_timeline_1["default"],
+	    getAuthorizers: function () {
+	        return { ajax: fetch_auth_1["default"] };
+	    },
+	    getWebSocketAPI: function () {
+	        return WebSocket;
+	    },
+	    getXHRAPI: function () {
+	        return XMLHttpRequest;
+	    },
+	    getNetwork: function () {
+	        return net_info_1.Network;
+	    }
+	};
 	exports.__esModule = true;
-	exports["default"] = runtime_1["default"];
+	exports["default"] = Worker;
 
 
 /***/ },
@@ -234,32 +267,21 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var xhr_timeline_1 = __webpack_require__(3);
-	var xhr_auth_1 = __webpack_require__(10);
-	var Collections = __webpack_require__(5);
-	var transports_1 = __webpack_require__(11);
-	var xhr_1 = __webpack_require__(33);
-	var ws_1 = __webpack_require__(23);
-	var net_info_1 = __webpack_require__(36);
+	var Collections = __webpack_require__(3);
+	var transports_1 = __webpack_require__(8);
+	var default_strategy_1 = __webpack_require__(16);
+	var transport_connection_initializer_1 = __webpack_require__(17);
+	var http_1 = __webpack_require__(18);
 	var Isomorphic = {
-	    TimelineTransport: xhr_timeline_1["default"],
+	    getDefaultStrategy: default_strategy_1["default"],
+	    Transports: transports_1["default"],
+	    transportConnectionInitializer: transport_connection_initializer_1["default"],
+	    HTTPFactory: http_1["default"],
 	    whenReady: function (callback) {
 	        callback();
 	    },
-	    getProtocol: function () {
-	        return "http:";
-	    },
-	    isXHRSupported: function () {
-	        return true;
-	    },
-	    isXDRSupported: function (encrypted) {
-	        return false;
-	    },
 	    getGlobal: function () {
 	        return Function("return this")();
-	    },
-	    getAuthorizers: function () {
-	        return { ajax: xhr_auth_1["default"] };
 	    },
 	    getLocalStorage: function () {
 	        return undefined;
@@ -267,17 +289,30 @@ var Pusher =
 	    getClientFeatures: function () {
 	        return Collections.keys(Collections.filterObject({ "ws": transports_1["default"].ws }, function (t) { return t.isSupported({}); }));
 	    },
+	    getProtocol: function () {
+	        return "http:";
+	    },
+	    isXHRSupported: function () {
+	        return true;
+	    },
+	    createSocketRequest: function (method, url) {
+	        if (this.isXHRSupported()) {
+	            return this.HTTPFactory.createXHR(method, url);
+	        }
+	        else {
+	            throw "Cross-origin HTTP requests are not supported";
+	        }
+	    },
 	    createXHR: function () {
-	        var Constructor = xhr_1["default"].getAPI();
+	        var Constructor = this.getXHRAPI();
 	        return new Constructor();
 	    },
-	    getNetwork: function () {
-	        return net_info_1.Network;
-	    },
 	    createWebSocket: function (url) {
-	        var Constructor = ws_1["default"].getAPI();
+	        var Constructor = this.getWebSocketAPI();
 	        return new Constructor(url);
-	    }
+	    },
+	    addUnloadListener: function (listener) { },
+	    removeUnloadListener: function (listener) { }
 	};
 	exports.__esModule = true;
 	exports["default"] = Isomorphic;
@@ -288,85 +323,8 @@ var Pusher =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var logger_1 = __webpack_require__(4);
-	var Collections = __webpack_require__(5);
-	var util_1 = __webpack_require__(7);
-	var runtime_1 = __webpack_require__(1);
-	var getAgent = function (sender, encrypted) {
-	    return function (data, callback) {
-	        var scheme = "http" + (encrypted ? "s" : "") + "://";
-	        var url = scheme + (sender.options.host) + sender.options.path;
-	        var params = Collections.filterObject(data, function (value) {
-	            return value !== undefined;
-	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
-	        url += ("/" + 2 + "?" + query);
-	        var xhr = runtime_1["default"].createXHR();
-	        xhr.open("GET", url, true);
-	        xhr.onreadystatechange = function () {
-	            if (xhr.readyState === 4) {
-	                if (xhr.responseText !== "OK") {
-	                    logger_1["default"].debug("TimelineSender Error: received from stats.pusher.com");
-	                }
-	            }
-	        };
-	        xhr.send();
-	    };
-	};
-	var xhr = {
-	    name: 'xhr',
-	    getAgent: getAgent
-	};
-	exports.__esModule = true;
-	exports["default"] = xhr;
-
-
-/***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var collections_1 = __webpack_require__(5);
-	var Logger = {
-	    log: null,
-	    debug: function () {
-	        var args = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            args[_i - 0] = arguments[_i];
-	        }
-	        if (!this.log) {
-	            return;
-	        }
-	        this.log(collections_1.stringify.apply(this, arguments));
-	    },
-	    warn: function () {
-	        var args = [];
-	        for (var _i = 0; _i < arguments.length; _i++) {
-	            args[_i - 0] = arguments[_i];
-	        }
-	        var message = collections_1.stringify.apply(this, arguments);
-	        if (console.warn) {
-	            console.warn(message);
-	        }
-	        else if (console.log) {
-	            console.log(message);
-	        }
-	        if (this.log) {
-	            this.log(message);
-	        }
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = Logger;
-
-
-/***/ },
-/* 5 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var base64_1 = __webpack_require__(6);
-	var runtime_1 = __webpack_require__(1);
+	var base64_1 = __webpack_require__(4);
+	var util_1 = __webpack_require__(5);
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -443,7 +401,7 @@ var Pusher =
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || runtime_1["default"].getGlobal(), array[i], i, array);
+	        f.call(context || util_1["default"].getGlobal(), array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
@@ -522,11 +480,12 @@ var Pusher =
 
 
 /***/ },
-/* 6 */
-/***/ function(module, exports) {
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var global = Function("return this")();
+	var util_1 = __webpack_require__(5);
+	var global = util_1["default"].getGlobal();
 	function encode(s) {
 	    return btoa(utob(s));
 	}
@@ -575,12 +534,15 @@ var Pusher =
 
 
 /***/ },
-/* 7 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var timers_1 = __webpack_require__(8);
+	var timers_1 = __webpack_require__(6);
 	var Util = {
+	    getGlobal: function () {
+	        return Function("return this")();
+	    },
 	    now: function () {
 	        if (Date.now) {
 	            return Date.now();
@@ -608,7 +570,7 @@ var Pusher =
 
 
 /***/ },
-/* 8 */
+/* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -617,7 +579,7 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var abstract_timer_1 = __webpack_require__(9);
+	var abstract_timer_1 = __webpack_require__(7);
 	var global = Function("return this")();
 	function clearTimeout(timer) {
 	    global.clearTimeout(timer);
@@ -650,7 +612,7 @@ var Pusher =
 
 
 /***/ },
-/* 9 */
+/* 7 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -680,78 +642,23 @@ var Pusher =
 
 
 /***/ },
-/* 10 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var logger_1 = __webpack_require__(4);
-	var runtime_1 = __webpack_require__(1);
-	var ajax = function (context, socketId, callback) {
-	    var self = this, xhr;
-	    xhr = runtime_1["default"].createXHR();
-	    xhr.open("POST", self.options.authEndpoint, true);
-	    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-	    for (var headerName in this.authOptions.headers) {
-	        xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
-	    }
-	    xhr.onreadystatechange = function () {
-	        if (xhr.readyState === 4) {
-	            if (xhr.status === 200) {
-	                var data, parsed = false;
-	                try {
-	                    data = JSON.parse(xhr.responseText);
-	                    parsed = true;
-	                }
-	                catch (e) {
-	                    callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
-	                }
-	                if (parsed) {
-	                    callback(false, data);
-	                }
-	            }
-	            else {
-	                logger_1["default"].warn("Couldn't get auth info from your webapp", xhr.status);
-	                callback(true, xhr.status);
-	            }
-	        }
-	    };
-	    xhr.send(this.composeQuery(socketId));
-	    return xhr;
-	};
-	exports.__esModule = true;
-	exports["default"] = ajax;
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var transports_1 = __webpack_require__(12);
-	exports.__esModule = true;
-	exports["default"] = transports_1["default"];
-
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var URLSchemes = __webpack_require__(13);
-	var transport_1 = __webpack_require__(17);
-	var Collections = __webpack_require__(5);
-	var ws_1 = __webpack_require__(23);
-	var http_1 = __webpack_require__(24);
+	var URLSchemes = __webpack_require__(9);
+	var transport_1 = __webpack_require__(11);
+	var Collections = __webpack_require__(3);
 	var runtime_1 = __webpack_require__(1);
 	var WSTransport = new transport_1["default"]({
 	    urls: URLSchemes.ws,
 	    handlesActivityChecks: false,
 	    supportsPing: false,
 	    isInitialized: function () {
-	        return Boolean(ws_1["default"].getAPI());
+	        return Boolean(runtime_1["default"].getWebSocketAPI());
 	    },
 	    isSupported: function () {
-	        return Boolean(ws_1["default"].getAPI());
+	        return Boolean(runtime_1["default"].getWebSocketAPI());
 	    },
 	    getSocket: function (url) {
 	        return runtime_1["default"].createWebSocket(url);
@@ -765,12 +672,12 @@ var Pusher =
 	        return true;
 	    }
 	};
-	var streamingConfiguration = Collections.extend({ getSocket: function (url) {
-	        return http_1["default"].createStreamingSocket(url);
+	exports.streamingConfiguration = Collections.extend({ getSocket: function (url) {
+	        return runtime_1["default"].HTTPFactory.createStreamingSocket(url);
 	    }
 	}, httpConfiguration);
-	var pollingConfiguration = Collections.extend({ getSocket: function (url) {
-	        return http_1["default"].createPollingSocket(url);
+	exports.pollingConfiguration = Collections.extend({ getSocket: function (url) {
+	        return runtime_1["default"].HTTPFactory.createPollingSocket(url);
 	    }
 	}, httpConfiguration);
 	var xhrConfiguration = {
@@ -778,33 +685,23 @@ var Pusher =
 	        return runtime_1["default"].isXHRSupported();
 	    }
 	};
-	var xdrConfiguration = {
-	    isSupported: function (environment) {
-	        var yes = runtime_1["default"].isXDRSupported(environment.encrypted);
-	        return yes;
-	    }
-	};
-	var XHRStreamingTransport = new transport_1["default"](Collections.extend({}, streamingConfiguration, xhrConfiguration));
-	var XDRStreamingTransport = new transport_1["default"](Collections.extend({}, streamingConfiguration, xdrConfiguration));
-	var XHRPollingTransport = new transport_1["default"](Collections.extend({}, pollingConfiguration, xhrConfiguration));
-	var XDRPollingTransport = new transport_1["default"](Collections.extend({}, pollingConfiguration, xdrConfiguration));
+	var XHRStreamingTransport = new transport_1["default"](Collections.extend({}, exports.streamingConfiguration, xhrConfiguration));
+	var XHRPollingTransport = new transport_1["default"](Collections.extend({}, exports.pollingConfiguration, xhrConfiguration));
 	var Transports = {
 	    ws: WSTransport,
 	    xhr_streaming: XHRStreamingTransport,
-	    xdr_streaming: XDRStreamingTransport,
-	    xhr_polling: XHRPollingTransport,
-	    xdr_polling: XDRPollingTransport
+	    xhr_polling: XHRPollingTransport
 	};
 	exports.__esModule = true;
 	exports["default"] = Transports;
 
 
 /***/ },
-/* 13 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var defaults_1 = __webpack_require__(14);
+	var defaults_1 = __webpack_require__(10);
 	function getGenericURL(baseScheme, params, path) {
 	    var scheme = baseScheme + (params.encrypted ? "s" : "");
 	    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
@@ -840,143 +737,40 @@ var Pusher =
 
 
 /***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var defaults_1 = __webpack_require__(15);
-	exports.__esModule = true;
-	exports["default"] = defaults_1["default"];
-
-
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var defaults_1 = __webpack_require__(16);
-	defaults_1["default"].getDefaultStrategy = function (config) {
-	    var wsStrategy;
-	    if (config.encrypted) {
-	        wsStrategy = [
-	            ":best_connected_ever",
-	            ":ws_loop",
-	            [":delayed", 2000, [":http_loop"]]
-	        ];
-	    }
-	    else {
-	        wsStrategy = [
-	            ":best_connected_ever",
-	            ":ws_loop",
-	            [":delayed", 2000, [":wss_loop"]],
-	            [":delayed", 5000, [":http_loop"]]
-	        ];
-	    }
-	    return [
-	        [":def", "ws_options", {
-	                hostUnencrypted: config.wsHost + ":" + config.wsPort,
-	                hostEncrypted: config.wsHost + ":" + config.wssPort
-	            }],
-	        [":def", "wss_options", [":extend", ":ws_options", {
-	                    encrypted: true
-	                }]],
-	        [":def", "http_options", {
-	                hostUnencrypted: config.httpHost + ":" + config.httpPort,
-	                hostEncrypted: config.httpHost + ":" + config.httpsPort,
-	                httpPath: config.httpPath
-	            }],
-	        [":def", "timeouts", {
-	                loop: true,
-	                timeout: 15000,
-	                timeoutLimit: 60000
-	            }],
-	        [":def", "ws_manager", [":transport_manager", {
-	                    lives: 2,
-	                    minPingDelay: 10000,
-	                    maxPingDelay: config.activity_timeout
-	                }]],
-	        [":def", "streaming_manager", [":transport_manager", {
-	                    lives: 2,
-	                    minPingDelay: 10000,
-	                    maxPingDelay: config.activity_timeout
-	                }]],
-	        [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
-	        [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-	        [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
-	        [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":http_options", ":streaming_manager"],
-	        [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
-	        [":def_transport", "xdr_polling", "xdr_polling", 1, ":http_options"],
-	        [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
-	        [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
-	        [":def", "streaming_loop", [":sequential", ":timeouts",
-	                [":if", [":is_supported", ":xhr_streaming"],
-	                    ":xhr_streaming",
-	                    ":xdr_streaming"
-	                ]
-	            ]],
-	        [":def", "polling_loop", [":sequential", ":timeouts",
-	                [":if", [":is_supported", ":xhr_polling"],
-	                    ":xhr_polling",
-	                    ":xdr_polling"
-	                ]
-	            ]],
-	        [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
-	                    ":best_connected_ever",
-	                    ":streaming_loop",
-	                    [":delayed", 4000, [":polling_loop"]]
-	                ], [
-	                    ":polling_loop"
-	                ]]],
-	        [":def", "strategy",
-	            [":cached", 1800000,
-	                [":first_connected",
-	                    [":if", [":is_supported", ":ws"],
-	                        wsStrategy,
-	                        ":http_loop"
-	                    ]
-	                ]
-	            ]
-	        ]
-	    ];
-	};
-	exports.__esModule = true;
-	exports["default"] = defaults_1["default"];
-
-
-/***/ },
-/* 16 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
-	var Defaults = {};
-	Defaults.VERSION = '3.0';
-	Defaults.PROTOCOL = 7;
-	Defaults.host = 'ws.pusherapp.com';
-	Defaults.ws_port = 80;
-	Defaults.wss_port = 443;
-	Defaults.sockjs_host = 'sockjs.pusher.com';
-	Defaults.sockjs_http_port = 80;
-	Defaults.sockjs_https_port = 443;
-	Defaults.sockjs_path = "/pusher";
-	Defaults.stats_host = 'stats.pusher.com';
-	Defaults.channel_auth_endpoint = '/pusher/auth';
-	Defaults.channel_auth_transport = 'ajax';
-	Defaults.activity_timeout = 120000;
-	Defaults.pong_timeout = 30000;
-	Defaults.unavailable_timeout = 10000;
-	Defaults.cdn_http = 'http://js.pusher.com';
-	Defaults.cdn_https = 'https://js.pusher.com';
-	Defaults.dependency_suffix = '';
+	var Defaults = {
+	    VERSION: '3.0',
+	    PROTOCOL: 7,
+	    host: 'ws.pusherapp.com',
+	    ws_port: 80,
+	    wss_port: 443,
+	    sockjs_host: 'sockjs.pusher.com',
+	    sockjs_http_port: 80,
+	    sockjs_https_port: 443,
+	    sockjs_path: "/pusher",
+	    stats_host: 'stats.pusher.com',
+	    channel_auth_endpoint: '/pusher/auth',
+	    channel_auth_transport: 'ajax',
+	    activity_timeout: 120000,
+	    pong_timeout: 30000,
+	    unavailable_timeout: 10000,
+	    cdn_http: 'http://js.pusher.com',
+	    cdn_https: 'https://js.pusher.com',
+	    dependency_suffix: ''
+	};
 	exports.__esModule = true;
 	exports["default"] = Defaults;
 
 
 /***/ },
-/* 17 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var transport_connection_1 = __webpack_require__(18);
+	var transport_connection_1 = __webpack_require__(12);
 	var Transport = (function () {
 	    function Transport(hooks) {
 	        this.hooks = hooks;
@@ -994,17 +788,7 @@ var Pusher =
 
 
 /***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var transport_connection_1 = __webpack_require__(19);
-	exports.__esModule = true;
-	exports["default"] = transport_connection_1["default"];
-
-
-/***/ },
-/* 19 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1013,65 +797,54 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var util_1 = __webpack_require__(7);
-	var Collections = __webpack_require__(5);
-	var dispatcher_1 = __webpack_require__(20);
-	var logger_1 = __webpack_require__(4);
-	var state_1 = __webpack_require__(22);
-	var BaseTransportConnection = (function (_super) {
-	    __extends(BaseTransportConnection, _super);
-	    function BaseTransportConnection(hooks, name, priority, key, options) {
+	var util_1 = __webpack_require__(5);
+	var Collections = __webpack_require__(3);
+	var dispatcher_1 = __webpack_require__(13);
+	var logger_1 = __webpack_require__(15);
+	var runtime_1 = __webpack_require__(1);
+	var TransportConnection = (function (_super) {
+	    __extends(TransportConnection, _super);
+	    function TransportConnection(hooks, name, priority, key, options) {
 	        _super.call(this);
+	        this.initialize = runtime_1["default"].transportConnectionInitializer;
 	        this.hooks = hooks;
 	        this.name = name;
 	        this.priority = priority;
 	        this.key = key;
 	        this.options = options;
-	        this.state = state_1["default"].NEW;
+	        this.state = "new";
 	        this.timeline = options.timeline;
 	        this.activityTimeout = options.activityTimeout;
 	        this.id = this.timeline.generateUniqueID();
 	    }
-	    BaseTransportConnection.prototype.handlesActivityChecks = function () {
+	    TransportConnection.prototype.handlesActivityChecks = function () {
 	        return Boolean(this.hooks.handlesActivityChecks);
 	    };
-	    BaseTransportConnection.prototype.supportsPing = function () {
+	    TransportConnection.prototype.supportsPing = function () {
 	        return Boolean(this.hooks.supportsPing);
 	    };
-	    BaseTransportConnection.prototype.initialize = function () {
-	        var self = this;
-	        self.timeline.info(self.buildTimelineMessage({
-	            transport: self.name + (self.options.encrypted ? "s" : "")
-	        }));
-	        if (self.hooks.isInitialized()) {
-	            self.changeState(state_1["default"].INITIALIZED);
-	        }
-	        else {
-	            self.onClose();
-	        }
-	    };
-	    BaseTransportConnection.prototype.connect = function () {
-	        var self = this;
-	        if (self.socket || self.state !== state_1["default"].INITIALIZED) {
+	    TransportConnection.prototype.connect = function () {
+	        var _this = this;
+	        if (this.socket || this.state !== "initialized") {
 	            return false;
 	        }
-	        var url = self.hooks.urls.getInitial(self.key, self.options);
+	        var url = this.hooks.urls.getInitial(this.key, this.options);
 	        try {
-	            self.socket = self.hooks.getSocket(url, self.options);
+	            this.socket = this.hooks.getSocket(url, this.options);
 	        }
 	        catch (e) {
 	            util_1["default"].defer(function () {
-	                self.onError(e);
-	                self.changeState(state_1["default"].CLOSED);
+	                _this.onError(e);
+	                _this.changeState("closed");
 	            });
 	            return false;
 	        }
-	        self.bindListeners();
-	        logger_1["default"].debug("Connecting", { transport: self.name, url: url });
-	        self.changeState(state_1["default"].CONNECTING);
+	        this.bindListeners();
+	        logger_1["default"].debug("Connecting", { transport: this.name, url: url });
+	        this.changeState("connecting");
 	        return true;
 	    };
-	    BaseTransportConnection.prototype.close = function () {
+	    TransportConnection.prototype.close = function () {
 	        if (this.socket) {
 	            this.socket.close();
 	            return true;
@@ -1080,12 +853,12 @@ var Pusher =
 	            return false;
 	        }
 	    };
-	    BaseTransportConnection.prototype.send = function (data) {
-	        var self = this;
-	        if (self.state === state_1["default"].OPEN) {
+	    TransportConnection.prototype.send = function (data) {
+	        var _this = this;
+	        if (this.state === "open") {
 	            util_1["default"].defer(function () {
-	                if (self.socket) {
-	                    self.socket.send(data);
+	                if (_this.socket) {
+	                    _this.socket.send(data);
 	                }
 	            });
 	            return true;
@@ -1094,61 +867,61 @@ var Pusher =
 	            return false;
 	        }
 	    };
-	    BaseTransportConnection.prototype.ping = function () {
-	        if (this.state === state_1["default"].OPEN && this.supportsPing()) {
+	    TransportConnection.prototype.ping = function () {
+	        if (this.state === "open" && this.supportsPing()) {
 	            this.socket.ping();
 	        }
 	    };
-	    BaseTransportConnection.prototype.onOpen = function () {
+	    TransportConnection.prototype.onOpen = function () {
 	        if (this.hooks.beforeOpen) {
 	            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
 	        }
-	        this.changeState(state_1["default"].OPEN);
+	        this.changeState("open");
 	        this.socket.onopen = undefined;
 	    };
-	    BaseTransportConnection.prototype.onError = function (error) {
+	    TransportConnection.prototype.onError = function (error) {
 	        this.emit("error", { type: 'WebSocketError', error: error });
 	        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
 	    };
-	    BaseTransportConnection.prototype.onClose = function (closeEvent) {
+	    TransportConnection.prototype.onClose = function (closeEvent) {
 	        if (closeEvent) {
-	            this.changeState(state_1["default"].CLOSED, {
+	            this.changeState("closed", {
 	                code: closeEvent.code,
 	                reason: closeEvent.reason,
 	                wasClean: closeEvent.wasClean
 	            });
 	        }
 	        else {
-	            this.changeState(state_1["default"].CLOSED);
+	            this.changeState("closed");
 	        }
 	        this.unbindListeners();
 	        this.socket = undefined;
 	    };
-	    BaseTransportConnection.prototype.onMessage = function (message) {
+	    TransportConnection.prototype.onMessage = function (message) {
 	        this.emit("message", message);
 	    };
-	    BaseTransportConnection.prototype.onActivity = function () {
+	    TransportConnection.prototype.onActivity = function () {
 	        this.emit("activity");
 	    };
-	    BaseTransportConnection.prototype.bindListeners = function () {
-	        var self = this;
-	        self.socket.onopen = function () {
-	            self.onOpen();
+	    TransportConnection.prototype.bindListeners = function () {
+	        var _this = this;
+	        this.socket.onopen = function () {
+	            _this.onOpen();
 	        };
-	        self.socket.onerror = function (error) {
-	            self.onError(error);
+	        this.socket.onerror = function (error) {
+	            _this.onError(error);
 	        };
-	        self.socket.onclose = function (closeEvent) {
-	            self.onClose(closeEvent);
+	        this.socket.onclose = function (closeEvent) {
+	            _this.onClose(closeEvent);
 	        };
-	        self.socket.onmessage = function (message) {
-	            self.onMessage(message);
+	        this.socket.onmessage = function (message) {
+	            _this.onMessage(message);
 	        };
-	        if (self.supportsPing()) {
-	            self.socket.onactivity = function () { self.onActivity(); };
+	        if (this.supportsPing()) {
+	            this.socket.onactivity = function () { _this.onActivity(); };
 	        }
 	    };
-	    BaseTransportConnection.prototype.unbindListeners = function () {
+	    TransportConnection.prototype.unbindListeners = function () {
 	        if (this.socket) {
 	            this.socket.onopen = undefined;
 	            this.socket.onerror = undefined;
@@ -1159,7 +932,7 @@ var Pusher =
 	            }
 	        }
 	    };
-	    BaseTransportConnection.prototype.changeState = function (state, params) {
+	    TransportConnection.prototype.changeState = function (state, params) {
 	        this.state = state;
 	        this.timeline.info(this.buildTimelineMessage({
 	            state: state,
@@ -1167,21 +940,21 @@ var Pusher =
 	        }));
 	        this.emit(state, params);
 	    };
-	    BaseTransportConnection.prototype.buildTimelineMessage = function (message) {
+	    TransportConnection.prototype.buildTimelineMessage = function (message) {
 	        return Collections.extend({ cid: this.id }, message);
 	    };
-	    return BaseTransportConnection;
+	    return TransportConnection;
 	}(dispatcher_1["default"]));
 	exports.__esModule = true;
-	exports["default"] = BaseTransportConnection;
+	exports["default"] = TransportConnection;
 
 
 /***/ },
-/* 20 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var callback_registry_1 = __webpack_require__(21);
+	var callback_registry_1 = __webpack_require__(14);
 	var global = Function("return this")();
 	var Dispatcher = (function () {
 	    function Dispatcher(failThrough) {
@@ -1228,11 +1001,11 @@ var Pusher =
 
 
 /***/ },
-/* 21 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
+	var Collections = __webpack_require__(3);
 	var CallbackRegistry = (function () {
 	    function CallbackRegistry() {
 	        this._callbacks = {};
@@ -1281,52 +1054,156 @@ var Pusher =
 
 
 /***/ },
-/* 22 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var ConnectionState;
-	(function (ConnectionState) {
-	    ConnectionState[ConnectionState["OPEN"] = "open"] = "OPEN";
-	    ConnectionState[ConnectionState["CLOSED"] = "closed"] = "CLOSED";
-	    ConnectionState[ConnectionState["NEW"] = "new"] = "NEW";
-	    ConnectionState[ConnectionState["INITIALIZED"] = "initialized"] = "INITIALIZED";
-	    ConnectionState[ConnectionState["INITIALIZING"] = "initializing"] = "INITIALIZING";
-	    ConnectionState[ConnectionState["CONNECTING"] = "connecting"] = "CONNECTING";
-	    ConnectionState[ConnectionState["FAILED"] = "failed"] = "FAILED";
-	    ConnectionState[ConnectionState["DISCONNECTED"] = "disconnected"] = "DISCONNECTED";
-	    ConnectionState[ConnectionState["UNAVAILABLE"] = "unavailable"] = "UNAVAILABLE";
-	    ConnectionState[ConnectionState["CONNECTED"] = "connected"] = "CONNECTED";
-	})(ConnectionState || (ConnectionState = {}));
-	exports.__esModule = true;
-	exports["default"] = ConnectionState;
-
-
-/***/ },
-/* 23 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var WS = {
-	    getAPI: function () {
-	        return WebSocket;
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = WS;
-
-
-/***/ },
-/* 24 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var http_request_1 = __webpack_require__(25);
-	var http_socket_1 = __webpack_require__(28);
-	var http_streaming_socket_1 = __webpack_require__(30);
-	var http_polling_socket_1 = __webpack_require__(31);
-	var http_xhr_request_1 = __webpack_require__(32);
-	var http_xdomain_request_1 = __webpack_require__(34);
+	var collections_1 = __webpack_require__(3);
+	var Logger = {
+	    log: null,
+	    debug: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        if (!this.log) {
+	            return;
+	        }
+	        this.log(collections_1.stringify.apply(this, arguments));
+	    },
+	    warn: function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        var message = collections_1.stringify.apply(this, arguments);
+	        if (console.warn) {
+	            console.warn(message);
+	        }
+	        else if (console.log) {
+	            console.log(message);
+	        }
+	        if (this.log) {
+	            this.log(message);
+	        }
+	    }
+	};
+	exports.__esModule = true;
+	exports["default"] = Logger;
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var getDefaultStrategy = function (config) {
+	    var wsStrategy;
+	    if (config.encrypted) {
+	        wsStrategy = [
+	            ":best_connected_ever",
+	            ":ws_loop",
+	            [":delayed", 2000, [":http_loop"]]
+	        ];
+	    }
+	    else {
+	        wsStrategy = [
+	            ":best_connected_ever",
+	            ":ws_loop",
+	            [":delayed", 2000, [":wss_loop"]],
+	            [":delayed", 5000, [":http_loop"]]
+	        ];
+	    }
+	    return [
+	        [":def", "ws_options", {
+	                hostUnencrypted: config.wsHost + ":" + config.wsPort,
+	                hostEncrypted: config.wsHost + ":" + config.wssPort
+	            }],
+	        [":def", "wss_options", [":extend", ":ws_options", {
+	                    encrypted: true
+	                }]],
+	        [":def", "http_options", {
+	                hostUnencrypted: config.httpHost + ":" + config.httpPort,
+	                hostEncrypted: config.httpHost + ":" + config.httpsPort,
+	                httpPath: config.httpPath
+	            }],
+	        [":def", "timeouts", {
+	                loop: true,
+	                timeout: 15000,
+	                timeoutLimit: 60000
+	            }],
+	        [":def", "ws_manager", [":transport_manager", {
+	                    lives: 2,
+	                    minPingDelay: 10000,
+	                    maxPingDelay: config.activity_timeout
+	                }]],
+	        [":def", "streaming_manager", [":transport_manager", {
+	                    lives: 2,
+	                    minPingDelay: 10000,
+	                    maxPingDelay: config.activity_timeout
+	                }]],
+	        [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
+	        [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
+	        [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
+	        [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
+	        [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
+	        [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
+	        [":def", "streaming_loop", [":sequential", ":timeouts", ":xhr_streaming"]],
+	        [":def", "polling_loop", [":sequential", ":timeouts", ":xhr_polling"]],
+	        [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
+	                    ":best_connected_ever",
+	                    ":streaming_loop",
+	                    [":delayed", 4000, [":polling_loop"]]
+	                ], [
+	                    ":polling_loop"
+	                ]]],
+	        [":def", "strategy",
+	            [":cached", 1800000,
+	                [":first_connected",
+	                    [":if", [":is_supported", ":ws"],
+	                        wsStrategy,
+	                        ":http_loop"
+	                    ]
+	                ]
+	            ]
+	        ]
+	    ];
+	};
+	exports.__esModule = true;
+	exports["default"] = getDefaultStrategy;
+
+
+/***/ },
+/* 17 */
+/***/ function(module, exports) {
+
+	"use strict";
+	function default_1() {
+	    var self = this;
+	    self.timeline.info(self.buildTimelineMessage({
+	        transport: self.name + (self.options.encrypted ? "s" : "")
+	    }));
+	    if (self.hooks.isInitialized()) {
+	        self.changeState("initialized");
+	    }
+	    else {
+	        self.onClose();
+	    }
+	}
+	exports.__esModule = true;
+	exports["default"] = default_1;
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var http_request_1 = __webpack_require__(19);
+	var http_socket_1 = __webpack_require__(20);
+	var http_streaming_socket_1 = __webpack_require__(22);
+	var http_polling_socket_1 = __webpack_require__(23);
+	var http_xhr_request_1 = __webpack_require__(24);
 	var HTTP = {
 	    createStreamingSocket: function (url) {
 	        return this.createSocket(http_streaming_socket_1["default"], url);
@@ -1340,9 +1217,6 @@ var Pusher =
 	    createXHR: function (method, url) {
 	        return this.createRequest(http_xhr_request_1["default"], method, url);
 	    },
-	    createXDR: function (method, url) {
-	        return this.createRequest(http_xdomain_request_1["default"], method, url);
-	    },
 	    createRequest: function (hooks, method, url) {
 	        return new http_request_1["default"](hooks, method, url);
 	    }
@@ -1352,7 +1226,7 @@ var Pusher =
 
 
 /***/ },
-/* 25 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1361,8 +1235,8 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var App = __webpack_require__(26);
-	var dispatcher_1 = __webpack_require__(20);
+	var runtime_1 = __webpack_require__(1);
+	var dispatcher_1 = __webpack_require__(13);
 	var MAX_BUFFER_LENGTH = 256 * 1024;
 	var HTTPRequest = (function (_super) {
 	    __extends(HTTPRequest, _super);
@@ -1373,19 +1247,19 @@ var Pusher =
 	        this.url = url;
 	    }
 	    HTTPRequest.prototype.start = function (payload) {
-	        var self = this;
-	        self.position = 0;
-	        self.xhr = self.hooks.getRequest(self);
-	        self.unloader = function () {
-	            self.close();
+	        var _this = this;
+	        this.position = 0;
+	        this.xhr = this.hooks.getRequest(this);
+	        this.unloader = function () {
+	            _this.close();
 	        };
-	        App.addUnloadListener(self.unloader);
-	        self.xhr.open(self.method, self.url, true);
-	        self.xhr.send(payload);
+	        runtime_1["default"].addUnloadListener(this.unloader);
+	        this.xhr.open(this.method, this.url, true);
+	        this.xhr.send(payload);
 	    };
 	    HTTPRequest.prototype.close = function () {
 	        if (this.unloader) {
-	            App.removeUnloadListener(this.unloader);
+	            runtime_1["default"].removeUnloadListener(this.unloader);
 	            this.unloader = null;
 	        }
 	        if (this.xhr) {
@@ -1428,34 +1302,12 @@ var Pusher =
 
 
 /***/ },
-/* 26 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var app_1 = __webpack_require__(27);
-	exports.addUnloadListener = app_1.addUnloadListener;
-	exports.removeUnloadListener = app_1.removeUnloadListener;
-
-
-/***/ },
-/* 27 */
-/***/ function(module, exports) {
-
-	"use strict";
-	exports.addUnloadListener = function (listener) {
-	};
-	exports.removeUnloadListener = function (listener) {
-	};
-
-
-/***/ },
-/* 28 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var state_1 = __webpack_require__(29);
-	var util_1 = __webpack_require__(7);
-	var http_1 = __webpack_require__(24);
+	var state_1 = __webpack_require__(21);
+	var util_1 = __webpack_require__(5);
 	var runtime_1 = __webpack_require__(1);
 	var autoIncrement = 1;
 	var HTTPSocket = (function () {
@@ -1478,7 +1330,7 @@ var Pusher =
 	    HTTPSocket.prototype.sendRaw = function (payload) {
 	        if (this.readyState === state_1["default"].OPEN) {
 	            try {
-	                createRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+	                runtime_1["default"].createSocketRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
 	                return true;
 	            }
 	            catch (e) {
@@ -1568,24 +1420,24 @@ var Pusher =
 	        }
 	    };
 	    HTTPSocket.prototype.openStream = function () {
-	        var self = this;
-	        self.stream = createRequest("POST", getUniqueURL(self.hooks.getReceiveURL(self.location, self.session)));
-	        self.stream.bind("chunk", function (chunk) {
-	            self.onChunk(chunk);
+	        var _this = this;
+	        this.stream = runtime_1["default"].createSocketRequest("POST", getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
+	        this.stream.bind("chunk", function (chunk) {
+	            _this.onChunk(chunk);
 	        });
-	        self.stream.bind("finished", function (status) {
-	            self.hooks.onFinished(self, status);
+	        this.stream.bind("finished", function (status) {
+	            _this.hooks.onFinished(_this, status);
 	        });
-	        self.stream.bind("buffer_too_long", function () {
-	            self.reconnect();
+	        this.stream.bind("buffer_too_long", function () {
+	            _this.reconnect();
 	        });
 	        try {
-	            self.stream.start();
+	            this.stream.start();
 	        }
 	        catch (error) {
 	            util_1["default"].defer(function () {
-	                self.onError(error);
-	                self.onClose(1006, "Could not start streaming", false);
+	                _this.onError(error);
+	                _this.onClose(1006, "Could not start streaming", false);
 	            });
 	        }
 	    };
@@ -1626,23 +1478,12 @@ var Pusher =
 	    }
 	    return result.join('');
 	}
-	function createRequest(method, url) {
-	    if (runtime_1["default"].isXHRSupported()) {
-	        return http_1["default"].createXHR(method, url);
-	    }
-	    else if (runtime_1["default"].isXDRSupported(url.indexOf("https:") === 0)) {
-	        return http_1["default"].createXDR(method, url);
-	    }
-	    else {
-	        throw "Cross-origin HTTP requests are not supported";
-	    }
-	}
 	exports.__esModule = true;
 	exports["default"] = HTTPSocket;
 
 
 /***/ },
-/* 29 */
+/* 21 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1657,7 +1498,7 @@ var Pusher =
 
 
 /***/ },
-/* 30 */
+/* 22 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1680,7 +1521,7 @@ var Pusher =
 
 
 /***/ },
-/* 31 */
+/* 23 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1707,14 +1548,14 @@ var Pusher =
 
 
 /***/ },
-/* 32 */
+/* 24 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var xhr_1 = __webpack_require__(33);
+	var runtime_1 = __webpack_require__(1);
 	var hooks = {
 	    getRequest: function (socket) {
-	        var Constructor = xhr_1["default"].getAPI();
+	        var Constructor = runtime_1["default"].getXHRAPI();
 	        var xhr = new Constructor();
 	        xhr.onreadystatechange = xhr.onprogress = function () {
 	            switch (xhr.readyState) {
@@ -1744,121 +1585,7 @@ var Pusher =
 
 
 /***/ },
-/* 33 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var XHR = {
-	    getAPI: function () {
-	        return XMLHttpRequest;
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = XHR;
-
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
-	var Errors = __webpack_require__(35);
-	var hooks = {
-	    getRequest: function (socket) {
-	        var xdr = new window.XDomainRequest();
-	        xdr.ontimeout = function () {
-	            socket.emit("error", new Errors.RequestTimedOut());
-	            socket.close();
-	        };
-	        xdr.onerror = function (e) {
-	            socket.emit("error", e);
-	            socket.close();
-	        };
-	        xdr.onprogress = function () {
-	            if (xdr.responseText && xdr.responseText.length > 0) {
-	                socket.onChunk(200, xdr.responseText);
-	            }
-	        };
-	        xdr.onload = function () {
-	            if (xdr.responseText && xdr.responseText.length > 0) {
-	                socket.onChunk(200, xdr.responseText);
-	            }
-	            socket.emit("finished", 200);
-	            socket.close();
-	        };
-	        return xdr;
-	    },
-	    abortRequest: function (xdr) {
-	        xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
-	        xdr.abort();
-	    }
-	};
-	exports.__esModule = true;
-	exports["default"] = hooks;
-
-
-/***/ },
-/* 35 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var __extends = (this && this.__extends) || function (d, b) {
-	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-	    function __() { this.constructor = d; }
-	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-	};
-	var BadEventName = (function (_super) {
-	    __extends(BadEventName, _super);
-	    function BadEventName() {
-	        _super.apply(this, arguments);
-	    }
-	    return BadEventName;
-	}(Error));
-	exports.BadEventName = BadEventName;
-	var RequestTimedOut = (function (_super) {
-	    __extends(RequestTimedOut, _super);
-	    function RequestTimedOut() {
-	        _super.apply(this, arguments);
-	    }
-	    return RequestTimedOut;
-	}(Error));
-	exports.RequestTimedOut = RequestTimedOut;
-	var TransportPriorityTooLow = (function (_super) {
-	    __extends(TransportPriorityTooLow, _super);
-	    function TransportPriorityTooLow() {
-	        _super.apply(this, arguments);
-	    }
-	    return TransportPriorityTooLow;
-	}(Error));
-	exports.TransportPriorityTooLow = TransportPriorityTooLow;
-	var TransportClosed = (function (_super) {
-	    __extends(TransportClosed, _super);
-	    function TransportClosed() {
-	        _super.apply(this, arguments);
-	    }
-	    return TransportClosed;
-	}(Error));
-	exports.TransportClosed = TransportClosed;
-	var UnsupportedTransport = (function (_super) {
-	    __extends(UnsupportedTransport, _super);
-	    function UnsupportedTransport() {
-	        _super.apply(this, arguments);
-	    }
-	    return UnsupportedTransport;
-	}(Error));
-	exports.UnsupportedTransport = UnsupportedTransport;
-	var UnsupportedStrategy = (function (_super) {
-	    __extends(UnsupportedStrategy, _super);
-	    function UnsupportedStrategy() {
-	        _super.apply(this, arguments);
-	    }
-	    return UnsupportedStrategy;
-	}(Error));
-	exports.UnsupportedStrategy = UnsupportedStrategy;
-
-
-/***/ },
-/* 36 */
+/* 25 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1867,7 +1594,7 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(20);
+	var dispatcher_1 = __webpack_require__(13);
 	var NetInfo = (function (_super) {
 	    __extends(NetInfo, _super);
 	    function NetInfo() {
@@ -1883,13 +1610,93 @@ var Pusher =
 
 
 /***/ },
-/* 37 */
+/* 26 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
-	var util_1 = __webpack_require__(7);
-	var level_1 = __webpack_require__(38);
+	var logger_1 = __webpack_require__(15);
+	var fetchAuth = function (context, socketId, callback) {
+	    var headers = new Headers();
+	    headers.set("Content-Type", "application/x-www-form-urlencoded");
+	    for (var headerName in this.authOptions.headers) {
+	        headers.set(headerName, this.authOptions.headers[headerName]);
+	    }
+	    var body = this.composeQuery(socketId);
+	    var request = new Request(this.options.authEndpoint, {
+	        headers: headers,
+	        body: body,
+	        method: "POST"
+	    });
+	    return fetch(request).then(function (response) {
+	        var status = response.status;
+	        if (status === 200) {
+	            return response.text();
+	        }
+	        else {
+	            logger_1["default"].warn("Couldn't get auth info from your webapp", status);
+	            throw status;
+	        }
+	    }).then(function (data) {
+	        try {
+	            data = JSON.parse(data);
+	        }
+	        catch (e) {
+	            var message = 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + data;
+	            logger_1["default"].warn(message);
+	            throw message;
+	        }
+	        callback(false, data);
+	    }).catch(function (err) {
+	        callback(true, err);
+	    });
+	};
+	exports.__esModule = true;
+	exports["default"] = fetchAuth;
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var logger_1 = __webpack_require__(15);
+	var Collections = __webpack_require__(3);
+	var util_1 = __webpack_require__(5);
+	var getAgent = function (sender, encrypted) {
+	    return function (data, callback) {
+	        var scheme = "http" + (encrypted ? "s" : "") + "://";
+	        var url = scheme + (sender.options.host) + sender.options.path;
+	        var params = Collections.filterObject(data, function (value) {
+	            return value !== undefined;
+	        });
+	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	        url += ("/" + 2 + "?" + query);
+	        fetch(url).
+	            then(function (response) {
+	            if (response.status !== 200) {
+	                logger_1["default"].debug("TimelineSender Error: received from stats.pusher.com");
+	            }
+	        }).catch(function (err) {
+	            logger_1["default"].debug("TimelineSender Error:", err);
+	        });
+	    };
+	};
+	var fetchTimeline = {
+	    name: 'xhr',
+	    getAgent: getAgent
+	};
+	exports.__esModule = true;
+	exports["default"] = fetchTimeline;
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var Collections = __webpack_require__(3);
+	var util_1 = __webpack_require__(5);
+	var level_1 = __webpack_require__(29);
 	var Timeline = (function () {
 	    function Timeline(key, session, options) {
 	        this.key = key;
@@ -1920,21 +1727,21 @@ var Pusher =
 	        return this.events.length === 0;
 	    };
 	    Timeline.prototype.send = function (sendfn, callback) {
-	        var self = this;
+	        var _this = this;
 	        var data = Collections.extend({
-	            session: self.session,
-	            bundle: self.sent + 1,
-	            key: self.key,
+	            session: this.session,
+	            bundle: this.sent + 1,
+	            key: this.key,
 	            lib: "js",
-	            version: self.options.version,
-	            cluster: self.options.cluster,
-	            features: self.options.features,
-	            timeline: self.events
-	        }, self.options.params);
-	        self.events = [];
+	            version: this.options.version,
+	            cluster: this.options.cluster,
+	            features: this.options.features,
+	            timeline: this.events
+	        }, this.options.params);
+	        this.events = [];
 	        sendfn(data, function (error, result) {
 	            if (!error) {
-	                self.sent++;
+	                _this.sent++;
 	            }
 	            if (callback) {
 	                callback(error, result);
@@ -1953,7 +1760,7 @@ var Pusher =
 
 
 /***/ },
-/* 38 */
+/* 29 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1968,27 +1775,27 @@ var Pusher =
 
 
 /***/ },
-/* 39 */
+/* 30 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
-	var util_1 = __webpack_require__(7);
-	var transports_1 = __webpack_require__(11);
-	var transport_manager_1 = __webpack_require__(40);
-	var Errors = __webpack_require__(35);
-	var transport_strategy_1 = __webpack_require__(56);
-	var sequential_strategy_1 = __webpack_require__(57);
-	var best_connected_ever_strategy_1 = __webpack_require__(58);
-	var cached_strategy_1 = __webpack_require__(59);
-	var delayed_strategy_1 = __webpack_require__(60);
-	var if_strategy_1 = __webpack_require__(61);
-	var first_connected_strategy_1 = __webpack_require__(62);
+	var Collections = __webpack_require__(3);
+	var util_1 = __webpack_require__(5);
+	var transport_manager_1 = __webpack_require__(31);
+	var Errors = __webpack_require__(42);
+	var transport_strategy_1 = __webpack_require__(46);
+	var sequential_strategy_1 = __webpack_require__(47);
+	var best_connected_ever_strategy_1 = __webpack_require__(48);
+	var cached_strategy_1 = __webpack_require__(49);
+	var delayed_strategy_1 = __webpack_require__(50);
+	var if_strategy_1 = __webpack_require__(51);
+	var first_connected_strategy_1 = __webpack_require__(52);
+	var runtime_1 = __webpack_require__(1);
+	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
 	    var context = Collections.extend({}, globalContext, options);
 	    return evaluate(scheme, context)[1].strategy;
 	};
-	var transports = transports_1["default"];
 	var UnsupportedStrategy = {
 	    isSupported: function () {
 	        return false;
@@ -2022,7 +1829,7 @@ var Pusher =
 	        return [undefined, context];
 	    },
 	    def_transport: function (context, name, type, priority, options, manager) {
-	        var transportClass = transports[type];
+	        var transportClass = Transports[type];
 	        if (!transportClass) {
 	            throw new Errors.UnsupportedTransport(type);
 	        }
@@ -2043,8 +1850,8 @@ var Pusher =
 	            transport = UnsupportedStrategy;
 	        }
 	        var newContext = context.def(context, name, transport)[1];
-	        newContext.transports = context.transports || {};
-	        newContext.transports[name] = transport;
+	        newContext.Transports = context.Transports || {};
+	        newContext.Transports[name] = transport;
 	        return [undefined, newContext];
 	    },
 	    transport_manager: returnWithOriginalContext(function (_, options) {
@@ -2055,7 +1862,7 @@ var Pusher =
 	        return new sequential_strategy_1["default"](strategies, options);
 	    }),
 	    cached: returnWithOriginalContext(function (context, ttl, strategy) {
-	        return new cached_strategy_1["default"](strategy, context.transports, {
+	        return new cached_strategy_1["default"](strategy, context.Transports, {
 	            ttl: ttl,
 	            timeline: context.timeline,
 	            encrypted: context.encrypted
@@ -2138,14 +1945,14 @@ var Pusher =
 
 
 /***/ },
-/* 40 */
+/* 31 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var factory_1 = __webpack_require__(41);
+	var factory_1 = __webpack_require__(32);
 	var TransportManager = (function () {
 	    function TransportManager(options) {
-	        this.options = options || [];
+	        this.options = options || {};
 	        this.livesLeft = this.options.lives || Infinity;
 	    }
 	    TransportManager.prototype.getAssistant = function (transport) {
@@ -2167,19 +1974,19 @@ var Pusher =
 
 
 /***/ },
-/* 41 */
+/* 32 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var assistant_to_the_transport_manager_1 = __webpack_require__(42);
-	var handshake_1 = __webpack_require__(43);
-	var pusher_authorizer_1 = __webpack_require__(48);
-	var timeline_sender_1 = __webpack_require__(49);
-	var presence_channel_1 = __webpack_require__(50);
-	var private_channel_1 = __webpack_require__(51);
-	var channel_1 = __webpack_require__(52);
-	var connection_manager_1 = __webpack_require__(54);
-	var channels_1 = __webpack_require__(55);
+	var assistant_to_the_transport_manager_1 = __webpack_require__(33);
+	var handshake_1 = __webpack_require__(34);
+	var pusher_authorizer_1 = __webpack_require__(37);
+	var timeline_sender_1 = __webpack_require__(38);
+	var presence_channel_1 = __webpack_require__(39);
+	var private_channel_1 = __webpack_require__(40);
+	var channel_1 = __webpack_require__(41);
+	var connection_manager_1 = __webpack_require__(44);
+	var channels_1 = __webpack_require__(45);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2214,12 +2021,12 @@ var Pusher =
 
 
 /***/ },
-/* 42 */
+/* 33 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(7);
-	var Collections = __webpack_require__(5);
+	var util_1 = __webpack_require__(5);
+	var Collections = __webpack_require__(3);
 	var AssistantToTheTransportManager = (function () {
 	    function AssistantToTheTransportManager(manager, transport, options) {
 	        this.manager = manager;
@@ -2229,11 +2036,11 @@ var Pusher =
 	        this.pingDelay = undefined;
 	    }
 	    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
-	        var self = this;
+	        var _this = this;
 	        options = Collections.extend({}, options, {
-	            activityTimeout: self.pingDelay
+	            activityTimeout: this.pingDelay
 	        });
-	        var connection = self.transport.createConnection(name, priority, key, options);
+	        var connection = this.transport.createConnection(name, priority, key, options);
 	        var openTimestamp = null;
 	        var onOpen = function () {
 	            connection.unbind("open", onOpen);
@@ -2243,13 +2050,13 @@ var Pusher =
 	        var onClosed = function (closeEvent) {
 	            connection.unbind("closed", onClosed);
 	            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-	                self.manager.reportDeath();
+	                _this.manager.reportDeath();
 	            }
 	            else if (!closeEvent.wasClean && openTimestamp) {
 	                var lifespan = util_1["default"].now() - openTimestamp;
-	                if (lifespan < 2 * self.maxPingDelay) {
-	                    self.manager.reportDeath();
-	                    self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
+	                if (lifespan < 2 * _this.maxPingDelay) {
+	                    _this.manager.reportDeath();
+	                    _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);
 	                }
 	            }
 	        };
@@ -2266,14 +2073,13 @@ var Pusher =
 
 
 /***/ },
-/* 43 */
+/* 34 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
-	var Protocol = __webpack_require__(44);
-	var connection_1 = __webpack_require__(47);
-	var handshake_results_1 = __webpack_require__(46);
+	var Collections = __webpack_require__(3);
+	var Protocol = __webpack_require__(35);
+	var connection_1 = __webpack_require__(36);
 	var Handshake = (function () {
 	    function Handshake(transport, callback) {
 	        this.transport = transport;
@@ -2285,35 +2091,35 @@ var Pusher =
 	        this.transport.close();
 	    };
 	    Handshake.prototype.bindListeners = function () {
-	        var self = this;
-	        self.onMessage = function (m) {
-	            self.unbindListeners();
+	        var _this = this;
+	        this.onMessage = function (m) {
+	            _this.unbindListeners();
 	            try {
 	                var result = Protocol.processHandshake(m);
-	                if (result.action === handshake_results_1["default"].CONNECTED) {
-	                    self.finish("connected", {
-	                        connection: new connection_1["default"](result.id, self.transport),
+	                if (result.action === "connected") {
+	                    _this.finish("connected", {
+	                        connection: new connection_1["default"](result.id, _this.transport),
 	                        activityTimeout: result.activityTimeout
 	                    });
 	                }
 	                else {
-	                    self.finish(result.action, { error: result.error });
-	                    self.transport.close();
+	                    _this.finish(result.action, { error: result.error });
+	                    _this.transport.close();
 	                }
 	            }
 	            catch (e) {
-	                self.finish("error", { error: e });
-	                self.transport.close();
+	                _this.finish("error", { error: e });
+	                _this.transport.close();
 	            }
 	        };
-	        self.onClosed = function (closeEvent) {
-	            self.unbindListeners();
+	        this.onClosed = function (closeEvent) {
+	            _this.unbindListeners();
 	            var action = Protocol.getCloseAction(closeEvent) || "backoff";
 	            var error = Protocol.getCloseError(closeEvent);
-	            self.finish(action, { error: error });
+	            _this.finish(action, { error: error });
 	        };
-	        self.transport.bind("message", self.onMessage);
-	        self.transport.bind("closed", self.onClosed);
+	        this.transport.bind("message", this.onMessage);
+	        this.transport.bind("closed", this.onClosed);
 	    };
 	    Handshake.prototype.unbindListeners = function () {
 	        this.transport.unbind("message", this.onMessage);
@@ -2329,12 +2135,10 @@ var Pusher =
 
 
 /***/ },
-/* 44 */
-/***/ function(module, exports, __webpack_require__) {
+/* 35 */
+/***/ function(module, exports) {
 
 	"use strict";
-	var internal_events_1 = __webpack_require__(45);
-	var handshake_results_1 = __webpack_require__(46);
 	exports.decodeMessage = function (message) {
 	    try {
 	        var params = JSON.parse(message.data);
@@ -2359,17 +2163,17 @@ var Pusher =
 	};
 	exports.processHandshake = function (message) {
 	    message = exports.decodeMessage(message);
-	    if (message.event === internal_events_1["default"].CONNECTION_ESTABLISHED) {
+	    if (message.event === "pusher:connection_established") {
 	        if (!message.data.activity_timeout) {
 	            throw "No activity timeout specified in handshake";
 	        }
 	        return {
-	            action: handshake_results_1["default"].CONNECTED,
+	            action: "connected",
 	            id: message.data.socket_id,
 	            activityTimeout: message.data.activity_timeout * 1000
 	        };
 	    }
-	    else if (message.event === internal_events_1["default"].ERROR) {
+	    else if (message.event === "pusher:error") {
 	        return {
 	            action: this.getCloseAction(message.data),
 	            error: this.getCloseError(message.data)
@@ -2382,26 +2186,26 @@ var Pusher =
 	exports.getCloseAction = function (closeEvent) {
 	    if (closeEvent.code < 4000) {
 	        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-	            return handshake_results_1["default"].BACKOFF;
+	            return "backoff";
 	        }
 	        else {
 	            return null;
 	        }
 	    }
 	    else if (closeEvent.code === 4000) {
-	        return handshake_results_1["default"].SSL_ONLY;
+	        return "ssl_only";
 	    }
 	    else if (closeEvent.code < 4100) {
-	        return handshake_results_1["default"].REFUSED;
+	        return "refused";
 	    }
 	    else if (closeEvent.code < 4200) {
-	        return handshake_results_1["default"].BACKOFF;
+	        return "backoff";
 	    }
 	    else if (closeEvent.code < 4300) {
-	        return handshake_results_1["default"].RETRY;
+	        return "retry";
 	    }
 	    else {
-	        return handshake_results_1["default"].REFUSED;
+	        return "refused";
 	    }
 	};
 	exports.getCloseError = function (closeEvent) {
@@ -2421,38 +2225,7 @@ var Pusher =
 
 
 /***/ },
-/* 45 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var InternalEvents;
-	(function (InternalEvents) {
-	    InternalEvents[InternalEvents["CONNECTION_ESTABLISHED"] = "pusher:connection_established"] = "CONNECTION_ESTABLISHED";
-	    InternalEvents[InternalEvents["ERROR"] = "pusher:error"] = "ERROR";
-	})(InternalEvents || (InternalEvents = {}));
-	exports.__esModule = true;
-	exports["default"] = InternalEvents;
-
-
-/***/ },
-/* 46 */
-/***/ function(module, exports) {
-
-	"use strict";
-	var HandshakeResults;
-	(function (HandshakeResults) {
-	    HandshakeResults[HandshakeResults["CONNECTED"] = "connected"] = "CONNECTED";
-	    HandshakeResults[HandshakeResults["BACKOFF"] = "backoff"] = "BACKOFF";
-	    HandshakeResults[HandshakeResults["SSL_ONLY"] = "ssl_only"] = "SSL_ONLY";
-	    HandshakeResults[HandshakeResults["REFUSED"] = "refused"] = "REFUSED";
-	    HandshakeResults[HandshakeResults["RETRY"] = "retry"] = "RETRY";
-	})(HandshakeResults || (HandshakeResults = {}));
-	exports.__esModule = true;
-	exports["default"] = HandshakeResults;
-
-
-/***/ },
-/* 47 */
+/* 36 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2461,10 +2234,10 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var Collections = __webpack_require__(5);
-	var dispatcher_1 = __webpack_require__(20);
-	var Protocol = __webpack_require__(44);
-	var logger_1 = __webpack_require__(4);
+	var Collections = __webpack_require__(3);
+	var dispatcher_1 = __webpack_require__(13);
+	var Protocol = __webpack_require__(35);
+	var logger_1 = __webpack_require__(15);
 	var Connection = (function (_super) {
 	    __extends(Connection, _super);
 	    function Connection(id, transport) {
@@ -2500,7 +2273,7 @@ var Pusher =
 	        this.transport.close();
 	    };
 	    Connection.prototype.bindListeners = function () {
-	        var self = this;
+	        var _this = this;
 	        var listeners = {
 	            message: function (m) {
 	                var message;
@@ -2508,7 +2281,7 @@ var Pusher =
 	                    message = Protocol.decodeMessage(m);
 	                }
 	                catch (e) {
-	                    self.emit('error', {
+	                    _this.emit('error', {
 	                        type: 'MessageParseError',
 	                        error: e,
 	                        data: m.data
@@ -2518,40 +2291,40 @@ var Pusher =
 	                    logger_1["default"].debug('Event recd', message);
 	                    switch (message.event) {
 	                        case 'pusher:error':
-	                            self.emit('error', { type: 'PusherError', data: message.data });
+	                            _this.emit('error', { type: 'PusherError', data: message.data });
 	                            break;
 	                        case 'pusher:ping':
-	                            self.emit("ping");
+	                            _this.emit("ping");
 	                            break;
 	                        case 'pusher:pong':
-	                            self.emit("pong");
+	                            _this.emit("pong");
 	                            break;
 	                    }
-	                    self.emit('message', message);
+	                    _this.emit('message', message);
 	                }
 	            },
 	            activity: function () {
-	                self.emit("activity");
+	                _this.emit("activity");
 	            },
 	            error: function (error) {
-	                self.emit("error", { type: "WebSocketError", error: error });
+	                _this.emit("error", { type: "WebSocketError", error: error });
 	            },
 	            closed: function (closeEvent) {
 	                unbindListeners();
 	                if (closeEvent && closeEvent.code) {
-	                    self.handleCloseEvent(closeEvent);
+	                    _this.handleCloseEvent(closeEvent);
 	                }
-	                self.transport = null;
-	                self.emit("closed");
+	                _this.transport = null;
+	                _this.emit("closed");
 	            }
 	        };
 	        var unbindListeners = function () {
 	            Collections.objectApply(listeners, function (listener, event) {
-	                self.transport.unbind(event, listener);
+	                _this.transport.unbind(event, listener);
 	            });
 	        };
 	        Collections.objectApply(listeners, function (listener, event) {
-	            self.transport.bind(event, listener);
+	            _this.transport.bind(event, listener);
 	        });
 	    };
 	    Connection.prototype.handleCloseEvent = function (closeEvent) {
@@ -2571,7 +2344,7 @@ var Pusher =
 
 
 /***/ },
-/* 48 */
+/* 37 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2579,7 +2352,11 @@ var Pusher =
 	var Authorizer = (function () {
 	    function Authorizer(channel, options) {
 	        this.channel = channel;
-	        this.type = options.authTransport;
+	        var authTransport = options.authTransport;
+	        if (typeof runtime_1["default"].getAuthorizers()[authTransport] === "undefined") {
+	            throw "'" + authTransport + "' is not a recognized auth transport";
+	        }
+	        this.type = authTransport;
 	        this.options = options;
 	        this.authOptions = (options || {}).auth || {};
 	    }
@@ -2602,7 +2379,7 @@ var Pusher =
 
 
 /***/ },
-/* 49 */
+/* 38 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2613,11 +2390,10 @@ var Pusher =
 	        this.options = options || {};
 	    }
 	    TimelineSender.prototype.send = function (encrypted, callback) {
-	        var self = this;
-	        if (self.timeline.isEmpty()) {
+	        if (this.timeline.isEmpty()) {
 	            return;
 	        }
-	        self.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, encrypted), callback);
+	        this.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, encrypted), callback);
 	    };
 	    return TimelineSender;
 	}());
@@ -2626,7 +2402,7 @@ var Pusher =
 
 
 /***/ },
-/* 50 */
+/* 39 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2635,9 +2411,9 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var private_channel_1 = __webpack_require__(51);
-	var logger_1 = __webpack_require__(4);
-	var members_1 = __webpack_require__(53);
+	var private_channel_1 = __webpack_require__(40);
+	var logger_1 = __webpack_require__(15);
+	var members_1 = __webpack_require__(43);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
 	    function PresenceChannel(name, pusher) {
@@ -2645,18 +2421,18 @@ var Pusher =
 	        this.members = new members_1["default"]();
 	    }
 	    PresenceChannel.prototype.authorize = function (socketId, callback) {
-	        var self = this;
+	        var _this = this;
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            if (!error) {
 	                if (authData.channel_data === undefined) {
 	                    logger_1["default"].warn("Invalid auth response for channel '" +
-	                        self.name +
+	                        _this.name +
 	                        "', expected 'channel_data' field");
 	                    callback("Invalid auth response");
 	                    return;
 	                }
 	                var channelData = JSON.parse(authData.channel_data);
-	                self.members.setMyID(channelData.user_id);
+	                _this.members.setMyID(channelData.user_id);
 	            }
 	            callback(error, authData);
 	        });
@@ -2693,7 +2469,7 @@ var Pusher =
 
 
 /***/ },
-/* 51 */
+/* 40 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2702,8 +2478,8 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var factory_1 = __webpack_require__(41);
-	var channel_1 = __webpack_require__(52);
+	var factory_1 = __webpack_require__(32);
+	var channel_1 = __webpack_require__(41);
 	var PrivateChannel = (function (_super) {
 	    __extends(PrivateChannel, _super);
 	    function PrivateChannel() {
@@ -2720,7 +2496,7 @@ var Pusher =
 
 
 /***/ },
-/* 52 */
+/* 41 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2729,9 +2505,9 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(20);
-	var Errors = __webpack_require__(35);
-	var logger_1 = __webpack_require__(4);
+	var dispatcher_1 = __webpack_require__(13);
+	var Errors = __webpack_require__(42);
+	var logger_1 = __webpack_require__(15);
 	var Channel = (function (_super) {
 	    __extends(Channel, _super);
 	    function Channel(name, pusher) {
@@ -2792,11 +2568,71 @@ var Pusher =
 
 
 /***/ },
-/* 53 */
+/* 42 */
+/***/ function(module, exports) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var BadEventName = (function (_super) {
+	    __extends(BadEventName, _super);
+	    function BadEventName() {
+	        _super.apply(this, arguments);
+	    }
+	    return BadEventName;
+	}(Error));
+	exports.BadEventName = BadEventName;
+	var RequestTimedOut = (function (_super) {
+	    __extends(RequestTimedOut, _super);
+	    function RequestTimedOut() {
+	        _super.apply(this, arguments);
+	    }
+	    return RequestTimedOut;
+	}(Error));
+	exports.RequestTimedOut = RequestTimedOut;
+	var TransportPriorityTooLow = (function (_super) {
+	    __extends(TransportPriorityTooLow, _super);
+	    function TransportPriorityTooLow() {
+	        _super.apply(this, arguments);
+	    }
+	    return TransportPriorityTooLow;
+	}(Error));
+	exports.TransportPriorityTooLow = TransportPriorityTooLow;
+	var TransportClosed = (function (_super) {
+	    __extends(TransportClosed, _super);
+	    function TransportClosed() {
+	        _super.apply(this, arguments);
+	    }
+	    return TransportClosed;
+	}(Error));
+	exports.TransportClosed = TransportClosed;
+	var UnsupportedTransport = (function (_super) {
+	    __extends(UnsupportedTransport, _super);
+	    function UnsupportedTransport() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedTransport;
+	}(Error));
+	exports.UnsupportedTransport = UnsupportedTransport;
+	var UnsupportedStrategy = (function (_super) {
+	    __extends(UnsupportedStrategy, _super);
+	    function UnsupportedStrategy() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedStrategy;
+	}(Error));
+	exports.UnsupportedStrategy = UnsupportedStrategy;
+
+
+/***/ },
+/* 43 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
+	var Collections = __webpack_require__(3);
 	var Members = (function () {
 	    function Members() {
 	        this.reset();
@@ -2854,7 +2690,7 @@ var Pusher =
 
 
 /***/ },
-/* 54 */
+/* 44 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2863,36 +2699,36 @@ var Pusher =
 	    function __() { this.constructor = d; }
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
-	var dispatcher_1 = __webpack_require__(20);
-	var timers_1 = __webpack_require__(8);
-	var net_info_1 = __webpack_require__(36);
-	var logger_1 = __webpack_require__(4);
-	var state_1 = __webpack_require__(22);
-	var Collections = __webpack_require__(5);
+	var dispatcher_1 = __webpack_require__(13);
+	var timers_1 = __webpack_require__(6);
+	var logger_1 = __webpack_require__(15);
+	var Collections = __webpack_require__(3);
+	var runtime_1 = __webpack_require__(1);
 	var ConnectionManager = (function (_super) {
 	    __extends(ConnectionManager, _super);
 	    function ConnectionManager(key, options) {
+	        var _this = this;
 	        _super.call(this);
 	        this.key = key;
 	        this.options = options || {};
-	        this.state = state_1["default"].INITIALIZED;
+	        this.state = "initialized";
 	        this.connection = null;
 	        this.encrypted = !!options.encrypted;
 	        this.timeline = this.options.timeline;
 	        this.connectionCallbacks = this.buildConnectionCallbacks();
 	        this.errorCallbacks = this.buildErrorCallbacks();
 	        this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
-	        var self = this;
-	        net_info_1.Network.bind("online", function () {
-	            self.timeline.info({ netinfo: "online" });
-	            if ((self.state) === "connecting" || (self.state) === "unavailable") {
-	                self.retryIn(0);
+	        var Network = runtime_1["default"].getNetwork();
+	        Network.bind("online", function () {
+	            _this.timeline.info({ netinfo: "online" });
+	            if (_this.state === "connecting" || _this.state === "unavailable") {
+	                _this.retryIn(0);
 	            }
 	        });
-	        net_info_1.Network.bind("offline", function () {
-	            self.timeline.info({ netinfo: "offline" });
-	            if (self.connection) {
-	                self.sendActivityCheck();
+	        Network.bind("offline", function () {
+	            _this.timeline.info({ netinfo: "offline" });
+	            if (_this.connection) {
+	                _this.sendActivityCheck();
 	            }
 	        });
 	        this.updateStrategy();
@@ -2902,10 +2738,10 @@ var Pusher =
 	            return;
 	        }
 	        if (!this.strategy.isSupported()) {
-	            this.updateState(state_1["default"].FAILED);
+	            this.updateState("failed");
 	            return;
 	        }
-	        this.updateState(state_1["default"].CONNECTING);
+	        this.updateState("connecting");
 	        this.startConnecting();
 	        this.setUnavailableTimer();
 	    };
@@ -2930,7 +2766,7 @@ var Pusher =
 	    ;
 	    ConnectionManager.prototype.disconnect = function () {
 	        this.disconnectInternally();
-	        this.updateState(state_1["default"].DISCONNECTED);
+	        this.updateState("disconnected");
 	    };
 	    ;
 	    ConnectionManager.prototype.isEncrypted = function () {
@@ -2938,23 +2774,23 @@ var Pusher =
 	    };
 	    ;
 	    ConnectionManager.prototype.startConnecting = function () {
-	        var self = this;
+	        var _this = this;
 	        var callback = function (error, handshake) {
 	            if (error) {
-	                self.runner = self.strategy.connect(0, callback);
+	                _this.runner = _this.strategy.connect(0, callback);
 	            }
 	            else {
 	                if (handshake.action === "error") {
-	                    self.emit("error", { type: "HandshakeError", error: handshake.error });
-	                    self.timeline.error({ handshakeError: handshake.error });
+	                    _this.emit("error", { type: "HandshakeError", error: handshake.error });
+	                    _this.timeline.error({ handshakeError: handshake.error });
 	                }
 	                else {
-	                    self.abortConnecting();
-	                    self.handshakeCallbacks[handshake.action](handshake);
+	                    _this.abortConnecting();
+	                    _this.handshakeCallbacks[handshake.action](handshake);
 	                }
 	            }
 	        };
-	        self.runner = self.strategy.connect(0, callback);
+	        this.runner = this.strategy.connect(0, callback);
 	    };
 	    ;
 	    ConnectionManager.prototype.abortConnecting = function () {
@@ -2983,14 +2819,14 @@ var Pusher =
 	    };
 	    ;
 	    ConnectionManager.prototype.retryIn = function (delay) {
-	        var self = this;
-	        self.timeline.info({ action: "retry", delay: delay });
+	        var _this = this;
+	        this.timeline.info({ action: "retry", delay: delay });
 	        if (delay > 0) {
-	            self.emit("connecting_in", Math.round(delay / 1000));
+	            this.emit("connecting_in", Math.round(delay / 1000));
 	        }
-	        self.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {
-	            self.disconnectInternally();
-	            self.connect();
+	        this.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {
+	            _this.disconnectInternally();
+	            _this.connect();
 	        });
 	    };
 	    ;
@@ -3002,9 +2838,9 @@ var Pusher =
 	    };
 	    ;
 	    ConnectionManager.prototype.setUnavailableTimer = function () {
-	        var self = this;
-	        self.unavailableTimer = new timers_1.OneOffTimer(self.options.unavailableTimeout, function () {
-	            self.updateState(state_1["default"].UNAVAILABLE);
+	        var _this = this;
+	        this.unavailableTimer = new timers_1.OneOffTimer(this.options.unavailableTimeout, function () {
+	            _this.updateState("unavailable");
 	        });
 	    };
 	    ;
@@ -3015,21 +2851,21 @@ var Pusher =
 	    };
 	    ;
 	    ConnectionManager.prototype.sendActivityCheck = function () {
-	        var self = this;
-	        self.stopActivityCheck();
-	        self.connection.ping();
-	        self.activityTimer = new timers_1.OneOffTimer(self.options.pongTimeout, function () {
-	            self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-	            self.retryIn(0);
+	        var _this = this;
+	        this.stopActivityCheck();
+	        this.connection.ping();
+	        this.activityTimer = new timers_1.OneOffTimer(this.options.pongTimeout, function () {
+	            _this.timeline.error({ pong_timed_out: _this.options.pongTimeout });
+	            _this.retryIn(0);
 	        });
 	    };
 	    ;
 	    ConnectionManager.prototype.resetActivityCheck = function () {
-	        var self = this;
-	        self.stopActivityCheck();
-	        if (!self.connection.handlesActivityChecks()) {
-	            self.activityTimer = new timers_1.OneOffTimer(self.activityTimeout, function () {
-	                self.sendActivityCheck();
+	        var _this = this;
+	        this.stopActivityCheck();
+	        if (!this.connection.handlesActivityChecks()) {
+	            this.activityTimer = new timers_1.OneOffTimer(this.activityTimeout, function () {
+	                _this.sendActivityCheck();
 	            });
 	        }
 	    };
@@ -3041,67 +2877,67 @@ var Pusher =
 	    };
 	    ;
 	    ConnectionManager.prototype.buildConnectionCallbacks = function () {
-	        var self = this;
+	        var _this = this;
 	        return {
 	            message: function (message) {
-	                self.resetActivityCheck();
-	                self.emit('message', message);
+	                _this.resetActivityCheck();
+	                _this.emit('message', message);
 	            },
 	            ping: function () {
-	                self.send_event('pusher:pong', {});
+	                _this.send_event('pusher:pong', {});
 	            },
 	            activity: function () {
-	                self.resetActivityCheck();
+	                _this.resetActivityCheck();
 	            },
 	            error: function (error) {
-	                self.emit("error", { type: "WebSocketError", error: error });
+	                _this.emit("error", { type: "WebSocketError", error: error });
 	            },
 	            closed: function () {
-	                self.abandonConnection();
-	                if (self.shouldRetry()) {
-	                    self.retryIn(1000);
+	                _this.abandonConnection();
+	                if (_this.shouldRetry()) {
+	                    _this.retryIn(1000);
 	                }
 	            }
 	        };
 	    };
 	    ;
 	    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
-	        var self = this;
+	        var _this = this;
 	        return Collections.extend({}, errorCallbacks, {
 	            connected: function (handshake) {
-	                self.activityTimeout = Math.min(self.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
-	                self.clearUnavailableTimer();
-	                self.setConnection(handshake.connection);
-	                self.socket_id = self.connection.id;
-	                self.updateState(state_1["default"].CONNECTED, { socket_id: self.socket_id });
+	                _this.activityTimeout = Math.min(_this.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
+	                _this.clearUnavailableTimer();
+	                _this.setConnection(handshake.connection);
+	                _this.socket_id = _this.connection.id;
+	                _this.updateState("connected", { socket_id: _this.socket_id });
 	            }
 	        });
 	    };
 	    ;
 	    ConnectionManager.prototype.buildErrorCallbacks = function () {
-	        var self = this;
-	        function withErrorEmitted(callback) {
+	        var _this = this;
+	        var withErrorEmitted = function (callback) {
 	            return function (result) {
 	                if (result.error) {
-	                    self.emit("error", { type: "WebSocketError", error: result.error });
+	                    _this.emit("error", { type: "WebSocketError", error: result.error });
 	                }
 	                callback(result);
 	            };
-	        }
+	        };
 	        return {
 	            ssl_only: withErrorEmitted(function () {
-	                self.encrypted = true;
-	                self.updateStrategy();
-	                self.retryIn(0);
+	                _this.encrypted = true;
+	                _this.updateStrategy();
+	                _this.retryIn(0);
 	            }),
 	            refused: withErrorEmitted(function () {
-	                self.disconnect();
+	                _this.disconnect();
 	            }),
 	            backoff: withErrorEmitted(function () {
-	                self.retryIn(1000);
+	                _this.retryIn(1000);
 	            }),
 	            retry: withErrorEmitted(function () {
-	                self.retryIn(0);
+	                _this.retryIn(0);
 	            })
 	        };
 	    };
@@ -3141,7 +2977,7 @@ var Pusher =
 	        }
 	    };
 	    ConnectionManager.prototype.shouldRetry = function () {
-	        return (this.state) === "connecting" || (this.state) === "connected";
+	        return this.state === "connecting" || this.state === "connected";
 	    };
 	    return ConnectionManager;
 	}(dispatcher_1["default"]));
@@ -3150,12 +2986,12 @@ var Pusher =
 
 
 /***/ },
-/* 55 */
+/* 45 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
-	var factory_1 = __webpack_require__(41);
+	var Collections = __webpack_require__(3);
+	var factory_1 = __webpack_require__(32);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -3200,13 +3036,13 @@ var Pusher =
 
 
 /***/ },
-/* 56 */
+/* 46 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var factory_1 = __webpack_require__(41);
-	var util_1 = __webpack_require__(7);
-	var Errors = __webpack_require__(35);
+	var factory_1 = __webpack_require__(32);
+	var util_1 = __webpack_require__(5);
+	var Errors = __webpack_require__(42);
 	var TransportStrategy = (function () {
 	    function TransportStrategy(name, priority, transport, options) {
 	        this.name = name;
@@ -3220,13 +3056,13 @@ var Pusher =
 	        });
 	    };
 	    TransportStrategy.prototype.connect = function (minPriority, callback) {
+	        var _this = this;
 	        if (!this.isSupported()) {
 	            return failAttempt(new Errors.UnsupportedStrategy(), callback);
 	        }
 	        else if (this.priority < minPriority) {
 	            return failAttempt(new Errors.TransportPriorityTooLow(), callback);
 	        }
-	        var self = this;
 	        var connected = false;
 	        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
 	        var handshake = null;
@@ -3277,7 +3113,7 @@ var Pusher =
 	                if (connected) {
 	                    return;
 	                }
-	                if (self.priority < p) {
+	                if (_this.priority < p) {
 	                    if (handshake) {
 	                        handshake.close();
 	                    }
@@ -3304,13 +3140,13 @@ var Pusher =
 
 
 /***/ },
-/* 57 */
+/* 47 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
-	var util_1 = __webpack_require__(7);
-	var timers_1 = __webpack_require__(8);
+	var Collections = __webpack_require__(3);
+	var util_1 = __webpack_require__(5);
+	var timers_1 = __webpack_require__(6);
 	var SequentialStrategy = (function () {
 	    function SequentialStrategy(strategies, options) {
 	        this.strategies = strategies;
@@ -3323,7 +3159,7 @@ var Pusher =
 	        return Collections.any(this.strategies, util_1["default"].method("isSupported"));
 	    };
 	    SequentialStrategy.prototype.connect = function (minPriority, callback) {
-	        var self = this;
+	        var _this = this;
 	        var strategies = this.strategies;
 	        var current = 0;
 	        var timeout = this.timeout;
@@ -3334,17 +3170,17 @@ var Pusher =
 	            }
 	            else {
 	                current = current + 1;
-	                if (self.loop) {
+	                if (_this.loop) {
 	                    current = current % strategies.length;
 	                }
 	                if (current < strategies.length) {
 	                    if (timeout) {
 	                        timeout = timeout * 2;
-	                        if (self.timeoutLimit) {
-	                            timeout = Math.min(timeout, self.timeoutLimit);
+	                        if (_this.timeoutLimit) {
+	                            timeout = Math.min(timeout, _this.timeoutLimit);
 	                        }
 	                    }
-	                    runner = self.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: self.failFast }, tryNextStrategy);
+	                    runner = _this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: _this.failFast }, tryNextStrategy);
 	                }
 	                else {
 	                    callback(true);
@@ -3401,12 +3237,12 @@ var Pusher =
 
 
 /***/ },
-/* 58 */
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var Collections = __webpack_require__(5);
-	var util_1 = __webpack_require__(7);
+	var Collections = __webpack_require__(3);
+	var util_1 = __webpack_require__(5);
 	var BestConnectedEverStrategy = (function () {
 	    function BestConnectedEverStrategy(strategies) {
 	        this.strategies = strategies;
@@ -3464,13 +3300,13 @@ var Pusher =
 
 
 /***/ },
-/* 59 */
+/* 49 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var util_1 = __webpack_require__(7);
+	var util_1 = __webpack_require__(5);
 	var runtime_1 = __webpack_require__(1);
-	var sequential_strategy_1 = __webpack_require__(57);
+	var sequential_strategy_1 = __webpack_require__(47);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
 	        this.strategy = strategy;
@@ -3578,11 +3414,11 @@ var Pusher =
 
 
 /***/ },
-/* 60 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var timers_1 = __webpack_require__(8);
+	var timers_1 = __webpack_require__(6);
 	var DelayedStrategy = (function () {
 	    function DelayedStrategy(strategy, _a) {
 	        var number = _a.delay;
@@ -3620,7 +3456,7 @@ var Pusher =
 
 
 /***/ },
-/* 61 */
+/* 51 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3645,7 +3481,7 @@ var Pusher =
 
 
 /***/ },
-/* 62 */
+/* 52 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -3672,11 +3508,11 @@ var Pusher =
 
 
 /***/ },
-/* 63 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var defaults_1 = __webpack_require__(14);
+	var defaults_1 = __webpack_require__(10);
 	exports.getGlobalConfig = function () {
 	    return {
 	        wsHost: defaults_1["default"].host,

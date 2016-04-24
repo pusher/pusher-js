@@ -21,12 +21,12 @@ declare class HTTPSocket implements Socket {
     sendRaw(payload: any): boolean;
     reconnect(): void;
     onClose(code: any, reason: any, wasClean: any): void;
-    onChunk(chunk: any): void;
-    onOpen(options: any): void;
-    onEvent(event: any): void;
-    onActivity(): void;
-    onError(error: any): void;
-    openStream(): void;
-    closeStream(): void;
+    private onChunk(chunk);
+    private onOpen(options);
+    private onEvent(event);
+    private onActivity();
+    private onError(error);
+    private openStream();
+    private closeStream();
 }
 export default HTTPSocket;

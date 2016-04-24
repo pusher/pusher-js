@@ -1,5 +1,5 @@
 import TransportHooks from "./transport_hooks";
-import TransportConnection from "transports/transport_connection";
+import TransportConnection from "./transport_connection";
 export default class Transport {
     hooks: TransportHooks;
     constructor(hooks: TransportHooks);
