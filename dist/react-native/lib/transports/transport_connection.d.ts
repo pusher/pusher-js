@@ -1,0 +1,34 @@
+import { default as EventsDispatcher } from "../events/dispatcher";
+import ConnectionState from '../connection/state';
+import TransportHooks from './transport_hooks';
+import Socket from '../socket/socket';
+export default class TransportConnection extends EventsDispatcher {
+    hooks: TransportHooks;
+    name: string;
+    priority: number;
+    key: string;
+    options: any;
+    state: ConnectionState;
+    timeline: any;
+    activityTimeout: number;
+    id: string;
+    socket: Socket;
+    beforeOpen: Function;
+    constructor(hooks: TransportHooks, name: string, priority: number, key: string, options: any);
+    handlesActivityChecks(): boolean;
+    supportsPing(): boolean;
+    initialize(): void;
+    connect(): boolean;
+    close(): boolean;
+    send(data: any): boolean;
+    ping(): void;
+    onOpen(): void;
+    onError(error: any): void;
+    onClose(closeEvent?: any): void;
+    onMessage(message: any): void;
+    onActivity(): void;
+    bindListeners(): void;
+    unbindListeners(): void;
+    changeState(state: ConnectionState, params?: any): void;
+    buildTimelineMessage(message: any): any;
+}

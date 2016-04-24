@@ -4,6 +4,9 @@
 *.swp
 coverage
 node_modules
+lib/
+tmp/
 
 !/dist/*
 !/src/node_modules
+!spec/node_modules

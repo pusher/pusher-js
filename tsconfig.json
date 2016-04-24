@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "lib/",
+    "declaration": true,
+    "sourceMap": true,
+    "target": "es3",
+    "removeComments": true
+  },
+  "files": [
+    "src/core/pusher.ts",
+    "src/d.ts/faye-websocket/faye-websocket.d.ts",
+    "src/d.ts/xmlhttprequest/xmlhttprequest.d.ts",
+    "src/d.ts/window/websocket.d.ts",
+    "src/d.ts/window/xmlhttprequest.d.ts",
+    "src/d.ts/window/sockjs.d.ts",
+    "src/d.ts/window/events.d.ts",
+    "src/d.ts/react-native/react-native.d.ts",
+    "src/d.ts/module/module.d.ts",
+    "src/d.ts/fetch/promise.d.ts",
+    "src/d.ts/fetch/fetch.d.ts",
+    "src/runtimes/web/net_info.ts",
+    "src/runtimes/react-native/net_info.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

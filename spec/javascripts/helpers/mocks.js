@@ -1,4 +1,4 @@
-var EventsDispatcher = require('events_dispatcher');
+var EventsDispatcher = require('core/events/dispatcher').default;
 
 var Mocks = {
   getScriptRequest: function() {

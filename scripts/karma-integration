@@ -1,5 +1,0 @@
-#!/bin/bash
-set -euo pipefail
-cd "$(dirname "$0")"/..
-
-node_modules/karma/bin/karma start spec/karma/config/integration.js
