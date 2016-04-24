@@ -1,6 +1,5 @@
 import Action from './action';
 import Message from './message';
-import HandshakeResults from '../handshake/handshake_results';
 /**
  * Provides functions for handling Pusher protocol-specific messages.
  */
@@ -64,7 +63,7 @@ export var processHandshake = function(message : Message) : Action {
       throw "No activity timeout specified in handshake";
     }
     return {
-      action: HandshakeResults.CONNECTED,
+      action: "connected",
       id: message.data.socket_id,
       activityTimeout: message.data.activity_timeout * 1000
     };
@@ -90,7 +89,7 @@ export var processHandshake = function(message : Message) : Action {
  * @param  {CloseEvent} closeEvent
  * @return {String} close action name
  */
-export var getCloseAction = function(closeEvent) : HandshakeResults {
+export var getCloseAction = function(closeEvent) : string {
   if (closeEvent.code < 4000) {
     // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
     //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
@@ -98,21 +97,21 @@ export var getCloseAction = function(closeEvent) : HandshakeResults {
     // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
     //        1004 CLOSE_TOO_LARGE
     if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-      return HandshakeResults.BACKOFF;
+      return "backoff";
     } else {
       return null;
     }
   } else if (closeEvent.code === 4000) {
-    return HandshakeResults.SSL_ONLY;
+    return "ssl_only";
   } else if (closeEvent.code < 4100) {
-    return HandshakeResults.REFUSED;
+    return "refused";
   } else if (closeEvent.code < 4200) {
-    return HandshakeResults.BACKOFF;
+    return "backoff";
   } else if (closeEvent.code < 4300) {
-    return HandshakeResults.RETRY;
+    return "retry";
   } else {
     // unknown error
-    return HandshakeResults.REFUSED;
+    return "refused";
   }
 };
 

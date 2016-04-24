@@ -1,5 +1,3 @@
-import ConnectionState from 'core/connection/state';
-
 /** Initializes the transport.
  *
  * Fetches resources if needed and then transitions to initialized.
@@ -12,7 +10,7 @@ export default function() {
   }));
 
   if (self.hooks.isInitialized()) {
-    self.changeState(ConnectionState.INITIALIZED);
+    self.changeState("initialized");
   } else {
     self.onClose();
   }

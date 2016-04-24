@@ -2,7 +2,6 @@ import Util from '../util';
 import * as Collections from '../utils/collections';
 import {default as EventsDispatcher} from "../events/dispatcher";
 import Logger from '../logger';
-import ConnectionState from '../connection/state';
 import TransportHooks from './transport_hooks';
 import Socket from '../socket';
 import Runtime from 'runtime';
@@ -43,7 +42,7 @@ export default class TransportConnection extends EventsDispatcher {
   priority: number;
   key: string;
   options: TransportConnectionOptions;
-  state: ConnectionState;
+  state: string;
   timeline: Timeline;
   activityTimeout: number;
   id: number;
@@ -60,7 +59,7 @@ export default class TransportConnection extends EventsDispatcher {
     this.key = key;
     this.options = options;
 
-    this.state = ConnectionState.NEW;
+    this.state = "new";
     this.timeline = options.timeline;
     this.activityTimeout = options.activityTimeout;
     this.id = this.timeline.generateUniqueID();
@@ -87,7 +86,7 @@ export default class TransportConnection extends EventsDispatcher {
    * @returns {Boolean} false if transport is in invalid state
    */
   connect() : boolean {
-    if (this.socket || this.state !== <any>ConnectionState.INITIALIZED) {
+    if (this.socket || this.state !== "initialized") {
       return false;
     }
 
@@ -97,7 +96,7 @@ export default class TransportConnection extends EventsDispatcher {
     } catch (e) {
       Util.defer(()=> {
         this.onError(e);
-        this.changeState(ConnectionState.CLOSED);
+        this.changeState("closed");
       });
       return false;
     }
@@ -105,7 +104,7 @@ export default class TransportConnection extends EventsDispatcher {
     this.bindListeners();
 
     Logger.debug("Connecting", { transport: this.name, url});
-    this.changeState(ConnectionState.CONNECTING);
+    this.changeState("connecting");
     return true;
   }
 
@@ -128,7 +127,7 @@ export default class TransportConnection extends EventsDispatcher {
    * @return {Boolean} true only when in the "open" state
    */
   send(data : any) : boolean {
-    if (this.state === <any>ConnectionState.OPEN) {
+    if (this.state === "open") {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
       Util.defer(()=> {
         if (this.socket) {
@@ -143,7 +142,7 @@ export default class TransportConnection extends EventsDispatcher {
 
   /** Sends a ping if the connection is open and transport supports it. */
   ping() {
-    if (this.state === <any>ConnectionState.OPEN && this.supportsPing()) {
+    if (this.state === "open" && this.supportsPing()) {
       this.socket.ping();
     }
   }
@@ -154,7 +153,7 @@ export default class TransportConnection extends EventsDispatcher {
         this.socket, this.hooks.urls.getPath(this.key, this.options)
       );
     }
-    this.changeState(ConnectionState.OPEN);
+    this.changeState("open");
     this.socket.onopen = undefined;
   }
 
@@ -165,13 +164,13 @@ export default class TransportConnection extends EventsDispatcher {
 
   private onClose(closeEvent?:any) {
     if (closeEvent) {
-      this.changeState(ConnectionState.CLOSED, {
+      this.changeState("closed", {
         code: closeEvent.code,
         reason: closeEvent.reason,
         wasClean: closeEvent.wasClean
       });
     } else {
-      this.changeState(ConnectionState.CLOSED);
+      this.changeState("closed");
     }
     this.unbindListeners();
     this.socket = undefined;
@@ -216,13 +215,13 @@ export default class TransportConnection extends EventsDispatcher {
     }
   }
 
-  private changeState(state : ConnectionState, params?:any) {
+  private changeState(state : string, params?:any) {
     this.state = state;
     this.timeline.info(this.buildTimelineMessage({
       state: state,
       params: params
     }));
-    this.emit(<any>state, params);
+    this.emit(state, params);
   }
 
   buildTimelineMessage(message) : any {

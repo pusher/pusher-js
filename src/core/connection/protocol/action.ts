@@ -1,7 +1,5 @@
-import Descriptions from "../handshake/handshake_results";
-
 interface Action {
-  action: Descriptions;
+  action: string;
   id?: string;
   activityTimeout?: number;
   error?: any;

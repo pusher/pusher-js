@@ -1,7 +1,6 @@
 import {default as EventsDispatcher} from '../events/dispatcher';
 import {OneOffTimer as Timer} from '../utils/timers';
 import Logger from '../logger';
-import ConnectionState from './state';
 import HandshakePayload from './handshake/handshake_payload';
 import Connection from "./connection";
 import Strategy from "../strategies/strategy";
@@ -41,7 +40,7 @@ import {ErrorCallbacks, HandshakeCallbacks, ConnectionCallbacks} from './callbac
 export default class ConnectionManager extends EventsDispatcher {
   key : string;
   options: ConnectionManagerOptions;
-  state: ConnectionState;
+  state: string;
   connection: Connection;
   encrypted: boolean;
   timeline: Timeline;
@@ -60,7 +59,7 @@ export default class ConnectionManager extends EventsDispatcher {
     super();
     this.key = key;
     this.options = options || {};
-    this.state = ConnectionState.INITIALIZED;
+    this.state = "initialized";
     this.connection = null;
     this.encrypted = !!options.encrypted;
     this.timeline = this.options.timeline;
@@ -73,7 +72,7 @@ export default class ConnectionManager extends EventsDispatcher {
 
     Network.bind("online", ()=> {
       this.timeline.info({ netinfo: "online" });
-      if (<any>(this.state) === "connecting" || <any>(this.state) === "unavailable") {
+      if (this.state === "connecting" || this.state === "unavailable") {
         this.retryIn(0);
       }
     });
@@ -97,10 +96,10 @@ export default class ConnectionManager extends EventsDispatcher {
       return;
     }
     if (!this.strategy.isSupported()) {
-      this.updateState(ConnectionState.FAILED);
+      this.updateState("failed");
       return;
     }
-    this.updateState(ConnectionState.CONNECTING);
+    this.updateState("connecting");
     this.startConnecting();
     this.setUnavailableTimer();
   };
@@ -135,7 +134,7 @@ export default class ConnectionManager extends EventsDispatcher {
   /** Closes the connection. */
   disconnect() {
     this.disconnectInternally();
-    this.updateState(ConnectionState.DISCONNECTED);
+    this.updateState("disconnected");
   };
 
   isEncrypted() {
@@ -206,7 +205,7 @@ export default class ConnectionManager extends EventsDispatcher {
     this.unavailableTimer = new Timer(
       this.options.unavailableTimeout,
       ()=> {
-        this.updateState(ConnectionState.UNAVAILABLE);
+        this.updateState("unavailable");
       }
     );
   };
@@ -283,7 +282,7 @@ export default class ConnectionManager extends EventsDispatcher {
         this.clearUnavailableTimer();
         this.setConnection(handshake.connection);
         this.socket_id = this.connection.id;
-        this.updateState(ConnectionState.CONNECTED, { socket_id: this.socket_id });
+        this.updateState("connected", { socket_id: this.socket_id });
       }
     });
   };
@@ -337,23 +336,23 @@ export default class ConnectionManager extends EventsDispatcher {
     return connection;
   }
 
-  private updateState(newState : ConnectionState, data?: any) {
+  private updateState(newState : string, data?: any) {
     var previousState = this.state;
     this.state = newState;
     if (previousState !== newState) {
-      var newStateDescription = <any> newState;
+      var newStateDescription = newState;
       if (newStateDescription === "connected") {
         newStateDescription += " with new socket ID " + data.socket_id;
       }
       Logger.debug('State changed', previousState + ' -> ' + newStateDescription);
       this.timeline.info({ state: newState, params: data });
       this.emit('state_change', { previous: previousState, current: newState });
-      this.emit(<any>newState, data);
+      this.emit(newState, data);
     }
   }
 
   private shouldRetry() : boolean {
-    return <any>(this.state) === "connecting" || <any>(this.state) === "connected";
+    return this.state === "connecting" || this.state === "connected";
   }
 
 }

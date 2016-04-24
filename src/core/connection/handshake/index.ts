@@ -3,7 +3,6 @@ import * as Collections from '../../utils/collections';
 import * as Protocol from '../protocol/protocol';
 import Connection from '../connection';
 import TransportConnection from "../../transports/transport_connection";
-import HandshakeResults from './handshake_results';
 import HandshakePayload from './handshake_payload';
 
 /**
@@ -45,8 +44,8 @@ export default class Handshake {
 
       try {
         var result = Protocol.processHandshake(m);
-        if (result.action === <any>HandshakeResults.CONNECTED) {
-          this.finish(HandshakeResults.CONNECTED, {
+        if (result.action === "connected") {
+          this.finish("connected", {
             connection: new Connection(result.id, this.transport),
             activityTimeout: result.activityTimeout
           });
@@ -55,7 +54,7 @@ export default class Handshake {
           this.transport.close();
         }
       } catch (e) {
-        this.finish(HandshakeResults.ERROR, { error: e });
+        this.finish("error", { error: e });
         this.transport.close();
       }
     };
@@ -63,7 +62,7 @@ export default class Handshake {
     this.onClosed = (closeEvent) => {
       this.unbindListeners();
 
-      var action = Protocol.getCloseAction(closeEvent) || HandshakeResults.BACKOFF;
+      var action = Protocol.getCloseAction(closeEvent) || "backoff";
       var error = Protocol.getCloseError(closeEvent);
       this.finish(action, { error: error });
     };
@@ -77,7 +76,7 @@ export default class Handshake {
     this.transport.unbind("closed", this.onClosed);
   }
 
-  private finish(action : HandshakeResults, params : any) {
+  private finish(action : string, params : any) {
     this.callback(
       Collections.extend({ transport: this.transport, action: action }, params)
     );

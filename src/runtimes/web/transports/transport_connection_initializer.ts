@@ -1,5 +1,4 @@
 import {Dependencies} from '../dom/dependencies';
-import ConnectionState from 'core/connection/state';
 
 /** Initializes the transport.
  *
@@ -13,15 +12,15 @@ export default function() {
   }));
 
   if (self.hooks.isInitialized()) {
-    self.changeState(ConnectionState.INITIALIZED);
+    self.changeState("initialized");
   } else if (self.hooks.file) {
-    self.changeState(ConnectionState.INITIALIZING);
+    self.changeState("initializing");
     Dependencies.load(
       self.hooks.file,
       { encrypted: self.options.encrypted },
       function(error, callback) {
         if (self.hooks.isInitialized()) {
-          self.changeState(ConnectionState.INITIALIZED);
+          self.changeState("initialized");
           callback(true);
         } else {
           if (error) {

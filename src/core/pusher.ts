@@ -15,7 +15,6 @@ import {PeriodicTimer} from './utils/timers';
 import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
-import ConnectionState from './connection/state';
 import Factory from './utils/factory';
 import {default as Client, ClientOptions} from './client';
 
@@ -196,7 +195,7 @@ class Pusher implements Client {
 
   subscribe(channel_name : string) {
     var channel = this.channels.add(channel_name, this);
-    if (this.connection.state === <any>ConnectionState.CONNECTED) {
+    if (this.connection.state === "connected") {
       channel.subscribe();
     }
     return channel;
@@ -204,7 +203,7 @@ class Pusher implements Client {
 
   unsubscribe(channel_name : string) {
     var channel = this.channels.remove(channel_name);
-    if (channel && this.connection.state === <any>ConnectionState.CONNECTED) {
+    if (channel && this.connection.state === "connected") {
       channel.unsubscribe();
     }
   }
