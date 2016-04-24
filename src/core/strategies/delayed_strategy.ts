@@ -12,7 +12,7 @@ import StrategyOptions from './strategy_options';
  */
 export default class DelayedStrategy implements Strategy {
   strategy: Strategy;
-  options: any;
+  options: {delay: number};
 
   constructor(strategy : Strategy, {delay : number}) {
     this.strategy = strategy;

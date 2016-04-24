@@ -1,6 +1,6 @@
 var TestEnv = require('testenv');
 var Pusher = require('core/pusher');
-var NetInfo  = require('net_info');
+var NetInfo  = require('net_info').NetInfo;
 var Mocks = require('mocks');
 var Defaults = require('core/defaults').default;
 var version = Defaults.VERSION;
@@ -19,6 +19,7 @@ describe("Host/Port Configuration", function() {
       var network = new NetInfo();
       network.isOnline = jasmine.createSpy("isOnline")
         .andReturn(true);
+      return network;
     });
     spyOn(Runtime, "getLocalStorage").andReturn({});
   });

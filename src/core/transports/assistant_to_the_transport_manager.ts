@@ -1,6 +1,7 @@
 import Util from '../util';
 import * as Collections from '../utils/collections';
 import TransportManager from './transport_manager';
+import TransportConnection from './transport_connection';
 import Transport from './transport';
 import PingDelayOptions from './ping_delay_options';
 
@@ -17,14 +18,14 @@ import PingDelayOptions from './ping_delay_options';
  * @param {TransportConnection} transport
  * @param {Object} options
  */
-export default class AssistantToTheTransportManager implements PingDelayOptions {
+export default class AssistantToTheTransportManager {
   manager : TransportManager;
   transport : Transport;
   minPingDelay: number;
   maxPingDelay: number;
   pingDelay: number;
 
-  constructor(manager : TransportManager, transport : Transport, options : any) {
+  constructor(manager : TransportManager, transport : Transport, options : PingDelayOptions) {
     this.manager = manager;
     this.transport = transport;
     this.minPingDelay = options.minPingDelay;
@@ -42,13 +43,11 @@ export default class AssistantToTheTransportManager implements PingDelayOptions 
    * @param {Object} options
    * @returns {TransportConnection}
    */
-  createConnection(name : string, priority : number, key : string, options : Object) : any {
-    var self = this;
-
+  createConnection(name : string, priority : number, key : string, options : Object) : TransportConnection {
     options = Collections.extend({}, options, {
-      activityTimeout: self.pingDelay
+      activityTimeout: this.pingDelay
     });
-    var connection = self.transport.createConnection(
+    var connection = this.transport.createConnection(
       name, priority, key, options
     );
 
@@ -59,18 +58,18 @@ export default class AssistantToTheTransportManager implements PingDelayOptions 
       connection.bind("closed", onClosed);
       openTimestamp = Util.now();
     };
-    var onClosed = function(closeEvent) {
+    var onClosed = (closeEvent)=> {
       connection.unbind("closed", onClosed);
 
       if (closeEvent.code === 1002 || closeEvent.code === 1003) {
         // we don't want to use transports not obeying the protocol
-        self.manager.reportDeath();
+        this.manager.reportDeath();
       } else if (!closeEvent.wasClean && openTimestamp) {
         // report deaths only for short-living transport
         var lifespan = Util.now() - openTimestamp;
-        if (lifespan < 2 * self.maxPingDelay) {
-          self.manager.reportDeath();
-          self.pingDelay = Math.max(lifespan / 2, self.minPingDelay);
+        if (lifespan < 2 * this.maxPingDelay) {
+          this.manager.reportDeath();
+          this.pingDelay = Math.max(lifespan / 2, this.minPingDelay);
         }
       }
     };
@@ -87,7 +86,7 @@ export default class AssistantToTheTransportManager implements PingDelayOptions 
    * @param {Object} environment the environment details (encryption, settings)
    * @returns {Boolean} true when the transport is supported
    */
-  isSupported(environment : any) : boolean {
+  isSupported(environment : string) : boolean {
     return this.manager.isAlive() && this.transport.isSupported(environment);
   }
 }

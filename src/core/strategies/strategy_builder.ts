@@ -12,6 +12,7 @@ import IfStrategy from './if_strategy';
 import FirstConnectedStrategy from './first_connected_strategy';
 import Runtime from "runtime";
 
+const {Transports} = Runtime;
 /** Transforms a JSON scheme to a strategy tree.
  *
  * @param {Array} scheme JSON strategy scheme
@@ -22,8 +23,6 @@ export var build = function(scheme, options) {
   var context = Collections.extend({}, globalContext, options);
   return evaluate(scheme, context)[1].strategy;
 }
-
-var transports = Runtime.Transports;
 
 var UnsupportedStrategy : Strategy = {
   isSupported: function() {
@@ -64,7 +63,7 @@ var globalContext = {
   },
 
   def_transport: function(context, name, type, priority, options, manager) {
-    var transportClass = transports[type];
+    var transportClass = Transports[type];
     if (!transportClass) {
       throw new Errors.UnsupportedTransport(type);
     }
@@ -93,8 +92,8 @@ var globalContext = {
     }
 
     var newContext = context.def(context, name, transport)[1];
-    newContext.transports = context.transports || {};
-    newContext.transports[name] = transport;
+    newContext.Transports = context.Transports || {};
+    newContext.Transports[name] = transport;
     return [undefined, newContext];
   },
 
@@ -108,7 +107,7 @@ var globalContext = {
   }),
 
   cached: returnWithOriginalContext(function(context, ttl, strategy){
-    return new CachedStrategy(strategy, context.transports, {
+    return new CachedStrategy(strategy, context.Transports, {
       ttl: ttl,
       timeline: context.timeline,
       encrypted: context.encrypted

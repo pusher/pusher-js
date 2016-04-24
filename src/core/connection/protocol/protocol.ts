@@ -1,5 +1,4 @@
 import Action from './action';
-import InternalEvents from './internal_events';
 import Message from './message';
 import HandshakeResults from '../handshake/handshake_results';
 /**
@@ -60,7 +59,7 @@ export var encodeMessage = function(message : Message) : string {
 export var processHandshake = function(message : Message) : Action {
   message = decodeMessage(message);
 
-  if (message.event === <any>InternalEvents.CONNECTION_ESTABLISHED) {
+  if (message.event === "pusher:connection_established") {
     if (!message.data.activity_timeout) {
       throw "No activity timeout specified in handshake";
     }
@@ -69,7 +68,7 @@ export var processHandshake = function(message : Message) : Action {
       id: message.data.socket_id,
       activityTimeout: message.data.activity_timeout * 1000
     };
-  } else if (message.event === <any>InternalEvents.ERROR) {
+  } else if (message.event === "pusher:error") {
     // From protocol 6 close codes are sent only once, so this only
     // happens when connection does not support close codes
     return {

@@ -1,12 +1,13 @@
 import {NetInfo as NativeNetInfo} from 'react-native';
 import EventsDispatcher from 'core/events/dispatcher';
 import Util from 'core/util';
+import Reachability from 'core/reachability';
 
 function hasOnlineConnectionState(connectionState) : boolean{
   return connectionState.toLowerCase() !== "none";
 }
 
-export class NetInfo extends EventsDispatcher {
+export class NetInfo extends EventsDispatcher implements Reachability {
   online: boolean;
 
   constructor() {

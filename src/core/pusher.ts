@@ -1,3 +1,4 @@
+import AbstractRuntime from "runtimes/interface";
 import Runtime from "runtime";
 import Util from "./util";
 import * as Collections from './utils/collections';
@@ -9,20 +10,22 @@ import TimelineSender from './timeline/timeline_sender';
 import TimelineLevel from './timeline/level';
 import * as StrategyBuilder from './strategies/strategy_builder';
 import ConnectionManager from './connection/connection_manager';
+import ConnectionManagerOptions from './connection/connection_manager_options';
 import {PeriodicTimer} from './utils/timers';
 import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import ConnectionState from './connection/state';
 import Factory from './utils/factory';
+import {default as Client, ClientOptions} from './client';
 
-class Pusher {
+class Pusher implements Client {
 
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
   static isReady : boolean = false;
   // for jsonp
-  static Runtime : any = Runtime;
+  static Runtime : AbstractRuntime = Runtime;
   static ScriptReceivers : any  = (<any>Runtime).ScriptReceivers;
   static DependenciesReceivers : any = (<any>Runtime).DependenciesReceivers;
 
@@ -47,7 +50,7 @@ class Pusher {
 
   /* INSTANCE PROPERTIES */
   key: string;
-  config: any;
+  config: ClientOptions;
   channels: Channels;
   global_emitter: EventsDispatcher;
   sessionID: number;
@@ -60,10 +63,8 @@ class Pusher {
     checkAppKey(app_key);
     options = options || {};
 
-    var self = this;
-
     this.key = app_key;
-    this.config = Collections.extend(
+    this.config = Collections.extend<ClientOptions>(
       DefaultConfig.getGlobalConfig(),
       options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {},
       options
@@ -88,8 +89,8 @@ class Pusher {
       });
     }
 
-    var getStrategy = function(options) {
-      var config = Collections.extend({}, self.config, options);
+    var getStrategy = (options)=> {
+      var config = Collections.extend({}, this.config, options);
       return StrategyBuilder.build(
         Runtime.getDefaultStrategy(config), config
       );
@@ -97,7 +98,7 @@ class Pusher {
 
     this.connection = Factory.createConnectionManager(
       this.key,
-      Collections.extend(
+      Collections.extend<ConnectionManagerOptions>(
         { getStrategy: getStrategy,
           timeline: this.timeline,
           activityTimeout: this.config.activity_timeout,
@@ -109,29 +110,29 @@ class Pusher {
       )
     );
 
-    this.connection.bind('connected', function() {
-      self.subscribeAll();
-      if (self.timelineSender) {
-        self.timelineSender.send(self.connection.isEncrypted());
+    this.connection.bind('connected', ()=> {
+      this.subscribeAll();
+      if (this.timelineSender) {
+        this.timelineSender.send(this.connection.isEncrypted());
       }
     });
-    this.connection.bind('message', function(params) {
+    this.connection.bind('message', (params)=> {
       var internal = (params.event.indexOf('pusher_internal:') === 0);
       if (params.channel) {
-        var channel = self.channel(params.channel);
+        var channel = this.channel(params.channel);
         if (channel) {
           channel.handleEvent(params.event, params.data);
         }
       }
       // Emit globally [deprecated]
       if (!internal) {
-        self.global_emitter.emit(params.event, params.data);
+        this.global_emitter.emit(params.event, params.data);
       }
     });
-    this.connection.bind('disconnected', function() {
-      self.channels.disconnect();
+    this.connection.bind('disconnected', ()=> {
+      this.channels.disconnect();
     });
-    this.connection.bind('error', function(err) {
+    this.connection.bind('error', (err)=> {
       Logger.warn('Error', err);
     });
 
@@ -139,7 +140,7 @@ class Pusher {
     this.timeline.info({ instances: Pusher.instances.length });
 
     if (Pusher.isReady) {
-      self.connect();
+      this.connect();
     }
   }
 

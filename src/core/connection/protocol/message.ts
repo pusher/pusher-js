@@ -1,7 +1,5 @@
-import InternalEvents from "./internal_events";
-
 interface Message {
-  event: string | InternalEvents;
+  event: string;
   channel?: string;
   data?: any;
 }

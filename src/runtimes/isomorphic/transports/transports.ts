@@ -1,4 +1,5 @@
 import * as URLSchemes from "core/transports/url_schemes";
+import URLScheme from 'core/transports/url_scheme'
 import Transport from "core/transports/transport";
 import Util from "core/util";
 import * as Collections from "core/utils/collections";

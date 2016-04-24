@@ -1,7 +1,7 @@
 import Defaults from "../defaults";
-import URLScheme from "./url_scheme";
+import {default as URLScheme, URLSchemeParams} from "./url_scheme";
 
-function getGenericURL(baseScheme : string, params : any, path : string): string {
+function getGenericURL(baseScheme : string, params : URLSchemeParams, path : string): string {
   var scheme = baseScheme + (params.encrypted ? "s" : "");
   var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
   return scheme + "://" + host + path;
@@ -18,23 +18,23 @@ function getGenericPath(key : string, queryString?:string) : string {
 }
 
 export var ws : URLScheme = {
-    getInitial: function(key : string , params : any) : string {
+    getInitial: function(key : string , params : URLSchemeParams) : string {
         return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
     }
 };
 
 export var http : URLScheme = {
-    getInitial: function(key : string, params : any) : string {
+    getInitial: function(key : string, params : URLSchemeParams) : string {
         var path = (params.httpPath || "/pusher") + getGenericPath(key);
         return getGenericURL("http", params, path);
     }
 };
 
 export var sockjs : URLScheme = {
-  getInitial: function(key : string, params : any) : string {
+  getInitial: function(key : string, params : URLSchemeParams) : string {
     return getGenericURL("http", params, params.httpPath || "/pusher");
   },
-  getPath: function(key : string, params : any) : string {
+  getPath: function(key : string, params : URLSchemeParams) : string {
     return getGenericPath(key);
   }
 };

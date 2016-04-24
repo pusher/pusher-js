@@ -35,33 +35,31 @@ export default class SequentialStrategy implements Strategy {
   }
 
   connect(minPriority : number, callback : Function) {
-    var self = this;
-
     var strategies = this.strategies;
     var current = 0;
     var timeout = this.timeout;
     var runner = null;
 
-    var tryNextStrategy = function(error, handshake) {
+    var tryNextStrategy = (error, handshake)=> {
       if (handshake) {
         callback(null, handshake);
       } else {
         current = current + 1;
-        if (self.loop) {
+        if (this.loop) {
           current = current % strategies.length;
         }
 
         if (current < strategies.length) {
           if (timeout) {
             timeout = timeout * 2;
-            if (self.timeoutLimit) {
-              timeout = Math.min(timeout, self.timeoutLimit);
+            if (this.timeoutLimit) {
+              timeout = Math.min(timeout, this.timeoutLimit);
             }
           }
-          runner = self.tryStrategy(
+          runner = this.tryStrategy(
             strategies[current],
             minPriority,
-            { timeout: timeout, failFast: self.failFast },
+            { timeout, failFast: this.failFast },
             tryNextStrategy
           );
         } else {
@@ -90,8 +88,7 @@ export default class SequentialStrategy implements Strategy {
     };
   }
 
-  /** @private */
-  tryStrategy(strategy : Strategy, minPriority : number, options : StrategyOptions, callback : Function) {
+  private tryStrategy(strategy : Strategy, minPriority : number, options : StrategyOptions, callback : Function) {
     var timer = null;
     var runner = null;
 

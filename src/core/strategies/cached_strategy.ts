@@ -4,6 +4,7 @@ import Strategy from './strategy';
 import SequentialStrategy from './sequential_strategy';
 import StrategyOptions from "./strategy_options";
 import TransportStrategy from './transport_strategy';
+import Timeline from '../timeline/timeline'
 
 /** Caches last successful transport and uses it for following attempts.
  *
@@ -16,7 +17,7 @@ export default class CachedStrategy implements Strategy {
   transports: TransportStrategy[];
   ttl: number;
   encrypted: boolean;
-  timeline: any;
+  timeline: Timeline;
 
   constructor(strategy : Strategy, transports: TransportStrategy[], options : StrategyOptions) {
     this.strategy = strategy;

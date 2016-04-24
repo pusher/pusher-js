@@ -21,18 +21,16 @@ export default class HTTPRequest extends EventsDispatcher {
   }
 
   start(payload?: any) {
-    var self = this;
+    this.position = 0;
+    this.xhr = this.hooks.getRequest(this);
 
-    self.position = 0;
-    self.xhr = self.hooks.getRequest(self);
-
-    self.unloader = function() {
-      self.close();
+    this.unloader = ()=> {
+      this.close();
     };
-    Runtime.addUnloadListener(self.unloader);
+    Runtime.addUnloadListener(this.unloader);
 
-    self.xhr.open(self.method, self.url, true);
-    self.xhr.send(payload);
+    this.xhr.open(this.method, this.url, true);
+    this.xhr.send(payload);
   }
 
   close() {
@@ -60,7 +58,7 @@ export default class HTTPRequest extends EventsDispatcher {
     }
   }
 
-  advanceBuffer(buffer : any[]) : any {
+  private advanceBuffer(buffer : any[]) : any {
     var unreadData = buffer.slice(this.position);
     var endOfLinePosition = unreadData.indexOf("\n");
 
@@ -73,7 +71,7 @@ export default class HTTPRequest extends EventsDispatcher {
     }
   }
 
-  isBufferTooLong(buffer : any) : boolean {
+  private isBufferTooLong(buffer : any) : boolean {
     return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
   }
 }

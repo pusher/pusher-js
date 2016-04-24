@@ -1,6 +1,6 @@
 interface URLLocation {
-    base: string;
-    queryString: string;
+  base: string;
+  queryString: string;
 }
 
 export default URLLocation;

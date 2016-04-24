@@ -1,6 +1,5 @@
 import {default as EventsDispatcher} from '../events/dispatcher';
 import {OneOffTimer as Timer} from '../utils/timers';
-import {Network} from 'net_info';
 import Logger from '../logger';
 import ConnectionState from './state';
 import HandshakePayload from './handshake/handshake_payload';
@@ -8,6 +7,10 @@ import Connection from "./connection";
 import Strategy from "../strategies/strategy";
 import StrategyRunner from "../strategies/strategy_runner";
 import * as Collections from "../utils/collections";
+import Timeline from '../timeline/timeline';
+import ConnectionManagerOptions from './connection_manager_options';
+import Runtime from 'runtime';
+import {ErrorCallbacks, HandshakeCallbacks, ConnectionCallbacks} from './callbacks';
 
 /** Manages connection to Pusher.
  *
@@ -37,11 +40,11 @@ import * as Collections from "../utils/collections";
  */
 export default class ConnectionManager extends EventsDispatcher {
   key : string;
-  options: any;
+  options: ConnectionManagerOptions;
   state: ConnectionState;
   connection: Connection;
   encrypted: boolean;
-  timeline: any;
+  timeline: Timeline;
   socket_id: string;
   unavailableTimer: Timer;
   activityTimer: Timer;
@@ -49,9 +52,9 @@ export default class ConnectionManager extends EventsDispatcher {
   activityTimeout: number;
   strategy: Strategy;
   runner: StrategyRunner;
-  errorCallbacks: any;
-  handshakeCallbacks: any;
-  connectionCallbacks: any;
+  errorCallbacks: ErrorCallbacks;
+  handshakeCallbacks: HandshakeCallbacks;
+  connectionCallbacks: ConnectionCallbacks;
 
   constructor(key : string, options : any) {
     super();
@@ -66,18 +69,18 @@ export default class ConnectionManager extends EventsDispatcher {
     this.errorCallbacks = this.buildErrorCallbacks();
     this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 
-    var self = this;
+    var Network = Runtime.getNetwork();
 
-    Network.bind("online", function() {
-      self.timeline.info({ netinfo: "online" });
-      if (<any>(self.state) === "connecting" || <any>(self.state) === "unavailable") {
-        self.retryIn(0);
+    Network.bind("online", ()=> {
+      this.timeline.info({ netinfo: "online" });
+      if (<any>(this.state) === "connecting" || <any>(this.state) === "unavailable") {
+        this.retryIn(0);
       }
     });
-    Network.bind("offline", function() {
-      self.timeline.info({ netinfo: "offline" });
-      if (self.connection) {
-        self.sendActivityCheck();
+    Network.bind("offline", ()=> {
+      this.timeline.info({ netinfo: "offline" });
+      if (this.connection) {
+        this.sendActivityCheck();
       }
     });
 
@@ -139,35 +142,31 @@ export default class ConnectionManager extends EventsDispatcher {
     return this.encrypted;
   };
 
-  /** @private */
-  startConnecting() {
-    var self = this;
-    var callback = function(error, handshake) {
+  private startConnecting() {
+    var callback = (error, handshake)=> {
       if (error) {
-        self.runner = self.strategy.connect(0, callback);
+        this.runner = this.strategy.connect(0, callback);
       } else {
         if (handshake.action === "error") {
-          self.emit("error", { type: "HandshakeError", error: handshake.error });
-          self.timeline.error({ handshakeError: handshake.error });
+          this.emit("error", { type: "HandshakeError", error: handshake.error });
+          this.timeline.error({ handshakeError: handshake.error });
         } else {
-          self.abortConnecting(); // we don't support switching connections yet
-          self.handshakeCallbacks[handshake.action](handshake);
+          this.abortConnecting(); // we don't support switching connections yet
+          this.handshakeCallbacks[handshake.action](handshake);
         }
       }
     };
-    self.runner = self.strategy.connect(0, callback);
+    this.runner = this.strategy.connect(0, callback);
   };
 
-  /** @private */
-  abortConnecting() {
+  private abortConnecting() {
     if (this.runner) {
       this.runner.abort();
       this.runner = null;
     }
   };
 
-  /** @private */
-  disconnectInternally() {
+  private disconnectInternally() {
     this.abortConnecting();
     this.clearRetryTimer();
     this.clearUnavailableTimer();
@@ -177,8 +176,7 @@ export default class ConnectionManager extends EventsDispatcher {
     }
   };
 
-  /** @private */
-  updateStrategy() {
+  private updateStrategy() {
     this.strategy = this.options.getStrategy({
       key: this.key,
       timeline: this.timeline,
@@ -186,158 +184,139 @@ export default class ConnectionManager extends EventsDispatcher {
     });
   };
 
-  /** @private */
-  retryIn(delay) {
-    var self = this;
-    self.timeline.info({ action: "retry", delay: delay });
+  private retryIn(delay) {
+    this.timeline.info({ action: "retry", delay: delay });
     if (delay > 0) {
-      self.emit("connecting_in", Math.round(delay / 1000));
+      this.emit("connecting_in", Math.round(delay / 1000));
     }
-    self.retryTimer = new Timer(delay || 0, function() {
-      self.disconnectInternally();
-      self.connect();
+    this.retryTimer = new Timer(delay || 0, ()=> {
+      this.disconnectInternally();
+      this.connect();
     });
   };
 
-  /** @private */
-  clearRetryTimer() {
+  private clearRetryTimer() {
     if (this.retryTimer) {
       this.retryTimer.ensureAborted();
       this.retryTimer = null;
     }
   };
 
-  /** @private */
-  setUnavailableTimer() {
-    var self = this;
-    self.unavailableTimer = new Timer(
-      self.options.unavailableTimeout,
-      function() {
-        self.updateState(ConnectionState.UNAVAILABLE);
+  private setUnavailableTimer() {
+    this.unavailableTimer = new Timer(
+      this.options.unavailableTimeout,
+      ()=> {
+        this.updateState(ConnectionState.UNAVAILABLE);
       }
     );
   };
 
-  /** @private */
-  clearUnavailableTimer() {
+  private clearUnavailableTimer() {
     if (this.unavailableTimer) {
       this.unavailableTimer.ensureAborted();
     }
   };
 
-  /** @private */
-  sendActivityCheck() {
-    var self = this;
-    self.stopActivityCheck();
-    self.connection.ping();
+  private sendActivityCheck() {
+    this.stopActivityCheck();
+    this.connection.ping();
     // wait for pong response
-    self.activityTimer = new Timer(
-      self.options.pongTimeout,
-      function() {
-        self.timeline.error({ pong_timed_out: self.options.pongTimeout });
-        self.retryIn(0);
+    this.activityTimer = new Timer(
+      this.options.pongTimeout,
+      ()=> {
+        this.timeline.error({ pong_timed_out: this.options.pongTimeout });
+        this.retryIn(0);
       }
     );
   };
 
-  /** @private */
-  resetActivityCheck() {
-    var self = this;
-    self.stopActivityCheck();
+  private resetActivityCheck() {
+    this.stopActivityCheck();
     // send ping after inactivity
-    if (!self.connection.handlesActivityChecks()) {
-      self.activityTimer = new Timer(self.activityTimeout, function() {
-        self.sendActivityCheck();
+    if (!this.connection.handlesActivityChecks()) {
+      this.activityTimer = new Timer(this.activityTimeout, ()=> {
+        this.sendActivityCheck();
       });
     }
   };
 
-  /** @private */
-  stopActivityCheck() {
+  private stopActivityCheck() {
     if (this.activityTimer) {
       this.activityTimer.ensureAborted();
     }
   };
 
-  /** @private */
-  buildConnectionCallbacks() {
-    var self = this;
+  private buildConnectionCallbacks() : ConnectionCallbacks {
     return {
-      message: function(message) {
+      message: (message)=> {
         // includes pong messages from server
-        self.resetActivityCheck();
-        self.emit('message', message);
+        this.resetActivityCheck();
+        this.emit('message', message);
       },
-      ping: function() {
-        self.send_event('pusher:pong', {});
+      ping: ()=> {
+        this.send_event('pusher:pong', {});
       },
-      activity: function() {
-        self.resetActivityCheck();
+      activity: ()=> {
+        this.resetActivityCheck();
       },
-      error: function(error) {
+      error: (error)=> {
         // just emit error to user - socket will already be closed by browser
-        self.emit("error", { type: "WebSocketError", error: error });
+        this.emit("error", { type: "WebSocketError", error: error });
       },
-      closed: function() {
-        self.abandonConnection();
-        if (self.shouldRetry()) {
-          self.retryIn(1000);
+      closed: ()=> {
+        this.abandonConnection();
+        if (this.shouldRetry()) {
+          this.retryIn(1000);
         }
       }
     };
   };
 
-  /** @private */
-  buildHandshakeCallbacks(errorCallbacks) {
-    var self = this;
-    return Collections.extend({}, errorCallbacks, {
-      connected: function(handshake : HandshakePayload) {
-        self.activityTimeout = Math.min(
-          self.options.activityTimeout,
+  private buildHandshakeCallbacks(errorCallbacks : ErrorCallbacks) : HandshakeCallbacks {
+    return Collections.extend<HandshakeCallbacks>({}, errorCallbacks, {
+      connected: (handshake : HandshakePayload)=> {
+        this.activityTimeout = Math.min(
+          this.options.activityTimeout,
           handshake.activityTimeout,
           handshake.connection.activityTimeout || Infinity
         );
-        self.clearUnavailableTimer();
-        self.setConnection(handshake.connection);
-        self.socket_id = self.connection.id;
-        self.updateState(ConnectionState.CONNECTED, { socket_id: self.socket_id });
+        this.clearUnavailableTimer();
+        this.setConnection(handshake.connection);
+        this.socket_id = this.connection.id;
+        this.updateState(ConnectionState.CONNECTED, { socket_id: this.socket_id });
       }
     });
   };
 
-  /** @private */
-  buildErrorCallbacks() {
-    var self = this;
-
-    function withErrorEmitted(callback) {
-      return function(result) {
+  private buildErrorCallbacks() : ErrorCallbacks {
+    let withErrorEmitted = (callback)=> {
+      return (result)=> {
         if (result.error) {
-          self.emit("error", { type: "WebSocketError", error: result.error });
+          this.emit("error", { type: "WebSocketError", error: result.error });
         }
         callback(result);
       };
     }
 
     return {
-      ssl_only: withErrorEmitted(function() {
-        self.encrypted = true;
-        self.updateStrategy();
-        self.retryIn(0);
+      ssl_only: withErrorEmitted(()=> {
+        this.encrypted = true;
+        this.updateStrategy();
+        this.retryIn(0);
       }),
-      refused: withErrorEmitted(function() {
-        self.disconnect();
+      refused: withErrorEmitted(()=> {
+        this.disconnect();
       }),
-      backoff: withErrorEmitted(function() {
-        self.retryIn(1000);
+      backoff: withErrorEmitted(()=> {
+        this.retryIn(1000);
       }),
-      retry: withErrorEmitted(function() {
-        self.retryIn(0);
+      retry: withErrorEmitted(()=> {
+        this.retryIn(0);
       })
     };
   };
 
-  /** @private */
-  setConnection(connection) {
+  private setConnection(connection) {
     this.connection = connection;
     for (var event in this.connectionCallbacks) {
       this.connection.bind(event, this.connectionCallbacks[event]);
@@ -345,8 +324,7 @@ export default class ConnectionManager extends EventsDispatcher {
     this.resetActivityCheck();
   };
 
-  /** @private */
-  abandonConnection() {
+  private abandonConnection() {
     if (!this.connection) {
       return;
     }
@@ -359,8 +337,7 @@ export default class ConnectionManager extends EventsDispatcher {
     return connection;
   }
 
-  /** @private */
-  updateState(newState : ConnectionState, data?: any) {
+  private updateState(newState : ConnectionState, data?: any) {
     var previousState = this.state;
     this.state = newState;
     if (previousState !== newState) {
@@ -375,8 +352,7 @@ export default class ConnectionManager extends EventsDispatcher {
     }
   }
 
-  /** @private */
-  shouldRetry() : boolean {
+  private shouldRetry() : boolean {
     return <any>(this.state) === "connecting" || <any>(this.state) === "connected";
   }
 

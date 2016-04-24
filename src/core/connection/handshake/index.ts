@@ -39,50 +39,45 @@ export default class Handshake {
     this.transport.close();
   }
 
-  /** @private */
-  bindListeners() {
-    var self = this;
-
-    self.onMessage = function(m) {
-      self.unbindListeners();
+  private bindListeners() {
+    this.onMessage = (m)=> {
+      this.unbindListeners();
 
       try {
         var result = Protocol.processHandshake(m);
         if (result.action === <any>HandshakeResults.CONNECTED) {
-          self.finish("connected", {
-            connection: new Connection(result.id, self.transport),
+          this.finish(HandshakeResults.CONNECTED, {
+            connection: new Connection(result.id, this.transport),
             activityTimeout: result.activityTimeout
           });
         } else {
-          self.finish(result.action, { error: result.error });
-          self.transport.close();
+          this.finish(result.action, { error: result.error });
+          this.transport.close();
         }
       } catch (e) {
-        self.finish("error", { error: e });
-        self.transport.close();
+        this.finish(HandshakeResults.ERROR, { error: e });
+        this.transport.close();
       }
     };
 
-    self.onClosed = function(closeEvent) {
-      self.unbindListeners();
+    this.onClosed = (closeEvent) => {
+      this.unbindListeners();
 
-      var action = Protocol.getCloseAction(closeEvent) || "backoff";
+      var action = Protocol.getCloseAction(closeEvent) || HandshakeResults.BACKOFF;
       var error = Protocol.getCloseError(closeEvent);
-      self.finish(action, { error: error });
+      this.finish(action, { error: error });
     };
 
-    self.transport.bind("message", self.onMessage);
-    self.transport.bind("closed", self.onClosed);
+    this.transport.bind("message", this.onMessage);
+    this.transport.bind("closed", this.onClosed);
   }
 
-  /** @private */
-  unbindListeners() {
+  private unbindListeners() {
     this.transport.unbind("message", this.onMessage);
     this.transport.unbind("closed", this.onClosed);
   }
 
-  /** @private */
-  finish(action : any, params : any) {
+  private finish(action : HandshakeResults, params : any) {
     this.callback(
       Collections.extend({ transport: this.transport, action: action }, params)
     );

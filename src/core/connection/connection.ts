@@ -84,17 +84,14 @@ export default class Connection extends EventsDispatcher implements Socket {
      this.transport.close();
    }
 
-   /** @private */
-   bindListeners() {
-     var self = this;
-
+   private bindListeners() {
      var listeners = {
-       message: function(m) {
+       message: (m)=> {
          var message;
          try {
            message = Protocol.decodeMessage(m);
          } catch(e) {
-           self.emit('error', {
+           this.emit('error', {
              type: 'MessageParseError',
              error: e,
              data: m.data
@@ -106,49 +103,48 @@ export default class Connection extends EventsDispatcher implements Socket {
 
            switch (message.event) {
              case 'pusher:error':
-               self.emit('error', { type: 'PusherError', data: message.data });
+               this.emit('error', { type: 'PusherError', data: message.data });
                break;
              case 'pusher:ping':
-               self.emit("ping");
+               this.emit("ping");
                break;
              case 'pusher:pong':
-               self.emit("pong");
+               this.emit("pong");
                break;
            }
-           self.emit('message', message);
+           this.emit('message', message);
          }
        },
-       activity: function() {
-         self.emit("activity");
+       activity: ()=> {
+         this.emit("activity");
        },
-       error: function(error) {
-         self.emit("error", { type: "WebSocketError", error: error });
+       error: (error)=> {
+         this.emit("error", { type: "WebSocketError", error: error });
        },
-       closed: function(closeEvent) {
+       closed: (closeEvent)=> {
          unbindListeners();
 
          if (closeEvent && closeEvent.code) {
-           self.handleCloseEvent(closeEvent);
+           this.handleCloseEvent(closeEvent);
          }
 
-         self.transport = null;
-         self.emit("closed");
+         this.transport = null;
+         this.emit("closed");
        }
      };
 
-     var unbindListeners = function() {
-       Collections.objectApply(listeners, function(listener, event) {
-         self.transport.unbind(event, listener);
+     var unbindListeners = ()=> {
+       Collections.objectApply(listeners, (listener, event)=> {
+         this.transport.unbind(event, listener);
        });
      };
 
-     Collections.objectApply(listeners, function(listener, event) {
-       self.transport.bind(event, listener);
+     Collections.objectApply(listeners, (listener, event)=> {
+       this.transport.bind(event, listener);
      });
    }
 
-   /** @private */
-   handleCloseEvent(closeEvent : any) {
+   private handleCloseEvent(closeEvent : any) {
      var action = Protocol.getCloseAction(closeEvent);
      var error = Protocol.getCloseError(closeEvent);
      if (error) {

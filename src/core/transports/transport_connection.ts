@@ -1,11 +1,13 @@
-import Util from 'core/util';
-import * as Collections from 'core/utils/collections';
-import {default as EventsDispatcher} from "core/events/dispatcher";
-import Logger from 'core/logger';
-import ConnectionState from 'core/connection/state';
-import TransportHooks from 'core/transports/transport_hooks';
-import Socket from 'core/socket';
+import Util from '../util';
+import * as Collections from '../utils/collections';
+import {default as EventsDispatcher} from "../events/dispatcher";
+import Logger from '../logger';
+import ConnectionState from '../connection/state';
+import TransportHooks from './transport_hooks';
+import Socket from '../socket';
 import Runtime from 'runtime';
+import Timeline from '../timeline/timeline';
+import TransportConnectionOptions from './transport_connection_options';
 
 /** Provides universal API for transport connections.
  *
@@ -40,16 +42,16 @@ export default class TransportConnection extends EventsDispatcher {
   name: string;
   priority: number;
   key: string;
-  options: any;
+  options: TransportConnectionOptions;
   state: ConnectionState;
-  timeline: any;
+  timeline: Timeline;
   activityTimeout: number;
-  id: string;
+  id: number;
   socket: Socket;
   beforeOpen: Function;
   initialize: Function;
 
-  constructor(hooks : TransportHooks, name : string, priority : number, key : string, options : any) {
+  constructor(hooks : TransportHooks, name : string, priority : number, key : string, options : TransportConnectionOptions) {
     super();
     this.initialize = Runtime.transportConnectionInitializer;
     this.hooks = hooks;
@@ -85,27 +87,25 @@ export default class TransportConnection extends EventsDispatcher {
    * @returns {Boolean} false if transport is in invalid state
    */
   connect() : boolean {
-    var self = this;
-
-    if (self.socket || self.state !== <any>ConnectionState.INITIALIZED) {
+    if (this.socket || this.state !== <any>ConnectionState.INITIALIZED) {
       return false;
     }
 
-    var url = self.hooks.urls.getInitial(self.key, self.options);
+    var url = this.hooks.urls.getInitial(this.key, this.options);
     try {
-      self.socket = self.hooks.getSocket(url, self.options);
+      this.socket = this.hooks.getSocket(url, this.options);
     } catch (e) {
-      Util.defer(function() {
-        self.onError(e);
-        self.changeState(ConnectionState.CLOSED);
+      Util.defer(()=> {
+        this.onError(e);
+        this.changeState(ConnectionState.CLOSED);
       });
       return false;
     }
 
-    self.bindListeners();
+    this.bindListeners();
 
-    Logger.debug("Connecting", { transport: self.name, url: url });
-    self.changeState(ConnectionState.CONNECTING);
+    Logger.debug("Connecting", { transport: this.name, url});
+    this.changeState(ConnectionState.CONNECTING);
     return true;
   }
 
@@ -128,13 +128,11 @@ export default class TransportConnection extends EventsDispatcher {
    * @return {Boolean} true only when in the "open" state
    */
   send(data : any) : boolean {
-    var self = this;
-
-    if (self.state === <any>ConnectionState.OPEN) {
+    if (this.state === <any>ConnectionState.OPEN) {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
-      Util.defer(function() {
-        if (self.socket) {
-          self.socket.send(data);
+      Util.defer(()=> {
+        if (this.socket) {
+          this.socket.send(data);
         }
       });
       return true;
@@ -150,8 +148,7 @@ export default class TransportConnection extends EventsDispatcher {
     }
   }
 
-  /** @private */
-  onOpen() {
+  private onOpen() {
     if (this.hooks.beforeOpen) {
       this.hooks.beforeOpen(
         this.socket, this.hooks.urls.getPath(this.key, this.options)
@@ -161,14 +158,12 @@ export default class TransportConnection extends EventsDispatcher {
     this.socket.onopen = undefined;
   }
 
-  /** @private */
-  onError(error) {
+  private onError(error) {
     this.emit("error", { type: 'WebSocketError', error: error });
     this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
   }
 
-  /** @private */
-  onClose(closeEvent?:any) {
+  private onClose(closeEvent?:any) {
     if (closeEvent) {
       this.changeState(ConnectionState.CLOSED, {
         code: closeEvent.code,
@@ -182,40 +177,34 @@ export default class TransportConnection extends EventsDispatcher {
     this.socket = undefined;
   }
 
-  /** @private */
-  onMessage(message) {
+  private onMessage(message) {
     this.emit("message", message);
   }
 
-  /** @private */
-  onActivity() {
+  private onActivity() {
     this.emit("activity");
   }
 
-  /** @private */
-  bindListeners() {
-    var self = this;
-
-    self.socket.onopen = function() {
-      self.onOpen();
+  private bindListeners() {
+    this.socket.onopen = ()=> {
+      this.onOpen();
     };
-    self.socket.onerror = function(error) {
-      self.onError(error);
+    this.socket.onerror = (error) => {
+      this.onError(error);
     };
-    self.socket.onclose = function(closeEvent) {
-      self.onClose(closeEvent);
+    this.socket.onclose = (closeEvent) => {
+      this.onClose(closeEvent);
     };
-    self.socket.onmessage = function(message) {
-      self.onMessage(message);
+    this.socket.onmessage = (message) => {
+      this.onMessage(message);
     };
 
-    if (self.supportsPing()) {
-      self.socket.onactivity = function() { self.onActivity(); };
+    if (this.supportsPing()) {
+      this.socket.onactivity = ()=> { this.onActivity(); };
     }
   }
 
-  /** @private */
-  unbindListeners() {
+  private unbindListeners() {
     if (this.socket) {
       this.socket.onopen = undefined;
       this.socket.onerror = undefined;
@@ -227,8 +216,7 @@ export default class TransportConnection extends EventsDispatcher {
     }
   }
 
-  /** @private */
-  changeState(state : ConnectionState, params?:any) {
+  private changeState(state : ConnectionState, params?:any) {
     this.state = state;
     this.timeline.info(this.buildTimelineMessage({
       state: state,

@@ -3,20 +3,21 @@ import Channel from '../channels/channel';
 import Factory from '../utils/factory';
 import Runtime from 'runtime';
 import {AuthTransports} from './auth_transports';
+import {AuthOptions, AuthorizerOptions} from './options';
 
 export default class Authorizer {
   static authorizers : AuthTransports;
 
   channel: Channel;
   type: string;
-  options: any;
-  authOptions: any;
+  options: AuthorizerOptions;
+  authOptions: AuthOptions;
 
-  constructor(channel : Channel, options : any) {
+  constructor(channel : Channel, options : AuthorizerOptions) {
     this.channel = channel;
     this.type = options.authTransport;
     this.options = options;
-    this.authOptions = (options || {}).auth || {}
+    this.authOptions = (options || <any>{}).auth || {}
   }
 
   composeQuery(socketId : string) : string {

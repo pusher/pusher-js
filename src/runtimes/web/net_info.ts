@@ -1,3 +1,4 @@
+import Reachability from 'core/reachability';
 import {default as EventsDispatcher} from 'core/events/dispatcher'
 
 /** Really basic interface providing network availability info.
@@ -6,7 +7,7 @@ import {default as EventsDispatcher} from 'core/events/dispatcher'
  * - online - when browser goes online
  * - offline - when browser goes offline
  */
-export class NetInfo extends EventsDispatcher {
+export class NetInfo extends EventsDispatcher implements Reachability {
 
   constructor() {
     super();

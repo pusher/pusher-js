@@ -2,7 +2,7 @@ import {AuthTransports} from 'core/auth/auth_transports';
 import TimelineSender from 'core/timeline/timeline_sender';
 import TimelineTransport from 'core/timeline/timeline_transport';
 import Ajax from 'core/http/ajax';
-import {NetInfo} from 'net_info';
+import Reachability from 'core/reachability';
 import TransportsTable from 'core/transports/transports_table';
 import Socket from 'core/socket';
 import HTTPFactory from 'core/http/http_factory';
@@ -18,7 +18,7 @@ interface Runtime {
   TimelineTransport: TimelineTransport;
   createXHR() : Ajax;
   createWebSocket(url : string) : Socket;
-  getNetwork() : NetInfo;
+  getNetwork() : Reachability;
   getDefaultStrategy(config : any) : any;
   Transports: TransportsTable;
   getWebSocketAPI() : new(url: string) => Socket;

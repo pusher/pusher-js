@@ -1,5 +1,5 @@
 import base64encode from '../base64';
-const global = Function("return this")();
+import Util from '../util';
 
 /** Merges multiple objects into the target argument.
 *
@@ -15,7 +15,7 @@ const global = Function("return this")();
 * @param  {Object} target
 * @return {Object} the target argument
 */
-export function extend(target : any, ...sources: any[]) : any {
+export function extend<T>(target : any, ...sources: any[]) : T {
   var self = this;
   for (var i = 0; i < sources.length; i++) {
     var extensions = sources[i];
@@ -30,23 +30,22 @@ export function extend(target : any, ...sources: any[]) : any {
         }
       }
     }
-    return target;
-  }
+  return target;
+}
 
-
-  export function stringify() : string {
-    var m = ["Pusher"];
-    for (var i = 0; i < arguments.length; i++) {
-      if (typeof arguments[i] === "string") {
-        m.push(arguments[i]);
-      } else {
-        m.push(JSON.stringify(arguments[i]));
-      }
+export function stringify() : string {
+  var m = ["Pusher"];
+  for (var i = 0; i < arguments.length; i++) {
+    if (typeof arguments[i] === "string") {
+      m.push(arguments[i]);
+    } else {
+      m.push(JSON.stringify(arguments[i]));
     }
-    return m.join(" : ");
   }
+  return m.join(" : ");
+}
 
-  export function arrayIndexOf(array : any[], item : any) : number { // MSIE doesn't have array.indexOf
+export function arrayIndexOf(array : any[], item : any) : number { // MSIE doesn't have array.indexOf
   var nativeIndexOf = Array.prototype.indexOf;
   if (array === null) {
     return -1;
@@ -119,7 +118,7 @@ export function values(object : any) : any[] {
 */
 export function apply(array : any[], f : Function, context?: any) {
   for (var i = 0; i < array.length; i++) {
-    f.call(context || global, array[i], i, array);
+    f.call(context || Util.getGlobal(), array[i], i, array);
   }
 }
 

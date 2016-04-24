@@ -1,6 +1,6 @@
 import {stringify} from './utils/collections';
 
-var Logger = {
+const Logger = {
   log: null,
   debug(...args : any[]) {
     if (!this.log) {

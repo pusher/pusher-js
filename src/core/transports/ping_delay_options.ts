@@ -1,6 +1,6 @@
 interface PingDelayOptions {
-  minPingDelay: number;
-  maxPingDelay: number;
+  minPingDelay?: number;
+  maxPingDelay?: number;
   pingDelay?: number;
 }
 

@@ -2,15 +2,24 @@ import * as Collections from "../utils/collections";
 import Util from "../util";
 import {default as Level} from "./level";
 
+export interface TimelineOptions {
+  level?: Level;
+  limit?: number;
+  version?: string;
+  cluster?: string;
+  features?: string[];
+  params?: any;
+}
+
 export default class Timeline {
   key: string;
   session: number;
   events: any[];
-  options: any;
+  options: TimelineOptions;
   sent: number;
   uniqueID: number;
 
-  constructor(key : string, session : number, options : any) {
+  constructor(key : string, session : number, options : TimelineOptions) {
     this.key = key;
     this.session = session;
     this.events = [];
@@ -47,23 +56,21 @@ export default class Timeline {
   }
 
   send(sendfn, callback) {
-    var self = this;
-
     var data = Collections.extend({
-      session: self.session,
-      bundle: self.sent + 1,
-      key: self.key,
+      session: this.session,
+      bundle: this.sent + 1,
+      key: this.key,
       lib: "js",
-      version: self.options.version,
-      cluster: self.options.cluster,
-      features: self.options.features,
-      timeline: self.events
-    }, self.options.params);
+      version: this.options.version,
+      cluster: this.options.cluster,
+      features: this.options.features,
+      timeline: this.events
+    }, this.options.params);
 
-    self.events = [];
-    sendfn(data, function(error, result) {
+    this.events = [];
+    sendfn(data, (error, result)=> {
       if (!error) {
-        self.sent++;
+        this.sent++;
       }
       if (callback) {
         callback(error, result);

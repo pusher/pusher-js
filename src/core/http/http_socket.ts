@@ -45,14 +45,14 @@ class HTTPSocket implements Socket {
     /** For internal use only */
     sendRaw(payload : any) : boolean {
         if (this.readyState === State.OPEN) {
-            try {
+          try {
             Runtime.createSocketRequest(
                 "POST", getUniqueURL(getSendURL(this.location, this.session))
             ).start(payload);
             return true;
-            } catch(e) {
+          } catch(e) {
             return false;
-            }
+          }
         } else {
             return false;
         }
@@ -77,8 +77,7 @@ class HTTPSocket implements Socket {
         }
     }
 
-    /** @private */
-    onChunk(chunk) {
+    private onChunk(chunk) {
       if (chunk.status !== 200) {
         return;
       }
@@ -113,8 +112,7 @@ class HTTPSocket implements Socket {
       }
     }
 
-    /** @private */
-    onOpen(options) {
+    private onOpen(options) {
       if (this.readyState === State.CONNECTING) {
         if (options && options.hostname) {
           this.location.base = replaceHost(this.location.base, options.hostname);
@@ -129,59 +127,51 @@ class HTTPSocket implements Socket {
       }
     }
 
-    /** @private */
-    onEvent(event) {
+    private onEvent(event) {
       if (this.readyState === State.OPEN && this.onmessage) {
         this.onmessage({ data: event });
       }
     }
 
-    /** @private */
-    onActivity() {
+    private onActivity() {
       if (this.onactivity) {
         this.onactivity();
       }
     }
 
-
-    /** @private */
-    onError(error) {
+    private onError(error) {
       if (this.onerror) {
         this.onerror(error);
       }
     }
 
-    /** @private */
-    openStream() {
-      var self = this;
-
-      self.stream = Runtime.createSocketRequest(
+    private openStream() {
+      this.stream = Runtime.createSocketRequest(
         "POST",
-        getUniqueURL(self.hooks.getReceiveURL(self.location, self.session))
+        getUniqueURL(this.hooks.getReceiveURL(this.location, this.session))
       );
 
-      self.stream.bind("chunk", function(chunk) {
-        self.onChunk(chunk);
+      this.stream.bind("chunk", (chunk)=> {
+        this.onChunk(chunk);
       });
-      self.stream.bind("finished", function(status) {
-        self.hooks.onFinished(self, status);
+      this.stream.bind("finished", (status)=> {
+        this.hooks.onFinished(this, status);
       });
-      self.stream.bind("buffer_too_long", function() {
-        self.reconnect();
+      this.stream.bind("buffer_too_long", ()=> {
+        this.reconnect();
       });
 
       try {
-        self.stream.start();
+        this.stream.start();
       } catch (error) {
-        Util.defer(function() {
-          self.onError(error);
-          self.onClose(1006, "Could not start streaming", false);
+        Util.defer(()=> {
+          this.onError(error);
+          this.onClose(1006, "Could not start streaming", false);
         });
       }
     }
 
-    /** @private */
-    closeStream() {
+    private closeStream() {
       if (this.stream) {
         this.stream.unbind_all();
         this.stream.close();

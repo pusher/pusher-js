@@ -17,7 +17,7 @@ export default class TransportStrategy implements Strategy {
   name: string;
   priority: number;
   transport: Transport;
-  options: any;
+  options: StrategyOptions;
 
   constructor(name : string, priority : number, transport : Transport, options : StrategyOptions) {
     this.name = name;
@@ -48,7 +48,6 @@ export default class TransportStrategy implements Strategy {
       return failAttempt(new Errors.TransportPriorityTooLow(), callback);
     }
 
-    var self = this;
     var connected = false;
 
     var transport = this.transport.createConnection(
@@ -92,7 +91,7 @@ export default class TransportStrategy implements Strategy {
     transport.initialize();
 
     return {
-      abort: function() {
+      abort: ()=> {
         if (connected) {
           return;
         }
@@ -103,11 +102,11 @@ export default class TransportStrategy implements Strategy {
           transport.close();
         }
       },
-      forceMinPriority: function(p) {
+      forceMinPriority: (p)=> {
         if (connected) {
           return;
         }
-        if (self.priority < p) {
+        if (this.priority < p) {
           if (handshake) {
             handshake.close();
           } else {

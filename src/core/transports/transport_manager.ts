@@ -3,6 +3,10 @@ import Transport from "./transport";
 import PingDelayOptions from "./ping_delay_options";
 import Factory from "../utils/factory";
 
+export interface TransportManagerOptions extends PingDelayOptions {
+  lives?: number;
+}
+
 /** Keeps track of the number of lives left for a transport.
  *
  * In the beginning of a session, transports may be assigned a number of
@@ -13,11 +17,11 @@ import Factory from "../utils/factory";
  * @param {Object} options
  */
 export default class TransportManager {
-  options: any;
+  options: TransportManagerOptions;
   livesLeft: number;
 
-  constructor(options : any){
-    this.options = options || [];
+  constructor(options : TransportManagerOptions){
+    this.options = options || {};
     this.livesLeft = this.options.lives || Infinity;
   }
 
@@ -27,7 +31,7 @@ export default class TransportManager {
    * @returns {AssistantToTheTransportManager}
    */
   getAssistant(transport : Transport) : AssistantToTheTransportManager {
-    return Factory.createAssistantToTheTransportManager(this, transport, <PingDelayOptions> {
+    return Factory.createAssistantToTheTransportManager(this, transport, {
       minPingDelay: this.options.minPingDelay,
       maxPingDelay: this.options.maxPingDelay
     });

@@ -85,7 +85,7 @@ var Runtime : Browser = {
     return new ScriptRequest(src);
   },
 
-  getClientFeatures() : any[] {
+  getClientFeatures() : string[] {
     return Collections.keys(
       Collections.filterObject(
         { "ws": Transports.ws },

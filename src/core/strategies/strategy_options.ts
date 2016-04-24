@@ -7,6 +7,7 @@ interface StrategyOptions {
   failFast?: boolean;
   timeout?: number;
   timeoutLimit?: number;
+  key?: string;
 }
 
 export default StrategyOptions;

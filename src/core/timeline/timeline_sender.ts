@@ -4,23 +4,27 @@ import base64encode from "../base64";
 import Timeline from "./timeline";
 import Runtime from 'runtime';
 
+export interface TimelineSenderOptions {
+  host?: string;
+  port?: number;
+  path?: string;
+}
+
 export default class TimelineSender {
   timeline: Timeline;
-  options : any;
+  options : TimelineSenderOptions;
   host: string;
 
-  constructor(timeline: Timeline, options : any) {
+  constructor(timeline: Timeline, options : TimelineSenderOptions) {
     this.timeline = timeline;
     this.options = options || {};
   }
 
   send(encrypted : boolean, callback?: Function) {
-    var self = this;
-
-    if (self.timeline.isEmpty()) {
+    if (this.timeline.isEmpty()) {
       return;
     }
 
-    self.timeline.send(Runtime.TimelineTransport.getAgent(this, encrypted), callback);
+    this.timeline.send(Runtime.TimelineTransport.getAgent(this, encrypted), callback);
   }
 }

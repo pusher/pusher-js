@@ -1,6 +1,7 @@
 import PrivateChannel from './private_channel';
 import Logger from '../logger';
 import Members from './members';
+import Client from '../client';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -10,7 +11,7 @@ export default class PresenceChannel extends PrivateChannel {
    * @param {String} name
    * @param {Pusher} pusher
    */
-  constructor(name : string, pusher : any) {
+  constructor(name : string, pusher : Client) {
     super(name, pusher);
     this.members = new Members();
   }
@@ -21,20 +22,19 @@ export default class PresenceChannel extends PrivateChannel {
    * @param  {Function} callback
    */
   authorize(socketId : string, callback : Function) {
-    var self = this;
-    super.authorize(socketId, function(error, authData) {
+    super.authorize(socketId, (error, authData) => {
       if (!error) {
         if (authData.channel_data === undefined) {
           Logger.warn(
             "Invalid auth response for channel '" +
-            self.name +
+            this.name +
             "', expected 'channel_data' field"
           );
           callback("Invalid auth response");
           return;
         }
         var channelData = JSON.parse(authData.channel_data);
-        self.members.setMyID(channelData.user_id);
+        this.members.setMyID(channelData.user_id);
       }
       callback(error, authData);
     });

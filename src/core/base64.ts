@@ -1,4 +1,5 @@
-var global = Function("return this")();
+import Util from './util';
+const global = Util.getGlobal();
 
 export default function encode (s : any) : string {
     return btoa(utob(s));
