@@ -15,7 +15,14 @@ export default class Authorizer {
 
   constructor(channel : Channel, options : AuthorizerOptions) {
     this.channel = channel;
-    this.type = options.authTransport;
+
+    let {authTransport} = options;
+
+    if (typeof Runtime.getAuthorizers()[authTransport] === "undefined") {
+      throw `'${authTransport}' is not a recognized auth transport`
+    }
+
+    this.type = authTransport;
     this.options = options;
     this.authOptions = (options || <any>{}).auth || {}
   }

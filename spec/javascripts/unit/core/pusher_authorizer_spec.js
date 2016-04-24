@@ -8,9 +8,20 @@ var Logger = require('core/logger').default;
 var Runtime = require('runtime').default;
 
 describe("Authorizer", function() {
+
+  describe("initialization", function(){
+    it("should throw an error if the specified transport is unrecognized", function(){
+      expect(function(){
+        new Authorizer({name: "chan"}, {
+          authTransport: "yolo"
+        })
+      }).toThrow("'yolo' is not a recognized auth transport");
+    });
+  });
+
   describe("#composeQuery", function() {
     it("should return str with just socket id and channel name if no auth query options", function() {
-      var authorizer = new Authorizer({ name: "chan" }, {});
+      var authorizer = new Authorizer({ name: "chan" }, {authTransport: "ajax"});
 
       expect(authorizer.composeQuery("1.1"))
         .toEqual("socket_id=1.1&channel_name=chan");
@@ -21,7 +32,8 @@ describe("Authorizer", function() {
         { name: "chan" },
         { auth: {
             params: { a: 1, b: 2 }
-          }
+          },
+          authTransport: "ajax"
         }
       );
 
