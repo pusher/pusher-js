@@ -13,3 +13,4 @@ export declare function flatten(object: Object): any[];
 export declare function any(array: any[], test: Function): boolean;
 export declare function all(array: any[], test: Function): boolean;
 export declare function encodeParamsObject(data: any): string;
+export declare function buildQueryString(data: any): string;

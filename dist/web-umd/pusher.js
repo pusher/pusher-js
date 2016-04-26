@@ -759,6 +759,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	}
 	exports.encodeParamsObject = encodeParamsObject;
+	function buildQueryString(data) {
+	    var params = filterObject(data, function (value) {
+	        return value !== undefined;
+	    });
+	    var query = map(flatten(encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	    return query;
+	}
+	exports.buildQueryString = buildQueryString;
 
 
 /***/ },
@@ -1028,7 +1036,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Collections = __webpack_require__(8);
-	var util_1 = __webpack_require__(10);
 	var runtime_1 = __webpack_require__(1);
 	var JSONPRequest = (function () {
 	    function JSONPRequest(url, data) {
@@ -1039,10 +1046,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (this.request) {
 	            return;
 	        }
-	        var params = Collections.filterObject(this.data, function (value) {
-	            return value !== undefined;
-	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	        var query = Collections.buildQueryString(this.data);
 	        var url = this.url + "/" + receiver.number + "?" + query;
 	        this.request = runtime_1["default"].createScriptRequest(url);
 	        this.request.send(receiver);

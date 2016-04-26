@@ -477,6 +477,14 @@ var Pusher =
 	    });
 	}
 	exports.encodeParamsObject = encodeParamsObject;
+	function buildQueryString(data) {
+	    var params = filterObject(data, function (value) {
+	        return value !== undefined;
+	    });
+	    var query = map(flatten(encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	    return query;
+	}
+	exports.buildQueryString = buildQueryString;
 
 
 /***/ },
@@ -1661,23 +1669,25 @@ var Pusher =
 	"use strict";
 	var logger_1 = __webpack_require__(15);
 	var Collections = __webpack_require__(3);
-	var util_1 = __webpack_require__(5);
 	var getAgent = function (sender, encrypted) {
 	    return function (data, callback) {
 	        var scheme = "http" + (encrypted ? "s" : "") + "://";
-	        var url = scheme + (sender.options.host) + sender.options.path;
-	        var params = Collections.filterObject(data, function (value) {
-	            return value !== undefined;
-	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
+	        var query = Collections.buildQueryString(data);
 	        url += ("/" + 2 + "?" + query);
 	        fetch(url).
 	            then(function (response) {
 	            if (response.status !== 200) {
-	                logger_1["default"].debug("TimelineSender Error: received from stats.pusher.com");
+	                throw ("received " + response.status + " from stats.pusher.com");
+	            }
+	            return response.json();
+	        }).then(function (_a) {
+	            var host = _a.host;
+	            if (host) {
+	                sender.host = host;
 	            }
 	        }).catch(function (err) {
-	            logger_1["default"].debug("TimelineSender Error:", err);
+	            logger_1["default"].debug("TimelineSender Error: ", err);
 	        });
 	    };
 	};

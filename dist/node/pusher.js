@@ -479,6 +479,14 @@ module.exports =
 	    });
 	}
 	exports.encodeParamsObject = encodeParamsObject;
+	function buildQueryString(data) {
+	    var params = filterObject(data, function (value) {
+	        return value !== undefined;
+	    });
+	    var query = map(flatten(encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	    return query;
+	}
+	exports.buildQueryString = buildQueryString;
 
 
 /***/ },
@@ -1673,23 +1681,30 @@ module.exports =
 	"use strict";
 	var logger_1 = __webpack_require__(15);
 	var Collections = __webpack_require__(3);
-	var util_1 = __webpack_require__(5);
 	var runtime_1 = __webpack_require__(1);
 	var getAgent = function (sender, encrypted) {
 	    return function (data, callback) {
 	        var scheme = "http" + (encrypted ? "s" : "") + "://";
-	        var url = scheme + (sender.options.host) + sender.options.path;
-	        var params = Collections.filterObject(data, function (value) {
-	            return value !== undefined;
-	        });
-	        var query = Collections.map(Collections.flatten(Collections.encodeParamsObject(params)), util_1["default"].method("join", "=")).join("&");
+	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
+	        var query = Collections.buildQueryString(data);
 	        url += ("/" + 2 + "?" + query);
 	        var xhr = runtime_1["default"].createXHR();
 	        xhr.open("GET", url, true);
 	        xhr.onreadystatechange = function () {
 	            if (xhr.readyState === 4) {
-	                if (xhr.responseText !== "OK") {
-	                    logger_1["default"].debug("TimelineSender Error: received from stats.pusher.com");
+	                var status_1 = xhr.status, responseText = xhr.responseText;
+	                if (status_1 !== 200) {
+	                    logger_1["default"].debug("TimelineSender Error: received " + status_1 + " from stats.pusher.com");
+	                    return;
+	                }
+	                try {
+	                    var host = JSON.parse(responseText).host;
+	                }
+	                catch (e) {
+	                    logger_1["default"].debug("TimelineSenderError: invalid response " + responseText);
+	                }
+	                if (host) {
+	                    sender.host = host;
 	                }
 	            }
 	        };
