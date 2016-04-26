@@ -37,14 +37,7 @@ import Runtime from '../runtime';
        return;
      }
 
-     var params = Collections.filterObject(this.data, function(value) {
-       return value !== undefined;
-     });
-
-     var query = Collections.map(
-       Collections.flatten(Collections.encodeParamsObject(params)),
-       Util.method("join", "=")
-     ).join("&");
+     var query = Collections.buildQueryString(this.data);
      var url = this.url + "/" + receiver.number + "?" + query;
      this.request = Runtime.createScriptRequest(url);
      this.request.send(receiver);
