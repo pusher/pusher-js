@@ -81,13 +81,30 @@ describe("TimelineSender", function() {
         sender.send(false, onSend);
         expect(Runtime.createXHR).not.toHaveBeenCalled();
       });
+
+      it("should use returned hostname for subsequent requests", function() {
+        sender.send(false);
+        xhrRequest.readyState = 4;
+        xhrRequest.status = 200;
+        xhrRequest.responseText = JSON.stringify({host: "returned.example.com"});
+        xhrRequest.onreadystatechange();
+
+        sender.send(false);
+        expect(xhrRequest.open).toHaveBeenCalledWith(
+          'GET',
+          'http://returned.example.com/timeline/2?events=WzEsMiwzXQ%3D%3D',
+          true
+        );
+      });
     });
   });
 
   describe("fetch", function(){
+    var encodedParams;
 
     beforeEach(function(){
       Runtime.TimelineTransport = fetchTimeline;
+      encodedParams = 'WzEsMiwzXQ%3D%3D';
     });
 
     afterEach(function(){
@@ -97,7 +114,6 @@ describe("TimelineSender", function() {
     describe("on send", function(){
       it ("should send a non-empty timeline", function(){
         var matcher = /example\.com/;
-        var encodedParams = 'WzEsMiwzXQ%3D%3D';
 
         fetchMock.mock(matcher, 200);
         sender.send(false, onSend);
@@ -109,7 +125,6 @@ describe("TimelineSender", function() {
 
     it("should send secure requests when encrypted", function(){
       var matcher = /example\.com/;
-      var encodedParams = 'WzEsMiwzXQ%3D%3D';
 
       var sender = new TimelineSender(timeline, {
         encrypted: true,
@@ -122,6 +137,24 @@ describe("TimelineSender", function() {
 
       var lastCall = fetchMock.lastCall(matcher)[0];
       expect(lastCall).toEqual('https://example.com/timeline/2?events=' + encodedParams);
+    });
+
+    it("should use returned hostname for subsequent requests", function(done) {
+      var matcher = /example\.com/;
+
+      fetchMock.mock(matcher, {
+        status: 200,
+        body: JSON.stringify({host: "returned.example.com"})
+      });
+
+      sender.send(false);
+
+      setTimeout(function(){
+        sender.send(false)
+        var lastCall = fetchMock.lastCall(matcher)[0];
+        expect(lastCall).toEqual('http://returned.example.com/timeline/2?events=' + encodedParams);
+        done();
+      }, 10);
     });
   });
 });

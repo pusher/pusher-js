@@ -263,3 +263,16 @@ export function encodeParamsObject(data) : string {
     return encodeURIComponent(base64encode(value.toString()));
   });
 }
+
+export function buildQueryString(data : any) : string {
+  var params = filterObject(data, function(value) {
+    return value !== undefined;
+  });
+
+  var query = map(
+    flatten(encodeParamsObject(params)),
+    Util.method("join", "=")
+  ).join("&");
+
+  return query;
+}
