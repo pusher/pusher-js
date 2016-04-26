@@ -17,7 +17,7 @@ module.exports = function(config) {
       '**/spec/javascripts/helpers/**/*.js': ['webpack']
     },
 
-    reporters: ['progress', 'coverage', 'spec'],
+    reporters: ['coverage', 'verbose'],
 
     coverageReporter: {
       type : 'html',

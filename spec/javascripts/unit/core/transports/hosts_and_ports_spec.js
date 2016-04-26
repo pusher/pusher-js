@@ -22,6 +22,7 @@ describe("Host/Port Configuration", function() {
       return network;
     });
     spyOn(Runtime, "getLocalStorage").andReturn({});
+    Transports = Runtime.Transports;
   });
 
   afterEach(function() {
@@ -33,8 +34,6 @@ describe("Host/Port Configuration", function() {
 
     beforeEach(function() {
       spyOn(Runtime, 'createWebSocket').andReturn(Mocks.getTransport());
-
-      Transports = Runtime.Transports;
 
       spyOn(Transports.ws, "isSupported").andReturn(true);
       spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);

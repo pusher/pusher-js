@@ -40,6 +40,7 @@
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-spec-reporter": "0.0.24",
+    "karma-verbose-reporter": "0.0.3",
     "karma-webpack": "^1.7.0",
     "object-assign-deep": "0.0.4",
     "typescript": "^1.8.0",
