@@ -34,10 +34,11 @@ var config = {
     }
   },
   browsers: [
-    // 'bs_ie8',
+    'bs_ie8'
+    // ,
     // 'bs_ie7'
     // 'bs_opera1215'
-    'bs_firefox_3_6'
+    // 'bs_firefox_3_6'
   ]
 };
 
