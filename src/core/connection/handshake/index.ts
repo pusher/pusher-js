@@ -42,19 +42,22 @@ export default class Handshake {
     this.onMessage = (m)=> {
       this.unbindListeners();
 
+      var result;
       try {
-        var result = Protocol.processHandshake(m);
-        if (result.action === "connected") {
-          this.finish("connected", {
-            connection: new Connection(result.id, this.transport),
-            activityTimeout: result.activityTimeout
-          });
-        } else {
-          this.finish(result.action, { error: result.error });
-          this.transport.close();
-        }
+        result = Protocol.processHandshake(m);
       } catch (e) {
         this.finish("error", { error: e });
+        this.transport.close();
+        return;
+      }
+
+      if (result.action === "connected") {
+        this.finish("connected", {
+          connection: new Connection(result.id, this.transport),
+          activityTimeout: result.activityTimeout
+        });
+      } else {
+        this.finish(result.action, { error: result.error });
         this.transport.close();
       }
     };
