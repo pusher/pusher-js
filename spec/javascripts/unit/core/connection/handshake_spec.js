@@ -16,13 +16,6 @@ describe("Handshake", function() {
     handshake = new Handshake(transport, callback);
   });
 
-  it("should use Protocol.processHandshake to process first received message", function() {
-    transport.emit("message", { data: "dummy" });
-    expect(Protocol.processHandshake).toHaveBeenCalledWith({
-      data: "dummy"
-    });
-  });
-
   describe("after a successful handshake", function() {
     beforeEach(function() {
       Protocol.processHandshake.andReturn({
@@ -86,6 +79,30 @@ describe("Handshake", function() {
       expect(transport.close).toHaveBeenCalled();
     });
   });
+
+  describe("on connection exception", function(){
+    it("should throw an error", function(){
+      var finishSpy = spyOn(handshake, 'finish');
+      var error = new Error("some exception");
+
+      finishSpy.andCallFake(function(action, params){
+        if (action === "connected") {
+          throw error
+        } else {
+          finishSpy.andCallThrough();
+        }
+      });
+
+      Protocol.processHandshake.andReturn({
+        action: "connected",
+        id: "9.9"
+      });
+
+      expect(function(){
+        transport.emit("message", {data: "dummy"});
+      }).toThrow(error);
+    });
+  })
 
   describe("after receiving a 'closed' event from transport", function() {
     describe("with defined action", function() {
