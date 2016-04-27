@@ -35,6 +35,7 @@ describe("Host/Port Configuration", function() {
     beforeEach(function() {
       spyOn(Runtime, 'createWebSocket').andReturn(Mocks.getTransport());
 
+      spyOn(Transports.ws.hooks, "isInitialized").andReturn(true);
       spyOn(Transports.ws, "isSupported").andReturn(true);
       spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);
       spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
