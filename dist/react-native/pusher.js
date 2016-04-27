@@ -2137,21 +2137,23 @@ module.exports =
 	        var _this = this;
 	        this.onMessage = function (m) {
 	            _this.unbindListeners();
+	            var result;
 	            try {
-	                var result = Protocol.processHandshake(m);
-	                if (result.action === "connected") {
-	                    _this.finish("connected", {
-	                        connection: new connection_1["default"](result.id, _this.transport),
-	                        activityTimeout: result.activityTimeout
-	                    });
-	                }
-	                else {
-	                    _this.finish(result.action, { error: result.error });
-	                    _this.transport.close();
-	                }
+	                result = Protocol.processHandshake(m);
 	            }
 	            catch (e) {
 	                _this.finish("error", { error: e });
+	                _this.transport.close();
+	                return;
+	            }
+	            if (result.action === "connected") {
+	                _this.finish("connected", {
+	                    connection: new connection_1["default"](result.id, _this.transport),
+	                    activityTimeout: result.activityTimeout
+	                });
+	            }
+	            else {
+	                _this.finish(result.action, { error: result.error });
 	                _this.transport.close();
 	            }
 	        };
