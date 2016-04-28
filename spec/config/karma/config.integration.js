@@ -54,8 +54,11 @@ var config = {
   autoWatch: true,
 
   browsers: ['Chrome'],
-  captureTimeout: 120000,
-  browserNoActivityTimeout: 60000,
+
+  captureTimeout: 3e5,
+  browserNoActivityTimeout: 3e5,
+  browserDisconnectTimeout: 3e5,
+  browserDisconnectTolerance: 3,
 
   singleRun: false
 };
