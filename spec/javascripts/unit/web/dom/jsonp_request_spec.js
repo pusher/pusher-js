@@ -1,6 +1,6 @@
 var JSONPRequest = require('dom/jsonp_request').default;
 var Runtime = require('runtime').default;
-var Pusher = require('core/pusher');;
+var Pusher = require('core/pusher').default;
 var Mocks = require('../../../helpers/mocks');
 
 describe("JSONPRequest", function() {
