@@ -10,7 +10,7 @@ var objectAssign = require('object-assign-deep');
 ///////////////////////////////////////////////////
 var config = objectAssign(require('./config.shared'),{
   entry: {
-    pusher: "./src/core/pusher",
+    pusher: "./src/core/index",
   },
   output: {
     library: "Pusher",

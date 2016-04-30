@@ -18,11 +18,12 @@ import Logger from './logger';
 import Factory from './utils/factory';
 import {default as Client, ClientOptions} from './client';
 
-class Pusher implements Client {
+export default class Pusher implements Client {
 
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
   static isReady : boolean = false;
+  static logToConsole : boolean = false;
   // for jsonp
   static Runtime : AbstractRuntime = Runtime;
   static ScriptReceivers : any  = (<any>Runtime).ScriptReceivers;
@@ -35,17 +36,11 @@ class Pusher implements Client {
     }
   }
 
-  static logToConsole() {
-    if (!console.log) throw "Your environment doesn't have console.log. Please use Pusher.setLogger for your own custom logger."
-    this.setLogger(function(log){
-      console.log(log);
-    });
+  static log(message : any) {
+    if (console && console.log && Pusher.logToConsole) {
+      console.log(message);
+    }
   }
-
-  static setLogger(logger : Function) {
-    Logger.log = logger;
-  }
-
 
   /* INSTANCE PROPERTIES */
   key: string;
@@ -228,6 +223,3 @@ function checkAppKey(key) {
 }
 
 Runtime.whenReady(Pusher.ready);
-
-// required so we don't have to do require('pusher').default etc.
-module.exports = Pusher;
