@@ -1,4 +1,4 @@
-var Pusher = require('core/pusher');
+var Pusher = require('core/pusher').default;
 var Logger = require('core/logger').default;
 var global = require('runtime').default.getGlobal();
 
@@ -21,7 +21,7 @@ describe("Pusher.logToConsole", function() {
   });
 
   it("should be disabled by default", function() {
-    expect(Logger.log).toBe(null);
+    expect(Pusher.logToConsole).toEqual(false);
   });
 
   it("should not log to the console if set to false", function() {
@@ -31,7 +31,7 @@ describe("Pusher.logToConsole", function() {
   });
 
   it("should log to the console if set to true", function() {
-    Pusher.logToConsole();
+    Pusher.logToConsole = true;
     Logger.warn("test", "this is a test");
 
     expect(_consoleLogCalls.length).toBeGreaterThan(0);

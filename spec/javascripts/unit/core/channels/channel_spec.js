@@ -1,4 +1,3 @@
-var Channel = require('core/channels/channel').default;
 var Errors = require('core/errors');
 var Factory = require('core/utils/factory').default;
 var Mocks = require("mocks");
@@ -6,6 +5,7 @@ var Mocks = require("mocks");
 describe("Channel", function() {
   var pusher;
   var channel;
+  var Channel = require('core/channels/channel').default;
 
   beforeEach(function() {
     pusher = Mocks.getPusher();

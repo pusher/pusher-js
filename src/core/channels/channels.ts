@@ -2,7 +2,7 @@ import Channel from "./channel";
 import * as Collections from '../utils/collections';
 import ChannelTable from './channel_table';
 import Factory from '../utils/factory';
-import Client from '../client';
+import Pusher from '../pusher';
 
 /** Handles a channel map. */
 export default class Channels {
@@ -18,7 +18,7 @@ export default class Channels {
    * @param {Pusher} pusher
    * @return {Channel}
    */
-  add(name : string, pusher : Client) {
+  add(name : string, pusher : Pusher) {
     if (!this.channels[name]) {
       this.channels[name] = createChannel(name, pusher);
     }
@@ -60,7 +60,7 @@ export default class Channels {
   }
 }
 
-function createChannel(name : string, pusher : Client) : Channel {
+function createChannel(name : string, pusher : Pusher) : Channel {
   if (name.indexOf('private-') === 0) {
     return Factory.createPrivateChannel(name, pusher);
   } else if (name.indexOf('presence-') === 0) {

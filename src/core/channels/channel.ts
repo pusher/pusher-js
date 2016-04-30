@@ -1,7 +1,7 @@
 import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Errors from '../errors';
 import Logger from '../logger';
-import Client from '../client';
+import Pusher from '../pusher';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -14,10 +14,10 @@ import Client from '../client';
  */
 export default class Channel extends EventsDispatcher {
   name: string;
-  pusher: Client;
+  pusher: Pusher;
   subscribed: boolean;
 
-  constructor(name : string, pusher: Client) {
+  constructor(name : string, pusher: Pusher) {
     super(function(event, data){
       Logger.debug('No callbacks on ' + name + ' for ' + event);
     });

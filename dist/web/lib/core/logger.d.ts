@@ -1,5 +1,4 @@
 declare const Logger: {
-    log: any;
     debug(...args: any[]): void;
     warn(...args: any[]): void;
 };

@@ -1,10 +1,10 @@
 import Channel from "./channel";
 import ChannelTable from './channel_table';
-import Client from '../client';
+import Pusher from '../pusher';
 export default class Channels {
     channels: ChannelTable;
     constructor();
-    add(name: string, pusher: Client): Channel;
+    add(name: string, pusher: Pusher): Channel;
     all(): Channel[];
     find(name: string): Channel;
     remove(name: string): Channel;

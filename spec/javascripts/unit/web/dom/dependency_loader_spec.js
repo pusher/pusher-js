@@ -1,4 +1,4 @@
-var Pusher = require('core/pusher');
+var Pusher = require('core/pusher').default;
 var Mocks = require('../../../helpers/mocks');
 var Runtime = require('runtime').default;
 var Factory = require('core/utils/factory').default;

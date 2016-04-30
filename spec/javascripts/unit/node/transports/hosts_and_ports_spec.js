@@ -1,5 +1,5 @@
 var TestEnv = require('testenv');
-var Pusher = require('core/pusher');
+var Pusher = require('core/pusher').default;
 var NetInfo  = require('net_info').NetInfo;
 var Mocks = require('mocks');
 var Defaults = require('core/defaults').default;

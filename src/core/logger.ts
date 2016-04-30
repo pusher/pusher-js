@@ -1,12 +1,12 @@
 import {stringify} from './utils/collections';
+import Pusher from './pusher';
 
 const Logger = {
-  log: null,
   debug(...args : any[]) {
-    if (!this.log) {
+    if (!Pusher.log) {
       return
     }
-    this.log(stringify.apply(this, arguments));
+    Pusher.log(stringify.apply(this, arguments));
   },
   warn(...args : any[]) {
     var message = stringify.apply(this, arguments);
@@ -15,8 +15,8 @@ const Logger = {
     } else if (console.log) {
       console.log(message);
     }
-    if (this.log) {
-      this.log(message);
+    if (Pusher.log) {
+      Pusher.log(message);
     }
   }
 }
