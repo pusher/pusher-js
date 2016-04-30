@@ -17,7 +17,7 @@ import ConnectionManager from "../connection/connection_manager";
 import ConnectionManagerOptions from '../connection/connection_manager_options';
 import Ajax from "../http/ajax";
 import Channels from "../channels/channels";
-import Client from '../client';
+import Pusher from '../pusher';
 
 var Factory = {
 
@@ -29,15 +29,15 @@ var Factory = {
     return new ConnectionManager(key, options);
   },
 
-  createChannel(name: string, pusher: Client) : Channel {
+  createChannel(name: string, pusher: Pusher) : Channel {
     return new Channel(name, pusher);
   },
 
-  createPrivateChannel(name: string, pusher: Client) : PrivateChannel {
+  createPrivateChannel(name: string, pusher: Pusher) : PrivateChannel {
     return new PrivateChannel(name, pusher);
   },
 
-  createPresenceChannel(name: string, pusher: Client) : PresenceChannel {
+  createPresenceChannel(name: string, pusher: Pusher) : PresenceChannel {
     return new PresenceChannel(name, pusher);
   },
 

@@ -16,9 +16,9 @@ import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
-import {default as Client, ClientOptions} from './client';
+import PusherOptions from './options';
 
-export default class Pusher implements Client {
+export default class Pusher {
 
   /*  STATIC PROPERTIES */
   static instances : Pusher[]  = [];
@@ -44,7 +44,7 @@ export default class Pusher implements Client {
 
   /* INSTANCE PROPERTIES */
   key: string;
-  config: ClientOptions;
+  config: PusherOptions;
   channels: Channels;
   global_emitter: EventsDispatcher;
   sessionID: number;
@@ -58,7 +58,7 @@ export default class Pusher implements Client {
     options = options || {};
 
     this.key = app_key;
-    this.config = Collections.extend<ClientOptions>(
+    this.config = Collections.extend<PusherOptions>(
       DefaultConfig.getGlobalConfig(),
       options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {},
       options
@@ -203,7 +203,7 @@ export default class Pusher implements Client {
     }
   }
 
-  send_event(event_name : string, data : any, channel : string) {
+  send_event(event_name : string, data : any, channel?: string) {
     return this.connection.send_event(event_name, data, channel);
   }
 

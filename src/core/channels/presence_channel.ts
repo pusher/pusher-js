@@ -1,7 +1,7 @@
 import PrivateChannel from './private_channel';
 import Logger from '../logger';
 import Members from './members';
-import Client from '../client';
+import Pusher from '../pusher';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -11,7 +11,7 @@ export default class PresenceChannel extends PrivateChannel {
    * @param {String} name
    * @param {Pusher} pusher
    */
-  constructor(name : string, pusher : Client) {
+  constructor(name : string, pusher : Pusher) {
     super(name, pusher);
     this.members = new Members();
   }
