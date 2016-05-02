@@ -1,6 +1,7 @@
 var webpack = require('webpack');
 var fs = require('fs');
 var version = require('../package').version;
+var StringReplacePlugin = require("string-replace-webpack-plugin");
 
 module.exports = {
   entry: {
@@ -11,13 +12,23 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /\.ts$/, loader: 'ts-loader' }
+      { test: /\.ts$/, loader: 'ts-loader' },
+      {
+        test: /.*/,
+        loader: StringReplacePlugin.replace({
+          replacements: [
+            {
+              pattern: "<VERSION>",
+              replacement: function (match, p1, offset, string) {
+                return version;
+              }
+            }
+          ]})
+        }
     ]
   },
-  externals: {
-    'version': "'"+version+"'"
-  },
   plugins: [
-    new webpack.BannerPlugin(fs.readFileSync('./src/core/pusher-licence.js', 'utf8').replace("<VERSION>", version), {raw: true})
+    new webpack.BannerPlugin(fs.readFileSync('./src/core/pusher-licence.js', 'utf8').replace("<VERSION>", version), {raw: true}),
+    new StringReplacePlugin()
   ]
 }

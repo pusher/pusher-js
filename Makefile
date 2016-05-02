@@ -8,6 +8,10 @@ sockjs:
 	make &&  \
 	popd
 
+json2:
+	cp src/runtimes/web/dom/json2.js dist/web
+	node_modules/.bin/uglifyjs dist/web/json2.js -o dist/web/json2.min.js
+
 web:
 	echo "Browser Release:"
 	cp src/runtimes/web/dom/sockjs/sockjs.js dist/web

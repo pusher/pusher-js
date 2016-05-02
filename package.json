@@ -1,6 +1,6 @@
 {
   "name": "pusher-websocket-iso",
-  "version": "0.2.0",
+  "version": "3.0",
   "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
   "main": "dist/web-umd/pusher.js",
   "scripts": {
@@ -43,7 +43,9 @@
     "karma-verbose-reporter": "0.0.3",
     "karma-webpack": "^1.7.0",
     "object-assign-deep": "0.0.4",
+    "string-replace-webpack-plugin": "0.0.3",
     "typescript": "^1.8.0",
+    "uglify-js": "^2.6.2",
     "webpack": "^1.12.9"
   },
   "dependencies": {
