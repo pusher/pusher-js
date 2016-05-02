@@ -2,7 +2,6 @@ var path = require("path");
 var objectAssign = require('object-assign-deep');
 
 module.exports = objectAssign(require('./config.shared'), {
-  entry: "./src/core/index",
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",

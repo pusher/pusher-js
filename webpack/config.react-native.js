@@ -10,7 +10,6 @@ var objectAssign = require('object-assign-deep');
 // NetInfo: platforms/react-native/net_info //
 //////////////////////////////////////////////
 module.exports = objectAssign(require('./config.shared'),{
-  entry: "./src/core/index",
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",

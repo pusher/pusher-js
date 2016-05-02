@@ -9,9 +9,6 @@ var objectAssign = require('object-assign-deep');
 // XHR, WebSocket and NetInfo in platforms/web/* //
 ///////////////////////////////////////////////////
 var config = objectAssign(require('./config.shared'),{
-  entry: {
-    pusher: "./src/core/index",
-  },
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
