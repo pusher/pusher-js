@@ -1,3 +1,5 @@
+const VERSION = require<string>('version');
+
 export interface DefaultConfig {
   VERSION: string;
   PROTOCOL: number;
@@ -21,7 +23,7 @@ export interface DefaultConfig {
 }
 
 var Defaults : DefaultConfig = {
-  VERSION: '3.0',
+  VERSION,
   PROTOCOL: 7,
 
   // DEPRECATED: WS connection parameters

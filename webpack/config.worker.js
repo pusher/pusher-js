@@ -15,9 +15,6 @@ module.exports = objectAssign(require('./config.shared'),{
     path: path.join(__dirname, "../dist/worker"),
     filename: "pusher.js"
   },
-  externals: {
-    '../package': '{version: "'+ version +'"}'
-  },
   resolve: {
     modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/worker', 'src/runtimes']
   }

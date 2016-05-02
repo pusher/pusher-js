@@ -19,7 +19,6 @@ module.exports = objectAssign(require('./config.shared'),{
   target: "node",
   externals: {
     "react-native": "react-native",
-    '../package': 'var {version: "'+ version +'"}'
   },
   resolve: {
     modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/react-native', 'src/runtimes']
