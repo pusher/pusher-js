@@ -1,3 +1,11 @@
+/*!
+ * Pusher JavaScript Library v<VERSION>
+ * http://pusher.com/
+ *
+ * Copyright 2014, Pusher
+ * Released under the MIT licence.
+ */
+
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
