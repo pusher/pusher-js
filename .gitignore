@@ -6,6 +6,7 @@ coverage
 node_modules
 lib/
 tmp/
+dist/*/lib/
 
 !/dist/*
 !/src/node_modules
