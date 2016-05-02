@@ -44,110 +44,112 @@ describe("Authorizer", function() {
 
 });
 
-describe("AJAX Authorizer", function() {
-  var xhr;
+if (TestEnv !== "worker") {
+  describe("AJAX Authorizer", function() {
+    var xhr;
 
-  beforeEach(function() {
-    xhr = new Mocks.getXHR();
+    beforeEach(function() {
+      xhr = new Mocks.getXHR();
 
-    if (TestEnv === "web" && !window.XMLHttpRequest) {
-      spyOn(Runtime, "createMicrosoftXHR").andReturn(xhr);
-    } else {
-      spyOn(Runtime, "createXHR").andReturn(xhr);
-    }
-  });
-
-  it("should pass headers in the request", function() {
-    var headers = { "foo": "bar", "n": 42 };
-    var authorizer = new Authorizer(
-      { name: "chan" },
-      { authTransport: "ajax",
-        auth: {
-          headers: headers
-        }
+      if (TestEnv === "web" && !window.XMLHttpRequest) {
+        spyOn(Runtime, "createMicrosoftXHR").andReturn(xhr);
+      } else {
+        spyOn(Runtime, "createXHR").andReturn(xhr);
       }
-    );
-    authorizer.authorize("1.23", function() {});
+    });
 
-    expect(xhr.setRequestHeader.calls.length).toEqual(3);
-    expect(xhr.setRequestHeader).toHaveBeenCalledWith(
-      "Content-Type", "application/x-www-form-urlencoded"
-    );
-    expect(xhr.setRequestHeader).toHaveBeenCalledWith("foo", "bar");
-    expect(xhr.setRequestHeader).toHaveBeenCalledWith("n", 42);
-  });
-
-  it("should pass params in the query string", function() {
-    var params = { "a": 1, "b": 2 };
-    var authorizer = new Authorizer(
-      { name: "chan" },
-      { authTransport: "ajax",
-        auth: {
-          params: params
+    it("should pass headers in the request", function() {
+      var headers = { "foo": "bar", "n": 42 };
+      var authorizer = new Authorizer(
+        { name: "chan" },
+        { authTransport: "ajax",
+          auth: {
+            headers: headers
+          }
         }
+      );
+      authorizer.authorize("1.23", function() {});
+
+      expect(xhr.setRequestHeader.calls.length).toEqual(3);
+      expect(xhr.setRequestHeader).toHaveBeenCalledWith(
+        "Content-Type", "application/x-www-form-urlencoded"
+      );
+      expect(xhr.setRequestHeader).toHaveBeenCalledWith("foo", "bar");
+      expect(xhr.setRequestHeader).toHaveBeenCalledWith("n", 42);
+    });
+
+    it("should pass params in the query string", function() {
+      var params = { "a": 1, "b": 2 };
+      var authorizer = new Authorizer(
+        { name: "chan" },
+        { authTransport: "ajax",
+          auth: {
+            params: params
+          }
+        }
+      );
+      authorizer.authorize("1.23", function() {});
+
+      expect(xhr.send.calls.length).toEqual(1);
+      expect(xhr.send).toHaveBeenCalledWith(
+        "socket_id=1.23&channel_name=chan&a=1&b=2"
+      );
+    });
+
+    it("should call back with auth result on success", function() {
+      var authorizer = new Authorizer(
+        { name: "chan" },
+        { authTransport: "ajax" }
+      );
+
+      var data = { foo: "bar", number: 1};
+      var dataJSON = JSON.stringify(data);
+
+      var callback = jasmine.createSpy("callback");
+      authorizer.authorize("1.23", callback);
+
+      if (TestEnv === "web" && !window.XMLHttpRequest) {
+        expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
+      } else {
+        expect(Runtime.createXHR.calls.length).toEqual(1);
       }
-    );
-    authorizer.authorize("1.23", function() {});
 
-    expect(xhr.send.calls.length).toEqual(1);
-    expect(xhr.send).toHaveBeenCalledWith(
-      "socket_id=1.23&channel_name=chan&a=1&b=2"
-    );
+      xhr.readyState = 4;
+      xhr.status = 200;
+      xhr.responseText = dataJSON;
+      xhr.onreadystatechange();
+
+      expect(callback.calls.length).toEqual(1);
+      expect(callback).toHaveBeenCalledWith(false, data);
+    });
+
+    it("should call back with an error if JSON in xhr.responseText is invalid", function() {
+      var authorizer = new Authorizer(
+        { name: "chan" },
+        { authTransport: "ajax" }
+      );
+      var invalidJSON = 'INVALID { "something": "something"}';
+      var callback = jasmine.createSpy("callback");
+      authorizer.authorize("1.23", callback);
+
+      if (TestEnv === "web" && !window.XMLHttpRequest) {
+        expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
+      } else {
+        expect(Runtime.createXHR.calls.length).toEqual(1);
+      }
+
+      xhr.readyState = 4;
+      xhr.status = 200;
+      xhr.responseText = invalidJSON;
+      xhr.onreadystatechange();
+
+      expect(callback.calls.length).toEqual(1);
+      expect(callback).toHaveBeenCalledWith(
+        true,
+        "JSON returned from webapp was invalid, yet status code was 200. " +
+          "Data was: " +
+          invalidJSON
+      );
+    });
   });
-
-  it("should call back with auth result on success", function() {
-    var authorizer = new Authorizer(
-      { name: "chan" },
-      { authTransport: "ajax" }
-    );
-
-    var data = { foo: "bar", number: 1};
-    var dataJSON = JSON.stringify(data);
-
-    var callback = jasmine.createSpy("callback");
-    authorizer.authorize("1.23", callback);
-
-    if (TestEnv === "web" && !window.XMLHttpRequest) {
-      expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
-    } else {
-      expect(Runtime.createXHR.calls.length).toEqual(1);
-    }
-
-    xhr.readyState = 4;
-    xhr.status = 200;
-    xhr.responseText = dataJSON;
-    xhr.onreadystatechange();
-
-    expect(callback.calls.length).toEqual(1);
-    expect(callback).toHaveBeenCalledWith(false, data);
-  });
-
-  it("should call back with an error if JSON in xhr.responseText is invalid", function() {
-    var authorizer = new Authorizer(
-      { name: "chan" },
-      { authTransport: "ajax" }
-    );
-    var invalidJSON = 'INVALID { "something": "something"}';
-    var callback = jasmine.createSpy("callback");
-    authorizer.authorize("1.23", callback);
-
-    if (TestEnv === "web" && !window.XMLHttpRequest) {
-      expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
-    } else {
-      expect(Runtime.createXHR.calls.length).toEqual(1);
-    }
-
-    xhr.readyState = 4;
-    xhr.status = 200;
-    xhr.responseText = invalidJSON;
-    xhr.onreadystatechange();
-
-    expect(callback.calls.length).toEqual(1);
-    expect(callback).toHaveBeenCalledWith(
-      true,
-      "JSON returned from webapp was invalid, yet status code was 200. " +
-        "Data was: " +
-        invalidJSON
-    );
-  });
-});
+}

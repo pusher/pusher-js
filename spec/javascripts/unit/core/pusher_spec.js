@@ -15,6 +15,7 @@ describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
 
   switch (TestEnv) {
+    case "worker":
     case "node":
       var timelineTransport = "xhr";
       break;

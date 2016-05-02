@@ -7,6 +7,10 @@ if (process.env.CI === 'true') {
   config.browsers = ci.browsers;
 }
 
+if (process.env.WORKER === 'true') {
+  config = require('./config.worker')(config, 'unit');
+}
+
 module.exports = function(suite) {
   config.logLevel = suite.LOG_INFO,
   suite.set(config);

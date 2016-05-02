@@ -7,6 +7,11 @@ if (process.env.CI === 'true') {
   config.browsers = ci.browsers;
 }
 
+if (process.env.WORKER === 'true') {
+  config = require('./config.worker')(config, 'integration');
+  config.webpack.resolve.alias = {integration: 'node/integration'}
+}
+
 module.exports = function(suite) {
   config.logLevel = suite.LOG_INFO,
   suite.set(config);

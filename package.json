@@ -28,7 +28,7 @@
   "homepage": "https://github.com/pusher-community/pusher-websocket-js-iso",
   "devDependencies": {
     "es3ify-loader": "^0.2.0",
-    "fetch-mock": "^4.4.0",
+    "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^2.2.1",
     "jasmine-node": "^1.14.5",
     "jasmine-spec-reporter": "^1.2.0",
@@ -39,6 +39,7 @@
     "karma-coverage": "^0.2.7",
     "karma-firefox-launcher": "^0.1.4",
     "karma-jasmine": "~0.1.0",
+    "karma-jasmine-web-worker": "^0.1.2",
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-spec-reporter": "0.0.24",
