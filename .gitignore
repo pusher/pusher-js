@@ -10,4 +10,4 @@ dist/*/lib/
 
 !/dist/*
 !/src/node_modules
-!spec/node_modules
+!spec/javascripts/node_modules
