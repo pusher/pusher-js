@@ -31,15 +31,30 @@ var config = {
       browser_version: "3.6",
       device: null,
       os: "Windows"
+    },
+    bs_chrome_49: {
+      base: 'BrowserStack',
+      os_version: "El Capitan",
+      browser: "chrome",
+      browser_version: "49.0",
+      device: null,
+      os: "OS X"
+    },
+    bs_safari_5: {
+      base: 'BrowserStack',
+      os_version: "Snow Leopard",
+      browser: "safari",
+      browser_version: "5.1",
+      device: null,
+      os: "OS X"
     }
-  },
-  browsers: [
-    'bs_ie8'
-    // ,
-    // 'bs_ie7'
-    // 'bs_opera1215'
-    // 'bs_firefox_3_6'
-  ]
+  }
 };
+
+if (process.env.CI === 'full') {
+  config.browsers = Object.keys(config.customLaunchers);
+} else {
+  config.browsers = ['bs_ie7', 'bs_ie8', 'bs_chrome_49'];
+}
 
 module.exports = config;

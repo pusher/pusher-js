@@ -60,7 +60,7 @@ var config = {
   browserDisconnectTimeout: 3e5,
   browserDisconnectTolerance: 3,
 
-  singleRun: false
+  singleRun: true
 };
 
 module.exports = config;

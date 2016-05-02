@@ -1,7 +1,7 @@
 var objectAssign = require('object-assign-deep');
 var config = require('./config.unit');
 
-if (process.env.CI === 'true') {
+if (process.env.CI) {
   var ci = require('./config.ci');
   config = objectAssign(config, ci);
   config.browsers = ci.browsers;
@@ -9,6 +9,7 @@ if (process.env.CI === 'true') {
 
 if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'unit');
+  if (process.env.CI) config.browsers = ['bs_chrome_49'];
 }
 
 module.exports = function(suite) {
