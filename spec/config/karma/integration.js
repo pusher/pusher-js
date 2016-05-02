@@ -9,7 +9,10 @@ if (process.env.CI === 'true') {
 
 if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'integration');
-  config.webpack.resolve.alias = {integration: 'node/integration'}
+  config.webpack.resolve.alias = {
+    pusher_integration: 'core/pusher',
+    integration: 'node/integration'
+  }
 }
 
 module.exports = function(suite) {
