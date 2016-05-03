@@ -1,4 +1,3 @@
-require('isomorphic-fetch');
 var Authorizer = require('core/auth/pusher_authorizer').default;
 var fetchAuth = require('worker/auth/fetch_auth').default;
 var Runtime = require('runtime').default;
@@ -54,10 +53,11 @@ describe("Fetch Authorizer", function(){
         }
       }
     );
-    authorizer.authorize("1.23", function() {});
-
-    var lastCall = fetchMock.lastCall(endpoint)[0];
-    expect(lastCall.body).toEqual("socket_id=1.23&channel_name=chan&a=1&b=2");
+    authorizer.authorize("1.23", function() {}).then(function(){
+      var lastCall = fetchMock.lastCall(endpoint)[0];
+      console.log(lastCall);
+      expect(lastCall.body).toEqual("socket_id=1.23&channel_name=chan&a=1&b=2");
+    });
   });
 
   it("should call back with the auth result on success", function(){

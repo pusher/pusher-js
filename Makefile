@@ -40,6 +40,12 @@ web_unit:
 web_integration:
 	node_modules/karma/bin/karma start spec/config/karma/integration.js
 
+worker_unit:
+	WORKER=true node_modules/karma/bin/karma start spec/config/karma/unit.js
+
+worker_integration:
+	WORKER=true node_modules/karma/bin/karma start spec/config/karma/integration.js
+
 node_unit:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.unit.js && \
 	node spec/config/jasmine-node/jasmine.unit.js

@@ -1,63 +1,22 @@
-var version = require('../../../package').version;
 var objectAssign = require('object-assign-deep');
-var webpackConfig = require('../../../webpack/config.shared');
-var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
+var config = require('./config.integration');
 
-module.exports = function(config) {
-  config.set({
-    basePath: '../../../',
-    frameworks: ["jasmine"],
-    client: {
-      useIframe: true,
-      captureConsole: true,
-      clearContext: true
-    },
-    files: [
-      '**/spec/javascripts/integration/index.web.js'
-    ],
-    preprocessors: {
-      '**/spec/javascripts/integration/index.web.js': ['webpack'],
-      '**/spec/javascripts/node_modules/**/*.ts': ['webpack']
-    },
+if (process.env.CI) {
+  var ci = require('./config.ci');
+  config = objectAssign(config, ci);
+  config.browsers = ci.browsers;
+}
 
-    reporters: ['coverage', 'verbose'],
+if (process.env.WORKER === 'true') {
+  config = require('./config.worker')(config, 'integration');
+  config.webpack.resolve.alias = {
+    pusher_integration: 'core/pusher',
+    integration: 'node/integration'
+  }
+  if (process.env.CI) config.browsers = ['bs_chrome_49'];
+}
 
-    coverageReporter: {
-      type : 'html',
-      dir : 'coverage/'
-    },
-
-    webpack: objectAssign(webpackConfig, {
-      resolve: {
-        modulesDirectories: [
-          'node_modules',
-          'web_modules',
-          'src',
-          'src/runtimes/web',
-          'src/runtimes',
-          'spec/javascripts/helpers'
-        ],
-        alias: {
-          integration: 'web/integration'
-        }
-      },
-      externals: {
-        '../package': '{version: "'+ version +'"}',
-        testenv: "'web'"
-      }
-    }),
-
-    port: 9876,
-    runnerPort: 9100,
-
-    colors: true,
-    logLevel: config.LOG_INFO,
-
-    autoWatch: true,
-
-    browsers: ['Chrome'],
-    captureTimeout: 120000,
-
-    singleRun: true
-  });
+module.exports = function(suite) {
+  config.logLevel = suite.LOG_INFO,
+  suite.set(config);
 };

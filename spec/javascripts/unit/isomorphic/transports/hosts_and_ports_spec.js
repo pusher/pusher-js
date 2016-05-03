@@ -22,7 +22,6 @@ describe("Host/Port Configuration", function() {
       return network;
     });
     spyOn(Runtime, "getLocalStorage").andReturn({});
-    Transports = Runtime.Transports;
   });
 
   afterEach(function() {
@@ -35,15 +34,11 @@ describe("Host/Port Configuration", function() {
     beforeEach(function() {
       spyOn(Runtime, 'createWebSocket').andReturn(Mocks.getTransport());
 
-      spyOn(Transports.ws.hooks, "isInitialized").andReturn(true);
+      var Transports = Runtime.Transports;
+
       spyOn(Transports.ws, "isSupported").andReturn(true);
       spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);
       spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
-
-      if (TestEnv == "web") {
-        spyOn(Transports.xdr_streaming, "isSupported").andReturn(false);
-        spyOn(Transports.xdr_polling, "isSupported").andReturn(false);
-      }
     });
 
     it("should connect to ws://ws.pusherapp.com:80 by default", function() {

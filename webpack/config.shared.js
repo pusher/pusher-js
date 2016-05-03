@@ -24,7 +24,8 @@ module.exports = {
               }
             }
           ]})
-        }
+        },
+      { test : /\.js$/, loader: 'es3ify-loader'}
     ]
   },
   plugins: [
