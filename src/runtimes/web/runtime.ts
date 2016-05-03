@@ -40,9 +40,10 @@ var Runtime : Browser = {
     return window.WebSocket || window.MozWebSocket;
   },
 
-  whenReady(callback : Function) : void {
+  setup(PusherClass) : void {
+    (<any>window).Pusher = PusherClass; // JSONp requires Pusher to be in the global scope.
     var initializeOnDocumentBody = ()=> {
-        this.onDocumentBody(callback);
+        this.onDocumentBody(PusherClass.ready);
     }
     if (!(<any>window).JSON) {
       Dependencies.load("json2", {}, initializeOnDocumentBody);

@@ -13,7 +13,7 @@ import xhrTimeline from 'isomorphic/timeline/xhr_timeline';
 const {
   getDefaultStrategy,
   Transports,
-  whenReady,
+  setup,
   getProtocol,
   isXHRSupported,
   getGlobal,
@@ -31,7 +31,7 @@ const {
 const NodeJS : Runtime = {
   getDefaultStrategy,
   Transports,
-  whenReady,
+  setup,
   getProtocol,
   isXHRSupported,
   createSocketRequest,

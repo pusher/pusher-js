@@ -11,7 +11,7 @@ import fetchTimeline from './timeline/fetch_timeline';
 const {
   getDefaultStrategy,
   Transports,
-  whenReady,
+  setup,
   getProtocol,
   isXHRSupported,
   getGlobal,
@@ -29,7 +29,7 @@ const {
 const Worker : Runtime = {
   getDefaultStrategy,
   Transports,
-  whenReady,
+  setup,
   getProtocol,
   isXHRSupported,
   getGlobal,

@@ -13,8 +13,8 @@ var Isomorphic : any = {
   transportConnectionInitializer,
   HTTPFactory,
 
-  whenReady(callback : Function) : void {
-    callback();
+  setup(PusherClass) : void {
+    PusherClass.ready();
   },
 
   getGlobal() : any {

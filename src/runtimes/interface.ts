@@ -7,9 +7,13 @@ import TransportsTable from 'core/transports/transports_table';
 import Socket from 'core/socket';
 import HTTPFactory from 'core/http/http_factory';
 import HTTPRequest from 'core/http/http_request';
+import Pusher from 'core/pusher';
 
 interface Runtime {
-  whenReady(callback : Function) : void;
+  setup(PusherClass : {
+    new (key: string, options: any) : Pusher;
+    ready() : void;
+  }) : void;
   getProtocol() : string;
   getGlobal() : any;
   getAuthorizers() : AuthTransports;

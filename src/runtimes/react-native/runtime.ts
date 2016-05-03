@@ -11,7 +11,7 @@ import xhrTimeline from 'isomorphic/timeline/xhr_timeline';
 const {
   getDefaultStrategy,
   Transports,
-  whenReady,
+  setup,
   getProtocol,
   isXHRSupported,
   getGlobal,
@@ -29,7 +29,7 @@ const {
 const ReactNative : Runtime = {
   getDefaultStrategy,
   Transports,
-  whenReady,
+  setup,
   getProtocol,
   isXHRSupported,
   getGlobal,

@@ -2,7 +2,7 @@
   "name": "pusher-websocket-iso",
   "version": "3.0.0",
   "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
-  "main": "dist/web-umd/pusher.js",
+  "main": "dist/web/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

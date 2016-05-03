@@ -222,4 +222,4 @@ function checkAppKey(key) {
   }
 }
 
-Runtime.whenReady(Pusher.ready);
+Runtime.setup(Pusher);
