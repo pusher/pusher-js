@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.0
+ * Pusher JavaScript Library v3.0.0
  * http://pusher.com/
  *
  * Copyright 2014, Pusher
@@ -229,7 +229,7 @@ var Pusher =
 	        throw "You must pass your app key when you instantiate Pusher.";
 	    }
 	}
-	runtime_1["default"].whenReady(Pusher.ready);
+	runtime_1["default"].setup(Pusher);
 
 
 /***/ },
@@ -241,11 +241,11 @@ var Pusher =
 	var net_info_1 = __webpack_require__(26);
 	var fetch_auth_1 = __webpack_require__(27);
 	var fetch_timeline_1 = __webpack_require__(28);
-	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, whenReady = runtime_1["default"].whenReady, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getGlobal = runtime_1["default"].getGlobal, getLocalStorage = runtime_1["default"].getLocalStorage, getClientFeatures = runtime_1["default"].getClientFeatures, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
+	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, setup = runtime_1["default"].setup, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getGlobal = runtime_1["default"].getGlobal, getLocalStorage = runtime_1["default"].getLocalStorage, getClientFeatures = runtime_1["default"].getClientFeatures, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
 	var Worker = {
 	    getDefaultStrategy: getDefaultStrategy,
 	    Transports: Transports,
-	    whenReady: whenReady,
+	    setup: setup,
 	    getProtocol: getProtocol,
 	    isXHRSupported: isXHRSupported,
 	    getGlobal: getGlobal,
@@ -291,8 +291,8 @@ var Pusher =
 	    Transports: transports_1["default"],
 	    transportConnectionInitializer: transport_connection_initializer_1["default"],
 	    HTTPFactory: http_1["default"],
-	    whenReady: function (callback) {
-	        callback();
+	    setup: function (PusherClass) {
+	        PusherClass.ready();
 	    },
 	    getGlobal: function () {
 	        return Function("return this")();
@@ -764,7 +764,7 @@ var Pusher =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.0",
+	    VERSION: "3.0.0",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,

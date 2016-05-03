@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.0
+ * Pusher JavaScript Library v3.0.0
  * http://pusher.com/
  *
  * Copyright 2014, Pusher
@@ -238,7 +238,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        throw "You must pass your app key when you instantiate Pusher.";
 	    }
 	}
-	runtime_1["default"].whenReady(Pusher.ready);
+	runtime_1["default"].setup(Pusher);
 
 
 /***/ },
@@ -275,10 +275,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    getWebSocketAPI: function () {
 	        return window.WebSocket || window.MozWebSocket;
 	    },
-	    whenReady: function (callback) {
+	    setup: function (PusherClass) {
 	        var _this = this;
+	        window.Pusher = PusherClass;
 	        var initializeOnDocumentBody = function () {
-	            _this.onDocumentBody(callback);
+	            _this.onDocumentBody(PusherClass.ready);
 	        };
 	        if (!window.JSON) {
 	            dependencies_1.Dependencies.load("json2", {}, initializeOnDocumentBody);
@@ -449,7 +450,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.0",
+	    VERSION: "3.0.0",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
