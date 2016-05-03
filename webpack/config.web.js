@@ -11,7 +11,8 @@ var config = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
-    filename: "[name].js"
+    filename: "pusher.js",
+    libraryTarget: "umd"
   },
   resolve: {
     modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/web', 'src/runtimes']

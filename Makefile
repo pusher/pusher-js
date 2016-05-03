@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-build_all: web web-min web-umd react-native node worker
+build_all: web web-min react-native node worker
 
 sockjs:
 	pushd src/runtimes/web/dom/sockjs && \
@@ -21,11 +21,6 @@ web-min:
 	echo "Browser Minified Release:"
 	cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
 	node_modules/webpack/bin/webpack.js --config=webpack/config.web.min.js
-
-web-umd:
-	echo "Web UMD Release:"
-	make sockjs
-	node_modules/webpack/bin/webpack.js --config=webpack/config.web-umd.js
 
 react-native:
 	echo "React Native Release:"
