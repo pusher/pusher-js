@@ -1,5 +1,6 @@
 import base64encode from '../base64';
 import Util from '../util';
+const global = Function("return this")();
 
 /** Merges multiple objects into the target argument.
 *
@@ -16,13 +17,12 @@ import Util from '../util';
 * @return {Object} the target argument
 */
 export function extend<T>(target : any, ...sources: any[]) : T {
-  var self = this;
   for (var i = 0; i < sources.length; i++) {
     var extensions = sources[i];
     for (var property in extensions) {
       if (extensions[property] && extensions[property].constructor &&
         extensions[property].constructor === Object) {
-          target[property] = self.extend(
+          target[property] = extend(
             target[property] || {}, extensions[property]
           );
         } else {
@@ -118,7 +118,7 @@ export function values(object : any) : any[] {
 */
 export function apply(array : any[], f : Function, context?: any) {
   for (var i = 0; i < array.length; i++) {
-    f.call(context || Util.getGlobal(), array[i], i, array);
+    f.call(context || global, array[i], i, array);
   }
 }
 

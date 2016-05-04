@@ -1,9 +1,8 @@
-import Util from './util';
-const global = Util.getGlobal();
+const global = Function("return this")();
 
 export default function encode (s : any) : string {
-    return btoa(utob(s));
-  }
+  return btoa(utob(s));
+}
 
 var fromCharCode = String.fromCharCode;
 
@@ -42,12 +41,6 @@ var cb_encode = function(ccc) {
   return chars.join('');
 };
 
-var btoa;
-
-if (global && global.btoa){
-  btoa = global.btoa;
-} else {
-  btoa = function(b) {
-    return b.replace(/[\s\S]{1,3}/g, cb_encode);
-  };
-}
+var btoa = global.btoa || function(b) {
+  return b.replace(/[\s\S]{1,3}/g, cb_encode);
+};

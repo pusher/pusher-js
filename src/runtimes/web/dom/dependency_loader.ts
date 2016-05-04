@@ -63,6 +63,10 @@ export default class DependencyLoader {
      }
    }
 
+   /** Returns a root URL for pusher-js CDN.
+    *
+    * @returns {String}
+    */
    getRoot(options : any) : string {
      var cdn;
      var protocol = Runtime.getDocument().location.protocol;

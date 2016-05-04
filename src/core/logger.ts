@@ -1,6 +1,8 @@
 import {stringify} from './utils/collections';
 import Pusher from './pusher';
 
+const global = Function("return this")();
+
 const Logger = {
   debug(...args : any[]) {
     if (!Pusher.log) {
@@ -10,10 +12,13 @@ const Logger = {
   },
   warn(...args : any[]) {
     var message = stringify.apply(this, arguments);
-    if (console.warn) {
-      console.warn(message);
-    } else if (console.log) {
-      console.log(message);
+    let {console} = global;
+    if (console) {
+      if (console.warn) {
+        console.warn(message);
+      } else if (console.log) {
+        console.log(message);
+      }
     }
     if (Pusher.log) {
       Pusher.log(message);

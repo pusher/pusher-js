@@ -1,7 +1,6 @@
 import CallbackRegistry from './callback_registry';
 import Callback from './callback';
-
-var global = Function("return this")();
+const global = Function("return this")();
 
 /** Manages callback bindings and event emitting.
  *
