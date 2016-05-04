@@ -86,15 +86,6 @@ var Runtime : Browser = {
     return new ScriptRequest(src);
   },
 
-  getClientFeatures() : string[] {
-    return Collections.keys(
-      Collections.filterObject(
-        { "ws": Transports.ws },
-        function (t) { return t.isSupported({}); }
-      )
-    );
-  },
-
   getLocalStorage() {
     try {
       return window.localStorage;

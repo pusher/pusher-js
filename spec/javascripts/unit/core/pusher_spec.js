@@ -105,7 +105,7 @@ describe("Pusher", function() {
     });
 
     it("should pass a feature list to the timeline", function() {
-      spyOn(Runtime, "getClientFeatures").andReturn(["foo", "bar"]);
+      spyOn(Pusher, "getClientFeatures").andReturn(["foo", "bar"]);
       var pusher = new Pusher("foo");
       expect(pusher.timeline.options.features).toEqual(["foo", "bar"]);
     });

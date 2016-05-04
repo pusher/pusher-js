@@ -95,7 +95,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.sessionID = Math.floor(Math.random() * 1000000000);
 	        this.timeline = new timeline_1["default"](this.key, this.sessionID, {
 	            cluster: this.config.cluster,
-	            features: runtime_1["default"].getClientFeatures(),
+	            features: Pusher.getClientFeatures(),
 	            params: this.config.timelineParams || {},
 	            limit: 50,
 	            level: level_1["default"].INFO,
@@ -157,6 +157,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (console && console.log && Pusher.logToConsole) {
 	            console.log(message);
 	        }
+	    };
+	    Pusher.getClientFeatures = function () {
+	        return Collections.keys(Collections.filterObject({ "ws": runtime_1["default"].Transports.ws }, function (t) { return t.isSupported({}); }));
 	    };
 	    Pusher.prototype.channel = function (name) {
 	        return this.channels.find(name);
@@ -251,7 +254,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	var jsonp_auth_1 = __webpack_require__(14);
 	var script_request_1 = __webpack_require__(15);
 	var jsonp_request_1 = __webpack_require__(16);
-	var Collections = __webpack_require__(9);
 	var script_receiver_factory_1 = __webpack_require__(4);
 	var jsonp_timeline_1 = __webpack_require__(17);
 	var transports_1 = __webpack_require__(18);
@@ -316,9 +318,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    },
 	    createScriptRequest: function (src) {
 	        return new script_request_1["default"](src);
-	    },
-	    getClientFeatures: function () {
-	        return Collections.keys(Collections.filterObject({ "ws": transports_1["default"].ws }, function (t) { return t.isSupported({}); }));
 	    },
 	    getLocalStorage: function () {
 	        try {
@@ -441,7 +440,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return ScriptReceiverFactory;
 	}());
 	exports.ScriptReceiverFactory = ScriptReceiverFactory;
-	exports.ScriptReceivers = new ScriptReceiverFactory("_pusher_script_", "Pusher.Runtime.ScriptReceivers");
+	exports.ScriptReceivers = new ScriptReceiverFactory("_pusher_script_", "Pusher.ScriptReceivers");
 
 
 /***/ },
@@ -583,6 +582,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var collections_1 = __webpack_require__(9);
 	var pusher_1 = __webpack_require__(1);
+	var global = Function("return this")();
 	var Logger = {
 	    debug: function () {
 	        var args = [];
@@ -600,11 +600,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            args[_i - 0] = arguments[_i];
 	        }
 	        var message = collections_1.stringify.apply(this, arguments);
-	        if (console.warn) {
-	            console.warn(message);
-	        }
-	        else if (console.log) {
-	            console.log(message);
+	        var console = global.console;
+	        if (console) {
+	            if (console.warn) {
+	                console.warn(message);
+	            }
+	            else if (console.log) {
+	                console.log(message);
+	            }
 	        }
 	        if (pusher_1["default"].log) {
 	            pusher_1["default"].log(message);
@@ -622,18 +625,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var base64_1 = __webpack_require__(10);
 	var util_1 = __webpack_require__(11);
+	var global = Function("return this")();
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
 	        sources[_i - 1] = arguments[_i];
 	    }
-	    var self = this;
 	    for (var i = 0; i < sources.length; i++) {
 	        var extensions = sources[i];
 	        for (var property in extensions) {
 	            if (extensions[property] && extensions[property].constructor &&
 	                extensions[property].constructor === Object) {
-	                target[property] = self.extend(target[property] || {}, extensions[property]);
+	                target[property] = extend(target[property] || {}, extensions[property]);
 	            }
 	            else {
 	                target[property] = extensions[property];
@@ -698,7 +701,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || util_1["default"].getGlobal(), array[i], i, array);
+	        f.call(context || global, array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
@@ -786,11 +789,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 10 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
-	var util_1 = __webpack_require__(11);
-	var global = util_1["default"].getGlobal();
+	var global = Function("return this")();
 	function encode(s) {
 	    return btoa(utob(s));
 	}
@@ -827,15 +829,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ];
 	    return chars.join('');
 	};
-	var btoa;
-	if (global && global.btoa) {
-	    btoa = global.btoa;
-	}
-	else {
-	    btoa = function (b) {
-	        return b.replace(/[\s\S]{1,3}/g, cb_encode);
-	    };
-	}
+	var btoa = global.btoa || function (b) {
+	    return b.replace(/[\s\S]{1,3}/g, cb_encode);
+	};
 
 
 /***/ },

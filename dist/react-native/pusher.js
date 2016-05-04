@@ -86,7 +86,7 @@ module.exports =
 	        this.sessionID = Math.floor(Math.random() * 1000000000);
 	        this.timeline = new timeline_1["default"](this.key, this.sessionID, {
 	            cluster: this.config.cluster,
-	            features: runtime_1["default"].getClientFeatures(),
+	            features: Pusher.getClientFeatures(),
 	            params: this.config.timelineParams || {},
 	            limit: 50,
 	            level: level_1["default"].INFO,
@@ -148,6 +148,9 @@ module.exports =
 	        if (console && console.log && Pusher.logToConsole) {
 	            console.log(message);
 	        }
+	    };
+	    Pusher.getClientFeatures = function () {
+	        return Collections.keys(Collections.filterObject({ "ws": runtime_1["default"].Transports.ws }, function (t) { return t.isSupported({}); }));
 	    };
 	    Pusher.prototype.channel = function (name) {
 	        return this.channels.find(name);
@@ -241,7 +244,7 @@ module.exports =
 	var net_info_1 = __webpack_require__(26);
 	var xhr_auth_1 = __webpack_require__(28);
 	var xhr_timeline_1 = __webpack_require__(29);
-	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, setup = runtime_1["default"].setup, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getGlobal = runtime_1["default"].getGlobal, getLocalStorage = runtime_1["default"].getLocalStorage, getClientFeatures = runtime_1["default"].getClientFeatures, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
+	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, setup = runtime_1["default"].setup, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getGlobal = runtime_1["default"].getGlobal, getLocalStorage = runtime_1["default"].getLocalStorage, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
 	var ReactNative = {
 	    getDefaultStrategy: getDefaultStrategy,
 	    Transports: Transports,
@@ -250,7 +253,6 @@ module.exports =
 	    isXHRSupported: isXHRSupported,
 	    getGlobal: getGlobal,
 	    getLocalStorage: getLocalStorage,
-	    getClientFeatures: getClientFeatures,
 	    createXHR: createXHR,
 	    createWebSocket: createWebSocket,
 	    addUnloadListener: addUnloadListener,
@@ -339,18 +341,18 @@ module.exports =
 	"use strict";
 	var base64_1 = __webpack_require__(5);
 	var util_1 = __webpack_require__(6);
+	var global = Function("return this")();
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
 	        sources[_i - 1] = arguments[_i];
 	    }
-	    var self = this;
 	    for (var i = 0; i < sources.length; i++) {
 	        var extensions = sources[i];
 	        for (var property in extensions) {
 	            if (extensions[property] && extensions[property].constructor &&
 	                extensions[property].constructor === Object) {
-	                target[property] = self.extend(target[property] || {}, extensions[property]);
+	                target[property] = extend(target[property] || {}, extensions[property]);
 	            }
 	            else {
 	                target[property] = extensions[property];
@@ -415,7 +417,7 @@ module.exports =
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || util_1["default"].getGlobal(), array[i], i, array);
+	        f.call(context || global, array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
@@ -503,11 +505,10 @@ module.exports =
 
 /***/ },
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	"use strict";
-	var util_1 = __webpack_require__(6);
-	var global = util_1["default"].getGlobal();
+	var global = Function("return this")();
 	function encode(s) {
 	    return btoa(utob(s));
 	}
@@ -544,15 +545,9 @@ module.exports =
 	    ];
 	    return chars.join('');
 	};
-	var btoa;
-	if (global && global.btoa) {
-	    btoa = global.btoa;
-	}
-	else {
-	    btoa = function (b) {
-	        return b.replace(/[\s\S]{1,3}/g, cb_encode);
-	    };
-	}
+	var btoa = global.btoa || function (b) {
+	    return b.replace(/[\s\S]{1,3}/g, cb_encode);
+	};
 
 
 /***/ },
@@ -1082,6 +1077,7 @@ module.exports =
 	"use strict";
 	var collections_1 = __webpack_require__(4);
 	var pusher_1 = __webpack_require__(1);
+	var global = Function("return this")();
 	var Logger = {
 	    debug: function () {
 	        var args = [];
@@ -1099,11 +1095,14 @@ module.exports =
 	            args[_i - 0] = arguments[_i];
 	        }
 	        var message = collections_1.stringify.apply(this, arguments);
-	        if (console.warn) {
-	            console.warn(message);
-	        }
-	        else if (console.log) {
-	            console.log(message);
+	        var console = global.console;
+	        if (console) {
+	            if (console.warn) {
+	                console.warn(message);
+	            }
+	            else if (console.log) {
+	                console.log(message);
+	            }
 	        }
 	        if (pusher_1["default"].log) {
 	            pusher_1["default"].log(message);

@@ -42,6 +42,15 @@ export default class Pusher {
     }
   }
 
+  private static getClientFeatures() : string[] {
+    return Collections.keys(
+      Collections.filterObject(
+        { "ws": Runtime.Transports.ws },
+        function (t) { return t.isSupported({}); }
+      )
+    );
+  }
+
   /* INSTANCE PROPERTIES */
   key: string;
   config: PusherOptions;
@@ -70,7 +79,7 @@ export default class Pusher {
 
     this.timeline = new Timeline(this.key, this.sessionID, {
       cluster: this.config.cluster,
-      features: Runtime.getClientFeatures(),
+      features: Pusher.getClientFeatures(),
       params: this.config.timelineParams || {},
       limit: 50,
       level: TimelineLevel.INFO,

@@ -18,7 +18,6 @@ interface Runtime {
   getGlobal() : any;
   getAuthorizers() : AuthTransports;
   getLocalStorage() : any;
-  getClientFeatures() : any[];
   TimelineTransport: TimelineTransport;
   createXHR() : Ajax;
   createWebSocket(url : string) : Socket;
