@@ -9,6 +9,13 @@ import HTTPFactory from 'core/http/http_factory';
 import HTTPRequest from 'core/http/http_request';
 import Pusher from 'core/pusher';
 
+/*
+This interface is implemented in web/runtime, node/runtime, react-native/runtime
+and worker/runtime. Its job is to be the only point of contact to platform-specific
+code for the core library. When the core library imports "runtime", Webpack will
+look for src/runtimes/<platform>/runtime.ts. This is how PusherJS keeps
+core and platform-specific code separate.
+*/
 interface Runtime {
   setup(PusherClass : {
     new (key: string, options: any) : Pusher;
