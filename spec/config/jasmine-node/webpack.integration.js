@@ -11,7 +11,7 @@ baseConfig.output = {
 
 baseConfig.externals.testenv = "'node'";
 baseConfig.resolve.alias = {
-  pusher_integration: 'core/pusher',
+  pusher_integration: 'core/index',
   integration: 'node/integration'
 }
 baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
