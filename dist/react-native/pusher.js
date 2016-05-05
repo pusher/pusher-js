@@ -145,8 +145,9 @@ module.exports =
 	        }
 	    };
 	    Pusher.log = function (message) {
-	        if (console && console.log && Pusher.logToConsole) {
-	            console.log(message);
+	        var global = Function("return this")();
+	        if (Pusher.logToConsole && global.console && global.console.log) {
+	            global.console.log(message);
 	        }
 	    };
 	    Pusher.getClientFeatures = function () {
@@ -1078,7 +1079,6 @@ module.exports =
 	"use strict";
 	var collections_1 = __webpack_require__(4);
 	var pusher_1 = __webpack_require__(1);
-	var global = Function("return this")();
 	var Logger = {
 	    debug: function () {
 	        var args = [];
@@ -1096,13 +1096,13 @@ module.exports =
 	            args[_i - 0] = arguments[_i];
 	        }
 	        var message = collections_1.stringify.apply(this, arguments);
-	        var console = global.console;
-	        if (console) {
-	            if (console.warn) {
-	                console.warn(message);
+	        var global = Function("return this")();
+	        if (global.console) {
+	            if (global.console.warn) {
+	                global.console.warn(message);
 	            }
-	            else if (console.log) {
-	                console.log(message);
+	            else if (global.console.log) {
+	                global.console.log(message);
 	            }
 	        }
 	        if (pusher_1["default"].log) {

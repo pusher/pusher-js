@@ -1,6 +1,6 @@
 var Pusher = require('core/pusher').default;
 var Logger = require('core/logger').default;
-var global = require('runtime').default.getGlobal();
+var global = Function("return this")();
 
 describe("Pusher.logToConsole", function() {
 
