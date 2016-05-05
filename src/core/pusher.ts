@@ -24,10 +24,12 @@ export default class Pusher {
   static instances : Pusher[]  = [];
   static isReady : boolean = false;
   static logToConsole : boolean = false;
+
   // for jsonp
   static Runtime : AbstractRuntime = Runtime;
   static ScriptReceivers : any  = (<any>Runtime).ScriptReceivers;
   static DependenciesReceivers : any = (<any>Runtime).DependenciesReceivers;
+  static auth_callbacks: any = (<any>Runtime).auth_callbacks;
 
   static ready() {
     Pusher.isReady = true;

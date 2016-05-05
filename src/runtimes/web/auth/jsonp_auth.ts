@@ -19,7 +19,7 @@ var jsonp : AuthTransport = function(context : Browser, socketId, callback){
     callback(false, data);
   };
 
-  var callback_name = "Pusher.Runtime.auth_callbacks['" + callbackName + "']";
+  var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
   script.src = this.options.authEndpoint +
     '?callback=' +
     encodeURIComponent(callback_name) +
