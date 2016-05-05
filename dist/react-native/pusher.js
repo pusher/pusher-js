@@ -1,8 +1,8 @@
 /*!
- * Pusher JavaScript Library v3.1.0
+ * Pusher JavaScript Library v3.1.0-pre2
  * http://pusher.com/
  *
- * Copyright 2014, Pusher
+ * Copyright 2016, Pusher
  * Released under the MIT licence.
  */
 
@@ -223,6 +223,7 @@ module.exports =
 	    Pusher.Runtime = runtime_1["default"];
 	    Pusher.ScriptReceivers = runtime_1["default"].ScriptReceivers;
 	    Pusher.DependenciesReceivers = runtime_1["default"].DependenciesReceivers;
+	    Pusher.auth_callbacks = runtime_1["default"].auth_callbacks;
 	    return Pusher;
 	}());
 	exports.__esModule = true;
@@ -759,7 +760,7 @@ module.exports =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.1.0",
+	    VERSION: "3.1.0-pre2",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,

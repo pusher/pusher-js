@@ -1,7 +1,7 @@
 {
-  "name": "pusher-websocket-iso",
-  "version": "3.1.0",
-  "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
+  "name": "pusher-js",
+  "version": "3.1.0-pre2",
+  "description": "Pusher JavaScript library for browser, React Native, NodeJS and web workers",
   "main": "dist/web/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
