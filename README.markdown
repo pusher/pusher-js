@@ -327,7 +327,7 @@ There are a number of events which are used internally, but can also be of use e
 
 You can host JavaScript files yourself, but it's a bit more complicated than putting them somewhere and just linking `pusher.js` in the source of your website. Because pusher-js loads fallback files dynamically, the dependency loader must be configured correctly or it will be using `js.pusher.com`.
 
-First, clone this repository and run `npm install`. Then run:
+First, clone this repository and run `npm install && git submodule init && git submodule update`. Then run:
 
     $ CDN_HTTP='http://your.http.url' CDN_HTTPS='https://your.https.url' make web
 
