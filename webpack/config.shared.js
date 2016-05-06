@@ -1,7 +1,26 @@
+'use strict';
+
 var webpack = require('webpack');
 var fs = require('fs');
-var version = require('../package').version;
 var StringReplacePlugin = require("string-replace-webpack-plugin");
+var Config = require('./hosting_config');
+
+var lookup = {
+  "<VERSION>": Config.version,
+  "<CDN_HTTP>": Config.cdn_http,
+  "<CDN_HTTPS>": Config.cdn_https
+};
+
+var replacements = [];
+
+for (let i of Object.keys(lookup)) {
+  replacements.push({
+    pattern: i,
+    replacement: function() {
+      return lookup[i];
+    }
+  });
+}
 
 module.exports = {
   entry: {
@@ -15,21 +34,13 @@ module.exports = {
       { test: /\.ts$/, loader: 'ts-loader' },
       {
         test: /.*/,
-        loader: StringReplacePlugin.replace({
-          replacements: [
-            {
-              pattern: "<VERSION>",
-              replacement: function (match, p1, offset, string) {
-                return version;
-              }
-            }
-          ]})
-        },
+        loader: StringReplacePlugin.replace({replacements: replacements})
+      },
       { test : /\.js$/, loader: 'es3ify-loader'}
     ]
   },
   plugins: [
-    new webpack.BannerPlugin(fs.readFileSync('./src/core/pusher-licence.js', 'utf8').replace("<VERSION>", version), {raw: true}),
+    new webpack.BannerPlugin(fs.readFileSync('./src/core/pusher-licence.js', 'utf8').replace("<VERSION>", Config.version), {raw: true}),
     new StringReplacePlugin()
   ]
 }

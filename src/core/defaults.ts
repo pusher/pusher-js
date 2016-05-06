@@ -43,8 +43,8 @@ var Defaults : DefaultConfig = {
   unavailable_timeout: 10000,
 
   // CDN configuration
-  cdn_http: 'http://js.pusher.com',
-  cdn_https: 'https://js.pusher.com',
+  cdn_http: '<CDN_HTTP>',
+  cdn_https: '<CDN_HTTPS>',
   dependency_suffix: ''
 }
 
