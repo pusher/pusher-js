@@ -1531,21 +1531,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	        var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
 	        if (callback || context) {
-	            Collections.apply(names, function (name) {
-	                this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {
-	                    return (callback && callback !== binding.fn) ||
-	                        (context && context !== binding.context);
-	                });
-	                if (this._callbacks[name].length === 0) {
-	                    delete this._callbacks[name];
-	                }
-	            }, this);
+	            this.removeCallback(names, callback, context);
 	        }
 	        else {
-	            Collections.apply(names, function (name) {
-	                delete this._callbacks[name];
-	            }, this);
+	            this.removeAllCallbacks(names);
 	        }
+	    };
+	    CallbackRegistry.prototype.removeCallback = function (names, callback, context) {
+	        Collections.apply(names, function (name) {
+	            this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {
+	                return (callback && callback !== binding.fn) ||
+	                    (context && context !== binding.context);
+	            });
+	            if (this._callbacks[name].length === 0) {
+	                delete this._callbacks[name];
+	            }
+	        }, this);
+	    };
+	    CallbackRegistry.prototype.removeAllCallbacks = function (names) {
+	        Collections.apply(names, function (name) {
+	            delete this._callbacks[name];
+	        }, this);
 	    };
 	    return CallbackRegistry;
 	}());
