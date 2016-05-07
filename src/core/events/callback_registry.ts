@@ -31,23 +31,31 @@ export default class CallbackRegistry {
     var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
 
     if (callback || context) {
-      Collections.apply(names, function(name) {
-        this._callbacks[name] = Collections.filter(
-          this._callbacks[name] || [],
-          function(binding) {
-            return (callback && callback !== binding.fn) ||
-                   (context && context !== binding.context);
-          }
-        );
-        if (this._callbacks[name].length === 0) {
-          delete this._callbacks[name];
-        }
-      }, this);
+      this.removeCallback(names, callback, context);
     } else {
-      Collections.apply(names, function(name) {
-        delete this._callbacks[name];
-      }, this);
+      this.removeAllCallbacks(names);
     }
+  }
+
+  private removeCallback(names : string[], callback : Function, context : any) {
+    Collections.apply(names, function(name) {
+      this._callbacks[name] = Collections.filter(
+        this._callbacks[name] || [],
+        function(binding) {
+          return (callback && callback !== binding.fn) ||
+                 (context && context !== binding.context);
+        }
+      );
+      if (this._callbacks[name].length === 0) {
+        delete this._callbacks[name];
+      }
+    }, this);
+  }
+
+  private removeAllCallbacks(names : string[]) {
+    Collections.apply(names, function(name) {
+      delete this._callbacks[name];
+    }, this);
   }
 }
 
