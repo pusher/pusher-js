@@ -46,10 +46,11 @@ module.exports = {
 
   autoWatch: true,
 
-  // browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
-  browsers: ['Chrome'],
-  captureTimeout: 120000,
-  browserNoActivityTimeout: 60000,
+  browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+  captureTimeout: 3e5,
+  browserNoActivityTimeout: 3e5,
+  browserDisconnectTimeout: 3e5,
+  browserDisconnectTolerance: 3,
 
   singleRun: true
 }
