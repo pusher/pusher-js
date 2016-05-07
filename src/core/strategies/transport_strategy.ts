@@ -1,6 +1,7 @@
 import Factory from "../utils/factory";
 import Util from '../util';
 import * as Errors from '../errors';
+import * as Collections from '../utils/collections';
 import Strategy from './strategy';
 import Transport from '../transports/transport';
 import StrategyOptions from './strategy_options';
@@ -72,7 +73,18 @@ export default class TransportStrategy implements Strategy {
     };
     var onClosed = function() {
       unbindListeners();
-      callback(new Errors.TransportClosed(JSON.stringify(transport)));
+      var serializedTransport;
+
+      // The reason for this try/catch block is that on React Native
+      // the WebSocket object is circular. Therefore transport.socket will
+      // throw errors upon stringification. Collections.safeJSONStringify
+      // discards circular references when serializing.
+      try {
+        serializedTransport = JSON.stringify(transport);
+      } catch (e) {
+        serializedTransport = Collections.safeJSONStringify(transport);
+      }
+      callback(new Errors.TransportClosed(serializedTransport));
     };
 
     var unbindListeners = function() {

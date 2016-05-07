@@ -786,6 +786,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return query;
 	}
 	exports.buildQueryString = buildQueryString;
+	function safeJSONStringify(source) {
+	    var cache = [];
+	    var serialized = JSON.stringify(source, function (key, value) {
+	        if (typeof value === 'object' && value !== null) {
+	            if (cache.indexOf(value) !== -1) {
+	                return;
+	            }
+	            cache.push(value);
+	        }
+	        return value;
+	    });
+	    cache = null;
+	    return serialized;
+	}
+	exports.safeJSONStringify = safeJSONStringify;
 
 
 /***/ },
@@ -3520,6 +3535,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var factory_1 = __webpack_require__(42);
 	var util_1 = __webpack_require__(11);
 	var Errors = __webpack_require__(30);
+	var Collections = __webpack_require__(9);
 	var TransportStrategy = (function () {
 	    function TransportStrategy(name, priority, transport, options) {
 	        this.name = name;
@@ -3560,7 +3576,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	        var onClosed = function () {
 	            unbindListeners();
-	            callback(new Errors.TransportClosed(JSON.stringify(transport)));
+	            var serializedTransport;
+	            try {
+	                serializedTransport = JSON.stringify(transport);
+	            }
+	            catch (e) {
+	                serializedTransport = Collections.safeJSONStringify(transport);
+	            }
+	            callback(new Errors.TransportClosed(serializedTransport));
 	        };
 	        var unbindListeners = function () {
 	            transport.unbind("initialized", onInitialized);
