@@ -12,6 +12,8 @@
 
 [INTERNAL] Ported to TypeScript.
 
+[INTERNAL] The library is split into a core directory and a runtimes directory to make a separation between platform-independent and platform-specific code.
+
 [INTERNAL] Uses Webpack as a bundler.
 
 [INTERNAL] Testing suites for NodeJS and workers.
