@@ -9,13 +9,19 @@ var objectAssign = require('object-assign-deep');
 // XHR: platforms/web/xhr           //
 // NetInfo: platforms/node/net_info //
 //////////////////////////////////////
-module.exports = objectAssign(require('./config.shared'),{
+var config = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/worker"),
-    filename: "pusher.js"
+    filename: "pusher.worker.js"
   },
   resolve: {
     modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/worker', 'src/runtimes']
   }
-})
+});
+
+config.entry = {
+  "pusher.worker": "./src/core/index",
+};
+
+module.exports = config;
