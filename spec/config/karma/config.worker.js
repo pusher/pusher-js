@@ -1,3 +1,9 @@
+/*
+Takes + modifies existing Karma config + the name of the suite,
+i.e. 'unit' or 'integration'.
+Sorts out the module resolution for this build and changes
+the testenv.
+*/
 module.exports = function(config, suite) {
   config.frameworks = ["jasmine-web-worker"];
   config.files = [

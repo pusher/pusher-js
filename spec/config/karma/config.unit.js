@@ -2,55 +2,15 @@ var version = require('../../../package').version;
 var objectAssign = require('object-assign-deep');
 var webpackConfig = require('../../../webpack/config.shared');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
+var commonConfig = require('./config.common');
 
-module.exports = {
-  basePath: '../../../',
-  frameworks: ["jasmine"],
-
+module.exports = objectAssign(commonConfig,{
   files: [
     '**/spec/javascripts/unit/index.web.js'
   ],
   preprocessors: {
-    '**/spec/javascripts/node_modules/**/*.ts': ['webpack'],
-    '**/spec/javascripts/unit/index.web.js': ['webpack'],
-    '**/spec/javascripts/helpers/**/*.js': ['webpack']
+    '**/spec/javascripts/unit/index.web.js': ['webpack']
   },
 
-  reporters: ['coverage', 'verbose'],
-
-  coverageReporter: {
-    type : 'html',
-    dir : 'coverage/'
-  },
-
-  webpack: objectAssign(webpackConfig,{
-    resolve: {
-      modulesDirectories: [
-        'node_modules',
-        'web_modules',
-        'src',
-        'src/runtimes/web',
-        'src/runtimes',
-        'spec/javascripts/helpers'
-      ]
-    },
-    externals: {
-      testenv: "'web'"
-    }
-  }),
-
-  port: 9876,
-  runnerPort: 9100,
-
-  colors: true,
-
-  autoWatch: true,
-
-  browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
-  captureTimeout: 3e5,
-  browserNoActivityTimeout: 3e5,
-  browserDisconnectTimeout: 3e5,
-  browserDisconnectTolerance: 3,
-
-  singleRun: true
-}
+  webpack: webpackConfig
+});

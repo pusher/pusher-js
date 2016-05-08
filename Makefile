@@ -49,11 +49,11 @@ worker_integration:
 
 node_unit:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.unit.js && \
-	node spec/config/jasmine-node/jasmine.unit.js
+	node spec/config/jasmine-node/config.js ./tmp/node_unit
 
 node_integration:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.integration.js && \
-	node spec/config/jasmine-node/jasmine.integration.js
+	node spec/config/jasmine-node/config.js ./tmp/node_integration
 
 serve:
 	node webpack/dev.server.js

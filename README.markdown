@@ -482,4 +482,4 @@ make worker_unit
 make worker_integration
 ```
 
-If you want your Karma tests to automatically reload, then in `spec/karma/config.<unit||integration>.js` set `singleRun` to `false`.
+If you want your Karma tests to automatically reload, then in `spec/karma/config.common.js` set `singleRun` to `false`.
