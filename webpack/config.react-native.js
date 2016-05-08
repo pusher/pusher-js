@@ -3,12 +3,15 @@ var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPl
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 
-//////////////////////////////////////////////
-// The ReactNative build uses:              //
-// WebSocket: platforms/web/ws              //
-// XHR: platforms/web/xhr                   //
-// NetInfo: platforms/react-native/net_info //
-//////////////////////////////////////////////
+/*
+  Upon importing the 'runtime' module, this react-native build is made to look at
+  src/runtimes/react-native/runtime.ts by the below webpack resolution config.
+  This is achieved by adding 'src/runtimes/react-native' to the resolve.modulesDirectories array
+
+  -- CONVENIENCE --
+  We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
+  We also add 'src/' so that the runtimes/react-native folder can conveniently import 'core/' modules.
+*/
 module.exports = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
@@ -18,9 +21,9 @@ module.exports = objectAssign(require('./config.shared'),{
   },
   target: "node",
   externals: {
-    "react-native": "react-native",
+    "react-native": "react-native", // our Reachability implementation needs to reference react-native.
   },
   resolve: {
-    modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/react-native', 'src/runtimes']
+    modulesDirectories: ['src/', 'src/runtimes/react-native', 'src/runtimes']
   },
 })

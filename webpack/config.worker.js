@@ -3,12 +3,15 @@ var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPl
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 
-//////////////////////////////////////
-// The worker build uses:           //
-// WebSocket: platforms/web/ws      //
-// XHR: platforms/web/xhr           //
-// NetInfo: platforms/node/net_info //
-//////////////////////////////////////
+/*
+  Upon importing the 'runtime' module, this worker build is made to look at
+  src/runtimes/worker/runtime.ts by the below webpack resolution config.
+  This is achieved by adding 'src/runtimes/worker' to the resolve.modulesDirectories array
+
+  -- CONVENIENCE --
+  We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
+  We also add 'src/' so that the runtimes/worker folder can conveniently import 'core/' modules.
+*/
 var config = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
@@ -16,10 +19,13 @@ var config = objectAssign(require('./config.shared'),{
     filename: "pusher.worker.js"
   },
   resolve: {
-    modulesDirectories: ['node_modules', 'web_modules', 'src/', 'src/runtimes/worker', 'src/runtimes']
+    modulesDirectories: ['src/', 'src/runtimes/worker', 'src/runtimes']
   }
 });
 
+/*
+We want the file to be called pusher.worker.js and not pusher.js
+*/
 config.entry = {
   "pusher.worker": "./src/core/index",
 };
