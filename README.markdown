@@ -457,61 +457,31 @@ make worker       # for the worker build
 
 ## Testing
 
-### Jasmine
-
-Jasmine test suite contains two types of tests:
+Each test environment contains two types of tests:
 
 1. unit tests,
 2. integration tests.
 
 Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
 
-There are several ways to run jasmine tests. All commands mentioned below also start a JBundle server, which is required for integration tests.
+There are 3 different testing environments: one for web, one for NodeJS and one for workers. We may consider adding another one for React Native in the future.
 
-Please make sure you run bundler before running any of following commands.
+The web and worker tests use [Karma](https://github.com/karma-runner/karma) to execute specs in real browsers. The NodeJS tests use [jasmine-node](https://github.com/mhevery/jasmine-node).
 
-```bash
-bundle install
-```
-
-#### Run tests manually in a browser
-
-First, start the jasmine and JSONP integration servers:
+To run the tests:
 
 ```bash
-bin/jasmine
+# For web
+make web_unit
+make web_integration
+
+# For NodeJS
+make node_unit
+make node_integration
+
+# For workers
+make worker_unit
+make worker_integration
 ```
 
-Then open any browser and navigate to <http://localhost:8888/> - it will run both unit and integration tests.
-
-#### Run headless tests
-
-Running headless tests is very convenient for development, especially when using guard. Make sure you have PhantomJS installed - you can use `brew install phantomjs` on OS X. Start jasmine and guard:
-
-```bash
-bin/guard
-```
-
-Tests will be run automatically in the terminal. Guard watches JS files and specs and re-runs aproppriate tests whenever you save any changes. Press enter to re-run all tests.
-
-Guard runs only unit tests - partially because PhantomJS does not support WebSockets, partially for convenience.
-
-There's also a JSHint watch, which will validate JS files on save.
-
-#### Run karma
-
-Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install karma npm modules
-
-```bash
-npm install
-```
-
-Then start the server, run one of following commands:
-
-```bash
-bin/karma-unit           # runs only unit tests
-bin/karma-integration    # runs only integration tests
-bin/karma                # runs both unit and integration tests
-```
-
-All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
+If you want your Karma tests to automatically reload, then in `spec/karma/config.<unit||integration>.js` set `singleRun` to `false`.
