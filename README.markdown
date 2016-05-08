@@ -409,6 +409,25 @@ You can optionally pass a `PORT` environment variable to run the server on a dif
 
 This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respective minified versions.
 
+## Core Vs. Platform-Specific Code
+
+New to PusherJS 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
+Web Workers.
+
+In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
+
+Throughout the `core/` directory you'll find this line:
+
+```javascript
+import Runtime from "runtime";
+```
+
+We use webpack module resolution to make the library look for different versions of this module depending on the build.
+
+For web it will look for `src/runtimes/web/runtime.ts`. For ReactNative, `src/runtimes/react-native/runtime.ts`. For Node:  `src/runtimes/node/runtime.ts`. For worker: `src/runtimes/worker/runtime.ts`.
+
+Each of these runtime files exports an object (conforming to the interface you can see in `src/runtimes/interface.ts`) that abstracts away everything platform-specific. The core library pulls this object in without any knowledge of how it implements it. This means web build can use the DOM underneath, the ReactNative build can use its native NetInfo API, Workers can use `fetch` and so on.
+
 ## Building
 
 In order to build SockJS, you must first initialize and update the Git submodule:
