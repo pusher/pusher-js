@@ -12,7 +12,11 @@ They both include their own licences.
 
 The following topics are covered:
 
-* Installation
+* Supported runtimes and installation
+  * Web
+  * React Native
+  * Web Workers
+  * NodeJS
 * Configuration
 * Global configuration
 * Connection
@@ -25,15 +29,17 @@ The following topics are covered:
 
 ## Installation
 
-### CDN
+### Web
 
-Via the Pusher CDN:
+If you're using PusherJS on a web page, you can install the library via:
+
+#### CDN
 
 ```html
-<script src="//js.pusher.com/3.0/pusher.min.js"></script>
+<script src="//js.pusher.com/3.1/pusher.min.js"></script>
 ```
 
-### Bower
+#### Bower
 
 Or via [Bower](http://bower.io/):
 
@@ -44,14 +50,48 @@ bower install pusher
 and then
 
 ```html
-<script src="bower_components/pusher/dist/pusher.min.js"></script>
+<script src="bower_components/pusher/dist/web/pusher.min.js"></script>
 ```
 
-### NPM
+#### NPM
 
 ```bash
 npm install pusher-js
 ```
+
+Then simply call:
+
+```javascript
+var Pusher = require('pusher-js');
+```
+
+### React Native
+
+You can install `pusher-js` from NPM, then import the `react-native` path of PusherJS.
+
+```javascript
+import Pusher from 'pusher-js/react-native';
+```
+
+Notes:
+
+* The fallbacks available for this runtime are HTTP streaming and polling.
+* This build uses React Native's NetInfo API to detect changes on connectivity state. It will use this to automatically reconnect.
+
+### Web Workers
+
+Download the `pusher.js` worker distribution from the `dist/worker` of this repo.
+
+To import the library:
+
+```javascript
+importScripts("path/to/worker/pusher.js");
+```
+
+Notes:
+
+* For standard `WebWorkers`, this build will use HTTP as a fallback.
+* For `ServiceWorkers`, as the `XMLHttpRequest` API is unavailable, there is currently no support for HTTP fallbacks. However, we are open to requests for fallbacks using `fetch` if there is demand.
 
 ## Initialization
 
@@ -125,7 +165,7 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 #### `enabledTransports` (Array)
 
-Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
+Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
 
 ```js
 // will only use WebSockets
@@ -134,7 +174,7 @@ var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
 
 #### `disabledTransports` (Array)
 
-Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
+Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
 
 ```js
 // will use all transports except for sockjs
@@ -167,7 +207,7 @@ Time before the connection is terminated after sending a ping message. Default i
 
 ### `Pusher.logToConsole` (Boolean)
 
-Enables logging to the browser console via calls to `window.console.log`.
+Enables logging to the browser console via calls to `console.log`.
 
 ### `Pusher.log` (Function)
 
