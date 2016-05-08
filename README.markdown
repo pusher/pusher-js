@@ -80,12 +80,10 @@ Notes:
 
 ### Web Workers
 
-Download the `pusher.js` worker distribution from the `dist/worker` of this repo.
-
-To import the library:
+You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the CDN:
 
 ```javascript
-importScripts("path/to/worker/pusher.js");
+importScripts("https://js.pusher.com/3.1/pusher.worker.min.js");
 ```
 
 Notes:
