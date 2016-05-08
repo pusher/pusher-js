@@ -393,79 +393,48 @@ All other browsers work fine with two or three connections.
 
 ## Developing
 
-Use Bundler to install all development dependencies
+Install all dependencies via NPM:
 
 ```bash
-bundle install
-```
-
-and create a local config file
-
-```bash
-cp config/config.yml.example config/config.yml # and edit
+npm install
 ```
 
 Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
 
 ```bash
-bundle exec jbundle server
+make serve
 ```
 
-In order to build the minified versions:
+You can optionally pass a `PORT` environment variable to run the server on a different port. You can also pass `CDN_HTTP` and `CDN_HTTPS` variables if you wish the library to load dependencies from a new host.
 
-```bash
-ENVIRONMENT=development rake build
-```
-
-If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
+This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respective minified versions.
 
 ## Building
 
-You must first build `src/sockjs/sockjs.js`:
+In order to build SockJS, you must first initialize and update the Git submodule:
 
 ```bash
 git submodule init
 git submodule update
-pushd src/sockjs
-npm install
-make sockjs.js
-popd
 ```
 
-`./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
-Define the version number in JFile (should be in the format 1.2.3).
+Then simply run:
 
 ```bash
-bundle exec rake build
+make web
 ```
 
-That writes source and minified versions of each bundle declared in the JFile into versioned directories. For example if the JFile says
+This will build the source files relevant for the web build into `dist/web`.
 
-```rb
-version '1.7.1'
-```
+In order to specify the library version, you can either update `package.json` or pass a `VERSION` environment variable upon building.
 
-Then rake build will put copies of the files in ./dist/1.7.1/ and ./dist/1.7/
-
-However for a prerelease
-
-```rb
-version '1.7.2-pre'
-```
-
-It will only write to the full, suffixed directory ./dist/1.7.2-pre
-
-This is so prereleases don't overwrite the previous stable release.
-
-### Clean builds
-
-Building everything from scratch is useful when you update submodules, which need compiling. If you want to perform a clean build, run:
+Other build commands include:
 
 ```bash
-bin/build
+make react-native # for the React Native build
+make node         # for the NodeJS build
+make worker       # for the worker build
 ```
-
-This will clean sockjs-client submodule, check out last committed revision, rebuild SockJS fallback files and then run JBundle. Don't run this command if you have uncommitted changes in any of submodules, since it might overwrite them.
 
 ## Testing
 

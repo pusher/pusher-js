@@ -53,4 +53,7 @@ node_integration:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.integration.js && \
 	node spec/config/jasmine-node/jasmine.integration.js
 
+serve:
+	node webpack/dev.server.js
+
 .PHONY: build_all

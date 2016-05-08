@@ -49,7 +49,8 @@
     "string-replace-webpack-plugin": "0.0.3",
     "typescript": "^1.8.0",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.12.9"
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "faye-websocket": "0.9.4",
