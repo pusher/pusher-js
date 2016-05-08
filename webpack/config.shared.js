@@ -8,7 +8,8 @@ var Config = require('./hosting_config');
 var lookup = {
   "<VERSION>": Config.version,
   "<CDN_HTTP>": Config.cdn_http,
-  "<CDN_HTTPS>": Config.cdn_https
+  "<CDN_HTTPS>": Config.cdn_https,
+  "<DEPENDENCY_SUFFIX>": Config.dependency_suffix
 };
 
 var replacements = [];

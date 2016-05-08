@@ -19,8 +19,4 @@ var config = objectAssign(require('./config.shared'),{
   }
 });
 
-if (process.env.MIN === 'true') {
-  config.plugins.push(new webpack.optimize.UglifyJsPlugin())
-}
-
 module.exports = config;

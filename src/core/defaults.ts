@@ -45,7 +45,7 @@ var Defaults : DefaultConfig = {
   // CDN configuration
   cdn_http: '<CDN_HTTP>',
   cdn_https: '<CDN_HTTPS>',
-  dependency_suffix: ''
+  dependency_suffix: '<DEPENDENCY_SUFFIX>'
 }
 
 export default Defaults;
