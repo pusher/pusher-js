@@ -1,4 +1,27 @@
-/* SockJS client, version 0.3.4.10.g3f7e, http://sockjs.org, MIT License
+/* SockJS client, http://sockjs.org, MIT License
+ *
+ * Copyright (c) 2011-2012 VMware, Inc.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+/* SockJS client, version 0.3.4.72.g5b91, http://sockjs.org, MIT License
 
 Copyright (c) 2011-2012 VMware, Inc.
 
@@ -27,7 +50,7 @@ var JSON;JSON||(JSON={}),function(){function str(a,b){var c,d,e,f,g=gap,h,i=b[a]
 
 //     [*] Including lib/index.js
 // Public object
-SockJS = (function(){
+var SockJS = (function(){
               var _document = document;
               var _window = window;
               var utils = {};
@@ -195,6 +218,7 @@ EventEmitter.prototype.nuke = function() {
  */
 
 var random_string_chars = 'abcdefghijklmnopqrstuvwxyz0123456789_';
+
 utils.random_string = function(length, max) {
     max = max || random_string_chars.length;
     var i, ret = [];
@@ -203,41 +227,40 @@ utils.random_string = function(length, max) {
     }
     return ret.join('');
 };
+
 utils.random_number = function(max) {
     return Math.floor(Math.random() * max);
 };
+
 utils.random_number_string = function(max) {
     var t = (''+(max - 1)).length;
     var p = Array(t+1).join('0');
     return (p + utils.random_number(max)).slice(-t);
 };
 
-// Assuming that url looks like: http://asdasd:111/asd
 utils.getOrigin = function(url) {
-    url += '/';
-    var parts = url.split('/').slice(0, 3);
-    return parts.join('/');
+    if (url.match(/^file:\/\//)) {
+        // no origin when using file protocol
+        return null;
+    }
+
+    var parts = url.match(/^(https?):\/\/([^\/:]+)(:([0-9]+))?/);
+    var protocol = parts[1];
+    var hostname = parts[2];
+    var port = parts[4];
+
+    if (!port) {
+        port = (protocol === "https") ? 443 : 80;
+    }
+
+    return protocol + "://" + hostname + ":" + port;
 };
 
 utils.isSameOriginUrl = function(url_a, url_b) {
     // location.origin would do, but it's not always available.
     if (!url_b) url_b = _window.location.href;
 
-    return (url_a.split('/').slice(0,3).join('/')
-                ===
-            url_b.split('/').slice(0,3).join('/'));
-};
-
-utils.getParentDomain = function(url) {
-    // ipv4 ip address
-    if (/^[0-9.]*$/.test(url)) return url;
-    // ipv6 ip address
-    if (/^\[/.test(url)) return url;
-    // no dots
-    if (!(/[.]/.test(url))) return url;
-
-    var parts = url.split('.').slice(1);
-    return parts.join('.');
+    return utils.getOrigin(url_a) === utils.getOrigin(url_b);
 };
 
 utils.objectExtend = function(dst, src) {
@@ -310,22 +333,12 @@ utils.amendUrl = function(url) {
     if (url.indexOf('//') === 0) {
         url = dl.protocol + url;
     }
-    // '/abc' --> 'http://localhost:1234/abc'
+    // '/abc' --> 'http://localhost:80/abc'
     if (url.indexOf('/') === 0) {
         url = dl.protocol + '//' + dl.host + url;
     }
     // strip trailing slashes
     url = url.replace(/[/]+$/,'');
-
-    // We have a full url here, with proto and host. For some browsers
-    // http://localhost:80/ is not in the same origin as http://localhost/
-	// Remove explicit :80 or :443 in such cases. See #74
-    var parts = url.split("/");
-    if ((parts[0] === "http:" && /:80$/.test(parts[2])) ||
-	    (parts[0] === "https:" && /:443$/.test(parts[2]))) {
-		parts[2] = parts[2].replace(/:(80|443)$/, "");
-	}
-    url = parts.join("/");
     return url;
 };
 
@@ -451,75 +464,47 @@ utils.quote = function(string) {
     });
 }
 
-var _all_protocols = ['websocket',
-                      'xdr-streaming',
-                      'xhr-streaming',
-                      'iframe-eventsource',
-                      'iframe-htmlfile',
-                      'xdr-polling',
-                      'xhr-polling',
-                      'iframe-xhr-polling',
-                      'jsonp-polling'];
+var _all_protocols = [
+    'iframe-eventsource',
+    'iframe-htmlfile',
+    'iframe-xhr-polling',
+    'jsonp-polling'
+];
 
-utils.probeProtocols = function() {
+utils.probeProtocols = function(url) {
     var probed = {};
     for(var i=0; i<_all_protocols.length; i++) {
         var protocol = _all_protocols[i];
         // User can have a typo in protocol name.
         probed[protocol] = SockJS[protocol] &&
-                           SockJS[protocol].enabled();
+                           SockJS[protocol].enabled(url);
     }
     return probed;
 };
 
-utils.detectProtocols = function(probed, protocols_whitelist, info) {
-    var pe = {},
-        protocols = [];
-    if (!protocols_whitelist) protocols_whitelist = _all_protocols;
-    for(var i=0; i<protocols_whitelist.length; i++) {
+utils.detectProtocols = function(protocols_probed, protocols_whitelist, info) {
+    protocols_whitelist = protocols_whitelist || _all_protocols;
+
+    var protocols = [];
+    for (var i = 0; i < protocols_whitelist.length; i++) {
         var protocol = protocols_whitelist[i];
-        pe[protocol] = probed[protocol];
-    }
-    var maybe_push = function(protos) {
-        var proto = protos.shift();
-        if (pe[proto]) {
-            protocols.push(proto);
-        } else {
-            if (protos.length > 0) {
-                maybe_push(protos);
-            }
-        }
-    }
-
-    // 1. Websocket
-    if (info.websocket !== false) {
-        maybe_push(['websocket']);
-    }
-
-    // 2. Streaming
-    if (pe['xhr-streaming'] && !info.null_origin) {
-        protocols.push('xhr-streaming');
-    } else {
-        if (pe['xdr-streaming'] && !info.cookie_needed && !info.null_origin) {
-            protocols.push('xdr-streaming');
-        } else {
-            maybe_push(['iframe-eventsource',
-                        'iframe-htmlfile']);
-        }
-    }
-
-    // 3. Polling
-    if (pe['xhr-polling'] && !info.null_origin) {
-        protocols.push('xhr-polling');
-    } else {
-        if (pe['xdr-polling'] && !info.cookie_needed && !info.null_origin) {
-            protocols.push('xdr-polling');
-        } else {
-            maybe_push(['iframe-xhr-polling',
-                        'jsonp-polling']);
+        if (protocols_probed[protocol]) {
+            protocols.push(protocol);
         }
     }
     return protocols;
+}
+
+utils.defaultOptions = function(){
+    return {
+        devel: false,
+        debug: false,
+        protocols_whitelist: [],
+        info: undefined,
+        rtt: undefined,
+        max_window_time: 4000,
+        init_window_size: 4096
+    };
 }
 //         [*] End of lib/utils.js
 
@@ -533,30 +518,10 @@ utils.detectProtocols = function(probed, protocols_whitelist, info) {
  * ***** END LICENSE BLOCK *****
  */
 
-// May be used by htmlfile jsonp and transports.
-var MPrefix = '_sockjs_global';
-utils.createHook = function() {
-    var window_id = 'a' + utils.random_string(8);
-    if (!(MPrefix in _window)) {
-        var map = {};
-        _window[MPrefix] = function(window_id) {
-            if (!(window_id in map)) {
-                map[window_id] = {
-                    id: window_id,
-                    del: function() {delete map[window_id];}
-                };
-            }
-            return map[window_id];
-        }
-    }
-    return _window[MPrefix](window_id);
-};
-
-
-
 utils.attachMessage = function(listener) {
     utils.attachEvent('message', listener);
 };
+
 utils.attachEvent = function(event, listener) {
     if (typeof _window.addEventListener !== 'undefined') {
         _window.addEventListener(event, listener, false);
@@ -573,6 +538,7 @@ utils.attachEvent = function(event, listener) {
 utils.detachMessage = function(listener) {
     utils.detachEvent('message', listener);
 };
+
 utils.detachEvent = function(event, listener) {
     if (typeof _window.addEventListener !== 'undefined') {
         _window.removeEventListener(event, listener, false);
@@ -612,11 +578,11 @@ utils.unload_add = function(listener) {
     }
     return ref;
 };
+
 utils.unload_del = function(ref) {
     if (ref in on_unload)
         delete on_unload[ref];
 };
-
 
 utils.createIframe = function (iframe_url, error_callback) {
     var iframe = _document.createElement('iframe');
@@ -918,18 +884,100 @@ XDRObject.prototype.close = function() {
 // 2. Is natively via XDR
 // 3. Nope, but postMessage is there so it should work via the Iframe.
 // 4. Nope, sorry.
-utils.isXHRCorsCapable = function() {
+utils.isXHRCorsCapable = function(url) {
+    var protocol = url.match(/^(https?:)/)[0];
     if (_window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest()) {
         return 1;
     }
     // XDomainRequest doesn't work if page is served from file://
-    if (_window.XDomainRequest && _document.domain) {
+    if (_window.XDomainRequest && _document.domain &&
+        _document.location.protocol == protocol) {
         return 2;
     }
     if (IframeTransport.enabled()) {
         return 3;
     }
     return 4;
+};
+
+
+var JsonpSender = function(url, payload, cache){
+    var that = this;
+    utils.delay(function(){that._start(url, payload, cache);});
+};
+JsonpSender.prototype = new EventEmitter(['finish']);
+JsonpSender.prototype._start = function(url, payload, cache){
+    var that = this;
+
+    if (!('_send_form' in cache)) {
+        var form = cache._send_form = _document.createElement('form');
+        var area = cache._send_area = _document.createElement('textarea');
+        area.name = 'd';
+        form.style.display = 'none';
+        form.style.position = 'absolute';
+        form.method = 'POST';
+        form.enctype = 'application/x-www-form-urlencoded';
+        form.acceptCharset = "UTF-8";
+        form.appendChild(area);
+        _document.body.appendChild(form);
+    }
+    var form = cache._send_form;
+    var area = cache._send_area;
+    var id = 'a' + utils.random_string(8);
+    that.area   = area;
+    form.target = id;
+    form.action = url + '/jsonp_send?i=' + id;
+
+    var iframe;
+    try {
+        // ie6 dynamic iframes with target="" support (thanks Chris Lambacher)
+        iframe = _document.createElement('<iframe name="'+ id +'">');
+    } catch(x) {
+        iframe = _document.createElement('iframe');
+        iframe.name = id;
+    }
+    that.iframe = iframe;
+    iframe.id = id;
+    form.appendChild(iframe);
+    iframe.style.display = 'none';
+
+    try {
+        area.value = payload;
+    } catch(e) {
+        utils.log('Your browser is seriously broken. Go home! ' + e.message);
+    }
+    form.submit();
+    var completed = function(e) {
+        if (!that.iframe) return;
+        that._cleanup();
+        // It is not possible to detect if the iframe succeeded or
+        // failed to submit our form.
+        that.emit('finish');
+    };
+    iframe.onerror = iframe.onload = completed;
+    iframe.onreadystatechange = function(e) {
+        if (iframe.readyState == 'complete') completed();
+    };
+};
+
+JsonpSender.prototype._cleanup = function(){
+    var that = this;
+    if (!that.iframe) return;
+    var iframe = that.iframe;
+    that.area.value = '';
+    that.iframe.onreadystatechange = that.iframe.onerror = that.iframe.onload = that.area = null;
+    that.iframe = '';
+    // Opera mini doesn't like if we GC iframe
+    // immediately, thus this timeout.
+    utils.delay(500, function() {
+        iframe.parentNode.removeChild(iframe);
+        iframe = null;
+    });
+};
+JsonpSender.prototype.close = function(){
+    var that = this;
+    that.nuke();
+    that._cleanup();
 };
 //         [*] End of lib/dom2.js
 
@@ -944,19 +992,19 @@ utils.isXHRCorsCapable = function() {
  */
 
 var SockJS = function(url, dep_protocols_whitelist, options) {
-    if (!(this instanceof SockJS)) {
+    if (this === _window) {
         // makes `new` optional
         return new SockJS(url, dep_protocols_whitelist, options);
     }
-    
+
     var that = this, protocols_whitelist;
-    that._options = {devel: false, debug: false, protocols_whitelist: [],
-                     info: undefined, rtt: undefined};
+    that._options = utils.defaultOptions();
     if (options) {
         utils.objectExtend(that._options, options);
     }
     that._base_url = utils.amendUrl(url);
     that._server = that._options.server || utils.random_number_string(1000);
+    that._bus = new EventEmitter(['close', 'heartbeat', 'message']);
     if (that._options.protocols_whitelist &&
         that._options.protocols_whitelist.length) {
         protocols_whitelist = that._options.protocols_whitelist;
@@ -979,7 +1027,7 @@ var SockJS = function(url, dep_protocols_whitelist, options) {
     that._protocols = [];
     that.protocol = null;
     that.readyState = SockJS.CONNECTING;
-    that._ir = createInfoReceiver(that._base_url);
+    that._ir = createInfoReceiver(that, that._base_url);
     that._ir.onfinish = function(info, rtt) {
         that._ir = null;
         if (info) {
@@ -991,16 +1039,16 @@ var SockJS = function(url, dep_protocols_whitelist, options) {
                 rtt = that._options.rtt;
             }
             that._applyInfo(info, rtt, protocols_whitelist);
-            that._didClose();
+            that._didClose(undefined, undefined, undefined, "info-onfinish");
         } else {
-            that._didClose(1002, 'Can\'t connect to server', true);
+            that._didClose(1002, 'Can\'t connect to server', true, "info-failed");
         }
     };
 };
 // Inheritance
 SockJS.prototype = new REventTarget();
 
-SockJS.version = "0.3.4.10.g3f7e";
+SockJS.version = "0.3.4.72.g5b91";
 
 SockJS.CONNECTING = 0;
 SockJS.OPEN = 1;
@@ -1020,11 +1068,13 @@ SockJS.prototype._dispatchOpen = function() {
             that._transport_tref = null;
         }
         that.readyState = SockJS.OPEN;
+        var shi = that._options.info.server_heartbeat_interval;
+        if (shi) that._startHeartbeats(shi);
         that.dispatchEvent(new SimpleEvent("open"));
     } else {
         // The server might have been restarted, and lost track of our
         // connection.
-        that._didClose(1006, "Server lost session");
+        that._didClose(1006, "Server lost session", undefined, "_dispatchOpen");
     }
 };
 
@@ -1032,22 +1082,29 @@ SockJS.prototype._dispatchMessage = function(data) {
     var that = this;
     if (that.readyState !== SockJS.OPEN)
             return;
+    that._bus.emit('message', data);
     that.dispatchEvent(new SimpleEvent("message", {data: data}));
 };
 
-SockJS.prototype._dispatchHeartbeat = function(data) {
+SockJS.prototype._dispatchHeartbeat = function(flavour) {
     var that = this;
+    // Ignore heartbeats before "o" frame - prelude.
     if (that.readyState !== SockJS.OPEN)
         return;
-    that.dispatchEvent(new SimpleEvent('heartbeat', {}));
+    that._bus.emit('heartbeat', flavour);
+    that.dispatchEvent(new SimpleEvent('heartbeat', {flavour: flavour}));
 };
 
-SockJS.prototype._didClose = function(code, reason, force) {
+SockJS.prototype._didClose = function(code, reason, force, debug) {
     var that = this;
     if (that.readyState !== SockJS.CONNECTING &&
         that.readyState !== SockJS.OPEN &&
-        that.readyState !== SockJS.CLOSING)
-            throw new Error('INVALID_STATE_ERR');
+        that.readyState !== SockJS.CLOSING) {
+        // Temporarily disabled below exception until we find the issue
+        // https://github.com/pusher/pusher-js/issues/35
+        // throw new Error('INVALID_STATE_ERR (' + code + ',' + reason + ',' + force + ',' + debug + ')');
+        return;
+    }
     if (that._ir) {
         that._ir.nuke();
         that._ir = null;
@@ -1075,6 +1132,7 @@ SockJS.prototype._didClose = function(code, reason, force) {
     }
     that.readyState = SockJS.CLOSED;
 
+    that._bus.emit('close');
     utils.delay(function() {
                    that.dispatchEvent(close_event);
                 });
@@ -1092,6 +1150,9 @@ SockJS.prototype._didMessage = function(data) {
         for(var i=0; i < payload.length; i++){
             that._dispatchMessage(payload[i]);
         }
+        if (payload.length === 0) {
+            that._dispatchHeartbeat('recv');
+        }
         break;
     case 'm':
         var payload = JSON.parse(data.slice(1) || 'null');
@@ -1099,10 +1160,10 @@ SockJS.prototype._didMessage = function(data) {
         break;
     case 'c':
         var payload = JSON.parse(data.slice(1) || '[]');
-        that._didClose(payload[0], payload[1]);
+        that._didClose(payload[0], payload[1], undefined, "_didMessage");
         break;
     case 'h':
-        that._dispatchHeartbeat();
+        that._dispatchHeartbeat('send');
         break;
     }
 };
@@ -1138,8 +1199,7 @@ SockJS.prototype._try_next_protocol = function(close_event) {
             return true;
         }
 
-        if (!SockJS[protocol] ||
-              !SockJS[protocol].enabled(that._options)) {
+        if (!SockJS[protocol] || !SockJS[protocol].enabled(that._base_url)) {
             that._debug('Skipping transport:', protocol);
         } else {
             var roundTrips = SockJS[protocol].roundTrips || 1;
@@ -1173,7 +1233,7 @@ SockJS.prototype.close = function(code, reason) {
         return false;
     }
     that.readyState = SockJS.CLOSING;
-    that._didClose(code || 1000, reason || "Normal closure");
+    that._didClose(code || 1000, reason || "Normal closure", undefined, "close");
     return true;
 };
 
@@ -1187,80 +1247,31 @@ SockJS.prototype.send = function(data) {
     return true;
 };
 
+SockJS.prototype._sendEmpty = function() {
+    var that = this;
+    if (that.readyState === SockJS.OPEN) {
+        that._transport.doSend('');
+    }
+    return true;
+};
+
 SockJS.prototype._applyInfo = function(info, rtt, protocols_whitelist) {
     var that = this;
     that._options.info = info;
     that._options.rtt = rtt;
     that._options.rto = utils.countRTO(rtt);
-    that._options.info.null_origin = !_document.domain;
-    var probed = utils.probeProtocols();
+    that._options.info.null_origin = Boolean(
+        that._options.ignore_null_origin || !_document.domain
+    );
+    var probed = utils.probeProtocols(that._base_url);
     that._protocols = utils.detectProtocols(probed, protocols_whitelist, info);
+    // Replace the hostname part of URL if supplied by the server
+    if (info.hostname) {
+        var url = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(that._base_url);
+        that._base_url = url[1] + info.hostname + url[3];
+    }
 };
 //         [*] End of lib/sockjs.js
-
-
-//         [*] Including lib/trans-websocket.js
-/*
- * ***** BEGIN LICENSE BLOCK *****
- * Copyright (c) 2011-2012 VMware, Inc.
- *
- * For the license see COPYING.
- * ***** END LICENSE BLOCK *****
- */
-
-var WebSocketTransport = SockJS.websocket = function(ri, trans_url) {
-    var that = this;
-    var url = trans_url + '/websocket';
-    if (url.slice(0, 5) === 'https') {
-        url = 'wss' + url.slice(5);
-    } else {
-        url = 'ws' + url.slice(4);
-    }
-    that.ri = ri;
-    that.url = url;
-    var Constructor = _window.WebSocket || _window.MozWebSocket;
-
-    that.ws = new Constructor(that.url);
-    that.ws.onmessage = function(e) {
-        that.ri._didMessage(e.data);
-    };
-    // Firefox has an interesting bug. If a websocket connection is
-    // created after onunload, it stays alive even when user
-    // navigates away from the page. In such situation let's lie -
-    // let's not open the ws connection at all. See:
-    // https://github.com/sockjs/sockjs-client/issues/28
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=696085
-    that.unload_ref = utils.unload_add(function(){that.ws.close()});
-    that.ws.onclose = function() {
-        that.ri._didMessage(utils.closeFrame(1006, "WebSocket connection broken"));
-    };
-};
-
-WebSocketTransport.prototype.doSend = function(data) {
-    this.ws.send('[' + data + ']');
-};
-
-WebSocketTransport.prototype.doCleanup = function() {
-    var that = this;
-    var ws = that.ws;
-    if (ws) {
-        ws.onmessage = ws.onclose = null;
-        ws.close();
-        utils.unload_del(that.unload_ref);
-        that.unload_ref = that.ri = that.ws = null;
-    }
-};
-
-WebSocketTransport.enabled = function() {
-    return !!(_window.WebSocket || _window.MozWebSocket);
-};
-
-// In theory, ws should require 1 round trip. But in chrome, this is
-// not very stable over SSL. Most likely a ws connection requires a
-// separate SSL connection, in which case 2 round trips are an
-// absolute minumum.
-WebSocketTransport.roundTrips = 2;
-//         [*] End of lib/trans-websocket.js
 
 
 //         [*] Including lib/trans-sender.js
@@ -1277,14 +1288,47 @@ BufferedSender.prototype.send_constructor = function(sender) {
     var that = this;
     that.send_buffer = [];
     that.sender = sender;
+    that.init_window_size = that.ri._options.init_window_size;
+    that.window_size      = that.init_window_size;
+    that.max_window_time  = that.ri._options.max_window_time;
 };
 BufferedSender.prototype.doSend = function(message) {
     var that = this;
-    that.send_buffer.push(message);
+    if (message.length > 0) {
+        that.send_buffer.push(message);
+    }
+
+    if (that.send_stop && message.length == 0) {
+        that.ri._debug('Attempting to send a heartbeat, but sending previous messages is still in progress.');
+    }
+
     if (!that.send_stop) {
         that.send_schedule();
     }
+
 };
+
+BufferedSender.prototype.adjustWindow = function(td, full_window) {
+    var that = this;
+    if (td > that.max_window_time) {
+        // Over time, reduce window
+        that.window_size = Math.max(that.window_size / 2,
+                                    that.init_window_size);
+        return true;
+    } else {
+        if (full_window) {
+            if (td*2 < that.max_window_time) {
+                // A lot time left
+                that.window_size *= 2;
+            } else {
+                // Not so much time left...
+                that.window_size *= 1.1;
+            }
+            return true;
+        }
+    }
+    return false;
+}
 
 // For polling transports in a situation when in the message callback,
 // new message is being send. If the sending connection was started
@@ -1303,93 +1347,58 @@ BufferedSender.prototype.send_schedule_wait = function() {
     };
     tref = utils.delay(25, function() {
         that.send_stop = null;
-        that.send_schedule();
+        if (that.send_buffer.length > 0) {
+            that.send_schedule();
+        }
     });
 };
 
 BufferedSender.prototype.send_schedule = function() {
     var that = this;
-    if (that.send_buffer.length > 0) {
-        var payload = '[' + that.send_buffer.join(',') + ']';
-        that.send_stop = that.sender(that.trans_url, payload, function(success, abort_reason) {
-            that.send_stop = null;
-            if (success === false) {
-                that.ri._didClose(1006, 'Sending error ' + abort_reason);
-            } else {
-                that.send_schedule_wait();
-            }
-        });
-        that.send_buffer = [];
+    var t0 = +new Date();
+    var i, serialized = 2, full_window = false;
+    for (i=0; i < that.send_buffer.length; i++) {
+        serialized += that.send_buffer[i].length + 1;
+        if (serialized > that.window_size) {
+            full_window = true;
+            break;
+        }
     }
+    // Splice removes messages from the array.
+    var messages = that.send_buffer.splice(0, i);
+
+    var payload = '[' +  messages.join(',') + ']';
+    that.send_stop = that.sender(that.trans_url, payload, function(success, abort_reason) {
+        that.send_stop = null;
+        if (success === false) {
+            that.ri._didClose(1006, 'Sending error ' + abort_reason);
+        } else {
+            var td = (+new Date()) - t0;
+            if (that.adjustWindow(td, full_window)) {
+                that.ri._debug('window_size adjusted: ' + that.window_size);
+            }
+            that.send_schedule_wait();
+        }
+    });
 };
 
 BufferedSender.prototype.send_destructor = function() {
     var that = this;
-    if (that._send_stop) {
-        that._send_stop();
+    if (that.send_stop) {
+        that.send_stop();
     }
-    that._send_stop = null;
+    that.send_stop = null;
 };
 
 var jsonPGenericSender = function(url, payload, callback) {
     var that = this;
-
-    if (!('_send_form' in that)) {
-        var form = that._send_form = _document.createElement('form');
-        var area = that._send_area = _document.createElement('textarea');
-        area.name = 'd';
-        form.style.display = 'none';
-        form.style.position = 'absolute';
-        form.method = 'POST';
-        form.enctype = 'application/x-www-form-urlencoded';
-        form.acceptCharset = "UTF-8";
-        form.appendChild(area);
-        _document.body.appendChild(form);
-    }
-    var form = that._send_form;
-    var area = that._send_area;
-    var id = 'a' + utils.random_string(8);
-    form.target = id;
-    form.action = url + '/jsonp_send?i=' + id;
-
-    var iframe;
-    try {
-        // ie6 dynamic iframes with target="" support (thanks Chris Lambacher)
-        iframe = _document.createElement('<iframe name="'+ id +'">');
-    } catch(x) {
-        iframe = _document.createElement('iframe');
-        iframe.name = id;
-    }
-    iframe.id = id;
-    form.appendChild(iframe);
-    iframe.style.display = 'none';
-
-    try {
-        area.value = payload;
-    } catch(e) {
-        utils.log('Your browser is seriously broken. Go home! ' + e.message);
-    }
-    form.submit();
-
-    var completed = function(e) {
-        if (!iframe.onerror) return;
-        iframe.onreadystatechange = iframe.onerror = iframe.onload = null;
-        // Opera mini doesn't like if we GC iframe
-        // immediately, thus this timeout.
-        utils.delay(500, function() {
-                       iframe.parentNode.removeChild(iframe);
-                       iframe = null;
-                   });
-        area.value = '';
-        // It is not possible to detect if the iframe succeeded or
-        // failed to submit our form.
+    var js = new JsonpSender(url, payload, that);
+    js.onfinish = function(){
         callback(true);
     };
-    iframe.onerror = iframe.onload = completed;
-    iframe.onreadystatechange = function(e) {
-        if (iframe.readyState == 'complete') completed();
+    return function(){
+        js.close();
     };
-    return completed;
 };
 
 var createAjaxSender = function(AjaxObject) {
@@ -1400,7 +1409,7 @@ var createAjaxSender = function(AjaxObject) {
                      'http status ' + status);
         };
         return function(abort_reason) {
-            callback(false, abort_reason);
+            xo.close();
         };
     };
 };
@@ -1581,6 +1590,7 @@ JsonPTransport.enabled = function() {
 };
 
 JsonPTransport.need_body = true;
+JsonPTransport.polling = true;
 
 
 JsonPTransport.prototype.doCleanup = function() {
@@ -1664,68 +1674,8 @@ AjaxBasedTransport.prototype.doCleanup = function() {
         that.poll.abort();
         that.poll = null;
     }
+    that.send_destructor();
 };
-
-// xhr-streaming
-var XhrStreamingTransport = SockJS['xhr-streaming'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr_streaming', XhrReceiver, utils.XHRCorsObject);
-};
-
-XhrStreamingTransport.prototype = new AjaxBasedTransport();
-
-XhrStreamingTransport.enabled = function() {
-    // Support for CORS Ajax aka Ajax2? Opera 12 claims CORS but
-    // doesn't do streaming.
-    return (_window.XMLHttpRequest &&
-            'withCredentials' in new XMLHttpRequest() &&
-            (!/opera/i.test(navigator.userAgent)));
-};
-XhrStreamingTransport.roundTrips = 2; // preflight, ajax
-
-// Safari gets confused when a streaming ajax request is started
-// before onload. This causes the load indicator to spin indefinetely.
-XhrStreamingTransport.need_body = true;
-
-
-// According to:
-//   http://stackoverflow.com/questions/1641507/detect-browser-support-for-cross-domain-xmlhttprequests
-//   http://hacks.mozilla.org/2009/07/cross-site-xmlhttprequest-with-cors/
-
-
-// xdr-streaming
-var XdrStreamingTransport = SockJS['xdr-streaming'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr_streaming', XhrReceiver, utils.XDRObject);
-};
-
-XdrStreamingTransport.prototype = new AjaxBasedTransport();
-
-XdrStreamingTransport.enabled = function() {
-    return !!_window.XDomainRequest;
-};
-XdrStreamingTransport.roundTrips = 2; // preflight, ajax
-
-
-
-// xhr-polling
-var XhrPollingTransport = SockJS['xhr-polling'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr', XhrReceiver, utils.XHRCorsObject);
-};
-
-XhrPollingTransport.prototype = new AjaxBasedTransport();
-
-XhrPollingTransport.enabled = XhrStreamingTransport.enabled;
-XhrPollingTransport.roundTrips = 2; // preflight, ajax
-
-
-// xdr-polling
-var XdrPollingTransport = SockJS['xdr-polling'] = function(ri, trans_url) {
-    this.run(ri, trans_url, '/xhr', XhrReceiver, utils.XDRObject);
-};
-
-XdrPollingTransport.prototype = new AjaxBasedTransport();
-
-XdrPollingTransport.enabled = XdrStreamingTransport.enabled;
-XdrPollingTransport.roundTrips = 2; // preflight, ajax
 //         [*] End of lib/trans-xhr.js
 
 
@@ -1756,9 +1706,18 @@ IframeTransport.prototype.i_constructor = function(ri, trans_url, base_url) {
     that.trans_url = trans_url;
 
     var iframe_url = base_url + '/iframe.html';
+    var query = [];
+
     if (that.ri._options.devel) {
-        iframe_url += '?t=' + (+new Date);
+        query.push('t=' + (+new Date));
     }
+    if (that.ri._options.js_path) {
+        query.push('js_path=' + encodeURIComponent(that.ri._options.js_path));
+    }
+    if (query.length > 0) {
+        iframe_url += ("?" + query.join("&"));
+    }
+
     that.window_id = utils.random_string(8);
     iframe_url += '#' + that.window_id;
 
@@ -1789,7 +1748,8 @@ IframeTransport.prototype.doCleanup = function() {
 
 IframeTransport.prototype.onmessage = function(e) {
     var that = this;
-    if (e.origin !== that.origin) return;
+
+    if (utils.getOrigin(e.origin) !== utils.getOrigin(that.origin)) return;
     var window_id = e.data.slice(0, 8);
     var type = e.data.slice(8, 9);
     var data = e.data.slice(9);
@@ -1799,7 +1759,7 @@ IframeTransport.prototype.onmessage = function(e) {
     switch(type) {
     case 's':
         that.iframeObj.loaded();
-        that.postMessage('s', JSON.stringify([SockJS.version, that.protocol, that.trans_url, that.base_url]));
+        that.postMessage('s', JSON.stringify([SockJS.version, that.protocol, that.trans_url, that.base_url, that.ri._options]));
         break;
     case 't':
         that.ri._didMessage(data);
@@ -1845,7 +1805,9 @@ var postMessage = function (type, data) {
     }
 };
 
-var FacadeJS = function() {};
+var FacadeJS = function(options) {
+    this._options = options || utils.defaultOptions();
+};
 FacadeJS.prototype._didClose = function (code, reason) {
     postMessage('t', utils.closeFrame(code, reason));
 };
@@ -1858,7 +1820,9 @@ FacadeJS.prototype._doSend = function (data) {
 FacadeJS.prototype._doCleanup = function () {
     this._transport.doCleanup();
 };
-
+FacadeJS.prototype._debug = function () {
+    utils.log.apply(utils, arguments);
+}
 utils.parent_origin = undefined;
 
 SockJS.bootstrap_iframe = function() {
@@ -1877,14 +1841,16 @@ SockJS.bootstrap_iframe = function() {
         switch(type) {
         case 's':
             var p = JSON.parse(data);
-            var version = p[0];
-            var protocol = p[1];
+            var version   = p[0];
+            var protocol  = p[1];
             var trans_url = p[2];
-            var base_url = p[3];
+            var base_url  = p[3];
+            var options   = p[4];
             if (version !== SockJS.version) {
-                utils.log("Incompatibile SockJS! Main site uses:" +
-                          " \"" + version + "\", the iframe:" +
-                          " \"" + SockJS.version + "\".");
+                utils.log("Incompatibile SockJS! Main site uses: " +
+                          version + ", the iframe: " +
+                          SockJS.version + ". " +
+                          "Double check SockJS urls and flush browser cache.");
             }
             if (!utils.flatUrl(trans_url) || !utils.flatUrl(base_url)) {
                 utils.log("Only basic urls are supported in SockJS");
@@ -1898,7 +1864,7 @@ SockJS.bootstrap_iframe = function() {
                           ")");
                 return;
             }
-            facade = new FacadeJS();
+            facade = new FacadeJS(options);
             facade._transport = new FacadeJS[protocol](facade, trans_url, base_url);
             break;
         case 'm':
@@ -1966,7 +1932,7 @@ InfoReceiver.prototype.doXhr = function(base_url, AjaxObject) {
     };
 };
 
-var InfoReceiverIframe = function(base_url) {
+var InfoReceiverIframe = function(ri, base_url) {
     var that = this;
     var go = function() {
         var ifr = new IframeTransport();
@@ -1983,7 +1949,9 @@ var InfoReceiverIframe = function(base_url) {
             ifr = null;
         };
         var mock_ri = {
-            _options: {},
+            _options: {
+                js_path: ri._options.js_path
+            },
             _didClose: fun,
             _didMessage: fun
         };
@@ -2009,13 +1977,13 @@ var InfoReceiverFake = function() {
 };
 InfoReceiverFake.prototype = new EventEmitter(['finish']);
 
-var createInfoReceiver = function(base_url) {
+var createInfoReceiver = function(connection, base_url) {
     if (utils.isSameOriginUrl(base_url)) {
         // If, for some reason, we have SockJS locally - there's no
         // need to start up the complex machinery. Just use ajax.
         return new InfoReceiver(base_url, utils.XHRLocalObject);
     }
-    switch (utils.isXHRCorsCapable()) {
+    switch (utils.isXHRCorsCapable(base_url)) {
     case 1:
         // XHRLocalObject -> no_credentials=true
         return new InfoReceiver(base_url, utils.XHRLocalObject);
@@ -2023,7 +1991,7 @@ var createInfoReceiver = function(base_url) {
         return new InfoReceiver(base_url, utils.XDRObject);
     case 3:
         // Opera
-        return new InfoReceiverIframe(base_url);
+        return new InfoReceiverIframe(connection, base_url);
     default:
         // IE 7
         return new InfoReceiverFake();
@@ -2035,7 +2003,7 @@ var WInfoReceiverIframe = FacadeJS['w-iframe-info-receiver'] = function(ri, _tra
     var ir = new InfoReceiver(base_url, utils.XHRLocalObject);
     ir.onfinish = function(info, rtt) {
         ri._didMessage('m'+JSON.stringify([info, rtt]));
-        ri._didClose();
+        ri._didClose(undefined, undefined, undefined, "w-iframe-info-receiver");
     }
 };
 WInfoReceiverIframe.prototype.doCleanup = function() {};
@@ -2375,6 +2343,80 @@ SockJS.getIframeTransport = function(){
 };
 //         [*] End of lib/test-hooks.js
 
+
+//         [*] Including lib/heartbeater.js
+/*
+ * ***** BEGIN LICENSE BLOCK *****
+ * Copyright (c) 2011-2012 VMware, Inc.
+ *
+ * For the license see COPYING.
+ * ***** END LICENSE BLOCK *****
+ */
+
+var Heartbeater = function(timeout, how_many_intervals){
+    var that = this;
+
+    that.timeout = timeout;
+    that.not_poked = 0;
+
+    that._onTimeout = function(){
+        that.not_poked += 1;
+        if (that.not_poked === how_many_intervals) {
+            that.emit('timeout');
+        }
+        that._restartTimeout();
+    };
+    that._restartTimeout();
+};
+
+Heartbeater.prototype = new EventEmitter(['first', 'second', 'timeout']);
+Heartbeater.prototype.poke = function(){
+    this.not_poked = 0;
+    this._restartTimeout();
+};
+
+Heartbeater.prototype.close = function(){
+    clearTimeout(this.tref);
+};
+
+Heartbeater.prototype._restartTimeout = function(){
+    if (this.tref) {
+        clearTimeout(this.tref);
+    }
+    this.tref = setTimeout(this._onTimeout, this.timeout);
+};
+
+
+SockJS.prototype._startHeartbeats = function(server_heartbeat_interval){
+    var that = this;
+
+    that._heartbeater = new Heartbeater(server_heartbeat_interval, 2);
+
+    // 1. Answer server pings
+    that._bus.on('heartbeat', function(){
+        if (!SockJS[that.protocol].polling) {
+            // Polling transports need to reconnect on every delivery,
+            // there is no need to send anything.
+            that._sendEmpty();
+        }
+    });
+
+    // 2. Expect traffic between (2*interval...3*interval)
+    that._heartbeater.ontimeout = function(){
+        that._didClose(1007, 'Server heartbeat missed');
+    };
+    var poke = function(){
+        that._heartbeater.poke();
+    };
+    that._bus.on('heartbeat', poke);
+    that._bus.on('message', poke);
+    that._bus.on('close', function(){
+        that._heartbeater.nuke();
+        that._heartbeater.close();
+    });
+};
+//         [*] End of lib/heartbeater.js
+
                   return SockJS;
           })();
 if ('_sockjs_onload' in window) setTimeout(_sockjs_onload, 1);
@@ -2382,6 +2424,10 @@ if ('_sockjs_onload' in window) setTimeout(_sockjs_onload, 1);
 // AMD compliance
 if (typeof define === 'function' && define.amd) {
     define('sockjs', [], function(){return SockJS;});
+}
+
+if (typeof module === 'object' && module && module.exports) {
+    module.exports = SockJS;
 }
 //     [*] End of lib/index.js
 

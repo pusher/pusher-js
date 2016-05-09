@@ -2,11 +2,11 @@ SHELL := /bin/bash
 
 build_all: web react-native node worker
 
-sockjs:
-	pushd src/runtimes/web/dom/sockjs && \
-	npm install &&  \
-	make build &&  \
-	popd
+# sockjs:
+# 	pushd src/runtimes/web/dom/sockjs && \
+# 	npm install &&  \
+# 	make build &&  \
+# 	popd
 
 json2:
 	cp src/runtimes/web/dom/json2.js dist/web
@@ -14,11 +14,11 @@ json2:
 
 web:
 	echo "Browser Release:"
-	make sockjs
-	cp src/runtimes/web/dom/sockjs/sockjs.js dist/web
+	# make sockjs
+	# cp src/runtimes/web/dom/sockjs/sockjs.js dist/web
 	node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 	echo "Browser Minified Release:"
-	cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
+	# cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
 	MINIFY=web node_modules/webpack/bin/webpack.js --config=webpack/config.min.js
 
 react-native:

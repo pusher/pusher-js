@@ -1,6 +1,6 @@
 {
   "name": "pusher-js",
-  "version": "3.1.0-pre7",
+  "version": "3.1.0-pre11",
   "description": "Pusher JavaScript library for browser, React Native, NodeJS and web workers",
   "main": "dist/web/pusher.js",
   "scripts": {
