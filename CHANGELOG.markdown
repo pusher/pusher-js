@@ -1,5 +1,27 @@
 # Changelog
 
+## 3.1.0 (2016-05-08)
+
+[NEW] New builds for ReactNative, NodeJS and Web Workers. The first two are available on NPM. The last is available as a download.
+
+[FIXED] The library no longer swallows connected exceptions. (#105)
+
+[FIXED] Callback removal issues in Safari 9 (#125 #129)
+
+[CHANGED] Monkey-patching the DependencyLoader when self-hosting no longer supported. New steps in README.
+
+[INTERNAL] Ported to TypeScript.
+
+[INTERNAL] The library is split into a core directory and a runtimes directory to make a separation between platform-independent and platform-specific code.
+
+[INTERNAL] Uses Webpack as a bundler.
+
+[INTERNAL] Testing suites for NodeJS and workers.
+
+[INTERNAL] TravisCI + Browserstack setup.
+
+[INTERNAL] NodeJS and ReactNative builds use XMLHttpRequest polyfills for authorization and session timelines. Workers use the `fetch` API.
+
 ## 3.1.0-pre
 
 [NEW] Added Pusher.logToConsole to log to console as a short-hand for writing a Pusher.log function to do so

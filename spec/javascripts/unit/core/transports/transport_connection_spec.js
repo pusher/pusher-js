@@ -1,0 +1,578 @@
+var TestEnv = require('testenv');
+var Mocks = require("mocks");
+var TransportConnection = require('core/transports/transport_connection').default;
+var Collections = require('core/utils/collections');
+var Timer = require('core/utils/timers').OneOffTimer;
+
+describe("TransportConnection", function() {
+  function getTransport(hooks, key, options) {
+    options = Collections.extend({
+      encrypted: false,
+      hostUnencrypted: "example.com:12345",
+      hostEncrypted: "example.com:54321"
+    }, options);
+
+    return new TransportConnection(hooks, "test", 7, key, options);
+  }
+
+  var urls;
+  var hooks;
+  var socket;
+  var timeline;
+  var transport;
+  var Dependencies, _Dependencies, DependenciesModule;
+
+  beforeEach(function() {
+    if (TestEnv === "web") {
+      DependenciesModule = require('dom/dependencies');
+      _Dependencies = DependenciesModule.Dependencies;
+      DependenciesModule.Dependencies = Mocks.getDependencies();
+      Dependencies = DependenciesModule.Dependencies;
+    }
+
+    timeline = Mocks.getTimeline();
+    timeline.generateUniqueID.andReturn(667);
+
+    urls = {
+      getInitial: function(key, params) {
+        return (params.encrypted ? "wss" : "ws") + "://test/" + key;
+      }
+    };
+    socket = Mocks.getWebSocket();
+    hooks = {
+      urls: urls,
+      supportsPing: false,
+      isInitialized: jasmine.createSpy().andReturn(true),
+      getSocket: jasmine.createSpy().andReturn(socket)
+    };
+
+    transport = getTransport(hooks, "foo", {
+      timeline: timeline
+    });
+  });
+
+  afterEach(function(){
+    if (TestEnv === "web") {
+      DependenciesModule.Dependencies = _Dependencies;
+    }
+  });
+
+  describe("#activityTimeout", function() {
+    it("should be set to the value passed via options", function() {
+      var transport = getTransport(hooks, "xxx", {
+        timeline: timeline,
+        activityTimeout: 654321
+      });
+      expect(transport.activityTimeout).toEqual(654321);
+    });
+
+    it("should be set to undefined if not passed via options", function() {
+      var transport = getTransport(hooks, "xxx", {
+        timeline: timeline
+      });
+      expect(transport.activityTimeout).toBe(undefined);
+    });
+  });
+
+  describe("#initialize", function() {
+    it("should log transport name with info level", function() {
+      transport.initialize();
+      expect(timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "test"
+      });
+    });
+
+    it("should log transport name with an 's' suffix when encrypted", function() {
+      var transport = getTransport(hooks, "xxx", {
+        timeline: timeline,
+        encrypted: true
+      });
+      transport.initialize();
+
+      expect(timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "tests"
+      });
+    });
+
+    describe("if the transport is initialized", function() {
+      var hooks;
+      var transport;
+
+      beforeEach(function() {
+        hooks = {
+          supportsPing: false,
+          isInitialized: jasmine.createSpy().andReturn(true)
+        };
+        transport = getTransport(hooks, "foo", {
+          timeline: timeline
+        });
+      });
+
+      it("should transition to 'initialized' immediately", function() {
+        var onInitialized = jasmine.createSpy("onInitialized");
+        transport.bind("initialized", onInitialized);
+
+        transport.initialize();
+        expect(onInitialized).toHaveBeenCalled();
+        expect(transport.state).toEqual("initialized");
+      });
+
+    });
+
+    describe("if the transport is not initialized", function() {
+      var hooks, transport;
+
+      beforeEach(function() {
+        hooks = {
+          file: "test",
+          isInitialized: jasmine.createSpy().andReturn(false),
+          getSocket: jasmine.createSpy().andReturn(socket)
+        };
+        transport = getTransport(hooks, "foo", {
+          timeline: timeline
+        });
+      });
+
+      if (TestEnv === "web") {
+        it("should transition to 'initializing' immediately", function() {
+          var onInitializing = jasmine.createSpy("onInitializing");
+          transport.bind("initializing", onInitializing);
+
+          transport.initialize();
+          expect(onInitializing).toHaveBeenCalled();
+          expect(transport.state).toEqual("initializing");
+        });
+
+        it("should load the resource file (encrypted=false)", function() {
+          transport.initialize();
+          expect(Dependencies.load.calls.length).toEqual(1);
+          expect(Dependencies.load).toHaveBeenCalledWith(
+            "test", { encrypted: false }, jasmine.any(Function)
+          );
+        });
+
+        it("should load the resource file (encrypted=true)", function() {
+          var transport = getTransport(hooks, "foo", {
+            encrypted: true,
+            timeline: timeline
+          });
+
+          transport.initialize();
+          expect(Dependencies.load.calls.length).toEqual(1);
+          expect(Dependencies.load).toHaveBeenCalledWith(
+            "test", { encrypted: true }, jasmine.any(Function)
+          );
+        });
+
+        describe("after loading the resource successfully", function() {
+          var onInitialized;
+          var loadCallback;
+
+          beforeEach(function() {
+            onInitialized = jasmine.createSpy("onInitialized");
+            loadCallback = jasmine.createSpy("loadCallback");
+            transport.bind("initialized", onInitialized);
+
+            transport.initialize();
+            // after loading the resource, isInitialized will return true
+            hooks.isInitialized.andReturn(true);
+            // fire the callback for the resource file load
+            Dependencies.load.calls[0].args[2](null, loadCallback);
+          });
+
+          it("should transition to 'initialized'", function() {
+            expect(onInitialized).toHaveBeenCalled();
+            expect(transport.state).toEqual("initialized");
+          });
+
+          it("should call the load callback with true", function() {
+            expect(loadCallback).toHaveBeenCalledWith(true);
+          });
+        });
+
+        describe("after failing to load the resource", function() {
+          var onClosed;
+          var loadCallback;
+
+          beforeEach(function() {
+            onClosed = jasmine.createSpy("onClosed");
+            loadCallback = jasmine.createSpy("loadCallback");
+            transport.bind("closed", onClosed);
+
+            transport.initialize();
+            // after loading the resource, isInitialized will return true
+            hooks.isInitialized.andReturn(false);
+            // fire the callback for the resource file load
+            Dependencies.load.calls[0].args[2](null, loadCallback);
+          });
+
+          it("should transition to 'closed'", function() {
+            expect(onClosed).toHaveBeenCalled();
+            expect(transport.state).toEqual("closed");
+          });
+
+          it("should call the load callback with false", function() {
+            expect(loadCallback).toHaveBeenCalledWith(false);
+          });
+        });
+      }
+    });
+  });
+
+  describe("#connect", function() {
+    it("should not create a socket if not initialized", function() {
+      transport.connect();
+      expect(hooks.getSocket).not.toHaveBeenCalled();
+    });
+
+    it("should create a socket unencrypted socket by default", function() {
+      transport.initialize();
+      transport.connect();
+      expect(hooks.getSocket).toHaveBeenCalledWith(
+        "ws://test/foo", transport.options
+      );
+    });
+
+    it("should create an encrypted socket if specified", function() {
+      var transport = getTransport(hooks, "bar", {
+        timeline: timeline,
+        encrypted: true
+      });
+
+      transport.initialize();
+      transport.connect();
+      expect(hooks.getSocket).toHaveBeenCalledWith(
+        "wss://test/bar", transport.options
+      );
+    });
+
+    it("should not transition to 'connecting' if not initialized", function() {
+      var onConnecting = jasmine.createSpy("onConnecting");
+      transport.bind("connecting", onConnecting);
+
+      transport.connect();
+      expect(transport.state).toEqual("new");
+      expect(onConnecting).not.toHaveBeenCalled();
+    });
+
+    it("should transition to 'connecting'", function() {
+      var onConnecting = jasmine.createSpy("onConnecting");
+      transport.bind("connecting", onConnecting);
+
+      transport.initialize();
+      transport.connect();
+      expect(transport.state).toEqual("connecting");
+      expect(onConnecting.calls.length).toEqual(1);
+    });
+
+    it("should transition to 'open' after connection is established", function() {
+      var onOpen = jasmine.createSpy("onOpen");
+      transport.bind("open", onOpen);
+
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+
+      expect(transport.state).toEqual("open");
+      expect(onOpen.calls.length).toEqual(1);
+    });
+
+    it("should emit the error raised by getSocket", function() {
+      hooks.getSocket.andThrow("test exception");
+
+      var onError = jasmine.createSpy("onError");
+      transport.bind("error", onError);
+
+      runs(function() {
+        transport.initialize();
+        transport.connect();
+      });
+      waitsFor(function () {
+        return onError.calls.length > 0;
+      }, "error to be emitted", 50);
+      runs(function() {
+        expect(onError.calls.length).toEqual(1);
+        expect(onError).toHaveBeenCalledWith({
+          type: "WebSocketError",
+          error: "test exception"
+        });
+      });
+    });
+
+    it("should transition to 'closed' when getSocket raises an error", function() {
+      hooks.getSocket.andThrow("test exception");
+
+      var onClosed = jasmine.createSpy("onClosed");
+      transport.bind("closed", onClosed);
+
+      runs(function() {
+        transport.initialize();
+        transport.connect();
+      });
+      waitsFor(function () {
+        return onClosed.calls.length > 0;
+      }, "transitioning to 'closed'", 50);
+      runs(function() {
+        expect(onClosed.calls.length).toEqual(1);
+        expect(transport.state).toEqual("closed");
+      });
+    });
+
+    it("should be idempotent", function() {
+      transport.initialize();
+
+      transport.connect();
+      expect(hooks.getSocket.calls.length).toEqual(1);
+      expect(transport.state).toEqual("connecting");
+
+      var onConnecting = jasmine.createSpy("onConnecting");
+      transport.bind("connecting", onConnecting);
+
+      transport.connect();
+      expect(transport.state).toEqual("connecting");
+      expect(hooks.getSocket.calls.length).toEqual(1);
+      expect(onConnecting).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("#send", function() {
+    beforeEach(function() {
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+    });
+
+    it("should defer sending data to the socket", function() {
+      var sendCalled = false;
+      socket.send = jasmine.createSpy("send").andCallFake(function() {
+        sendCalled = true;
+      });
+
+      runs(function() {
+        expect(transport.send("foobar")).toBe(true);
+        expect(socket.send).not.toHaveBeenCalled();
+      });
+      waitsFor(function () {
+        return sendCalled;
+      }, "socket.send to be called", 50);
+      runs(function() {
+        expect(socket.send).toHaveBeenCalledWith("foobar");
+      });
+    });
+
+    it("should not crash when socket is closed before next tick (will log to console only)", function() {
+      var timer;
+      runs(function() {
+        transport.send("foobar");
+
+        transport.close();
+        socket.onclose({ wasClean: true });
+
+        timer = new Timer(100, function() {});
+      });
+      waitsFor(function () {
+        return !timer.isRunning();
+      }, "timer to run", 500);
+    });
+  });
+
+  describe("#ping", function() {
+    beforeEach(function() {
+    });
+
+    it("should call ping on the socket, if it supports it", function() {
+      var hooks = {
+        urls: urls,
+        supportsPing: true,
+        isInitialized: jasmine.createSpy().andReturn(true),
+        getSocket: jasmine.createSpy().andReturn(socket)
+      };
+      var transport = getTransport(hooks, "foo", {
+        timeline: timeline
+      });
+      socket.ping = jasmine.createSpy("ping");
+
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+
+      expect(socket.ping).not.toHaveBeenCalled();
+      transport.ping();
+      expect(socket.ping).toHaveBeenCalled();
+    });
+
+    it("should not fail if socket does not support ping", function() {
+      var hooks = {
+        urls: urls,
+        supportsPing: false,
+        isInitialized: jasmine.createSpy().andReturn(true),
+        getSocket: jasmine.createSpy().andReturn(socket)
+      };
+      var transport = getTransport(hooks, "foo", {
+        timeline: timeline
+      });
+
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+
+      transport.ping();
+    });
+  });
+
+  describe("#close", function() {
+    it("should call close on the socket and emit a 'closed' event", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      transport.bind("closed", onClosed);
+
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+
+      transport.close();
+      expect(socket.close).toHaveBeenCalled();
+      expect(onClosed).not.toHaveBeenCalled();
+
+      socket.onclose({ wasClean: true });
+      expect(onClosed).toHaveBeenCalledWith({ wasClean: true });
+    });
+
+    it("should not fail if not open", function() {
+      transport.close();
+    });
+  });
+
+  describe("after receiving a message", function() {
+    beforeEach(function() {
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+    });
+
+    it("should emit message event with received object", function() {
+      var onMessage = jasmine.createSpy("onMessage");
+      transport.bind("message", onMessage);
+
+      socket.onmessage("ugabuga");
+
+      expect(transport.state).toEqual("open");
+      expect(onMessage).toHaveBeenCalledWith("ugabuga");
+    });
+  });
+
+  describe("after receiving an activity event if the socket supports ping", function() {
+    var hooks;
+    var transport;
+
+    beforeEach(function() {
+      hooks = {
+        urls: urls,
+        supportsPing: true,
+        isInitialized: jasmine.createSpy().andReturn(true),
+        getSocket: jasmine.createSpy().andReturn(socket)
+      };
+      transport = getTransport(hooks, "foo", {
+        timeline: timeline
+      });
+
+      transport.initialize();
+      transport.connect();
+      socket.onopen();
+    });
+
+    it("should emit an 'activity' event", function() {
+      var onActivity = jasmine.createSpy("onActivity");
+      transport.bind("activity", onActivity);
+
+      socket.onactivity();
+      expect(onActivity).toHaveBeenCalled();
+    });
+  });
+
+  describe("after receiving an error", function() {
+    beforeEach(function() {
+      transport.initialize();
+      transport.connect();
+    });
+
+    it("should emit errors", function() {
+      var onError = jasmine.createSpy("onError");
+      transport.bind("error", onError);
+
+      socket.onerror({ test: "We're doomed" });
+
+      // should emit the whole error, not stringify it
+      expect(onError).toHaveBeenCalledWith({
+        type: "WebSocketError",
+        error: {
+          test: "We're doomed"
+        }
+      });
+      expect(onError.calls.length).toEqual(1);
+    });
+
+    it("should emit a closed event with correct params", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      transport.bind("closed", onClosed);
+
+      socket.onclose({
+        code: 1234,
+        reason: "testing",
+        wasClean: true,
+        foo: "bar"
+      });
+
+      expect(onClosed).toHaveBeenCalledWith({
+        code: 1234,
+        reason: "testing",
+        wasClean: true
+      });
+      expect(onClosed.calls.length).toEqual(1);
+      expect(transport.state).toEqual("closed");
+    });
+
+    it("should emit a closed events without params when no details were provided", function() {
+      var onClosed = jasmine.createSpy("onClosed");
+      transport.bind("closed", onClosed);
+
+      socket.onclose();
+
+      expect(onClosed).toHaveBeenCalledWith(undefined);
+      expect(onClosed.calls.length).toEqual(1);
+    });
+
+    it("should log an error as a string to timeline", function() {
+      socket.onerror({ toString: function() { return "error message"; }});
+      expect(timeline.error).toHaveBeenCalledWith({
+        cid: 667,
+        error: "error message"
+      });
+    });
+  });
+
+  describe("on state change", function () {
+    it("should log the new state to timeline", function() {
+      transport.initialize();
+
+      expect(timeline.info.calls.length).toEqual(2);
+      expect(timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        transport: "test"
+      });
+      expect(timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        state: "initialized"
+      });
+
+      transport.connect();
+
+      expect(timeline.info.calls.length).toEqual(3);
+      expect(timeline.info).toHaveBeenCalledWith({
+        cid: 667,
+        state: "connecting"
+      });
+    });
+  });
+});

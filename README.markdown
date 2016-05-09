@@ -12,7 +12,11 @@ They both include their own licences.
 
 The following topics are covered:
 
-* Installation
+* Supported runtimes and installation
+  * Web
+  * React Native
+  * Web Workers
+  * NodeJS
 * Configuration
 * Global configuration
 * Connection
@@ -25,15 +29,17 @@ The following topics are covered:
 
 ## Installation
 
-### CDN
+### Web
 
-Via the Pusher CDN:
+If you're using PusherJS on a web page, you can install the library via:
+
+#### CDN
 
 ```html
-<script src="//js.pusher.com/3.0/pusher.min.js"></script>
+<script src="//js.pusher.com/3.1/pusher.min.js"></script>
 ```
 
-### Bower
+#### Bower
 
 Or via [Bower](http://bower.io/):
 
@@ -44,14 +50,46 @@ bower install pusher
 and then
 
 ```html
-<script src="bower_components/pusher/dist/pusher.min.js"></script>
+<script src="bower_components/pusher/dist/web/pusher.min.js"></script>
 ```
 
-### NPM
+#### NPM
 
 ```bash
 npm install pusher-js
 ```
+
+Then simply call:
+
+```javascript
+var Pusher = require('pusher-js');
+```
+
+### React Native
+
+You can install `pusher-js` from NPM, then import the `react-native` path of PusherJS.
+
+```javascript
+import Pusher from 'pusher-js/react-native';
+```
+
+Notes:
+
+* The fallbacks available for this runtime are HTTP streaming and polling.
+* This build uses React Native's NetInfo API to detect changes on connectivity state. It will use this to automatically reconnect.
+
+### Web Workers
+
+You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the CDN:
+
+```javascript
+importScripts("https://js.pusher.com/3.1/pusher.worker.min.js");
+```
+
+Notes:
+
+* For standard `WebWorkers`, this build will use HTTP as a fallback.
+* For `ServiceWorkers`, as the `XMLHttpRequest` API is unavailable, there is currently no support for HTTP fallbacks. However, we are open to requests for fallbacks using `fetch` if there is demand.
 
 ## Initialization
 
@@ -125,7 +163,7 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 #### `enabledTransports` (Array)
 
-Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
+Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
 
 ```js
 // will only use WebSockets
@@ -134,7 +172,7 @@ var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
 
 #### `disabledTransports` (Array)
 
-Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
+Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
 
 ```js
 // will use all transports except for sockjs
@@ -167,7 +205,7 @@ Time before the connection is terminated after sending a ping message. Default i
 
 ### `Pusher.logToConsole` (Boolean)
 
-Enables logging to the browser console via calls to `window.console.log`.
+Enables logging to the browser console via calls to `console.log`.
 
 ### `Pusher.log` (Function)
 
@@ -327,28 +365,23 @@ There are a number of events which are used internally, but can also be of use e
 
 You can host JavaScript files yourself, but it's a bit more complicated than putting them somewhere and just linking `pusher.js` in the source of your website. Because pusher-js loads fallback files dynamically, the dependency loader must be configured correctly or it will be using `js.pusher.com`.
 
-First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 2.1.3 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URL's:
+First, clone this repository and run `npm install && git submodule init && git submodule update`. Then run:
 
-    http://example.com/pusher-js/2.1.3/pusher.js
-    http://example.com/pusher-js/2.1.3/json2.js
-    http://example.com/pusher-js/2.1.3/sockjs.js
+    $ CDN_HTTP='http://your.http.url' CDN_HTTPS='https://your.https.url' make web
 
-Minified files should have `.min` in names, as in the `dist` directory:
+In the `dist/web` folder, you should see the files you need: `pusher.js`, `pusher.min.js`, `json2.js`, `json.min.js`, `sockjs.js` and `sockjs.min.js`. `pusher.js` should be built referencing your URLs as the dependency hosts.
+
+First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 3.1.0 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URL's:
+
+    http://example.com/pusher-js/3.1.0/pusher.js
+    http://example.com/pusher-js/3.1.0/json2.js
+    http://example.com/pusher-js/3.1.0/sockjs.js
+
+Minified files should have `.min` in their names, as in the `dist/web` directory:
 
     http://example.com/pusher-js/2.1.3/pusher.min.js
     http://example.com/pusher-js/2.1.3/json2.min.js
     http://example.com/pusher-js/2.1.3/sockjs.min.js
-
-Then after loading `pusher.js`, but before connecting, you need to overwrite the dependency loader by executing following piece of code:
-
-```js
-Pusher.Dependencies = new Pusher.DependencyLoader({
-  cdn_http: "http://example.com/pusher-js/",
-  cdn_https: "https://example.com/pusher-js/",
-  version: Pusher.VERSION,
-  suffix: Pusher.dependency_suffix
-});
-```
 
 ## SockJS compatibility
 
@@ -358,137 +391,95 @@ All other browsers work fine with two or three connections.
 
 ## Developing
 
-Use Bundler to install all development dependencies
+Install all dependencies via NPM:
 
 ```bash
-bundle install
-```
-
-and create a local config file
-
-```bash
-cp config/config.yml.example config/config.yml # and edit
+npm install
 ```
 
 Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
 
 ```bash
-bundle exec jbundle server
+make serve
 ```
 
-In order to build the minified versions:
+You can optionally pass a `PORT` environment variable to run the server on a different port. You can also pass `CDN_HTTP` and `CDN_HTTPS` variables if you wish the library to load dependencies from a new host.
 
-```bash
-ENVIRONMENT=development rake build
+This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respective minified versions.
+
+## Core Vs. Platform-Specific Code
+
+New to PusherJS 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
+Web Workers.
+
+In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
+
+Throughout the `core/` directory you'll find this line:
+
+```javascript
+import Runtime from "runtime";
 ```
 
-If you wish to host the javascript on your own server you need to change [:js][:host] in `config.yml` and then rebuild.
+We use webpack module resolution to make the library look for different versions of this module depending on the build.
+
+For web it will look for `src/runtimes/web/runtime.ts`. For ReactNative, `src/runtimes/react-native/runtime.ts`. For Node:  `src/runtimes/node/runtime.ts`. For worker: `src/runtimes/worker/runtime.ts`.
+
+Each of these runtime files exports an object (conforming to the interface you can see in `src/runtimes/interface.ts`) that abstracts away everything platform-specific. The core library pulls this object in without any knowledge of how it implements it. This means web build can use the DOM underneath, the ReactNative build can use its native NetInfo API, Workers can use `fetch` and so on.
 
 ## Building
 
-You must first build `src/sockjs/sockjs.js`:
+In order to build SockJS, you must first initialize and update the Git submodule:
 
 ```bash
 git submodule init
 git submodule update
-pushd src/sockjs
-npm install
-make sockjs.js
-popd
 ```
 
-`./JFile` declares all bundles, src dir and target dir. See [https://github.com/ismasan/jbundle](https://github.com/ismasan/jbundle)
-Define the version number in JFile (should be in the format 1.2.3).
+Then simply run:
 
 ```bash
-bundle exec rake build
+make web
 ```
 
-That writes source and minified versions of each bundle declared in the JFile into versioned directories. For example if the JFile says
+This will build the source files relevant for the web build into `dist/web`.
 
-```rb
-version '1.7.1'
-```
+In order to specify the library version, you can either update `package.json` or pass a `VERSION` environment variable upon building.
 
-Then rake build will put copies of the files in ./dist/1.7.1/ and ./dist/1.7/
-
-However for a prerelease
-
-```rb
-version '1.7.2-pre'
-```
-
-It will only write to the full, suffixed directory ./dist/1.7.2-pre
-
-This is so prereleases don't overwrite the previous stable release.
-
-### Clean builds
-
-Building everything from scratch is useful when you update submodules, which need compiling. If you want to perform a clean build, run:
+Other build commands include:
 
 ```bash
-bin/build
+make react-native # for the React Native build
+make node         # for the NodeJS build
+make worker       # for the worker build
 ```
-
-This will clean sockjs-client submodule, check out last committed revision, rebuild SockJS fallback files and then run JBundle. Don't run this command if you have uncommitted changes in any of submodules, since it might overwrite them.
 
 ## Testing
 
-### Jasmine
-
-Jasmine test suite contains two types of tests:
+Each test environment contains two types of tests:
 
 1. unit tests,
 2. integration tests.
 
 Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
 
-There are several ways to run jasmine tests. All commands mentioned below also start a JBundle server, which is required for integration tests.
+There are 3 different testing environments: one for web, one for NodeJS and one for workers. We may consider adding another one for React Native in the future.
 
-Please make sure you run bundler before running any of following commands.
+The web and worker tests use [Karma](https://github.com/karma-runner/karma) to execute specs in real browsers. The NodeJS tests use [jasmine-node](https://github.com/mhevery/jasmine-node).
 
-```bash
-bundle install
-```
-
-#### Run tests manually in a browser
-
-First, start the jasmine and JSONP integration servers:
+To run the tests:
 
 ```bash
-bin/jasmine
+# For web
+make web_unit
+make web_integration
+
+# For NodeJS
+make node_unit
+make node_integration
+
+# For workers
+make worker_unit
+make worker_integration
 ```
 
-Then open any browser and navigate to <http://localhost:8888/> - it will run both unit and integration tests.
-
-#### Run headless tests
-
-Running headless tests is very convenient for development, especially when using guard. Make sure you have PhantomJS installed - you can use `brew install phantomjs` on OS X. Start jasmine and guard:
-
-```bash
-bin/guard
-```
-
-Tests will be run automatically in the terminal. Guard watches JS files and specs and re-runs aproppriate tests whenever you save any changes. Press enter to re-run all tests.
-
-Guard runs only unit tests - partially because PhantomJS does not support WebSockets, partially for convenience.
-
-There's also a JSHint watch, which will validate JS files on save.
-
-#### Run karma
-
-Testacular also runs tests automatically, but it uses actual browsers to execute them. First, install karma npm modules
-
-```bash
-npm install
-```
-
-Then start the server, run one of following commands:
-
-```bash
-bin/karma-unit           # runs only unit tests
-bin/karma-integration    # runs only integration tests
-bin/karma                # runs both unit and integration tests
-```
-
-All configured browsers will be automatically opened and will run all tests. Testacular also re-executes all specs on file changes. After you close the server, browsers will get shut down too.
+If you want your Karma tests to automatically reload, then in `spec/karma/config.common.js` set `singleRun` to `false`.

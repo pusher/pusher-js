@@ -1,37 +1,60 @@
 {
   "name": "pusher-js",
-  "version": "3.0.0",
-  "description": "Pusher JavaScript library for the browser",
-  "main": "dist/pusher.js",
+  "version": "3.1.0-pre7",
+  "description": "Pusher JavaScript library for browser, React Native, NodeJS and web workers",
+  "main": "dist/web/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pusher/pusher-js.git"
+    "url": "https://github.com/pusher-community/pusher-websocket-js-iso.git"
   },
   "keywords": [
     "pusher",
+    "client",
     "websocket",
     "http",
     "fallback",
+    "isomorphic",
     "events",
     "pubsub"
   ],
   "author": "Pusher",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pusher/pusher-js/issues"
+    "url": "https://github.com/pusher-community/pusher-websocket-js-iso/issues"
   },
-  "homepage": "https://github.com/pusher/pusher-js",
+  "homepage": "https://github.com/pusher-community/pusher-websocket-js-iso",
   "devDependencies": {
+    "es3ify-loader": "^0.2.0",
+    "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
+    "isomorphic-fetch": "^2.2.1",
+    "jasmine-node": "^1.14.5",
+    "jasmine-spec-reporter": "^1.2.0",
     "jshint": "~2.6.3",
-    "karma": "~0.12.0",
-    "karma-jasmine": "~0.1.0",
+    "karma": "^0.13.18",
+    "karma-browserstack-launcher": "^0.1.11",
     "karma-chrome-launcher": "^0.1.7",
     "karma-coverage": "^0.2.7",
     "karma-firefox-launcher": "^0.1.4",
+    "karma-jasmine": "~0.1.0",
+    "karma-jasmine-web-worker": "^0.1.2",
     "karma-opera-launcher": "^0.1.0",
-    "karma-safari-launcher": "^0.1.1"
+    "karma-safari-launcher": "^0.1.1",
+    "karma-spec-reporter": "0.0.24",
+    "karma-verbose-reporter": "0.0.3",
+    "karma-webpack": "^1.7.0",
+    "object-assign-deep": "0.0.4",
+    "string-replace-webpack-plugin": "0.0.3",
+    "typescript": "^1.8.0",
+    "uglify-js": "^2.6.2",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.1"
+  },
+  "dependencies": {
+    "faye-websocket": "0.9.4",
+    "ts-loader": "^0.8.1",
+    "xmlhttprequest": "^1.8.0"
   }
 }
