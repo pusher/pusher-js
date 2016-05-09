@@ -30,6 +30,10 @@ export default class HTTPRequest extends EventsDispatcher {
     Runtime.addUnloadListener(this.unloader);
 
     this.xhr.open(this.method, this.url, true);
+
+    if (this.xhr.setRequestHeader) {
+      this.xhr.setRequestHeader("Content-Type", "application/json"); // ReactNative doesn't set this header by default.
+    }
     this.xhr.send(payload);
   }
 

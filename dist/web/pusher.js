@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.1.0-pre4
+ * Pusher JavaScript Library v3.1.0-pre7
  * http://pusher.com/
  *
  * Copyright 2016, Pusher
@@ -451,7 +451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.1.0-pre4",
+	    VERSION: "3.1.0-pre7",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
@@ -1916,6 +1916,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	        runtime_1["default"].addUnloadListener(this.unloader);
 	        this.xhr.open(this.method, this.url, true);
+	        if (this.xhr.setRequestHeader) {
+	            this.xhr.setRequestHeader("Content-Type", "application/json");
+	        }
 	        this.xhr.send(payload);
 	    };
 	    HTTPRequest.prototype.close = function () {
