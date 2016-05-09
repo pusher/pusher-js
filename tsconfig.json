@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "commonjs",
     "outDir": "lib/",
-    "declaration": true,
+    "declaration": false,
     "sourceMap": true,
     "target": "es3",
     "removeComments": true
