@@ -5,7 +5,7 @@ build_all: web react-native node worker
 sockjs:
 	pushd src/runtimes/web/dom/sockjs && \
 	npm install &&  \
-	make &&  \
+	make build &&  \
 	popd
 
 json2:
