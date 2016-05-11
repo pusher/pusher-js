@@ -86,6 +86,14 @@ You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the 
 importScripts("https://js.pusher.com/3.1/pusher.worker.min.js");
 ```
 
+### NodeJS
+
+Having installed `pusher-js` via NPM, simply call:
+
+```javascript
+var Pusher = require('pusher-js/node');
+```
+
 Notes:
 
 * For standard `WebWorkers`, this build will use HTTP as a fallback.
