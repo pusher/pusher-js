@@ -10,6 +10,8 @@
 
 [CHANGED] Monkey-patching the DependencyLoader when self-hosting no longer supported. New steps in README.
 
+[CHANGED] HTTP fallbacks are now included as part of the main file and are not therefore dynamically loaded.
+
 [INTERNAL] Ported to TypeScript.
 
 [INTERNAL] The library is split into a core directory and a runtimes directory to make a separation between platform-independent and platform-specific code.
