@@ -4,6 +4,7 @@ export interface DefaultConfig {
   host: string;
   ws_port: number;
   wss_port: number;
+  ws_path: string;
   sockjs_host: string;
   sockjs_http_port: number;
   sockjs_https_port: number;
@@ -28,6 +29,7 @@ var Defaults : DefaultConfig = {
   host: 'ws.pusherapp.com',
   ws_port: 80,
   wss_port: 443,
+  ws_path: '',
   // DEPRECATED: SockJS fallback parameters
   sockjs_host: 'sockjs.pusher.com',
   sockjs_http_port: 80,

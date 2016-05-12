@@ -18,7 +18,8 @@ var getDefaultStrategy = function(config) {
   return [
     [":def", "ws_options", {
       hostUnencrypted: config.wsHost + ":" + config.wsPort,
-      hostEncrypted: config.wsHost + ":" + config.wssPort
+      hostEncrypted: config.wsHost + ":" + config.wssPort,
+      httpPath: config.wsPath
     }],
     [":def", "wss_options", [":extend", ":ws_options", {
       encrypted: true

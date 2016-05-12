@@ -5,6 +5,7 @@ export var getGlobalConfig = function() {
     wsHost: Defaults.host,
     wsPort: Defaults.ws_port,
     wssPort: Defaults.wss_port,
+    wsPath: Defaults.ws_path,
     httpHost: Defaults.sockjs_host,
     httpPort: Defaults.sockjs_http_port,
     httpsPort: Defaults.sockjs_https_port,
