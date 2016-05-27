@@ -356,7 +356,27 @@ channel.unbind(); // removes all handlers on `channel`
 
 ### Binding to everything
 
-It is possible to bind to all events at either the global or channel level by using the method `bind_all`. This is used for debugging, but may have other utilities.
+It is possible to bind to all events, rather than specifying the event name, using the method `bind_all`. This can be used for debugging, but may have other utilities.
+
+This binding can be done for a single channel or for all subscribed channels. Here is how to bind to all events on a single channel:
+
+```javascript
+var channel = pusher.subscribe('test_channel');
+channel.bind_all(function(eventName, data) {
+  console.log("Received event on channel test_channel event with name", eventName, "and data", data);
+});
+```
+
+To bind to all events on all subscribed channels, instead call `pusher.bind_all`:
+
+```javascript
+pusher.bind_all(function(eventName, data) {
+  console.log("Received event with name", eventName, "and data", data);
+});
+```
+
+(Note that this will only work if the event is sent on a subscribed channel. Also note that this does not tell your callback which subscribed channel the event was sent on.)
+
 
 ## Batching auth requests (aka multi-auth)
 
