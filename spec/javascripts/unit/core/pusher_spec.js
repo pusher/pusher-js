@@ -391,6 +391,21 @@ describe("Pusher", function() {
     });
   });
 
+  describe("#unbind", function() {
+    it("should allow a globally bound callback to be removed", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      pusher.bind("event", onEvent);
+      pusher.unbind("event", onEvent);
+
+      pusher.connection.emit("message", {
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
+      });
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+  });
+
   describe("#disconnect", function() {
     it("should call disconnect on connection manager", function() {
       var pusher = new Pusher("foo");

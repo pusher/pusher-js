@@ -191,6 +191,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.global_emitter.bind(event_name, callback);
 	        return this;
 	    };
+	    Pusher.prototype.unbind = function (event_name, callback) {
+	        this.global_emitter.unbind(event_name, callback);
+	        return this;
+	    };
 	    Pusher.prototype.bind_all = function (callback) {
 	        this.global_emitter.bind_all(callback);
 	        return this;
