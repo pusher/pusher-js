@@ -47,6 +47,7 @@
     "karma-webpack": "^1.7.0",
     "object-assign-deep": "0.0.4",
     "string-replace-webpack-plugin": "0.0.3",
+    "ts-loader": "^0.8.2",
     "typescript": "^1.8.0",
     "uglify-js": "^2.6.2",
     "webpack": "^1.12.9",
@@ -54,7 +55,6 @@
   },
   "dependencies": {
     "faye-websocket": "0.9.4",
-    "ts-loader": "^0.8.1",
     "xmlhttprequest": "^1.8.0"
   }
 }
