@@ -50,7 +50,7 @@ bower install pusher
 and then
 
 ```html
-<script src="bower_components/pusher/dist/web/pusher.min.js"></script>
+<script src="bower_components/pusher-websocket-iso/dist/web/pusher.js"></script>
 ```
 
 #### NPM
