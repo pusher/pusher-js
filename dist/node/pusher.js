@@ -495,7 +495,7 @@ module.exports =
 	function encodeParamsObject(data) {
 	    return mapObject(data, function (value) {
 	        if (typeof value === "object") {
-	            value = JSON.stringify(value);
+	            value = safeJSONStringify(value);
 	        }
 	        return encodeURIComponent(base64_1["default"](value.toString()));
 	    });
@@ -520,7 +520,6 @@ module.exports =
 	        }
 	        return value;
 	    });
-	    cache = null;
 	    return serialized;
 	}
 	exports.safeJSONStringify = safeJSONStringify;
@@ -1115,14 +1114,14 @@ module.exports =
 	        if (!pusher_1["default"].log) {
 	            return;
 	        }
-	        pusher_1["default"].log(collections_1.stringify.apply(this, arguments));
+	        pusher_1["default"].log(collections_1.safeJSONStringify.apply(this, arguments));
 	    },
 	    warn: function () {
 	        var args = [];
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            args[_i - 0] = arguments[_i];
 	        }
-	        var message = collections_1.stringify.apply(this, arguments);
+	        var message = collections_1.safeJSONStringify.apply(this, arguments);
 	        var global = Function("return this")();
 	        if (global.console) {
 	            if (global.console.warn) {

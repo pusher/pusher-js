@@ -258,7 +258,7 @@ export function all(array : any[], test : Function) : boolean {
 export function encodeParamsObject(data) : string {
   return mapObject(data, function(value) {
     if (typeof value === "object") {
-      value = JSON.stringify(value);
+      value = safeJSONStringify(value);
     }
     return encodeURIComponent(base64encode(value.toString()));
   });
@@ -290,6 +290,5 @@ export function safeJSONStringify(source : any) : string {
     }
     return value;
   });
-  cache = null; // Enable garbage collection
   return serialized;
 }

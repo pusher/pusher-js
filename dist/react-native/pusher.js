@@ -493,7 +493,7 @@ module.exports =
 	function encodeParamsObject(data) {
 	    return mapObject(data, function (value) {
 	        if (typeof value === "object") {
-	            value = JSON.stringify(value);
+	            value = safeJSONStringify(value);
 	        }
 	        return encodeURIComponent(base64_1["default"](value.toString()));
 	    });
@@ -518,7 +518,6 @@ module.exports =
 	        }
 	        return value;
 	    });
-	    cache = null;
 	    return serialized;
 	}
 	exports.safeJSONStringify = safeJSONStringify;
