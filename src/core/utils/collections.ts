@@ -290,6 +290,5 @@ export function safeJSONStringify(source : any) : string {
     }
     return value;
   });
-  cache = null; // Enable garbage collection
   return serialized;
 }
