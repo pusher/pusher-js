@@ -10,7 +10,6 @@ const Logger = {
   },
   warn(...args : any[]) {
     var message = safeJSONStringify.apply(this, arguments);
-    const global = Function("return this")();
     if (global.console) {
       if (global.console.warn) {
         global.console.warn(message);

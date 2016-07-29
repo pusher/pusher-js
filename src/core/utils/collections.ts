@@ -1,6 +1,5 @@
 import base64encode from '../base64';
 import Util from '../util';
-const global = Function("return this")();
 
 /** Merges multiple objects into the target argument.
 *

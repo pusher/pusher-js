@@ -21,7 +21,12 @@ var config = objectAssign(require('./config.shared'),{
   },
   resolve: {
     modulesDirectories: ['src/', 'src/runtimes/web', 'src/runtimes']
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      global: "window"
+    })
+  ]
 });
 
 module.exports = config;

@@ -39,7 +39,6 @@ export default class Pusher {
   }
 
   static log(message : any) {
-    const global = Function("return this")();
     if (Pusher.logToConsole && global.console && global.console.log) {
       global.console.log(message);
     }
