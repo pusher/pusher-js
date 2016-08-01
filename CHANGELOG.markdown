@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.2.0 (2016-08-01)
+
+[FIXED] CSP Issue with 3.1 in Chrome extension background context. #168
+
+[FIXED] Stringifying circular JSON structures for React Native. #182
+
+[NEW] Add a new global unbind method.
+
+[INTERNAL] Uses webpack define plugin to specify the global for each runtime.
+
 ## 3.1.0 (2016-05-08)
 
 [NEW] New builds for ReactNative, NodeJS and Web Workers. The first two are available on NPM. The last is available as a download.
