@@ -301,9 +301,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    getProtocol: function () {
 	        return this.getDocument().location.protocol;
 	    },
-	    getGlobal: function () {
-	        return window;
-	    },
 	    getAuthorizers: function () {
 	        return { ajax: xhr_auth_1["default"], jsonp: jsonp_auth_1["default"] };
 	    },
@@ -890,9 +887,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var timers_1 = __webpack_require__(12);
 	var Util = {
-	    getGlobal: function () {
-	        return Function("return this")();
-	    },
 	    now: function () {
 	        if (Date.now) {
 	            return Date.now();
@@ -930,12 +924,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var abstract_timer_1 = __webpack_require__(13);
-	var global = Function("return this")();
 	function clearTimeout(timer) {
-	    global.clearTimeout(timer);
+	    (window).clearTimeout(timer);
 	}
 	function clearInterval(timer) {
-	    global.clearInterval(timer);
+	    (window).clearInterval(timer);
 	}
 	var OneOffTimer = (function (_super) {
 	    __extends(OneOffTimer, _super);
