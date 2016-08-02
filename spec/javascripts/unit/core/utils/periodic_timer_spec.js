@@ -1,6 +1,5 @@
 var Timers = require('core/utils/timers');
 var PeriodicTimer = Timers.PeriodicTimer;
-var global = require('runtime').default.getGlobal();
 
 describe("PeriodicTimer", function() {
   var callback;

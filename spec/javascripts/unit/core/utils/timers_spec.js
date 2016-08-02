@@ -1,5 +1,4 @@
 var timers = require('core/utils/timers');
-var global = require('runtime').default.getGlobal();
 
 describe("timers", function() {
   describe("Timer", function() {
