@@ -17,10 +17,6 @@ var Isomorphic : any = {
     PusherClass.ready();
   },
 
-  getGlobal() : any {
-    return Function("return this")();
-  },
-
   getLocalStorage() : any {
     return undefined;
   },

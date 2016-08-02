@@ -3,11 +3,6 @@ import TimedCallback from "./utils/timers/timed_callback";
 import {OneOffTimer, PeriodicTimer} from "./utils/timers";
 
 var Util = {
-
-  getGlobal() : any {
-    return Function("return this")();
-  },
-
   now() : number {
     if (Date.now) {
       return Date.now();

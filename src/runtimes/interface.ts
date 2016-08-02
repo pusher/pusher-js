@@ -22,7 +22,6 @@ interface Runtime {
     ready() : void;
   }) : void;
   getProtocol() : string;
-  getGlobal() : any;
   getAuthorizers() : AuthTransports;
   getLocalStorage() : any;
   TimelineTransport: TimelineTransport;
