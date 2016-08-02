@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.1 (2016-08-02)
+
+[FIXED] Removes instances of evalling for global scope in timers module.
+
 ## 3.2.0 (2016-08-01)
 
 [FIXED] CSP Issue with 3.1 in Chrome extension background context. #168
