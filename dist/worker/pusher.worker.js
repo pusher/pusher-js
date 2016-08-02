@@ -145,9 +145,8 @@ var Pusher =
 	        }
 	    };
 	    Pusher.log = function (message) {
-	        var global = Function("return this")();
-	        if (Pusher.logToConsole && global.console && global.console.log) {
-	            global.console.log(message);
+	        if (Pusher.logToConsole && (self).console && (self).console.log) {
+	            (self).console.log(message);
 	        }
 	    };
 	    Pusher.getClientFeatures = function () {
@@ -347,7 +346,6 @@ var Pusher =
 	"use strict";
 	var base64_1 = __webpack_require__(5);
 	var util_1 = __webpack_require__(6);
-	var global = Function("return this")();
 	function extend(target) {
 	    var sources = [];
 	    for (var _i = 1; _i < arguments.length; _i++) {
@@ -375,7 +373,7 @@ var Pusher =
 	            m.push(arguments[i]);
 	        }
 	        else {
-	            m.push(JSON.stringify(arguments[i]));
+	            m.push(safeJSONStringify(arguments[i]));
 	        }
 	    }
 	    return m.join(" : ");
@@ -423,7 +421,7 @@ var Pusher =
 	exports.values = values;
 	function apply(array, f, context) {
 	    for (var i = 0; i < array.length; i++) {
-	        f.call(context || global, array[i], i, array);
+	        f.call(context || (self), array[i], i, array);
 	    }
 	}
 	exports.apply = apply;
@@ -507,28 +505,61 @@ var Pusher =
 	    return query;
 	}
 	exports.buildQueryString = buildQueryString;
-	function safeJSONStringify(source) {
-	    var cache = [];
-	    var serialized = JSON.stringify(source, function (key, value) {
-	        if (typeof value === 'object' && value !== null) {
-	            if (cache.indexOf(value) !== -1) {
-	                return;
-	            }
-	            cache.push(value);
+	function decycleObject(object) {
+	    var objects = [], paths = [];
+	    return (function derez(value, path) {
+	        var i, name, nu;
+	        switch (typeof value) {
+	            case 'object':
+	                if (!value) {
+	                    return null;
+	                }
+	                for (i = 0; i < objects.length; i += 1) {
+	                    if (objects[i] === value) {
+	                        return { $ref: paths[i] };
+	                    }
+	                }
+	                objects.push(value);
+	                paths.push(path);
+	                if (Object.prototype.toString.apply(value) === '[object Array]') {
+	                    nu = [];
+	                    for (i = 0; i < value.length; i += 1) {
+	                        nu[i] = derez(value[i], path + '[' + i + ']');
+	                    }
+	                }
+	                else {
+	                    nu = {};
+	                    for (name in value) {
+	                        if (Object.prototype.hasOwnProperty.call(value, name)) {
+	                            nu[name] = derez(value[name], path + '[' + JSON.stringify(name) + ']');
+	                        }
+	                    }
+	                }
+	                return nu;
+	            case 'number':
+	            case 'string':
+	            case 'boolean':
+	                return value;
 	        }
-	        return value;
-	    });
-	    return serialized;
+	    }(object, '$'));
+	}
+	exports.decycleObject = decycleObject;
+	function safeJSONStringify(source) {
+	    try {
+	        return JSON.stringify(source);
+	    }
+	    catch (e) {
+	        return JSON.stringify(decycleObject(source));
+	    }
 	}
 	exports.safeJSONStringify = safeJSONStringify;
 
 
 /***/ },
 /* 5 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
-	var global = Function("return this")();
 	function encode(s) {
 	    return btoa(utob(s));
 	}
@@ -565,7 +596,7 @@ var Pusher =
 	    ];
 	    return chars.join('');
 	};
-	var btoa = global.btoa || function (b) {
+	var btoa = (self).btoa || function (b) {
 	    return b.replace(/[\s\S]{1,3}/g, cb_encode);
 	};
 
@@ -992,7 +1023,6 @@ var Pusher =
 
 	"use strict";
 	var callback_registry_1 = __webpack_require__(15);
-	var global = Function("return this")();
 	var Dispatcher = (function () {
 	    function Dispatcher(failThrough) {
 	        this.callbacks = new callback_registry_1["default"]();
@@ -1023,7 +1053,7 @@ var Pusher =
 	        var callbacks = this.callbacks.get(eventName);
 	        if (callbacks && callbacks.length > 0) {
 	            for (i = 0; i < callbacks.length; i++) {
-	                callbacks[i].fn.call(callbacks[i].context || global, data);
+	                callbacks[i].fn.call(callbacks[i].context || (self), data);
 	            }
 	        }
 	        else if (this.failThrough) {
@@ -1112,21 +1142,20 @@ var Pusher =
 	        if (!pusher_1["default"].log) {
 	            return;
 	        }
-	        pusher_1["default"].log(collections_1.safeJSONStringify.apply(this, arguments));
+	        pusher_1["default"].log(collections_1.stringify.apply(this, arguments));
 	    },
 	    warn: function () {
 	        var args = [];
 	        for (var _i = 0; _i < arguments.length; _i++) {
 	            args[_i - 0] = arguments[_i];
 	        }
-	        var message = collections_1.safeJSONStringify.apply(this, arguments);
-	        var global = Function("return this")();
-	        if (global.console) {
-	            if (global.console.warn) {
-	                global.console.warn(message);
+	        var message = collections_1.stringify.apply(this, arguments);
+	        if ((self).console) {
+	            if ((self).console.warn) {
+	                (self).console.warn(message);
 	            }
-	            else if (global.console.log) {
-	                global.console.log(message);
+	            else if ((self).console.log) {
+	                (self).console.log(message);
 	            }
 	        }
 	        if (pusher_1["default"].log) {
@@ -3138,12 +3167,7 @@ var Pusher =
 	        var onClosed = function () {
 	            unbindListeners();
 	            var serializedTransport;
-	            try {
-	                serializedTransport = JSON.stringify(transport);
-	            }
-	            catch (e) {
-	                serializedTransport = Collections.safeJSONStringify(transport);
-	            }
+	            serializedTransport = Collections.safeJSONStringify(transport);
 	            callback(new Errors.TransportClosed(serializedTransport));
 	        };
 	        var unbindListeners = function () {
@@ -3368,6 +3392,7 @@ var Pusher =
 	var util_1 = __webpack_require__(6);
 	var runtime_1 = __webpack_require__(2);
 	var sequential_strategy_1 = __webpack_require__(48);
+	var Collections = __webpack_require__(4);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
 	        this.strategy = strategy;
@@ -3452,7 +3477,7 @@ var Pusher =
 	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
-	            storage[getTransportCacheKey(encrypted)] = JSON.stringify({
+	            storage[getTransportCacheKey(encrypted)] = Collections.safeJSONStringify({
 	                timestamp: util_1["default"].now(),
 	                transport: transport,
 	                latency: latency
