@@ -2,8 +2,6 @@ import Timer from "./abstract_timer";
 import TimedCallback from "./timed_callback";
 import {Delay} from "./scheduling";
 
-var global = Function("return this")();
-
 // We need to bind clear functions this way to avoid exceptions on IE8
 function clearTimeout(timer) {
   global.clearTimeout(timer);

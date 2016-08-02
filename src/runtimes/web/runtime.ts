@@ -60,10 +60,6 @@ var Runtime : Browser = {
     return this.getDocument().location.protocol;
   },
 
-  getGlobal() : any {
-    return window;
-  },
-
   getAuthorizers() : AuthTransports {
     return {ajax: xhrAuth, jsonp: jsonpAuth};
   },

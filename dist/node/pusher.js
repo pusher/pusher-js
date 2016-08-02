@@ -251,7 +251,7 @@ module.exports =
 	var net_info_1 = __webpack_require__(28);
 	var xhr_auth_1 = __webpack_require__(29);
 	var xhr_timeline_1 = __webpack_require__(30);
-	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, setup = runtime_1["default"].setup, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getGlobal = runtime_1["default"].getGlobal, getLocalStorage = runtime_1["default"].getLocalStorage, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
+	var getDefaultStrategy = runtime_1["default"].getDefaultStrategy, Transports = runtime_1["default"].Transports, setup = runtime_1["default"].setup, getProtocol = runtime_1["default"].getProtocol, isXHRSupported = runtime_1["default"].isXHRSupported, getLocalStorage = runtime_1["default"].getLocalStorage, createXHR = runtime_1["default"].createXHR, createWebSocket = runtime_1["default"].createWebSocket, addUnloadListener = runtime_1["default"].addUnloadListener, removeUnloadListener = runtime_1["default"].removeUnloadListener, transportConnectionInitializer = runtime_1["default"].transportConnectionInitializer, createSocketRequest = runtime_1["default"].createSocketRequest, HTTPFactory = runtime_1["default"].HTTPFactory;
 	var NodeJS = {
 	    getDefaultStrategy: getDefaultStrategy,
 	    Transports: Transports,
@@ -259,7 +259,6 @@ module.exports =
 	    getProtocol: getProtocol,
 	    isXHRSupported: isXHRSupported,
 	    createSocketRequest: createSocketRequest,
-	    getGlobal: getGlobal,
 	    getLocalStorage: getLocalStorage,
 	    createXHR: createXHR,
 	    createWebSocket: createWebSocket,
@@ -302,9 +301,6 @@ module.exports =
 	    HTTPFactory: http_1["default"],
 	    setup: function (PusherClass) {
 	        PusherClass.ready();
-	    },
-	    getGlobal: function () {
-	        return Function("return this")();
 	    },
 	    getLocalStorage: function () {
 	        return undefined;
@@ -610,9 +606,6 @@ module.exports =
 	"use strict";
 	var timers_1 = __webpack_require__(7);
 	var Util = {
-	    getGlobal: function () {
-	        return Function("return this")();
-	    },
 	    now: function () {
 	        if (Date.now) {
 	            return Date.now();
@@ -650,7 +643,6 @@ module.exports =
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var abstract_timer_1 = __webpack_require__(8);
-	var global = Function("return this")();
 	function clearTimeout(timer) {
 	    global.clearTimeout(timer);
 	}
