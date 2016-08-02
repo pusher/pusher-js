@@ -1,4 +1,4 @@
-import {safeJSONStringify} from './utils/collections';
+import {stringify} from './utils/collections';
 import Pusher from './pusher';
 
 const Logger = {
@@ -6,11 +6,10 @@ const Logger = {
     if (!Pusher.log) {
       return
     }
-    Pusher.log(safeJSONStringify.apply(this, arguments));
+    Pusher.log(stringify.apply(this, arguments));
   },
   warn(...args : any[]) {
-    var message = safeJSONStringify.apply(this, arguments);
-    const global = Function("return this")();
+    var message = stringify.apply(this, arguments);
     if (global.console) {
       if (global.console.warn) {
         global.console.warn(message);

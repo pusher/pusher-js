@@ -2,6 +2,7 @@ var path = require("path");
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
+var webpack = require('webpack');
 
 /*
   Upon importing the 'runtime' module, this worker build is made to look at
@@ -20,7 +21,12 @@ var config = objectAssign(require('./config.shared'),{
   },
   resolve: {
     modulesDirectories: ['src/', 'src/runtimes/worker', 'src/runtimes']
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      global: "self"
+    })
+  ]
 });
 
 /*

@@ -1,5 +1,3 @@
-const global = Function("return this")();
-
 export default function encode (s : any) : string {
   return btoa(utob(s));
 }

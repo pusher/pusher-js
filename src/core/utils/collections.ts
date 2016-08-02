@@ -1,6 +1,5 @@
 import base64encode from '../base64';
 import Util from '../util';
-const global = Function("return this")();
 
 /** Merges multiple objects into the target argument.
 *
@@ -39,7 +38,7 @@ export function stringify() : string {
     if (typeof arguments[i] === "string") {
       m.push(arguments[i]);
     } else {
-      m.push(JSON.stringify(arguments[i]));
+      m.push(safeJSONStringify(arguments[i]));
     }
   }
   return m.join(" : ");
@@ -277,18 +276,72 @@ export function buildQueryString(data : any) : string {
   return query;
 }
 
-export function safeJSONStringify(source : any) : string {
-  var cache = [];
-  var serialized = JSON.stringify(source, function(key, value) {
-    if (typeof value === 'object' && value !== null) {
-      if (cache.indexOf(value) !== -1) {
-          // Circular reference found, discard key
-          return;
+/**
+ * See https://github.com/douglascrockford/JSON-js/blob/master/cycle.js
+ *
+ * Remove circular references from an object. Required for JSON.stringify in
+ * React Native, which tends to blow up a lot.
+ *
+ * @param  {any} object
+ * @return {any}        Decycled object
+ */
+export function decycleObject(object : any) : any {
+  var objects = [],
+  paths = [];
+
+  return (function derez(value, path) {
+    var i, name, nu;
+
+    switch (typeof value) {
+      case 'object':
+      if (!value) {
+        return null;
       }
-      // Store value in our collection
-      cache.push(value);
+      for (i = 0; i < objects.length; i += 1) {
+        if (objects[i] === value) {
+          return {$ref: paths[i]};
+        }
+      }
+
+      objects.push(value);
+      paths.push(path);
+
+      if (Object.prototype.toString.apply(value) === '[object Array]') {
+        nu = [];
+        for (i = 0; i < value.length; i += 1) {
+          nu[i] = derez(value[i], path + '[' + i + ']');
+        }
+      } else {
+        nu = {};
+        for (name in value) {
+          if (Object.prototype.hasOwnProperty.call(value, name)) {
+            nu[name] = derez(value[name],
+              path + '[' + JSON.stringify(name) + ']');
+          }
+        }
+      }
+      return nu;
+      case 'number':
+      case 'string':
+      case 'boolean':
+      return value;
     }
-    return value;
-  });
-  return serialized;
+  }(object, '$'));
+}
+
+
+/**
+ * Provides a cross-browser and cross-platform way to safely stringify objects
+ * into JSON. This is particularly necessary for ReactNative, where circular JSON
+ * structures throw an exception.
+ *
+ * @param  {any}    source The object to stringify
+ * @return {string}        The serialized output.
+ */
+export function safeJSONStringify(source : any) : string {
+  try {
+    return JSON.stringify(source)
+  } catch (e) {
+    return JSON.stringify(decycleObject(source));
+  }
 }

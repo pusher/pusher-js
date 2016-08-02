@@ -79,11 +79,7 @@ export default class TransportStrategy implements Strategy {
       // the WebSocket object is circular. Therefore transport.socket will
       // throw errors upon stringification. Collections.safeJSONStringify
       // discards circular references when serializing.
-      try {
-        serializedTransport = JSON.stringify(transport);
-      } catch (e) {
-        serializedTransport = Collections.safeJSONStringify(transport);
-      }
+      serializedTransport = Collections.safeJSONStringify(transport);
       callback(new Errors.TransportClosed(serializedTransport));
     };
 

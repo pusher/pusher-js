@@ -54,7 +54,7 @@ var config = {
 if (process.env.CI === 'full') {
   config.browsers = Object.keys(config.customLaunchers);
 } else {
-  config.browsers = ['bs_ie7', 'bs_ie8', 'bs_chrome_49'];
+  config.browsers = ['bs_ie7', 'bs_ie8', 'bs_opera_12_15'];
 }
 
 module.exports = config;

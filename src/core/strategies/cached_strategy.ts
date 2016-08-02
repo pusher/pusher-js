@@ -4,7 +4,8 @@ import Strategy from './strategy';
 import SequentialStrategy from './sequential_strategy';
 import StrategyOptions from "./strategy_options";
 import TransportStrategy from './transport_strategy';
-import Timeline from '../timeline/timeline'
+import Timeline from '../timeline/timeline';
+import * as Collections from '../utils/collections';
 
 /** Caches last successful transport and uses it for following attempts.
  *
@@ -111,7 +112,7 @@ function storeTransportCache(encrypted : boolean, transport : TransportStrategy,
   var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
-      storage[getTransportCacheKey(encrypted)] = JSON.stringify({
+      storage[getTransportCacheKey(encrypted)] = Collections.safeJSONStringify({
         timestamp: Util.now(),
         transport: transport,
         latency: latency
