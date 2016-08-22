@@ -386,8 +386,21 @@ Currently, pusher-js itself does not support authenticating multiple channels in
 
 There are a number of events which are used internally, but can also be of use elsewhere:
 
-* connection_established
 * subscribe
+
+## Connection Events
+
+To listen for when you connect to Pusher:
+
+```js
+pusher.connection.bind('connected', callback);
+```
+
+And to bind to disconnections:
+
+```js
+pusher.connection.bind('disconnected', callback);
+```
 
 ## Self-serving JS files
 
