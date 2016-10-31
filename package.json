@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/pusher-community/pusher-websocket-js-iso.git"
+    "url": "https://github.com/pusher/pusher-js.git"
   },
   "keywords": [
     "pusher",
@@ -23,9 +23,9 @@
   "author": "Pusher",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/pusher-community/pusher-websocket-js-iso/issues"
+    "url": "https://github.com/pusher/pusher-js"
   },
-  "homepage": "https://github.com/pusher-community/pusher-websocket-js-iso",
+  "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
     "es3ify-loader": "^0.2.0",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
