@@ -16,6 +16,8 @@ export default class Channel extends EventsDispatcher {
   name: string;
   pusher: Pusher;
   subscribed: boolean;
+  subscriptionPending: boolean;
+  subscriptionCancelled: boolean;
 
   constructor(name : string, pusher: Pusher) {
     super(function(event, data){
@@ -25,6 +27,8 @@ export default class Channel extends EventsDispatcher {
     this.name = name;
     this.pusher = pusher;
     this.subscribed = false;
+    this.subscriptionPending = false;
+    this.subscriptionCancelled = false;
   }
 
   /** Skips authorization, since public channels don't require it.
@@ -58,8 +62,13 @@ export default class Channel extends EventsDispatcher {
   handleEvent(event : string, data : any) {
     if (event.indexOf("pusher_internal:") === 0) {
       if (event === "pusher_internal:subscription_succeeded") {
+        this.subscriptionPending = false;
         this.subscribed = true;
-        this.emit("pusher:subscription_succeeded", data);
+        if (this.subscriptionCancelled) {
+          this.pusher.unsubscribe(this.name);
+        } else {
+          this.emit("pusher:subscription_succeeded", data);
+        }
       }
     } else {
       this.emit(event, data);
@@ -68,6 +77,7 @@ export default class Channel extends EventsDispatcher {
 
   /** Sends a subscription request. For internal use only. */
   subscribe() {
+    this.subscriptionPending = true;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {
       if (error) {
         this.handleEvent('pusher:subscription_error', data);
@@ -83,6 +93,7 @@ export default class Channel extends EventsDispatcher {
 
   /** Sends an unsubscription request. For internal use only. */
   unsubscribe() {
+    this.subscribed = false;
     this.pusher.send_event('pusher:unsubscribe', {
       channel: this.name
     });

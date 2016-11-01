@@ -214,9 +214,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return channel;
 	    };
 	    Pusher.prototype.unsubscribe = function (channel_name) {
-	        var channel = this.channels.remove(channel_name);
-	        if (channel && this.connection.state === "connected") {
-	            channel.unsubscribe();
+	        var channel = this.channels.find(channel_name);
+	        if (channel && channel.subscriptionPending) {
+	            channel.subscriptionCancelled = true;
+	        }
+	        else {
+	            channel = this.channels.remove(channel_name);
+	            if (channel && this.connection.state === "connected") {
+	                channel.unsubscribe();
+	            }
 	        }
 	    };
 	    Pusher.prototype.send_event = function (event_name, data, channel) {
@@ -3103,6 +3109,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.name = name;
 	        this.pusher = pusher;
 	        this.subscribed = false;
+	        this.subscriptionPending = false;
+	        this.subscriptionCancelled = false;
 	    }
 	    Channel.prototype.authorize = function (socketId, callback) {
 	        return callback(false, {});
@@ -3119,8 +3127,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Channel.prototype.handleEvent = function (event, data) {
 	        if (event.indexOf("pusher_internal:") === 0) {
 	            if (event === "pusher_internal:subscription_succeeded") {
+	                this.subscriptionPending = false;
 	                this.subscribed = true;
-	                this.emit("pusher:subscription_succeeded", data);
+	                if (this.subscriptionCancelled) {
+	                    this.pusher.unsubscribe(this.name);
+	                }
+	                else {
+	                    this.emit("pusher:subscription_succeeded", data);
+	                }
 	            }
 	        }
 	        else {
@@ -3129,6 +3143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    Channel.prototype.subscribe = function () {
 	        var _this = this;
+	        this.subscriptionPending = true;
 	        this.authorize(this.pusher.connection.socket_id, function (error, data) {
 	            if (error) {
 	                _this.handleEvent('pusher:subscription_error', data);
@@ -3143,6 +3158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    };
 	    Channel.prototype.unsubscribe = function () {
+	        this.subscribed = false;
 	        this.pusher.send_event('pusher:unsubscribe', {
 	            channel: this.name
 	        });
