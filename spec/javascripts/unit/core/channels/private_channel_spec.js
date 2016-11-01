@@ -17,6 +17,14 @@ describe("PrivateChannel", function() {
     it("#subscribed should be false", function() {
       expect(channel.subscribed).toEqual(false);
     });
+
+    it("#subscriptionPending should be false", function() {
+      expect(channel.subscriptionPending).toEqual(false);
+    });
+
+    it("#subscriptionCancelled should be false", function() {
+      expect(channel.subscriptionCancelled).toEqual(false);
+    });
   });
 
   describe("#authorize", function() {
@@ -105,6 +113,43 @@ describe("PrivateChannel", function() {
           expect(channel.subscribed).toEqual(true);
         });
         channel.handleEvent("pusher_internal:subscription_succeeded");
+      });
+    });
+
+    describe("pusher_internal:subscription_succeded but subscription cancelled", function() {
+      it("should not emit pusher:subscription_succeded", function() {
+        var callback = jasmine.createSpy("callback");
+        channel.bind("pusher:subscription_succeeded", callback);
+
+        channel.cancelSubscription();
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it("should set #subscribed to true", function() {
+        channel.cancelSubscription();
+        channel.bind(function() {
+          expect(channel.subscribed).toEqual(true);
+        });
+        channel.handleEvent("pusher_internal:subscription_succeeded");
+      });
+
+      it("should set #subscriptionPending to false", function() {
+        channel.cancelSubscription();
+        channel.bind(function() {
+          expect(channel.subscriptionPending).toEqual(true);
+        });
+        channel.handleEvent("pusher_internal:subscription_succeeded");
+      });
+
+      it("should call #pusher.unsubscribe", function() {
+        expect(pusher.unsubscribe).not.toHaveBeenCalled();
+
+        channel.cancelSubscription();
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(pusher.unsubscribe).toHaveBeenCalledWith(channel.name);
       });
     });
 

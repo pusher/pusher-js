@@ -98,4 +98,9 @@ export default class Channel extends EventsDispatcher {
       channel: this.name
     });
   }
+
+  /** Cancels an in progress subscription. For internal use only. */
+  cancelSubscription() {
+    this.subscriptionCancelled = true;
+  }
 }
