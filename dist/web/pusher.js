@@ -3032,9 +3032,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    PresenceChannel.prototype.handleEvent = function (event, data) {
 	        switch (event) {
 	            case "pusher_internal:subscription_succeeded":
-	                this.members.onSubscription(data);
+	                this.subscriptionPending = false;
 	                this.subscribed = true;
-	                this.emit("pusher:subscription_succeeded", this.members);
+	                if (this.subscriptionCancelled) {
+	                    this.pusher.unsubscribe(this.name);
+	                }
+	                else {
+	                    this.members.onSubscription(data);
+	                    this.emit("pusher:subscription_succeeded", this.members);
+	                }
 	                break;
 	            case "pusher_internal:member_added":
 	                var addedMember = this.members.addMember(data);
