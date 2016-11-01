@@ -216,7 +216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Pusher.prototype.unsubscribe = function (channel_name) {
 	        var channel = this.channels.find(channel_name);
 	        if (channel && channel.subscriptionPending) {
-	            channel.subscriptionCancelled = true;
+	            channel.cancelSubscription();
 	        }
 	        else {
 	            channel = this.channels.remove(channel_name);
@@ -3168,6 +3168,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.pusher.send_event('pusher:unsubscribe', {
 	            channel: this.name
 	        });
+	    };
+	    Channel.prototype.cancelSubscription = function () {
+	        this.subscriptionCancelled = true;
 	    };
 	    return Channel;
 	}(dispatcher_1["default"]));
