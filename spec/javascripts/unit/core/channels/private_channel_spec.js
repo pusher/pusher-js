@@ -98,8 +98,8 @@ describe("PrivateChannel", function() {
       expect(callback).not.toHaveBeenCalled();
     });
 
-    describe("on pusher_internal:subscription_succeded", function() {
-      it("should emit pusher:subscription_succeded", function() {
+    describe("on pusher_internal:subscription_succeeded", function() {
+      it("should emit pusher:subscription_succeeded", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
 
@@ -116,8 +116,8 @@ describe("PrivateChannel", function() {
       });
     });
 
-    describe("pusher_internal:subscription_succeded but subscription cancelled", function() {
-      it("should not emit pusher:subscription_succeded", function() {
+    describe("pusher_internal:subscription_succeeded but subscription cancelled", function() {
+      it("should not emit pusher:subscription_succeeded", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
 
@@ -129,18 +129,16 @@ describe("PrivateChannel", function() {
 
       it("should set #subscribed to true", function() {
         channel.cancelSubscription();
-        channel.bind(function() {
-          expect(channel.subscribed).toEqual(true);
-        });
-        channel.handleEvent("pusher_internal:subscription_succeeded");
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscribed).toEqual(true);
       });
 
       it("should set #subscriptionPending to false", function() {
         channel.cancelSubscription();
-        channel.bind(function() {
-          expect(channel.subscriptionPending).toEqual(true);
-        });
-        channel.handleEvent("pusher_internal:subscription_succeeded");
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscriptionPending).toEqual(false);
       });
 
       it("should call #pusher.unsubscribe", function() {
