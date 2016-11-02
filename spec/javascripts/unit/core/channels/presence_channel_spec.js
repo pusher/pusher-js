@@ -152,15 +152,25 @@ describe("PresenceChannel", function() {
         });
 
         it("should set #subscribed to true", function() {
-          channel.bind(function() {
-            expect(channel.subscribed).toEqual(true);
-          });
           channel.handleEvent("pusher_internal:subscription_succeeded", {
             presence: {
-              hash: {},
-              count: 0
+              hash: { "U": "me" },
+              count: 1
             }
           });
+
+          expect(channel.subscribed).toEqual(true);
+        });
+
+        it("should set #subscriptionPending to false", function() {
+          channel.handleEvent("pusher_internal:subscription_succeeded", {
+            presence: {
+              hash: { "U": "me" },
+              count: 1
+            }
+          });
+
+          expect(channel.subscriptionPending).toEqual(false);
         });
       });
 

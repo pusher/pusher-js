@@ -109,10 +109,15 @@ describe("PrivateChannel", function() {
       });
 
       it("should set #subscribed to true", function() {
-        channel.bind(function() {
-          expect(channel.subscribed).toEqual(true);
-        });
-        channel.handleEvent("pusher_internal:subscription_succeeded");
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscribed).toEqual(true);
+      });
+
+      it("should set #subscriptionPending to false", function() {
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscriptionPending).toEqual(false);
       });
     });
 
