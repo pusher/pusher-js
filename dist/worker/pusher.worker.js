@@ -205,9 +205,15 @@ var Pusher =
 	        return channel;
 	    };
 	    Pusher.prototype.unsubscribe = function (channel_name) {
-	        var channel = this.channels.remove(channel_name);
-	        if (channel && this.connection.state === "connected") {
-	            channel.unsubscribe();
+	        var channel = this.channels.find(channel_name);
+	        if (channel && channel.subscriptionPending) {
+	            channel.cancelSubscription();
+	        }
+	        else {
+	            channel = this.channels.remove(channel_name);
+	            if (channel && this.connection.state === "connected") {
+	                channel.unsubscribe();
+	            }
 	        }
 	    };
 	    Pusher.prototype.send_event = function (event_name, data, channel) {
@@ -2514,9 +2520,15 @@ var Pusher =
 	    PresenceChannel.prototype.handleEvent = function (event, data) {
 	        switch (event) {
 	            case "pusher_internal:subscription_succeeded":
-	                this.members.onSubscription(data);
+	                this.subscriptionPending = false;
 	                this.subscribed = true;
-	                this.emit("pusher:subscription_succeeded", this.members);
+	                if (this.subscriptionCancelled) {
+	                    this.pusher.unsubscribe(this.name);
+	                }
+	                else {
+	                    this.members.onSubscription(data);
+	                    this.emit("pusher:subscription_succeeded", this.members);
+	                }
 	                break;
 	            case "pusher_internal:member_added":
 	                var addedMember = this.members.addMember(data);
@@ -2591,6 +2603,8 @@ var Pusher =
 	        this.name = name;
 	        this.pusher = pusher;
 	        this.subscribed = false;
+	        this.subscriptionPending = false;
+	        this.subscriptionCancelled = false;
 	    }
 	    Channel.prototype.authorize = function (socketId, callback) {
 	        return callback(false, {});
@@ -2607,8 +2621,14 @@ var Pusher =
 	    Channel.prototype.handleEvent = function (event, data) {
 	        if (event.indexOf("pusher_internal:") === 0) {
 	            if (event === "pusher_internal:subscription_succeeded") {
+	                this.subscriptionPending = false;
 	                this.subscribed = true;
-	                this.emit("pusher:subscription_succeeded", data);
+	                if (this.subscriptionCancelled) {
+	                    this.pusher.unsubscribe(this.name);
+	                }
+	                else {
+	                    this.emit("pusher:subscription_succeeded", data);
+	                }
 	            }
 	        }
 	        else {
@@ -2617,6 +2637,7 @@ var Pusher =
 	    };
 	    Channel.prototype.subscribe = function () {
 	        var _this = this;
+	        this.subscriptionPending = true;
 	        this.authorize(this.pusher.connection.socket_id, function (error, data) {
 	            if (error) {
 	                _this.handleEvent('pusher:subscription_error', data);
@@ -2631,9 +2652,13 @@ var Pusher =
 	        });
 	    };
 	    Channel.prototype.unsubscribe = function () {
+	        this.subscribed = false;
 	        this.pusher.send_event('pusher:unsubscribe', {
 	            channel: this.name
 	        });
+	    };
+	    Channel.prototype.cancelSubscription = function () {
+	        this.subscriptionCancelled = true;
 	    };
 	    return Channel;
 	}(dispatcher_1["default"]));

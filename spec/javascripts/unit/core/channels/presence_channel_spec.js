@@ -20,6 +20,14 @@ describe("PresenceChannel", function() {
       expect(channel.subscribed).toBe(false);
     });
 
+    it("#subscriptionPending should be false", function() {
+      expect(channel.subscriptionPending).toEqual(false);
+    });
+
+    it("#subscriptionCancelled should be false", function() {
+      expect(channel.subscriptionCancelled).toEqual(false);
+    });
+
     it("#me should be undefined", function() {
       expect(channel.me).toBe(undefined);
     });
@@ -128,8 +136,8 @@ describe("PresenceChannel", function() {
         expect(callback).not.toHaveBeenCalled();
       });
 
-      describe("on pusher_internal:subscription_succeded", function() {
-        it("should emit pusher:subscription_succeded with members", function() {
+      describe("on pusher_internal:subscription_succeeded", function() {
+        it("should emit pusher:subscription_succeeded with members", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:subscription_succeeded", callback);
 
@@ -144,15 +152,60 @@ describe("PresenceChannel", function() {
         });
 
         it("should set #subscribed to true", function() {
-          channel.bind(function() {
-            expect(channel.subscribed).toEqual(true);
-          });
           channel.handleEvent("pusher_internal:subscription_succeeded", {
             presence: {
-              hash: {},
-              count: 0
+              hash: { "U": "me" },
+              count: 1
             }
           });
+
+          expect(channel.subscribed).toEqual(true);
+        });
+
+        it("should set #subscriptionPending to false", function() {
+          channel.handleEvent("pusher_internal:subscription_succeeded", {
+            presence: {
+              hash: { "U": "me" },
+              count: 1
+            }
+          });
+
+          expect(channel.subscriptionPending).toEqual(false);
+        });
+      });
+
+      describe("pusher_internal:subscription_succeeded but subscription cancelled", function() {
+        it("should not emit pusher:subscription_succeeded", function() {
+          var callback = jasmine.createSpy("callback");
+          channel.bind("pusher:subscription_succeeded", callback);
+
+          channel.cancelSubscription();
+          channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+          expect(callback).not.toHaveBeenCalled();
+        });
+
+        it("should set #subscribed to true", function() {
+          channel.cancelSubscription();
+          channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+          expect(channel.subscribed).toEqual(true);
+        });
+
+        it("should set #subscriptionPending to false", function() {
+          channel.cancelSubscription();
+          channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+          expect(channel.subscriptionPending).toEqual(false);
+        });
+
+        it("should call #pusher.unsubscribe", function() {
+          expect(pusher.unsubscribe).not.toHaveBeenCalled();
+
+          channel.cancelSubscription();
+          channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+          expect(pusher.unsubscribe).toHaveBeenCalledWith(channel.name);
         });
       });
 

@@ -16,6 +16,14 @@ describe("Channel", function() {
     it("#subscribed should be false", function() {
       expect(channel.subscribed).toEqual(false);
     });
+
+    it("#subscriptionPending should be false", function() {
+      expect(channel.subscriptionPending).toEqual(false);
+    });
+
+    it("#subscriptionCancelled should be false", function() {
+      expect(channel.subscriptionCancelled).toEqual(false);
+    });
   });
 
   describe("#authorize", function() {
@@ -69,8 +77,8 @@ describe("Channel", function() {
       expect(callback).not.toHaveBeenCalled();
     });
 
-    describe("on pusher_internal:subscription_succeded", function() {
-      it("should emit pusher:subscription_succeded", function() {
+    describe("on pusher_internal:subscription_succeeded", function() {
+      it("should emit pusher:subscription_succeeded", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
 
@@ -80,10 +88,50 @@ describe("Channel", function() {
       });
 
       it("should set #subscribed to true", function() {
-        channel.bind(function() {
-          expect(channel.subscribed).toEqual(true);
-        });
-        channel.handleEvent("pusher_internal:subscription_succeeded");
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscribed).toEqual(true);
+      });
+
+      it("should set #subscriptionPending to false", function() {
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscriptionPending).toEqual(false);
+      });
+    });
+
+    describe("pusher_internal:subscription_succeeded but subscription cancelled", function() {
+      it("should not emit pusher:subscription_succeeded", function() {
+        var callback = jasmine.createSpy("callback");
+        channel.bind("pusher:subscription_succeeded", callback);
+
+        channel.cancelSubscription();
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(callback).not.toHaveBeenCalled();
+      });
+
+      it("should set #subscribed to true", function() {
+        channel.cancelSubscription();
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscribed).toEqual(true);
+      });
+
+      it("should set #subscriptionPending to false", function() {
+        channel.cancelSubscription();
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(channel.subscriptionPending).toEqual(false);
+      });
+
+      it("should call #pusher.unsubscribe", function() {
+        expect(pusher.unsubscribe).not.toHaveBeenCalled();
+
+        channel.cancelSubscription();
+        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+
+        expect(pusher.unsubscribe).toHaveBeenCalledWith(channel.name);
       });
     });
 
@@ -155,6 +203,14 @@ describe("Channel", function() {
       );
       expect(pusher.send_event).not.toHaveBeenCalled();
     });
+
+    it("should set #subscriptionPending to true", function() {
+      expect(channel.subscriptionPending).toEqual(false);
+
+      channel.subscribe();
+
+      expect(channel.subscriptionPending).toEqual(true);
+    });
   });
 
   describe("#unsubscribe", function() {
@@ -165,6 +221,24 @@ describe("Channel", function() {
       expect(pusher.send_event).toHaveBeenCalledWith(
         "pusher:unsubscribe", { channel: "test" }
       );
+    });
+
+    it("should set #subscribed to false", function() {
+      channel.subscribed = true;
+
+      channel.unsubscribe();
+
+      expect(channel.subscribed).toEqual(false);
+    });
+  });
+
+  describe("#cancelSubscription", function() {
+    it("should set #subscriptionCancelled to true", function() {
+      expect(channel.subscriptionCancelled).toEqual(false);
+
+      channel.cancelSubscription();
+
+      expect(channel.subscriptionCancelled).toEqual(true);
     });
   });
 });

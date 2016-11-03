@@ -127,6 +127,41 @@ Integration.describe("Pusher", function() {
         pusher.unsubscribe(channelName);
       });
     });
+
+    it("should handle cancelling pending subscription", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      var eventName = "after_unsubscribing";
+      var received = null;
+      var timer = null;
+
+      var channel = pusher.subscribe(channelName);
+      channel.bind(eventName, function(message) {
+        received = message;
+      });
+
+      pusher.unsubscribe(channelName);
+      waitsFor(function() {
+        return !channel.subscriptionPending;
+      }, "subscription to succeed", 10000);
+      runs(function () {
+        Integration.sendAPIMessage({
+          url: Integration.API_URL + "/v2/send",
+          channel: channelName,
+          event: eventName,
+          data: {}
+        });
+        timer = new Timer(3000, function() {});
+      });
+      waitsFor(function() {
+        return !timer.isRunning();
+      }, "timer to finish", 10000);
+      runs(function() {
+        expect(channel.subscribed).toEqual(false);
+        expect(received).toBe(null);
+      });
+    });
   }
 
 

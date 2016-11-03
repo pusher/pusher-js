@@ -220,6 +220,7 @@ var Mocks = {
   getPusher: function(config) {
     var pusher = new EventsDispatcher();
     pusher.config = config;
+    pusher.unsubscribe = jasmine.createSpy("unsubscribe");
     pusher.send_event = jasmine.createSpy("send_event");
     return pusher;
   },
@@ -228,6 +229,7 @@ var Mocks = {
     var channel = new EventsDispatcher();
     channel.name = name;
     channel.authorize = jasmine.createSpy("authorize");
+    channel.cancelSubscription = jasmine.createSpy("cancelSubscription");
     channel.disconnect = jasmine.createSpy("disconnect");
     channel.handleEvent = jasmine.createSpy("handleEvent");
     channel.subscribe = jasmine.createSpy("subscribe");

@@ -310,13 +310,31 @@ describe("Pusher", function() {
     });
 
     describe("#unsubscribe", function() {
-      it("should unsubscribe the channel", function() {
+      it("should unsubscribe the channel if subscription is not pending", function() {
         var channel = pusher.subscribe("yyy");
         expect(channel.unsubscribe).not.toHaveBeenCalled();
 
         pusher.unsubscribe("yyy");
         expect(channel.unsubscribe).toHaveBeenCalled();
       });
+
+      it("should remove the channel from .channels if subscription is not pending", function () {
+        var channel = pusher.subscribe("yyy");
+        expect(pusher.channel("yyy")).toBe(channel);
+
+        pusher.unsubscribe("yyy");
+        expect(pusher.channel("yyy")).toBe(undefined);
+      });
+
+      it("should delay unsubscription if the subscription is pending", function () {
+        var channel = pusher.subscribe("yyy");
+        channel.subscriptionPending = true;
+
+        pusher.unsubscribe("yyy");
+        expect(pusher.channel("yyy")).toBe(channel);
+        expect(channel.unsubscribe).not.toHaveBeenCalled();
+        expect(channel.cancelSubscription).toHaveBeenCalled();
+      })
     });
   });
 
