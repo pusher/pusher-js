@@ -48,7 +48,7 @@
     "object-assign-deep": "0.0.4",
     "string-replace-webpack-plugin": "0.0.3",
     "ts-loader": "^0.8.2",
-    "typescript": "^1.8.0",
+    "typescript": "^2.0.6",
     "uglify-js": "^2.6.2",
     "webpack": "^1.12.9",
     "webpack-dev-server": "^1.14.1"
