@@ -1,7 +1,8 @@
 import AbstractRuntime from 'runtimes/interface';
+import Authorizer from './pusher_authorizer';
 
 interface AuthTransport {
-  (context : AbstractRuntime, socketId : string, callback : Function) : void
+  (this: Authorizer, context : AbstractRuntime, socketId : string, callback : Function) : void
 }
 
 interface AuthTransports {

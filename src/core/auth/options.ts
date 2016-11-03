@@ -1,9 +1,9 @@
+export type Headers = {
+  [key: string]: string;
+};
+
 export interface AuthOptions {
   params: any;
-  headers : any;
-}
-
-export interface AuthorizerOptions {
-  authTransport: "ajax" | "jsonp";
-  auth: AuthOptions;
+  headers : Headers;
+  withCredentials: boolean;
 }

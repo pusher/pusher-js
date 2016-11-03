@@ -1,8 +1,9 @@
 import AbstractRuntime from 'runtimes/interface';
 import Logger from 'core/logger';
 import {AuthTransport} from 'core/auth/auth_transports';
+import Authorizer from 'core/auth/pusher_authorizer';
 
-var fetchAuth : AuthTransport = function(context, socketId, callback){
+var fetchAuth : AuthTransport = function(this : Authorizer, context, socketId, callback){
   var headers = new Headers();
   headers.set("Content-Type", "application/x-www-form-urlencoded");
 

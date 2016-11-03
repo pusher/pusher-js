@@ -3,8 +3,9 @@ import Logger from 'core/logger';
 import JSONPRequest from '../dom/jsonp_request';
 import {ScriptReceivers} from '../dom/script_receiver_factory';
 import {AuthTransport} from 'core/auth/auth_transports';
+import Authorizer from 'core/auth/pusher_authorizer';
 
-var jsonp : AuthTransport = function(context : Browser, socketId, callback){
+var jsonp : AuthTransport = function(this : Authorizer, context : Browser, socketId, callback){
   if(this.authOptions.headers !== undefined) {
     Logger.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
   }
