@@ -5,12 +5,15 @@ import Util from 'core/util';
 import Runtime from 'runtime';
 import {AuthTransport} from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
+import Authorizer from 'core/auth/pusher_authorizer';
 
-var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callback){
-  var self = this, xhr;
+var ajax : AuthTransport = function(this: Authorizer, context : AbstractRuntime, socketId : string, callback : Function){
+  let xhr;
 
   xhr = Runtime.createXHR();
-  xhr.open("POST", self.options.authEndpoint, true);
+  xhr.withCredentials = this.authOptions.withCredentials;
+
+  xhr.open("POST", this.options.authEndpoint, true);
 
   // add request headers
   xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");

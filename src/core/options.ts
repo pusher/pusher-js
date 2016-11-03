@@ -11,6 +11,7 @@ interface PusherOptions {
   encrypted: boolean;
   timelineParams: any;
   authTransport: "ajax" | "jsonp";
+  authEndpoint: string;
   auth: AuthOptions;
 }
 

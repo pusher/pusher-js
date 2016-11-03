@@ -7,7 +7,6 @@ import TransportConnection from "../transports/transport_connection";
 import SocketHooks from "../http/socket_hooks";
 import HTTPSocket from "../http/http_socket";
 import Authorizer from "../auth/pusher_authorizer";
-import {AuthorizerOptions} from '../auth/options';
 import Timeline from "../timeline/timeline";
 import {default as TimelineSender, TimelineSenderOptions} from "../timeline/timeline_sender";
 import PresenceChannel from "../channels/presence_channel";
@@ -18,6 +17,7 @@ import ConnectionManagerOptions from '../connection/connection_manager_options';
 import Ajax from "../http/ajax";
 import Channels from "../channels/channels";
 import Pusher from '../pusher';
+import PusherOptions from "../options";
 
 var Factory = {
 
@@ -45,7 +45,7 @@ var Factory = {
     return new TimelineSender(timeline, options);
   },
 
-  createAuthorizer(channel : Channel, options : AuthorizerOptions) : Authorizer {
+  createAuthorizer(channel : Channel, options : PusherOptions) : Authorizer {
     return new Authorizer(channel, options);
   },
 

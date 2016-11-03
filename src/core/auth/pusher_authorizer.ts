@@ -3,17 +3,18 @@ import Channel from '../channels/channel';
 import Factory from '../utils/factory';
 import Runtime from 'runtime';
 import {AuthTransports} from './auth_transports';
-import {AuthOptions, AuthorizerOptions} from './options';
+import {AuthOptions} from './options';
+import PusherOptions from '../options';
 
 export default class Authorizer {
   static authorizers : AuthTransports;
 
   channel: Channel;
   type: string;
-  options: AuthorizerOptions;
+  options: PusherOptions;
   authOptions: AuthOptions;
 
-  constructor(channel : Channel, options : AuthorizerOptions) {
+  constructor(channel : Channel, options : PusherOptions) {
     this.channel = channel;
 
     let {authTransport} = options;
