@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.2.2 (2016-10-03)
+
+[FIXED] Fix unsubscribe behaviour while subscription is pending (thanks to @hot-leaf-juice).
+
 ## 3.2.1 (2016-08-02)
 
 [FIXED] Removes instances of evalling for global scope in timers module.

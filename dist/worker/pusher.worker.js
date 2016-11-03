@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.2.1
+ * Pusher JavaScript Library v3.2.2
  * http://pusher.com/
  *
  * Copyright 2016, Pusher
@@ -808,7 +808,7 @@ var Pusher =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.2.1",
+	    VERSION: "3.2.2",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
