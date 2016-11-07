@@ -241,4 +241,15 @@ describe("Channel", function() {
       expect(channel.subscriptionCancelled).toEqual(true);
     });
   });
+
+  describe("#reinstateSubscription", function() {
+    it("should set #subscriptionCancelled to false", function() {
+      channel.cancelSubscription()
+      expect(channel.subscriptionCancelled).toEqual(true);
+
+      channel.reinstateSubscription();
+
+      expect(channel.subscriptionCancelled).toEqual(false);
+    });
+  });
 });

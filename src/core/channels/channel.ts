@@ -77,7 +77,9 @@ export default class Channel extends EventsDispatcher {
 
   /** Sends a subscription request. For internal use only. */
   subscribe() {
+    if (this.subscribed) { return; }
     this.subscriptionPending = true;
+    this.subscriptionCancelled = false;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {
       if (error) {
         this.handleEvent('pusher:subscription_error', data);
@@ -102,5 +104,10 @@ export default class Channel extends EventsDispatcher {
   /** Cancels an in progress subscription. For internal use only. */
   cancelSubscription() {
     this.subscriptionCancelled = true;
+  }
+
+  /** Reinstates an in progress subscripiton. For internal use only. */
+  reinstateSubscription() {
+    this.subscriptionCancelled = false;
   }
 }

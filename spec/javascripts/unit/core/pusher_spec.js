@@ -307,6 +307,15 @@ describe("Pusher", function() {
         var channel = pusher.subscribe("xxx");
         expect(channel.subscribe).toHaveBeenCalled();
       });
+
+      it("should reinstate cancelled pending subscription", function() {
+        var channel = pusher.subscribe("xxx");
+        channel.subscriptionPending = true;
+        channel.subscriptionCancelled = true;
+        pusher.subscribe("xxx");
+
+        expect(channel.reinstateSubscription).toHaveBeenCalled();
+      })
     });
 
     describe("#unsubscribe", function() {

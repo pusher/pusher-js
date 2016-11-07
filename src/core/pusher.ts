@@ -206,7 +206,9 @@ export default class Pusher {
 
   subscribe(channel_name : string) {
     var channel = this.channels.add(channel_name, this);
-    if (this.connection.state === "connected") {
+    if (channel.subscriptionPending && channel.subscriptionCancelled) {
+      channel.reinstateSubscription();
+    } else if (!channel.subscriptionPending && this.connection.state === "connected") {
       channel.subscribe();
     }
     return channel;

@@ -232,6 +232,7 @@ var Mocks = {
     channel.cancelSubscription = jasmine.createSpy("cancelSubscription");
     channel.disconnect = jasmine.createSpy("disconnect");
     channel.handleEvent = jasmine.createSpy("handleEvent");
+    channel.reinstateSubscription = jasmine.createSpy("reinstateSubscription");
     channel.subscribe = jasmine.createSpy("subscribe");
     channel.unsubscribe = jasmine.createSpy("unsubscribe");
     return channel;
