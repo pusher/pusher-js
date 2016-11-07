@@ -200,6 +200,197 @@ Integration.describe("Pusher", function() {
     });
   }
 
+  function buildSubscriptionStateTests(getPusher, prefix) {
+    it("sub-sub = sub", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      waitsFor(function() {
+        return pusher.channel(channelName).subscribed;
+      }, "subscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName).subscribed).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+      });
+    });
+
+    it("sub-wait-sub = sub", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      waitsFor(function() {
+        return pusher.channel(channelName).subscribed;
+      }, "subscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName).subscribed).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+        pusher.subscribe(channelName)
+        expect(pusher.channel(channelName).subscribed).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+      });
+    });
+
+    it("sub-unsub = NOP", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      pusher.unsubscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
+
+      waitsFor(function() {
+        return !pusher.channel(channelName);
+      }, "unsubscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName)).toBe(undefined);
+      });
+    });
+
+    it("sub-wait-unsub = NOP", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      waitsFor(function() {
+        return pusher.channel(channelName).subscribed;
+      }, "subscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName).subscribed).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+        pusher.unsubscribe(channelName)
+        expect(pusher.channel(channelName)).toBe(undefined);
+      });
+    });
+
+    it("sub-unsub-sub = sub", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      pusher.unsubscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      waitsFor(function() {
+        return pusher.channel(channelName).subscribed;
+      }, "subscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName).subscribed).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+      });
+    });
+
+    it("sub-unsub-wait-sub = sub", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      pusher.unsubscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
+
+      waitsFor(function() {
+        return !pusher.channel(channelName);
+      }, "unsubscription to finish", 10000);
+      runs(function() {
+        expect(pusher.channel(channelName)).toBe(undefined);
+
+        pusher.subscribe(channelName)
+        expect(pusher.channel(channelName).subscribed).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+      });
+
+      waitsFor(function() {
+        return pusher.channel(channelName).subscribed;
+      }, "subscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName).subscribed).toEqual(true);
+        expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+        expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+      });
+    });
+
+    it("sub-unsub-unsub = NOP", function() {
+      var pusher = getPusher();
+      var channelName = Integration.getRandomName((prefix || "") + "integration");
+
+      pusher.subscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+
+      pusher.unsubscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
+
+      pusher.unsubscribe(channelName)
+      expect(pusher.channel(channelName).subscribed).toEqual(false);
+      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
+
+      waitsFor(function() {
+        return !pusher.channel(channelName);
+      }, "unsubscription to finish", 10000);
+
+      runs(function() {
+        expect(pusher.channel(channelName)).toBe(undefined);
+      });
+    });
+  }
 
   function buildClientEventsTests(getPusher1, getPusher2, prefix) {
     it("should receive a client event sent by another connection", function() {
@@ -532,6 +723,12 @@ Integration.describe("Pusher", function() {
         buildPublicChannelTests(
           function() { return pusher1; }
         );
+
+        buildSubscriptionStateTests(
+          function() { return pusher1; },
+          "private-"
+        );
+
         if (canRunTwoConnections(transport, encrypted)) {
           buildClientEventsTests(
             function() { return pusher1; },
@@ -545,6 +742,12 @@ Integration.describe("Pusher", function() {
         buildPublicChannelTests(
           function() { return pusher1; }
         );
+
+        buildSubscriptionStateTests(
+          function() { return pusher1; },
+          "presence-"
+        );
+
         if (canRunTwoConnections(transport, encrypted)) {
           buildClientEventsTests(
             function() { return pusher1; },
