@@ -204,13 +204,21 @@ describe("Channel", function() {
       expect(pusher.send_event).not.toHaveBeenCalled();
     });
 
-    it("should set #subscriptionPending to true", function() {
+    it("should set #subscriptionPending to true if previously unsubscribed", function() {
       expect(channel.subscriptionPending).toEqual(false);
 
       channel.subscribe();
 
       expect(channel.subscriptionPending).toEqual(true);
     });
+
+    it("should do nothing if already subscribed", function() {
+      channel.subscribed = true;
+
+      channel.subscribe();
+
+      expect(channel.subscriptionPending).toEqual(false);
+    }
   });
 
   describe("#unsubscribe", function() {
