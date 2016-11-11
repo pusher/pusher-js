@@ -218,7 +218,7 @@ describe("Channel", function() {
       channel.subscribe();
 
       expect(channel.subscriptionPending).toEqual(false);
-    }
+    });
   });
 
   describe("#unsubscribe", function() {
