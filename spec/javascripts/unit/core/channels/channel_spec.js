@@ -70,7 +70,7 @@ describe("Channel", function() {
     it("should not emit pusher_internal:* events", function() {
       var callback = jasmine.createSpy("callback");
       channel.bind("pusher_internal:test", callback);
-      channel.bind_all(callback);
+      channel.bind_global(callback);
 
       channel.handleEvent("pusher_internal:test");
 

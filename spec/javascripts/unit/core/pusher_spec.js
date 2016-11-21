@@ -396,7 +396,7 @@ describe("Pusher", function() {
       var onEvent = jasmine.createSpy("onEvent");
       var onAllEvents = jasmine.createSpy("onAllEvents");
       pusher.bind("global", onEvent);
-      pusher.bind_all(onAllEvents);
+      pusher.bind_global(onAllEvents);
 
       pusher.connection.emit("message", {
         event: "global",

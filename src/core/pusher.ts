@@ -193,8 +193,8 @@ export default class Pusher {
     return this;
   }
 
-  bind_all(callback : Function) : Pusher {
-    this.global_emitter.bind_all(callback);
+  bind_global(callback : Function) : Pusher {
+    this.global_emitter.bind_global(callback);
     return this;
   }
 

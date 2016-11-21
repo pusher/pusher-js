@@ -44,11 +44,11 @@ describe("EventsDispatcher", function() {
     });
   });
 
-  describe("#bind_all", function() {
+  describe("#bind_global", function() {
     it("should add the listener to all events", function() {
       var onAll = jasmine.createSpy("onAll");
 
-      dispatcher.bind_all(onAll);
+      dispatcher.bind_global(onAll);
       dispatcher.emit("event", "test");
       dispatcher.emit("boop", []);
 
@@ -256,7 +256,7 @@ describe("EventsDispatcher", function() {
         return jasmine.createSpy("onGlobal" + i);
       });
       Collections.apply(callbacks, function(callback) {
-        dispatcher.bind_all(callback);
+        dispatcher.bind_global(callback);
       });
 
       dispatcher.emit("g", { y: 2 });
@@ -305,6 +305,73 @@ describe("EventsDispatcher", function() {
 
       expect(boundContext).toEqual(context);
       expect(unboundContext).toEqual(global);
+    });
+  });
+
+  describe("#unbind_global", function() {
+    it("should remove a particular global callback if specified", function () {
+      var global1 = jasmine.createSpy("global1");
+      var global2 = jasmine.createSpy("global2");
+
+      dispatcher.bind_global(global1);
+      dispatcher.bind_global(global2);
+
+      dispatcher.unbind_global(global1);
+
+      dispatcher.emit("event", "test");
+
+      expect(global1).not.toHaveBeenCalled();
+      expect(global2).toHaveBeenCalledWith("event", "test");
+    });
+
+    it("should remove all global callbacks if called with no params", function () {
+      var global1 = jasmine.createSpy("global1");
+      var global2 = jasmine.createSpy("global2");
+
+      dispatcher.bind_global(global1);
+      dispatcher.bind_global(global2);
+
+      dispatcher.unbind_global();
+
+      dispatcher.emit("event", "test");
+
+      expect(global1).not.toHaveBeenCalled();
+      expect(global2).not.toHaveBeenCalled();
+    });
+
+    it("should not remove any event specific callbacks", function () {
+      var specific = jasmine.createSpy("specific");
+
+      dispatcher.bind("event", specific);
+
+      dispatcher.unbind_global();
+
+      dispatcher.emit("event", "test");
+
+      expect(specific).toHaveBeenCalledWith("test");
+    });
+  });
+
+  describe("#unbind_all", function () {
+    it("should remove all bindings – global and event specific", function () {
+      var global1 = jasmine.createSpy("global1");
+      var global2 = jasmine.createSpy("global2");
+      var specific1 = jasmine.createSpy("specific1");
+      var specific2 = jasmine.createSpy("specific2");
+
+      dispatcher.bind_global(global1);
+      dispatcher.bind_global(global2);
+      dispatcher.bind("event", specific1);
+      dispatcher.bind("event", specific2);
+
+      dispatcher.unbind_all();
+
+      dispatcher.emit("event", "test");
+
+      expect(global1).not.toHaveBeenCalled();
+      expect(global2).not.toHaveBeenCalled();
+      expect(specific1).not.toHaveBeenCalled();
+      expect(specific2).not.toHaveBeenCalled();
     });
   });
 });

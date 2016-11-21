@@ -1,5 +1,6 @@
-import CallbackRegistry from './callback_registry';
+import * as Collections from '../utils/collections';
 import Callback from './callback';
+import CallbackRegistry from './callback_registry';
 
 /** Manages callback bindings and event emitting.
  *
@@ -21,18 +22,33 @@ export default class Dispatcher {
     return this;
   }
 
-  bind_all(callback : Function) {
+  bind_global(callback : Function) {
     this.global_callbacks.push(callback);
     return this;
   }
 
-  unbind(eventName : string, callback : Function, context?: any) {
+  unbind(eventName? : string, callback? : Function, context?: any) {
     this.callbacks.remove(eventName, callback, context);
     return this;
   }
 
-  unbind_all(eventName?: string, callback?: Function) {
-    this.callbacks.remove(eventName, callback);
+  unbind_global(callback?: Function) {
+    if (!callback) {
+      this.global_callbacks = [];
+      return this;
+    }
+
+    this.global_callbacks = Collections.filter(
+      this.global_callbacks || [],
+      c => c !== callback
+    );
+
+    return this;
+  }
+
+  unbind_all() {
+    this.unbind();
+    this.unbind_global();
     return this;
   }
 
