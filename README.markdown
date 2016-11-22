@@ -300,83 +300,68 @@ socket.unsubscribe('private-my-channel');
 
 ## Binding to events
 
-Events can be bound to at 2 levels, the global, and per channel. They take a very similar form to the way events are handled in jQuery.
+Event binding takes a very similar form to the way events are handled in jQuery. You can use the following methods either on a channel object, to bind to events on a particular channel; or on the pusher object, to bind to events on all subscribed channels simultaneously.
 
-### Global events
-
-You can attach behaviour to these events regardless of the channel the event is broadcast to. The following is an example of an app that binds to new comments from any channel:
-
+### `bind` and `unbind`
+Binding to "new-message" on channel: The following logs message data to the console when "new-message" is received
 ```js
-var socket = new Pusher('MY_API_KEY');
-var my_channel = socket.subscribe('my-channel');
-socket.bind('new-comment',
-  function(data) {
-    // add comment into page
-  }
-);
-```
-
-### Per-channel events
-
-These are bound to a specific channel, and mean that you can reuse event names in different parts of your client application. The following might be an example of a stock tracking app where several channels are opened for different companies:
-
-```js
-var socket = new Pusher('MY_API_KEY');
-var channel = socket.subscribe('APPL');
-channel.bind('new-price',
-  function(data) {
-    // add new price into the APPL widget
-  }
-);
-```
-
-### Bind event handler with optional context
-
-It is possible to provide a third, optional parameter that is used as the `this` value when calling a handler:
-
-```js
-var context = { title: 'Pusher' };
-var handler = function(){
-  console.log('My name is ' + this.title);
-};
-channel.bind('new-comment', handler, context);
-```
-
-### Unbind event handlers
-
-Remove previously-bound handlers from an object. Only handlers that match all of the provided arguments (`eventName`, `handler` or `context`) are removed:
-
-```js
-channel.unbind('new-comment', handler); // removes just `handler` for the `new-comment` event
-channel.unbind('new-comment'); // removes all handlers for the `new-comment` event
-channel.unbind(null, handler); // removes `handler` for all events
-channel.unbind(null, null, context); // removes all handlers for `context`
-channel.unbind(); // removes all handlers on `channel`
-```
-
-### Binding to everything
-
-It is possible to bind to all events, rather than specifying the event name, using the method `bind_all`. This can be used for debugging, but may have other utilities.
-
-This binding can be done for a single channel or for all subscribed channels. Here is how to bind to all events on a single channel:
-
-```javascript
-var channel = pusher.subscribe('test_channel');
-channel.bind_all(function(eventName, data) {
-  console.log("Received event on channel test_channel event with name", eventName, "and data", data);
+channel.bind("new-message", function (data) {
+  console.log(data.message);
 });
 ```
 
-To bind to all events on all subscribed channels, instead call `pusher.bind_all`:
+We can also provide the `this` value when calling a handler as a third optional parameter. The following logs "hi Pusher" when "my-event" is fired.
 
-```javascript
-pusher.bind_all(function(eventName, data) {
-  console.log("Received event with name", eventName, "and data", data);
-});
+```js
+channel.bind(
+  "my-event",
+  function () { console.log("hi " + this.name); },
+  { name: "Pusher" }
+);
 ```
 
-(Note that this will only work if the event is sent on a subscribed channel. Also note that this does not tell your callback which subscribed channel the event was sent on.)
+Unsubscribe behaviour varies depending on which parameters you provide it with. For example:
 
+```js
+// remove just `handler` for the `new-comment` event
+channel.unbind("new-comment", handler);
+
+// remove all handlers for the `new-comment` event
+channel.unbind("new-comment");
+
+// remove `handler` for all events
+channel.unbind(null, handler);
+
+// remove all handlers for `context`
+channel.unbind(null, null, context);
+
+// remove all handlers on `channel`
+channel.unbind();
+```
+
+### `bind_global` and `unbind_global`
+
+`bind_global` and `unbind_global` work much like `bind` and `unbind`, but instead of only firing callbacks on a specific event, they fire callbacks on any event, and provide that event along to the handler along with the event data. For example:
+
+```js
+channel.bind_global(function (event, data) {
+  console.log("The event " + event + " was triggered with data " + data);
+})
+```
+
+`unbind_global` works similarly to `unbind`.
+
+```js
+// remove just `handler` from global bindings
+channel.unbind_global(handler);
+
+// remove all global bindings
+channel.unbind_global();
+```
+
+### `unbind_all`
+
+The `unbind_all` method is equivalent to calling `unbind()` and `unbind_global()` together; it removes all bindings, global and event specific.
 
 ## Batching auth requests (aka multi-auth)
 
