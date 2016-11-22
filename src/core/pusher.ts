@@ -189,7 +189,7 @@ export default class Pusher {
   }
 
   unbind(event_name? : string, callback? : Function, context? : any) : Pusher {
-    this.global_emitter.unbind(event_name, callback);
+    this.global_emitter.unbind(event_name, callback, context);
     return this;
   }
 
