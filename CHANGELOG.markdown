@@ -2,7 +2,7 @@
 
 ## 4.0.0 (2016-12-01)
 
-New major version released due to breaking changes:
+New major version released due to breaking changes.
 
 [CHANGED] rename bind_all to bind_global
 
