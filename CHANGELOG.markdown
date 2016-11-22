@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.0.0 (2016-12-01)
+
+New major version released due to breaking changes:
+
+[CHANGED] rename bind_all to bind_global
+
+[NEW] unbind_global to remove global bindings
+
+[CHANGED] unbind_all now removes global bindings as well as event specific
+
+[NEW] expose context to pusher level bindings
+
 ## 3.2.4 (2016-10-29)
 
 [FIXED] Subscriptions are reinstated correctly after a disconnection and
