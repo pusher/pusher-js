@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.2.3 (2016-10-22)
+
+[NEW] Cancelled subscriptions are now re-instated on subsequent `subscribe`
+calls, allowing arbitrary chains of `subscribe`/`unsubscribe` calls, where the
+final method is always respected regardless of the timings.
+See [PR 201](https://github.com/pusher/pusher-js/pull/201) for details.
+
 ## 3.2.2 (2016-10-03)
 
 [FIXED] Fix unsubscribe behaviour while subscription is pending (thanks to @hot-leaf-juice).

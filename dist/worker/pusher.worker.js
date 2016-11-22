@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.2.2
+ * Pusher JavaScript Library v3.2.3
  * http://pusher.com/
  *
  * Copyright 2016, Pusher
@@ -199,7 +199,10 @@ var Pusher =
 	    };
 	    Pusher.prototype.subscribe = function (channel_name) {
 	        var channel = this.channels.add(channel_name, this);
-	        if (this.connection.state === "connected") {
+	        if (channel.subscriptionPending && channel.subscriptionCancelled) {
+	            channel.reinstateSubscription();
+	        }
+	        else if (!channel.subscriptionPending && this.connection.state === "connected") {
 	            channel.subscribe();
 	        }
 	        return channel;
@@ -808,7 +811,7 @@ var Pusher =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.2.2",
+	    VERSION: "3.2.3",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
@@ -2637,7 +2640,11 @@ var Pusher =
 	    };
 	    Channel.prototype.subscribe = function () {
 	        var _this = this;
+	        if (this.subscribed) {
+	            return;
+	        }
 	        this.subscriptionPending = true;
+	        this.subscriptionCancelled = false;
 	        this.authorize(this.pusher.connection.socket_id, function (error, data) {
 	            if (error) {
 	                _this.handleEvent('pusher:subscription_error', data);
@@ -2659,6 +2666,9 @@ var Pusher =
 	    };
 	    Channel.prototype.cancelSubscription = function () {
 	        this.subscriptionCancelled = true;
+	    };
+	    Channel.prototype.reinstateSubscription = function () {
+	        this.subscriptionCancelled = false;
 	    };
 	    return Channel;
 	}(dispatcher_1["default"]));
