@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.2.3
+ * Pusher JavaScript Library v3.2.4
  * http://pusher.com/
  *
  * Copyright 2016, Pusher
@@ -125,6 +125,9 @@ module.exports =
 	            if (!internal) {
 	                _this.global_emitter.emit(params.event, params.data);
 	            }
+	        });
+	        this.connection.bind('connecting', function () {
+	            _this.channels.disconnect();
 	        });
 	        this.connection.bind('disconnected', function () {
 	            _this.channels.disconnect();
@@ -813,7 +816,7 @@ module.exports =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.2.3",
+	    VERSION: "3.2.4",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,

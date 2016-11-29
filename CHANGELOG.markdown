@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.4 (2016-10-29)
+
+[FIXED] Subscriptions are reinstated correctly after a disconnection and
+reconnection. Regression introduced in 3.2.3.
+
 ## 3.2.3 (2016-10-22)
 
 [NEW] Cancelled subscriptions are now re-instated on subsequent `subscribe`
