@@ -2,7 +2,8 @@
   "name": "pusher-js",
   "version": "3.2.4",
   "description": "Pusher JavaScript library for browser, React Native, NodeJS and web workers",
-  "main": "dist/web/pusher.js",
+  "main": "dist/node/pusher.js",
+  "browser": "dist/web/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
