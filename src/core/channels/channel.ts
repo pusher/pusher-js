@@ -77,6 +77,7 @@ export default class Channel extends EventsDispatcher {
 
   /** Sends a subscription request. For internal use only. */
   subscribe() {
+    if (this.subscribed) { return; }
     this.subscriptionPending = true;
     this.subscriptionCancelled = false;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {

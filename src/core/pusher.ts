@@ -134,6 +134,9 @@ export default class Pusher {
         this.global_emitter.emit(params.event, params.data);
       }
     });
+    this.connection.bind('connecting', ()=> {
+      this.channels.disconnect();
+    });
     this.connection.bind('disconnected', ()=> {
       this.channels.disconnect();
     });
