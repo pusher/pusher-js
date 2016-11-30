@@ -14,6 +14,7 @@ export interface DefaultConfig {
   activity_timeout: number;
   pong_timeout: number;
   unavailable_timeout: number;
+  transport_lives: number;
 
   cdn_http?: string;
   cdn_https?: string;
@@ -41,11 +42,13 @@ var Defaults : DefaultConfig = {
   activity_timeout: 120000,
   pong_timeout: 30000,
   unavailable_timeout: 10000,
+  transport_lives: 2,
 
   // CDN configuration
   cdn_http: '<CDN_HTTP>',
   cdn_https: '<CDN_HTTPS>',
   dependency_suffix: '<DEPENDENCY_SUFFIX>'
+
 }
 
 export default Defaults;
