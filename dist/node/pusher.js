@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v3.2.4
+ * Pusher JavaScript Library v4.0.0
  * http://pusher.com/
  *
  * Copyright 2016, Pusher
@@ -180,16 +180,24 @@ module.exports =
 	            this.timelineSenderTimer = null;
 	        }
 	    };
-	    Pusher.prototype.bind = function (event_name, callback) {
-	        this.global_emitter.bind(event_name, callback);
+	    Pusher.prototype.bind = function (event_name, callback, context) {
+	        this.global_emitter.bind(event_name, callback, context);
 	        return this;
 	    };
-	    Pusher.prototype.unbind = function (event_name, callback) {
-	        this.global_emitter.unbind(event_name, callback);
+	    Pusher.prototype.unbind = function (event_name, callback, context) {
+	        this.global_emitter.unbind(event_name, callback, context);
 	        return this;
 	    };
-	    Pusher.prototype.bind_all = function (callback) {
-	        this.global_emitter.bind_all(callback);
+	    Pusher.prototype.bind_global = function (callback) {
+	        this.global_emitter.bind_global(callback);
+	        return this;
+	    };
+	    Pusher.prototype.unbind_global = function (callback) {
+	        this.global_emitter.unbind_global(callback);
+	        return this;
+	    };
+	    Pusher.prototype.unbind_all = function (callback) {
+	        this.global_emitter.unbind_all();
 	        return this;
 	    };
 	    Pusher.prototype.subscribeAll = function () {
@@ -816,7 +824,7 @@ module.exports =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "3.2.4",
+	    VERSION: "4.0.0",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
@@ -1028,6 +1036,7 @@ module.exports =
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
+	var Collections = __webpack_require__(4);
 	var callback_registry_1 = __webpack_require__(15);
 	var Dispatcher = (function () {
 	    function Dispatcher(failThrough) {
@@ -1039,7 +1048,7 @@ module.exports =
 	        this.callbacks.add(eventName, callback, context);
 	        return this;
 	    };
-	    Dispatcher.prototype.bind_all = function (callback) {
+	    Dispatcher.prototype.bind_global = function (callback) {
 	        this.global_callbacks.push(callback);
 	        return this;
 	    };
@@ -1047,8 +1056,17 @@ module.exports =
 	        this.callbacks.remove(eventName, callback, context);
 	        return this;
 	    };
-	    Dispatcher.prototype.unbind_all = function (eventName, callback) {
-	        this.callbacks.remove(eventName, callback);
+	    Dispatcher.prototype.unbind_global = function (callback) {
+	        if (!callback) {
+	            this.global_callbacks = [];
+	            return this;
+	        }
+	        this.global_callbacks = Collections.filter(this.global_callbacks || [], function (c) { return c !== callback; });
+	        return this;
+	    };
+	    Dispatcher.prototype.unbind_all = function () {
+	        this.unbind();
+	        this.unbind_global();
 	        return this;
 	    };
 	    Dispatcher.prototype.emit = function (eventName, data) {
