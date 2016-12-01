@@ -1,7 +1,7 @@
 {
-  "name": "pusher-websocket-iso",
-  "location": "git://github.com/pusher-community/pusher-websocket-js-iso.git",
-  "description": "EXPERIMENTAL isomorphic Pusher WebSocket client",
+  "name": "pusher-js",
+  "location": "git://github.com/pusher/pusher-js.git",
+  "description": "Pusher JavaScript library for browsers, React Native, NodeJS and web workers",
   "keywords": [
     "pusher",
     "client",
