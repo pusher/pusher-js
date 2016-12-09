@@ -15,5 +15,5 @@
   "licence": "MIT",
   "authors": ["Pusher <support@pusher.com>"],
   "main": "./dist/web/pusher.js",
-  "ignore": ["**/*", "!/dist/*", "!LICENCE", "!README.markdown", "!bower.json", "!CHANGELOG.markdown"]
+  "ignore": ["**/*", "!/dist/**/*", "!LICENCE", "!README.markdown", "!bower.json", "!CHANGELOG.markdown"]
 }
