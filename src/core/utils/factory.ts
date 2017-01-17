@@ -6,8 +6,8 @@ import Handshake from "../connection/handshake";
 import TransportConnection from "../transports/transport_connection";
 import SocketHooks from "../http/socket_hooks";
 import HTTPSocket from "../http/http_socket";
-import Authorizer from "../auth/pusher_authorizer";
-import {AuthorizerOptions} from '../auth/options';
+import {AuthorizerOptions, Authorizer} from '../auth/options';
+import PusherAuthorizer from '../auth/pusher_authorizer';
 import Timeline from "../timeline/timeline";
 import {default as TimelineSender, TimelineSenderOptions} from "../timeline/timeline_sender";
 import PresenceChannel from "../channels/presence_channel";
@@ -46,7 +46,11 @@ var Factory = {
   },
 
   createAuthorizer(channel : Channel, options : AuthorizerOptions) : Authorizer {
-    return new Authorizer(channel, options);
+    if (options.authorizer) {
+      return options.authorizer(channel, options);
+    }
+
+    return new PusherAuthorizer(channel, options);
   },
 
   createHandshake(transport : TransportConnection, callback : (HandshakePayload)=>void) : Handshake {
