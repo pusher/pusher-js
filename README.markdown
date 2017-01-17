@@ -156,6 +156,23 @@ var pusher = new Pusher(API_KEY, {
 });
 ```
 
+#### `authorizer` (Function)
+
+If you need custom authorization behavior you can provide your own `authorizer` function as follows:
+
+```js
+var pusher = new Pusher(API_KEY, {
+  authorizer: function(channel, options) {
+    return {
+      authorize: function(socketId, callback) {
+        // Do some ajax to get the auth information
+        callback(false, authInformation);
+      }
+    };
+  }
+})
+```
+
 #### `cluster` (String)
 
 Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
