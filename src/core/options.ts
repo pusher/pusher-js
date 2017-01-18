@@ -1,5 +1,5 @@
 import ConnectionManager from './connection/connection_manager';
-import {AuthOptions} from './auth/options';
+import {AuthOptions, AuthorizerGenerator} from './auth/options';
 
 interface PusherOptions {
   cluster: string;
@@ -12,6 +12,7 @@ interface PusherOptions {
   timelineParams: any;
   authTransport: "ajax" | "jsonp";
   auth: AuthOptions;
+  authorizer: AuthorizerGenerator;
 }
 
 export default PusherOptions;

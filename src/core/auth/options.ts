@@ -6,11 +6,15 @@ export interface AuthOptions {
 }
 
 export interface Authorizer {
-	authorize: (socketId : string, callback : Function)
+	authorize(socketId : string, callback : Function)
+}
+
+export interface AuthorizerGenerator {
+  (channel: Channel, options : AuthorizerOptions): Authorizer
 }
 
 export interface AuthorizerOptions {
   authTransport: "ajax" | "jsonp";
   auth: AuthOptions;
-  authorizer(channel : Channel, options : AuthorizerOptions): Authorizer;
+  authorizer: AuthorizerGenerator;
 }
