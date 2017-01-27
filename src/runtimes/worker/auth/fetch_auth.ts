@@ -14,6 +14,7 @@ var fetchAuth : AuthTransport = function(context, socketId, callback){
   var request = new Request(this.options.authEndpoint, {
     headers,
     body,
+    credentials: "same-origin",
     method: "POST",
   });
 
