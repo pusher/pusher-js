@@ -1,6 +1,6 @@
 # Pusher Javascript Client
 
-This library is an open source client that allows Javascript web browser clients to connect to the [Pusher](http://pusher.com/) WebSocket API. It also supports fallback to HTTP connection transports. It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
+This library is an open source client that allows JavaScript web browser clients to connect to the [Pusher](http://pusher.com/) WebSocket API. It also supports fallback to HTTP connection transports. It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
 
 We have included the source code for following libraries:
 
