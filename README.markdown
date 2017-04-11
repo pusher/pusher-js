@@ -39,6 +39,8 @@ If you're using PusherJS on a web page, you can install the library via:
 <script src="//js.pusher.com/4.0/pusher.min.js"></script>
 ```
 
+You can also use [cdnjs.com](https://cdnjs.com/libraries/pusher) if you prefer or as a fallback.
+
 #### Bower
 
 Or via [Bower](http://bower.io/):
