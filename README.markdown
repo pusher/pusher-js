@@ -104,7 +104,7 @@ Notes:
 ## Initialization
 
 ```js
-var pusher = new Pusher(APP_KEY);
+var socket = new Pusher(APP_KEY);
 ```
 
 ## Configuration
@@ -112,7 +112,7 @@ var pusher = new Pusher(APP_KEY);
 There are a number of configuration parameters which can be set for the Pusher client, which can be passed as an object to the Pusher constructor, i.e.:
 
 ```js
-var pusher = new Pusher(APP_KEY, {
+var socket = new Pusher(APP_KEY, {
     authEndpoint: "http://example.com/pusher/auth",
     encrypted: true
 });
@@ -137,7 +137,7 @@ Defines how the authentication endpoint, defined using authEndpoint, will be cal
 Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
 
 ```js
-var pusher = new Pusher(API_KEY, {
+var socket = new Pusher(API_KEY, {
   auth: {
     params: { foo: "bar" },
     headers: { baz: "boo" }
@@ -150,7 +150,7 @@ var pusher = new Pusher(API_KEY, {
 If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
 
 ```js
-var pusher = new Pusher(API_KEY, {
+var socket = new Pusher(API_KEY, {
   auth: {
     params: { foo: "bar" },
     headers: { "X-CSRF-Token": "SOME_CSRF_TOKEN" }
@@ -181,7 +181,7 @@ Allows connecting to a different datacenter by setting up correct hostnames and 
 
 ```js
 // will connect to the 'eu' cluster
-var pusher = new Pusher(API_KEY, { cluster: "eu" });
+var socket = new Pusher(API_KEY, { cluster: "eu" });
 ```
 
 #### `disableStats` (Boolean)
@@ -194,7 +194,7 @@ Specifies which transports should be used by Pusher to establish a connection. U
 
 ```js
 // will only use WebSockets
-var pusher = new Pusher(API_KEY, { enabledTransports: ["ws"] });
+var socket = new Pusher(API_KEY, { enabledTransports: ["ws"] });
 ```
 
 #### `disabledTransports` (Array)
@@ -203,10 +203,10 @@ Specified which transports must not be used by Pusher to establish a connection.
 
 ```js
 // will use all transports except for sockjs
-var pusher = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
+var socket = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
 
 // will only use WebSockets
-var pusher = new Pusher(API_KEY, {
+var socket = new Pusher(API_KEY, {
   enabledTransports: ["ws", "xhr_streaming"],
   disabledTransports: ["xhr_streaming"]
 });
