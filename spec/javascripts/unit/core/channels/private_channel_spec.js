@@ -7,6 +7,7 @@ var Mocks = require("mocks");
 describe("PrivateChannel", function() {
   var pusher;
   var channel;
+  var factorySpy;
 
   beforeEach(function() {
     pusher = Mocks.getPusher({ foo: "bar" });
@@ -32,7 +33,7 @@ describe("PrivateChannel", function() {
 
     beforeEach(function() {
       authorizer = Mocks.getAuthorizer();
-      spyOn(Factory, "createAuthorizer").andReturn(authorizer);
+      factorySpy = spyOn(Factory, "createAuthorizer").andReturn(authorizer);
     });
 
     it("should create and call an authorizer", function() {
@@ -52,6 +53,25 @@ describe("PrivateChannel", function() {
       authorizer._callback(false, { foo: "bar" });
 
       expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
+    });
+
+    describe('with custom authorizer', function() {
+      beforeEach(function() {
+        pusher = Mocks.getPusher({ 
+          authorizer: function(channel, options) {
+            return authorizer;
+          }
+        });
+        channel = new PrivateChannel("private-test-custom-auth", pusher);
+        factorySpy.andCallThrough();
+      });
+
+      it("should call the authorizer", function() {
+        var callback = jasmine.createSpy("callback");
+        channel.authorize("1.23", callback);
+        authorizer._callback(false, { foo: "bar" });
+        expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
+      });
     });
   });
 
