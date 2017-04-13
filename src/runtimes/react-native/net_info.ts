@@ -14,7 +14,7 @@ export class NetInfo extends EventsDispatcher implements Reachability {
     super();
     this.online = true;
 
-    NativeNetInfo.fetch().done((connectionState)=>{
+    NativeNetInfo.fetch().then((connectionState)=>{
       this.online = hasOnlineConnectionState(connectionState);
     });
 
