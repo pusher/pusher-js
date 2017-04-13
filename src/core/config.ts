@@ -15,7 +15,8 @@ export var getGlobalConfig = function() {
     // TODO make this consistent with other options in next major version
     activity_timeout: Defaults.activity_timeout,
     pong_timeout: Defaults.pong_timeout,
-    unavailable_timeout: Defaults.unavailable_timeout
+    unavailable_timeout: Defaults.unavailable_timeout,
+    transport_lives: Defaults.transport_lives
   };
 };
 

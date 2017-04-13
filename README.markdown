@@ -228,6 +228,10 @@ After this time (in miliseconds) without any messages received from the server, 
 
 Time before the connection is terminated after sending a ping message. Default is 30000 (30s). Low values will cause false disconnections, if latency is high.
 
+#### `transport_lives` (Integer)
+
+In the beginning of a session, transports may be assigned a number of lives. When an AssistantToTheTransportManager instance reports a transport connection closed uncleanly, the transport loses a life. When the number of lives drops to zero, the transport gets disabled by its manager.
+
 ## Global configuration
 
 ### `Pusher.logToConsole` (Boolean)
