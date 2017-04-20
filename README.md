@@ -6,6 +6,9 @@ React Native.
 If you're looking for the Pusher server library for Node.js, use
 [pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
 
+For tutorials and more in-depth information about the Pusher platform, visit
+our [official docs](https://pusher.com/docs/javascript_quick_start).
+
 ## Usage Overview
 
 The following topics are covered:
@@ -24,9 +27,9 @@ The following topics are covered:
 * [Binding to Events](https://github.com/pusher/pusher-js#binding-to-events)
 * [Default events](https://github.com/pusher/pusher-js#default-events)
 * [Developing](https://github.com/pusher/pusher-js#developing)
-* [Core vs. Platform-specific Code](https://github.com/pusher/pusher-js#core-vs-platform-specific-code)
-* [Building](https://github.com/pusher/pusher-js#building)
-* [Testing](https://github.com/pusher/pusher-js#testing)
+  * [Core vs. Platform-specific Code](https://github.com/pusher/pusher-js#core-vs-platform-specific-code)
+  * [Building](https://github.com/pusher/pusher-js#building)
+  * [Testing](https://github.com/pusher/pusher-js#testing)
 
 ## Installation
 
@@ -462,7 +465,7 @@ You can optionally pass a `PORT` environment variable to run the server on a dif
 
 This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respective minified versions.
 
-## Core Vs. Platform-Specific Code
+### Core Vs. Platform-Specific Code
 
 New to PusherJS 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
 Web Workers.
@@ -481,7 +484,7 @@ For web it will look for `src/runtimes/web/runtime.ts`. For ReactNative, `src/ru
 
 Each of these runtime files exports an object (conforming to the interface you can see in `src/runtimes/interface.ts`) that abstracts away everything platform-specific. The core library pulls this object in without any knowledge of how it implements it. This means web build can use the DOM underneath, the ReactNative build can use its native NetInfo API, Workers can use `fetch` and so on.
 
-## Building
+### Building
 
 In order to build SockJS, you must first initialize and update the Git submodule:
 
@@ -508,7 +511,7 @@ make node         # for the NodeJS build
 make worker       # for the worker build
 ```
 
-## Testing
+### Testing
 
 Each test environment contains two types of tests:
 
