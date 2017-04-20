@@ -1,7 +1,7 @@
 /*!
  * Pusher JavaScript Library v<VERSION>
- * http://pusher.com/
+ * https://pusher.com/
  *
- * Copyright 2016, Pusher
+ * Copyright 2017, Pusher
  * Released under the MIT licence.
  */
