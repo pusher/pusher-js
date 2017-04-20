@@ -10,20 +10,23 @@ If you're looking for the Pusher server library for Node.js, use
 
 The following topics are covered:
 
-* Supported runtimes and installation
-  * Web
-  * React Native
-  * Web Workers
-  * NodeJS
-* Configuration
-* Global configuration
-* Connection
-* Socket ids
-* Subscribing to channels (public and private)
-* Binding to events
-  * Globally
-  * Per-channel
-* Default events
+* [Installation](https://github.com/pusher/pusher-js#installation)
+  * [Web](https://github.com/pusher/pusher-js#web)
+  * [React Native](https://github.com/pusher/pusher-js#react-native)
+  * [Web Workers](https://github.com/pusher/pusher-js#web-workers)
+  * [Node.js](https://github.com/pusher/pusher-js#nodejs)
+* [Initialization](https://github.com/pusher/pusher-js#initialization)
+* [Configuration](https://github.com/pusher/pusher-js#configuration)
+* [Global Configuration](https://github.com/pusher/pusher-js#global-configuration)
+* [Connection](https://github.com/pusher/pusher-js#connection)
+  * [Socket IDs](https://github.com/pusher/pusher-js#socket-ids)
+* [Subscribing to Channels (Public and Private)](https://github.com/pusher/pusher-js#subscribing-to-channels)
+* [Binding to Events](https://github.com/pusher/pusher-js#binding-to-events)
+* [Default events](https://github.com/pusher/pusher-js#default-events)
+* [Developing](https://github.com/pusher/pusher-js#developing)
+* [Core vs. Platform-specific Code](https://github.com/pusher/pusher-js#core-vs-platform-specific-code)
+* [Building](https://github.com/pusher/pusher-js#building)
+* [Testing](https://github.com/pusher/pusher-js#testing)
 
 ## Installation
 
