@@ -1,5 +1,24 @@
 # Changelog
 
+## 4.1.0 (2017-05-20)
+
+[NEW] Enable custom authorizers. For more information,
+[see here](https://github.com/pusher/pusher-js#authorizer-function).
+
+[NEW] Send credentials with Fetch requests in workers.
+
+[NEW] Replace main file with Node.js version and add new browser field. This
+also makes `require('pusher-js')` work out of the box.
+
+[FIXED] Change `.done` to `.then` in React Native.
+
+[FIXED] Include minified files when installing with Bower.
+
+[CHANGED] Change `pusher` to `socket` for instance names in the readme.
+
+Many thanks to @ejlangev, @piperchester, @wawyed, @mgalgs, @jamesfisher,
+@kubik369 & @mrbabbs for their contributions to this release!
+
 ## 4.0.0 (2016-12-01)
 
 New major version released due to breaking changes.
