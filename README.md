@@ -1,14 +1,12 @@
 # Pusher Javascript Client
 
-This library is an open source client that allows JavaScript web browser clients to connect to the [Pusher](http://pusher.com/) WebSocket API. It also supports fallback to HTTP connection transports. It is highly recommended that you use the hosted version of this file to stay up to date with the latest updates.
+This Pusher client library supports web browsers, web workers, Node.js and
+React Native.
 
-We have included the source code for following libraries:
+If you're looking for the Pusher server library for Node.js, use
+[pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
 
-* sockjs-client
-
-They both include their own licences.
-
-## Usage overview
+## Usage Overview
 
 The following topics are covered:
 
@@ -31,17 +29,38 @@ The following topics are covered:
 
 ### Web
 
-If you're using PusherJS on a web page, you can install the library via:
+If you're using Pusher on a web page, you can install the library via:
+
+#### Yarn (or NPM)
+
+You can use any NPM-compatible package manager, including NPM itself and Yarn.
+
+```bash
+yarn add pusher-js
+```
+
+Then:
+
+```javascript
+import Pusher from 'pusher-js';
+```
+
+Or, if you're not using ES6 modules:
+
+```javascript
+const Pusher = require('pusher-js');
+```
 
 #### CDN
 
 ```html
-<script src="//js.pusher.com/4.1/pusher.min.js"></script>
+<script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 ```
 
-You can also use [cdnjs.com](https://cdnjs.com/libraries/pusher) if you prefer or as a fallback.
+You can also use [cdnjs.com](https://cdnjs.com/libraries/pusher) if you prefer
+or as a fallback.
 
-#### Bower
+#### Bower (discouraged)
 
 Or via [Bower](http://bower.io/):
 
@@ -49,27 +68,16 @@ Or via [Bower](http://bower.io/):
 bower install pusher
 ```
 
-and then
+and then:
 
 ```html
 <script src="bower_components/pusher/dist/web/pusher.min.js"></script>
 ```
 
-#### NPM
-
-```bash
-npm install pusher-js
-```
-
-Then simply call:
-
-```javascript
-var Pusher = require('pusher-js');
-```
-
 ### React Native
 
-You can install `pusher-js` from NPM, then import the `react-native` path of PusherJS.
+Use a package manager like Yarn or NPM to install `pusher-js` and then import
+it as follows:
 
 ```javascript
 import Pusher from 'pusher-js/react-native';
@@ -85,15 +93,15 @@ Notes:
 You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the CDN:
 
 ```javascript
-importScripts("https://js.pusher.com/4.1/pusher.worker.min.js");
+importScripts('https://js.pusher.com/4.1/pusher.worker.min.js');
 ```
 
-### NodeJS
+### Node.js
 
-Having installed `pusher-js` via NPM, simply call:
+Having installed `pusher-js` via an NPM-compatible package manager, simply:
 
 ```javascript
-var Pusher = require('pusher-js/node');
+import Pusher from 'pusher-js';
 ```
 
 Notes:
@@ -104,17 +112,19 @@ Notes:
 ## Initialization
 
 ```js
-var socket = new Pusher(APP_KEY);
+const socket = new Pusher(APP_KEY);
 ```
+
+You can get your app key from the [Pusher dashboard](https://dashboard.pusher.com/).
 
 ## Configuration
 
 There are a number of configuration parameters which can be set for the Pusher client, which can be passed as an object to the Pusher constructor, i.e.:
 
 ```js
-var socket = new Pusher(APP_KEY, {
-    authEndpoint: "http://example.com/pusher/auth",
-    encrypted: true
+const socket = new Pusher(APP_KEY, {
+  authEndpoint: 'http://example.com/pusher/auth',
+  encrypted: true
 });
 ```
 
@@ -137,10 +147,10 @@ Defines how the authentication endpoint, defined using authEndpoint, will be cal
 Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
 
 ```js
-var socket = new Pusher(API_KEY, {
+const socket = new Pusher(API_KEY, {
   auth: {
-    params: { foo: "bar" },
-    headers: { baz: "boo" }
+    params: { foo: 'bar' },
+    headers: { baz: 'boo' }
   }
 });
 ```
@@ -150,10 +160,10 @@ var socket = new Pusher(API_KEY, {
 If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
 
 ```js
-var socket = new Pusher(API_KEY, {
+const socket = new Pusher(API_KEY, {
   auth: {
-    params: { foo: "bar" },
-    headers: { "X-CSRF-Token": "SOME_CSRF_TOKEN" }
+    params: { foo: 'bar' },
+    headers: { 'X-CSRF-Token': 'SOME_CSRF_TOKEN' }
   }
 });
 ```
@@ -163,10 +173,10 @@ var socket = new Pusher(API_KEY, {
 If you need custom authorization behavior you can provide your own `authorizer` function as follows:
 
 ```js
-var pusher = new Pusher(API_KEY, {
-  authorizer: function(channel, options) {
+const pusher = new Pusher(API_KEY, {
+  authorizer: function (channel, options) {
     return {
-      authorize: function(socketId, callback) {
+      authorize: function (socketId, callback) {
         // Do some ajax to get the auth information
         callback(false, authInformation);
       }
@@ -180,8 +190,10 @@ var pusher = new Pusher(API_KEY, {
 Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
 
 ```js
-// will connect to the 'eu' cluster
-var socket = new Pusher(API_KEY, { cluster: "eu" });
+// Connect to the EU cluster:
+const socket = new Pusher(API_KEY, {
+  cluster: 'eu'
+});
 ```
 
 #### `disableStats` (Boolean)
@@ -193,8 +205,10 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
 
 ```js
-// will only use WebSockets
-var socket = new Pusher(API_KEY, { enabledTransports: ["ws"] });
+// Only use WebSockets
+const socket = new Pusher(API_KEY, {
+  enabledTransports: ['ws']
+});
 ```
 
 #### `disabledTransports` (Array)
@@ -202,13 +216,15 @@ var socket = new Pusher(API_KEY, { enabledTransports: ["ws"] });
 Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
 
 ```js
-// will use all transports except for sockjs
-var socket = new Pusher(API_KEY, { disabledTransports: ["sockjs"] });
+// Use all transports except for sockjs
+const socket = new Pusher(API_KEY, {
+  disabledTransports: ['sockjs']
+});
 
-// will only use WebSockets
-var socket = new Pusher(API_KEY, {
-  enabledTransports: ["ws", "xhr_streaming"],
-  disabledTransports: ["xhr_streaming"]
+// Only use WebSockets
+const socket = new Pusher(API_KEY, {
+  enabledTransports: ['ws', 'xhr_streaming'],
+  disabledTransports: ['xhr_streaming']
 });
 ```
 
@@ -239,7 +255,7 @@ Enables logging to the browser console via calls to `console.log`.
 Assign a custom log handler for the Pusher library logging. For example:
 
 ```js
-Pusher.log = function(msg) {
+Pusher.log = (msg) => {
   console.log(msg);
 };
 ```
@@ -251,7 +267,7 @@ By setting the `log` property you also override the use of `Pusher.enableLogging
 A connection to Pusher is established by providing your API key to the constructor function:
 
 ```js
-var socket = new Pusher(API_KEY);
+const socket = new Pusher(API_KEY);
 ```
 
 This returns a socket object which can then be used to subscribe to channels.
@@ -269,7 +285,7 @@ It is also stored within the socket, and used as a token for generating signatur
 The default method for subscribing to a channel involves invoking the `subscribe` method of your socket object:
 
 ```js
-var my_channel = socket.subscribe('my-channel');
+const channel = socket.subscribe('my-channel');
 ```
 
 This returns a Channel object which events can be bound to.
@@ -279,26 +295,19 @@ This returns a Channel object which events can be bound to.
 Private channels are created in exactly the same way as normal channels, except that they reside in the 'private-' namespace. This means prefixing the channel name:
 
 ```js
-var my_channel = socket.subscribe('private-my-channel');
+const channel = socket.subscribe('private-my-channel');
 ```
 
 It is possible to access channels by name, through the `channel` function:
 
 ```js
-channel = socket.channel('private-my-channel');
+const channel = socket.channel('private-my-channel');
 ```
 
 It is possible to access all subscribed channels through the `allChannels` function:
 
 ```js
-var channels = socket.allChannels();
-console.group('Pusher - subscribed to:');
-for (var i = 0; i < channels.length; i++) {
-    var channel = channels[i];
-    console.log(channel.name);
-}
-
-console.groupEnd();
+socket.allChannels().forEach(channel => console.log(channel.name));
 ```
 
 Private and presence channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
@@ -324,7 +333,7 @@ Event binding takes a very similar form to the way events are handled in jQuery.
 ### `bind` and `unbind`
 Binding to "new-message" on channel: The following logs message data to the console when "new-message" is received
 ```js
-channel.bind("new-message", function (data) {
+channel.bind('new-message', function (data) {
   console.log(data.message);
 });
 ```
@@ -332,29 +341,27 @@ channel.bind("new-message", function (data) {
 We can also provide the `this` value when calling a handler as a third optional parameter. The following logs "hi Pusher" when "my-event" is fired.
 
 ```js
-channel.bind(
-  "my-event",
-  function () { console.log("hi " + this.name); },
-  { name: "Pusher" }
-);
+channel.bind('my-event', function () {
+  console.log(`hi ${this.name}`);
+}, { name: 'Pusher' });
 ```
 
 Unsubscribe behaviour varies depending on which parameters you provide it with. For example:
 
 ```js
-// remove just `handler` for the `new-comment` event
-channel.unbind("new-comment", handler);
+// Remove just `handler` for the `new-comment` event
+channel.unbind('new-comment', handler);
 
-// remove all handlers for the `new-comment` event
-channel.unbind("new-comment");
+// Remove all handlers for the `new-comment` event
+channel.unbind('new-comment');
 
-// remove `handler` for all events
+// Remove `handler` for all events
 channel.unbind(null, handler);
 
-// remove all handlers for `context`
+// Remove all handlers for `context`
 channel.unbind(null, null, context);
 
-// remove all handlers on `channel`
+// Remove all handlers on `channel`
 channel.unbind();
 ```
 
@@ -364,7 +371,7 @@ channel.unbind();
 
 ```js
 channel.bind_global(function (event, data) {
-  console.log("The event " + event + " was triggered with data " + data);
+  console.log(`The event ${event} was triggered with data ${data}`);
 })
 ```
 
@@ -436,10 +443,10 @@ All other browsers work fine with two or three connections.
 
 ## Developing
 
-Install all dependencies via NPM:
+Install all dependencies via Yarn:
 
 ```bash
-npm install
+yarn install
 ```
 
 Run a development server which serves bundled javascript from <http://localhost:5555/pusher.js> so that you can edit files in /src freely.
