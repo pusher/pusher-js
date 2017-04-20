@@ -1,6 +1,6 @@
 # Changelog
 
-## 4.1.0 (2017-05-20)
+## 4.1.0 (2017-04-20)
 
 [NEW] Enable custom authorizers. For more information,
 [see here](https://github.com/pusher/pusher-js#authorizer-function).
