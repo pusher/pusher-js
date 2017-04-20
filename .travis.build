@@ -1,9 +1,0 @@
-#!/bin/bash
-
-if [ "$TRAVIS_BRANCH" == "master" ]; then
-  export CI='full' ;
-else
-  export CI='basic' ;
-fi
-
-make web_unit && make web_integration
