@@ -278,6 +278,12 @@ const socket = new Pusher(API_KEY);
 
 This returns a socket object which can then be used to subscribe to channels.
 
+You may disconnect again by invoking the `disconnect` method:
+
+```js
+socket.disconnect();
+```
+
 ### Socket IDs
 
 Making a connection provides the client with a new `socket_id` that is assigned by the server. This can be used to distinguish the client's own events. A change of state might otherwise be duplicated in the client. More information on this pattern is available [here](http://pusherapp.com/docs/duplicates).
