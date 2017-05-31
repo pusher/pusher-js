@@ -118,10 +118,12 @@ Notes:
 ## Initialization
 
 ```js
-const socket = new Pusher(APP_KEY);
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
+});
 ```
 
-You can get your app key from the [Pusher dashboard](https://dashboard.pusher.com/).
+You can get your `APP_KEY` and `APP_CLUSTER` from the [Pusher dashboard](https://dashboard.pusher.com/).
 
 ## Configuration
 
@@ -129,6 +131,7 @@ There are a number of configuration parameters which can be set for the Pusher c
 
 ```js
 const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   authEndpoint: 'http://example.com/pusher/auth',
   encrypted: true
 });
@@ -153,7 +156,8 @@ Defines how the authentication endpoint, defined using authEndpoint, will be cal
 Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
 
 ```js
-const socket = new Pusher(API_KEY, {
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   auth: {
     params: { foo: 'bar' },
     headers: { baz: 'boo' }
@@ -166,7 +170,8 @@ const socket = new Pusher(API_KEY, {
 If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
 
 ```js
-const socket = new Pusher(API_KEY, {
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   auth: {
     params: { foo: 'bar' },
     headers: { 'X-CSRF-Token': 'SOME_CSRF_TOKEN' }
@@ -179,7 +184,8 @@ const socket = new Pusher(API_KEY, {
 If you need custom authorization behavior you can provide your own `authorizer` function as follows:
 
 ```js
-const pusher = new Pusher(API_KEY, {
+const pusher = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   authorizer: function (channel, options) {
     return {
       authorize: function (socketId, callback) {
@@ -197,7 +203,8 @@ Allows connecting to a different datacenter by setting up correct hostnames and 
 
 ```js
 // Connect to the EU cluster:
-const socket = new Pusher(API_KEY, {
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   cluster: 'eu'
 });
 ```
@@ -212,7 +219,8 @@ Specifies which transports should be used by Pusher to establish a connection. U
 
 ```js
 // Only use WebSockets
-const socket = new Pusher(API_KEY, {
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   enabledTransports: ['ws']
 });
 ```
@@ -223,12 +231,14 @@ Specified which transports must not be used by Pusher to establish a connection.
 
 ```js
 // Use all transports except for sockjs
-const socket = new Pusher(API_KEY, {
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   disabledTransports: ['sockjs']
 });
 
 // Only use WebSockets
-const socket = new Pusher(API_KEY, {
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
   enabledTransports: ['ws', 'xhr_streaming'],
   disabledTransports: ['xhr_streaming']
 });
@@ -270,10 +280,12 @@ By setting the `log` property you also override the use of `Pusher.enableLogging
 
 ## Connection
 
-A connection to Pusher is established by providing your API key to the constructor function:
+A connection to Pusher is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
 
 ```js
-const socket = new Pusher(API_KEY);
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
+});
 ```
 
 This returns a socket object which can then be used to subscribe to channels.
@@ -410,13 +422,13 @@ There are a number of events which are used internally, but can also be of use e
 To listen for when you connect to Pusher:
 
 ```js
-pusher.connection.bind('connected', callback);
+socket.connection.bind('connected', callback);
 ```
 
 And to bind to disconnections:
 
 ```js
-pusher.connection.bind('disconnected', callback);
+socket.connection.bind('disconnected', callback);
 ```
 
 ## Self-serving JS files
