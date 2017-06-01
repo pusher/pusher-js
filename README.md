@@ -202,10 +202,8 @@ const pusher = new Pusher(APP_KEY, {
 Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
 
 ```js
-// Connect to the EU cluster:
 const socket = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
-  cluster: 'eu'
 });
 ```
 
