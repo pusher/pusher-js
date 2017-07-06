@@ -2,6 +2,7 @@ import PrivateChannel from './private_channel';
 import Logger from '../logger';
 import Members from './members';
 import Pusher from '../pusher';
+import UrlStore from 'core/utils/url_store';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -25,10 +26,12 @@ export default class PresenceChannel extends PrivateChannel {
     super.authorize(socketId, (error, authData) => {
       if (!error) {
         if (authData.channel_data === undefined) {
+          let suffix = UrlStore.buildLogSuffix("authentication_endpoint");
           Logger.warn(
             "Invalid auth response for channel '" +
             this.name +
-            "', expected 'channel_data' field"
+            "', expected 'channel_data' field." +
+            suffix
           );
           callback("Invalid auth response");
           return;

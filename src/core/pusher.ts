@@ -17,6 +17,7 @@ import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
 import PusherOptions from './options';
+import UrlStore from 'core/utils/url_store';
 
 export default class Pusher {
 
@@ -67,6 +68,12 @@ export default class Pusher {
   constructor(app_key : string, options : any) {
     checkAppKey(app_key);
     options = options || {};
+    if (!options.cluster) {
+      let suffix = UrlStore.buildLogSuffix("javascript_quick_start");
+      Logger.warn(
+        `You should always specify a cluster when connecting. ${suffix}`
+      );
+    }
 
     this.key = app_key;
     this.config = Collections.extend<PusherOptions>(
