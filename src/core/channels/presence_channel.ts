@@ -28,10 +28,8 @@ export default class PresenceChannel extends PrivateChannel {
         if (authData.channel_data === undefined) {
           let suffix = UrlStore.buildLogSuffix("authentication_endpoint");
           Logger.warn(
-            "Invalid auth response for channel '" +
-            this.name +
-            "', expected 'channel_data' field." +
-            suffix
+            `Invalid auth response for channel '${this.name}',` +
+            `expected 'channel_data' field. ${suffix}`
           );
           callback("Invalid auth response");
           return;

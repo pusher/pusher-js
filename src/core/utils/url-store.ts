@@ -2,13 +2,13 @@
 * A place to store help URLs for error messages etc
 */
 
-const url_store = {
-  base_url: "https://pusher.com",
+const urlStore = {
+  baseUrl: "https://pusher.com",
   urls: {
-    authentication_endpoint: {
+    authenticationEndpoint: {
       path: "/docs/authenticating_users",
     },
-    javascript_quick_start: {
+    javascriptQuickStart: {
       path: "/docs/javascript_quick_start"
     },
   }
@@ -20,19 +20,19 @@ const url_store = {
 * @return {string} suffix string to append to log message
 */
 const buildLogSuffix = function(key: string) : string {
-  const url_prefix = "Check out:";
-  const url_obj = url_store.urls[key];
-  if(!url_obj) return "";
+  const urlPrefix = "See:";
+  const urlObj = urlStore.urls[key];
+  if(!urlObj) return "";
 
-  var url;
-  if (url_obj.full_url) {
-    url = url_obj.full_url;
-  } else if(url_obj.path) {
-    url = url_store.base_url + url_obj.path;
+  let url;
+  if (urlObj.fullUrl) {
+    url = urlObj.fullUrl;
+  } else if(urlObj.path) {
+    url = urlStore.baseUrl + urlObj.path;
   }
 
   if(!url) return "";
-  return [url_prefix, url].join(" ");
+  return `${urlPrefix}${url}`
 }
 
 export default { buildLogSuffix };
