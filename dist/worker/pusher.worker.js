@@ -71,14 +71,19 @@ var Pusher =
 	var StrategyBuilder = __webpack_require__(31);
 	var timers_1 = __webpack_require__(7);
 	var defaults_1 = __webpack_require__(11);
-	var DefaultConfig = __webpack_require__(54);
+	var DefaultConfig = __webpack_require__(55);
 	var logger_1 = __webpack_require__(16);
 	var factory_1 = __webpack_require__(33);
+	var url_store_1 = __webpack_require__(45);
 	var Pusher = (function () {
 	    function Pusher(app_key, options) {
 	        var _this = this;
 	        checkAppKey(app_key);
 	        options = options || {};
+	        if (!options.cluster) {
+	            var suffix = url_store_1["default"].buildLogSuffix("javascript_quick_start");
+	            logger_1["default"].warn("You should always specify a cluster when connecting. " + suffix);
+	        }
 	        this.key = app_key;
 	        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
 	        this.channels = factory_1["default"].createChannels();
@@ -1886,13 +1891,13 @@ var Pusher =
 	var util_1 = __webpack_require__(6);
 	var transport_manager_1 = __webpack_require__(32);
 	var Errors = __webpack_require__(43);
-	var transport_strategy_1 = __webpack_require__(47);
-	var sequential_strategy_1 = __webpack_require__(48);
-	var best_connected_ever_strategy_1 = __webpack_require__(49);
-	var cached_strategy_1 = __webpack_require__(50);
-	var delayed_strategy_1 = __webpack_require__(51);
-	var if_strategy_1 = __webpack_require__(52);
-	var first_connected_strategy_1 = __webpack_require__(53);
+	var transport_strategy_1 = __webpack_require__(48);
+	var sequential_strategy_1 = __webpack_require__(49);
+	var best_connected_ever_strategy_1 = __webpack_require__(50);
+	var cached_strategy_1 = __webpack_require__(51);
+	var delayed_strategy_1 = __webpack_require__(52);
+	var if_strategy_1 = __webpack_require__(53);
+	var first_connected_strategy_1 = __webpack_require__(54);
 	var runtime_1 = __webpack_require__(2);
 	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
@@ -2088,8 +2093,8 @@ var Pusher =
 	var presence_channel_1 = __webpack_require__(40);
 	var private_channel_1 = __webpack_require__(41);
 	var channel_1 = __webpack_require__(42);
-	var connection_manager_1 = __webpack_require__(45);
-	var channels_1 = __webpack_require__(46);
+	var connection_manager_1 = __webpack_require__(46);
+	var channels_1 = __webpack_require__(47);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2522,6 +2527,7 @@ var Pusher =
 	var private_channel_1 = __webpack_require__(41);
 	var logger_1 = __webpack_require__(16);
 	var members_1 = __webpack_require__(44);
+	var url_store_1 = __webpack_require__(45);
 	var PresenceChannel = (function (_super) {
 	    __extends(PresenceChannel, _super);
 	    function PresenceChannel(name, pusher) {
@@ -2533,9 +2539,11 @@ var Pusher =
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            if (!error) {
 	                if (authData.channel_data === undefined) {
+	                    var suffix = url_store_1["default"].buildLogSuffix("authentication_endpoint");
 	                    logger_1["default"].warn("Invalid auth response for channel '" +
 	                        _this.name +
-	                        "', expected 'channel_data' field");
+	                        "', expected 'channel_data' field." +
+	                        suffix);
 	                    callback("Invalid auth response");
 	                    return;
 	                }
@@ -2825,6 +2833,42 @@ var Pusher =
 
 /***/ }),
 /* 45 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	var url_store = {
+	    base_url: "https://pusher.com",
+	    urls: {
+	        authentication_endpoint: {
+	            path: "/docs/authenticating_users"
+	        },
+	        javascript_quick_start: {
+	            path: "/docs/javascript_quick_start"
+	        }
+	    }
+	};
+	var buildLogSuffix = function (key) {
+	    var url_prefix = "Check out:";
+	    var url_obj = url_store.urls[key];
+	    if (!url_obj)
+	        return "";
+	    var url;
+	    if (url_obj.full_url) {
+	        url = url_obj.full_url;
+	    }
+	    else if (url_obj.path) {
+	        url = url_store.base_url + url_obj.path;
+	    }
+	    if (!url)
+	        return "";
+	    return [url_prefix, url].join(" ");
+	};
+	exports.__esModule = true;
+	exports["default"] = { buildLogSuffix: buildLogSuffix };
+
+
+/***/ }),
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3120,7 +3164,7 @@ var Pusher =
 
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3170,7 +3214,7 @@ var Pusher =
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3277,7 +3321,7 @@ var Pusher =
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3374,7 +3418,7 @@ var Pusher =
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3437,13 +3481,13 @@ var Pusher =
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(6);
 	var runtime_1 = __webpack_require__(2);
-	var sequential_strategy_1 = __webpack_require__(48);
+	var sequential_strategy_1 = __webpack_require__(49);
 	var Collections = __webpack_require__(4);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
@@ -3552,7 +3596,7 @@ var Pusher =
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3594,7 +3638,7 @@ var Pusher =
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3619,7 +3663,7 @@ var Pusher =
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3646,7 +3690,7 @@ var Pusher =
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";

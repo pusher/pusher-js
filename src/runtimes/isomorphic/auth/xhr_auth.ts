@@ -5,6 +5,7 @@ import Util from 'core/util';
 import Runtime from 'runtime';
 import {AuthTransport} from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
+import UrlStore from 'core/utils/url_store';
 
 var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callback){
   var self = this, xhr;
@@ -34,7 +35,11 @@ var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callbac
           callback(false, data);
         }
       } else {
-        Logger.warn("Couldn't get auth info from your webapp", xhr.status);
+        var suffix = UrlStore.buildLogSuffix("authentication_endpoint");
+        Logger.warn(
+          `Couldn't retrieve authentication info. ${xhr.status}` +
+          `Clients must be authenticated to join private or presence channels. ${suffix}`
+        );
         callback(true, xhr.status);
       }
     }
