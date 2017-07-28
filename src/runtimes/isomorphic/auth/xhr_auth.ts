@@ -35,7 +35,7 @@ var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callbac
           callback(false, data);
         }
       } else {
-        var suffix = UrlStore.buildLogSuffix("authentication_endpoint");
+        var suffix = UrlStore.buildLogSuffix("authenticationEndpoint");
         Logger.warn(
           `Couldn't retrieve authentication info. ${xhr.status}` +
           `Clients must be authenticated to join private or presence channels. ${suffix}`

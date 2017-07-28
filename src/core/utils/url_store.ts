@@ -32,7 +32,7 @@ const buildLogSuffix = function(key: string) : string {
   }
 
   if(!url) return "";
-  return `${urlPrefix}${url}`
+  return `${urlPrefix} ${url}`
 }
 
 export default { buildLogSuffix };
