@@ -26,7 +26,7 @@ export default class PresenceChannel extends PrivateChannel {
     super.authorize(socketId, (error, authData) => {
       if (!error) {
         if (authData.channel_data === undefined) {
-          let suffix = UrlStore.buildLogSuffix("authentication_endpoint");
+          let suffix = UrlStore.buildLogSuffix("authenticationEndpoint");
           Logger.warn(
             `Invalid auth response for channel '${this.name}',` +
             `expected 'channel_data' field. ${suffix}`
