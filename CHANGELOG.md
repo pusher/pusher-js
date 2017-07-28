@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.1.1 (2017-07-28)
+
+[NEW] Add a place to store documentation urls for more helpful logging
+
+[CHANGED] Include documentation urls in some common error logs
+
 ## 4.1.0 (2017-04-20)
 
 [NEW] Enable custom authorizers. For more information,
