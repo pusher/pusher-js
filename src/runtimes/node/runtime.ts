@@ -1,5 +1,5 @@
 import Isomorphic from 'isomorphic/runtime';
-import {Client as WebSocket} from "faye-websocket";
+import WebSocket = require( "ws" );
 import {XMLHttpRequest} from "xmlhttprequest";
 import Runtime from "../interface";
 import {Network} from './net_info';
