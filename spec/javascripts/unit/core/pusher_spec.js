@@ -76,8 +76,14 @@ describe("Pusher", function() {
 
     it("should allow a hex key", function() {
       spyOn(Logger, "warn");
-      var pusher = new Pusher("1234567890abcdef");
+      var pusher = new Pusher("1234567890abcdef", { cluster: "mt1" });
       expect(Logger.warn).not.toHaveBeenCalled();
+    });
+
+    it("should warn if no cluster supplied", function() {
+      spyOn(Logger, "warn");
+      var pusher = new Pusher("1234567890abcdef");
+      expect(Logger.warn).toHaveBeenCalled();
     });
   });
 
