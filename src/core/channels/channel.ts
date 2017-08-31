@@ -52,6 +52,7 @@ export default class Channel extends EventsDispatcher {
   /** Signals disconnection to the channel. For internal use only. */
   disconnect() {
     this.subscribed = false;
+    this.subscriptionPending = false;
   }
 
   /** Handles an event. For internal use only.
