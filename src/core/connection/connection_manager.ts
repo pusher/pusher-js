@@ -232,7 +232,7 @@ export default class ConnectionManager extends EventsDispatcher {
   private resetActivityCheck() {
     this.stopActivityCheck();
     // send ping after inactivity
-    if (!this.connection.handlesActivityChecks()) {
+    if (this.connection && !this.connection.handlesActivityChecks()) {
       this.activityTimer = new Timer(this.activityTimeout, ()=> {
         this.sendActivityCheck();
       });
