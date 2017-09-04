@@ -64,6 +64,14 @@ describe("Channel", function() {
       channel.disconnect();
       expect(channel.subscribed).toEqual(false);
     });
+
+    it("should set subscriptionPending to false", function() {
+      channel.subscriptionPending = true;
+      
+      channel.disconnect();
+
+      expect(channel.subscriptionPending).toEqual(false);
+    });
   });
 
   describe("#handleEvent", function() {
