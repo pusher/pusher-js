@@ -81,7 +81,7 @@ module.exports =
 	        checkAppKey(app_key);
 	        options = options || {};
 	        if (!options.cluster) {
-	            var suffix = url_store_1["default"].buildLogSuffix("javascript_quick_start");
+	            var suffix = url_store_1["default"].buildLogSuffix("javascriptQuickStart");
 	            logger_1["default"].warn("You should always specify a cluster when connecting. " + suffix);
 	        }
 	        this.key = app_key;
@@ -271,7 +271,7 @@ module.exports =
 
 	"use strict";
 	var runtime_1 = __webpack_require__(3);
-	var faye_websocket_1 = __webpack_require__(26);
+	var WebSocket = __webpack_require__(26);
 	var xmlhttprequest_1 = __webpack_require__(27);
 	var net_info_1 = __webpack_require__(28);
 	var xhr_auth_1 = __webpack_require__(29);
@@ -296,7 +296,7 @@ module.exports =
 	        return { ajax: xhr_auth_1["default"] };
 	    },
 	    getWebSocketAPI: function () {
-	        return faye_websocket_1.Client;
+	        return WebSocket;
 	    },
 	    getXHRAPI: function () {
 	        return xmlhttprequest_1.XMLHttpRequest;
@@ -1695,7 +1695,7 @@ module.exports =
 /* 26 */
 /***/ (function(module, exports) {
 
-	module.exports = require("faye-websocket");
+	module.exports = require("ws");
 
 /***/ }),
 /* 27 */
@@ -1760,8 +1760,8 @@ module.exports =
 	                }
 	            }
 	            else {
-	                var suffix = url_store_1["default"].buildLogSuffix("authentication_endpoint");
-	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + status) +
+	                var suffix = url_store_1["default"].buildLogSuffix("authenticationEndpoint");
+	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status) +
 	                    ("Clients must be authenticated to join private or presence channels. " + suffix));
 	                callback(true, xhr.status);
 	            }
@@ -1779,32 +1779,32 @@ module.exports =
 /***/ (function(module, exports) {
 
 	"use strict";
-	var url_store = {
-	    base_url: "https://pusher.com",
+	var urlStore = {
+	    baseUrl: "https://pusher.com",
 	    urls: {
-	        authentication_endpoint: {
+	        authenticationEndpoint: {
 	            path: "/docs/authenticating_users"
 	        },
-	        javascript_quick_start: {
+	        javascriptQuickStart: {
 	            path: "/docs/javascript_quick_start"
 	        }
 	    }
 	};
 	var buildLogSuffix = function (key) {
-	    var url_prefix = "Check out:";
-	    var url_obj = url_store.urls[key];
-	    if (!url_obj)
+	    var urlPrefix = "See:";
+	    var urlObj = urlStore.urls[key];
+	    if (!urlObj)
 	        return "";
 	    var url;
-	    if (url_obj.full_url) {
-	        url = url_obj.full_url;
+	    if (urlObj.fullUrl) {
+	        url = urlObj.fullUrl;
 	    }
-	    else if (url_obj.path) {
-	        url = url_store.base_url + url_obj.path;
+	    else if (urlObj.path) {
+	        url = urlStore.baseUrl + urlObj.path;
 	    }
 	    if (!url)
 	        return "";
-	    return [url_prefix, url].join(" ");
+	    return urlPrefix + " " + url;
 	};
 	exports.__esModule = true;
 	exports["default"] = { buildLogSuffix: buildLogSuffix };
@@ -2597,11 +2597,9 @@ module.exports =
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            if (!error) {
 	                if (authData.channel_data === undefined) {
-	                    var suffix = url_store_1["default"].buildLogSuffix("authentication_endpoint");
-	                    logger_1["default"].warn("Invalid auth response for channel '" +
-	                        _this.name +
-	                        "', expected 'channel_data' field." +
-	                        suffix);
+	                    var suffix = url_store_1["default"].buildLogSuffix("authenticationEndpoint");
+	                    logger_1["default"].warn(("Invalid auth response for channel '" + _this.name + "',") +
+	                        ("expected 'channel_data' field. " + suffix));
 	                    callback("Invalid auth response");
 	                    return;
 	                }

@@ -54,7 +54,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
-    "faye-websocket": "0.9.4",
+    "ws": "^3.1.0",
     "xmlhttprequest": "^1.8.0"
   }
 }

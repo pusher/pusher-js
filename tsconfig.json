@@ -10,7 +10,7 @@
   "files": [
     "src/core/pusher.ts",
     "src/d.ts/global/global.d.ts",
-    "src/d.ts/faye-websocket/faye-websocket.d.ts",
+    "src/d.ts/ws/ws.d.ts",
     "src/d.ts/xmlhttprequest/xmlhttprequest.d.ts",
     "src/d.ts/window/websocket.d.ts",
     "src/d.ts/window/xmlhttprequest.d.ts",
