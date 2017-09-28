@@ -9,7 +9,7 @@ failed.
 [FIXED] Does not attempt to call `handlesActivityChecks` on an undefined
 connection instance anymore. Fixes issues #82 and #233.
 
-[NEW] More helpful logging (
+[NEW] More helpful error messages can now be logged, with URLs.
 
 [CHANGED] Various improvements in README.md.
 
