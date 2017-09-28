@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.2.1 (2017-09-28)
+
+[FIXED] Correct version numbers in file headers (v4.2.0 still showed 4.1.0).
+
 ## 4.2.0 (2017-09-28)
 
 [FIXED] Fixed an issue where pusher-js would not attempt to subscribe to
