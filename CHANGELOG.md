@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.2.0 (2017-09-28)
+
+[FIXED] Fixed an issue where pusher-js would not attempt to subscribe to
+channels that were in the process of being subscribed to when the connection
+failed.
+
+[FIXED] Does not attempt to call `handlesActivityChecks` on an undefined
+connection instance anymore. Fixes issues #82 and #233.
+
+[NEW] More helpful logging (
+
+[CHANGED] Various improvements in README.md.
+
+Many thanks to @hengwoon, @leesio, @juliangruber and Heng for their
+contributions to this release!
+
 ## 4.1.0 (2017-04-20)
 
 [NEW] Enable custom authorizers. For more information,
