@@ -246,6 +246,10 @@ const socket = new Pusher(APP_KEY, {
 
 These can be changed to point to alternative Pusher URLs (used internally for our staging server).
 
+#### `wsPath`
+
+Useful in special scenarios if you're using the library against an endpoint you control yourself. If you're not sure whether you need this, you don't need it.
+
 #### `ignoreNullOrigin` (Boolean)
 
 Ignores null origin checks for HTTP fallbacks. Use with care, it should be disabled only if necessary (i.e. PhoneGap).
