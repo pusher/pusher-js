@@ -1702,7 +1702,7 @@ module.exports =
 	var react_native_1 = __webpack_require__(27);
 	var dispatcher_1 = __webpack_require__(14);
 	function hasOnlineConnectionState(connectionState) {
-	    return connectionState.toLowerCase() !== "none";
+	    return connectionState.type.toLowerCase() !== "none";
 	}
 	var NetInfo = (function (_super) {
 	    __extends(NetInfo, _super);
@@ -1710,10 +1710,10 @@ module.exports =
 	        var _this = this;
 	        _super.call(this);
 	        this.online = true;
-	        react_native_1.NetInfo.fetch().then(function (connectionState) {
+	        react_native_1.NetInfo.getConnectionInfo().then(function (connectionState) {
 	            _this.online = hasOnlineConnectionState(connectionState);
 	        });
-	        react_native_1.NetInfo.addEventListener('change', function (connectionState) {
+	        react_native_1.NetInfo.addEventListener('connectionChange', function (connectionState) {
 	            var isNowOnline = hasOnlineConnectionState(connectionState);
 	            if (_this.online === isNowOnline)
 	                return;
