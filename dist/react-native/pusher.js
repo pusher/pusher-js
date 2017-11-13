@@ -1711,7 +1711,7 @@ module.exports =
 	        _super.call(this);
 	        this.online = true;
 	        react_native_1.NetInfo.getConnectionInfo().then(function (connectionState) {
-	            this.online = hasOnlineConnectionState(connectionState);
+	            _this.online = hasOnlineConnectionState(connectionState);
 	        });
 	        react_native_1.NetInfo.addEventListener('connectionChange', function (connectionState) {
 	            var isNowOnline = hasOnlineConnectionState(connectionState);
