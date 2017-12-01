@@ -80,7 +80,7 @@ module.exports =
 	        var _this = this;
 	        checkAppKey(app_key);
 	        options = options || {};
-	        if (!options.cluster) {
+	        if (!options.cluster && !(options.wsHost || options.httpHost)) {
 	            var suffix = url_store_1["default"].buildLogSuffix("javascriptQuickStart");
 	            logger_1["default"].warn("You should always specify a cluster when connecting. " + suffix);
 	        }
@@ -804,7 +804,8 @@ module.exports =
 	}
 	exports.ws = {
 	    getInitial: function (key, params) {
-	        return getGenericURL("ws", params, getGenericPath(key, "flash=false"));
+	        var path = (params.httpPath || "") + getGenericPath(key, "flash=false");
+	        return getGenericURL("ws", params, path);
 	    }
 	};
 	exports.http = {
@@ -834,6 +835,7 @@ module.exports =
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
 	    wss_port: 443,
+	    ws_path: '',
 	    sockjs_host: 'sockjs.pusher.com',
 	    sockjs_http_port: 80,
 	    sockjs_https_port: 443,
@@ -1179,16 +1181,16 @@ module.exports =
 	            args[_i - 0] = arguments[_i];
 	        }
 	        var message = collections_1.stringify.apply(this, arguments);
-	        if (global.console) {
+	        if (pusher_1["default"].log) {
+	            pusher_1["default"].log(message);
+	        }
+	        else if (global.console) {
 	            if (global.console.warn) {
 	                global.console.warn(message);
 	            }
 	            else if (global.console.log) {
 	                global.console.log(message);
 	            }
-	        }
-	        if (pusher_1["default"].log) {
-	            pusher_1["default"].log(message);
 	        }
 	    }
 	};
@@ -1221,7 +1223,8 @@ module.exports =
 	    return [
 	        [":def", "ws_options", {
 	                hostUnencrypted: config.wsHost + ":" + config.wsPort,
-	                hostEncrypted: config.wsHost + ":" + config.wssPort
+	                hostEncrypted: config.wsHost + ":" + config.wssPort,
+	                httpPath: config.wsPath
 	            }],
 	        [":def", "wss_options", [":extend", ":ws_options", {
 	                    encrypted: true
@@ -3721,6 +3724,7 @@ module.exports =
 	        wsHost: defaults_1["default"].host,
 	        wsPort: defaults_1["default"].ws_port,
 	        wssPort: defaults_1["default"].wss_port,
+	        wsPath: defaults_1["default"].ws_path,
 	        httpHost: defaults_1["default"].sockjs_host,
 	        httpPort: defaults_1["default"].sockjs_http_port,
 	        httpsPort: defaults_1["default"].sockjs_https_port,

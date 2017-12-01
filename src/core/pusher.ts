@@ -68,7 +68,7 @@ export default class Pusher {
   constructor(app_key : string, options : any) {
     checkAppKey(app_key);
     options = options || {};
-    if (!options.cluster) {
+    if (!options.cluster && !(options.wsHost || options.httpHost)) {
       let suffix = UrlStore.buildLogSuffix("javascriptQuickStart");
       Logger.warn(
         `You should always specify a cluster when connecting. ${suffix}`
