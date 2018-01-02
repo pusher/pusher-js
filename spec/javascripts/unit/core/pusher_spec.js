@@ -80,10 +80,18 @@ describe("Pusher", function() {
       expect(Logger.warn).not.toHaveBeenCalled();
     });
 
-    it("should warn if no cluster supplied", function() {
+    it("should warn if no cluster is supplied", function() {
       spyOn(Logger, "warn");
       var pusher = new Pusher("1234567890abcdef");
       expect(Logger.warn).toHaveBeenCalled();
+    });
+
+    it("should not warn if no cluster is supplied if wsHost or httpHost are supplied", function() {
+      spyOn(Logger, "warn");
+      var wsPusher = new Pusher("1234567890abcdef", { wsHost: 'example.com' });
+      var httpPusher = new Pusher("1234567890abcdef", { httpHost: 'example.com' });
+      expect(Logger.warn).not.toHaveBeenCalled();
+      expect(Logger.warn).not.toHaveBeenCalled();
     });
   });
 
