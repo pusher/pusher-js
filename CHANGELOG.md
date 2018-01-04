@@ -1,5 +1,18 @@
 # Changelog
 
+## 4.2.2 (2018-01-04)
+
+[FIXED] Do not warn about a missing cluster when the host is explicitly set.
+
+[FIXED] Only log with a custom logger when configured (prevents double
+logging).
+
+[FIXED] Update React Native NetInfo usage due to deprecated modules.
+
+[NEW] Add `wsPath` option (see README.md for details).
+
+Many thanks to @sunweiyang, @rajivm and @WillSewell for their contributions!
+
 ## 4.2.1 (2017-09-28)
 
 [FIXED] Correct version numbers in file headers (v4.2.0 still showed 4.1.0).

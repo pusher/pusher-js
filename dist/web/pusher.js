@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v4.2.1
+ * Pusher JavaScript Library v4.2.2
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -476,7 +476,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "4.2.1",
+	    VERSION: "4.2.2",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
