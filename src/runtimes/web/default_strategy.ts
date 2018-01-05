@@ -1,19 +1,9 @@
 var getDefaultStrategy = function(config : any) : any {
-  var wsStrategy;
-  if (config.encrypted) {
-    wsStrategy = [
-      ":best_connected_ever",
-      ":ws_loop",
-      [":delayed", 2000, [":http_fallback_loop"]]
-    ];
-  } else {
-    wsStrategy = [
-      ":best_connected_ever",
-      ":ws_loop",
-      [":delayed", 2000, [":wss_loop"]],
-      [":delayed", 5000, [":http_fallback_loop"]]
-    ];
-  }
+  var wsStrategy = [
+    ":best_connected_ever",
+    ":ws_loop",
+    [":delayed", 2000, [":http_fallback_loop"]]
+  ];
 
   return [
     [":def", "ws_options", {
