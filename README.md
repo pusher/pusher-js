@@ -256,7 +256,7 @@ Ignores null origin checks for HTTP fallbacks. Use with care, it should be disab
 
 #### `activityTimeout` (Integer)
 
-After this time (in miliseconds) without any messages received from the server, a ping message will be sent to check if the connection is still working. Default value is is supplied by the server, low values will result in unnecessary traffic.
+After this time (in miliseconds) without any messages received from the server, a ping message will be sent to check if the connection is still working. Default value is supplied by the server, low values will result in unnecessary traffic.
 
 #### `pongTimeout` (Integer)
 
