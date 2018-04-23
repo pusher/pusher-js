@@ -184,7 +184,7 @@ const socket = new Pusher(APP_KEY, {
 If you need custom authorization behavior you can provide your own `authorizer` function as follows:
 
 ```js
-const pusher = new Pusher(APP_KEY, {
+const socket = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   authorizer: function (channel, options) {
     return {
