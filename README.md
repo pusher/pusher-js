@@ -262,6 +262,17 @@ const socket = new Pusher(APP_KEY, {
 });
 ```
 
+Note: if you intend to use secure websockets, or `wss`, you can not simply specify `wss` in `enabledTransports`, you must specify `ws` in `enabledTransports` as well as set the `encrypted` option to `true`.
+
+```js
+// Only use secure WebSockets
+const socket = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
+  enabledTransports: ['ws'],
+  encrypted: true
+});
+```
+
 #### `disabledTransports` (Array)
 
 Specifies which transports must not be used by pusher-js to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. This is a whitelist, so any new transports we introduce in the future will be used until you explicitly add them to this list.
