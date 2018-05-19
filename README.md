@@ -292,24 +292,12 @@ By setting the `log` property you also override the use of `Pusher.enableLogging
 ## Connection
 
 A connection to Pusher is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
-### Connection States
-The connection can be in any one of these states.
 
 ```js
 const socket = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
-
-**State**|**Note**
---- | ---
-initialized|Initial state. No event is emitted in this state.
-connecting|All dependencies have been loaded and Channels is trying to connect. The connection will also enter this state when it is trying to reconnect after a connection failure.
-connected|The connection to Channels is open and authenticated with your app.
-unavailable|The connection is temporarily unavailable. In most cases this means that there is no internet connection. It could also mean that Channels is down
-failed|Channels is not supported by the browser. This implies that WebSockets are not natively available and an HTTP-based transport could not be found.
-disconnected|The Channels connection was previously connected and has now intentionally been closed.
-
 
 This returns a socket object which can then be used to subscribe to channels.
 
@@ -329,6 +317,18 @@ You may disconnect again by invoking the `disconnect` method:
 ```js
 socket.disconnect();
 ```
+
+### Connection States
+The connection can be in any one of these states.
+
+**State**|**Note**
+--- | ---
+initialized|Initial state. No event is emitted in this state.
+connecting|All dependencies have been loaded and Channels is trying to connect. The connection will also enter this state when it is trying to reconnect after a connection failure.
+connected|The connection to Channels is open and authenticated with your app.
+unavailable|The connection is temporarily unavailable. In most cases this means that there is no internet connection. It could also mean that Channels is down
+failed|Channels is not supported by the browser. This implies that WebSockets are not natively available and an HTTP-based transport could not be found.
+disconnected|The Channels connection was previously connected and has now intentionally been closed.
 
 ### Socket IDs
 
