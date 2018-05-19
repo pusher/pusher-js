@@ -153,11 +153,10 @@ For more information see [authenticating users](https://pusher.com/docs/authenti
 
 Defines how the authentication endpoint, defined using authEndpoint, will be called. There are two options available: `ajax` and `jsonp`.
 
-**ajax** - The **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+* `ajax` - The **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+* `jsonp` - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `authEndpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
 
-**jsonp** - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `authEndpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
--
--For more information see the [Channel authentication transport section of our authenticating users docs](http://pusher.com/docs/authenticating_users#authTransport).
+For more information see the [Channel authentication transport section of our authenticating users docs](http://pusher.com/docs/authenticating_users#authTransport).
 
 #### `auth` (Hash)
 
