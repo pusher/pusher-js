@@ -145,11 +145,18 @@ Forces the connection to use encrypted transports.
 
 #### `authEndpoint` (String)
 
-Endpoint on your server that will return the authentication signature needed for private channels.
+Endpoint on your server that will return the authentication signature needed for private and presence channels. Defaults to `'/pusher/auth'`.
+
+For more information see [authenticating users](https://pusher.com/docs/authenticating_users).
 
 #### `authTransport` (String)
 
 Defines how the authentication endpoint, defined using authEndpoint, will be called. There are two options available: `ajax` and `jsonp`.
+
+* `ajax` - The **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+* `jsonp` - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `authEndpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
+
+For more information see the [Channel authentication transport section of our authenticating users docs](http://pusher.com/docs/authenticating_users#authTransport).
 
 #### `auth` (Hash)
 
@@ -164,6 +171,8 @@ const socket = new Pusher(APP_KEY, {
   }
 });
 ```
+
+Additional parameters to be sent when the channel authentication endpoint is called. When using [ajax authentication](https://pusher.com/docs/authenticating_users#ajax_authentication) the parameters are passed as additional `POST` parameters. When using [jsonp authentication](http://pusher.com/docs/authenticating_users#jsonp_authentication) the parameters are passed as `GET` parameters. This can be useful with web application frameworks that guard against [CSRF (Cross-site request forgery)](http://en.wikipedia.org/wiki/Cross-site_request_forgery).
 
 ##### CSRF
 
@@ -199,7 +208,7 @@ const socket = new Pusher(APP_KEY, {
 
 #### `cluster` (String)
 
-Allows connecting to a different datacenter by setting up correct hostnames and ports for the connection.
+Specifies the cluster that PusherJS should connect to. [If you'd like to see a full list of our clusters, click here](https://pusher.com/docs/clusters). If you do not specify a cluster, `mt1` will be used by default.
 
 ```js
 const socket = new Pusher(APP_KEY, {
@@ -213,7 +222,7 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 #### `enabledTransports` (Array)
 
-Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be disabled.
+Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. If you specify your transports in this way, you may miss out on new transports we add in the future.
 
 ```js
 // Only use WebSockets
@@ -225,7 +234,7 @@ const socket = new Pusher(APP_KEY, {
 
 #### `disabledTransports` (Array)
 
-Specified which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. Additional transports may be added in the future and without adding them to this list, they will be enabled.
+Specifies which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. This is a whitelist, so any new transports we introduce in the future will be used until you explicitly add them to this list.
 
 ```js
 // Use all transports except for sockjs
@@ -248,7 +257,7 @@ These can be changed to point to alternative Pusher URLs (used internally for ou
 
 #### `wsPath`
 
-Useful in special scenarios if you're using the library against an endpoint you control yourself. If you're not sure whether you need this, you don't need it.
+Useful in special scenarios if you're using the library against an endpoint you control yourself. This is used internally for testing.
 
 #### `ignoreNullOrigin` (Boolean)
 
@@ -256,11 +265,11 @@ Ignores null origin checks for HTTP fallbacks. Use with care, it should be disab
 
 #### `activityTimeout` (Integer)
 
-After this time (in miliseconds) without any messages received from the server, a ping message will be sent to check if the connection is still working. Default value is supplied by the server, low values will result in unnecessary traffic.
+If there is no activity for this length of time (in milliseconds), the client will ping the server to check if the connection is still working. The default value is set by the server. Setting this value to be too low will result in unnecessary traffic.
 
 #### `pongTimeout` (Integer)
 
-Time before the connection is terminated after sending a ping message. Default is 30000 (30s). Low values will cause false disconnections, if latency is high.
+Time before the connection is terminated after a ping is sent to the server. Default is 30000 (30s). Low values will cause false disconnections, if latency is high.
 
 ## Global configuration
 
@@ -292,11 +301,34 @@ const socket = new Pusher(APP_KEY, {
 
 This returns a socket object which can then be used to subscribe to channels.
 
+One reason this connection might fail is your account being over its' limits. You can detect this in the client by binding to the `error` event on the `pusher.connection` object. For example:
+
+```js
+var pusher = new Pusher('app_key');
+pusher.connection.bind( 'error', function( err ) {
+  if( err.error.data.code === 4004 ) {
+    log('Over limit!');
+  }
+});
+```
+
 You may disconnect again by invoking the `disconnect` method:
 
 ```js
 socket.disconnect();
 ```
+
+### Connection States
+The connection can be in any one of these states.
+
+**State**|**Note**
+--- | ---
+initialized|Initial state. No event is emitted in this state.
+connecting|All dependencies have been loaded and Channels is trying to connect. The connection will also enter this state when it is trying to reconnect after a connection failure.
+connected|The connection to Channels is open and authenticated with your app.
+unavailable|The connection is temporarily unavailable. In most cases this means that there is no internet connection. It could also mean that Channels is down
+failed|Channels is not supported by the browser. This implies that WebSockets are not natively available and an HTTP-based transport could not be found.
+disconnected|The Channels connection was previously connected and has now intentionally been closed.
 
 ### Socket IDs
 
@@ -421,9 +453,14 @@ Currently, pusher-js itself does not support authenticating multiple channels in
 
 ## Default events
 
-There are a number of events which are used internally, but can also be of use elsewhere:
+There are a number of events which are used internally, but can also be of use elsewhere, for instance `subscribe`. There is also a `state_change` event - which fires whenever there is a state change. You can use it like this:
 
-* subscribe
+```js
+pusher.connection.bind('state_change', function(states) {
+  // states = {previous: 'oldState', current: 'newState'}
+  $('div#status').text("Channels current state is " + states.current);
+});
+```
 
 ## Connection Events
 
