@@ -28,6 +28,8 @@
   },
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
+    "babel-loader": "^7.1.4",
+    "babel-preset-es2015": "^6.24.1",
     "es3ify-loader": "^0.2.0",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^2.2.1",
@@ -46,15 +48,18 @@
     "karma-verbose-reporter": "0.0.3",
     "karma-webpack": "^1.7.0",
     "object-assign-deep": "0.0.4",
-    "string-replace-webpack-plugin": "0.0.3",
-    "ts-loader": "^0.8.2",
-    "typescript": "^1.8.0",
+    "ts-loader": "^4.3.0",
+    "typescript": "^2.8.4",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.12.9",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "webpack-cli": "^2.1.4",
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
     "faye-websocket": "0.9.4",
+    "tweetnacl": "^1.0.0",
+    "tweetnacl-util": "^0.15.0",
+    "webpack": "^4.10.2",
     "xmlhttprequest": "^1.8.0"
   }
 }

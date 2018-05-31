@@ -16,10 +16,9 @@ web:
 	echo "Browser Release:"
 	# make sockjs
 	# cp src/runtimes/web/dom/sockjs/sockjs.js dist/web
-	node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
-	echo "Browser Minified Release:"
+	NODE_ENV=production node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 	# cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
-	MINIFY=web node_modules/webpack/bin/webpack.js --config=webpack/config.min.js
+	NODE_ENV=development node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 
 react-native:
 	echo "React Native Release:"

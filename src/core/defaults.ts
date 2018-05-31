@@ -21,8 +21,13 @@ export interface DefaultConfig {
   dependency_suffix?: string;
 }
 
+declare var __VERSION__: string
+declare var __CDN_HTTP__: string
+declare var __CDN_HTTPS__: string
+declare var __DEPENDENCY_SUFFIX__: string
+
 var Defaults : DefaultConfig = {
-  VERSION: "<VERSION>",
+  VERSION: __VERSION__,
   PROTOCOL: 7,
 
   // DEPRECATED: WS connection parameters
@@ -45,9 +50,9 @@ var Defaults : DefaultConfig = {
   unavailable_timeout: 10000,
 
   // CDN configuration
-  cdn_http: '<CDN_HTTP>',
-  cdn_https: '<CDN_HTTPS>',
-  dependency_suffix: '<DEPENDENCY_SUFFIX>'
+  cdn_http: __CDN_HTTP__,
+  cdn_https: __CDN_HTTPS__,
+  dependency_suffix: __DEPENDENCY_SUFFIX__
 }
 
 export default Defaults;
