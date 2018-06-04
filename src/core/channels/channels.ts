@@ -61,7 +61,7 @@ export default class Channels {
 }
 
 function createChannel(name : string, pusher : Pusher) : Channel {
-  if (name.indexOf('encrypted-') === 0) {
+  if (name.indexOf('private-encrypted-') === 0) {
     return Factory.createEncryptedChannel(name, pusher);
   } else if (name.indexOf('private-') === 0) {
     return Factory.createPrivateChannel(name, pusher);
