@@ -1,7 +1,8 @@
 import Factory from "../utils/factory";
 import PrivateChannel from './private_channel';
 import Pusher from '../pusher';
-import * as _sodium from 'libsodium-wrappers'
+import * as nacl from 'tweetnacl'
+import * as naclUtil from 'tweetnacl-util'
 
 /** Extends public channels to provide private channel interface.
  *
@@ -9,16 +10,12 @@ import * as _sodium from 'libsodium-wrappers'
  * @param {Pusher} pusher
  */
 export default class EncryptedChannel extends PrivateChannel {
-  key: string;
-  sodium: any;
+  key: Uint8Array;
   encryptedDataPrefix :string;
 
   constructor(name: string, pusher: Pusher){
     super(name, pusher)
     this.encryptedDataPrefix = 'encrypted_data';
-    _sodium.ready.then(() => {
-      this.sodium = _sodium;
-    });
   }
 
   /** Authorizes the connection to use the channel.
@@ -51,10 +48,7 @@ export default class EncryptedChannel extends PrivateChannel {
   }
 
   private decryptPayload(encryptedData: string) {
-    if(!this.sodium) {
-      throw new Error('Unable to decrypt payload, sodium not initalized')
-    }
-    let minLength = this.sodium.crypto_secretbox_NONCEBYTES + this.sodium.crypto_secretbox_MACBYTES;
+    let minLength = nacl.secretbox.overheadLength + nacl.secretbox.nonceLength;
     if (encryptedData.length < minLength) {
       throw new Error('Unable to decrypt payload, encrypted payload too short')
     }
@@ -66,23 +60,22 @@ export default class EncryptedChannel extends PrivateChannel {
     let nonce = this.convertBase64(parts[1])
     let cipherText = this.convertBase64(parts[2])
 
-    let bytes = this.sodium.crypto_secretbox_open_easy(cipherText, nonce, this.key);
-    let str = this.sodium.to_string(bytes);
+    let bytes = nacl.secretbox.open(cipherText, nonce, this.key);
+    let str = naclUtil.encodeUTF8(bytes)
     let decryptedData;
     try {
       decryptedData = JSON.parse(str);
     } catch(e) {
-      throw new Error(`Unable to parse decrypted payload: ${e}`)
     }
-    return decryptedData
+    return decryptedData || str
   }
 
   private extractAndAttachKey(authEndpointResponse: any): void {
     let decodedKey = this.convertBase64(authEndpointResponse['shared-secret'])
     this.key = decodedKey;
   }
-  private convertBase64(b: string): string {
-    return this.sodium.from_base64(b, this.sodium.base64_variants.ORIGINAL)
+  private convertBase64(b: string): Uint8Array {
+    return naclUtil.decodeBase64(b)
   }
 
   private isEncryptedData(data: string): boolean {
@@ -92,6 +85,4 @@ export default class EncryptedChannel extends PrivateChannel {
     return data.indexOf(this.encryptedDataPrefix) === 0
   }
 }
-
-
 
