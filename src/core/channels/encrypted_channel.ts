@@ -1,8 +1,9 @@
 import Factory from "../utils/factory";
 import PrivateChannel from './private_channel';
 import Pusher from '../pusher';
-import * as nacl from 'tweetnacl'
-import * as naclUtil from 'tweetnacl-util'
+
+import { secretbox as naclSecretbox } from 'tweetnacl'
+import { encodeUTF8, decodeBase64 } from 'tweetnacl-util'
 
 /** Extends public channels to provide private channel interface.
  *
@@ -48,20 +49,26 @@ export default class EncryptedChannel extends PrivateChannel {
   }
 
   private decryptPayload(encryptedData: string) {
-    let minLength = nacl.secretbox.overheadLength + nacl.secretbox.nonceLength;
+    if(!this.key) {
+      throw new Error('Unable to decrypt payload, no decryption key');
+    }
+    let minLength = naclSecretbox.overheadLength + naclSecretbox.nonceLength;
     if (encryptedData.length < minLength) {
-      throw new Error('Unable to decrypt payload, encrypted payload too short')
+      throw new Error('Unable to decrypt payload, encrypted payload too short');
     }
-    let parts = encryptedData.split(':')
+    let parts = encryptedData.split(':');
     if (parts.length != 3 ) {
-      throw new Error('Unable to decrypt payload, unexpected data format')
+      throw new Error('Unable to decrypt payload, unexpected data format');
     }
 
-    let nonce = this.convertBase64(parts[1])
-    let cipherText = this.convertBase64(parts[2])
+    let nonce = this.convertBase64(parts[1]);
+    let cipherText = this.convertBase64(parts[2]);
 
-    let bytes = nacl.secretbox.open(cipherText, nonce, this.key);
-    let str = naclUtil.encodeUTF8(bytes)
+    let bytes = naclSecretbox.open(cipherText, nonce, this.key);
+    if(bytes === null) {
+      throw new Error("Unable to decrypt payload, probably an invalid key");
+    }
+    let str = encodeUTF8(bytes)
     let decryptedData;
     try {
       decryptedData = JSON.parse(str);
@@ -75,7 +82,7 @@ export default class EncryptedChannel extends PrivateChannel {
     this.key = decodedKey;
   }
   private convertBase64(b: string): Uint8Array {
-    return naclUtil.decodeBase64(b)
+    return decodeBase64(b)
   }
 
   private isEncryptedData(data: string): boolean {
