@@ -1,9 +1,15 @@
 import Factory from "../utils/factory";
 import PrivateChannel from './private_channel';
 import Pusher from '../pusher';
+import * as Errors from '../errors';
 
-import { secretbox as naclSecretbox } from 'tweetnacl'
-import { encodeUTF8, decodeBase64 } from 'tweetnacl-util'
+import { secretbox as naclSecretbox, randomBytes } from 'tweetnacl'
+import {
+  encodeUTF8,
+  decodeBase64,
+  encodeBase64,
+  decodeUTF8
+} from 'tweetnacl-util'
 
 /** Extends public channels to provide private channel interface.
  *
@@ -26,13 +32,21 @@ export default class EncryptedChannel extends PrivateChannel {
    */
   authorize(socketId : string, callback : Function) {
     super.authorize(socketId, (error, authData) => {
-      if(authData['shared-secret']){
-        this.extractAndAttachKey(authData)
-        delete authData['shared-secret'];
+      if(authData['shared_secret']){
+        this.key  = this.convertBase64(authData['shared_secret'])
+        delete authData['shared_secret'];
+      } else {
+        throw new Error('Unable to extract shared secret from auth payload');
       }
       callback(error, authData)
     });
 
+  }
+
+  /** Triggers an event */
+  trigger(event : string, data : any) {
+    let encryptedData = this.encryptPayload(data);
+    return super.trigger(event, encryptedData)
   }
 
   /** Handles an event. For internal use only.
@@ -46,6 +60,22 @@ export default class EncryptedChannel extends PrivateChannel {
     }
     var decryptedData = this.decryptPayload(data)
     this.emit(event, decryptedData);
+  }
+
+  private encryptPayload(data: string): string {
+    if(!this.key) {
+      throw new Error('Unable to encrypt payload, no key');
+    }
+    let nonce = randomBytes(24);
+    let dataStr = JSON.stringify(data);
+    let dataBytes = decodeUTF8(dataStr);
+
+    let bytes = naclSecretbox(dataBytes, nonce, this.key);
+    if(bytes === null) {
+      throw new Error("Unable to encrypt data, probably an invalid key");
+    }
+    let encryptedData = encodeBase64(bytes)
+    return `encrypted_data:${encodeBase64(nonce)}:${encryptedData}`
   }
 
   private decryptPayload(encryptedData: string) {
@@ -77,10 +107,6 @@ export default class EncryptedChannel extends PrivateChannel {
     return decryptedData || str
   }
 
-  private extractAndAttachKey(authEndpointResponse: any): void {
-    let decodedKey = this.convertBase64(authEndpointResponse['shared-secret'])
-    this.key = decodedKey;
-  }
   private convertBase64(b: string): Uint8Array {
     return decodeBase64(b)
   }
