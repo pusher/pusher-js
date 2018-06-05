@@ -32,13 +32,13 @@ export default class EncryptedChannel extends PrivateChannel {
    */
   authorize(socketId : string, callback : Function) {
     super.authorize(socketId, (error, authData) => {
-      if(authData['shared_secret']){
-        this.key  = this.convertBase64(authData['shared_secret'])
-        delete authData['shared_secret'];
+      let { auth, shared_secret} = authData;
+      if(shared_secret){
+        this.key  = this.convertBase64(shared_secret)
       } else {
         throw new Error('Unable to extract shared secret from auth payload');
       }
-      callback(error, authData)
+      callback(error, {auth});
     });
 
   }
@@ -118,4 +118,3 @@ export default class EncryptedChannel extends PrivateChannel {
     return data.indexOf(this.encryptedDataPrefix) === 0
   }
 }
-
