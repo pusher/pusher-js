@@ -1,15 +1,15 @@
-import Factory from "../utils/factory";
+import Factory from '../utils/factory';
 import PrivateChannel from './private_channel';
 import Pusher from '../pusher';
 import * as Errors from '../errors';
 
-import { secretbox as naclSecretbox, randomBytes } from 'tweetnacl'
+import {secretbox as naclSecretbox, randomBytes} from 'tweetnacl';
 import {
   encodeUTF8,
   decodeBase64,
   encodeBase64,
-  decodeUTF8
-} from 'tweetnacl-util'
+  decodeUTF8,
+} from 'tweetnacl-util';
 
 /** Extends public channels to provide private channel interface.
  *
@@ -18,10 +18,10 @@ import {
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array;
-  encryptedDataPrefix :string;
+  encryptedDataPrefix: string;
 
-  constructor(name: string, pusher: Pusher){
-    super(name, pusher)
+  constructor(name: string, pusher: Pusher) {
+    super(name, pusher);
     this.encryptedDataPrefix = 'encrypted_data';
   }
 
@@ -30,23 +30,22 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {String} socketId
    * @param  {Function} callback
    */
-  authorize(socketId : string, callback : Function) {
+  authorize(socketId: string, callback: Function) {
     super.authorize(socketId, (error, authData) => {
-      let { auth, shared_secret} = authData;
-      if(shared_secret){
-        this.key  = this.convertBase64(shared_secret)
+      let {auth, shared_secret} = authData;
+      if (shared_secret) {
+        this.key = decodeBase64(shared_secret);
       } else {
         throw new Error('Unable to extract shared secret from auth payload');
       }
       callback(error, {auth});
     });
-
   }
 
   /** Triggers an event */
-  trigger(event : string, data : any) {
+  trigger(event: string, data: any) {
     let encryptedData = this.encryptPayload(data);
-    return super.trigger(event, encryptedData)
+    return super.trigger(event, encryptedData);
   }
 
   /** Handles an event. For internal use only.
@@ -54,16 +53,16 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param {String} event
    * @param {*} data
    */
-  handleEvent(event : string, data : any) {
+  handleEvent(event: string, data: any) {
     if (!this.isEncryptedData(data)) {
-      return super.handleEvent(event, data)
+      return super.handleEvent(event, data);
     }
-    var decryptedData = this.decryptPayload(data)
+    var decryptedData = this.decryptPayload(data);
     this.emit(event, decryptedData);
   }
 
   private encryptPayload(data: string): string {
-    if(!this.key) {
+    if (!this.key) {
       throw new Error('Unable to encrypt payload, no key');
     }
     let nonce = randomBytes(24);
@@ -71,15 +70,15 @@ export default class EncryptedChannel extends PrivateChannel {
     let dataBytes = decodeUTF8(dataStr);
 
     let bytes = naclSecretbox(dataBytes, nonce, this.key);
-    if(bytes === null) {
-      throw new Error("Unable to encrypt data, probably an invalid key");
+    if (bytes === null) {
+      throw new Error('Unable to encrypt data, probably an invalid key');
     }
-    let encryptedData = encodeBase64(bytes)
-    return `encrypted_data:${encodeBase64(nonce)}:${encryptedData}`
+    let encryptedData = encodeBase64(bytes);
+    return `encrypted_data:${encodeBase64(nonce)}:${encryptedData}`;
   }
 
   private decryptPayload(encryptedData: string) {
-    if(!this.key) {
+    if (!this.key) {
       throw new Error('Unable to decrypt payload, no decryption key');
     }
     let minLength = naclSecretbox.overheadLength + naclSecretbox.nonceLength;
@@ -87,34 +86,29 @@ export default class EncryptedChannel extends PrivateChannel {
       throw new Error('Unable to decrypt payload, encrypted payload too short');
     }
     let parts = encryptedData.split(':');
-    if (parts.length != 3 ) {
+    if (parts.length != 3) {
       throw new Error('Unable to decrypt payload, unexpected data format');
     }
 
-    let nonce = this.convertBase64(parts[1]);
-    let cipherText = this.convertBase64(parts[2]);
+    let nonce = decodeBase64(parts[1]);
+    let cipherText = decodeBase64(parts[2]);
 
     let bytes = naclSecretbox.open(cipherText, nonce, this.key);
-    if(bytes === null) {
-      throw new Error("Unable to decrypt payload, probably an invalid key");
+    if (bytes === null) {
+      throw new Error('Unable to decrypt payload, probably an invalid key');
     }
-    let str = encodeUTF8(bytes)
+    let str = encodeUTF8(bytes);
     let decryptedData;
     try {
       decryptedData = JSON.parse(str);
-    } catch(e) {
-    }
-    return decryptedData || str
-  }
-
-  private convertBase64(b: string): Uint8Array {
-    return decodeBase64(b)
+    } catch (e) {}
+    return decryptedData || str;
   }
 
   private isEncryptedData(data: string): boolean {
-    if (typeof(data) !== 'string') {
-      return false
+    if (typeof data !== 'string') {
+      return false;
     }
-    return data.indexOf(this.encryptedDataPrefix) === 0
+    return data.indexOf(this.encryptedDataPrefix) === 0;
   }
 }
