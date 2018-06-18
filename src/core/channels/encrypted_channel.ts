@@ -18,10 +18,21 @@ import {
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array;
+  keyPromise: Promise<Uint8Array>;
+  resolveKeyPromise: any;
+  rejectKeyPromise: any;
+
   encryptedDataPrefix: string;
 
   constructor(name: string, pusher: Pusher) {
     super(name, pusher);
+    this.keyPromise = new Promise((resolve, reject) => {
+      this.resolveKeyPromise = resolve;
+      this.rejectKeyPromise = reject;
+    }).then((key: Uint8Array) => {
+      this.key = key;
+      return key;
+    });
     this.encryptedDataPrefix = 'encrypted_data';
   }
 
@@ -34,7 +45,7 @@ export default class EncryptedChannel extends PrivateChannel {
     super.authorize(socketId, (error, authData) => {
       let {auth, shared_secret} = authData;
       if (shared_secret) {
-        this.key = decodeBase64(shared_secret);
+        this.resolveKeyPromise(decodeBase64(shared_secret));
       } else {
         throw new Error('Unable to extract shared secret from auth payload');
       }
@@ -42,10 +53,11 @@ export default class EncryptedChannel extends PrivateChannel {
     });
   }
 
-  /** Triggers an event */
-  trigger(event: string, data: any) {
-    let encryptedData = this.encryptPayload(data);
-    return super.trigger(event, encryptedData);
+  /** Triggers an encrypted event */
+  triggerEncrypted(event: string, data: any) {
+    this.encryptPayload(data).then((encryptedData) => {
+      return super.trigger(event, encryptedData);
+    });
   }
 
   /** Handles an event. For internal use only.
@@ -57,52 +69,75 @@ export default class EncryptedChannel extends PrivateChannel {
     if (!this.isEncryptedData(data)) {
       return super.handleEvent(event, data);
     }
-    var decryptedData = this.decryptPayload(data);
-    this.emit(event, decryptedData);
+    this.decryptPayload(data)
+      .then(decryptedData => {
+        this.emit(event, decryptedData);
+      })
+      .catch(err => {
+        throw new Error(`Unable to decrypted payload: ${err}`)
+      });
   }
 
-  private encryptPayload(data: string): string {
-    if (!this.key) {
-      throw new Error('Unable to encrypt payload, no key');
-    }
-    let nonce = randomBytes(24);
-    let dataStr = JSON.stringify(data);
-    let dataBytes = decodeUTF8(dataStr);
-
-    let bytes = naclSecretbox(dataBytes, nonce, this.key);
-    if (bytes === null) {
-      throw new Error('Unable to encrypt data, probably an invalid key');
-    }
-    let encryptedData = encodeBase64(bytes);
-    return `encrypted_data:${encodeBase64(nonce)}:${encryptedData}`;
+  private getKey(): Promise<Uint8Array> {
+    return new Promise((resolve, reject) => {
+      if (this.key) {
+        return resolve(this.key);
+      }
+      return resolve(this.keyPromise);
+    });
   }
 
-  private decryptPayload(encryptedData: string) {
-    if (!this.key) {
-      throw new Error('Unable to decrypt payload, no decryption key');
-    }
-    let minLength = naclSecretbox.overheadLength + naclSecretbox.nonceLength;
-    if (encryptedData.length < minLength) {
-      throw new Error('Unable to decrypt payload, encrypted payload too short');
-    }
-    let parts = encryptedData.split(':');
-    if (parts.length != 3) {
-      throw new Error('Unable to decrypt payload, unexpected data format');
-    }
+  private encryptPayload(data: string): Promise<string> {
+    return this.getKey()
+      .then(key => {
+        let nonce = randomBytes(24);
+        let dataStr = JSON.stringify(data);
+        let dataBytes = decodeUTF8(dataStr);
 
-    let nonce = decodeBase64(parts[1]);
-    let cipherText = decodeBase64(parts[2]);
+        let bytes = naclSecretbox(dataBytes, nonce, this.key);
+        if (bytes === null) {
+          throw new Error('Unable to encrypt data, probably an invalid key');
+        }
+        let encryptedData = encodeBase64(bytes);
+        return `encrypted_data:${encodeBase64(nonce)}:${encryptedData}`;
+      })
+      .catch(err => {
+        throw new Error('Unable to encrypt payload, no key');
+      });
+  }
 
-    let bytes = naclSecretbox.open(cipherText, nonce, this.key);
-    if (bytes === null) {
-      throw new Error('Unable to decrypt payload, probably an invalid key');
-    }
-    let str = encodeUTF8(bytes);
-    let decryptedData;
-    try {
-      decryptedData = JSON.parse(str);
-    } catch (e) {}
-    return decryptedData || str;
+  private decryptPayload(encryptedData: string): Promise<string> {
+    return this.getKey()
+      .then(key => {
+        let minLength =
+          naclSecretbox.overheadLength + naclSecretbox.nonceLength;
+        if (encryptedData.length < minLength) {
+          throw new Error(
+            'encrypted payload too short',
+          );
+        }
+        let parts = encryptedData.split(':');
+        if (parts.length != 3) {
+          throw new Error('unexpected data format');
+        }
+
+        let nonce = decodeBase64(parts[1]);
+        let cipherText = decodeBase64(parts[2]);
+
+        let bytes = naclSecretbox.open(cipherText, nonce, this.key);
+        if (bytes === null) {
+          throw new Error('probably invalid key');
+        }
+        let str = encodeUTF8(bytes);
+        let decryptedData;
+        try {
+          decryptedData = JSON.parse(str);
+        } catch (e) {}
+        return decryptedData || str;
+      })
+      .catch(err => {
+        throw new Error('no decryption key');
+      });
   }
 
   private isEncryptedData(data: string): boolean {
