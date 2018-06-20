@@ -19,7 +19,7 @@ module.exports = objectAssign(require('./config.shared'), {
   },
   target: "node",
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/node', 'src/runtimes']
+    modules: ['src/', 'src/runtimes/node', 'src/runtimes', 'node_modules']
   },
   externals: {
     "faye-websocket": "commonjs faye-websocket",
