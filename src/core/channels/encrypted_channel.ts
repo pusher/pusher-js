@@ -17,7 +17,6 @@ import {
  * @param {Pusher} pusher
  */
 export default class EncryptedChannel extends PrivateChannel {
-  key: Uint8Array;
   keyPromise: Promise<Uint8Array>;
   resolveKeyPromise: any;
   rejectKeyPromise: any;
@@ -29,9 +28,6 @@ export default class EncryptedChannel extends PrivateChannel {
     this.keyPromise = new Promise((resolve, reject) => {
       this.resolveKeyPromise = resolve;
       this.rejectKeyPromise = reject;
-    }).then((key: Uint8Array) => {
-      this.key = key;
-      return key;
     });
     this.encryptedDataPrefix = 'encrypted_data';
   }
@@ -67,6 +63,8 @@ export default class EncryptedChannel extends PrivateChannel {
    */
   handleEvent(event: string, data: any) {
     if (!this.isEncryptedData(data)) {
+      // should throw an error here. We don't want to work with non-encrypted
+      // stuff
       return super.handleEvent(event, data);
     }
     this.decryptPayload(data)
@@ -78,23 +76,15 @@ export default class EncryptedChannel extends PrivateChannel {
       });
   }
 
-  private getKey(): Promise<Uint8Array> {
-    return new Promise((resolve, reject) => {
-      if (this.key) {
-        return resolve(this.key);
-      }
-      return resolve(this.keyPromise);
-    });
-  }
 
   private encryptPayload(data: string): Promise<string> {
-    return this.getKey()
+    return this.keyPromise
       .then(key => {
         let nonce = randomBytes(24);
         let dataStr = JSON.stringify(data);
         let dataBytes = decodeUTF8(dataStr);
 
-        let bytes = naclSecretbox(dataBytes, nonce, this.key);
+        let bytes = naclSecretbox(dataBytes, nonce, key);
         if (bytes === null) {
           throw new Error('Unable to encrypt data, probably an invalid key');
         }
@@ -107,7 +97,7 @@ export default class EncryptedChannel extends PrivateChannel {
   }
 
   private decryptPayload(encryptedData: string): Promise<string> {
-    return this.getKey()
+    return this.keyPromise
       .then(key => {
         let minLength =
           naclSecretbox.overheadLength + naclSecretbox.nonceLength;
@@ -124,7 +114,7 @@ export default class EncryptedChannel extends PrivateChannel {
         let nonce = decodeBase64(parts[1]);
         let cipherText = decodeBase64(parts[2]);
 
-        let bytes = naclSecretbox.open(cipherText, nonce, this.key);
+        let bytes = naclSecretbox.open(cipherText, nonce, key);
         if (bytes === null) {
           throw new Error('probably invalid key');
         }
