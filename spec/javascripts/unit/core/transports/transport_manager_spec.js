@@ -12,7 +12,7 @@ describe("TransportManager", function() {
       maxPingDelay: 2222
     });
 
-    spyOn(Factory, 'createAssistantToTheTransportManager').andReturn(assistant);
+    spyOn(Factory, 'createAssistantToTheTransportManager').and.returnValue(assistant);
 
     expect(manager.getAssistant(transportClass)).toBe(assistant);
     expect(Factory.createAssistantToTheTransportManager).toHaveBeenCalledWith(

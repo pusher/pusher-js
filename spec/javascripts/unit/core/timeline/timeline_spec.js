@@ -49,7 +49,7 @@ describe("Timeline", function() {
 
   describe("on send", function() {
     beforeEach(function() {
-      spyOn(Network, "isOnline").andReturn(true);
+      spyOn(Network, "isOnline").and.returnValue(true);
     });
 
     it("should include key, session id, cluster, features, version and params", function() {
@@ -84,13 +84,13 @@ describe("Timeline", function() {
     it("should include pushed events", function() {
       spyOn(util, "now");
 
-      util.now.andReturn(1000);
+      util.now.and.returnValue(1000);
       timeline.log(2, {a: 1});
-      util.now.andReturn(2000);
+      util.now.and.returnValue(2000);
       timeline.error({ b: 2.2 });
-      util.now.andReturn(100000);
+      util.now.and.returnValue(100000);
       timeline.info({ foo: "bar" });
-      util.now.andReturn(100001);
+      util.now.and.returnValue(100001);
       timeline.debug({ debug: true });
 
       expect(timeline.send(sendJSONP, onSend)).toBe(true);
@@ -117,7 +117,7 @@ describe("Timeline", function() {
     });
 
     it("should respect the size limit", function() {
-      spyOn(util, "now").andReturn(123);
+      spyOn(util, "now").and.returnValue(123);
 
       var timeline = new Timeline("bar", 123, {
         level: TimelineLevel.INFO,

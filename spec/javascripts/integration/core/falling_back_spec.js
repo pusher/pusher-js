@@ -16,19 +16,19 @@ Integration.describe("Falling back", function() {
   var pusher;
 
   beforeEach(function() {
-    spyOn(Network, "isOnline").andReturn(true);
+    spyOn(Network, "isOnline").and.returnValue(true);
 
-    spyOn(transports.ws, "isSupported").andReturn(false);
-    spyOn(transports.xhr_streaming, "isSupported").andReturn(false);
-    spyOn(transports.xhr_polling, "isSupported").andReturn(false);
+    spyOn(transports.ws, "isSupported").and.returnValue(false);
+    spyOn(transports.xhr_streaming, "isSupported").and.returnValue(false);
+    spyOn(transports.xhr_polling, "isSupported").and.returnValue(false);
 
     if (TestEnv === "web") {
-      spyOn(transports.sockjs, "isSupported").andReturn(false);
-      spyOn(transports.xdr_streaming, "isSupported").andReturn(false);
-      spyOn(transports.xdr_polling, "isSupported").andReturn(false);
+      spyOn(transports.sockjs, "isSupported").and.returnValue(false);
+      spyOn(transports.xdr_streaming, "isSupported").and.returnValue(false);
+      spyOn(transports.xdr_polling, "isSupported").and.returnValue(false);
     }
 
-    spyOn(Runtime, "getLocalStorage").andReturn({});
+    spyOn(Runtime, "getLocalStorage").and.returnValue({});
   });
 
   afterEach(function() {
@@ -43,8 +43,8 @@ Integration.describe("Falling back", function() {
       return transport;
     }
 
-    transports.ws.isSupported.andReturn(true);
-    spyOn(transports.ws, "createConnection").andCallFake(createConnection);
+    transports.ws.isSupported.and.returnValue(true);
+    spyOn(transports.ws, "createConnection").and.callFake(createConnection);
 
     var timer;
     runs(function() {
@@ -52,14 +52,14 @@ Integration.describe("Falling back", function() {
       pusher.connect();
     });
     waitsFor(function() {
-      return transports.ws.createConnection.calls.length === 1;
+      return transports.ws.createConnection.calls.count() === 1;
     }, "WS connection to be created", 500);
     runs(function() {
       transport.state = "initialized";
       transport.emit("initialized");
     });
     waitsFor(function() {
-      return transport.connect.calls.length === 1;
+      return transport.connect.calls.count() === 1;
     }, "connect to be called", 500);
     runs(function() {
       transport.state = "open";
@@ -74,14 +74,14 @@ Integration.describe("Falling back", function() {
       });
     });
     waitsFor(function() {
-      return transports.ws.createConnection.calls.length === 2;
+      return transports.ws.createConnection.calls.count() === 2;
     }, "WS connection to be created", 1500);
     runs(function() {
       transport.state = "initialized";
       transport.emit("initialized");
     });
     waitsFor(function() {
-      return transport.connect.calls.length === 1;
+      return transport.connect.calls.count() === 1;
     }, "connect to be called", 500);
     runs(function() {
       transport.state = "open";
@@ -105,7 +105,7 @@ Integration.describe("Falling back", function() {
       return !timer.isRunning();
     }, "a while", 600);
     runs(function() {
-      expect(transports.ws.createConnection.calls.length).toEqual(2);
+      expect(transports.ws.createConnection.calls.count()).toEqual(2);
       pusher.disconnect();
     });
   });
@@ -123,10 +123,10 @@ Integration.describe("Falling back", function() {
         return sockjsTransport;
       }
 
-      transports.ws.isSupported.andReturn(true);
-      transports.sockjs.isSupported.andReturn(true);
-      spyOn(transports.ws, "createConnection").andCallFake(createWSConnection);
-      spyOn(transports.sockjs, "createConnection").andCallFake(createSockJSConnection);
+      transports.ws.isSupported.and.returnValue(true);
+      transports.sockjs.isSupported.and.returnValue(true);
+      spyOn(transports.ws, "createConnection").and.callFake(createWSConnection);
+      spyOn(transports.sockjs, "createConnection").and.callFake(createSockJSConnection);
 
       runs(function() {
         // use encrypted connection, to force sockjs to be the primary fallback
@@ -134,14 +134,14 @@ Integration.describe("Falling back", function() {
         pusher.connect();
       });
       waitsFor(function() {
-        return transports.ws.createConnection.calls.length === 1;
+        return transports.ws.createConnection.calls.count() === 1;
       }, "WS connection to be created", 500);
       runs(function() {
         wsTransport.state = "initialized";
         wsTransport.emit("initialized");
       });
       waitsFor(function() {
-        return wsTransport.connect.calls.length === 1;
+        return wsTransport.connect.calls.count() === 1;
       }, "connect on WS to be called", 500);
       runs(function() {
         wsTransport.state = "open";
@@ -149,14 +149,14 @@ Integration.describe("Falling back", function() {
         // start handshake, but don't do anything
       });
       waitsFor(function() {
-        return transports.sockjs.createConnection.calls.length === 1;
+        return transports.sockjs.createConnection.calls.count() === 1;
       }, "SockJS connection to be created", 3000);
       runs(function() {
         sockjsTransport.state = "initialized";
         sockjsTransport.emit("initialized");
       });
       waitsFor(function() {
-        return sockjsTransport.connect.calls.length === 1;
+        return sockjsTransport.connect.calls.count() === 1;
       }, "connect on SockJS to be called", 500);
       runs(function() {
         sockjsTransport.state = "open";
@@ -172,7 +172,7 @@ Integration.describe("Falling back", function() {
         });
       });
       waitsFor(function() {
-        return wsTransport.close.calls.length === 1;
+        return wsTransport.close.calls.count() === 1;
       }, "close on WS to be called", 500);
 
       var timer;

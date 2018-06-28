@@ -37,7 +37,7 @@ describe("StrategyBuilder", function() {
   });
 
   it("should construct a sequential strategy", function() {
-    spyOn(WSTransport, "isSupported").andReturn(true);
+    spyOn(WSTransport, "isSupported").and.returnValue(true);
 
     var strategy = StrategyBuilder.build([
       [":def_transport", "one", "ws", 1, { option: "1" }],

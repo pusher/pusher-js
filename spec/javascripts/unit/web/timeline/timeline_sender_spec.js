@@ -9,13 +9,13 @@ describe("TimelineSender", function() {
 
   beforeEach(function() {
     timeline = Mocks.getTimeline();
-    timeline.isEmpty.andReturn(false);
-    timeline.send.andCallFake(function(sendJSONP, callback) {
+    timeline.isEmpty.and.returnValue(false);
+    timeline.send.and.callFake(function(sendJSONP, callback) {
       sendJSONP({ events: [1, 2, 3]}, callback);
     });
 
     onSend = jasmine.createSpy("onSend");
-    spyOn(Runtime, "createJSONPRequest").andCallFake(function() {
+    spyOn(Runtime, "createJSONPRequest").and.callFake(function() {
       // JSONPRequest and ScriptRequest have compatible interfaces
       jsonpRequest = Mocks.getScriptRequest();
       return jsonpRequest;
@@ -44,7 +44,7 @@ describe("TimelineSender", function() {
     it("should send a non-empty timeline", function() {
       sender.send(false, onSend);
 
-      expect(Runtime.createJSONPRequest.calls.length).toEqual(1);
+      expect(Runtime.createJSONPRequest.calls.count()).toEqual(1);
       expect(Runtime.createJSONPRequest).toHaveBeenCalledWith(
         "http://example.com/timeline",
         { "events": [1, 2, 3] }
@@ -60,7 +60,7 @@ describe("TimelineSender", function() {
       });
       sender.send(true, onSend);
 
-      expect(Runtime.createJSONPRequest.calls.length).toEqual(1);
+      expect(Runtime.createJSONPRequest.calls.count()).toEqual(1);
       expect(Runtime.createJSONPRequest).toHaveBeenCalledWith(
         "https://example.com/timeline",
         { "events": [1, 2, 3] }
@@ -70,7 +70,7 @@ describe("TimelineSender", function() {
     it("should register a receiver using ScriptReceivers", function() {
       sender.send(false, onSend);
 
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      var jsonpReceiver = jsonpRequest.send.calls.argsFor(0)[0];
       expect(ScriptReceivers[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
     });
 
@@ -78,7 +78,7 @@ describe("TimelineSender", function() {
       sender.send(false, onSend);
 
       expect(onSend).not.toHaveBeenCalled();
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      var jsonpReceiver = jsonpRequest.send.calls.argsFor(0)[0];
       jsonpReceiver.callback(null, { result: "ok" });
       expect(onSend).toHaveBeenCalledWith(null, { result: "ok" });
     });
@@ -87,7 +87,7 @@ describe("TimelineSender", function() {
       sender.send(false, onSend);
 
       expect(onSend).not.toHaveBeenCalled();
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      var jsonpReceiver = jsonpRequest.send.calls.argsFor(0)[0];
       jsonpReceiver.callback("ERROR!", undefined);
       expect(onSend).toHaveBeenCalledWith("ERROR!", undefined);
     });
@@ -95,7 +95,7 @@ describe("TimelineSender", function() {
     it("should remove the receiver from ScriptReceivers", function() {
       sender.send(false, onSend);
 
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      var jsonpReceiver = jsonpRequest.send.calls.argsFor(0)[0];
       jsonpReceiver.callback(null, {});
       expect(ScriptReceivers[jsonpReceiver.number]).toBe(undefined);
     });
@@ -104,13 +104,13 @@ describe("TimelineSender", function() {
       sender.send(false, onSend);
 
       expect(jsonpRequest.cleanup).not.toHaveBeenCalled();
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      var jsonpReceiver = jsonpRequest.send.calls.argsFor(0)[0];
       jsonpReceiver.callback(null, {});
       expect(jsonpRequest.cleanup).toHaveBeenCalled();
     });
 
     it("should not send an empty timeline", function() {
-      timeline.isEmpty.andReturn(true);
+      timeline.isEmpty.and.returnValue(true);
       sender.send(false, onSend);
       expect(Runtime.createJSONPRequest).not.toHaveBeenCalled();
     });
@@ -118,7 +118,7 @@ describe("TimelineSender", function() {
     it("should use returned hostname for subsequent requests", function() {
       sender.send(false);
 
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
+      var jsonpReceiver = jsonpRequest.send.calls.argsFor(0)[0];
       jsonpReceiver.callback(null, { host: "returned.example.com" });
 
       sender.send(false);

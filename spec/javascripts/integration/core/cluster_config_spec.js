@@ -38,10 +38,10 @@ Integration.describe("Cluster Configuration", function() {
     describe("with " + options.transport + ", encrypted=" + options.encrypted, function() {
       beforeEach(function() {
         Collections.objectApply(TRANSPORTS, function(transport, name) {
-          spyOn(transport, "isSupported").andReturn(false);
+          spyOn(transport, "isSupported").and.returnValue(false);
         });
-        TRANSPORTS[options.transport].isSupported.andReturn(true);
-        spyOn(Runtime, "getLocalStorage").andReturn({});
+        TRANSPORTS[options.transport].isSupported.and.returnValue(true);
+        spyOn(Runtime, "getLocalStorage").and.returnValue({});
       });
 
       it("should open a connection to the 'eu' cluster", function() {
@@ -71,7 +71,7 @@ Integration.describe("Cluster Configuration", function() {
         var received = null;
 
         waitsFor(function() {
-          return onSubscribed.calls.length;
+          return onSubscribed.calls.count();
         }, "subscription to succeed", 10000);
         runs(function() {
           channel.bind(eventName, function(message) {

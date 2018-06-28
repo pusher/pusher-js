@@ -4,7 +4,7 @@ var webpackConfig = require('../../../webpack/config.shared');
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var commonConfig = require('./config.common');
 
-module.exports = objectAssign(commonConfig,{
+module.exports =  objectAssign(commonConfig,{
   files: [
     '**/spec/javascripts/unit/index.web.js'
   ],

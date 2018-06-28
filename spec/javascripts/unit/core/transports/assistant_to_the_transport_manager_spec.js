@@ -4,11 +4,11 @@ var Util = require('core/util').default;
 
 describe("AssistantToTheTransportManager", function() {
   var transport, transportClass;
-  var manager;
+  var transportManager, manager, assistant;
 
   beforeEach(function() {
-    jasmine.Clock.useMock();
-    spyOn(Util, "now").andReturn(1);
+    jasmine.clock().install();
+    spyOn(Util, "now").and.returnValue(1);
 
     transport = Mocks.getTransport(true);
     transportManager = Mocks.getTransportManager();
@@ -19,6 +19,9 @@ describe("AssistantToTheTransportManager", function() {
       transportClass,
       { minPingDelay: 10000, maxPingDelay: 120000 }
     );
+  });
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("#isSupported", function() {
@@ -41,12 +44,12 @@ describe("AssistantToTheTransportManager", function() {
     });
 
     it("should return true if transport is alive", function() {
-      transportManager.isAlive.andReturn(true);
+      transportManager.isAlive.and.returnValue(true);
       expect(assistant.isSupported()).toBe(true);
     });
 
     it("should return false if transport is not alive", function() {
-      transportManager.isAlive.andReturn(false);
+      transportManager.isAlive.and.returnValue(false);
       expect(assistant.isSupported()).toBe(false);
     });
   });
@@ -69,9 +72,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       connection = assistant.createConnection("x", 1, "a", {});
-      Util.now.andReturn(1);
+      Util.now.and.returnValue(1);
       connection.emit("open");
-      Util.now.andReturn(100001);
+      Util.now.and.returnValue(100001);
       connection.emit("closed", { wasClean: true, code: 1002 });
     });
 
@@ -85,9 +88,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       connection = assistant.createConnection("x", 1, "a", {});
-      Util.now.andReturn(1);
+      Util.now.and.returnValue(1);
       connection.emit("open");
-      Util.now.andReturn(100001);
+      Util.now.and.returnValue(100001);
       connection.emit("closed", { wasClean: true, code: 1003 });
     });
 
@@ -107,14 +110,14 @@ describe("AssistantToTheTransportManager", function() {
         { minPingDelay: 10000, maxPingDelay: 100000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
-      Util.now.andReturn(1);
+      Util.now.and.returnValue(1);
       connection.emit("open");
-      Util.now.andReturn(190001);
+      Util.now.and.returnValue(190001);
       connection.emit("closed", { wasClean: false });
     });
 
     it("should report its death once to the manager", function() {
-      expect(transportManager.reportDeath.calls.length).toEqual(1);
+      expect(transportManager.reportDeath.calls.count()).toEqual(1);
     });
 
     it("should set the activity timeout on the next connection to lifetime/2 ms", function() {
@@ -136,9 +139,9 @@ describe("AssistantToTheTransportManager", function() {
         { minPingDelay: 10000, maxPingDelay: 50000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
-      Util.now.andReturn(1);
+      Util.now.and.returnValue(1);
       connection.emit("open");
-      Util.now.andReturn(100002);
+      Util.now.and.returnValue(100002);
       connection.emit("closed", { wasClean: false });
     });
 
@@ -149,7 +152,7 @@ describe("AssistantToTheTransportManager", function() {
     it("should not set the activity timeout on the next connection", function() {
       var connection = assistant.createConnection("x", 1, "a", {});
       expect(transportClass.createConnection).toHaveBeenCalledWith(
-        "x", 1, "a", {}
+        "x", 1, "a", {},
       );
     });
   });
@@ -165,14 +168,14 @@ describe("AssistantToTheTransportManager", function() {
         { minPingDelay: 20000, maxPingDelay: 100000 }
       );
       connection = assistant.createConnection("x", 1, "a", {});
-      Util.now.andReturn(1);
+      Util.now.and.returnValue(1);
       connection.emit("open");
-      Util.now.andReturn(32001);
+      Util.now.and.returnValue(32001);
       connection.emit("closed", { wasClean: false });
     });
 
     it("should report its death once to the manager", function() {
-      expect(transportManager.reportDeath.calls.length).toEqual(1);
+      expect(transportManager.reportDeath.calls.count()).toEqual(1);
     });
 
     it("should set the activity timeout on the next connection to minPingDelay ms", function() {
@@ -188,9 +191,9 @@ describe("AssistantToTheTransportManager", function() {
 
     beforeEach(function() {
       connection = assistant.createConnection("x", 1, "a", {});
-      Util.now.andReturn(1);
+      Util.now.and.returnValue(1);
       connection.emit("open");
-      Util.now.andReturn(100001);
+      Util.now.and.returnValue(100001);
       connection.emit("closed", { wasClean: true });
     });
 

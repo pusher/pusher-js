@@ -10,6 +10,6 @@ baseConfig.output = {
 },
 
 baseConfig.externals.testenv = "'node'";
-baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
+baseConfig.resolve.modules.push('spec/javascripts/helpers')
 
 module.exports = baseConfig;

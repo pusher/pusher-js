@@ -5,6 +5,7 @@ describe("FirstConnectedStrategy", function() {
   var substrategy;
   var callback;
   var strategy;
+  var state;
 
   beforeEach(function() {
     substrategy = Mocks.getStrategy(true);

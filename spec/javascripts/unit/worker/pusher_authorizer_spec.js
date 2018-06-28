@@ -77,7 +77,7 @@ describe("Fetch Authorizer", function(){
     );
     var callback = jasmine.createSpy("callback");
     authorizer.authorize("1.23", callback).then(function(){
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
       expect(callback).toHaveBeenCalledWith(false, data);
     });
   });
@@ -99,7 +99,7 @@ describe("Fetch Authorizer", function(){
     var callback = jasmine.createSpy("callback");
 
     authorizer.authorize("1.23", callback).then(function(){
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
       expect(callback).toHaveBeenCalledWith(
         true,
         "JSON returned from webapp was invalid, yet status code was 200. " +

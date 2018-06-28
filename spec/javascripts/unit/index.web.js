@@ -2,7 +2,7 @@
 // both of which are unavailable in old versions of IE.
 require('../polyfills');
 
-var sharedTestsContext = require.context("./core", true, /_spec$/);
+var sharedTestsContext = require.context("./core", true, /_spec.js$/);
 sharedTestsContext.keys().forEach(sharedTestsContext);
 
 var nodeTestsContext = require.context("./web", true, /_spec$/);

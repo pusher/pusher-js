@@ -17,18 +17,18 @@ Integration.describe("Transport lists", function() {
   var _isReady = Pusher.isReady;
 
   beforeEach(function() {
-    spyOn(transports.ws, "isSupported").andReturn(true);
-    spyOn(transports.xhr_streaming, "isSupported").andReturn(true);
-    spyOn(transports[BASE_FALLBACK], "isSupported").andReturn(true);
+    spyOn(transports.ws, "isSupported").and.returnValue(true);
+    spyOn(transports.xhr_streaming, "isSupported").and.returnValue(true);
+    spyOn(transports[BASE_FALLBACK], "isSupported").and.returnValue(true);
 
     spyOn(transports.ws, "createConnection")
-      .andCallFake(Mocks.getTransport);
+      .and.callFake(Mocks.getTransport);
     spyOn(transports.xhr_streaming, "createConnection")
-      .andCallFake(Mocks.getTransport);
+      .and.callFake(Mocks.getTransport);
     spyOn(transports[BASE_FALLBACK], "createConnection")
-      .andCallFake(Mocks.getTransport);
+      .and.callFake(Mocks.getTransport);
 
-    spyOn(Runtime, "getDefaultStrategy").andCallFake(function() {
+    spyOn(Runtime, "getDefaultStrategy").and.callFake(function() {
       return [
         [":def_transport", "a", "ws", 1, {}],
         [":def_transport", "b", "xhr_streaming", 2, {}],
@@ -37,7 +37,7 @@ Integration.describe("Transport lists", function() {
       ];
     });
 
-    spyOn(Network, "isOnline").andReturn(true);
+    spyOn(Network, "isOnline").and.returnValue(true);
     Pusher.isReady = true;
   });
 

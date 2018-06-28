@@ -28,10 +28,10 @@ Integration.describe("ScriptRequest", function() {
       request.send(receiver);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
       expect(callback).toHaveBeenCalledWith(null, { param: "test" });
     });
   });
@@ -52,7 +52,7 @@ Integration.describe("ScriptRequest", function() {
       expect(document.getElementById(receiver.id)).not.toBe(null);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
       expect(document.getElementById(receiver.id)).not.toBe(null);
@@ -70,11 +70,11 @@ Integration.describe("ScriptRequest", function() {
       request.send(receiver);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback.calls[0].args[1]).toBe(undefined);
+      expect(callback.calls.count()).toEqual(1);
+      expect(callback.calls.argsFor(0)[1]).toBe(undefined);
       request.cleanup();
     });
   });
@@ -87,11 +87,11 @@ Integration.describe("ScriptRequest", function() {
       request.send(receiver);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
     runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback.calls[0].args[1]).toBe(undefined);
+      expect(callback.calls.count()).toEqual(1);
+      expect(callback.calls.argsFor(0)[1]).toBe(undefined);
       request.cleanup();
     });
   });

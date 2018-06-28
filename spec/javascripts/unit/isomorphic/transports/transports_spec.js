@@ -81,9 +81,9 @@ describe("Transports", function() {
         var FakeWebSocket = function(url) {
           this.url = url;
         }
-        spyOn(Runtime, 'getWebSocketAPI').andReturn(FakeWebSocket);
+        spyOn(Runtime, 'getWebSocketAPI').and.returnValue(FakeWebSocket);
         var socket = Transports.ws.hooks.getSocket("testurl");
-        expect(Runtime.getWebSocketAPI.calls.length).toEqual(1);
+        expect(Runtime.getWebSocketAPI.calls.count()).toEqual(1);
         expect(socket).toEqual(jasmine.any(FakeWebSocket));
         expect(socket.url).toEqual("testurl");
       });
@@ -170,12 +170,12 @@ describe("Transports", function() {
     describe(transport, function() {
       describe("getSocket hook", function() {
         it("should return a new streaming HTTPSocket object", function() {
-          spyOn(HTTP, "createStreamingSocket").andCallFake(function(url) {
+          spyOn(HTTP, "createStreamingSocket").and.callFake(function(url) {
             return "streaming socket mock";
           });
 
           var socket = Transports[transport].hooks.getSocket("streamurl");
-          expect(HTTP.createStreamingSocket.calls.length).toEqual(1);
+          expect(HTTP.createStreamingSocket.calls.count()).toEqual(1);
           expect(HTTP.createStreamingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("streaming socket mock");
         });
@@ -187,12 +187,12 @@ describe("Transports", function() {
     describe(transport, function() {
       describe("getSocket hook", function() {
         it("should return a new polling HTTPSocket object", function() {
-          spyOn(HTTP, "createPollingSocket").andCallFake(function(url) {
+          spyOn(HTTP, "createPollingSocket").and.callFake(function(url) {
             return "polling socket mock";
           });
 
           var socket = Transports[transport].hooks.getSocket("streamurl");
-          expect(HTTP.createPollingSocket.calls.length).toEqual(1);
+          expect(HTTP.createPollingSocket.calls.count()).toEqual(1);
           expect(HTTP.createPollingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("polling socket mock");
         });

@@ -32,10 +32,10 @@ Integration.describe("JSONP", function() {
       request.send(receiver);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "JSONP to respond", 5000);
     runs(function() {
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
       expect(callback).toHaveBeenCalledWith(null, {
         "session": "2289545",
         "features": ["ws", "sockjs"],
@@ -68,11 +68,11 @@ Integration.describe("JSONP", function() {
       request.send(receiver);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "JSONP to respond", 5000);
     runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback.calls[0].args[1]).toBe(undefined);
+      expect(callback.calls.count()).toEqual(1);
+      expect(callback.calls.argsFor(0)[1]).toBe(undefined);
       request.cleanup();
     });
   });
@@ -88,11 +88,11 @@ Integration.describe("JSONP", function() {
       request.send(receiver);
     });
     waitsFor(function() {
-      return callback.calls.length > 0;
+      return callback.calls.count() > 0;
     }, "JSONP to respond", 5000);
     runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback.calls[0].args[1]).toBe(undefined);
+      expect(callback.calls.count()).toEqual(1);
+      expect(callback.calls.argsFor(0)[1]).toBe(undefined);
       request.cleanup();
     });
   });

@@ -5,7 +5,10 @@ var Util = require('core/util').default;
 
 describe("CachedStrategy", function() {
   beforeEach(function() {
-    jasmine.Clock.useMock();
+    jasmine.clock().install();
+  });
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("after calling isSupported", function() {
@@ -24,7 +27,7 @@ describe("CachedStrategy", function() {
 
   describe("on browsers not supporting localStorage", function() {
     beforeEach(function() {
-      spyOn(Runtime, "getLocalStorage").andReturn(undefined);
+      spyOn(Runtime, "getLocalStorage").and.returnValue(undefined);
     });
 
     it("should try the substrategy immediately", function() {
@@ -41,7 +44,7 @@ describe("CachedStrategy", function() {
 
     beforeEach(function() {
       localStorage = {};
-      spyOn(Runtime, "getLocalStorage").andReturn(localStorage);
+      spyOn(Runtime, "getLocalStorage").and.returnValue(localStorage);
     });
 
     function buildCachedTransportTests(encrypted) {
@@ -114,10 +117,10 @@ describe("CachedStrategy", function() {
 
           beforeEach(function() {
             startTimestamp = Util.now();
-            spyOn(Util, "now").andReturn(startTimestamp);
+            spyOn(Util, "now").and.returnValue(startTimestamp);
 
             strategy.connect(0, callback);
-            Util.now.andReturn(startTimestamp + 1000);
+            Util.now.and.returnValue(startTimestamp + 1000);
 
             transport = Mocks.getTransport(true);
             transport.name = "test";
@@ -208,10 +211,10 @@ describe("CachedStrategy", function() {
 
           beforeEach(function() {
             startTimestamp = Util.now();
-            spyOn(Util, "now").andReturn(startTimestamp);
+            spyOn(Util, "now").and.returnValue(startTimestamp);
 
             strategy.connect(0, callback);
-            Util.now.andReturn(startTimestamp + 2000);
+            Util.now.and.returnValue(startTimestamp + 2000);
 
             transport = Mocks.getTransport(true);
             transport.name = "test";
@@ -240,12 +243,12 @@ describe("CachedStrategy", function() {
         describe("after double the cached latency + 1s", function() {
           beforeEach(function() {
             startTimestamp = Util.now();
-            spyOn(Util, "now").andReturn(startTimestamp);
+            spyOn(Util, "now").and.returnValue(startTimestamp);
 
             strategy.connect(0, callback);
 
-            Util.now.andReturn(startTimestamp + 3000);
-            jasmine.Clock.tick(3000);
+            Util.now.and.returnValue(startTimestamp + 3000);
+            jasmine.clock().tick(3000);
           });
 
           it("should abort the cached strategy", function() {
@@ -267,13 +270,13 @@ describe("CachedStrategy", function() {
 
           beforeEach(function() {
             startTimestamp = Util.now();
-            spyOn(Util, "now").andReturn(startTimestamp);
+            spyOn(Util, "now").and.returnValue(startTimestamp);
 
             runner = strategy.connect(0, callback);
             runner.forceMinPriority(666);
-            Util.now.andReturn(startTimestamp + 2000);
+            Util.now.and.returnValue(startTimestamp + 2000);
             transports.test._callback("error");
-            Util.now.andReturn(startTimestamp + 2500);
+            Util.now.and.returnValue(startTimestamp + 2500);
           });
 
           it("should fall back to the substrategy", function() {

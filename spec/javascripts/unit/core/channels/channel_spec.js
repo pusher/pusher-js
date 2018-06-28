@@ -48,12 +48,12 @@ describe("Channel", function() {
     });
 
     it("should return true if connection sent the event", function() {
-      pusher.send_event.andReturn(true);
+      pusher.send_event.and.returnValue(true);
       expect(channel.trigger("client-test", {})).toBe(true);
     });
 
     it("should return false if connection didn't send the event", function() {
-      pusher.send_event.andReturn(false);
+      pusher.send_event.and.returnValue(false);
       expect(channel.trigger("client-test", {})).toBe(false);
     });
   });
@@ -173,10 +173,10 @@ describe("Channel", function() {
     });
 
     it("should authorize the connection first", function() {
-      expect(channel.authorize.calls.length).toEqual(0);
+      expect(channel.authorize.calls.count()).toEqual(0);
       channel.subscribe();
 
-      expect(channel.authorize.calls.length).toEqual(1);
+      expect(channel.authorize.calls.count()).toEqual(1);
       expect(channel.authorize).toHaveBeenCalledWith(
         "9.37", jasmine.any(Function)
       );
@@ -186,7 +186,7 @@ describe("Channel", function() {
       expect(pusher.send_event).not.toHaveBeenCalled();
 
       channel.subscribe();
-      var authorizeCallback = channel.authorize.calls[0].args[1];
+      var authorizeCallback = channel.authorize.calls.argsFor(0)[1];
       authorizeCallback(false, {
         auth: "one",
         channel_data: "two"
@@ -203,7 +203,7 @@ describe("Channel", function() {
       channel.bind("pusher:subscription_error", onSubscriptionError);
 
       channel.subscribe();
-      var authorizeCallback = channel.authorize.calls[0].args[1];
+      var authorizeCallback = channel.authorize.calls.argsFor(0)[1];
       authorizeCallback(true, { error: "test error" });
 
       expect(onSubscriptionError).toHaveBeenCalledWith(

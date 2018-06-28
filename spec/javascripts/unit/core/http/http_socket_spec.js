@@ -15,25 +15,25 @@ describe("HTTP.Socket", function() {
 
   beforeEach(function() {
     HTTPFactory = require('runtime').default.HTTPFactory;
-    jasmine.Clock.useMock();
+    jasmine.clock().install();
 
-    spyOn(HTTPFactory, "createXHR").andCallFake(function(method, url) {
+    spyOn(HTTPFactory, "createXHR").and.callFake(function(method, url) {
       lastXHR = Mocks.getHTTPRequest(method, url);
       return lastXHR;
     });
 
     if (TestEnv === "web") {
-      spyOn(HTTPFactory, "createXDR").andCallFake(function(method, url) {
+      spyOn(HTTPFactory, "createXDR").and.callFake(function(method, url) {
         lastXHR = Mocks.getHTTPRequest(method, url);
         return lastXHR;
       });
     }
 
-    spyOn(Runtime, "isXHRSupported").andReturn(true);
-    if (TestEnv === "web") spyOn(Runtime, "isXDRSupported").andReturn(false);
+    spyOn(Runtime, "isXHRSupported").and.returnValue(true);
+    if (TestEnv === "web") spyOn(Runtime, "isXDRSupported").and.returnValue(false);
 
     hooks = {
-      getReceiveURL: jasmine.createSpy().andCallFake(function(url, session) {
+      getReceiveURL: jasmine.createSpy().and.callFake(function(url, session) {
         return url.base + "/" + session + url.queryString;
       }),
       onHeartbeat: jasmine.createSpy(),
@@ -55,11 +55,12 @@ describe("HTTP.Socket", function() {
 
   afterEach(function() {
     socket.close();
+    jasmine.clock().uninstall();
   });
 
   it("should use XHR if it's supported", function() {
-    Runtime.isXHRSupported.andReturn(true);
-    if (TestEnv === "web" ) Runtime.isXDRSupported.andReturn(false);
+    Runtime.isXHRSupported.and.returnValue(true);
+    if (TestEnv === "web" ) Runtime.isXDRSupported.and.returnValue(false);
 
     var socket = new HTTPSocket(hooks, "http://example.com");
     expect(HTTPFactory.createXHR).toHaveBeenCalled();
@@ -68,8 +69,8 @@ describe("HTTP.Socket", function() {
 
   if (TestEnv === "web") {
     it("should use XDR if it's supported", function() {
-      Runtime.isXHRSupported.andReturn(false);
-      Runtime.isXDRSupported.andReturn(true);
+      Runtime.isXHRSupported.and.returnValue(false);
+      Runtime.isXDRSupported.and.returnValue(true);
 
       var socket = new HTTPSocket(hooks, "http://example.com");
       expect(HTTPFactory.createXDR).toHaveBeenCalled();
@@ -110,9 +111,9 @@ describe("HTTP.Socket", function() {
       // close the default socket
       socket.close();
 
-      HTTPFactory.createXHR.andCallFake(function() {
+      HTTPFactory.createXHR.and.callFake(function() {
         stream = Mocks.getHTTPRequest();
-        stream.start.andThrow("start exception");
+        stream.start.and.throwError("start exception");
         return stream;
       });
 
@@ -126,13 +127,13 @@ describe("HTTP.Socket", function() {
 
     it("should raise an error", function() {
       expect(onError).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(onError).toHaveBeenCalledWith("start exception");
     });
 
     it("should close itself with code 1006", function() {
       expect(onClose).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(onClose).toHaveBeenCalledWith({
         code: 1006,
         reason: "Could not start streaming",
@@ -142,12 +143,12 @@ describe("HTTP.Socket", function() {
 
     it("should unbind all listeners from the stream", function() {
       spyOn(stream, "unbind_all");
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(stream.unbind_all).toHaveBeenCalled();
     });
 
     it("should close the stream", function() {
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(stream.close).toHaveBeenCalled();
     });
   });
@@ -189,9 +190,9 @@ describe("HTTP.Socket", function() {
       });
 
       it("should not trigger any HTTP requests", function() {
-        expect(HTTPFactory.createXHR.calls.length).toEqual(1);
+        expect(HTTPFactory.createXHR.calls.count()).toEqual(1);
         socket.send("test");
-        expect(HTTPFactory.createXHR.calls.length).toEqual(1);
+        expect(HTTPFactory.createXHR.calls.count()).toEqual(1);
       });
     });
   });
@@ -199,9 +200,9 @@ describe("HTTP.Socket", function() {
   describe("when connecting", function() {
     describe("before the open frame", function() {
       it("should ignore heartbeat frames", function() {
-        var requestCount = HTTPFactory.createXHR.calls.length;
+        var requestCount = HTTPFactory.createXHR.calls.count();
         lastXHR.emit("chunk", { status: 200, data: "hhhhhhhhhhh" });
-        expect(HTTPFactory.createXHR.calls.length).toEqual(requestCount);
+        expect(HTTPFactory.createXHR.calls.count()).toEqual(requestCount);
       });
     });
 
@@ -221,10 +222,10 @@ describe("HTTP.Socket", function() {
 
     describe("#send", function() {
       it("should send an HTTP request to a correct URL", function() {
-        expect(HTTPFactory.createXHR.calls.length).toEqual(1);
+        expect(HTTPFactory.createXHR.calls.count()).toEqual(1);
         socket.send("test");
 
-        expect(HTTPFactory.createXHR.calls.length).toEqual(2);
+        expect(HTTPFactory.createXHR.calls.count()).toEqual(2);
         expect(lastXHR.method).toEqual("POST");
         expect(lastXHR.url).toMatch(
           new RegExp(
@@ -238,19 +239,19 @@ describe("HTTP.Socket", function() {
       it("should send a string payload", function() {
         var data = "test";
         socket.send(data);
-        expect(JSON.parse(lastXHR.start.calls[0].args[0])).toEqual([data]);
+        expect(JSON.parse(lastXHR.start.calls.argsFor(0)[0])).toEqual([data]);
       });
 
       it("should send an array payload", function() {
         var data = ["test", 1, { foo: "bar" }];
         socket.send(data);
-        expect(JSON.parse(lastXHR.start.calls[0].args[0])).toEqual([data]);
+        expect(JSON.parse(lastXHR.start.calls.argsFor(0)[0])).toEqual([data]);
       });
 
       it("should send an object payload", function() {
         var data = { num: 1, str: "data", arr: [1, 2, 3]};
         socket.send(data);
-        expect(JSON.parse(lastXHR.start.calls[0].args[0])).toEqual([data]);
+        expect(JSON.parse(lastXHR.start.calls.argsFor(0)[0])).toEqual([data]);
       });
 
       it("should return true if the request did not raise an exception", function() {
@@ -258,9 +259,9 @@ describe("HTTP.Socket", function() {
       });
 
       it("should return false if the request raised an exception", function() {
-        HTTPFactory.createXHR.andCallFake(function() {
+        HTTPFactory.createXHR.and.callFake(function() {
           var request = Mocks.getHTTPRequest();
-          request.start.andThrow("exception");
+          request.start.and.throwError("exception");
           return request;
         });
 
@@ -291,9 +292,9 @@ describe("HTTP.Socket", function() {
     describe("on a multi-message frame", function() {
       it("should emit all messages if status is 200", function() {
         lastXHR.emit("chunk", { status: 200, data: 'a[1,2,3]' });
-        expect(onMessage.calls[0].args[0]).toEqual({ data: 1 });
-        expect(onMessage.calls[1].args[0]).toEqual({ data: 2 });
-        expect(onMessage.calls[2].args[0]).toEqual({ data: 3 });
+        expect(onMessage.calls.argsFor(0)[0]).toEqual({ data: 1 });
+        expect(onMessage.calls.argsFor(1)[0]).toEqual({ data: 2 });
+        expect(onMessage.calls.argsFor(2)[0]).toEqual({ data: 3 });
       });
 
       it("should not emit any messages if status is not 200", function() {
@@ -351,7 +352,7 @@ describe("HTTP.Socket", function() {
       it("should send an HTTP request to the updated host", function() {
         socket.send("test");
         // opening the connection sends the first request
-        expect(HTTPFactory.createXHR.calls.length).toEqual(2);
+        expect(HTTPFactory.createXHR.calls.count()).toEqual(2);
         expect(lastXHR.method).toEqual("POST");
         expect(lastXHR.url).toMatch(
           new RegExp(

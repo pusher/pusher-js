@@ -17,7 +17,7 @@ describe("EventsDispatcher", function() {
       dispatcher.emit("boop", "nope");
 
       expect(onEvent).toHaveBeenCalledWith("test");
-      expect(onEvent.calls.length).toEqual(1);
+      expect(onEvent.calls.count()).toEqual(1);
     });
 
     it("should add the same listener to a specific event several times", function() {
@@ -28,7 +28,7 @@ describe("EventsDispatcher", function() {
       dispatcher.emit("event", "test");
 
       expect(onEvent).toHaveBeenCalledWith("test");
-      expect(onEvent.calls.length).toEqual(2);
+      expect(onEvent.calls.count()).toEqual(2);
     });
 
     it("should add the listener with different contexts", function() {
@@ -40,7 +40,7 @@ describe("EventsDispatcher", function() {
       dispatcher.emit("event", "test");
 
       expect(onEvent).toHaveBeenCalledWith("test");
-      expect(onEvent.calls.length).toEqual(3);
+      expect(onEvent.calls.count()).toEqual(3);
     });
   });
 
@@ -54,7 +54,7 @@ describe("EventsDispatcher", function() {
 
       expect(onAll).toHaveBeenCalledWith("event", "test");
       expect(onAll).toHaveBeenCalledWith("boop", []);
-      expect(onAll.calls.length).toEqual(2);
+      expect(onAll.calls.count()).toEqual(2);
     });
   });
 
@@ -70,7 +70,7 @@ describe("EventsDispatcher", function() {
     });
 
     it("should remove the listener while emitting events (regression)", function() {
-      var onEvent1 = jasmine.createSpy("onEvent1").andCallFake(function() {
+      var onEvent1 = jasmine.createSpy("onEvent1").and.callFake(function() {
         dispatcher.unbind("event", onEvent1);
       });
       var onEvent2 = jasmine.createSpy("onEvent2");
@@ -79,12 +79,12 @@ describe("EventsDispatcher", function() {
       dispatcher.bind("event", onEvent2);
 
       dispatcher.emit("event");
-      expect(onEvent1.calls.length).toEqual(1);
-      expect(onEvent2.calls.length).toEqual(1);
+      expect(onEvent1.calls.count()).toEqual(1);
+      expect(onEvent2.calls.count()).toEqual(1);
 
       dispatcher.emit("event");
-      expect(onEvent1.calls.length).toEqual(1);
-      expect(onEvent2.calls.length).toEqual(2);
+      expect(onEvent1.calls.count()).toEqual(1);
+      expect(onEvent2.calls.count()).toEqual(2);
     });
 
     it("should not remove the last callback if unbinding a function that was not bound (regression)", function() {
@@ -95,7 +95,7 @@ describe("EventsDispatcher", function() {
       dispatcher.unbind("event", otherCallback);
 
       dispatcher.emit("event");
-      expect(onEvent.calls.length).toEqual(1);
+      expect(onEvent.calls.count()).toEqual(1);
     });
 
     it("should remove all listeners on omitted arguments", function() {
@@ -127,7 +127,7 @@ describe("EventsDispatcher", function() {
 
       expect(onEvent1).not.toHaveBeenCalled();
       expect(onEvent2).not.toHaveBeenCalled();
-      expect(onOther.calls.length).toEqual(1);
+      expect(onOther.calls.count()).toEqual(1);
     });
 
     it("should remove all listeners with given callback", function() {
@@ -143,7 +143,7 @@ describe("EventsDispatcher", function() {
       dispatcher.emit("event2");
 
       expect(onEvent).not.toHaveBeenCalled();
-      expect(onOther.calls.length).toEqual(1);
+      expect(onOther.calls.count()).toEqual(1);
     });
 
     it("should remove all event's listeners with given callback", function() {
@@ -156,7 +156,7 @@ describe("EventsDispatcher", function() {
       dispatcher.emit("event");
       expect(onEvent).not.toHaveBeenCalled();
       dispatcher.emit("event2");
-      expect(onEvent.calls.length).toEqual(1);
+      expect(onEvent.calls.count()).toEqual(1);
     });
 
     it("should remove all event's listeners with given context", function() {
@@ -174,7 +174,7 @@ describe("EventsDispatcher", function() {
 
       expect(onEvent1).not.toHaveBeenCalled();
       expect(onEvent2).not.toHaveBeenCalled();
-      expect(onEvent3.calls.length).toEqual(1);
+      expect(onEvent3.calls.count()).toEqual(1);
     });
 
     it("should remove all listeners with given context", function() {
@@ -194,7 +194,7 @@ describe("EventsDispatcher", function() {
 
       expect(onEvent1).not.toHaveBeenCalled();
       expect(onEvent2).not.toHaveBeenCalled();
-      expect(onEvent3.calls.length).toEqual(1);
+      expect(onEvent3.calls.count()).toEqual(1);
     });
 
     it("should remove all event's listeners with given callback and context", function() {
@@ -209,7 +209,7 @@ describe("EventsDispatcher", function() {
       expect(onEvent).not.toHaveBeenCalled();
 
       dispatcher.emit("event2");
-      expect(onEvent.calls.length).toEqual(1);
+      expect(onEvent.calls.count()).toEqual(1);
     });
 
     it("should remove all listeners with given callback and context", function() {
@@ -228,10 +228,10 @@ describe("EventsDispatcher", function() {
       expect(onEvent).not.toHaveBeenCalled();
 
       dispatcher.emit("event3");
-      expect(onEvent.calls.length).toEqual(1);
+      expect(onEvent.calls.count()).toEqual(1);
 
       dispatcher.emit("other");
-      expect(onOther.calls.length).toEqual(1);
+      expect(onOther.calls.count()).toEqual(1);
     });
   });
 
@@ -292,10 +292,10 @@ describe("EventsDispatcher", function() {
       var context = {};
       var boundContext, unboundContext;
 
-      var onEventBound = jasmine.createSpy("onEventBound").andCallFake(function(){
+      var onEventBound = jasmine.createSpy("onEventBound").and.callFake(function(){
         boundContext = this;
       });
-      var onEventUnbound = jasmine.createSpy("onEventUnbound").andCallFake(function(){
+      var onEventUnbound = jasmine.createSpy("onEventUnbound").and.callFake(function(){
         unboundContext = this;
       });
 

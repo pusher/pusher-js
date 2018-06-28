@@ -7,8 +7,8 @@ describe("TimelineSender", function() {
 
   beforeEach(function(){
     timeline = Mocks.getTimeline();
-    timeline.isEmpty.andReturn(false);
-    timeline.send.andCallFake(function(sendXHR, callback) {
+    timeline.isEmpty.and.returnValue(false);
+    timeline.send.and.callFake(function(sendXHR, callback) {
       sendXHR({ events: [1, 2, 3]}, callback);
     });
 
@@ -23,7 +23,7 @@ describe("TimelineSender", function() {
     var xhrRequest;
 
     beforeEach(function() {
-      spyOn(Runtime, "createXHR").andCallFake(function() {
+      spyOn(Runtime, "createXHR").and.callFake(function() {
         xhrRequest = Mocks.getXHR();
         return xhrRequest;
       });
@@ -47,7 +47,7 @@ describe("TimelineSender", function() {
       it("should send a non-empty timeline", function() {
         sender.send(false, onSend);
 
-        expect(Runtime.createXHR.calls.length).toEqual(1);
+        expect(Runtime.createXHR.calls.count()).toEqual(1);
         var encodedParams = 'WzEsMiwzXQ%3D%3D';
 
         expect(xhrRequest.open).toHaveBeenCalledWith(
@@ -66,7 +66,7 @@ describe("TimelineSender", function() {
         });
         sender.send(true, onSend);
 
-        expect(Runtime.createXHR.calls.length).toEqual(1);
+        expect(Runtime.createXHR.calls.count()).toEqual(1);
         expect(xhrRequest.open).toHaveBeenCalledWith(
           "GET",
           'https://example.com/timeline/2?events=WzEsMiwzXQ%3D%3D',
@@ -74,7 +74,7 @@ describe("TimelineSender", function() {
       });
 
       it("should not send an empty timeline", function() {
-        timeline.isEmpty.andReturn(true);
+        timeline.isEmpty.and.returnValue(true);
         sender.send(false, onSend);
         expect(Runtime.createXHR).not.toHaveBeenCalled();
       });

@@ -104,13 +104,13 @@ describe("Transports", function() {
 
     describe("getSocket hook", function() {
       it("should return a new WebSocket object, if the class is present", function() {
-        window.WebSocket = jasmine.createSpy().andCallFake(function(url) {
+        window.WebSocket = jasmine.createSpy().and.callFake(function(url) {
           this.url = url;
         });
         window.MozWebSocket = undefined;
 
         var socket = Transports.ws.hooks.getSocket("testurl");
-        expect(window.WebSocket.calls.length).toEqual(1);
+        expect(window.WebSocket.calls.count()).toEqual(1);
         expect(window.WebSocket).toHaveBeenCalledWith("testurl");
         expect(socket).toEqual(jasmine.any(window.WebSocket));
         expect(socket.url).toEqual("testurl");
@@ -119,12 +119,12 @@ describe("Transports", function() {
       it("should return a new MozWebSocket object, if the class is present and WebSocket class is absent", function() {
         window.WebSocket = undefined;
 
-        window.MozWebSocket = jasmine.createSpy().andCallFake(function(url) {
+        window.MozWebSocket = jasmine.createSpy().and.callFake(function(url) {
           this.url = url;
         });
 
         var socket = Transports.ws.hooks.getSocket("moztesturl");
-        expect(window.MozWebSocket.calls.length).toEqual(1);
+        expect(window.MozWebSocket.calls.count()).toEqual(1);
         expect(window.MozWebSocket).toHaveBeenCalledWith("moztesturl");
         expect(socket).toEqual(jasmine.any(window.MozWebSocket));
         expect(socket.url).toEqual("moztesturl");
@@ -178,8 +178,8 @@ describe("Transports", function() {
         var socket = Mocks.getWebSocket();
         Transports.sockjs.hooks.beforeOpen(socket, "test/path");
 
-        expect(socket.send.calls.length).toEqual(1);
-        var pathMessage = JSON.parse(socket.send.calls[0].args[0]);
+        expect(socket.send.calls.count()).toEqual(1);
+        var pathMessage = JSON.parse(socket.send.calls.argsFor(0)[0]);
         expect(pathMessage).toEqual({ path: "test/path" });
       });
     });
@@ -195,7 +195,7 @@ describe("Transports", function() {
         Dependencies.load = jasmine.createSpy("load");
         Dependencies.getRoot = jasmine.createSpy("getRoot");
         Dependencies.getPath = jasmine.createSpy("getPath");
-        Dependencies.getPath.andCallFake(function(file, options) {
+        Dependencies.getPath.and.callFake(function(file, options) {
           return (options.encrypted ? "https" : "http") + "://host/" + file;
         });
       });
@@ -225,14 +225,14 @@ describe("Transports", function() {
       });
 
       it("should return a new SockJS object", function() {
-        window.SockJS = jasmine.createSpy().andCallFake(function(url) {
+        window.SockJS = jasmine.createSpy().and.callFake(function(url) {
           this.url = url;
         });
 
         var socket = Transports.sockjs.hooks.getSocket(
           "sock_test", { encrypted: false }
         );
-        expect(window.SockJS.calls.length).toEqual(1);
+        expect(window.SockJS.calls.count()).toEqual(1);
         expect(socket).toEqual(jasmine.any(window.SockJS));
         expect(socket.url).toEqual("sock_test");
       });
@@ -317,14 +317,14 @@ describe("Transports", function() {
 
       describe("isSupported hook", function() {
         it("should return true if window.XMLHttpRequest exists and its instances have a withCredentials property", function() {
-          window.XMLHttpRequest = jasmine.createSpy().andCallFake(function() {
+          window.XMLHttpRequest = jasmine.createSpy().and.callFake(function() {
             this.withCredentials = false;
           });
           expect(Transports[transport].hooks.isSupported({})).toBe(true);
         });
 
         it("should return false if window.XMLHttpRequest exists, but its instances don't have a withCredentials property", function() {
-          window.XMLHttpRequest = jasmine.createSpy().andCallFake(function() {
+          window.XMLHttpRequest = jasmine.createSpy().and.callFake(function() {
             this.withCredentials = undefined;
           });
           expect(Transports[transport].hooks.isSupported({})).toBe(false);
@@ -349,7 +349,7 @@ describe("Transports", function() {
       describe("isSupported hook", function() {
         it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Runtime, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").and.returnValue({
             location: {
               protocol: "http:"
             }
@@ -359,7 +359,7 @@ describe("Transports", function() {
 
         it("should return true if window.XDomainRequest exists, document protocol is https: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Runtime, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").and.returnValue({
             location: {
               protocol: "https:"
             }
@@ -369,7 +369,7 @@ describe("Transports", function() {
 
         it("should return false if window.XDomainRequest exists, document protocol is http: and connection is encrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Runtime, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").and.returnValue({
             location: {
               protocol: "http:"
             }
@@ -379,7 +379,7 @@ describe("Transports", function() {
 
         it("should return false if window.XDomainRequest exists, document protocol is https: and connection is unencrypted", function() {
           window.XDomainRequest = function() {};
-          spyOn(Runtime, "getDocument").andReturn({
+          spyOn(Runtime, "getDocument").and.returnValue({
             location: {
               protocol: "https:"
             }
@@ -400,12 +400,12 @@ describe("Transports", function() {
     describe(transport, function() {
       describe("getSocket hook", function() {
         it("should return a new streaming HTTPSocket object", function() {
-          spyOn(HTTP, "createStreamingSocket").andCallFake(function(url) {
+          spyOn(HTTP, "createStreamingSocket").and.callFake(function(url) {
             return "streaming socket mock";
           });
 
           var socket = Transports[transport].hooks.getSocket("streamurl");
-          expect(HTTP.createStreamingSocket.calls.length).toEqual(1);
+          expect(HTTP.createStreamingSocket.calls.count()).toEqual(1);
           expect(HTTP.createStreamingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("streaming socket mock");
         });
@@ -417,12 +417,12 @@ describe("Transports", function() {
     describe(transport, function() {
       describe("getSocket hook", function() {
         it("should return a new polling HTTPSocket object", function() {
-          spyOn(HTTP, "createPollingSocket").andCallFake(function(url) {
+          spyOn(HTTP, "createPollingSocket").and.callFake(function(url) {
             return "polling socket mock";
           });
 
           var socket = Transports[transport].hooks.getSocket("streamurl");
-          expect(HTTP.createPollingSocket.calls.length).toEqual(1);
+          expect(HTTP.createPollingSocket.calls.count()).toEqual(1);
           expect(HTTP.createPollingSocket).toHaveBeenCalledWith("streamurl");
           expect(socket).toEqual("polling socket mock");
         });

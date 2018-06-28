@@ -54,7 +54,7 @@ Integration.describe("Pusher", function() {
       var received = null;
 
       waitsFor(function() {
-        return onSubscribed.calls.length;
+        return onSubscribed.calls.count();
       }, "subscription to succeed", 10000);
       runs(function() {
         channel.bind(eventName, function(message) {
@@ -88,7 +88,7 @@ Integration.describe("Pusher", function() {
       var timer = null;
 
       waitsFor(function() {
-        return onSubscribed.calls.length;
+        return onSubscribed.calls.count();
       }, "subscription to succeed", 10000);
       runs(function() {
         channel.bind(eventName, function(message) {
@@ -119,7 +119,7 @@ Integration.describe("Pusher", function() {
       subscribe(pusher, channelName, onSubscribed);
 
       waitsFor(function() {
-        return onSubscribed.calls.length;
+        return onSubscribed.calls.count();
       }, "subscription to succeed", 10000);
       runs(function() {
         pusher.unsubscribe(channelName);
@@ -413,7 +413,7 @@ Integration.describe("Pusher", function() {
         channel2 = subscribe(pusher2, channelName, onSubscribed2);
       });
       waitsFor(function() {
-        return onSubscribed1.calls.length > 0 && onSubscribed2.calls.length > 0;
+        return onSubscribed1.calls.count() > 0 && onSubscribed2.calls.count() > 0;
       }, "both connections to subscribe", 10000);
       runs(function() {
         channel1.bind(eventName, onEvent1);
@@ -421,7 +421,7 @@ Integration.describe("Pusher", function() {
         pusher1.send_event(eventName, data, channelName);
       });
       waitsFor(function() {
-        return onEvent2.calls.length;
+        return onEvent2.calls.count();
       }, "second connection to receive a message", 10000);
       runs(function() {
         pusher1.unsubscribe(channelName);
@@ -441,7 +441,7 @@ Integration.describe("Pusher", function() {
 
       var channel = subscribe(pusher, channelName, onSubscribed);
       waitsFor(function() {
-        return onSubscribed.calls.length > 0;
+        return onSubscribed.calls.count() > 0;
       }, "connection to subscribe", 10000);
       runs(function() {
         channel.bind(eventName, onEvent);
@@ -565,7 +565,7 @@ Integration.describe("Pusher", function() {
         expect(channel1.members.count).toEqual(0);
       });
       waitsFor(function() {
-        return onSubscribed1.calls.length > 0;
+        return onSubscribed1.calls.count() > 0;
       }, "first connection to subscribe", 10000);
       runs(function() {
         expect(channel1.members.count).toEqual(1);
@@ -573,13 +573,13 @@ Integration.describe("Pusher", function() {
         channel2 = subscribe(pusher2, channelName, onSubscribed2);
       });
       waitsFor(function() {
-        return onSubscribed2.calls.length > 0;
+        return onSubscribed2.calls.count() > 0;
       }, "second connection to subscribe", 10000);
       runs(function() {
         expect(channel2.members.count).toEqual(2);
       });
       waitsFor(function() {
-        return onMemberAdded.calls.length > 0;
+        return onMemberAdded.calls.count() > 0;
       }, "member added event", 10000);
       runs(function() {
         expect(channel1.members.count).toEqual(2);
@@ -587,7 +587,7 @@ Integration.describe("Pusher", function() {
         pusher1.unsubscribe(channelName);
       });
       waitsFor(function() {
-        return onMemberRemoved.calls.length > 0;
+        return onMemberRemoved.calls.count() > 0;
       }, "member removed event", 10000);
       runs(function() {
         expect(channel2.members.count).toEqual(1);
@@ -625,7 +625,7 @@ Integration.describe("Pusher", function() {
         channel1 = subscribe(pusher1, channelName, onSubscribed1);
       });
       waitsFor(function() {
-        return onSubscribed1.calls.length > 0;
+        return onSubscribed1.calls.count() > 0;
       }, "first connection to subscribe", 10000);
       runs(function() {
         expect(channel1.members.get(pusher1.connection.socket_id))
@@ -639,7 +639,7 @@ Integration.describe("Pusher", function() {
         channel2 = subscribe(pusher2, channelName, onSubscribed2);
       });
       waitsFor(function() {
-        return onSubscribed2.calls.length > 0;
+        return onSubscribed2.calls.count() > 0;
       }, "second connection to subscribe", 10000);
       runs(function() {
         expect(channel2.members.get(pusher1.connection.socket_id))
@@ -650,7 +650,7 @@ Integration.describe("Pusher", function() {
         expect(channel2.members.me).toEqual(member2);
       });
       waitsFor(function() {
-        return onMemberAdded.calls.length > 0;
+        return onMemberAdded.calls.count() > 0;
       }, "member added event", 10000);
       runs(function() {
         expect(channel1.members.get(pusher1.connection.socket_id))
@@ -662,7 +662,7 @@ Integration.describe("Pusher", function() {
         pusher1.unsubscribe(channelName);
       });
       waitsFor(function() {
-        return onMemberRemoved.calls.length > 0;
+        return onMemberRemoved.calls.count() > 0;
       }, "member removed event", 10000);
       runs(function() {
         expect(channel2.members.get(pusher1.connection.socket_id))
@@ -683,9 +683,9 @@ Integration.describe("Pusher", function() {
 
       beforeEach(function() {
         Collections.objectApply(TRANSPORTS, function(t, name) {
-          spyOn(t, "isSupported").andReturn(false);
+          spyOn(t, "isSupported").and.returnValue(false);
         });
-        TRANSPORTS[transport].isSupported.andReturn(true);
+        TRANSPORTS[transport].isSupported.and.returnValue(true);
       });
 
       describe("setup", function() {

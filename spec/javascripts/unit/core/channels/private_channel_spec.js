@@ -33,16 +33,13 @@ describe("PrivateChannel", function() {
 
     beforeEach(function() {
       authorizer = Mocks.getAuthorizer();
-      factorySpy = spyOn(Factory, "createAuthorizer").andReturn(authorizer);
+      factorySpy = spyOn(Factory, "createAuthorizer").and.returnValue(authorizer);
     });
 
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(Factory.createAuthorizer.calls.length).toEqual(1);
-      expect(Factory.createAuthorizer).toHaveBeenCalledWith(
-        channel,
-        { foo: "bar" }
-      );
+      expect(Factory.createAuthorizer.calls.count()).toEqual(1);
+      expect(Factory.createAuthorizer).toHaveBeenCalledWith( channel, {foo: "bar" });
     });
 
     it("should call back with authorization data", function() {
@@ -63,7 +60,7 @@ describe("PrivateChannel", function() {
           }
         });
         channel = new PrivateChannel("private-test-custom-auth", pusher);
-        factorySpy.andCallThrough();
+        factorySpy.and.callThrough();
       });
 
       it("should call the authorizer", function() {
@@ -89,12 +86,12 @@ describe("PrivateChannel", function() {
     });
 
     it("should return true if connection sent the event", function() {
-      pusher.send_event.andReturn(true);
+      pusher.send_event.and.returnValue(true);
       expect(channel.trigger("client-test", {})).toBe(true);
     });
 
     it("should return false if connection didn't send the event", function() {
-      pusher.send_event.andReturn(false);
+      pusher.send_event.and.returnValue(false);
       expect(channel.trigger("client-test", {})).toBe(false);
     });
   });

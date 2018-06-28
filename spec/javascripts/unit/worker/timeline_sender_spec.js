@@ -9,8 +9,8 @@ describe("fetch", function(){
 
   beforeEach(function(){
     timeline = Mocks.getTimeline();
-    timeline.isEmpty.andReturn(false);
-    timeline.send.andCallFake(function(sendXHR, callback) {
+    timeline.isEmpty.and.returnValue(false);
+    timeline.send.and.callFake(function(sendXHR, callback) {
       sendXHR({ events: [1, 2, 3]}, callback);
     });
 

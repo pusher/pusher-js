@@ -7,7 +7,10 @@ describe("SequentialStrategy", function() {
     this.substrategies = Mocks.getStrategies([true, true]);
     this.strategy = new SequentialStrategy(this.substrategies, {});
 
-    jasmine.Clock.useMock();
+    jasmine.clock().install();
+  });
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("after calling isSupported", function() {
@@ -51,7 +54,7 @@ describe("SequentialStrategy", function() {
       this.substrategies[1]._callback(true);
       expect(this.substrategies[1]._abort).not.toHaveBeenCalled();
       expect(this.callback).toHaveBeenCalledWith(true);
-      expect(this.callback.calls.length).toEqual(1);
+      expect(this.callback.calls.count()).toEqual(1);
     });
 
     it("should support looping", function() {
@@ -60,18 +63,18 @@ describe("SequentialStrategy", function() {
       });
       var runner = strategy.connect(0, this.callback);
 
-      expect(this.substrategies[0].connect.calls.length).toEqual(1);
-      expect(this.substrategies[1].connect.calls.length).toEqual(0);
+      expect(this.substrategies[0].connect.calls.count()).toEqual(1);
+      expect(this.substrategies[1].connect.calls.count()).toEqual(0);
 
       this.substrategies[0]._callback(true);
 
-      expect(this.substrategies[0].connect.calls.length).toEqual(1);
-      expect(this.substrategies[1].connect.calls.length).toEqual(1);
+      expect(this.substrategies[0].connect.calls.count()).toEqual(1);
+      expect(this.substrategies[1].connect.calls.count()).toEqual(1);
 
       this.substrategies[1]._callback(true);
 
-      expect(this.substrategies[0].connect.calls.length).toEqual(2);
-      expect(this.substrategies[1].connect.calls.length).toEqual(1);
+      expect(this.substrategies[0].connect.calls.count()).toEqual(2);
+      expect(this.substrategies[1].connect.calls.count()).toEqual(1);
 
       runner.abort();
       expect(this.substrategies[0]._abort).toHaveBeenCalled();
@@ -111,7 +114,7 @@ describe("SequentialStrategy", function() {
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
 
       runner.abort();
-      jasmine.Clock.tick(100);
+      jasmine.clock().tick(100);
       expect(this.substrategies[1].connect).not.toHaveBeenCalled();
     });
   });
@@ -126,9 +129,9 @@ describe("SequentialStrategy", function() {
       strategy.connect(0, this.callback);
       substrategy._callback(true);
 
-      jasmine.Clock.tick(99);
+      jasmine.clock().tick(99);
       expect(this.callback).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(this.callback).toHaveBeenCalled();
     });
 
@@ -160,31 +163,31 @@ describe("SequentialStrategy", function() {
       expect(substrategies[0].connect).toHaveBeenCalled();
       expect(substrategies[1].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(99);
+      jasmine.clock().tick(99);
       expect(substrategies[1].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(substrategies[1].connect).toHaveBeenCalled();
       expect(substrategies[2].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(199);
+      jasmine.clock().tick(199);
       expect(substrategies[2].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(substrategies[2].connect).toHaveBeenCalled();
       expect(substrategies[3].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(399);
+      jasmine.clock().tick(399);
       expect(substrategies[3].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(substrategies[3].connect).toHaveBeenCalled();
       expect(substrategies[4].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(399);
+      jasmine.clock().tick(399);
       expect(substrategies[4].connect).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(substrategies[4].connect).toHaveBeenCalled();
     });
   });

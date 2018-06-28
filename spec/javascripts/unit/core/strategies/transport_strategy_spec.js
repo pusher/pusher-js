@@ -13,7 +13,7 @@ describe("TransportStrategy", function() {
     transport = Mocks.getTransport(true);
     transportClass = Mocks.getTransportClass(true, transport);
 
-    spyOn(Factory, 'createHandshake').andCallFake(function(transport, callback) {
+    spyOn(Factory, 'createHandshake').and.callFake(function(transport, callback) {
       handshake = Mocks.getHandshake(transport, callback);
       return handshake;
     });
@@ -133,7 +133,7 @@ describe("TransportStrategy", function() {
         strategy.connect(2, callback);
       });
       waitsFor(function() {
-        return callback.calls.length > 0;
+        return callback.calls.count() > 0;
       }, "callback to be called");
       runs(function() {
         expect(callback).toHaveBeenCalledWith(
@@ -143,12 +143,12 @@ describe("TransportStrategy", function() {
     });
 
     it("should call back with an error if transport is not supported", function() {
-      transportClass.isSupported.andReturn(false);
+      transportClass.isSupported.and.returnValue(false);
       runs(function() {
         strategy.connect(0, callback);
       });
       waitsFor(function() {
-        return callback.calls.length > 0;
+        return callback.calls.count() > 0;
       }, "callback to be called", 100);
       runs(function() {
         expect(callback).toHaveBeenCalledWith(
