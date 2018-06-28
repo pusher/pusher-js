@@ -39,19 +39,19 @@ export default class EncryptedChannel extends PrivateChannel {
    */
   authorize(socketId: string, callback: Function) {
     super.authorize(socketId, (error, authData) => {
-      let {auth, shared_secret} = authData;
+      let { shared_secret, ...remainingAuthData } = authData;
       if (shared_secret) {
         this.resolveKeyPromise(decodeBase64(shared_secret));
       } else {
         throw new Error('Unable to extract shared secret from auth payload');
       }
-      callback(error, {auth});
+      callback(error, remainingAuthData);
     });
   }
 
   /** Triggers an encrypted event */
   triggerEncrypted(event: string, data: any) {
-    this.encryptPayload(data).then((encryptedData) => {
+    return this.encryptPayload(data).then((encryptedData) => {
       return super.trigger(event, encryptedData);
     });
   }
@@ -67,9 +67,9 @@ export default class EncryptedChannel extends PrivateChannel {
       // stuff
       return super.handleEvent(event, data);
     }
-    this.decryptPayload(data)
+    return this.decryptPayload(data)
       .then(decryptedData => {
-        this.emit(event, decryptedData);
+        return this.emit(event, decryptedData);
       })
       .catch(err => {
         throw new Error(`Unable to decrypted payload: ${err}`)
@@ -79,7 +79,7 @@ export default class EncryptedChannel extends PrivateChannel {
 
   private encryptPayload(data: string): Promise<string> {
     return this.keyPromise
-      .then(key => {
+      .then(key =>{
         let nonce = randomBytes(24);
         let dataStr = JSON.stringify(data);
         let dataBytes = decodeUTF8(dataStr);
