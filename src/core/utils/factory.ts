@@ -12,6 +12,7 @@ import Timeline from "../timeline/timeline";
 import {default as TimelineSender, TimelineSenderOptions} from "../timeline/timeline_sender";
 import PresenceChannel from "../channels/presence_channel";
 import PrivateChannel from "../channels/private_channel";
+import EncryptedChannel from "../channels/encrypted_channel";
 import Channel from "../channels/channel";
 import ConnectionManager from "../connection/connection_manager";
 import ConnectionManagerOptions from '../connection/connection_manager_options';
@@ -39,6 +40,10 @@ var Factory = {
 
   createPresenceChannel(name: string, pusher: Pusher) : PresenceChannel {
     return new PresenceChannel(name, pusher);
+  },
+
+  createEncryptedChannel(name: string, pusher: Pusher) : EncryptedChannel {
+    return new EncryptedChannel(name, pusher);
   },
 
   createTimelineSender(timeline : Timeline, options : TimelineSenderOptions) {

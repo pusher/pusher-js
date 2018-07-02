@@ -20,7 +20,7 @@ var config = objectAssign(require('./config.shared'),{
     libraryTarget: "umd"
   },
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/web', 'src/runtimes']
+    modulesDirectories: ['src/', 'src/runtimes/web', 'src/runtimes', 'node_modules']
   },
   plugins: [
     new webpack.DefinePlugin({

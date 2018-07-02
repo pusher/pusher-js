@@ -5,7 +5,8 @@
     "declaration": false,
     "sourceMap": true,
     "target": "es3",
-    "removeComments": true
+    "removeComments": true,
+    "moduleResolution": "node"
   },
   "files": [
     "src/core/pusher.ts",
@@ -21,7 +22,9 @@
     "src/d.ts/fetch/promise.d.ts",
     "src/d.ts/fetch/fetch.d.ts",
     "src/runtimes/web/net_info.ts",
-    "src/runtimes/react-native/net_info.ts"
+    "src/runtimes/react-native/net_info.ts",
+    "src/d.ts/tweetnacl-util/index.d.ts",
+    "src/d.ts/tweetnacl/index.d.ts"
   ],
   "exclude": [
     "node_modules"
