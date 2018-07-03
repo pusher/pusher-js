@@ -10,28 +10,18 @@ import {
   decodeUTF8
 } from "tweetnacl-util";
 
-/** Extends public channels to provide private channel interface.
+type EncryptedMessage = {
+  nonce: string;
+  ciphertext: string;
+}
+
+/** Extends private channels to provide encrypted channel interface.
  *
  * @param {String} name
  * @param {Pusher} pusher
  */
 export default class EncryptedChannel extends PrivateChannel {
-  keyPromise: Promise<Uint8Array>;
-  resolveKeyPromise: any;
-  rejectKeyPromise: any;
-
-  constructor(name: string, pusher: Pusher) {
-    super(name, pusher);
-    this.keyPromise = new Promise((resolve, reject) => {
-      this.resolveKeyPromise = resolve;
-      this.rejectKeyPromise = reject;
-    });
-    this.keyPromise.catch(err => {
-      throw new Error(
-        `Unable to retrieve encryption master key from auth endpoint: ${err}`
-      );
-    });
-  }
+  key: Uint8Array = null;
 
   /** Authorizes the connection to use the channel.
    *
@@ -46,17 +36,16 @@ export default class EncryptedChannel extends PrivateChannel {
           "No shared_secret key in auth payload for encrypted channel"
         );
       }
-      this.resolveKeyPromise(decodeBase64(sharedSecret));
+      this.key = decodeBase64(sharedSecret);
       delete authData["shared_secret"];
       callback(error, authData);
     });
   }
 
-  /** Triggers an encrypted event */
-  triggerEncrypted(event: string, data: any) {
-    return this.encryptPayload(data).then(encryptedData => {
-      return super.trigger(event, encryptedData);
-    });
+  trigger(event: string, data: any) {
+    if(!this.key) return false;
+    let encryptedData = this.encryptPayload(data);
+    return super.trigger(event, encryptedData);
   }
 
   /** Handles an event. For internal use only.
@@ -65,71 +54,52 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param {*} data
    */
   handleEvent(event: string, data: any) {
-    return new Promise((resolve, reject) => {
-      if (event.indexOf("pusher_internal:") === 0) {
-        super.handleEvent(event, data);
-        resolve();
-      } else {
-        this.decryptPayload(data)
-          .then(decryptedData => {
-            this.emit(event, decryptedData);
-            resolve();
-          })
-          .catch(e => {
-            reject(e);
-          });
-      }
-    });
+    if (event.indexOf("pusher_internal:") === 0) {
+      super.handleEvent(event, data);
+      return
+    }
+    if(!this.key) return
+    let decryptedData = this.decryptPayload(data)
+    this.emit(event, decryptedData);
   }
 
-  private encryptPayload(data: string): Promise<string | void> {
-    return this.keyPromise
-      .then(key => {
-        let nonce = randomBytes(24);
-        let dataStr = JSON.stringify(data);
-        let dataBytes = decodeUTF8(dataStr);
-        let bytes = secretbox(dataBytes, nonce, key);
-        if (bytes === null) {
-          throw new Error("Unable to encrypt data, probably an invalid key");
-        }
-        return {
-          nonce: encodeBase64(nonce),
-          ciphertext: encodeBase64(bytes)
-        };
-      })
-      .catch(err => {
-        throw new Error(`Unable to encrypt payload: ${err}`);
-      });
-  }
-
-  private decryptPayload(encryptedData: string): Promise<string | void> {
+  private encryptPayload(data: string): EncryptedMessage {
     let baseErrMsg = "Unable to encrypt payload";
-    return this.keyPromise
-      .then(key => {
-        if (!encryptedData["ciphertext"] || !encryptedData["nonce"]) {
-          throw new Error(`${baseErrMsg}: unexpected data format`);
-        }
-        let nonce = decodeBase64(encryptedData["nonce"]);
-        let cipherText = decodeBase64(encryptedData["ciphertext"]);
-        if (
-          nonce.length < secretbox.nonceLength ||
-          cipherText.length < secretbox.overheadLength
-        ) {
-          throw new Error(`${baseErrMsg}: unexpected data format`);
-        }
-        let bytes = secretbox.open(cipherText, nonce, key);
-        if (bytes === null) {
-          throw new Error(`${baseErrMsg}: probably an invalid key`);
-        }
-        let str = encodeUTF8(bytes);
-        let decryptedData;
-        try {
-          decryptedData = JSON.parse(str);
-        } catch (e) {}
-        return decryptedData || str;
-      })
-      .catch(err => {
-        throw new Error(`${baseErrMsg}: ${err.message}`);
-      });
+    let nonce = randomBytes(24);
+    let dataStr = JSON.stringify(data);
+    let dataBytes = decodeUTF8(dataStr);
+    let bytes = secretbox(dataBytes, nonce, this.key);
+    if (bytes === null) {
+      throw new Errors.EncryptionError(`${baseErrMsg}: probably an invalid key`);
+    }
+    return {
+      nonce: encodeBase64(nonce),
+      ciphertext: encodeBase64(bytes)
+    };
+}
+
+  private decryptPayload(encryptedData: EncryptedMessage): string {
+    let baseErrMsg = "Unable to decrypt payload";
+    if (!encryptedData.ciphertext || !encryptedData.nonce) {
+      throw new Errors.EncryptionError(`${baseErrMsg}: unexpected data format`);
+    }
+    let nonce = decodeBase64(encryptedData.nonce);
+    let cipherText = decodeBase64(encryptedData.ciphertext);
+    if (
+      nonce.length < secretbox.nonceLength ||
+      cipherText.length < secretbox.overheadLength
+    ) {
+      throw new Errors.EncryptionError(`${baseErrMsg}: unexpected data format`);
+    }
+    let bytes = secretbox.open(cipherText, nonce, this.key);
+    if (bytes === null) {
+      throw new Errors.EncryptionError(`${baseErrMsg}: probably an invalid key`);
+    }
+    let str = encodeUTF8(bytes);
+    try {
+      return JSON.parse(str)
+    } catch (e) {
+      return str
+    }
   }
 }
