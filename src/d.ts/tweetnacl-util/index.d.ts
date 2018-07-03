@@ -1,6 +1,6 @@
 declare module "tweetnacl-util" {
-  export function encodeUTF8(data: any): any
-  export function decodeUTF8(data: any): any
-  export function encodeBase64(data: any): any
-  export function decodeBase64(data: any): any
+  export function encodeUTF8(data: Uint8Array): string;
+  export function decodeUTF8(data: string): Uint8Array;
+  export function encodeBase64(data: Uint8Array): string;
+  export function decodeBase64(data: string): Uint8Array;
 }
