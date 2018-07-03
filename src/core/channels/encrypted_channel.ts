@@ -19,7 +19,6 @@ export default class EncryptedChannel extends PrivateChannel {
   keyPromise: Promise<Uint8Array>;
   resolveKeyPromise: any;
   rejectKeyPromise: any;
-  encryptedDataPrefix: string;
 
   constructor(name: string, pusher: Pusher) {
     super(name, pusher);
@@ -28,9 +27,10 @@ export default class EncryptedChannel extends PrivateChannel {
       this.rejectKeyPromise = reject;
     });
     this.keyPromise.catch(err => {
-      throw new Error(`Unable to retrieve encryption master key from auth endpoint: ${err}`);
+      throw new Error(
+        `Unable to retrieve encryption master key from auth endpoint: ${err}`
+      );
     });
-    this.encryptedDataPrefix = "encrypted_data";
   }
 
   /** Authorizes the connection to use the channel.
@@ -69,14 +69,16 @@ export default class EncryptedChannel extends PrivateChannel {
       if (event.indexOf("pusher_internal:") === 0) {
         super.handleEvent(event, data);
         resolve();
+      } else {
+        this.decryptPayload(data)
+          .then(decryptedData => {
+            this.emit(event, decryptedData);
+            resolve();
+          })
+          .catch(e => {
+            reject(e);
+          });
       }
-      if (!this.isEncryptedData(data)) {
-        reject(new Error("non-encrypted payload on encrypted channel"));
-      }
-      this.decryptPayload(data).then(decryptedData => {
-        this.emit(event, decryptedData);
-        resolve();
-      });
     });
   }
 
@@ -86,13 +88,14 @@ export default class EncryptedChannel extends PrivateChannel {
         let nonce = randomBytes(24);
         let dataStr = JSON.stringify(data);
         let dataBytes = decodeUTF8(dataStr);
-
         let bytes = secretbox(dataBytes, nonce, key);
         if (bytes === null) {
           throw new Error("Unable to encrypt data, probably an invalid key");
         }
-        let encryptedData = encodeBase64(bytes);
-        return `encrypted_data:${encodeBase64(nonce)}:${encryptedData}`;
+        return {
+          nonce: encodeBase64(nonce),
+          ciphertext: encodeBase64(bytes)
+        };
       })
       .catch(err => {
         throw new Error(`Unable to encrypt payload: ${err}`);
@@ -103,16 +106,17 @@ export default class EncryptedChannel extends PrivateChannel {
     let baseErrMsg = "Unable to encrypt payload";
     return this.keyPromise
       .then(key => {
-        let minLength = secretbox.overheadLength + secretbox.nonceLength;
-        if (encryptedData.length < minLength) {
-          throw new Error(`${baseErrMsg}: payload too short`);
-        }
-        let parts = encryptedData.split(":");
-        if (parts.length !== 3) {
+        if (!encryptedData["ciphertext"] || !encryptedData["nonce"]) {
           throw new Error(`${baseErrMsg}: unexpected data format`);
         }
-        let nonce = decodeBase64(parts[1]);
-        let cipherText = decodeBase64(parts[2]);
+        let nonce = decodeBase64(encryptedData["nonce"]);
+        let cipherText = decodeBase64(encryptedData["ciphertext"]);
+        if (
+          nonce.length < secretbox.nonceLength ||
+          cipherText.length < secretbox.overheadLength
+        ) {
+          throw new Error(`${baseErrMsg}: unexpected data format`);
+        }
         let bytes = secretbox.open(cipherText, nonce, key);
         if (bytes === null) {
           throw new Error(`${baseErrMsg}: probably an invalid key`);
@@ -127,12 +131,5 @@ export default class EncryptedChannel extends PrivateChannel {
       .catch(err => {
         throw new Error(`${baseErrMsg}: ${err.message}`);
       });
-  }
-
-  private isEncryptedData(data: string): boolean {
-    if (typeof data !== "string") {
-      return false;
-    }
-    return data.indexOf(this.encryptedDataPrefix) === 0;
   }
 }

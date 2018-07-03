@@ -86,7 +86,7 @@ describe("EncryptedChannel", function() {
         expect(thenFn).toHaveBeenCalledWith(secretBytes);
       });
     });
-    iit("should error if no shared_secret included in auth data", function() {
+    it("should error if no shared_secret included in auth data", function() {
       let callback = jasmine.createSpy("callback");
       channel.authorize("1.23", callback);
       expect(callback).not.toHaveBeenCalled();
@@ -174,7 +174,10 @@ describe("EncryptedChannel", function() {
 
     it("should call send_event on connection with encrypted data", function(done) {
       let payload = {k: "v"};
-      let expArg = `encrypted_data:${nonceBase64}:${testEncrypt(payload)}`;
+      let expArg = {
+        nonce: nonceBase64,
+        ciphertext: testEncrypt(payload)
+      };
       let thenFn = jasmine.createSpy("thenFn")
       runs(() => {
         channel.triggerEncrypted("client-test", payload).then(thenFn)
@@ -323,7 +326,10 @@ describe("EncryptedChannel", function() {
       });
       it("should decrypt the event payload and emit the event", function() {
         let payload = {test: "payload"};
-        let encryptedPayload = `encrypted_data:${nonceBase64}:${testEncrypt(payload)}`;
+        let encryptedPayload = {
+          nonce: nonceBase64,
+          ciphertext: testEncrypt(payload)
+        };
         let boundCallback = jasmine.createSpy("boundCallback");
         let thenFn = jasmine.createSpy("thenFn")
         channel.bind("something", boundCallback);
