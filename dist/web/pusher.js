@@ -3346,20 +3346,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 	};
 	var private_channel_1 = __webpack_require__(51);
+	var Errors = __webpack_require__(31);
 	var tweetnacl_1 = __webpack_require__(55);
 	var tweetnacl_util_1 = __webpack_require__(57);
 	var EncryptedChannel = (function (_super) {
 	    __extends(EncryptedChannel, _super);
-	    function EncryptedChannel(name, pusher) {
-	        var _this = this;
-	        _super.call(this, name, pusher);
-	        this.keyPromise = new Promise(function (resolve, reject) {
-	            _this.resolveKeyPromise = resolve;
-	            _this.rejectKeyPromise = reject;
-	        });
-	        this.keyPromise.catch(function (err) {
-	            throw new Error("Unable to retrieve encryption master key from auth endpoint: " + err);
-	        });
+	    function EncryptedChannel() {
+	        _super.apply(this, arguments);
+	        this.key = null;
 	    }
 	    EncryptedChannel.prototype.authorize = function (socketId, callback) {
 	        var _this = this;
@@ -3368,83 +3362,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (!sharedSecret) {
 	                throw new Error("No shared_secret key in auth payload for encrypted channel");
 	            }
-	            _this.resolveKeyPromise(tweetnacl_util_1.decodeBase64(sharedSecret));
+	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
 	            delete authData["shared_secret"];
 	            callback(error, authData);
 	        });
 	    };
-	    EncryptedChannel.prototype.triggerEncrypted = function (event, data) {
-	        var _this = this;
-	        return this.encryptPayload(data).then(function (encryptedData) {
-	            return _super.prototype.trigger.call(_this, event, encryptedData);
-	        });
+	    EncryptedChannel.prototype.trigger = function (event, data) {
+	        if (!this.key)
+	            return false;
+	        var encryptedData = this.encryptPayload(data);
+	        return _super.prototype.trigger.call(this, event, encryptedData);
 	    };
 	    EncryptedChannel.prototype.handleEvent = function (event, data) {
-	        var _this = this;
-	        return new Promise(function (resolve, reject) {
-	            if (event.indexOf("pusher_internal:") === 0) {
-	                _super.prototype.handleEvent.call(_this, event, data);
-	                resolve();
-	            }
-	            else {
-	                _this.decryptPayload(data)
-	                    .then(function (decryptedData) {
-	                    _this.emit(event, decryptedData);
-	                    resolve();
-	                })
-	                    .catch(function (e) {
-	                    reject(e);
-	                });
-	            }
-	        });
+	        if (event.indexOf("pusher_internal:") === 0) {
+	            _super.prototype.handleEvent.call(this, event, data);
+	            return;
+	        }
+	        if (!this.key)
+	            return;
+	        var decryptedData = this.decryptPayload(data);
+	        this.emit(event, decryptedData);
 	    };
 	    EncryptedChannel.prototype.encryptPayload = function (data) {
-	        return this.keyPromise
-	            .then(function (key) {
-	            var nonce = tweetnacl_1.randomBytes(24);
-	            var dataStr = JSON.stringify(data);
-	            var dataBytes = tweetnacl_util_1.decodeUTF8(dataStr);
-	            var bytes = tweetnacl_1.secretbox(dataBytes, nonce, key);
-	            if (bytes === null) {
-	                throw new Error("Unable to encrypt data, probably an invalid key");
-	            }
-	            return {
-	                nonce: tweetnacl_util_1.encodeBase64(nonce),
-	                ciphertext: tweetnacl_util_1.encodeBase64(bytes)
-	            };
-	        })
-	            .catch(function (err) {
-	            throw new Error("Unable to encrypt payload: " + err);
-	        });
+	        var baseErrMsg = "Unable to encrypt payload";
+	        var nonce = tweetnacl_1.randomBytes(24);
+	        var dataStr = JSON.stringify(data);
+	        var dataBytes = tweetnacl_util_1.decodeUTF8(dataStr);
+	        var bytes = tweetnacl_1.secretbox(dataBytes, nonce, this.key);
+	        if (bytes === null) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": probably an invalid key");
+	        }
+	        return {
+	            nonce: tweetnacl_util_1.encodeBase64(nonce),
+	            ciphertext: tweetnacl_util_1.encodeBase64(bytes)
+	        };
 	    };
 	    EncryptedChannel.prototype.decryptPayload = function (encryptedData) {
-	        var baseErrMsg = "Unable to encrypt payload";
-	        return this.keyPromise
-	            .then(function (key) {
-	            if (!encryptedData["ciphertext"] || !encryptedData["nonce"]) {
-	                throw new Error(baseErrMsg + ": unexpected data format");
-	            }
-	            var nonce = tweetnacl_util_1.decodeBase64(encryptedData["nonce"]);
-	            var cipherText = tweetnacl_util_1.decodeBase64(encryptedData["ciphertext"]);
-	            if (nonce.length < tweetnacl_1.secretbox.nonceLength ||
-	                cipherText.length < tweetnacl_1.secretbox.overheadLength) {
-	                throw new Error(baseErrMsg + ": unexpected data format");
-	            }
-	            var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, key);
-	            if (bytes === null) {
-	                throw new Error(baseErrMsg + ": probably an invalid key");
-	            }
-	            var str = tweetnacl_util_1.encodeUTF8(bytes);
-	            var decryptedData;
-	            try {
-	                decryptedData = JSON.parse(str);
-	            }
-	            catch (e) { }
-	            return decryptedData || str;
-	        })
-	            .catch(function (err) {
-	            throw new Error(baseErrMsg + ": " + err.message);
-	        });
+	        var baseErrMsg = "Unable to decrypt payload";
+	        if (!encryptedData.ciphertext || !encryptedData.nonce) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        }
+	        var nonce = tweetnacl_util_1.decodeBase64(encryptedData.nonce);
+	        var cipherText = tweetnacl_util_1.decodeBase64(encryptedData.ciphertext);
+	        if (nonce.length < tweetnacl_1.secretbox.nonceLength ||
+	            cipherText.length < tweetnacl_1.secretbox.overheadLength) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        }
+	        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);
+	        if (bytes === null) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": probably an invalid key");
+	        }
+	        var str = tweetnacl_util_1.encodeUTF8(bytes);
+	        try {
+	            return JSON.parse(str);
+	        }
+	        catch (e) {
+	            return str;
+	        }
 	    };
 	    return EncryptedChannel;
 	}(private_channel_1["default"]));
