@@ -356,6 +356,14 @@ Private channels are created in exactly the same way as normal channels, except 
 const channel = socket.subscribe('private-my-channel');
 ```
 
+### Encrypted Channels (BETA)
+
+Like private channels, encrypted channels have their own namespace, 'private-encrypted-'. For more information about encrypted channels, please see the [docs](https://pusher.com/docs/client_api_guide/client_encrypted_channels).
+
+```js
+const channel = socket.subscribe('private-my-channel');
+```
+
 It is possible to access channels by name, through the `channel` function:
 
 ```js
@@ -368,7 +376,7 @@ It is possible to access all subscribed channels through the `allChannels` funct
 socket.allChannels().forEach(channel => console.log(channel.name));
 ```
 
-Private and presence channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
+Private, presence and encrypted channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
 
 ## Unsubscribing from channels
 
