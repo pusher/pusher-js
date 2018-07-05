@@ -361,7 +361,7 @@ const channel = socket.subscribe('private-my-channel');
 Like private channels, encrypted channels have their own namespace, 'private-encrypted-'. For more information about encrypted channels, please see the [docs](https://pusher.com/docs/client_api_guide/client_encrypted_channels).
 
 ```js
-const channel = socket.subscribe('private-my-channel');
+const channel = socket.subscribe('private-encrypted-my-channel');
 ```
 
 It is possible to access channels by name, through the `channel` function:
