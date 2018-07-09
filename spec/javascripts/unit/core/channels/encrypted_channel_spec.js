@@ -70,15 +70,15 @@ describe("EncryptedChannel", function() {
       expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
     });
 
-    it("should error if no shared_secret included in auth data", function() {
+    it("should callback an error if no shared_secret included in auth data", function() {
       let callback = jasmine.createSpy("callback");
       channel.authorize("1.23", callback);
-      expect(callback).not.toHaveBeenCalled();
-      expect(() => {
-        authorizer._callback(false, {
-          foo: "bar"
-        });
-      }).toThrow()
+      authorizer._callback(false, {
+        foo: "bar"
+      });
+      expect(callback).toHaveBeenCalledWith(true,
+        "No shared_secret key in auth payload for encrypted channel: private-encrypted-test"
+      );
     });
 
     describe('with custom authorizer', function() {
