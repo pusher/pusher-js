@@ -3363,7 +3363,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            var sharedSecret = authData["shared_secret"];
 	            if (!sharedSecret) {
-	                throw new Error("No shared_secret key in auth payload for encrypted channel");
+	                callback(true, "No shared_secret key in auth payload for encrypted channel: " + _this.name);
+	                return;
 	            }
 	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
 	            delete authData["shared_secret"];
