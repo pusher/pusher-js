@@ -248,6 +248,13 @@ describe("EncryptedChannel", function() {
         channel.handleEvent("something", encryptedPayload);
         expect(boundCallback).toHaveBeenCalledWith(payload);
       });
+      it("should emit pusher: prefixed events unmodified", function() {
+        let payload = { test: "payload" };
+        let boundCallback = jasmine.createSpy("boundCallback");
+        channel.bind("pusher:subscription_error", boundCallback);
+        channel.handleEvent("pusher:subscription_error", payload);
+        expect(boundCallback).toHaveBeenCalledWith(payload);
+      });
       it("should throw an error if the data payload is not encrypted", function() {
         let payload = { test: "payload" };
         let boundCallback = jasmine.createSpy("boundCallback");

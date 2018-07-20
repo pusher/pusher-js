@@ -2,6 +2,7 @@ import Factory from "../utils/factory";
 import PrivateChannel from "./private_channel";
 import Pusher from "../pusher";
 import * as Errors from "../errors";
+import Logger from '../logger'
 import { secretbox, randomBytes } from "tweetnacl";
 import {
   encodeUTF8,
@@ -32,7 +33,9 @@ export default class EncryptedChannel extends PrivateChannel {
     super.authorize(socketId, (error, authData) => {
       let sharedSecret = authData["shared_secret"];
       if (!sharedSecret) {
-        callback(true, `No shared_secret key in auth payload for encrypted channel: ${this.name}`);
+        let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
+        callback(true, errorMsg);
+        Logger.warn(`Error: ${errorMsg}`);
         return
       }
       this.key = decodeBase64(sharedSecret);
@@ -53,7 +56,7 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param {*} data
    */
   handleEvent(event: string, data: any) {
-    if (event.indexOf("pusher_internal:") === 0) {
+    if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
       super.handleEvent(event, data);
       return
     }
