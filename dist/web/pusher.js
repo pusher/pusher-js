@@ -593,7 +593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            else {
 	                var suffix = url_store_1["default"].buildLogSuffix("authenticationEndpoint");
-	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status) +
+	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status + " ") +
 	                    ("Clients must be authenticated to join private or presence channels. " + suffix));
 	                callback(true, xhr.status);
 	            }
@@ -3347,6 +3347,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	var private_channel_1 = __webpack_require__(51);
 	var Errors = __webpack_require__(31);
+	var logger_1 = __webpack_require__(8);
 	var tweetnacl_1 = __webpack_require__(55);
 	var tweetnacl_util_1 = __webpack_require__(57);
 	var EncryptedChannel = (function (_super) {
@@ -3360,7 +3361,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
 	            var sharedSecret = authData["shared_secret"];
 	            if (!sharedSecret) {
-	                callback(true, "No shared_secret key in auth payload for encrypted channel: " + _this.name);
+	                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
+	                callback(true, errorMsg);
+	                logger_1["default"].warn("Error: " + errorMsg);
 	                return;
 	            }
 	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
@@ -3375,7 +3378,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _super.prototype.trigger.call(this, event, encryptedData);
 	    };
 	    EncryptedChannel.prototype.handleEvent = function (event, data) {
-	        if (event.indexOf("pusher_internal:") === 0) {
+	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
 	            _super.prototype.handleEvent.call(this, event, data);
 	            return;
 	        }
