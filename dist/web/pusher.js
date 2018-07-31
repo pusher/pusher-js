@@ -593,7 +593,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            else {
 	                var suffix = url_store_1["default"].buildLogSuffix("authenticationEndpoint");
-	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status + " ") +
+	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status) +
 	                    ("Clients must be authenticated to join private or presence channels. " + suffix));
 	                callback(true, xhr.status);
 	            }
@@ -1939,6 +1939,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return TransportClosed;
 	}(Error));
 	exports.TransportClosed = TransportClosed;
+	var UnsupportedFeature = (function (_super) {
+	    __extends(UnsupportedFeature, _super);
+	    function UnsupportedFeature() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedFeature;
+	}(Error));
+	exports.UnsupportedFeature = UnsupportedFeature;
 	var UnsupportedTransport = (function (_super) {
 	    __extends(UnsupportedTransport, _super);
 	    function UnsupportedTransport() {
@@ -3372,10 +3380,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        });
 	    };
 	    EncryptedChannel.prototype.trigger = function (event, data) {
-	        if (!this.key)
-	            return false;
-	        var encryptedData = this.encryptPayload(data);
-	        return _super.prototype.trigger.call(this, event, encryptedData);
+	        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
 	    };
 	    EncryptedChannel.prototype.handleEvent = function (event, data) {
 	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
@@ -3386,20 +3391,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return;
 	        var decryptedData = this.decryptPayload(data);
 	        this.emit(event, decryptedData);
-	    };
-	    EncryptedChannel.prototype.encryptPayload = function (data) {
-	        var baseErrMsg = "Unable to encrypt payload";
-	        var nonce = tweetnacl_1.randomBytes(24);
-	        var dataStr = JSON.stringify(data);
-	        var dataBytes = tweetnacl_util_1.decodeUTF8(dataStr);
-	        var bytes = tweetnacl_1.secretbox(dataBytes, nonce, this.key);
-	        if (bytes === null) {
-	            throw new Errors.EncryptionError(baseErrMsg + ": probably an invalid key");
-	        }
-	        return {
-	            nonce: tweetnacl_util_1.encodeBase64(nonce),
-	            ciphertext: tweetnacl_util_1.encodeBase64(bytes)
-	        };
 	    };
 	    EncryptedChannel.prototype.decryptPayload = function (encryptedData) {
 	        var baseErrMsg = "Unable to decrypt payload";
