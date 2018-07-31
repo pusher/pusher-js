@@ -71,7 +71,7 @@ var Pusher =
 	var StrategyBuilder = __webpack_require__(31);
 	var timers_1 = __webpack_require__(7);
 	var defaults_1 = __webpack_require__(11);
-	var DefaultConfig = __webpack_require__(55);
+	var DefaultConfig = __webpack_require__(56);
 	var logger_1 = __webpack_require__(16);
 	var factory_1 = __webpack_require__(33);
 	var url_store_1 = __webpack_require__(45);
@@ -1897,13 +1897,13 @@ var Pusher =
 	var util_1 = __webpack_require__(6);
 	var transport_manager_1 = __webpack_require__(32);
 	var Errors = __webpack_require__(43);
-	var transport_strategy_1 = __webpack_require__(48);
-	var sequential_strategy_1 = __webpack_require__(49);
-	var best_connected_ever_strategy_1 = __webpack_require__(50);
-	var cached_strategy_1 = __webpack_require__(51);
-	var delayed_strategy_1 = __webpack_require__(52);
-	var if_strategy_1 = __webpack_require__(53);
-	var first_connected_strategy_1 = __webpack_require__(54);
+	var transport_strategy_1 = __webpack_require__(49);
+	var sequential_strategy_1 = __webpack_require__(50);
+	var best_connected_ever_strategy_1 = __webpack_require__(51);
+	var cached_strategy_1 = __webpack_require__(52);
+	var delayed_strategy_1 = __webpack_require__(53);
+	var if_strategy_1 = __webpack_require__(54);
+	var first_connected_strategy_1 = __webpack_require__(55);
 	var runtime_1 = __webpack_require__(2);
 	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
@@ -2098,9 +2098,10 @@ var Pusher =
 	var timeline_sender_1 = __webpack_require__(39);
 	var presence_channel_1 = __webpack_require__(40);
 	var private_channel_1 = __webpack_require__(41);
+	var encrypted_channel_1 = __webpack_require__(46);
 	var channel_1 = __webpack_require__(42);
-	var connection_manager_1 = __webpack_require__(46);
-	var channels_1 = __webpack_require__(47);
+	var connection_manager_1 = __webpack_require__(47);
+	var channels_1 = __webpack_require__(48);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2116,6 +2117,9 @@ var Pusher =
 	    },
 	    createPresenceChannel: function (name, pusher) {
 	        return new presence_channel_1["default"](name, pusher);
+	    },
+	    createEncryptedChannel: function (name, pusher) {
+	        return new encrypted_channel_1["default"](name, pusher);
 	    },
 	    createTimelineSender: function (timeline, options) {
 	        return new timeline_sender_1["default"](timeline, options);
@@ -2756,6 +2760,14 @@ var Pusher =
 	    return TransportClosed;
 	}(Error));
 	exports.TransportClosed = TransportClosed;
+	var UnsupportedFeature = (function (_super) {
+	    __extends(UnsupportedFeature, _super);
+	    function UnsupportedFeature() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedFeature;
+	}(Error));
+	exports.UnsupportedFeature = UnsupportedFeature;
 	var UnsupportedTransport = (function (_super) {
 	    __extends(UnsupportedTransport, _super);
 	    function UnsupportedTransport() {
@@ -2772,6 +2784,14 @@ var Pusher =
 	    return UnsupportedStrategy;
 	}(Error));
 	exports.UnsupportedStrategy = UnsupportedStrategy;
+	var EncryptionError = (function (_super) {
+	    __extends(EncryptionError, _super);
+	    function EncryptionError() {
+	        _super.apply(this, arguments);
+	    }
+	    return EncryptionError;
+	}(Error));
+	exports.EncryptionError = EncryptionError;
 
 
 /***/ }),
@@ -2874,6 +2894,84 @@ var Pusher =
 
 /***/ }),
 /* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var private_channel_1 = __webpack_require__(41);
+	var Errors = __webpack_require__(43);
+	var logger_1 = __webpack_require__(16);
+	var tweetnacl_1 = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"tweetnacl\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var tweetnacl_util_1 = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"tweetnacl-util\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var EncryptedChannel = (function (_super) {
+	    __extends(EncryptedChannel, _super);
+	    function EncryptedChannel() {
+	        _super.apply(this, arguments);
+	        this.key = null;
+	    }
+	    EncryptedChannel.prototype.authorize = function (socketId, callback) {
+	        var _this = this;
+	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+	            var sharedSecret = authData["shared_secret"];
+	            if (!sharedSecret) {
+	                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
+	                callback(true, errorMsg);
+	                logger_1["default"].warn("Error: " + errorMsg);
+	                return;
+	            }
+	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
+	            delete authData["shared_secret"];
+	            callback(error, authData);
+	        });
+	    };
+	    EncryptedChannel.prototype.trigger = function (event, data) {
+	        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
+	    };
+	    EncryptedChannel.prototype.handleEvent = function (event, data) {
+	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
+	            _super.prototype.handleEvent.call(this, event, data);
+	            return;
+	        }
+	        if (!this.key)
+	            return;
+	        var decryptedData = this.decryptPayload(data);
+	        this.emit(event, decryptedData);
+	    };
+	    EncryptedChannel.prototype.decryptPayload = function (encryptedData) {
+	        var baseErrMsg = "Unable to decrypt payload";
+	        if (!encryptedData.ciphertext || !encryptedData.nonce) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        }
+	        var nonce = tweetnacl_util_1.decodeBase64(encryptedData.nonce);
+	        var cipherText = tweetnacl_util_1.decodeBase64(encryptedData.ciphertext);
+	        if (nonce.length < tweetnacl_1.secretbox.nonceLength ||
+	            cipherText.length < tweetnacl_1.secretbox.overheadLength) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        }
+	        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);
+	        if (bytes === null) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": probably an invalid key");
+	        }
+	        var str = tweetnacl_util_1.encodeUTF8(bytes);
+	        try {
+	            return JSON.parse(str);
+	        }
+	        catch (e) {
+	            return str;
+	        }
+	    };
+	    return EncryptedChannel;
+	}(private_channel_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = EncryptedChannel;
+
+
+/***/ }),
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3169,7 +3267,7 @@ var Pusher =
 
 
 /***/ }),
-/* 47 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3206,7 +3304,10 @@ var Pusher =
 	exports.__esModule = true;
 	exports["default"] = Channels;
 	function createChannel(name, pusher) {
-	    if (name.indexOf('private-') === 0) {
+	    if (name.indexOf('private-encrypted-') === 0) {
+	        return factory_1["default"].createEncryptedChannel(name, pusher);
+	    }
+	    else if (name.indexOf('private-') === 0) {
 	        return factory_1["default"].createPrivateChannel(name, pusher);
 	    }
 	    else if (name.indexOf('presence-') === 0) {
@@ -3219,7 +3320,7 @@ var Pusher =
 
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3326,7 +3427,7 @@ var Pusher =
 
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3423,7 +3524,7 @@ var Pusher =
 
 
 /***/ }),
-/* 50 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3486,13 +3587,13 @@ var Pusher =
 
 
 /***/ }),
-/* 51 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(6);
 	var runtime_1 = __webpack_require__(2);
-	var sequential_strategy_1 = __webpack_require__(49);
+	var sequential_strategy_1 = __webpack_require__(50);
 	var Collections = __webpack_require__(4);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
@@ -3601,7 +3702,7 @@ var Pusher =
 
 
 /***/ }),
-/* 52 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3643,7 +3744,7 @@ var Pusher =
 
 
 /***/ }),
-/* 53 */
+/* 54 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3668,7 +3769,7 @@ var Pusher =
 
 
 /***/ }),
-/* 54 */
+/* 55 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3695,7 +3796,7 @@ var Pusher =
 
 
 /***/ }),
-/* 55 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
