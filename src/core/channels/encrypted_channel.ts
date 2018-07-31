@@ -41,10 +41,10 @@ export default class EncryptedChannel extends PrivateChannel {
     });
   }
 
-  trigger(event: string, data: any) {
-    if(!this.key) return false;
-    let encryptedData = this.encryptPayload(data);
-    return super.trigger(event, encryptedData);
+  trigger(event: string, data: any): boolean {
+    throw new Errors.UnsupportedFeature(
+      'Client events are not currently supported for encrypted channels'
+    );
   }
 
   /** Handles an event. For internal use only.
@@ -61,21 +61,6 @@ export default class EncryptedChannel extends PrivateChannel {
     let decryptedData = this.decryptPayload(data)
     this.emit(event, decryptedData);
   }
-
-  private encryptPayload(data: string): EncryptedMessage {
-    let baseErrMsg = "Unable to encrypt payload";
-    let nonce = randomBytes(24);
-    let dataStr = JSON.stringify(data);
-    let dataBytes = decodeUTF8(dataStr);
-    let bytes = secretbox(dataBytes, nonce, this.key);
-    if (bytes === null) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: probably an invalid key`);
-    }
-    return {
-      nonce: encodeBase64(nonce),
-      ciphertext: encodeBase64(bytes)
-    };
-}
 
   private decryptPayload(encryptedData: EncryptedMessage): string {
     let baseErrMsg = "Unable to decrypt payload";

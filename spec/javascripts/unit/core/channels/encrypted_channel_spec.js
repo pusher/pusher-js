@@ -105,52 +105,14 @@ describe("EncryptedChannel", function() {
   });
 
   describe("#trigger", function() {
-    let randomBytesSpy;
     beforeEach(function() {
-      // in order to trigger encrypted events, we need to get a shared secret
-      // from the authorizer.
-      let authorizer = Mocks.getAuthorizer();
-      factorySpy = spyOn(Factory, "createAuthorizer").andReturn(authorizer);
       let callback = function() {};
       channel.authorize("1.23", callback);
-      authorizer._callback(false, { shared_secret: secretBase64, foo: "bar" });
-      randomBytesSpy = spyOn(tweetNacl, "randomBytes").andReturn(nonceBytes);
     });
-    it("should raise an exception if the event name does not start with client-", function() {
+    it("should raise an exception if called", function() {
       expect(function() {
         channel.trigger("whatever", {});
-      }).toThrow(jasmine.any(Errors.BadEventName));
-    });
-
-    it("should call send_event on connection", function() {
-      let payload = { k: "v" };
-      let expArg = {
-        nonce: nonceBase64,
-        ciphertext: testEncrypt(payload)
-      };
-      channel.trigger("client-test", payload);
-      expect(pusher.send_event).toHaveBeenCalledWith(
-        "client-test",
-        expArg,
-        "private-encrypted-test"
-      );
-    });
-
-    it("should return true if connection sent the event", function() {
-      pusher.send_event.andReturn(true);
-      expect(channel.trigger("client-test", {})).toBe(true);
-    });
-
-    it("should return false if authentication hasn't completed", function() {
-      let callback = function() {};
-      channel.authorize("1.23", callback);
-      pusher.send_event.andReturn(false);
-      expect(channel.trigger("client-test", {})).toBe(false);
-    });
-
-    it("should return false if connection didn't send the event", function() {
-      pusher.send_event.andReturn(false);
-      expect(channel.trigger("client-test", {})).toBe(false);
+      }).toThrow(jasmine.any(Errors.UnsupportedFeature));
     });
   });
 
