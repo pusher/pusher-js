@@ -23,6 +23,8 @@ module.exports = objectAssign(require('./config.shared'), {
   },
   externals: {
     "faye-websocket": "commonjs faye-websocket",
-    "xmlhttprequest": "commonjs xmlhttprequest"
+    "xmlhttprequest": "commonjs xmlhttprequest",
+    "tweetnacl": "commonjs tweetnacl",
+    "tweetnacl-util": "commonjs tweetnacl-util"
   }
 });
