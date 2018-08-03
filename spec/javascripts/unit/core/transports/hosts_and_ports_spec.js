@@ -55,8 +55,8 @@ describe("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to wss://ws.pusherapp.com:443 by default when encrypted", function() {
-      pusher = new Pusher("foobar", { encrypted: true });
+    it("should connect to wss://ws.pusherapp.com:443 by default when forcing TLS", function() {
+      pusher = new Pusher("foobar", { forceTLS: true });
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(
@@ -73,8 +73,8 @@ describe("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect using wsHost and wssPort when specified in options and encrypted", function() {
-      pusher = new Pusher("foobar", { wsHost: "example.org", wssPort: 4444, encrypted: true });
+    it("should connect using wsHost and wssPort when specified in options and forcing TLS", function() {
+      pusher = new Pusher("foobar", { wsHost: "example.org", wssPort: 4444, forceTLS: true });
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(

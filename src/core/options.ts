@@ -8,6 +8,7 @@ interface PusherOptions {
   activity_timeout: number;
   pong_timeout: number;
   unavailable_timeout: number;
+  forceTLS: boolean;
   encrypted: boolean;
   timelineParams: any;
   authTransport: "ajax" | "jsonp";

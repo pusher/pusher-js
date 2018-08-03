@@ -1,6 +1,6 @@
 var getDefaultStrategy = function(config : any) : any {
   var wsStrategy;
-  if (config.encrypted) {
+  if (config.useTLS) {
     wsStrategy = [
       ":best_connected_ever",
       ":ws_loop",
@@ -17,16 +17,16 @@ var getDefaultStrategy = function(config : any) : any {
 
   return [
     [":def", "ws_options", {
-      hostUnencrypted: config.wsHost + ":" + config.wsPort,
-      hostEncrypted: config.wsHost + ":" + config.wssPort,
+      hostNonTLS: config.wsHost + ":" + config.wsPort,
+      hostTLS: config.wsHost + ":" + config.wssPort,
       httpPath: config.wsPath
     }],
     [":def", "wss_options", [":extend", ":ws_options", {
-      encrypted: true
+      useTLS: true
     }]],
     [":def", "sockjs_options", {
-      hostUnencrypted: config.httpHost + ":" + config.httpPort,
-      hostEncrypted: config.httpHost + ":" + config.httpsPort,
+      hostNonTLS: config.httpHost + ":" + config.httpPort,
+      hostTLS: config.httpHost + ":" + config.httpsPort,
       httpPath: config.httpPath
     }],
     [":def", "timeouts", {

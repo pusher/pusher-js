@@ -64,10 +64,10 @@ describe("StrategyBuilder", function() {
     var strategy = StrategyBuilder.build([
       [":def_transport", "sub", "xhr_streaming", 2],
       [":def", "strategy", [":cached", 1234, ":sub"]]
-    ], { encrypted: true });
+    ], { useTLS: true });
     expect(strategy).toEqual(jasmine.any(CachedStrategy));
     expect(strategy.ttl).toEqual(1234);
-    expect(strategy.encrypted).toEqual(true);
+    expect(strategy.usingTLS).toEqual(true);
   });
 
   it("should construct a first connected strategy", function() {

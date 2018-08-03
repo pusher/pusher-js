@@ -20,11 +20,11 @@ export default class TimelineSender {
     this.options = options || {};
   }
 
-  send(encrypted : boolean, callback?: Function) {
+  send(useTLS : boolean, callback?: Function) {
     if (this.timeline.isEmpty()) {
       return;
     }
 
-    this.timeline.send(Runtime.TimelineTransport.getAgent(this, encrypted), callback);
+    this.timeline.send(Runtime.TimelineTransport.getAgent(this, useTLS), callback);
   }
 }

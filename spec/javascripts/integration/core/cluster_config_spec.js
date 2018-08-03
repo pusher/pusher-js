@@ -30,12 +30,12 @@ Integration.describe("Cluster Configuration", function() {
   var pusher;
 
   function describeClusterTest(options) {
-    var environment = { encrypted: options.encrypted };
+    var environment = { forceTLS: options.forceTLS };
     if (!TRANSPORTS[options.transport].isSupported(environment)) {
       return;
     }
 
-    describe("with " + options.transport + ", encrypted=" + options.encrypted, function() {
+    describe("with " + options.transport + ", forceTLS=" + options.forceTLS, function() {
       beforeEach(function() {
         Collections.objectApply(TRANSPORTS, function(transport, name) {
           spyOn(transport, "isSupported").andReturn(false);
@@ -52,7 +52,7 @@ Integration.describe("Cluster Configuration", function() {
           authTransport: authTransport,
           authEndpoint: Integration.API_EU_URL + "/auth",
           cluster: "eu",
-          encrypted: options.encrypted,
+          forceTLS: options.forceTLS,
           disableStats: true
         });
         waitsFor(function() {
@@ -128,30 +128,30 @@ Integration.describe("Cluster Configuration", function() {
 
   if (TestEnv !== "web" || !/version\/5.*safari/i.test(navigator.userAgent)) {
     // Safari 5 uses hixie-75/76, which is not supported on EU
-    describeClusterTest({ transport: "ws", encrypted: false});
-    describeClusterTest({ transport: "ws", encrypted: true});
+    describeClusterTest({ transport: "ws", forceTLS: false});
+    describeClusterTest({ transport: "ws", forceTLS: true});
   }
 
   if (Runtime.isXHRSupported()) {
     // CORS-compatible browsers
     if (TestEnv !== "web" || !/Android 2\./i.test(navigator.userAgent)) {
       // Android 2.x does a lot of buffering, which kills streaming
-      describeClusterTest({ transport: "xhr_streaming", encrypted: false});
-      describeClusterTest({ transport: "xhr_streaming", encrypted: true});
+      describeClusterTest({ transport: "xhr_streaming", forceTLS: false});
+      describeClusterTest({ transport: "xhr_streaming", forceTLS: true});
     }
-    describeClusterTest({ transport: "xhr_polling", encrypted: false});
-    describeClusterTest({ transport: "xhr_polling", encrypted: true});
+    describeClusterTest({ transport: "xhr_polling", forceTLS: false});
+    describeClusterTest({ transport: "xhr_polling", forceTLS: true});
   } else if (Runtime.isXDRSupported(false)) {
-    describeClusterTest({ transport: "xdr_streaming", encrypted: false});
-    describeClusterTest({ transport: "xdr_streaming", encrypted: true});
-    describeClusterTest({ transport: "xdr_polling", encrypted: false});
-    describeClusterTest({ transport: "xdr_polling", encrypted: true});
+    describeClusterTest({ transport: "xdr_streaming", forceTLS: false});
+    describeClusterTest({ transport: "xdr_streaming", forceTLS: true});
+    describeClusterTest({ transport: "xdr_polling", forceTLS: false});
+    describeClusterTest({ transport: "xdr_polling", forceTLS: true});
     // IE can fall back to SockJS if protocols don't match
-    // No SockJS encrypted tests due to the way JS files are served
-    describeClusterTest({ transport: "sockjs", encrypted: false});
+    // No SockJS TLS tests due to the way JS files are served
+    describeClusterTest({ transport: "sockjs", forceTLS: false});
   } else {
     // Browsers using SockJS
-    describeClusterTest({ transport: "sockjs", encrypted: false});
-    describeClusterTest({ transport: "sockjs", encrypted: true});
+    describeClusterTest({ transport: "sockjs", forceTLS: false});
+    describeClusterTest({ transport: "sockjs", forceTLS: true});
   }
 });

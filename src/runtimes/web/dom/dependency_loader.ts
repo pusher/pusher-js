@@ -70,7 +70,7 @@ export default class DependencyLoader {
    getRoot(options : any) : string {
      var cdn;
      var protocol = Runtime.getDocument().location.protocol;
-     if ((options && options.encrypted) || protocol === "https:") {
+     if ((options && options.useTLS) || protocol === "https:") {
        cdn = this.options.cdn_https;
      } else {
        cdn = this.options.cdn_http;

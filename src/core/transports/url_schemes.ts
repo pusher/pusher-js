@@ -2,8 +2,8 @@ import Defaults from "../defaults";
 import {default as URLScheme, URLSchemeParams} from "./url_scheme";
 
 function getGenericURL(baseScheme : string, params : URLSchemeParams, path : string): string {
-  var scheme = baseScheme + (params.encrypted ? "s" : "");
-  var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
+  var scheme = baseScheme + (params.useTLS ? "s" : "");
+  var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
   return scheme + "://" + host + path;
 }
 

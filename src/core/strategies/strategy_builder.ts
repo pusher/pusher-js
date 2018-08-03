@@ -82,7 +82,7 @@ var globalContext = {
         manager ? manager.getAssistant(transportClass) : transportClass,
         Collections.extend({
           key: context.key,
-          encrypted: context.encrypted,
+          useTLS: context.useTLS,
           timeline: context.timeline,
           ignoreNullOrigin: context.ignoreNullOrigin
         }, options)
@@ -110,7 +110,7 @@ var globalContext = {
     return new CachedStrategy(strategy, context.Transports, {
       ttl: ttl,
       timeline: context.timeline,
-      encrypted: context.encrypted
+      useTLS: context.useTLS
     });
   }),
 

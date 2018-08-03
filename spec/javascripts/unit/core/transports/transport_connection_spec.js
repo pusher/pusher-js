@@ -7,9 +7,9 @@ var Timer = require('core/utils/timers').OneOffTimer;
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {
     options = Collections.extend({
-      encrypted: false,
-      hostUnencrypted: "example.com:12345",
-      hostEncrypted: "example.com:54321"
+      useTLS: false,
+      hostNonTLS: "example.com:12345",
+      hostTLS: "example.com:54321"
     }, options);
 
     return new TransportConnection(hooks, "test", 7, key, options);
@@ -35,7 +35,7 @@ describe("TransportConnection", function() {
 
     urls = {
       getInitial: function(key, params) {
-        return (params.encrypted ? "wss" : "ws") + "://test/" + key;
+        return (params.useTLS ? "wss" : "ws") + "://test/" + key;
       }
     };
     socket = Mocks.getWebSocket();
@@ -83,10 +83,10 @@ describe("TransportConnection", function() {
       });
     });
 
-    it("should log transport name with an 's' suffix when encrypted", function() {
+    it("should log transport name with an 's' suffix when using TLS", function() {
       var transport = getTransport(hooks, "xxx", {
         timeline: timeline,
-        encrypted: true
+        useTLS: true
       });
       transport.initialize();
 
@@ -145,24 +145,24 @@ describe("TransportConnection", function() {
           expect(transport.state).toEqual("initializing");
         });
 
-        it("should load the resource file (encrypted=false)", function() {
+        it("should load the resource file (useTLS=false)", function() {
           transport.initialize();
           expect(Dependencies.load.calls.length).toEqual(1);
           expect(Dependencies.load).toHaveBeenCalledWith(
-            "test", { encrypted: false }, jasmine.any(Function)
+            "test", { useTLS: false }, jasmine.any(Function)
           );
         });
 
-        it("should load the resource file (encrypted=true)", function() {
+        it("should load the resource file (useTLS=true)", function() {
           var transport = getTransport(hooks, "foo", {
-            encrypted: true,
+            useTLS: true,
             timeline: timeline
           });
 
           transport.initialize();
           expect(Dependencies.load.calls.length).toEqual(1);
           expect(Dependencies.load).toHaveBeenCalledWith(
-            "test", { encrypted: true }, jasmine.any(Function)
+            "test", { useTLS: true }, jasmine.any(Function)
           );
         });
 
@@ -227,7 +227,7 @@ describe("TransportConnection", function() {
       expect(hooks.getSocket).not.toHaveBeenCalled();
     });
 
-    it("should create a socket unencrypted socket by default", function() {
+    it("should create a non TLS socket by default", function() {
       transport.initialize();
       transport.connect();
       expect(hooks.getSocket).toHaveBeenCalledWith(
@@ -235,10 +235,10 @@ describe("TransportConnection", function() {
       );
     });
 
-    it("should create an encrypted socket if specified", function() {
+    it("should create a TLS socket if specified", function() {
       var transport = getTransport(hooks, "bar", {
         timeline: timeline,
-        encrypted: true
+        useTLS: true
       });
 
       transport.initialize();

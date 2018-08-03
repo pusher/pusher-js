@@ -40,11 +40,11 @@ describe("fetch", function(){
     });
   });
 
-  it("should send secure requests when encrypted", function(){
+  it("should send secure requests when using TLS", function(){
     var matcher = /example\.com/;
 
     var sender = new TimelineSender(timeline, {
-      encrypted: true,
+      useTLS: true,
       host: "example.com",
       path: "/timeline"
     });

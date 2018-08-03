@@ -56,16 +56,16 @@ describe("ConnectionManager", function() {
     });
   });
 
-  describe("#isEncrypted", function() {
-    it("should return false if the manager has been created with encrypted=false", function() {
-      expect(manager.isEncrypted()).toEqual(false);
+  describe("#isUsingTLS", function() {
+    it("should return false if the manager has been created with useTLS=false", function() {
+      expect(manager.isUsingTLS()).toEqual(false);
     });
 
-    it("should return true if the manager has been created with encrypted=true", function() {
+    it("should return true if the manager has been created with useTLS=true", function() {
       var manager = new ConnectionManager(
-        "foo", Collections.extend(managerOptions, { encrypted: true })
+        "foo", Collections.extend(managerOptions, { useTLS: true })
       );
-      expect(manager.isEncrypted()).toEqual(true);
+      expect(manager.isUsingTLS()).toEqual(true);
     });
   });
 
@@ -155,30 +155,30 @@ describe("ConnectionManager", function() {
       manager.connect();
     });
 
-    describe("with 'ssl_only' action", function() {
-      var encryptedStrategy;
+    describe("with 'tls_only' action", function() {
+      var tlsStrategy;
 
       beforeEach(function() {
-        encryptedStrategy = Mocks.getStrategy(true);
-        managerOptions.getStrategy.andReturn(encryptedStrategy);
+        tlsStrategy = Mocks.getStrategy(true);
+        managerOptions.getStrategy.andReturn(tlsStrategy);
 
-        handshake = { action: "ssl_only" };
+        handshake = { action: "tls_only" };
         strategy._callback(null, handshake);
       });
 
-      it("should build an encrypted strategy", function() {
+      it("should build a TLS strategy", function() {
         expect(managerOptions.getStrategy.calls.length).toEqual(2);
         expect(managerOptions.getStrategy).toHaveBeenCalledWith({
           key: "foo",
-          encrypted: true,
+          useTLS: true,
           timeline: timeline
         });
       });
 
-      it("should connect using the encrypted strategy", function() {
+      it("should connect using the TLS strategy", function() {
         // connection is retried with a zero delay
         jasmine.Clock.tick(0);
-        expect(encryptedStrategy.connect).toHaveBeenCalled();
+        expect(tlsStrategy.connect).toHaveBeenCalled();
         expect(manager.state).toEqual("connecting");
       });
 
@@ -186,8 +186,8 @@ describe("ConnectionManager", function() {
         expect(manager.state).toEqual("connecting");
       });
 
-      it("#isEncrypted should return true", function() {
-        expect(manager.isEncrypted()).toEqual(true);
+      it("#isUsingTLS should return true", function() {
+        expect(manager.isUsingTLS()).toEqual(true);
       });
     });
 

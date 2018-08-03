@@ -17,30 +17,30 @@ describe("Transports", function() {
       window.MozWebSocket = _MozWebSocket;
     });
 
-    it("should generate correct unencrypted URLs", function() {
+    it("should generate correct TLS URLs", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: false,
-        hostUnencrypted: "example.com:123"
+        useTLS: false,
+        hostNonTLS: "example.com:123"
       });
       expect(url).toEqual(
         "ws://example.com:123/app/foobar?protocol=7&client=js&version=" + VERSION + "&flash=false"
       );
     });
 
-    it("should generate correct encrypted URLs", function() {
+    it("should generate correct TLS URLs", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: true,
-        hostEncrypted: "example.org:321"
+        useTLS: true,
+        hostTLS: "example.org:321"
       });
       expect(url).toEqual(
         "wss://example.org:321/app/foobar?protocol=7&client=js&version=" + VERSION + "&flash=false"
       );
     });
 
-    it("should generate correct unencrypted URLs with custom path prefix", function() {
+    it("should generate correct non TLS URLs with custom path prefix", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: false,
-        hostUnencrypted: "example.com:123",
+        useTLS: false,
+        hostNonTLS: "example.com:123",
         httpPath: "/path"
       });
       expect(url).toEqual(
@@ -48,10 +48,10 @@ describe("Transports", function() {
       );
     });
  
-    it("should generate correct encrypted URLs with custom path prefix", function() {
+    it("should generate correct TLS URLs with custom path prefix", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: true,
-        hostEncrypted: "example.org:321",
+        useTLS: true,
+        hostTLS: "example.org:321",
         httpPath: "/path"
       });
       expect(url).toEqual(
@@ -143,18 +143,18 @@ describe("Transports", function() {
       expect(Transports.sockjs.hooks.file).toEqual("sockjs");
     });
 
-    it("should generate correct unencrypted URLs", function() {
+    it("should generate correct non TLS URLs", function() {
       var url = Transports.sockjs.hooks.urls.getInitial("foobar", {
-        encrypted: false,
-        hostUnencrypted: "example.com:111"
+        useTLS: false,
+        hostNonTLS: "example.com:111"
       });
       expect(url).toEqual("http://example.com:111/pusher");
     });
 
-    it("should generate correct encrypted URLs", function() {
+    it("should generate correct TLS URLs", function() {
       var url = Transports.sockjs.hooks.urls.getInitial("foobar", {
-        encrypted: true,
-        hostEncrypted: "example.com:222"
+        useTLS: true,
+        hostTLS: "example.com:222"
       });
       expect(url).toEqual("https://example.com:222/pusher");
     });
@@ -196,7 +196,7 @@ describe("Transports", function() {
         Dependencies.getRoot = jasmine.createSpy("getRoot");
         Dependencies.getPath = jasmine.createSpy("getPath");
         Dependencies.getPath.andCallFake(function(file, options) {
-          return (options.encrypted ? "https" : "http") + "://host/" + file;
+          return (options.useTLS ? "https" : "http") + "://host/" + file;
         });
       });
 
@@ -204,7 +204,7 @@ describe("Transports", function() {
         window.SockJS = jasmine.createSpy();
 
         var socket = Transports.sockjs.hooks.getSocket(
-          "url", { encrypted: false, ignoreNullOrigin: true }
+          "url", { useTLS: false, ignoreNullOrigin: true }
         );
         expect(window.SockJS).toHaveBeenCalledWith(
           "url",
@@ -217,7 +217,7 @@ describe("Transports", function() {
         window.SockJS = jasmine.createSpy();
 
         var socket = Transports.sockjs.hooks.getSocket(
-          "url", { encrypted: true }
+          "url", { useTLS: true }
         );
         expect(window.SockJS).toHaveBeenCalledWith(
           "url", null, { js_path: "https://host/sockjs" }
@@ -230,7 +230,7 @@ describe("Transports", function() {
         });
 
         var socket = Transports.sockjs.hooks.getSocket(
-          "sock_test", { encrypted: false }
+          "sock_test", { useTLS: false }
         );
         expect(window.SockJS.calls.length).toEqual(1);
         expect(socket).toEqual(jasmine.any(window.SockJS));
@@ -247,20 +247,20 @@ describe("Transports", function() {
 
   Collections.apply(HTTP_TRANSPORTS, function(transport) {
     describe(transport, function() {
-      it("should generate correct unencrypted URLs with default path prefix", function() {
+      it("should generate correct non TLS URLs with default path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: false,
-          hostUnencrypted: "example.com:8080"
+          useTLS: false,
+          hostNonTLS: "example.com:8080"
         });
         expect(url).toEqual(
           "http://example.com:8080/pusher/app/foobar?protocol=7&client=js&version=" + VERSION
         );
       });
 
-      it("should generate correct unencrypted URLs with custom path prefix", function() {
+      it("should generate correct non TLS URLs with custom path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: false,
-          hostUnencrypted: "example.com:8080",
+          useTLS: false,
+          hostNonTLS: "example.com:8080",
           httpPath: "/a/b/c"
         });
         expect(url).toEqual(
@@ -268,20 +268,20 @@ describe("Transports", function() {
         );
       });
 
-      it("should generate correct encrypted URLs with default path prefix", function() {
+      it("should generate correct TLS URLs with default path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: true,
-          hostEncrypted: "example.org:4443"
+          useTLS: true,
+          hostTLS: "example.org:4443"
         });
         expect(url).toEqual(
           "https://example.org:4443/pusher/app/foobar?protocol=7&client=js&version=" + VERSION
         );
       });
 
-      it("should generate correct encrypted URLs with custom path prefix", function() {
+      it("should generate correct TLS URLs with custom path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: true,
-          hostEncrypted: "example.org:4443",
+          useTLS: true,
+          hostTLS: "example.org:4443",
           httpPath: "/c/b/a"
         });
         expect(url).toEqual(
@@ -347,50 +347,50 @@ describe("Transports", function() {
       });
 
       describe("isSupported hook", function() {
-        it("should return true if window.XDomainRequest exists, document protocol is http: and connection is unencrypted", function() {
+        it("should return true if window.XDomainRequest exists, document protocol is http: and connection is not using TLS", function() {
           window.XDomainRequest = function() {};
           spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
           });
-          expect(Transports[transport].hooks.isSupported({ encrypted: false })).toBe(true);
+          expect(Transports[transport].hooks.isSupported({ useTLS: false })).toBe(true);
         });
 
-        it("should return true if window.XDomainRequest exists, document protocol is https: and connection is encrypted", function() {
+        it("should return true if window.XDomainRequest exists, document protocol is https: and connection is using TLS", function() {
           window.XDomainRequest = function() {};
           spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }
           });
-          expect(Transports[transport].hooks.isSupported({ encrypted: true })).toBe(true);
+          expect(Transports[transport].hooks.isSupported({ useTLS: true })).toBe(true);
         });
 
-        it("should return false if window.XDomainRequest exists, document protocol is http: and connection is encrypted", function() {
+        it("should return false if window.XDomainRequest exists, document protocol is http: and connection is using TLS", function() {
           window.XDomainRequest = function() {};
           spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "http:"
             }
           });
-          expect(Transports[transport].hooks.isSupported({ encrypted: true })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ useTLS: true })).toBe(false);
         });
 
-        it("should return false if window.XDomainRequest exists, document protocol is https: and connection is unencrypted", function() {
+        it("should return false if window.XDomainRequest exists, document protocol is https: and connection is not using TLS", function() {
           window.XDomainRequest = function() {};
           spyOn(Runtime, "getDocument").andReturn({
             location: {
               protocol: "https:"
             }
           });
-          expect(Transports[transport].hooks.isSupported({ encrypted: false })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ useTLS: false })).toBe(false);
         });
 
         it("should return false if window.XDomainRequest does not exist", function() {
           window.XDomainRequest = undefined;
-          expect(Transports[transport].hooks.isSupported({ encrypted: false })).toBe(false);
-          expect(Transports[transport].hooks.isSupported({ encrypted: true })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ useTLS: false })).toBe(false);
+          expect(Transports[transport].hooks.isSupported({ useTLS: true })).toBe(false);
         });
       });
     });

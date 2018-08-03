@@ -24,7 +24,7 @@ Integration.describe("Pusher", function() {
   // Ideally, we'd have a separate connection per spec, but this introduces
   // significant delays and triggers security mechanisms in some browsers.
 
-  function canRunTwoConnections(transport, encrypted) {
+  function canRunTwoConnections(transport) {
     if (transport !== "sockjs") {
       return true;
     }
@@ -673,12 +673,12 @@ Integration.describe("Pusher", function() {
     });
   }
 
-  function buildIntegrationTests(transport, encrypted) {
-    if (!TRANSPORTS[transport].isSupported({ encrypted: encrypted })) {
+  function buildIntegrationTests(transport, forceTLS) {
+    if (!TRANSPORTS[transport].isSupported({ useTLS: forceTLS })) {
       return;
     }
 
-    describe("with " + (transport ? transport + ", " : "") + "encrypted=" + encrypted, function() {
+    describe("with " + (transport ? transport + ", " : "") + "forceTLS=" + forceTLS, function() {
       var pusher1, pusher2;
 
       beforeEach(function() {
@@ -691,12 +691,12 @@ Integration.describe("Pusher", function() {
       describe("setup", function() {
         it("should open connections", function() {
           pusher1 = new Pusher("7324d55a5eeb8f554761", {
-            encrypted: encrypted,
+            forceTLS: forceTLS,
             disableStats: true
           });
-          if (canRunTwoConnections(transport, encrypted)) {
+          if (canRunTwoConnections(transport)) {
             pusher2 = new Pusher("7324d55a5eeb8f554761", {
-              encrypted: encrypted,
+              forceTLS: forceTLS,
               disableStats: true
             });
             waitsFor(function() {
@@ -729,7 +729,7 @@ Integration.describe("Pusher", function() {
           "private-"
         );
 
-        if (canRunTwoConnections(transport, encrypted)) {
+        if (canRunTwoConnections(transport)) {
           buildClientEventsTests(
             function() { return pusher1; },
             function() { return pusher2; },
@@ -748,7 +748,7 @@ Integration.describe("Pusher", function() {
           "presence-"
         );
 
-        if (canRunTwoConnections(transport, encrypted)) {
+        if (canRunTwoConnections(transport)) {
           buildClientEventsTests(
             function() { return pusher1; },
             function() { return pusher2; },
@@ -762,7 +762,7 @@ Integration.describe("Pusher", function() {
       });
 
       describe("teardown", function() {
-        if (canRunTwoConnections(transport, encrypted)) {
+        if (canRunTwoConnections(transport)) {
           it("should disconnect second connection", function() {
             pusher2.disconnect();
           });
@@ -819,7 +819,7 @@ Integration.describe("Pusher", function() {
     buildIntegrationTests("xdr_polling", false);
     buildIntegrationTests("xdr_polling", true);
     // IE can fall back to SockJS if protocols don't match
-    // No SockJS encrypted tests due to the way JS files are served
+    // No SockJS TLS tests due to the way JS files are served
     buildIntegrationTests("sockjs", false);
   } else {
     // Browsers using SockJS

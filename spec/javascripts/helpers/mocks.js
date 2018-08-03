@@ -92,10 +92,8 @@ var Mocks = {
 
   getTimelineSender: function() {
     var sender = {
-      isEncrypted: jasmine.createSpy("isEncrypted"),
       send: jasmine.createSpy("send")
     };
-    sender.getEncrypted = jasmine.createSpy("getEncrypted").andReturn(sender);
 
     return sender;
   },
@@ -213,7 +211,7 @@ var Mocks = {
     manager.connect = jasmine.createSpy("connect");
     manager.disconnect = jasmine.createSpy("disconnect");
     manager.send_event = jasmine.createSpy("send_event");
-    manager.isEncrypted = jasmine.createSpy("isEncrypted").andReturn(false);
+    manager.isUsingTLS = jasmine.createSpy("isUsingTLS").andReturn(false);
     return manager;
   },
 

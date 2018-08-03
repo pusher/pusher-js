@@ -131,8 +131,8 @@ var Runtime : Browser = {
     return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
   },
 
-  isXDRSupported(encrypted?: boolean) : boolean {
-    var protocol = encrypted ? "https:" : "http:";
+  isXDRSupported(useTLS?: boolean) : boolean {
+    var protocol = useTLS ? "https:" : "http:";
     var documentProtocol = this.getProtocol();
     return Boolean(<any>(window['XDomainRequest'])) && documentProtocol === protocol;
   },

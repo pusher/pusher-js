@@ -109,10 +109,10 @@ describe("Protocol", function() {
       };
     }
 
-    it("should return 'ssl_only' for code 4000", function() {
+    it("should return 'tls_only' for code 4000", function() {
       var message = getErrorMessage(4000, "SSL ONLY!");
       expect(Protocol.processHandshake(message)).toEqual({
-        action: "ssl_only",
+        action: "tls_only",
         error: {
           type: "PusherError",
           data: {
@@ -288,8 +288,8 @@ describe("Protocol", function() {
       expect(Protocol.getCloseAction({ code: 3999 })).toBe(null);
     });
 
-    it("should return 'ssl_only' for code 4000", function() {
-      expect(Protocol.getCloseAction({ code: 4000 })).toEqual("ssl_only");
+    it("should return 'tls_only' for code 4000", function() {
+      expect(Protocol.getCloseAction({ code: 4000 })).toEqual("tls_only");
     });
 
     it("should return 'refused' for code 4001", function() {

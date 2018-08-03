@@ -121,11 +121,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            activityTimeout: this.config.activity_timeout,
 	            pongTimeout: this.config.pong_timeout,
 	            unavailableTimeout: this.config.unavailable_timeout
-	        }, this.config, { encrypted: this.isEncrypted() }));
+	        }, this.config, { useTLS: this.shouldUseTLS() }));
 	        this.connection.bind('connected', function () {
 	            _this.subscribeAll();
 	            if (_this.timelineSender) {
-	                _this.timelineSender.send(_this.connection.isEncrypted());
+	                _this.timelineSender.send(_this.connection.isUsingTLS());
 	            }
 	        });
 	        this.connection.bind('message', function (params) {
@@ -179,10 +179,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.connection.connect();
 	        if (this.timelineSender) {
 	            if (!this.timelineSenderTimer) {
-	                var encrypted = this.connection.isEncrypted();
+	                var usingTLS = this.connection.isUsingTLS();
 	                var timelineSender = this.timelineSender;
 	                this.timelineSenderTimer = new timers_1.PeriodicTimer(60000, function () {
-	                    timelineSender.send(encrypted);
+	                    timelineSender.send(usingTLS);
 	                });
 	            }
 	        }
@@ -247,8 +247,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Pusher.prototype.send_event = function (event_name, data, channel) {
 	        return this.connection.send_event(event_name, data, channel);
 	    };
-	    Pusher.prototype.isEncrypted = function () {
+	    Pusher.prototype.shouldUseTLS = function () {
 	        if (runtime_1["default"].getProtocol() === "https:") {
+	            return true;
+	        }
+	        else if (this.config.forceTLS === true) {
 	            return true;
 	        }
 	        else {
@@ -391,8 +394,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var Constructor = this.getXHRAPI();
 	        return Boolean(Constructor) && (new Constructor()).withCredentials !== undefined;
 	    },
-	    isXDRSupported: function (encrypted) {
-	        var protocol = encrypted ? "https:" : "http:";
+	    isXDRSupported: function (useTLS) {
+	        var protocol = useTLS ? "https:" : "http:";
 	        var documentProtocol = this.getProtocol();
 	        return Boolean((window['XDomainRequest'])) && documentProtocol === protocol;
 	    },
@@ -542,7 +545,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    DependencyLoader.prototype.getRoot = function (options) {
 	        var cdn;
 	        var protocol = runtime_1["default"].getDocument().location.protocol;
-	        if ((options && options.encrypted) || protocol === "https:") {
+	        if ((options && options.useTLS) || protocol === "https:") {
 	            cdn = this.options.cdn_https;
 	        }
 	        else {
@@ -1187,9 +1190,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var runtime_1 = __webpack_require__(2);
 	var script_receiver_factory_1 = __webpack_require__(4);
-	var getAgent = function (sender, encrypted) {
+	var getAgent = function (sender, useTLS) {
 	    return function (data, callback) {
-	        var scheme = "http" + (encrypted ? "s" : "") + "://";
+	        var scheme = "http" + (useTLS ? "s" : "") + "://";
 	        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
 	        var request = runtime_1["default"].createJSONPRequest(url, data);
 	        var receiver = runtime_1["default"].ScriptReceivers.create(function (error, result) {
@@ -1238,7 +1241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    getSocket: function (url, options) {
 	        return new window.SockJS(url, null, {
 	            js_path: dependencies_1.Dependencies.getPath("sockjs", {
-	                encrypted: options.encrypted
+	                useTLS: options.useTLS
 	            }),
 	            ignore_null_origin: options.ignoreNullOrigin
 	        });
@@ -1251,7 +1254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	var xdrConfiguration = {
 	    isSupported: function (environment) {
-	        var yes = runtime_1["default"].isXDRSupported(environment.encrypted);
+	        var yes = runtime_1["default"].isXDRSupported(environment.useTLS);
 	        return yes;
 	    }
 	};
@@ -1326,8 +1329,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var defaults_1 = __webpack_require__(5);
 	function getGenericURL(baseScheme, params, path) {
-	    var scheme = baseScheme + (params.encrypted ? "s" : "");
-	    var host = params.encrypted ? params.hostEncrypted : params.hostUnencrypted;
+	    var scheme = baseScheme + (params.useTLS ? "s" : "");
+	    var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
 	    return scheme + "://" + host + path;
 	}
 	function getGenericPath(key, queryString) {
@@ -1709,7 +1712,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var getDefaultStrategy = function (config) {
 	    var wsStrategy;
-	    if (config.encrypted) {
+	    if (config.useTLS) {
 	        wsStrategy = [
 	            ":best_connected_ever",
 	            ":ws_loop",
@@ -1726,16 +1729,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return [
 	        [":def", "ws_options", {
-	                hostUnencrypted: config.wsHost + ":" + config.wsPort,
-	                hostEncrypted: config.wsHost + ":" + config.wssPort,
+	                hostNonTLS: config.wsHost + ":" + config.wsPort,
+	                hostTLS: config.wsHost + ":" + config.wssPort,
 	                httpPath: config.wsPath
 	            }],
 	        [":def", "wss_options", [":extend", ":ws_options", {
-	                    encrypted: true
+	                    useTLS: true
 	                }]],
 	        [":def", "sockjs_options", {
-	                hostUnencrypted: config.httpHost + ":" + config.httpPort,
-	                hostEncrypted: config.httpHost + ":" + config.httpsPort,
+	                hostNonTLS: config.httpHost + ":" + config.httpPort,
+	                hostTLS: config.httpHost + ":" + config.httpsPort,
 	                httpPath: config.httpPath
 	            }],
 	        [":def", "timeouts", {
@@ -1814,14 +1817,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	function default_1() {
 	    var self = this;
 	    self.timeline.info(self.buildTimelineMessage({
-	        transport: self.name + (self.options.encrypted ? "s" : "")
+	        transport: self.name + (self.options.useTLS ? "s" : "")
 	    }));
 	    if (self.hooks.isInitialized()) {
 	        self.changeState("initialized");
 	    }
 	    else if (self.hooks.file) {
 	        self.changeState("initializing");
-	        dependencies_1.Dependencies.load(self.hooks.file, { encrypted: self.options.encrypted }, function (error, callback) {
+	        dependencies_1.Dependencies.load(self.hooks.file, { useTLS: self.options.useTLS }, function (error, callback) {
 	            if (self.hooks.isInitialized()) {
 	                self.changeState("initialized");
 	                callback(true);
@@ -2502,7 +2505,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (enabled) {
 	            transport = new transport_strategy_1["default"](name, priority, manager ? manager.getAssistant(transportClass) : transportClass, Collections.extend({
 	                key: context.key,
-	                encrypted: context.encrypted,
+	                useTLS: context.useTLS,
 	                timeline: context.timeline,
 	                ignoreNullOrigin: context.ignoreNullOrigin
 	            }, options));
@@ -2526,7 +2529,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return new cached_strategy_1["default"](strategy, context.Transports, {
 	            ttl: ttl,
 	            timeline: context.timeline,
-	            encrypted: context.encrypted
+	            useTLS: context.useTLS
 	        });
 	    }),
 	    first_connected: returnWithOriginalContext(function (_, strategy) {
@@ -2859,7 +2862,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	    else if (closeEvent.code === 4000) {
-	        return "ssl_only";
+	        return "tls_only";
 	    }
 	    else if (closeEvent.code < 4100) {
 	        return "refused";
@@ -3055,11 +3058,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.timeline = timeline;
 	        this.options = options || {};
 	    }
-	    TimelineSender.prototype.send = function (encrypted, callback) {
+	    TimelineSender.prototype.send = function (useTLS, callback) {
 	        if (this.timeline.isEmpty()) {
 	            return;
 	        }
-	        this.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, encrypted), callback);
+	        this.timeline.send(runtime_1["default"].TimelineTransport.getAgent(this, useTLS), callback);
 	    };
 	    return TimelineSender;
 	}());
@@ -3347,7 +3350,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.options = options || {};
 	        this.state = "initialized";
 	        this.connection = null;
-	        this.encrypted = !!options.encrypted;
+	        this.usingTLS = !!options.useTLS;
 	        this.timeline = this.options.timeline;
 	        this.connectionCallbacks = this.buildConnectionCallbacks();
 	        this.errorCallbacks = this.buildErrorCallbacks();
@@ -3403,8 +3406,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.updateState("disconnected");
 	    };
 	    ;
-	    ConnectionManager.prototype.isEncrypted = function () {
-	        return this.encrypted;
+	    ConnectionManager.prototype.isUsingTLS = function () {
+	        return this.usingTLS;
 	    };
 	    ;
 	    ConnectionManager.prototype.startConnecting = function () {
@@ -3448,7 +3451,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.strategy = this.options.getStrategy({
 	            key: this.key,
 	            timeline: this.timeline,
-	            encrypted: this.encrypted
+	            useTLS: this.usingTLS
 	        });
 	    };
 	    ;
@@ -3559,8 +3562,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            };
 	        };
 	        return {
-	            ssl_only: withErrorEmitted(function () {
-	                _this.encrypted = true;
+	            tls_only: withErrorEmitted(function () {
+	                _this.usingTLS = true;
 	                _this.updateStrategy();
 	                _this.retryIn(0);
 	            }),
@@ -3687,7 +3690,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    TransportStrategy.prototype.isSupported = function () {
 	        return this.transport.isSupported({
-	            encrypted: this.options.encrypted
+	            useTLS: this.options.useTLS
 	        });
 	    };
 	    TransportStrategy.prototype.connect = function (minPriority, callback) {
@@ -3950,15 +3953,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.strategy = strategy;
 	        this.transports = transports;
 	        this.ttl = options.ttl || 1800 * 1000;
-	        this.encrypted = options.encrypted;
+	        this.usingTLS = options.useTLS;
 	        this.timeline = options.timeline;
 	    }
 	    CachedStrategy.prototype.isSupported = function () {
 	        return this.strategy.isSupported();
 	    };
 	    CachedStrategy.prototype.connect = function (minPriority, callback) {
-	        var encrypted = this.encrypted;
-	        var info = fetchTransportCache(encrypted);
+	        var usingTLS = this.usingTLS;
+	        var info = fetchTransportCache(usingTLS);
 	        var strategies = [this.strategy];
 	        if (info && info.timestamp + this.ttl >= util_1["default"].now()) {
 	            var transport = this.transports[info.transport];
@@ -3977,7 +3980,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var startTimestamp = util_1["default"].now();
 	        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {
 	            if (error) {
-	                flushTransportCache(encrypted);
+	                flushTransportCache(usingTLS);
 	                if (strategies.length > 0) {
 	                    startTimestamp = util_1["default"].now();
 	                    runner = strategies.pop().connect(minPriority, cb);
@@ -3987,7 +3990,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	            }
 	            else {
-	                storeTransportCache(encrypted, handshake.transport.name, util_1["default"].now() - startTimestamp);
+	                storeTransportCache(usingTLS, handshake.transport.name, util_1["default"].now() - startTimestamp);
 	                callback(null, handshake);
 	            }
 	        });
@@ -4007,29 +4010,29 @@ return /******/ (function(modules) { // webpackBootstrap
 	}());
 	exports.__esModule = true;
 	exports["default"] = CachedStrategy;
-	function getTransportCacheKey(encrypted) {
-	    return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
+	function getTransportCacheKey(usingTLS) {
+	    return "pusherTransport" + (usingTLS ? "TLS" : "NonTLS");
 	}
-	function fetchTransportCache(encrypted) {
+	function fetchTransportCache(usingTLS) {
 	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
-	            var serializedCache = storage[getTransportCacheKey(encrypted)];
+	            var serializedCache = storage[getTransportCacheKey(usingTLS)];
 	            if (serializedCache) {
 	                return JSON.parse(serializedCache);
 	            }
 	        }
 	        catch (e) {
-	            flushTransportCache(encrypted);
+	            flushTransportCache(usingTLS);
 	        }
 	    }
 	    return null;
 	}
-	function storeTransportCache(encrypted, transport, latency) {
+	function storeTransportCache(usingTLS, transport, latency) {
 	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
-	            storage[getTransportCacheKey(encrypted)] = Collections.safeJSONStringify({
+	            storage[getTransportCacheKey(usingTLS)] = Collections.safeJSONStringify({
 	                timestamp: util_1["default"].now(),
 	                transport: transport,
 	                latency: latency
@@ -4039,11 +4042,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    }
 	}
-	function flushTransportCache(encrypted) {
+	function flushTransportCache(usingTLS) {
 	    var storage = runtime_1["default"].getLocalStorage();
 	    if (storage) {
 	        try {
-	            delete storage[getTransportCacheKey(encrypted)];
+	            delete storage[getTransportCacheKey(usingTLS)];
 	        }
 	        catch (e) {
 	        }

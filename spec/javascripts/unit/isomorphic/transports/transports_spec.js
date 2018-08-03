@@ -8,30 +8,30 @@ var Transports = Runtime.Transports;
 
 describe("Transports", function() {
   describe("ws", function() {
-    it("should generate correct unencrypted URLs", function() {
+    it("should generate correct non TLS URLs", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: false,
-        hostUnencrypted: "example.com:123"
+        useTLS: false,
+        hostNonTLS: "example.com:123"
       });
       expect(url).toEqual(
         "ws://example.com:123/app/foobar?protocol=7&client=js&version=" + VERSION + "&flash=false"
       );
     });
 
-    it("should generate correct encrypted URLs", function() {
+    it("should generate correct TLS URLs", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: true,
-        hostEncrypted: "example.org:321"
+        useTLS: true,
+        hostTLS: "example.org:321"
       });
       expect(url).toEqual(
         "wss://example.org:321/app/foobar?protocol=7&client=js&version=" + VERSION + "&flash=false"
       );
     });
 
-    it("should generate correct unencrypted URLs with custom path prefix", function() {
+    it("should generate correct non TLS URLs with custom path prefix", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: false,
-        hostUnencrypted: "example.com:123",
+        useTLS: false,
+        hostNonTLS: "example.com:123",
         httpPath: "/path"
       });
       expect(url).toEqual(
@@ -39,10 +39,10 @@ describe("Transports", function() {
       );
     });
  
-    it("should generate correct encrypted URLs with custom path prefix", function() {
+    it("should generate correct TLS URLs with custom path prefix", function() {
       var url = Transports.ws.hooks.urls.getInitial("foobar", {
-        encrypted: true,
-        hostEncrypted: "example.org:321",
+        useTLS: true,
+        hostTLS: "example.org:321",
         httpPath: "/path"
       });
       expect(url).toEqual(
@@ -96,20 +96,20 @@ describe("Transports", function() {
 
   Collections.apply(XHR_TRANSPORTS, function(transport) {
     describe(transport, function() {
-      it("should generate correct unencrypted URLs with default path prefix", function() {
+      it("should generate correct non TLS URLs with default path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: false,
-          hostUnencrypted: "example.com:8080"
+          useTLS: false,
+          hostNonTLS: "example.com:8080"
         });
         expect(url).toEqual(
           "http://example.com:8080/pusher/app/foobar?protocol=7&client=js&version=" + VERSION
         );
       });
 
-      it("should generate correct unencrypted URLs with custom path prefix", function() {
+      it("should generate correct non TLS URLs with custom path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: false,
-          hostUnencrypted: "example.com:8080",
+          useTLS: false,
+          hostNonTLS: "example.com:8080",
           httpPath: "/a/b/c"
         });
         expect(url).toEqual(
@@ -117,20 +117,20 @@ describe("Transports", function() {
         );
       });
 
-      it("should generate correct encrypted URLs with default path prefix", function() {
+      it("should generate correct TLS URLs with default path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: true,
-          hostEncrypted: "example.org:4443"
+          useTLS: true,
+          hostTLS: "example.org:4443"
         });
         expect(url).toEqual(
           "https://example.org:4443/pusher/app/foobar?protocol=7&client=js&version=" + VERSION
         );
       });
 
-      it("should generate correct encrypted URLs with custom path prefix", function() {
+      it("should generate correct TLS URLs with custom path prefix", function() {
         var url = Transports[transport].hooks.urls.getInitial("foobar", {
-          encrypted: true,
-          hostEncrypted: "example.org:4443",
+          useTLS: true,
+          hostTLS: "example.org:4443",
           httpPath: "/c/b/a"
         });
         expect(url).toEqual(

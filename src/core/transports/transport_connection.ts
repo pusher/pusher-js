@@ -29,9 +29,9 @@ import TransportConnectionOptions from './transport_connection_options';
  * - error - after the connection raised an error
  *
  * Options:
- * - encrypted - whether connection should use ssl
- * - hostEncrypted - host to connect to when connection is encrypted
- * - hostUnencrypted - host to connect to when connection is not encrypted
+ * - useTLS - whether connection should be over TLS
+ * - hostTLS - host to connect to when connection is over TLS
+ * - hostNonTLS - host to connect to when connection is over TLS
  *
  * @param {String} key application key
  * @param {Object} options
