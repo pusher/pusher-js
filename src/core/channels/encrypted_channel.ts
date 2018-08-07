@@ -19,6 +19,7 @@ type EncryptedMessage = {
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array = null;
+  retries: number = 1;
 
   /** Authorizes the connection to use the channel.
    *
@@ -56,16 +57,41 @@ export default class EncryptedChannel extends PrivateChannel {
       super.handleEvent(event, data);
       return
     }
+    this.handleEncryptedEvent(event, data)
+  }
+
+  private handleEncryptedEvent(event: string, data: any): void {
     if(!this.key) return
-    let decryptedData = this.decryptPayload(data)
-    this.emit(event, decryptedData);
+    if (!data.ciphertext || !data.nonce) {
+      throw new Errors.EncryptionError('Unexpected data format for encrypted message');
+    }
+    let encryptedData = (data as EncryptedMessage);
+    try {
+      let decryptedData = this.decryptPayload(encryptedData)
+      this.retries = 1;
+      this.emit(event, decryptedData);
+    }
+    catch(e) {
+      if(e instanceof Errors.EncryptionKeyError) {
+        if(this.retries === 0) {
+          Logger.warn("Decryption error after successful re-auth, unsubscribing");
+          this.unsubscribe()
+          return
+        }
+        //need to reauth
+        this.authorize(this.pusher.connection.socket_id, (error, authData) => {
+          if(error) {
+            throw new Error("Reauth failed")
+          }
+          this.retries--;
+          this.handleEncryptedEvent(event, data)
+        });
+      }
+    }
   }
 
   private decryptPayload(encryptedData: EncryptedMessage): string {
     let baseErrMsg = "Unable to decrypt payload";
-    if (!encryptedData.ciphertext || !encryptedData.nonce) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: unexpected data format`);
-    }
     let nonce = decodeBase64(encryptedData.nonce);
     let cipherText = decodeBase64(encryptedData.ciphertext);
     if (
@@ -76,7 +102,7 @@ export default class EncryptedChannel extends PrivateChannel {
     }
     let bytes = secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: probably an invalid key`);
+      throw new Errors.EncryptionKeyError(baseErrMsg);
     }
     let str = encodeUTF8(bytes);
     try {
