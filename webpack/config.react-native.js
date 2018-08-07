@@ -24,6 +24,6 @@ module.exports = objectAssign(require('./config.shared'),{
     "react-native": "react-native", // our Reachability implementation needs to reference react-native.
   },
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/react-native', 'src/runtimes']
+    modulesDirectories: ['src/', 'src/runtimes/react-native', 'src/runtimes', 'node_modules']
   },
 })
