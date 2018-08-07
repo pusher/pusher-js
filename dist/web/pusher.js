@@ -1966,14 +1966,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return UnsupportedStrategy;
 	}(Error));
 	exports.UnsupportedStrategy = UnsupportedStrategy;
-	var EncryptionError = (function (_super) {
-	    __extends(EncryptionError, _super);
-	    function EncryptionError() {
-	        _super.apply(this, arguments);
-	    }
-	    return EncryptionError;
-	}(Error));
-	exports.EncryptionError = EncryptionError;
 
 
 /***/ }),
@@ -3370,6 +3362,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    EncryptedChannel.prototype.authorize = function (socketId, callback) {
 	        var _this = this;
 	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+	            if (error) {
+	                callback(true, authData);
+	                return;
+	            }
 	            var sharedSecret = authData["shared_secret"];
 	            if (!sharedSecret) {
 	                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
@@ -3379,7 +3375,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
 	            delete authData["shared_secret"];
-	            callback(error, authData);
+	            callback(false, authData);
 	        });
 	    };
 	    EncryptedChannel.prototype.trigger = function (event, data) {
@@ -3390,33 +3386,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _super.prototype.handleEvent.call(this, event, data);
 	            return;
 	        }
-	        if (!this.key)
-	            return;
-	        var decryptedData = this.decryptPayload(data);
-	        this.emit(event, decryptedData);
+	        this.handleEncryptedEvent(event, data);
 	    };
-	    EncryptedChannel.prototype.decryptPayload = function (encryptedData) {
-	        var baseErrMsg = "Unable to decrypt payload";
-	        if (!encryptedData.ciphertext || !encryptedData.nonce) {
-	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	    EncryptedChannel.prototype.handleEncryptedEvent = function (event, data) {
+	        var _this = this;
+	        if (!this.key) {
+	            logger_1["default"].debug('Received encrypted event before key has been retrieved from the authEndpoint');
+	            return;
 	        }
-	        var nonce = tweetnacl_util_1.decodeBase64(encryptedData.nonce);
-	        var cipherText = tweetnacl_util_1.decodeBase64(encryptedData.ciphertext);
-	        if (nonce.length < tweetnacl_1.secretbox.nonceLength ||
-	            cipherText.length < tweetnacl_1.secretbox.overheadLength) {
-	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        if (!data.ciphertext || !data.nonce) {
+	            logger_1["default"].warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+	            return;
+	        }
+	        var cipherText = tweetnacl_util_1.decodeBase64(data.ciphertext);
+	        if (cipherText.length < tweetnacl_1.secretbox.overheadLength) {
+	            logger_1["default"].warn("Expected encrypted event ciphertext length to be " + tweetnacl_1.secretbox.overheadLength + ", got: " + cipherText.length);
+	            return;
+	        }
+	        var nonce = tweetnacl_util_1.decodeBase64(data.nonce);
+	        if (nonce.length < tweetnacl_1.secretbox.nonceLength) {
+	            logger_1["default"].warn("Expected encrypted event nonce length to be " + tweetnacl_1.secretbox.nonceLength + ", got: " + nonce.length);
+	            return;
 	        }
 	        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);
 	        if (bytes === null) {
-	            throw new Errors.EncryptionError(baseErrMsg + ": probably an invalid key");
+	            logger_1["default"].debug('Failed to decrypted an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+	            this.authorize(this.pusher.connection.socket_id, function (error, authData) {
+	                if (error) {
+	                    logger_1["default"].warn("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
+	                    return;
+	                }
+	                bytes = tweetnacl_1.secretbox.open(cipherText, nonce, _this.key);
+	                if (bytes === null) {
+	                    logger_1["default"].warn("Failed to decrypt event with new key. Dropping encrypted event");
+	                    return;
+	                }
+	                _this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));
+	                return;
+	            });
+	            return;
 	        }
-	        var str = tweetnacl_util_1.encodeUTF8(bytes);
+	        this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));
+	    };
+	    EncryptedChannel.prototype.emitJSON = function (eventName, data) {
 	        try {
-	            return JSON.parse(str);
+	            this.emit(eventName, JSON.parse(data));
 	        }
 	        catch (e) {
-	            return str;
+	            this.emit(eventName, data);
 	        }
+	        return this;
 	    };
 	    return EncryptedChannel;
 	}(private_channel_1["default"]));
@@ -8257,6 +8276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var Collections = __webpack_require__(9);
 	var factory_1 = __webpack_require__(43);
+	var logger_1 = __webpack_require__(8);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -8289,6 +8309,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports["default"] = Channels;
 	function createChannel(name, pusher) {
 	    if (name.indexOf('private-encrypted-') === 0) {
+	        if (navigator.product == "ReactNative") {
+	            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
+	            logger_1["default"].warn("Error: " + errorMsg);
+	            return factory_1["default"].createPrivateChannel(name, pusher);
+	        }
 	        return factory_1["default"].createEncryptedChannel(name, pusher);
 	    }
 	    else if (name.indexOf('private-') === 0) {

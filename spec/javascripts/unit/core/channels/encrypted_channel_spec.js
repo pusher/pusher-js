@@ -1,11 +1,10 @@
-const Authorizer = require("core/auth/pusher_authorizer").default;
 const Errors = require("core/errors");
+const Logger = require('core/logger').default;
 const EncryptedChannel = require("core/channels/encrypted_channel").default;
 const Factory = require("core/utils/factory").default;
 const Mocks = require("mocks");
 const tweetNacl = require("tweetnacl");
 const tweetNaclUtil = require("tweetnacl-util");
-const timeout = 5000;
 
 describe("EncryptedChannel", function() {
   var pusher;
@@ -189,9 +188,6 @@ describe("EncryptedChannel", function() {
           shared_secret: secretBase64,
           foo: "bar"
         });
-        let randomBytesSpy = spyOn(tweetNacl, "randomBytes").andReturn(
-          nonceBytes
-        );
       });
       it("should decrypt the event payload and emit the event", function() {
         let payload = { test: "payload" };
@@ -211,13 +207,67 @@ describe("EncryptedChannel", function() {
         channel.handleEvent("pusher:subscription_error", payload);
         expect(boundCallback).toHaveBeenCalledWith(payload);
       });
-      it("should throw an error if the data payload is not encrypted", function() {
-        let payload = { test: "payload" };
-        let boundCallback = jasmine.createSpy("boundCallback");
-        channel.bind("something", boundCallback);
-        expect(function() {
-          channel.handleEvent("something", payload);
-        }).toThrow();
+
+      describe("with rotated shared key", function() {
+        const newSecretUTF8 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+        const newSecretBytes = tweetNaclUtil.decodeUTF8(newSecretUTF8);
+        const newSecretBase64 = tweetNaclUtil.encodeBase64(newSecretBytes);
+        const newTestEncrypt = function(payload) {
+          let payloadBytes = tweetNaclUtil.decodeUTF8(JSON.stringify(payload));
+          let bytes = tweetNacl.secretbox(payloadBytes, nonceBytes, newSecretBytes);
+          return tweetNaclUtil.encodeBase64(bytes);
+        };
+
+        beforeEach(function() {
+          pusher.connection = {
+            socket_id: "9.37"
+          };
+          authorizer._callback = null
+        });
+
+        it("should request new key from authorizer and decrypt event", function() {
+          let payload = { test: "payload" };
+          let encryptedPayload = {
+            nonce: nonceBase64,
+            ciphertext: newTestEncrypt(payload)
+          };
+          let boundCallback = jasmine.createSpy("boundCallback");
+          channel.bind("something", boundCallback);
+          channel.handleEvent("something", encryptedPayload);
+          authorizer._callback(false, {
+            shared_secret: newSecretBase64,
+            foo: "bar"
+          });
+          expect(boundCallback).toHaveBeenCalledWith(payload);
+        });
+        it("should log a warning if it fails to decrypt event after requesting a new key from the auth endpoint", function() {
+          let encryptedPayload = {
+            nonce: nonceBase64,
+            ciphertext: tweetNaclUtil.encodeBase64('garbage-ciphertext')
+          };
+          spyOn(Logger, "warn");
+          channel.handleEvent("something", encryptedPayload);
+          authorizer._callback(false, {
+            shared_secret: newSecretBase64,
+            foo: "bar"
+          });
+          expect(Logger.warn).toHaveBeenCalledWith(
+            "Failed to decrypt event with new key. Dropping encrypted event"
+          );
+        });
+        it("should log a warning if it fails to call the auth endpoint after failing to decrypt an event", function() {
+          let payload = { test: "payload" };
+          let encryptedPayload = {
+            nonce: nonceBase64,
+            ciphertext: newTestEncrypt(payload)
+          };
+          spyOn(Logger, "warn");
+          channel.handleEvent("something", encryptedPayload);
+          authorizer._callback(true, "ERROR");
+          expect(Logger.warn).toHaveBeenCalledWith(
+            "Failed to make a request to the authEndpoint: ERROR. Unable to fetch new key, so dropping encrypted event"
+          );
+        });
       });
     });
   });
