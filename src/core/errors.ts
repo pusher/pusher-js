@@ -5,4 +5,6 @@ export class TransportPriorityTooLow extends Error {}
 export class TransportClosed extends Error {}
 export class UnsupportedTransport extends Error {}
 export class UnsupportedStrategy extends Error {}
+// TODO maybe this should be decryptionkey now
 export class EncryptionError extends Error {}
+export class EncryptionKeyError extends Error {}

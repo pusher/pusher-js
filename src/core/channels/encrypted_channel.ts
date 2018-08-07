@@ -16,6 +16,17 @@ type EncryptedMessage = {
   ciphertext: string;
 }
 
+type EncryptedEvent = {
+  data: EncryptedMessage,
+  event: string,
+}
+
+enum State {
+  Authorized,
+  AuthorizationPending,
+  NotAuthorized,
+}
+
 /** Extends private channels to provide encrypted channel interface.
  *
  * @param {String} name
@@ -23,6 +34,9 @@ type EncryptedMessage = {
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array = null;
+  state: State = State.NotAuthorized;
+  buffer: Array<EncryptedEvent> = [];
+  retries: number = 0;
 
   /** Authorizes the connection to use the channel.
    *
@@ -30,6 +44,7 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {Function} callback
    */
   authorize(socketId: string, callback: Function) {
+    this.setState(State.AuthorizationPending)
     super.authorize(socketId, (error, authData) => {
       let sharedSecret = authData["shared_secret"];
       if (!sharedSecret) {
@@ -41,6 +56,19 @@ export default class EncryptedChannel extends PrivateChannel {
       this.key = decodeBase64(sharedSecret);
       delete authData["shared_secret"];
       callback(error, authData);
+      this.setState(State.Authorized)
+    });
+  }
+
+  private retryAuth(delay: number = 0): void {
+    this.setState(State.AuthorizationPending);
+    // we should already have a socket_id at this point
+    this.authorize(this.pusher.connection.socket_id, (error, authData) => {
+      if(error) {
+        this.retries++
+        let retryDelay = Math.pow(2, this.retries)
+        this.retryAuth(delay)
+      }
     });
   }
 
@@ -60,9 +88,59 @@ export default class EncryptedChannel extends PrivateChannel {
       super.handleEvent(event, data);
       return
     }
-    if(!this.key) return
-    let decryptedData = this.decryptPayload(data)
-    this.emit(event, decryptedData);
+    switch(this.state) {
+      case State.AuthorizationPending:
+        console.log("received event while auth pending, buffering")
+        this.bufferEvent({event, data})
+      case State.Authorized:
+        console.log("received event while authed, decrypting")
+        this.handleEncryptedEvent({event, data})
+      case State.NotAuthorized:
+        // Drop the message if we're not authorized or trying to authorize
+    }
+  }
+  private handleEncryptedEvent(encryptedEvent: EncryptedEvent): void {
+    try {
+      let decryptedData = this.decryptPayload(encryptedEvent.data)
+      this.emit(encryptedEvent.event, decryptedData);
+      if(this.retries !== 0) {
+        console.log("Successfully decrypted, resetting retries");
+        this.retries = 0;
+      }
+    }
+    catch(e) {
+      if(e instanceof Errors.EncryptionKeyError) {
+        console.log("Got encryption key error, retrying auth");
+        this.retryAuth();
+      }
+    }
+  }
+
+  private bufferEvent(encryptedEvent: EncryptedEvent): void {
+    this.buffer.push(encryptedEvent);
+  }
+
+  private drainBuffer(): void {
+    let last = this.buffer.length - 1;
+    for(let i = last; i > 0; i--) {
+      this.handleEncryptedEvent(this.buffer[i])
+      this.buffer.pop()
+    }
+  }
+
+  private setState(state: State): void {
+    console.log(`State transition from ${this.state} -> ${state}`);
+    // should we whether the state transform is valid?
+    // maybe have pre state and poststate transition methods?
+    switch(state) {
+      case State.NotAuthorized:
+      case State.AuthorizationPending:
+        // new events should now go into the buffer
+      case State.Authorized:
+        console.log('draining buffer');
+        this.drainBuffer()
+    }
+    this.state = state;
   }
 
   private encryptPayload(data: string): EncryptedMessage {
@@ -95,7 +173,7 @@ export default class EncryptedChannel extends PrivateChannel {
     }
     let bytes = secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: probably an invalid key`);
+      throw new Errors.EncryptionKeyError(`${baseErrMsg}: probably an invalid key`);
     }
     let str = encodeUTF8(bytes);
     try {
@@ -105,3 +183,7 @@ export default class EncryptedChannel extends PrivateChannel {
     }
   }
 }
+
+const delay = (seconds: number): Promise<any> => (
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+);
