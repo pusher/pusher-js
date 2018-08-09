@@ -2,15 +2,8 @@ import PrivateChannel from "./private_channel";
 import * as Errors from "../errors";
 import Logger from '../logger'
 import { secretbox } from "tweetnacl";
-import {
-  encodeUTF8,
-  decodeBase64
-} from "tweetnacl-util";
-
-type EncryptedMessage = {
-  nonce: string;
-  ciphertext: string;
-}
+import { decodeBase64 } from "tweetnacl-util";
+import Dispatcher from "../events/dispatcher";
 
 /** Extends private channels to provide encrypted channel interface.
  *
@@ -19,7 +12,6 @@ type EncryptedMessage = {
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array = null;
-  retries: number = 1;
 
   /** Authorizes the connection to use the channel.
    *
@@ -61,54 +53,54 @@ export default class EncryptedChannel extends PrivateChannel {
   }
 
   private handleEncryptedEvent(event: string, data: any): void {
-    if(!this.key) return
+    if (!this.key) {
+      Logger.debug('Received encrypted event before key has been retrieved from the authEndpoint');
+      return;
+    }
     if (!data.ciphertext || !data.nonce) {
-      throw new Errors.EncryptionError('Unexpected data format for encrypted message');
+      Logger.warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+      return;
     }
-    let encryptedData = (data as EncryptedMessage);
-    try {
-      let decryptedData = this.decryptPayload(encryptedData)
-      this.retries = 1;
-      this.emit(event, decryptedData);
+    let cipherText = decodeBase64(data.ciphertext);
+    if (cipherText.length < secretbox.overheadLength) {
+      Logger.warn(`Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`);
+      return;
     }
-    catch(e) {
-      if(e instanceof Errors.EncryptionKeyError) {
-        if(this.retries === 0) {
-          Logger.warn("Decryption error after successful re-auth, unsubscribing");
-          this.unsubscribe()
-          return
-        }
-        //need to reauth
-        this.authorize(this.pusher.connection.socket_id, (error, authData) => {
-          if(error) {
-            throw new Error("Reauth failed")
-          }
-          this.retries--;
-          this.handleEncryptedEvent(event, data)
-        });
-      }
+    let nonce = decodeBase64(data.nonce);
+    if (nonce.length < secretbox.nonceLength) {
+      Logger.warn(`Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`);
+      return;
     }
-  }
 
-  private decryptPayload(encryptedData: EncryptedMessage): string {
-    let baseErrMsg = "Unable to decrypt payload";
-    let nonce = decodeBase64(encryptedData.nonce);
-    let cipherText = decodeBase64(encryptedData.ciphertext);
-    if (
-      nonce.length < secretbox.nonceLength ||
-      cipherText.length < secretbox.overheadLength
-    ) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: unexpected data format`);
-    }
     let bytes = secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
-      throw new Errors.EncryptionKeyError(baseErrMsg);
+      Logger.debug('Failed to decrypted an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+      // Try a single time to retrieve a new auth key and decrypt the event with it
+      // If this fails, a new key will be requested when a new message is received
+      this.authorize(this.pusher.connection.socket_id, (error, authData) => {
+        if (error) {
+          Logger.warn(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
+          return;
+        }
+        bytes = secretbox.open(cipherText, nonce, this.key);
+        if (bytes === null) {
+          Logger.warn(`Failed to decrypt event with new key. Dropping encrypted event`);
+          return;
+        }
+        this.emit(event, bytes);
+        return
+      });
     }
-    let str = encodeUTF8(bytes);
+
+    this.emit(event, bytes);
+  }
+
+  emit(eventName: string, data?: any): Dispatcher {
     try {
-      return JSON.parse(str)
+      super.emit(eventName, JSON.parse(data));
     } catch (e) {
-      return str
+      super.emit(eventName, data);
     }
+    return this;
   }
 }
