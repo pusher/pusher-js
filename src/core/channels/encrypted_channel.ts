@@ -1,6 +1,4 @@
-import Factory from "../utils/factory";
 import PrivateChannel from "./private_channel";
-import Pusher from "../pusher";
 import * as Errors from "../errors";
 import Logger from '../logger'
 import { secretbox } from "tweetnacl";
