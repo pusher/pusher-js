@@ -71,7 +71,7 @@ module.exports =
 	var StrategyBuilder = __webpack_require__(33);
 	var timers_1 = __webpack_require__(7);
 	var defaults_1 = __webpack_require__(11);
-	var DefaultConfig = __webpack_require__(56);
+	var DefaultConfig = __webpack_require__(59);
 	var logger_1 = __webpack_require__(16);
 	var factory_1 = __webpack_require__(35);
 	var url_store_1 = __webpack_require__(29);
@@ -1965,13 +1965,13 @@ module.exports =
 	var util_1 = __webpack_require__(6);
 	var transport_manager_1 = __webpack_require__(34);
 	var Errors = __webpack_require__(45);
-	var transport_strategy_1 = __webpack_require__(49);
-	var sequential_strategy_1 = __webpack_require__(50);
-	var best_connected_ever_strategy_1 = __webpack_require__(51);
-	var cached_strategy_1 = __webpack_require__(52);
-	var delayed_strategy_1 = __webpack_require__(53);
-	var if_strategy_1 = __webpack_require__(54);
-	var first_connected_strategy_1 = __webpack_require__(55);
+	var transport_strategy_1 = __webpack_require__(52);
+	var sequential_strategy_1 = __webpack_require__(53);
+	var best_connected_ever_strategy_1 = __webpack_require__(54);
+	var cached_strategy_1 = __webpack_require__(55);
+	var delayed_strategy_1 = __webpack_require__(56);
+	var if_strategy_1 = __webpack_require__(57);
+	var first_connected_strategy_1 = __webpack_require__(58);
 	var runtime_1 = __webpack_require__(2);
 	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
@@ -2166,9 +2166,10 @@ module.exports =
 	var timeline_sender_1 = __webpack_require__(41);
 	var presence_channel_1 = __webpack_require__(42);
 	var private_channel_1 = __webpack_require__(43);
+	var encrypted_channel_1 = __webpack_require__(47);
 	var channel_1 = __webpack_require__(44);
-	var connection_manager_1 = __webpack_require__(47);
-	var channels_1 = __webpack_require__(48);
+	var connection_manager_1 = __webpack_require__(50);
+	var channels_1 = __webpack_require__(51);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2184,6 +2185,9 @@ module.exports =
 	    },
 	    createPresenceChannel: function (name, pusher) {
 	        return new presence_channel_1["default"](name, pusher);
+	    },
+	    createEncryptedChannel: function (name, pusher) {
+	        return new encrypted_channel_1["default"](name, pusher);
 	    },
 	    createTimelineSender: function (timeline, options) {
 	        return new timeline_sender_1["default"](timeline, options);
@@ -2824,6 +2828,14 @@ module.exports =
 	    return TransportClosed;
 	}(Error));
 	exports.TransportClosed = TransportClosed;
+	var UnsupportedFeature = (function (_super) {
+	    __extends(UnsupportedFeature, _super);
+	    function UnsupportedFeature() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedFeature;
+	}(Error));
+	exports.UnsupportedFeature = UnsupportedFeature;
 	var UnsupportedTransport = (function (_super) {
 	    __extends(UnsupportedTransport, _super);
 	    function UnsupportedTransport() {
@@ -2840,6 +2852,14 @@ module.exports =
 	    return UnsupportedStrategy;
 	}(Error));
 	exports.UnsupportedStrategy = UnsupportedStrategy;
+	var EncryptionError = (function (_super) {
+	    __extends(EncryptionError, _super);
+	    function EncryptionError() {
+	        _super.apply(this, arguments);
+	    }
+	    return EncryptionError;
+	}(Error));
+	exports.EncryptionError = EncryptionError;
 
 
 /***/ }),
@@ -2906,6 +2926,183 @@ module.exports =
 
 /***/ }),
 /* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var private_channel_1 = __webpack_require__(43);
+	var Errors = __webpack_require__(45);
+	var logger_1 = __webpack_require__(16);
+	var tweetnacl_1 = __webpack_require__(48);
+	var tweetnacl_util_1 = __webpack_require__(49);
+	var EncryptedChannel = (function (_super) {
+	    __extends(EncryptedChannel, _super);
+	    function EncryptedChannel() {
+	        _super.apply(this, arguments);
+	        this.key = null;
+	    }
+	    EncryptedChannel.prototype.authorize = function (socketId, callback) {
+	        var _this = this;
+	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+	            var sharedSecret = authData["shared_secret"];
+	            if (!sharedSecret) {
+	                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
+	                callback(true, errorMsg);
+	                logger_1["default"].warn("Error: " + errorMsg);
+	                return;
+	            }
+	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
+	            delete authData["shared_secret"];
+	            callback(error, authData);
+	        });
+	    };
+	    EncryptedChannel.prototype.trigger = function (event, data) {
+	        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
+	    };
+	    EncryptedChannel.prototype.handleEvent = function (event, data) {
+	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
+	            _super.prototype.handleEvent.call(this, event, data);
+	            return;
+	        }
+	        if (!this.key)
+	            return;
+	        var decryptedData = this.decryptPayload(data);
+	        this.emit(event, decryptedData);
+	    };
+	    EncryptedChannel.prototype.decryptPayload = function (encryptedData) {
+	        var baseErrMsg = "Unable to decrypt payload";
+	        if (!encryptedData.ciphertext || !encryptedData.nonce) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        }
+	        var nonce = tweetnacl_util_1.decodeBase64(encryptedData.nonce);
+	        var cipherText = tweetnacl_util_1.decodeBase64(encryptedData.ciphertext);
+	        if (nonce.length < tweetnacl_1.secretbox.nonceLength ||
+	            cipherText.length < tweetnacl_1.secretbox.overheadLength) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": unexpected data format");
+	        }
+	        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);
+	        if (bytes === null) {
+	            throw new Errors.EncryptionError(baseErrMsg + ": probably an invalid key");
+	        }
+	        var str = tweetnacl_util_1.encodeUTF8(bytes);
+	        try {
+	            return JSON.parse(str);
+	        }
+	        catch (e) {
+	            return str;
+	        }
+	    };
+	    return EncryptedChannel;
+	}(private_channel_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = EncryptedChannel;
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	exports.__esModule = true;
+	exports["default"] = {
+	    secretbox: {},
+	    randomBytes: {}
+	};
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports) {
+
+	// Written in 2014-2016 by Dmitry Chestnykh and Devi Mandiri.
+	// Public domain.
+	(function(root, f) {
+	  'use strict';
+	  if (typeof module !== 'undefined' && module.exports) module.exports = f();
+	  else if (root.nacl) root.nacl.util = f();
+	  else {
+	    root.nacl = {};
+	    root.nacl.util = f();
+	  }
+	}(this, function() {
+	  'use strict';
+
+	  var util = {};
+
+	  function validateBase64(s) {
+	    if (!(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(s))) {
+	      throw new TypeError('invalid encoding');
+	    }
+	  }
+
+	  util.decodeUTF8 = function(s) {
+	    if (typeof s !== 'string') throw new TypeError('expected string');
+	    var i, d = unescape(encodeURIComponent(s)), b = new Uint8Array(d.length);
+	    for (i = 0; i < d.length; i++) b[i] = d.charCodeAt(i);
+	    return b;
+	  };
+
+	  util.encodeUTF8 = function(arr) {
+	    var i, s = [];
+	    for (i = 0; i < arr.length; i++) s.push(String.fromCharCode(arr[i]));
+	    return decodeURIComponent(escape(s.join('')));
+	  };
+
+	  if (typeof atob === 'undefined') {
+	    // Node.js
+
+	    if (typeof Buffer.from !== 'undefined') {
+	       // Node v6 and later
+	      util.encodeBase64 = function (arr) { // v6 and later
+	          return Buffer.from(arr).toString('base64');
+	      };
+
+	      util.decodeBase64 = function (s) {
+	        validateBase64(s);
+	        return new Uint8Array(Array.prototype.slice.call(Buffer.from(s, 'base64'), 0));
+	      };
+
+	    } else {
+	      // Node earlier than v6
+	      util.encodeBase64 = function (arr) { // v6 and later
+	        return (new Buffer(arr)).toString('base64');
+	      };
+
+	      util.decodeBase64 = function(s) {
+	        validateBase64(s);
+	        return new Uint8Array(Array.prototype.slice.call(new Buffer(s, 'base64'), 0));
+	      };
+	    }
+
+	  } else {
+	    // Browsers
+
+	    util.encodeBase64 = function(arr) {
+	      var i, s = [], len = arr.length;
+	      for (i = 0; i < len; i++) s.push(String.fromCharCode(arr[i]));
+	      return btoa(s.join(''));
+	    };
+
+	    util.decodeBase64 = function(s) {
+	      validateBase64(s);
+	      var i, d = atob(s), b = new Uint8Array(d.length);
+	      for (i = 0; i < d.length; i++) b[i] = d.charCodeAt(i);
+	      return b;
+	    };
+
+	  }
+
+	  return util;
+
+	}));
+
+
+/***/ }),
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3201,7 +3398,7 @@ module.exports =
 
 
 /***/ }),
-/* 48 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3238,7 +3435,10 @@ module.exports =
 	exports.__esModule = true;
 	exports["default"] = Channels;
 	function createChannel(name, pusher) {
-	    if (name.indexOf('private-') === 0) {
+	    if (name.indexOf('private-encrypted-') === 0) {
+	        return factory_1["default"].createEncryptedChannel(name, pusher);
+	    }
+	    else if (name.indexOf('private-') === 0) {
 	        return factory_1["default"].createPrivateChannel(name, pusher);
 	    }
 	    else if (name.indexOf('presence-') === 0) {
@@ -3251,7 +3451,7 @@ module.exports =
 
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3358,7 +3558,7 @@ module.exports =
 
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3455,7 +3655,7 @@ module.exports =
 
 
 /***/ }),
-/* 51 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3518,13 +3718,13 @@ module.exports =
 
 
 /***/ }),
-/* 52 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(6);
 	var runtime_1 = __webpack_require__(2);
-	var sequential_strategy_1 = __webpack_require__(50);
+	var sequential_strategy_1 = __webpack_require__(53);
 	var Collections = __webpack_require__(4);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
@@ -3633,7 +3833,7 @@ module.exports =
 
 
 /***/ }),
-/* 53 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3675,7 +3875,7 @@ module.exports =
 
 
 /***/ }),
-/* 54 */
+/* 57 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3700,7 +3900,7 @@ module.exports =
 
 
 /***/ }),
-/* 55 */
+/* 58 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3727,7 +3927,7 @@ module.exports =
 
 
 /***/ }),
-/* 56 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
