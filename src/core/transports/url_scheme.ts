@@ -1,7 +1,7 @@
 export interface URLSchemeParams {
-  encrypted: boolean;
-  hostEncrypted: string;
-  hostUnencrypted: string;
+  useTLS: boolean;
+  hostTLS: string;
+  hostNonTLS: string;
   httpPath: string;
 }
 

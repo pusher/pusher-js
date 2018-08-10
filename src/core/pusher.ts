@@ -118,14 +118,14 @@ export default class Pusher {
           unavailableTimeout: this.config.unavailable_timeout
         },
         this.config,
-        { encrypted: this.isEncrypted() }
+        { useTLS: this.shouldUseTLS() }
       )
     );
 
     this.connection.bind('connected', ()=> {
       this.subscribeAll();
       if (this.timelineSender) {
-        this.timelineSender.send(this.connection.isEncrypted());
+        this.timelineSender.send(this.connection.isUsingTLS());
       }
     });
     this.connection.bind('message', (params)=> {
@@ -172,10 +172,10 @@ export default class Pusher {
 
     if (this.timelineSender) {
       if (!this.timelineSenderTimer) {
-        var encrypted = this.connection.isEncrypted();
+        var usingTLS = this.connection.isUsingTLS();
         var timelineSender = this.timelineSender;
         this.timelineSenderTimer = new PeriodicTimer(60000, function() {
-          timelineSender.send(encrypted);
+          timelineSender.send(usingTLS);
         });
       }
     }
@@ -250,10 +250,13 @@ export default class Pusher {
     return this.connection.send_event(event_name, data, channel);
   }
 
-  isEncrypted() : boolean {
+  shouldUseTLS() : boolean {
     if (Runtime.getProtocol() === "https:") {
       return true;
+    } else if (this.config.forceTLS === true) {
+      return true;
     } else {
+      // `encrypted` deprecated in favor of `forceTLS`
       return Boolean(this.config.encrypted);
     }
   }

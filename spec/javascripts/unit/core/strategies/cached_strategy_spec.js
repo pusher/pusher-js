@@ -44,12 +44,12 @@ describe("CachedStrategy", function() {
       spyOn(Runtime, "getLocalStorage").andReturn(localStorage);
     });
 
-    function buildCachedTransportTests(encrypted) {
-      var ENCRYPTED_KEY = "pusherTransportEncrypted";
-      var UNENCRYPTED_KEY = "pusherTransportUnencrypted";
+    function buildCachedTransportTests(useTLS) {
+      var TLS_KEY = "pusherTransportTLS";
+      var NON_TLS_KEY = "pusherTransportNonTLS";
 
-      var usedKey = encrypted ? ENCRYPTED_KEY : UNENCRYPTED_KEY;
-      var unusedKey = encrypted ? UNENCRYPTED_KEY : ENCRYPTED_KEY;
+      var usedKey = useTLS ? TLS_KEY : NON_TLS_KEY;
+      var unusedKey = useTLS ? NON_TLS_KEY : TLS_KEY;
 
       var substrategy, transports, timeline;
       var strategy;
@@ -63,13 +63,13 @@ describe("CachedStrategy", function() {
         timeline = Mocks.getTimeline();
 
         strategy = new CachedStrategy(substrategy, transports, {
-          encrypted: encrypted,
+          useTLS: useTLS,
           timeline: timeline
         });
         callback = jasmine.createSpy("callback");
       });
 
-      describe("without cached transport, encrypted=" + encrypted, function() {
+      describe("without cached transport, useTLS=" + useTLS, function() {
         beforeEach(function() {
           delete localStorage[usedKey];
           localStorage[unusedKey] = "mock";
@@ -161,7 +161,7 @@ describe("CachedStrategy", function() {
         });
       });
 
-      describe("with cached transport, encrypted=" + encrypted, function() {
+      describe("with cached transport, useTLS=" + useTLS, function() {
         var t0 = Util.now();
 
         beforeEach(function() {
@@ -215,7 +215,7 @@ describe("CachedStrategy", function() {
 
             transport = Mocks.getTransport(true);
             transport.name = "test";
-            transport.options = { encrypted: false };
+            transport.options = { useTLS: false };
             transports.test._callback(null, { transport: transport });
           });
 
@@ -308,11 +308,6 @@ describe("CachedStrategy", function() {
             var transport;
 
             beforeEach(function() {
-              connection = {
-                name: "test",
-                options: { encrypted: true, "hostEncrypted": "example.net" }
-              };
-
               transport = Mocks.getTransport(true);
               transport.name = "test";
               substrategy._callback(null, { transport: transport });

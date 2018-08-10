@@ -33,7 +33,7 @@ export default class TransportStrategy implements Strategy {
    */
   isSupported() : boolean {
     return this.transport.isSupported({
-      encrypted: this.options.encrypted
+      useTLS: this.options.useTLS
     });
   }
 

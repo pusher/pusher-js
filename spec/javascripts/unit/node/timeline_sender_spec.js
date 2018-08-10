@@ -58,21 +58,6 @@ describe("TimelineSender", function() {
         expect(xhrRequest.send).toHaveBeenCalled();
       });
 
-      it("should send secure XHR requests when encrypted", function() {
-        var sender = new TimelineSender(timeline, {
-          encrypted: true,
-          host: "example.com",
-          path: "/timeline"
-        });
-        sender.send(true, onSend);
-
-        expect(Runtime.createXHR.calls.length).toEqual(1);
-        expect(xhrRequest.open).toHaveBeenCalledWith(
-          "GET",
-          'https://example.com/timeline/2?events=WzEsMiwzXQ%3D%3D',
-          true);
-      });
-
       it("should not send an empty timeline", function() {
         timeline.isEmpty.andReturn(true);
         sender.send(false, onSend);

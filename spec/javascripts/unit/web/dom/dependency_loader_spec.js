@@ -40,9 +40,9 @@ describe("DependencyLoader", function() {
       );
     });
 
-    it("should return correct URL when using HTTP, but encrypted is requested", function() {
+    it("should return correct URL when using HTTP, but TLS is requested", function() {
       doc.location.protocol = "http:";
-      expect(loader.getRoot({ encrypted: true })).toEqual(
+      expect(loader.getRoot({ useTLS: true })).toEqual(
         "https://example.com/6.6.6"
       );
     });
@@ -76,9 +76,9 @@ describe("DependencyLoader", function() {
       );
     });
 
-    it("should return correct URL when using HTTP, but encrypted is requested", function() {
+    it("should return correct URL when using HTTP, but TLS is requested", function() {
       doc.location.protocol = "http:";
-      expect(loader.getPath("something", { encrypted: true })).toEqual(
+      expect(loader.getPath("something", { useTLS: true })).toEqual(
         "https://example.com/6.6.6/something-test.js"
       );
     });
@@ -105,7 +105,7 @@ describe("DependencyLoader", function() {
   });
 
   describe("#load", function() {
-    it("should send an unencrypted script request when served via http", function() {
+    it("should send an non TLS script request when served via http", function() {
       doc.location.protocol = "http:";
       loader.load("resource", {}, onLoaded);
       expect(Runtime.createScriptRequest.calls.length).toEqual(1);
@@ -114,7 +114,7 @@ describe("DependencyLoader", function() {
       );
     });
 
-    it("should send an encrypted script request when served via https", function() {
+    it("should send a TLS script request when served via https", function() {
       doc.location.protocol = "https:";
       loader.load("resource", {}, onLoaded);
       expect(Runtime.createScriptRequest.calls.length).toEqual(1);
@@ -123,9 +123,9 @@ describe("DependencyLoader", function() {
       );
     });
 
-    it("should send an encrypted script request when served via http, but passed encrypted via options", function() {
+    it("should send a TLS script request when served via http, but passed TLS via options", function() {
       doc.location.protocol = "http:";
-      loader.load("resource", { encrypted: true }, onLoaded);
+      loader.load("resource", { useTLS: true }, onLoaded);
       expect(Runtime.createScriptRequest.calls.length).toEqual(1);
       expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "https://example.com/6.6.6/resource-test.js"

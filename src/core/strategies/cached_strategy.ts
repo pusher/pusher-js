@@ -17,14 +17,14 @@ export default class CachedStrategy implements Strategy {
   strategy: Strategy;
   transports: TransportStrategy[];
   ttl: number;
-  encrypted: boolean;
+  usingTLS: boolean;
   timeline: Timeline;
 
   constructor(strategy : Strategy, transports: TransportStrategy[], options : StrategyOptions) {
     this.strategy = strategy;
     this.transports = transports;
     this.ttl = options.ttl || 1800*1000;
-    this.encrypted = options.encrypted;
+    this.usingTLS = options.useTLS;
     this.timeline = options.timeline;
   }
 
@@ -33,8 +33,8 @@ export default class CachedStrategy implements Strategy {
   }
 
   connect(minPriority : number, callback : Function) {
-    var encrypted = this.encrypted;
-    var info = fetchTransportCache(encrypted);
+    var usingTLS = this.usingTLS;
+    var info = fetchTransportCache(usingTLS);
 
     var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Util.now()) {
@@ -57,7 +57,7 @@ export default class CachedStrategy implements Strategy {
       minPriority,
       function cb(error, handshake) {
         if (error) {
-          flushTransportCache(encrypted);
+          flushTransportCache(usingTLS);
           if (strategies.length > 0) {
             startTimestamp = Util.now();
             runner = strategies.pop().connect(minPriority, cb);
@@ -66,7 +66,7 @@ export default class CachedStrategy implements Strategy {
           }
         } else {
           storeTransportCache(
-            encrypted,
+            usingTLS,
             handshake.transport.name,
             Util.now() - startTimestamp
           );
@@ -89,30 +89,30 @@ export default class CachedStrategy implements Strategy {
   }
 }
 
-function getTransportCacheKey(encrypted : boolean) : string {
-  return "pusherTransport" + (encrypted ? "Encrypted" : "Unencrypted");
+function getTransportCacheKey(usingTLS : boolean) : string {
+  return "pusherTransport" + (usingTLS ? "TLS" : "NonTLS");
 }
 
-function fetchTransportCache(encrypted : boolean) : any {
+function fetchTransportCache(usingTLS : boolean) : any {
   var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
-      var serializedCache = storage[getTransportCacheKey(encrypted)];
+      var serializedCache = storage[getTransportCacheKey(usingTLS)];
       if (serializedCache) {
         return JSON.parse(serializedCache);
       }
     } catch (e) {
-      flushTransportCache(encrypted);
+      flushTransportCache(usingTLS);
     }
   }
   return null;
 }
 
-function storeTransportCache(encrypted : boolean, transport : TransportStrategy, latency : number) {
+function storeTransportCache(usingTLS : boolean, transport : TransportStrategy, latency : number) {
   var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
-      storage[getTransportCacheKey(encrypted)] = Collections.safeJSONStringify({
+      storage[getTransportCacheKey(usingTLS)] = Collections.safeJSONStringify({
         timestamp: Util.now(),
         transport: transport,
         latency: latency
@@ -123,11 +123,11 @@ function storeTransportCache(encrypted : boolean, transport : TransportStrategy,
   }
 }
 
-function flushTransportCache(encrypted : boolean) {
+function flushTransportCache(usingTLS : boolean) {
   var storage = Runtime.getLocalStorage();
   if (storage) {
     try {
-      delete storage[getTransportCacheKey(encrypted)];
+      delete storage[getTransportCacheKey(usingTLS)];
     } catch (e) {
       // catch exceptions raised by localStorage
     }

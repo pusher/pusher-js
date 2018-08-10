@@ -145,14 +145,14 @@ describe("Pusher", function() {
       expect(pusher.channel("chan")).toBe(undefined);
     });
 
-    describe("encryption", function() {
+    describe("TLS", function() {
       it("should be off by default", function() {
-        expect(pusher.isEncrypted()).toBe(false);
+        expect(pusher.shouldUseTLS()).toBe(false);
       });
 
-      it("should be on when 'encrypted' parameter is passed", function() {
-        var pusher = new Pusher("foo", { encrypted: true });
-        expect(pusher.isEncrypted()).toBe(true);
+      it("should be on when 'forceTLS' parameter is passed", function() {
+        var pusher = new Pusher("foo", { forceTLS: true });
+        expect(pusher.shouldUseTLS()).toBe(true);
       });
 
       if (TestEnv === "web") {
@@ -162,7 +162,7 @@ describe("Pusher", function() {
               protocol: "https:"
             }
           });
-          expect(pusher.isEncrypted()).toBe(true);
+          expect(pusher.shouldUseTLS()).toBe(true);
         });
       }
     });
@@ -175,11 +175,11 @@ describe("Pusher", function() {
       });
 
       it("should pass per-connection strategy options", function() {
-        pusher = new Pusher("foo", { encrypted: true });
+        pusher = new Pusher("foo", { forceTLS: true });
 
         var expectedConfig = Collections.extend(
           DefaultConfig.getGlobalConfig(),
-          { encrypted: true }
+          { forceTLS: true }
         );
 
         var getStrategy = pusher.connection.options.getStrategy;
@@ -192,14 +192,14 @@ describe("Pusher", function() {
       it("should pass options to the strategy builder", function() {
         var expectedConfig = Collections.extend(
           DefaultConfig.getGlobalConfig(),
-          { encrypted: true }
+          { useTLS: true }
         );
 
         var getStrategy = pusher.connection.options.getStrategy;
-        expect(getStrategy({ encrypted: true }).options).toEqual(
+        expect(getStrategy({ useTLS: true }).options).toEqual(
           expectedConfig
         );
-        expect(getStrategy({ encrypted: true }).definition).toEqual(
+        expect(getStrategy({ useTLS: true }).definition).toEqual(
           Runtime.getDefaultStrategy(expectedConfig)
         );
       });
@@ -233,25 +233,25 @@ describe("Pusher", function() {
         expect(options.unavailableTimeout).toEqual(789);
       });
 
-      it("should be unencrypted by default", function() {
+      it("should not use TLS by default", function() {
         var pusher = new Pusher("foo");
-        expect(pusher.connection.options.encrypted).toBe(false);
+        expect(pusher.connection.options.useTLS).toBe(false);
       });
 
-      it("should be encrypted when specified in Pusher constructor", function() {
-        var pusher = new Pusher("foo", { encrypted: true });
-        expect(pusher.connection.options.encrypted).toBe(true);
+      it("should use TLS when specified in Pusher constructor", function() {
+        var pusher = new Pusher("foo", { forceTLS: true });
+        expect(pusher.connection.options.useTLS).toBe(true);
       });
 
       if (TestEnv === "web") {
-        it("should be encrypted when using HTTPS", function() {
+        it("should use TLS when using HTTPS", function() {
           Runtime.getDocument.andReturn({
             location: {
               protocol: "https:"
             }
           });
-          var pusher = new Pusher("foo", { encrypted: true });
-          expect(pusher.connection.options.encrypted).toBe(true);
+          var pusher = new Pusher("foo", { forceTLS: true });
+          expect(pusher.connection.options.useTLS).toBe(true);
         });
       }
     });
@@ -557,8 +557,8 @@ describe("Pusher", function() {
       expect(timelineSender.send.calls.length).toEqual(0);
     });
 
-    it("should be sent unencrypted if connection is unencrypted", function() {
-      pusher.connection.isEncrypted.andReturn(false);
+    it("should be sent without TLS if connection is not using TLS", function() {
+      pusher.connection.isUsingTLS.andReturn(false);
 
       pusher.connect();
       pusher.connection.options.timeline.info({});
@@ -569,8 +569,8 @@ describe("Pusher", function() {
       expect(timelineSender.send).toHaveBeenCalledWith(false);
     });
 
-    it("should be sent encrypted if connection is encrypted", function() {
-      pusher.connection.isEncrypted.andReturn(true);
+    it("should be sent with TLS if connection is over TLS", function() {
+      pusher.connection.isUsingTLS.andReturn(true);
 
       pusher.connect();
       pusher.connection.options.timeline.info({});

@@ -102,7 +102,7 @@ export var getCloseAction = function(closeEvent) : string {
       return null;
     }
   } else if (closeEvent.code === 4000) {
-    return "ssl_only";
+    return "tls_only";
   } else if (closeEvent.code < 4100) {
     return "refused";
   } else if (closeEvent.code < 4200) {

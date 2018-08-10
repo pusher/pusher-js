@@ -52,9 +52,9 @@ describe("TimelineSender", function() {
       expect(jsonpRequest.send).toHaveBeenCalled();
     });
 
-    it("should send secure JSONP requests when encrypted", function() {
+    it("should send secure JSONP requests when using TLS", function() {
       var sender = new TimelineSender(timeline, {
-        encrypted: true,
+        useTLS: true,
         host: "example.com",
         path: "/timeline"
       });

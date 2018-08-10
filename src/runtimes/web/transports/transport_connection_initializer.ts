@@ -8,7 +8,7 @@ export default function() {
   var self = this;
 
   self.timeline.info(self.buildTimelineMessage({
-    transport: self.name + (self.options.encrypted ? "s" : "")
+    transport: self.name + (self.options.useTLS ? "s" : "")
   }));
 
   if (self.hooks.isInitialized()) {
@@ -17,7 +17,7 @@ export default function() {
     self.changeState("initializing");
     Dependencies.load(
       self.hooks.file,
-      { encrypted: self.options.encrypted },
+      { useTLS: self.options.useTLS },
       function(error, callback) {
         if (self.hooks.isInitialized()) {
           self.changeState("initialized");

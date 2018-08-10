@@ -68,8 +68,8 @@ describe("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to https://sockjs.pusher.com:443 by default when encrypted", function() {
-      pusher = new Pusher("foobar", { encrypted: true });
+    it("should connect to https://sockjs.pusher.com:443 by default when forcing TLS", function() {
+      pusher = new Pusher("foobar", { forceTLS: true });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
@@ -94,8 +94,8 @@ describe("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect using httpHost and httpsPort when specified in options and encrypted", function() {
-      pusher = new Pusher("foobar", { httpHost: "example.org", httpsPort: 4444, encrypted: true });
+    it("should connect using httpHost and httpsPort when specified in options and forcing TLS", function() {
+      pusher = new Pusher("foobar", { httpHost: "example.org", httpsPort: 4444, forceTLS: true });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(

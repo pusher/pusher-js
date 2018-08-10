@@ -42,7 +42,7 @@ export default class ConnectionManager extends EventsDispatcher {
   options: ConnectionManagerOptions;
   state: string;
   connection: Connection;
-  encrypted: boolean;
+  usingTLS: boolean;
   timeline: Timeline;
   socket_id: string;
   unavailableTimer: Timer;
@@ -61,7 +61,7 @@ export default class ConnectionManager extends EventsDispatcher {
     this.options = options || {};
     this.state = "initialized";
     this.connection = null;
-    this.encrypted = !!options.encrypted;
+    this.usingTLS = !!options.useTLS;
     this.timeline = this.options.timeline;
 
     this.connectionCallbacks = this.buildConnectionCallbacks();
@@ -137,8 +137,8 @@ export default class ConnectionManager extends EventsDispatcher {
     this.updateState("disconnected");
   };
 
-  isEncrypted() {
-    return this.encrypted;
+  isUsingTLS() {
+    return this.usingTLS;
   };
 
   private startConnecting() {
@@ -179,7 +179,7 @@ export default class ConnectionManager extends EventsDispatcher {
     this.strategy = this.options.getStrategy({
       key: this.key,
       timeline: this.timeline,
-      encrypted: this.encrypted
+      useTLS: this.usingTLS
     });
   };
 
@@ -298,8 +298,8 @@ export default class ConnectionManager extends EventsDispatcher {
     }
 
     return {
-      ssl_only: withErrorEmitted(()=> {
-        this.encrypted = true;
+      tls_only: withErrorEmitted(()=> {
+        this.usingTLS = true;
         this.updateStrategy();
         this.retryIn(0);
       }),

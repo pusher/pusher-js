@@ -1,7 +1,7 @@
 interface StrategyOptions {
   ttl?: number;
   timeline?: any;
-  encrypted?: boolean;
+  useTLS?: boolean;
   ignoreNullOrigin?: boolean;
   loop?: boolean;
   failFast?: boolean;

@@ -1,7 +1,7 @@
 import HandshakePayload from './handshake/handshake_payload';
 
 export interface ErrorCallbacks {
-  ssl_only: (result: HandshakePayload) => void;
+  tls_only: (result: HandshakePayload) => void;
   refused: (result: HandshakePayload) => void;
   backoff: (result: HandshakePayload) => void;
   retry: (result: HandshakePayload) => void;

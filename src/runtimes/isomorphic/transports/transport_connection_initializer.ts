@@ -6,7 +6,7 @@ export default function() {
   var self = this;
 
   self.timeline.info(self.buildTimelineMessage({
-    transport: self.name + (self.options.encrypted ? "s" : "")
+    transport: self.name + (self.options.useTLS ? "s" : "")
   }));
 
   if (self.hooks.isInitialized()) {

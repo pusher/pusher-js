@@ -25,7 +25,7 @@ var SockJSTransport = new Transport(<TransportHooks>{
   getSocket: function(url, options) {
     return new window.SockJS(url, null, {
       js_path: Dependencies.getPath("sockjs", {
-        encrypted: options.encrypted
+        useTLS: options.useTLS
       }),
       ignore_null_origin: options.ignoreNullOrigin
     });
@@ -39,7 +39,7 @@ var SockJSTransport = new Transport(<TransportHooks>{
 
 var xdrConfiguration = {
   isSupported: function(environment) : boolean {
-    var yes = Runtime.isXDRSupported(environment.encrypted);
+    var yes = Runtime.isXDRSupported(environment.useTLS);
     return yes;
   }
 };

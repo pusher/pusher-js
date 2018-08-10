@@ -133,15 +133,15 @@ There are a number of configuration parameters which can be set for the Pusher c
 const socket = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   authEndpoint: 'http://example.com/pusher/auth',
-  encrypted: true
+  forceTLS: true
 });
 ```
 
 For most users, there is little need to change these. See [client API guide](http://pusher.com/docs/client_api_guide/client_connect) for more details.
 
-#### `encrypted` (Boolean)
+#### `forceTLS` (Boolean)
 
-Forces the connection to use encrypted transports.
+Forces the connection to use TLS.
 
 #### `authEndpoint` (String)
 
