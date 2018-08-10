@@ -1764,7 +1764,7 @@ module.exports =
 	            }
 	            else {
 	                var suffix = url_store_1["default"].buildLogSuffix("authenticationEndpoint");
-	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status + " ") +
+	                logger_1["default"].warn(("Couldn't retrieve authentication info. " + xhr.status) +
 	                    ("Clients must be authenticated to join private or presence channels. " + suffix));
 	                callback(true, xhr.status);
 	            }
@@ -2948,7 +2948,7 @@ module.exports =
 	        });
 	    };
 	    EncryptedChannel.prototype.trigger = function (event, data) {
-	        throw new Errors.UnsupportedFeature('Client events are not currently support for encrypted channels');
+	        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
 	    };
 	    EncryptedChannel.prototype.handleEvent = function (event, data) {
 	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
@@ -3304,6 +3304,7 @@ module.exports =
 	"use strict";
 	var Collections = __webpack_require__(4);
 	var factory_1 = __webpack_require__(36);
+	var logger_1 = __webpack_require__(16);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -3336,6 +3337,11 @@ module.exports =
 	exports["default"] = Channels;
 	function createChannel(name, pusher) {
 	    if (name.indexOf('private-encrypted-') === 0) {
+	        if (navigator.product == "ReactNative") {
+	            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
+	            logger_1["default"].warn("Error: " + errorMsg);
+	            return factory_1["default"].createPrivateChannel(name, pusher);
+	        }
 	        return factory_1["default"].createEncryptedChannel(name, pusher);
 	    }
 	    else if (name.indexOf('private-') === 0) {

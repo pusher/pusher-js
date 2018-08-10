@@ -8254,6 +8254,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	"use strict";
 	var Collections = __webpack_require__(9);
 	var factory_1 = __webpack_require__(43);
+	var logger_1 = __webpack_require__(8);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -8286,6 +8287,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports["default"] = Channels;
 	function createChannel(name, pusher) {
 	    if (name.indexOf('private-encrypted-') === 0) {
+	        if (navigator.product == "ReactNative") {
+	            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
+	            logger_1["default"].warn("Error: " + errorMsg);
+	            return factory_1["default"].createPrivateChannel(name, pusher);
+	        }
 	        return factory_1["default"].createEncryptedChannel(name, pusher);
 	    }
 	    else if (name.indexOf('private-') === 0) {
