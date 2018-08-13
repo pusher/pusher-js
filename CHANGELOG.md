@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.3.0 (2018-08-13) 
+
+[NEW] This release adds support for end to end encrypted channels, a new feature for Channels. Read more [in our docs](https://pusher.com/docs/client_api_guide/client_encrypted_channels).
+
 ## 4.2.2 (2018-01-04)
 
 [FIXED] Do not warn about a missing cluster when the host is explicitly set.
