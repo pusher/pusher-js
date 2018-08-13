@@ -20,7 +20,7 @@ var config = objectAssign(require('./config.shared'),{
     filename: "pusher.worker.js"
   },
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/worker', 'src/runtimes']
+    modulesDirectories: ['src/', 'src/runtimes/worker', 'src/runtimes', 'node_modules']
   },
   plugins: [
     new webpack.DefinePlugin({

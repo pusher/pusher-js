@@ -71,7 +71,7 @@ module.exports =
 	var StrategyBuilder = __webpack_require__(34);
 	var timers_1 = __webpack_require__(7);
 	var defaults_1 = __webpack_require__(11);
-	var DefaultConfig = __webpack_require__(57);
+	var DefaultConfig = __webpack_require__(60);
 	var logger_1 = __webpack_require__(16);
 	var factory_1 = __webpack_require__(36);
 	var url_store_1 = __webpack_require__(30);
@@ -1955,13 +1955,13 @@ module.exports =
 	var util_1 = __webpack_require__(6);
 	var transport_manager_1 = __webpack_require__(35);
 	var Errors = __webpack_require__(46);
-	var transport_strategy_1 = __webpack_require__(50);
-	var sequential_strategy_1 = __webpack_require__(51);
-	var best_connected_ever_strategy_1 = __webpack_require__(52);
-	var cached_strategy_1 = __webpack_require__(53);
-	var delayed_strategy_1 = __webpack_require__(54);
-	var if_strategy_1 = __webpack_require__(55);
-	var first_connected_strategy_1 = __webpack_require__(56);
+	var transport_strategy_1 = __webpack_require__(53);
+	var sequential_strategy_1 = __webpack_require__(54);
+	var best_connected_ever_strategy_1 = __webpack_require__(55);
+	var cached_strategy_1 = __webpack_require__(56);
+	var delayed_strategy_1 = __webpack_require__(57);
+	var if_strategy_1 = __webpack_require__(58);
+	var first_connected_strategy_1 = __webpack_require__(59);
 	var runtime_1 = __webpack_require__(2);
 	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
@@ -2156,9 +2156,10 @@ module.exports =
 	var timeline_sender_1 = __webpack_require__(42);
 	var presence_channel_1 = __webpack_require__(43);
 	var private_channel_1 = __webpack_require__(44);
+	var encrypted_channel_1 = __webpack_require__(48);
 	var channel_1 = __webpack_require__(45);
-	var connection_manager_1 = __webpack_require__(48);
-	var channels_1 = __webpack_require__(49);
+	var connection_manager_1 = __webpack_require__(51);
+	var channels_1 = __webpack_require__(52);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2174,6 +2175,9 @@ module.exports =
 	    },
 	    createPresenceChannel: function (name, pusher) {
 	        return new presence_channel_1["default"](name, pusher);
+	    },
+	    createEncryptedChannel: function (name, pusher) {
+	        return new encrypted_channel_1["default"](name, pusher);
 	    },
 	    createTimelineSender: function (timeline, options) {
 	        return new timeline_sender_1["default"](timeline, options);
@@ -2814,6 +2818,14 @@ module.exports =
 	    return TransportClosed;
 	}(Error));
 	exports.TransportClosed = TransportClosed;
+	var UnsupportedFeature = (function (_super) {
+	    __extends(UnsupportedFeature, _super);
+	    function UnsupportedFeature() {
+	        _super.apply(this, arguments);
+	    }
+	    return UnsupportedFeature;
+	}(Error));
+	exports.UnsupportedFeature = UnsupportedFeature;
 	var UnsupportedTransport = (function (_super) {
 	    __extends(UnsupportedTransport, _super);
 	    function UnsupportedTransport() {
@@ -2896,6 +2908,123 @@ module.exports =
 
 /***/ }),
 /* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	var __extends = (this && this.__extends) || function (d, b) {
+	    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+	    function __() { this.constructor = d; }
+	    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+	};
+	var private_channel_1 = __webpack_require__(44);
+	var Errors = __webpack_require__(46);
+	var logger_1 = __webpack_require__(16);
+	var tweetnacl_1 = __webpack_require__(49);
+	var tweetnacl_util_1 = __webpack_require__(50);
+	var EncryptedChannel = (function (_super) {
+	    __extends(EncryptedChannel, _super);
+	    function EncryptedChannel() {
+	        _super.apply(this, arguments);
+	        this.key = null;
+	    }
+	    EncryptedChannel.prototype.authorize = function (socketId, callback) {
+	        var _this = this;
+	        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+	            if (error) {
+	                callback(true, authData);
+	                return;
+	            }
+	            var sharedSecret = authData["shared_secret"];
+	            if (!sharedSecret) {
+	                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
+	                callback(true, errorMsg);
+	                logger_1["default"].warn("Error: " + errorMsg);
+	                return;
+	            }
+	            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
+	            delete authData["shared_secret"];
+	            callback(false, authData);
+	        });
+	    };
+	    EncryptedChannel.prototype.trigger = function (event, data) {
+	        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
+	    };
+	    EncryptedChannel.prototype.handleEvent = function (event, data) {
+	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
+	            _super.prototype.handleEvent.call(this, event, data);
+	            return;
+	        }
+	        this.handleEncryptedEvent(event, data);
+	    };
+	    EncryptedChannel.prototype.handleEncryptedEvent = function (event, data) {
+	        var _this = this;
+	        if (!this.key) {
+	            logger_1["default"].debug('Received encrypted event before key has been retrieved from the authEndpoint');
+	            return;
+	        }
+	        if (!data.ciphertext || !data.nonce) {
+	            logger_1["default"].warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+	            return;
+	        }
+	        var cipherText = tweetnacl_util_1.decodeBase64(data.ciphertext);
+	        if (cipherText.length < tweetnacl_1.secretbox.overheadLength) {
+	            logger_1["default"].warn("Expected encrypted event ciphertext length to be " + tweetnacl_1.secretbox.overheadLength + ", got: " + cipherText.length);
+	            return;
+	        }
+	        var nonce = tweetnacl_util_1.decodeBase64(data.nonce);
+	        if (nonce.length < tweetnacl_1.secretbox.nonceLength) {
+	            logger_1["default"].warn("Expected encrypted event nonce length to be " + tweetnacl_1.secretbox.nonceLength + ", got: " + nonce.length);
+	            return;
+	        }
+	        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);
+	        if (bytes === null) {
+	            logger_1["default"].debug('Failed to decrypted an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+	            this.authorize(this.pusher.connection.socket_id, function (error, authData) {
+	                if (error) {
+	                    logger_1["default"].warn("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
+	                    return;
+	                }
+	                bytes = tweetnacl_1.secretbox.open(cipherText, nonce, _this.key);
+	                if (bytes === null) {
+	                    logger_1["default"].warn("Failed to decrypt event with new key. Dropping encrypted event");
+	                    return;
+	                }
+	                _this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));
+	                return;
+	            });
+	            return;
+	        }
+	        this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));
+	    };
+	    EncryptedChannel.prototype.emitJSON = function (eventName, data) {
+	        try {
+	            this.emit(eventName, JSON.parse(data));
+	        }
+	        catch (e) {
+	            this.emit(eventName, data);
+	        }
+	        return this;
+	    };
+	    return EncryptedChannel;
+	}(private_channel_1["default"]));
+	exports.__esModule = true;
+	exports["default"] = EncryptedChannel;
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports) {
+
+	module.exports = require("tweetnacl");
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports) {
+
+	module.exports = require("tweetnacl-util");
+
+/***/ }),
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3191,12 +3320,13 @@ module.exports =
 
 
 /***/ }),
-/* 49 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(4);
 	var factory_1 = __webpack_require__(36);
+	var logger_1 = __webpack_require__(16);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -3228,7 +3358,15 @@ module.exports =
 	exports.__esModule = true;
 	exports["default"] = Channels;
 	function createChannel(name, pusher) {
-	    if (name.indexOf('private-') === 0) {
+	    if (name.indexOf('private-encrypted-') === 0) {
+	        if (navigator.product == "ReactNative") {
+	            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
+	            logger_1["default"].warn("Error: " + errorMsg);
+	            return factory_1["default"].createPrivateChannel(name, pusher);
+	        }
+	        return factory_1["default"].createEncryptedChannel(name, pusher);
+	    }
+	    else if (name.indexOf('private-') === 0) {
 	        return factory_1["default"].createPrivateChannel(name, pusher);
 	    }
 	    else if (name.indexOf('presence-') === 0) {
@@ -3241,7 +3379,7 @@ module.exports =
 
 
 /***/ }),
-/* 50 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3348,7 +3486,7 @@ module.exports =
 
 
 /***/ }),
-/* 51 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3445,7 +3583,7 @@ module.exports =
 
 
 /***/ }),
-/* 52 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3508,13 +3646,13 @@ module.exports =
 
 
 /***/ }),
-/* 53 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(6);
 	var runtime_1 = __webpack_require__(2);
-	var sequential_strategy_1 = __webpack_require__(51);
+	var sequential_strategy_1 = __webpack_require__(54);
 	var Collections = __webpack_require__(4);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
@@ -3623,7 +3761,7 @@ module.exports =
 
 
 /***/ }),
-/* 54 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3665,7 +3803,7 @@ module.exports =
 
 
 /***/ }),
-/* 55 */
+/* 58 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3690,7 +3828,7 @@ module.exports =
 
 
 /***/ }),
-/* 56 */
+/* 59 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3717,7 +3855,7 @@ module.exports =
 
 
 /***/ }),
-/* 57 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";

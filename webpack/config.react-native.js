@@ -24,6 +24,16 @@ module.exports = objectAssign(require('./config.shared'),{
     "react-native": "react-native", // our Reachability implementation needs to reference react-native.
   },
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/react-native', 'src/runtimes']
-  },
+    modulesDirectories: ['src/', 'src/runtimes/react-native', 'src/runtimes', 'node_modules'],
+    // at the moment, react-native doesn't contain the requisite crypto APIs to
+    // use tweetnacl/tweetnacl-utils.
+    //
+    // As a result encrypted channels cannot be supported in react native at
+    // this time. In order for the build to work, we need to replace the
+    // tweetnacl-utils with 'mocks'
+    alias: {
+      'tweetnacl': path.resolve(__dirname, '../src/runtimes/react-native/tweetnacl-dummy.ts'),
+      'tweetnacl-util': path.resolve(__dirname, '../src/runtimes/react-native/tweetnacl-util-dummy.ts'),
+    }
+  }
 })
