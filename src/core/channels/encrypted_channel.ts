@@ -6,11 +6,7 @@ import {
   encodeUTF8,
   decodeBase64
 } from "tweetnacl-util";
-
-type EncryptedMessage = {
-  nonce: string;
-  ciphertext: string;
-}
+import Dispatcher from "../events/dispatcher";
 
 /** Extends private channels to provide encrypted channel interface.
  *
@@ -27,16 +23,20 @@ export default class EncryptedChannel extends PrivateChannel {
    */
   authorize(socketId: string, callback: Function) {
     super.authorize(socketId, (error, authData) => {
+      if (error) {
+        callback(true, authData);
+        return;
+      }
       let sharedSecret = authData["shared_secret"];
       if (!sharedSecret) {
         let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
         callback(true, errorMsg);
         Logger.warn(`Error: ${errorMsg}`);
-        return
+        return;
       }
       this.key = decodeBase64(sharedSecret);
       delete authData["shared_secret"];
-      callback(error, authData);
+      callback(false, authData);
     });
   }
 
@@ -56,33 +56,59 @@ export default class EncryptedChannel extends PrivateChannel {
       super.handleEvent(event, data);
       return
     }
-    if(!this.key) return
-    let decryptedData = this.decryptPayload(data)
-    this.emit(event, decryptedData);
+    this.handleEncryptedEvent(event, data)
   }
 
-  private decryptPayload(encryptedData: EncryptedMessage): string {
-    let baseErrMsg = "Unable to decrypt payload";
-    if (!encryptedData.ciphertext || !encryptedData.nonce) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: unexpected data format`);
+  private handleEncryptedEvent(event: string, data: any): void {
+    if (!this.key) {
+      Logger.debug('Received encrypted event before key has been retrieved from the authEndpoint');
+      return;
     }
-    let nonce = decodeBase64(encryptedData.nonce);
-    let cipherText = decodeBase64(encryptedData.ciphertext);
-    if (
-      nonce.length < secretbox.nonceLength ||
-      cipherText.length < secretbox.overheadLength
-    ) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: unexpected data format`);
+    if (!data.ciphertext || !data.nonce) {
+      Logger.warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+      return;
     }
+    let cipherText = decodeBase64(data.ciphertext);
+    if (cipherText.length < secretbox.overheadLength) {
+      Logger.warn(`Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`);
+      return;
+    }
+    let nonce = decodeBase64(data.nonce);
+    if (nonce.length < secretbox.nonceLength) {
+      Logger.warn(`Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`);
+      return;
+    }
+
     let bytes = secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
-      throw new Errors.EncryptionError(`${baseErrMsg}: probably an invalid key`);
+      Logger.debug('Failed to decrypted an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+      // Try a single time to retrieve a new auth key and decrypt the event with it
+      // If this fails, a new key will be requested when a new message is received
+      this.authorize(this.pusher.connection.socket_id, (error, authData) => {
+        if (error) {
+          Logger.warn(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
+          return;
+        }
+        bytes = secretbox.open(cipherText, nonce, this.key);
+        if (bytes === null) {
+          Logger.warn(`Failed to decrypt event with new key. Dropping encrypted event`);
+          return;
+        }
+        this.emitJSON(event, encodeUTF8(bytes));
+        return;
+      });
+      return;
     }
-    let str = encodeUTF8(bytes);
+
+    this.emitJSON(event, encodeUTF8(bytes));
+  }
+
+  emitJSON(eventName: string, data?: any): Dispatcher {
     try {
-      return JSON.parse(str)
+      this.emit(eventName, JSON.parse(data));
     } catch (e) {
-      return str
+      this.emit(eventName, data);
     }
+    return this;
   }
 }
