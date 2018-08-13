@@ -4,6 +4,7 @@ import ChannelTable from './channel_table';
 import Factory from '../utils/factory';
 import Pusher from '../pusher';
 import Logger from '../logger';
+import * as Errors from '../errors';
 /** Handles a channel map. */
 export default class Channels {
   channels: ChannelTable;
@@ -66,8 +67,7 @@ function createChannel(name : string, pusher : Pusher) : Channel {
     // This prevents any weirdness by just returning a private channel instead.
     if(navigator.product == "ReactNative") {
       let errorMsg = `Encrypted channels are not yet supported when using React Native builds.`;
-      Logger.warn(`Error: ${errorMsg}`);
-      return Factory.createPrivateChannel(name, pusher);
+      throw new Errors.UnsupportedFeature(errorMsg);
     }
     return Factory.createEncryptedChannel(name, pusher);
   } else if (name.indexOf('private-') === 0) {
