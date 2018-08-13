@@ -7822,7 +7822,7 @@ var Pusher =
 	"use strict";
 	var Collections = __webpack_require__(4);
 	var factory_1 = __webpack_require__(33);
-	var logger_1 = __webpack_require__(16);
+	var Errors = __webpack_require__(43);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -7857,8 +7857,7 @@ var Pusher =
 	    if (name.indexOf('private-encrypted-') === 0) {
 	        if (navigator.product == "ReactNative") {
 	            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
-	            logger_1["default"].warn("Error: " + errorMsg);
-	            return factory_1["default"].createPrivateChannel(name, pusher);
+	            throw new Errors.UnsupportedFeature(errorMsg);
 	        }
 	        return factory_1["default"].createEncryptedChannel(name, pusher);
 	    }

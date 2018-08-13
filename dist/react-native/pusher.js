@@ -71,7 +71,7 @@ module.exports =
 	var StrategyBuilder = __webpack_require__(33);
 	var timers_1 = __webpack_require__(7);
 	var defaults_1 = __webpack_require__(11);
-	var DefaultConfig = __webpack_require__(57);
+	var DefaultConfig = __webpack_require__(59);
 	var logger_1 = __webpack_require__(16);
 	var factory_1 = __webpack_require__(35);
 	var url_store_1 = __webpack_require__(29);
@@ -1968,13 +1968,13 @@ module.exports =
 	var util_1 = __webpack_require__(6);
 	var transport_manager_1 = __webpack_require__(34);
 	var Errors = __webpack_require__(45);
-	var transport_strategy_1 = __webpack_require__(50);
-	var sequential_strategy_1 = __webpack_require__(51);
-	var best_connected_ever_strategy_1 = __webpack_require__(52);
-	var cached_strategy_1 = __webpack_require__(53);
-	var delayed_strategy_1 = __webpack_require__(54);
-	var if_strategy_1 = __webpack_require__(55);
-	var first_connected_strategy_1 = __webpack_require__(56);
+	var transport_strategy_1 = __webpack_require__(52);
+	var sequential_strategy_1 = __webpack_require__(53);
+	var best_connected_ever_strategy_1 = __webpack_require__(54);
+	var cached_strategy_1 = __webpack_require__(55);
+	var delayed_strategy_1 = __webpack_require__(56);
+	var if_strategy_1 = __webpack_require__(57);
+	var first_connected_strategy_1 = __webpack_require__(58);
 	var runtime_1 = __webpack_require__(2);
 	var Transports = runtime_1["default"].Transports;
 	exports.build = function (scheme, options) {
@@ -2171,8 +2171,8 @@ module.exports =
 	var private_channel_1 = __webpack_require__(43);
 	var encrypted_channel_1 = __webpack_require__(47);
 	var channel_1 = __webpack_require__(44);
-	var connection_manager_1 = __webpack_require__(48);
-	var channels_1 = __webpack_require__(49);
+	var connection_manager_1 = __webpack_require__(50);
+	var channels_1 = __webpack_require__(51);
 	var Factory = {
 	    createChannels: function () {
 	        return new channels_1["default"]();
@@ -2932,8 +2932,8 @@ module.exports =
 	var private_channel_1 = __webpack_require__(43);
 	var Errors = __webpack_require__(45);
 	var logger_1 = __webpack_require__(16);
-	var tweetnacl_1 = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"tweetnacl\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
-	var tweetnacl_util_1 = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"tweetnacl-util\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var tweetnacl_1 = __webpack_require__(48);
+	var tweetnacl_util_1 = __webpack_require__(49);
 	var EncryptedChannel = (function (_super) {
 	    __extends(EncryptedChannel, _super);
 	    function EncryptedChannel() {
@@ -3026,6 +3026,32 @@ module.exports =
 
 /***/ }),
 /* 48 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	exports.__esModule = true;
+	exports["default"] = {
+	    secretbox: {},
+	    randomBytes: {}
+	};
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports) {
+
+	"use strict";
+	exports.__esModule = true;
+	exports["default"] = {
+	    encodeUTF8: {},
+	    decodeUTF8: {},
+	    encodeBase64: {},
+	    decodeBase64: {}
+	};
+
+
+/***/ }),
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3321,13 +3347,13 @@ module.exports =
 
 
 /***/ }),
-/* 49 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var Collections = __webpack_require__(4);
 	var factory_1 = __webpack_require__(35);
-	var logger_1 = __webpack_require__(16);
+	var Errors = __webpack_require__(45);
 	var Channels = (function () {
 	    function Channels() {
 	        this.channels = {};
@@ -3362,8 +3388,7 @@ module.exports =
 	    if (name.indexOf('private-encrypted-') === 0) {
 	        if (navigator.product == "ReactNative") {
 	            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
-	            logger_1["default"].warn("Error: " + errorMsg);
-	            return factory_1["default"].createPrivateChannel(name, pusher);
+	            throw new Errors.UnsupportedFeature(errorMsg);
 	        }
 	        return factory_1["default"].createEncryptedChannel(name, pusher);
 	    }
@@ -3380,7 +3405,7 @@ module.exports =
 
 
 /***/ }),
-/* 50 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3487,7 +3512,7 @@ module.exports =
 
 
 /***/ }),
-/* 51 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3584,7 +3609,7 @@ module.exports =
 
 
 /***/ }),
-/* 52 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3647,13 +3672,13 @@ module.exports =
 
 
 /***/ }),
-/* 53 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 	var util_1 = __webpack_require__(6);
 	var runtime_1 = __webpack_require__(2);
-	var sequential_strategy_1 = __webpack_require__(51);
+	var sequential_strategy_1 = __webpack_require__(53);
 	var Collections = __webpack_require__(4);
 	var CachedStrategy = (function () {
 	    function CachedStrategy(strategy, transports, options) {
@@ -3762,7 +3787,7 @@ module.exports =
 
 
 /***/ }),
-/* 54 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3804,7 +3829,7 @@ module.exports =
 
 
 /***/ }),
-/* 55 */
+/* 57 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3829,7 +3854,7 @@ module.exports =
 
 
 /***/ }),
-/* 56 */
+/* 58 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -3856,7 +3881,7 @@ module.exports =
 
 
 /***/ }),
-/* 57 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
