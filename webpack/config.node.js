@@ -19,12 +19,10 @@ module.exports = objectAssign(require('./config.shared'), {
   },
   target: "node",
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/node', 'src/runtimes']
+    modules: ['src/', 'src/runtimes/node', 'src/runtimes', 'node_modules']
   },
   externals: {
     "faye-websocket": "commonjs faye-websocket",
-    "xmlhttprequest": "commonjs xmlhttprequest",
-    "tweetnacl": "commonjs tweetnacl",
-    "tweetnacl-util": "commonjs tweetnacl-util"
+    "xmlhttprequest": "commonjs xmlhttprequest"
   }
 });
