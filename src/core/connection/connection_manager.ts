@@ -64,8 +64,8 @@ export default class ConnectionManager extends EventsDispatcher {
     this.usingTLS = !!options.useTLS;
     this.timeline = this.options.timeline;
 
-    this.connectionCallbacks = this.buildConnectionCallbacks();
     this.errorCallbacks = this.buildErrorCallbacks();
+    this.connectionCallbacks = this.buildConnectionCallbacks(this.errorCallbacks);
     this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 
     var Network = Runtime.getNetwork();
@@ -245,8 +245,8 @@ export default class ConnectionManager extends EventsDispatcher {
     }
   };
 
-  private buildConnectionCallbacks() : ConnectionCallbacks {
-    return {
+  private buildConnectionCallbacks(errorCallbacks: ErrorCallbacks) : ConnectionCallbacks {
+    return Collections.extend<ConnectionCallbacks>({}, errorCallbacks, {
       message: (message)=> {
         // includes pong messages from server
         this.resetActivityCheck();
@@ -267,11 +267,8 @@ export default class ConnectionManager extends EventsDispatcher {
         if (this.shouldRetry()) {
           this.retryIn(1000);
         }
-      },
-      refused: ()=> {
-        this.disconnect();
       }
-    };
+    });
   };
 
   private buildHandshakeCallbacks(errorCallbacks : ErrorCallbacks) : HandshakeCallbacks {
