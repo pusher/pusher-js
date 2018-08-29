@@ -453,6 +453,13 @@ describe("ConnectionManager", function() {
         expect(manager.state).toEqual("connecting");
       });
     });
+
+    describe("on refused", function() {
+      it("should disconnect upon receipt of a refused event" function() {
+        connection.emit("refused");
+        expect(manager.state).toEqual("disconnected");
+      });
+    });
   });
 
   describe("after establishing a connection which handles activity checks by iself", function() {

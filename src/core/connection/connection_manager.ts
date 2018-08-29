@@ -267,6 +267,9 @@ export default class ConnectionManager extends EventsDispatcher {
         if (this.shouldRetry()) {
           this.retryIn(1000);
         }
+      },
+      refused: ()=> {
+        this.disconnect();
       }
     };
   };

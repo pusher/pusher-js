@@ -17,4 +17,5 @@ export interface ConnectionCallbacks {
   activity: () => void;
   error: (error : any) => void;
   closed: () => void;
+  refused: () => void;
 }
