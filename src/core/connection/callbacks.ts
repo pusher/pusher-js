@@ -1,10 +1,11 @@
 import HandshakePayload from './handshake/handshake_payload';
+import Action from './protocol/action';
 
 export interface ErrorCallbacks {
-  tls_only: (result: HandshakePayload) => void;
-  refused: (result: HandshakePayload) => void;
-  backoff: (result: HandshakePayload) => void;
-  retry: (result: HandshakePayload) => void;
+  tls_only: (result: Action | HandshakePayload) => void;
+  refused: (result: Action | HandshakePayload) => void;
+  backoff: (result: Action | HandshakePayload) => void;
+  retry: (result: Action | HandshakePayload) => void;
 }
 
 export interface HandshakeCallbacks {

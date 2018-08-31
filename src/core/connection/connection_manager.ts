@@ -10,6 +10,7 @@ import Timeline from '../timeline/timeline';
 import ConnectionManagerOptions from './connection_manager_options';
 import Runtime from 'runtime';
 import {ErrorCallbacks, HandshakeCallbacks, ConnectionCallbacks} from './callbacks';
+import Action from './protocol/action';
 
 /** Manages connection to Pusher.
  *
@@ -289,7 +290,7 @@ export default class ConnectionManager extends EventsDispatcher {
 
   private buildErrorCallbacks() : ErrorCallbacks {
     let withErrorEmitted = (callback)=> {
-      return (result)=> {
+      return (result: Action | HandshakePayload)=> {
         if (result.error) {
           this.emit("error", { type: "WebSocketError", error: result.error });
         }
