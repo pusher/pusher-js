@@ -10,6 +10,7 @@ import Timeline from '../timeline/timeline';
 import ConnectionManagerOptions from './connection_manager_options';
 import Runtime from 'runtime';
 import {ErrorCallbacks, HandshakeCallbacks, ConnectionCallbacks} from './callbacks';
+import Action from './protocol/action';
 
 /** Manages connection to Pusher.
  *
@@ -64,8 +65,8 @@ export default class ConnectionManager extends EventsDispatcher {
     this.usingTLS = !!options.useTLS;
     this.timeline = this.options.timeline;
 
-    this.connectionCallbacks = this.buildConnectionCallbacks();
     this.errorCallbacks = this.buildErrorCallbacks();
+    this.connectionCallbacks = this.buildConnectionCallbacks(this.errorCallbacks);
     this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 
     var Network = Runtime.getNetwork();
@@ -245,8 +246,8 @@ export default class ConnectionManager extends EventsDispatcher {
     }
   };
 
-  private buildConnectionCallbacks() : ConnectionCallbacks {
-    return {
+  private buildConnectionCallbacks(errorCallbacks: ErrorCallbacks) : ConnectionCallbacks {
+    return Collections.extend<ConnectionCallbacks>({}, errorCallbacks, {
       message: (message)=> {
         // includes pong messages from server
         this.resetActivityCheck();
@@ -268,7 +269,7 @@ export default class ConnectionManager extends EventsDispatcher {
           this.retryIn(1000);
         }
       }
-    };
+    });
   };
 
   private buildHandshakeCallbacks(errorCallbacks : ErrorCallbacks) : HandshakeCallbacks {
@@ -289,7 +290,7 @@ export default class ConnectionManager extends EventsDispatcher {
 
   private buildErrorCallbacks() : ErrorCallbacks {
     let withErrorEmitted = (callback)=> {
-      return (result)=> {
+      return (result: Action | HandshakePayload)=> {
         if (result.error) {
           this.emit("error", { type: "WebSocketError", error: result.error });
         }

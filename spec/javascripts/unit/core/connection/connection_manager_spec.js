@@ -453,6 +453,53 @@ describe("ConnectionManager", function() {
         expect(manager.state).toEqual("connecting");
       });
     });
+
+    describe("on error callback", function() {
+      var errorHandler;
+      beforeEach(function() {
+        errorHandler = jasmine.createSpy();
+        manager.bind("error", errorHandler)
+      });
+      it("should emit error and disconnect upon receipt of a refused event", function() {
+        var error = {code: 4000};
+        connection.emit("refused", {error: error});
+        expect(manager.state).toEqual("disconnected");
+        expect(errorHandler).toHaveBeenCalledWith({
+          type: 'WebSocketError',
+          error:  error
+        });
+      });
+      it("should emit error and reconnect upon receipt of a tls_only event", function() {
+        var error = {code: 4000};
+        connection.emit("tls_only", {error: error});
+        jasmine.Clock.tick(1);
+        expect(manager.state).toEqual("connecting");
+        expect(errorHandler).toHaveBeenCalledWith({
+          type: 'WebSocketError',
+          error:  error
+        });
+      });
+      it("should emit error and reconnect with backoff upon receipt of a backoff event", function() {
+        var error = {code: 4100};
+        connection.emit("backoff", {error: error});
+        jasmine.Clock.tick(1000);
+        expect(manager.state).toEqual("connecting");
+        expect(errorHandler).toHaveBeenCalledWith({
+          type: 'WebSocketError',
+          error:  error
+        });
+      });
+      it("should emit error and reconnect upon receipt of a retry event", function() {
+        var error = {code: 4200};
+        connection.emit("retry", {error: error});
+        jasmine.Clock.tick(1);
+        expect(manager.state).toEqual("connecting");
+        expect(errorHandler).toHaveBeenCalledWith({
+          type: 'WebSocketError',
+          error:  error
+        });
+      });
+    });
   });
 
   describe("after establishing a connection which handles activity checks by iself", function() {

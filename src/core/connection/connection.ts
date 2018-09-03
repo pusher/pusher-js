@@ -151,7 +151,7 @@ export default class Connection extends EventsDispatcher implements Socket {
        this.emit('error', error);
      }
      if (action) {
-       this.emit(action);
+       this.emit(action, {action: action, error: error});
      }
    }
 }
