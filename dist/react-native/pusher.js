@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v4.3.0
+ * Pusher JavaScript Library v4.3.1
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -831,7 +831,7 @@ module.exports =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "4.3.0",
+	    VERSION: "4.3.1",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
@@ -2528,7 +2528,7 @@ module.exports =
 	            this.emit('error', error);
 	        }
 	        if (action) {
-	            this.emit(action);
+	            this.emit(action, { action: action, error: error });
 	        }
 	    };
 	    return Connection;
@@ -3076,8 +3076,8 @@ module.exports =
 	        this.connection = null;
 	        this.usingTLS = !!options.useTLS;
 	        this.timeline = this.options.timeline;
-	        this.connectionCallbacks = this.buildConnectionCallbacks();
 	        this.errorCallbacks = this.buildErrorCallbacks();
+	        this.connectionCallbacks = this.buildConnectionCallbacks(this.errorCallbacks);
 	        this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 	        var Network = runtime_1["default"].getNetwork();
 	        Network.bind("online", function () {
@@ -3237,9 +3237,9 @@ module.exports =
 	        }
 	    };
 	    ;
-	    ConnectionManager.prototype.buildConnectionCallbacks = function () {
+	    ConnectionManager.prototype.buildConnectionCallbacks = function (errorCallbacks) {
 	        var _this = this;
-	        return {
+	        return Collections.extend({}, errorCallbacks, {
 	            message: function (message) {
 	                _this.resetActivityCheck();
 	                _this.emit('message', message);
@@ -3259,7 +3259,7 @@ module.exports =
 	                    _this.retryIn(1000);
 	                }
 	            }
-	        };
+	        });
 	    };
 	    ;
 	    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
