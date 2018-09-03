@@ -1,6 +1,10 @@
 # Changelog
 
-## 4.3.0 (2018-08-13) 
+## 4.3.1 (2018-09-03)
+
+[FIXED] Honour protocol error codes received after connection succeeds
+
+## 4.3.0 (2018-08-13)
 
 [NEW] This release adds support for end to end encrypted channels, a new feature for Channels. Read more [in our docs](https://pusher.com/docs/client_api_guide/client_encrypted_channels).
 
