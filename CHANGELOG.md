@@ -1,7 +1,8 @@
 # Changelog
+
 ## 4.3.2 (2018-11-05)
 
-[UPDATED] Fix Netinfo iOS to alway detect the connection when change.
+[UPDATED] Fix Netinfo iOS listener.
 
 ## 4.3.1 (2018-09-03)
 
@@ -395,13 +396,13 @@ No changes since 2.2.0-rc3, just changed the version number.
 
 ## 1.12.0 (2012-04-14)
 
-[NEW] Use `channel.members.me` to get the id and info for the local presence user.  See the docs for more information: http://pusher.com/docs
+[NEW] Use `channel.members.me` to get the id and info for the local presence user. See the docs for more information: http://pusher.com/docs
 
-[NEW] Send extra headers and query parameters with the private/presence channel authentication requests sent to your server.  This is useful for, amongst other things, frameworks that require cross-site request forgery validation.  See the docs for more information: http://pusher.com/docs
+[NEW] Send extra headers and query parameters with the private/presence channel authentication requests sent to your server. This is useful for, amongst other things, frameworks that require cross-site request forgery validation. See the docs for more information: http://pusher.com/docs
 
 [FIXED] `channel.subscribed` not set to `false` when `disconnect` event occurs on the connection.
 
-[UPGRADE] The linked version of web-socket-js. This includes a switch to the WebSocket version defined in RFC 6455.  For the full list of changes in web-socket-js, see <https://github.com/gimite/web-socket-js/compare/bb5797cad5244dc86410e35726ef886bbc49afe9...2ee87e910e92f2366d562efebbbec96349924df3>.
+[UPGRADE] The linked version of web-socket-js. This includes a switch to the WebSocket version defined in RFC 6455. For the full list of changes in web-socket-js, see <https://github.com/gimite/web-socket-js/compare/bb5797cad5244dc86410e35726ef886bbc49afe9...2ee87e910e92f2366d562efebbbec96349924df3>.
 
 [REMOVED] `channel.members.add()`, `channel.members.remove()` and `channel.members.clear()`.
 
@@ -441,7 +442,7 @@ No changes since 2.2.0-rc3, just changed the version number.
 
 [NEW] Changed `channel.trigger()` to return a boolean indicating whether the message was actually sent.
 
-[NEW] Private and public channels now emit `pusher:subscription_succeeded` events.  This is consistent with presence channels.
+[NEW] Private and public channels now emit `pusher:subscription_succeeded` events. This is consistent with presence channels.
 
 [CHANGED] Renamed the `subscription_error` event to `pusher:subscription_error`.
 
@@ -473,7 +474,7 @@ No changes since 2.2.0-rc3, just changed the version number.
 
 [NEW] Cleverer reconnection behaviour.
 
-If Connection is connected and the window.ononffline event is fired, this indicates that the computer has lost its connection to the local router.  In response, the Connection immediately closes the socket.
+If Connection is connected and the window.ononffline event is fired, this indicates that the computer has lost its connection to the local router. In response, the Connection immediately closes the socket.
 
 If Connection is disconnected and waiting to reattempt a connection, and the window.ononline event is fired, the Connection tries to connect immediately, rather than waiting for the current waiting period to elapse.
 
@@ -481,7 +482,7 @@ If the window is about to attempt a connection and the window.navigator.onLine v
 
 Note: window.ononline, window.onoffline and window.navigator.onLine are only supported by some browsers.
 
-[NEW] If channel authentication AJAX request returns a status code that is not 200, a `subscription_error` event is triggered.  The `subscription_error` can be bound to so that the library user can respond to the failure.
+[NEW] If channel authentication AJAX request returns a status code that is not 200, a `subscription_error` event is triggered. The `subscription_error` can be bound to so that the library user can respond to the failure.
 
 [FIX] Works with IE7 again, after being broken in 1.9.0.
 
@@ -519,7 +520,7 @@ Note: window.ononline, window.onoffline and window.navigator.onLine are only sup
 
 ## 1.8.3 (2011-04-19)
 
-[FIX] Delay Pusher initialization until document.body is defined. This fixes an issue in Firefox < 4 & IE which occasionally caused a "document.body is null"  error when loading the flash fallback.
+[FIX] Delay Pusher initialization until document.body is defined. This fixes an issue in Firefox < 4 & IE which occasionally caused a "document.body is null" error when loading the flash fallback.
 
 [UPGRADE] Upgraded linked version of web-socket-js. Amongst other things this removes the dependency on FABridge and reduces the minified size of fallback dependencies by 13KB.
 For the full list of changes in web-socket-js see <https://github.com/gimite/web-socket-js/compare/6640d9d806972ea1720a273d09e8919464bcd131...bb5797cad5244dc86410e35726ef886bbc49afe9>
@@ -645,17 +646,17 @@ Add some full-stack integration tests that interact with the production Pusher e
 
 ## 1.4.3
 
-Trigger pusher:connection\_failed if no websocket is defined, allowing the event to work on iphones etc.
+Trigger pusher:connection_failed if no websocket is defined, allowing the event to work on iphones etc.
 
 ## 1.4.2
 
- * Removed switch\_to\_secure and switch\_to\_unsecure in favour of automatic failover to ssl
- * Generate internal events pusher:connection\_disconnected and pusher:connection\_failed
- * Responds to pusher:connection\_established preparing for deprecation of connection\_established
+- Removed switch_to_secure and switch_to_unsecure in favour of automatic failover to ssl
+- Generate internal events pusher:connection_disconnected and pusher:connection_failed
+- Responds to pusher:connection_established preparing for deprecation of connection_established
 
 ## 1.4.1
 
-Added switch\_to\_secure() and switch\_to\_unsecure() to enable ssl testing
+Added switch_to_secure() and switch_to_unsecure() to enable ssl testing
 
 ## 1.4
 
