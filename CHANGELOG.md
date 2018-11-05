@@ -1,4 +1,7 @@
 # Changelog
+## 4.3.2 (2018-11-05)
+
+[UPDATED] Fix Netinfo iOS to alway detect the connection when change.
 
 ## 4.3.1 (2018-09-03)
 

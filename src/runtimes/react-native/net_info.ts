@@ -1,11 +1,6 @@
-import {NetInfo as NativeNetInfo} from 'react-native';
-import EventsDispatcher from 'core/events/dispatcher';
-import Util from 'core/util';
-import Reachability from 'core/reachability';
-
-function hasOnlineConnectionState(connectionState) : boolean{
-  return connectionState.type.toLowerCase() !== "none";
-}
+import { NetInfo as NativeNetInfo } from "react-native";
+import EventsDispatcher from "core/events/dispatcher";
+import Reachability from "core/reachability";
 
 export class NetInfo extends EventsDispatcher implements Reachability {
   online: boolean;
@@ -14,27 +9,36 @@ export class NetInfo extends EventsDispatcher implements Reachability {
     super();
     this.online = true;
 
-    NativeNetInfo.getConnectionInfo().then(connectionState => {
-      this.online = hasOnlineConnectionState(connectionState);
+    NativeNetInfo.isConnected.fetch().done(isConnected => {
+      this.online = isConnected;
     });
+    NativeNetInfo.isConnected.addEventListener(
+      "connectionChange",
+      this.handleConnectionChange
+    );
+  }
 
-    NativeNetInfo.addEventListener('connectionChange', (connectionState)=>{
-      var isNowOnline = hasOnlineConnectionState(connectionState);
+  handleConnectionChange = isConnected => {
+    var isNowOnline = isConnected;
 
-      // React Native counts the switch from Wi-Fi to Cellular
-      // as a state change. Return if current and previous states
-      // are both online/offline
-      if (this.online === isNowOnline) return;
+    // React Native counts the switch from Wi-Fi to Cellular
+    // as a state change. Return if current and previous states
+    // are both online/offline
+    if (this.online !== isNowOnline) {
       this.online = isNowOnline;
-      if (this.online){
+      if (this.online) {
         this.emit("online");
       } else {
         this.emit("offline");
       }
-    });
-  }
+    }
+    NativeNetInfo.isConnected.removeEventListener(
+      "connectionChange",
+      this.handleConnectionChange
+    );
+  };
 
-  isOnline() : boolean {
+  isOnline(): boolean {
     return this.online;
   }
 }

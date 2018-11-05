@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v4.3.1
+ * Pusher JavaScript Library v4.3.2
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -831,7 +831,7 @@ module.exports =
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "4.3.1",
+	    VERSION: "4.3.2",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
@@ -1707,30 +1707,29 @@ module.exports =
 	};
 	var react_native_1 = __webpack_require__(27);
 	var dispatcher_1 = __webpack_require__(14);
-	function hasOnlineConnectionState(connectionState) {
-	    return connectionState.type.toLowerCase() !== "none";
-	}
 	var NetInfo = (function (_super) {
 	    __extends(NetInfo, _super);
 	    function NetInfo() {
 	        var _this = this;
 	        _super.call(this);
+	        this.handleConnectionChange = function (isConnected) {
+	            var isNowOnline = isConnected;
+	            if (_this.online !== isNowOnline) {
+	                _this.online = isNowOnline;
+	                if (_this.online) {
+	                    _this.emit("online");
+	                }
+	                else {
+	                    _this.emit("offline");
+	                }
+	            }
+	            react_native_1.NetInfo.isConnected.removeEventListener("connectionChange", _this.handleConnectionChange);
+	        };
 	        this.online = true;
-	        react_native_1.NetInfo.getConnectionInfo().then(function (connectionState) {
-	            _this.online = hasOnlineConnectionState(connectionState);
+	        react_native_1.NetInfo.isConnected.fetch().done(function (isConnected) {
+	            _this.online = isConnected;
 	        });
-	        react_native_1.NetInfo.addEventListener('connectionChange', function (connectionState) {
-	            var isNowOnline = hasOnlineConnectionState(connectionState);
-	            if (_this.online === isNowOnline)
-	                return;
-	            _this.online = isNowOnline;
-	            if (_this.online) {
-	                _this.emit("online");
-	            }
-	            else {
-	                _this.emit("offline");
-	            }
-	        });
+	        react_native_1.NetInfo.isConnected.addEventListener("connectionChange", this.handleConnectionChange);
 	    }
 	    NetInfo.prototype.isOnline = function () {
 	        return this.online;
