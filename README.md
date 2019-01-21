@@ -96,7 +96,7 @@ Notes:
 * This build uses React Native's NetInfo API to detect changes on connectivity state. It will use this to automatically reconnect.
 
 ### Web Workers
-
+(`pusher-js`'s Web Workers implementation is currently not compatible with Internet Explorer)
 You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the CDN:
 
 ```javascript
