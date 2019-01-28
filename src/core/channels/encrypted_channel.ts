@@ -47,16 +47,15 @@ export default class EncryptedChannel extends PrivateChannel {
     );
   }
 
-  /** Handles an event. For internal use only.
+  /** Handles an message. For internal use only.
    *
-   * @param {String} event
-   * @param {*} data
+   * @param {Message} message
    */
-  handleEvent(message: Message) {
+  handleMessage(message: Message) {
     var event = message.event;
     var data = message.data;
     if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
-      super.handleEvent(message);
+      super.handleMessage(message);
       return
     }
     this.handleEncryptedEvent(event, data)

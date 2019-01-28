@@ -56,12 +56,11 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionPending = false;
   }
 
-  /** Handles an event. For internal use only.
+  /** Handles a message. For internal use only.
    *
-   * @param {String} event
-   * @param {*} data
+   * @param {Message} message
    */
-  handleEvent(message: Message) {
+  handleMessage(message: Message) {
     var event = message.event;
     var data = message.data;
     if (event.indexOf("pusher_internal:") === 0) {
@@ -90,7 +89,7 @@ export default class Channel extends EventsDispatcher {
           event: 'pusher:subscription_error',
           data: data,
         }
-        this.handleEvent(msg);
+        this.handleMessage(msg);
       } else {
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,

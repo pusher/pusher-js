@@ -60,7 +60,9 @@ describe("Channel", function() {
 
   describe("#disconnect", function() {
     it("should set subscribed to false", function() {
-      channel.handleEvent("pusher_internal:subscription_succeeded");
+      channel.handleMessage({
+        event: "pusher_internal:subscription_succeeded"
+      });
       channel.disconnect();
       expect(channel.subscribed).toEqual(false);
     });
@@ -74,13 +76,15 @@ describe("Channel", function() {
     });
   });
 
-  describe("#handleEvent", function() {
+  describe("#handleMessage", function() {
     it("should not emit pusher_internal:* events", function() {
       var callback = jasmine.createSpy("callback");
       channel.bind("pusher_internal:test", callback);
       channel.bind_global(callback);
 
-      channel.handleEvent("pusher_internal:test");
+      channel.handleMessage({
+        event: "pusher_internal:test"
+      });
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -90,19 +94,28 @@ describe("Channel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
 
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(callback).toHaveBeenCalledWith("123");
       });
 
       it("should set #subscribed to true", function() {
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(channel.subscribed).toEqual(true);
       });
 
       it("should set #subscriptionPending to false", function() {
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(channel.subscriptionPending).toEqual(false);
       });
@@ -114,21 +127,30 @@ describe("Channel", function() {
         channel.bind("pusher:subscription_succeeded", callback);
 
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(callback).not.toHaveBeenCalled();
       });
 
       it("should set #subscribed to true", function() {
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(channel.subscribed).toEqual(true);
       });
 
       it("should set #subscriptionPending to false", function() {
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(channel.subscriptionPending).toEqual(false);
       });
@@ -137,7 +159,10 @@ describe("Channel", function() {
         expect(pusher.unsubscribe).not.toHaveBeenCalled();
 
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleMessage({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
 
         expect(pusher.unsubscribe).toHaveBeenCalledWith(channel.name);
       });
@@ -148,7 +173,10 @@ describe("Channel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("something", callback);
 
-        channel.handleEvent("something", 9);
+        channel.handleMessage({
+          event: "something",
+          data: 9
+        });
 
         expect(callback).toHaveBeenCalledWith(9);
       });
@@ -157,7 +185,10 @@ describe("Channel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("toString", callback);
 
-        channel.handleEvent("toString", "works");
+        channel.handleMessage({
+          event: "toString",
+          data: "works"
+        });
 
         expect(callback).toHaveBeenCalledWith("works");
       });

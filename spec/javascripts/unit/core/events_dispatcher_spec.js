@@ -306,6 +306,14 @@ describe("EventsDispatcher", function() {
       expect(boundContext).toEqual(context);
       expect(unboundContext).toEqual(global);
     });
+    it("should call listener with provided metadata", function() {
+      var callback = jasmine.createSpy("callback");
+      dispatcher.bind("some-event", callback);
+
+      dispatcher.emit("some-event", {data: 1}, {user_id: "123-abc"})
+
+      expect(callback).toHaveBeenCalledWith({data: 1}, {user_id: "123-abc"})
+    })
   });
 
   describe("#unbind_global", function() {

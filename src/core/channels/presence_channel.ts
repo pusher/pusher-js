@@ -42,12 +42,26 @@ export default class PresenceChannel extends PrivateChannel {
     });
   }
 
-  /** Handles presence and subscription events. For internal use only.
+  /** Handles presence and subscription messages. For internal use only.
    *
-   * @param {String} event
-   * @param {*} data
+   * @param {Message} message
    */
-  handleEvent(message: Message) {
+  handleMessage(message: Message) {
+    var event = message.event;
+    if (event.indexOf("pusher_internal:") === 0) {
+      this.handleInternalMessage(message)
+    } else {
+      var data = message.data;
+      if (message.user_id) {
+        var metadata = {};
+        metadata['user_id'] = message.user_id;
+        this.emit(event, data, metadata);
+      } else {
+        this.emit(event, data);
+      }
+    }
+  }
+  handleInternalMessage(message: Message) {
     var event = message.event;
     var data = message.data;
     switch (event) {
@@ -70,17 +84,12 @@ export default class PresenceChannel extends PrivateChannel {
         if (removedMember) {
           this.emit('pusher:member_removed', removedMember);
         }
-        break;
+        break
       default:
-        if (message.user_id) {
-          var metadata = {};
-          metadata['user_id'] = message.user_id;
-          this.emit(event, data, metadata);
-        } else {
-          this.emit(event, data);
-        }
+        super.handleMessage(message)
     }
   }
+
 
   /** Resets the channel state, including members map. For internal use only. */
   disconnect() {

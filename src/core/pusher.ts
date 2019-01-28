@@ -129,16 +129,13 @@ export default class Pusher {
       }
     });
     this.connection.bind('message', (message)=> {
-      console.log('in pusher class, received message', message)
       var internal = (message.event.indexOf('pusher_internal:') === 0);
       if (message.channel) {
         var channel = this.channel(message.channel);
         if (channel) {
-          console.log('calling handleEvent on channel', channel, 'with message', message)
-          channel.handleEvent(message);
+          channel.handleMessage(message);
         }
       }
-      // TODO should we update the global emitter? It is deprecated
       // Emit globally [deprecated]
       if (!internal) {
         this.global_emitter.emit(message.event, message.data);
