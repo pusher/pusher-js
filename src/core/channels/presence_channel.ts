@@ -3,6 +3,7 @@ import Logger from '../logger';
 import Members from './members';
 import Pusher from '../pusher';
 import UrlStore from 'core/utils/url_store';
+import Message from '../connection/protocol/message';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -46,7 +47,9 @@ export default class PresenceChannel extends PrivateChannel {
    * @param {String} event
    * @param {*} data
    */
-  handleEvent(event : string, data : any) {
+  handleEvent(message: Message) {
+    var event = message.event;
+    var data = message.data;
     switch (event) {
       case "pusher_internal:subscription_succeeded":
         this.subscriptionPending = false;
@@ -69,7 +72,13 @@ export default class PresenceChannel extends PrivateChannel {
         }
         break;
       default:
-        PrivateChannel.prototype.handleEvent.call(this, event, data);
+        if (message.user_id) {
+          var metadata = {};
+          metadata['user_id'] = message.user_id;
+          this.emit(event, data, metadata);
+        } else {
+          this.emit(event, data);
+        }
     }
   }
 

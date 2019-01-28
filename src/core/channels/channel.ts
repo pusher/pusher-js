@@ -2,6 +2,7 @@ import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Errors from '../errors';
 import Logger from '../logger';
 import Pusher from '../pusher';
+import Message from '../connection/protocol/message';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -60,7 +61,9 @@ export default class Channel extends EventsDispatcher {
    * @param {String} event
    * @param {*} data
    */
-  handleEvent(event : string, data : any) {
+  handleEvent(message: Message) {
+    var event = message.event;
+    var data = message.data;
     if (event.indexOf("pusher_internal:") === 0) {
       if (event === "pusher_internal:subscription_succeeded") {
         this.subscriptionPending = false;
@@ -83,7 +86,11 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionCancelled = false;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {
       if (error) {
-        this.handleEvent('pusher:subscription_error', data);
+        var msg: Message = {
+          event: 'pusher:subscription_error',
+          data: data,
+        }
+        this.handleEvent(msg);
       } else {
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,

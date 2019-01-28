@@ -7,6 +7,7 @@ import {
   decodeBase64
 } from "tweetnacl-util";
 import Dispatcher from "../events/dispatcher";
+import Message from '../connection/protocol/message';
 
 /** Extends private channels to provide encrypted channel interface.
  *
@@ -51,9 +52,11 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param {String} event
    * @param {*} data
    */
-  handleEvent(event: string, data: any) {
+  handleEvent(message: Message) {
+    var event = message.event;
+    var data = message.data;
     if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
-      super.handleEvent(event, data);
+      super.handleEvent(message);
       return
     }
     this.handleEncryptedEvent(event, data)

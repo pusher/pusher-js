@@ -52,7 +52,7 @@ export default class Dispatcher {
     return this;
   }
 
-  emit(eventName : string, data?: any) : Dispatcher {
+  emit(eventName : string, data?: any, metadata?: any) : Dispatcher {
     var i;
 
     for (i = 0; i < this.global_callbacks.length; i++) {
@@ -62,7 +62,11 @@ export default class Dispatcher {
     var callbacks = this.callbacks.get(eventName);
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i].fn.call(callbacks[i].context || global, data);
+        if(metadata) {
+          callbacks[i].fn.call(callbacks[i].context || global, data, metadata);
+        } else {
+          callbacks[i].fn.call(callbacks[i].context || global, data);
+        }
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);

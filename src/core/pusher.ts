@@ -128,17 +128,20 @@ export default class Pusher {
         this.timelineSender.send(this.connection.isUsingTLS());
       }
     });
-    this.connection.bind('message', (params)=> {
-      var internal = (params.event.indexOf('pusher_internal:') === 0);
-      if (params.channel) {
-        var channel = this.channel(params.channel);
+    this.connection.bind('message', (message)=> {
+      console.log('in pusher class, received message', message)
+      var internal = (message.event.indexOf('pusher_internal:') === 0);
+      if (message.channel) {
+        var channel = this.channel(message.channel);
         if (channel) {
-          channel.handleEvent(params.event, params.data);
+          console.log('calling handleEvent on channel', channel, 'with message', message)
+          channel.handleEvent(message);
         }
       }
+      // TODO should we update the global emitter? It is deprecated
       // Emit globally [deprecated]
       if (!internal) {
-        this.global_emitter.emit(params.event, params.data);
+        this.global_emitter.emit(message.event, message.data);
       }
     });
     this.connection.bind('connecting', ()=> {
