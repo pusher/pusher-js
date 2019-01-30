@@ -417,6 +417,14 @@ channel.bind('my-event', function () {
 }, { name: 'Pusher' });
 ```
 
+For client-events on presence channels, bound callbacks will be called with an additional argument, an object containing the `user_id` of the user who triggered the event
+
+```
+presenceChannel.bind('client-message', function (data, metadata) {
+  console.log('received message', data.message, 'from', metadata.user_id);
+});
+```
+
 Unsubscribe behaviour varies depending on which parameters you provide it with. For example:
 
 ```js
