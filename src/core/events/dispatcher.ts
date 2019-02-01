@@ -60,9 +60,13 @@ export default class Dispatcher {
     }
 
     var callbacks = this.callbacks.get(eventName);
+    var args = [data];
+    if (metadata) {
+      args.push(metadata)
+    }
     if (callbacks && callbacks.length > 0) {
       for (i = 0; i < callbacks.length; i++) {
-        callbacks[i].fn.call(callbacks[i].context || global, data, metadata);
+        callbacks[i].fn.apply(callbacks[i].context || global, args);
       }
     } else if (this.failThrough) {
       this.failThrough(eventName, data);
