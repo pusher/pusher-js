@@ -52,12 +52,20 @@ export default class PresenceChannel extends PrivateChannel {
       this.handleInternalMessage(message)
     } else {
       var data = message.data;
-      var metadata = {};
-      if (message.user_id) {
-        metadata['user_id'] = message.user_id;
-      }
 
-      this.emit(event, data, metadata);
+      if (event.indexOf("client-") === 0) {
+
+        // client events on presence channels include a user_id field in the top
+        // level of the message object. This user_id parameter should be
+        // included in a metadata object included as the second argument to
+        // bound callbacks
+        var metadata = {};
+        metadata['user_id'] = message.user_id;
+        this.emit(event, data, metadata);
+
+      } else {
+        this.emit(event, data);
+      }
     }
   }
   handleInternalMessage(message: Message) {
@@ -65,15 +73,14 @@ export default class PresenceChannel extends PrivateChannel {
     var data = message.data;
     switch (event) {
       case "pusher_internal:subscription_succeeded":
-        this.subscriptionPending = false;
-        this.subscribed = true;
-        if (this.subscriptionCancelled) {
-          this.pusher.unsubscribe(this.name);
-        } else {
+        if (!this.subscriptionCancelled) {
           this.members.onSubscription(data);
-          this.emit("pusher:subscription_succeeded", this.members);
         }
-        break;
+        this.handleSubscriptionSucceededMessage({
+          event: event,
+          data: this.members,
+        });
+        break
       case "pusher_internal:member_added":
         var addedMember = this.members.addMember(data);
         this.emit('pusher:member_added', addedMember);
@@ -83,9 +90,7 @@ export default class PresenceChannel extends PrivateChannel {
         if (removedMember) {
           this.emit('pusher:member_removed', removedMember);
         }
-        break
-      default:
-        super.handleMessage(message)
+        break;
     }
   }
 

@@ -63,18 +63,20 @@ export default class Channel extends EventsDispatcher {
   handleMessage(message: Message) {
     var event = message.event;
     var data = message.data;
-    if (event.indexOf("pusher_internal:") === 0) {
-      if (event === "pusher_internal:subscription_succeeded") {
-        this.subscriptionPending = false;
-        this.subscribed = true;
-        if (this.subscriptionCancelled) {
-          this.pusher.unsubscribe(this.name);
-        } else {
-          this.emit("pusher:subscription_succeeded", data);
-        }
-      }
-    } else {
+    if (event === "pusher_internal:subscription_succeeded") {
+      this.handleSubscriptionSucceededMessage(message);
+    } else if (event.indexOf("pusher_internal:") !== 0) {
       this.emit(event, data);
+    }
+  }
+
+  handleSubscriptionSucceededMessage(message: Message) {
+    this.subscriptionPending = false;
+    this.subscribed = true;
+    if (this.subscriptionCancelled) {
+      this.pusher.unsubscribe(this.name);
+    } else {
+      this.emit("pusher:subscription_succeeded", message.data);
     }
   }
 
