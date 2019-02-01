@@ -52,13 +52,12 @@ export default class PresenceChannel extends PrivateChannel {
       this.handleInternalMessage(message)
     } else {
       var data = message.data;
+      var metadata = {};
       if (message.user_id) {
-        var metadata = {};
         metadata['user_id'] = message.user_id;
-        this.emit(event, data, metadata);
-      } else {
-        this.emit(event, data);
       }
+
+      this.emit(event, data, metadata);
     }
   }
   handleInternalMessage(message: Message) {
