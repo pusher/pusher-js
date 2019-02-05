@@ -128,17 +128,18 @@ export default class Pusher {
         this.timelineSender.send(this.connection.isUsingTLS());
       }
     });
-    this.connection.bind('message', (message)=> {
-      var internal = (message.event.indexOf('pusher_internal:') === 0);
-      if (message.channel) {
-        var channel = this.channel(message.channel);
+    this.connection.bind('message', (event)=> {
+      var eventName = event.event;
+      var internal = (eventName.indexOf('pusher_internal:') === 0);
+      if (event.channel) {
+        var channel = this.channel(event.channel);
         if (channel) {
-          channel.handleMessage(message);
+          channel.handleEvent(event);
         }
       }
       // Emit globally [deprecated]
       if (!internal) {
-        this.global_emitter.emit(message.event, message.data);
+        this.global_emitter.emit(event.event, event.data);
       }
     });
     this.connection.bind('connecting', ()=> {

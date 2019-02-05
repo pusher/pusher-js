@@ -2,7 +2,8 @@ import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Errors from '../errors';
 import Logger from '../logger';
 import Pusher from '../pusher';
-import Message from '../connection/protocol/message';
+import {PusherEvent} from '../connection/protocol/message-types';
+import Metadata from './metadata'
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -56,27 +57,28 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionPending = false;
   }
 
-  /** Handles a message. For internal use only.
+  /** Handles a PusherEvent. For internal use only.
    *
-   * @param {Message} message
+   * @param {PusherEvent} event
    */
-  handleMessage(message: Message) {
-    var event = message.event;
-    var data = message.data;
-    if (event === "pusher_internal:subscription_succeeded") {
-      this.handleSubscriptionSucceededMessage(message);
-    } else if (event.indexOf("pusher_internal:") !== 0) {
-      this.emit(event, data);
+  handleEvent(event: PusherEvent) {
+    var eventName = event.event;
+    var data = event.data;
+    if (eventName === "pusher_internal:subscription_succeeded") {
+      this.handleSubscriptionSucceededEvent(event);
+    } else if (eventName.indexOf("pusher_internal:") !== 0) {
+      var metadata: Metadata = {}
+      this.emit(eventName, data, metadata);
     }
   }
 
-  handleSubscriptionSucceededMessage(message: Message) {
+  handleSubscriptionSucceededEvent(event: PusherEvent) {
     this.subscriptionPending = false;
     this.subscribed = true;
     if (this.subscriptionCancelled) {
       this.pusher.unsubscribe(this.name);
     } else {
-      this.emit("pusher:subscription_succeeded", message.data);
+      this.emit("pusher:subscription_succeeded", event.data);
     }
   }
 
@@ -87,11 +89,7 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionCancelled = false;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {
       if (error) {
-        var msg: Message = {
-          event: 'pusher:subscription_error',
-          data: data,
-        }
-        this.handleMessage(msg);
+        this.emit('pusher:subscription_error', data)
       } else {
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,

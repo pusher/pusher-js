@@ -113,7 +113,7 @@ describe("EncryptedChannel", function() {
 
   describe("#disconnect", function() {
     it("should set subscribed to false", function() {
-      channel.handleMessage({
+      channel.handleEvent({
         event: "pusher_internal:subscription_succeeded"
       });
       channel.disconnect();
@@ -121,13 +121,13 @@ describe("EncryptedChannel", function() {
     });
   });
 
-  describe("#handleMessage", function() {
+  describe("#handleEvent", function() {
     it("should not emit pusher_internal:* events", function() {
       let callback = jasmine.createSpy("callback");
       channel.bind("pusher_internal:test", callback);
       channel.bind_global(callback);
 
-      channel.handleMessage({
+      channel.handleEvent({
         event: "pusher_internal:test"
       });
 
@@ -138,7 +138,7 @@ describe("EncryptedChannel", function() {
       it("should emit pusher:subscription_succeeded", function() {
         let callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -146,7 +146,7 @@ describe("EncryptedChannel", function() {
       });
 
       it("should set #subscribed to true", function() {
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -154,7 +154,7 @@ describe("EncryptedChannel", function() {
       });
 
       it("should set #subscriptionPending to false", function() {
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -167,7 +167,7 @@ describe("EncryptedChannel", function() {
         let callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -176,7 +176,7 @@ describe("EncryptedChannel", function() {
 
       it("should set #subscribed to true", function() {
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -185,7 +185,7 @@ describe("EncryptedChannel", function() {
 
       it("should set #subscriptionPending to false", function() {
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -195,7 +195,7 @@ describe("EncryptedChannel", function() {
       it("should call #pusher.unsubscribe", function() {
         expect(pusher.unsubscribe).not.toHaveBeenCalled();
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -222,7 +222,7 @@ describe("EncryptedChannel", function() {
         };
         let boundCallback = jasmine.createSpy("boundCallback");
         channel.bind("something", boundCallback);
-        channel.handleMessage({
+        channel.handleEvent({
           event: "something",
           data: encryptedPayload
         });
@@ -232,11 +232,11 @@ describe("EncryptedChannel", function() {
         let payload = { test: "payload" };
         let boundCallback = jasmine.createSpy("boundCallback");
         channel.bind("pusher:subscription_error", boundCallback);
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher:subscription_error",
           data: payload
         });
-        expect(boundCallback).toHaveBeenCalledWith(payload);
+        expect(boundCallback).toHaveBeenCalledWith(payload, {});
       });
 
       describe("with rotated shared key", function() {
@@ -264,7 +264,7 @@ describe("EncryptedChannel", function() {
           };
           let boundCallback = jasmine.createSpy("boundCallback");
           channel.bind("something", boundCallback);
-          channel.handleMessage({
+          channel.handleEvent({
             event: "something",
             data: encryptedPayload
           });
@@ -280,7 +280,7 @@ describe("EncryptedChannel", function() {
             ciphertext: tweetNaclUtil.encodeBase64('garbage-ciphertext')
           };
           spyOn(Logger, "warn");
-          channel.handleMessage({
+          channel.handleEvent({
             event: "something",
             data: encryptedPayload
           });
@@ -299,7 +299,7 @@ describe("EncryptedChannel", function() {
             ciphertext: newTestEncrypt(payload)
           };
           spyOn(Logger, "warn");
-          channel.handleMessage({
+          channel.handleEvent({
             event: "something",
             data: encryptedPayload
           });

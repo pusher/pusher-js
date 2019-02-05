@@ -125,13 +125,13 @@ describe("PresenceChannel", function() {
       });
     });
 
-    describe("#handleMessage", function() {
+    describe("#handleEvent", function() {
       it("should not emit pusher_internal:* events", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher_internal:test", callback);
         channel.bind_global(callback);
 
-        channel.handleMessage({event: "pusher_internal:test"});
+        channel.handleEvent({event: "pusher_internal:test"});
 
         expect(callback).not.toHaveBeenCalled();
       });
@@ -141,7 +141,7 @@ describe("PresenceChannel", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:subscription_succeeded", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: {
               presence: {
@@ -155,7 +155,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should set #subscribed to true", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: {
               presence: {
@@ -169,7 +169,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should set #subscriptionPending to false", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: {
               presence: {
@@ -189,7 +189,7 @@ describe("PresenceChannel", function() {
           channel.bind("pusher:subscription_succeeded", callback);
 
           channel.cancelSubscription();
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: "123"
           });
@@ -199,7 +199,7 @@ describe("PresenceChannel", function() {
 
         it("should set #subscribed to true", function() {
           channel.cancelSubscription();
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: "123"
           });
@@ -209,7 +209,7 @@ describe("PresenceChannel", function() {
 
         it("should set #subscriptionPending to false", function() {
           channel.cancelSubscription();
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: "123"
           });
@@ -221,7 +221,7 @@ describe("PresenceChannel", function() {
           expect(pusher.unsubscribe).not.toHaveBeenCalled();
 
           channel.cancelSubscription();
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:subscription_succeeded",
             data: "123"
           });
@@ -235,23 +235,22 @@ describe("PresenceChannel", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("something", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "something",
             data: 9
           });
 
-          expect(callback).toHaveBeenCalledWith(9);
+          expect(callback).toHaveBeenCalledWith(9, {});
         });
-        it("should include user_id in metadata", function() {
+        it("should emit metadata with user_id", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("client-something", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "client-something",
             data: 9,
-            user_id: "abc-def",
+            user_id: "abc-def"
           });
-
           expect(callback).toHaveBeenCalledWith(9, {user_id: "abc-def"});
         });
       });
@@ -263,7 +262,7 @@ describe("PresenceChannel", function() {
       beforeEach(function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: {
             presence: {
@@ -303,7 +302,7 @@ describe("PresenceChannel", function() {
 
       describe("on pusher_internal:member_added", function() {
         it("should add a new member", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_added",
             data: {
               user_id: "C",
@@ -315,7 +314,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should increment member count after adding a new member", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_added",
             data: {
               user_id: "C",
@@ -330,7 +329,7 @@ describe("PresenceChannel", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:member_added", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_added",
             data: {
               user_id: "C",
@@ -342,7 +341,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should update an existing member", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_added",
             data: {
               user_id: "B",
@@ -354,7 +353,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should not increment member count after updating a member", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_added",
             data: {
               user_id: "B",
@@ -369,7 +368,7 @@ describe("PresenceChannel", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:member_added", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_added",
             data: {
               user_id: "B",
@@ -383,7 +382,7 @@ describe("PresenceChannel", function() {
 
       describe("on pusher_internal:member_removed", function() {
         it("should remove an existing member", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_removed",
             data: {
               user_id: "B"
@@ -397,7 +396,7 @@ describe("PresenceChannel", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:member_removed", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_removed",
             data: {
               user_id: "B"
@@ -408,7 +407,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should decrement member count after removing a member", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_removed",
             data: {
               user_id: "B"
@@ -422,7 +421,7 @@ describe("PresenceChannel", function() {
           var callback = jasmine.createSpy("callback");
           channel.bind("pusher:member_removed", callback);
 
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_removed",
             data: {
               user_id: "C"
@@ -433,7 +432,7 @@ describe("PresenceChannel", function() {
         });
 
         it("should not decrement member count if member was not removed", function() {
-          channel.handleMessage({
+          channel.handleEvent({
             event: "pusher_internal:member_removed",
             data: {
               user_id: "C"

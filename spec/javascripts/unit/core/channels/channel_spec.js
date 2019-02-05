@@ -60,7 +60,7 @@ describe("Channel", function() {
 
   describe("#disconnect", function() {
     it("should set subscribed to false", function() {
-      channel.handleMessage({
+      channel.handleEvent({
         event: "pusher_internal:subscription_succeeded"
       });
       channel.disconnect();
@@ -76,13 +76,13 @@ describe("Channel", function() {
     });
   });
 
-  describe("#handleMessage", function() {
+  describe("#handleEvent", function() {
     it("should not emit pusher_internal:* events", function() {
       var callback = jasmine.createSpy("callback");
       channel.bind("pusher_internal:test", callback);
       channel.bind_global(callback);
 
-      channel.handleMessage({
+      channel.handleEvent({
         event: "pusher_internal:test"
       });
 
@@ -94,7 +94,7 @@ describe("Channel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
 
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -103,7 +103,7 @@ describe("Channel", function() {
       });
 
       it("should set #subscribed to true", function() {
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -112,7 +112,7 @@ describe("Channel", function() {
       });
 
       it("should set #subscriptionPending to false", function() {
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -127,7 +127,7 @@ describe("Channel", function() {
         channel.bind("pusher:subscription_succeeded", callback);
 
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -137,7 +137,7 @@ describe("Channel", function() {
 
       it("should set #subscribed to true", function() {
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -147,7 +147,7 @@ describe("Channel", function() {
 
       it("should set #subscriptionPending to false", function() {
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -159,7 +159,7 @@ describe("Channel", function() {
         expect(pusher.unsubscribe).not.toHaveBeenCalled();
 
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -173,24 +173,24 @@ describe("Channel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("something", callback);
 
-        channel.handleMessage({
+        channel.handleEvent({
           event: "something",
           data: 9
         });
 
-        expect(callback).toHaveBeenCalledWith(9);
+        expect(callback).toHaveBeenCalledWith(9, {});
       });
 
       it("should emit the event even if it's named like JS built-in", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("toString", callback);
 
-        channel.handleMessage({
+        channel.handleEvent({
           event: "toString",
           data: "works"
         });
 
-        expect(callback).toHaveBeenCalledWith("works");
+        expect(callback).toHaveBeenCalledWith("works", {});
       });
     });
   });
@@ -225,7 +225,7 @@ describe("Channel", function() {
 
       expect(pusher.send_event).toHaveBeenCalledWith(
         "pusher:subscribe",
-        { auth: "one", channel_data: "two", channel: "test" }
+        { auth: "one", channel_data: "two", channel: "test" },
       );
     });
 

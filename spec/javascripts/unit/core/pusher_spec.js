@@ -376,7 +376,7 @@ describe("Pusher", function() {
         event: "event",
         data: { key: "value" }
       });
-      expect(channel.handleMessage).toHaveBeenCalledWith({
+      expect(channel.handleEvent).toHaveBeenCalledWith({
         channel: "chan",
         event: "event",
         data: { key: "value" },

@@ -3,7 +3,8 @@ import Logger from '../logger';
 import Members from './members';
 import Pusher from '../pusher';
 import UrlStore from 'core/utils/url_store';
-import Message from '../connection/protocol/message';
+import {PusherEvent} from '../connection/protocol/message-types';
+import Metadata from './metadata'
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -42,42 +43,33 @@ export default class PresenceChannel extends PrivateChannel {
     });
   }
 
-  /** Handles presence and subscription messages. For internal use only.
+  /** Handles presence and subscription events. For internal use only.
    *
-   * @param {Message} message
+   * @param {PusherEvent} event
    */
-  handleMessage(message: Message) {
-    var event = message.event;
-    if (event.indexOf("pusher_internal:") === 0) {
-      this.handleInternalMessage(message)
+  handleEvent(event: PusherEvent) {
+    var eventName = event.event;
+    if (eventName.indexOf("pusher_internal:") === 0) {
+      this.handleInternalEvent(event)
     } else {
-      var data = message.data;
-
-      if (event.indexOf("client-") === 0) {
-
-        // client events on presence channels include a user_id field in the top
-        // level of the message object. This user_id parameter should be
-        // included in a metadata object included as the second argument to
-        // bound callbacks
-        var metadata = {};
-        metadata['user_id'] = message.user_id;
-        this.emit(event, data, metadata);
-
-      } else {
-        this.emit(event, data);
+      var data = event.data;
+      var metadata: Metadata = {};
+      if (event.user_id) {
+        metadata.user_id = event.user_id
       }
+      this.emit(eventName, data, metadata);
     }
   }
-  handleInternalMessage(message: Message) {
-    var event = message.event;
-    var data = message.data;
-    switch (event) {
+  handleInternalEvent(event: PusherEvent) {
+    var eventName = event.event;
+    var data = event.data;
+    switch (eventName) {
       case "pusher_internal:subscription_succeeded":
         if (!this.subscriptionCancelled) {
           this.members.onSubscription(data);
         }
-        this.handleSubscriptionSucceededMessage({
-          event: event,
+        this.handleSubscriptionSucceededEvent({
+          event: eventName,
           data: this.members,
         });
         break

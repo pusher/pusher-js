@@ -101,7 +101,7 @@ describe("PrivateChannel", function() {
 
   describe("#disconnect", function() {
     it("should set subscribed to false", function() {
-      channel.handleMessage({
+      channel.handleEvent({
         event: "pusher_internal:subscription_succeeded"
       });
       channel.disconnect();
@@ -109,13 +109,13 @@ describe("PrivateChannel", function() {
     });
   });
 
-  describe("#handleMessage", function() {
+  describe("#handleEvent", function() {
     it("should not emit pusher_internal:* events", function() {
       var callback = jasmine.createSpy("callback");
       channel.bind("pusher_internal:test", callback);
       channel.bind_global(callback);
 
-      channel.handleMessage({
+      channel.handleEvent({
         event: "pusher_internal:test"
       });
 
@@ -127,17 +127,16 @@ describe("PrivateChannel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
 
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
-          data: {
-            "123"
-          });
+          data: "123"
+        });
 
         expect(callback).toHaveBeenCalledWith("123");
       });
 
       it("should set #subscribed to true", function() {
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -146,7 +145,7 @@ describe("PrivateChannel", function() {
       });
 
       it("should set #subscriptionPending to false", function() {
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -161,7 +160,7 @@ describe("PrivateChannel", function() {
         channel.bind("pusher:subscription_succeeded", callback);
 
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -171,7 +170,7 @@ describe("PrivateChannel", function() {
 
       it("should set #subscribed to true", function() {
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -181,7 +180,7 @@ describe("PrivateChannel", function() {
 
       it("should set #subscriptionPending to false", function() {
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -193,7 +192,7 @@ describe("PrivateChannel", function() {
         expect(pusher.unsubscribe).not.toHaveBeenCalled();
 
         channel.cancelSubscription();
-        channel.handleMessage({
+        channel.handleEvent({
           event: "pusher_internal:subscription_succeeded",
           data: "123"
         });
@@ -207,12 +206,12 @@ describe("PrivateChannel", function() {
         var callback = jasmine.createSpy("callback");
         channel.bind("something", callback);
 
-        channel.handleMessage({
+        channel.handleEvent({
           event: "something",
           data: 9
         });
 
-        expect(callback).toHaveBeenCalledWith(9);
+        expect(callback).toHaveBeenCalledWith(9, {});
       });
     });
   });

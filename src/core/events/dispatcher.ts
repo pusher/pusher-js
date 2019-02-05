@@ -1,5 +1,6 @@
 import * as Collections from '../utils/collections';
 import Callback from './callback';
+import Metadata from '../channels/metadata';
 import CallbackRegistry from './callback_registry';
 
 /** Manages callback bindings and event emitting.
@@ -52,20 +53,28 @@ export default class Dispatcher {
     return this;
   }
 
-  emit(eventName : string, data?: any, metadata?: any) : Dispatcher {
-    var i;
-
-    for (i = 0; i < this.global_callbacks.length; i++) {
+  emit(eventName : string, data?: any, metadata?: Metadata) : Dispatcher {
+    for (var i = 0; i < this.global_callbacks.length; i++) {
       this.global_callbacks[i](eventName, data);
     }
 
     var callbacks = this.callbacks.get(eventName);
-    var args = [data];
+    var args = [];
+
     if (metadata) {
-      args.push(metadata)
+
+      // if there's a metadata argument, we need to call the callback with both
+      // data and metadata regardless of whether data is undefined
+      args.push(data, metadata)
+    } else if (data) {
+
+      // metadata is undefined, so we only need to call the callback with data
+      // if data exists
+      args.push(data)
     }
+
     if (callbacks && callbacks.length > 0) {
-      for (i = 0; i < callbacks.length; i++) {
+      for (var i = 0; i < callbacks.length; i++) {
         callbacks[i].fn.apply(callbacks[i].context || global, args);
       }
     } else if (this.failThrough) {
