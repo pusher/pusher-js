@@ -65,13 +65,7 @@ export default class PresenceChannel extends PrivateChannel {
     var data = event.data;
     switch (eventName) {
       case "pusher_internal:subscription_succeeded":
-        if (!this.subscriptionCancelled) {
-          this.members.onSubscription(data);
-        }
-        this.handleSubscriptionSucceededEvent({
-          event: eventName,
-          data: this.members,
-        });
+        this.handleSubscriptionSucceededEvent(event)
         break
       case "pusher_internal:member_added":
         var addedMember = this.members.addMember(data);
@@ -86,6 +80,16 @@ export default class PresenceChannel extends PrivateChannel {
     }
   }
 
+  handleSubscriptionSucceededEvent(event: PusherEvent) {
+    this.subscriptionPending = false;
+    this.subscribed = true;
+    if (this.subscriptionCancelled) {
+      this.pusher.unsubscribe(this.name);
+    } else {
+      this.members.onSubscription(event.data);
+      this.emit("pusher:subscription_succeeded", this.members);
+    }
+  }
 
   /** Resets the channel state, including members map. For internal use only. */
   disconnect() {

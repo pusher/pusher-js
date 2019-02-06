@@ -47,7 +47,7 @@ export default class EncryptedChannel extends PrivateChannel {
     );
   }
 
-  /** Handles an message. For internal use only.
+  /** Handles an event. For internal use only.
    *
    * @param {PusherEvent} event
    */
