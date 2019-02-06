@@ -4,6 +4,7 @@ import Logger from '../logger';
 import Pusher from '../pusher';
 import {PusherEvent} from '../connection/protocol/message-types';
 import Metadata from './metadata'
+import UrlStore from '../utils/url_store';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -46,6 +47,12 @@ export default class Channel extends EventsDispatcher {
     if (event.indexOf("client-") !== 0) {
       throw new Errors.BadEventName(
         "Event '" + event + "' does not start with 'client-'"
+      );
+    }
+    if (!this.subscribed) {
+      var suffix = UrlStore.buildLogSuffix("triggeringClientEvents");
+      throw new Errors.TriggerError(
+        `Event triggered before channel subscription complete. ${suffix}`
       );
     }
     return this.pusher.send_event(event, data, this.name);

@@ -89,6 +89,9 @@ describe("PresenceChannel", function() {
   });
 
   describe("#trigger", function() {
+    beforeEach(function() {
+      channel.subscribed = true;
+    });
     it("should raise an exception if the event name does not start with client-", function() {
       expect(function() {
         channel.trigger("whatever", {});
