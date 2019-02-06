@@ -6,3 +6,4 @@ export class TransportClosed extends Error {}
 export class UnsupportedFeature extends Error {}
 export class UnsupportedTransport extends Error {}
 export class UnsupportedStrategy extends Error {}
+export class TriggerError extends Error {}

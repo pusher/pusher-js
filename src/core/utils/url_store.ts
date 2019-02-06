@@ -11,6 +11,9 @@ const urlStore = {
     javascriptQuickStart: {
       path: "/docs/javascript_quick_start"
     },
+    triggeringClientEvents: {
+      path: "/docs/client_api_guide/client_events#trigger-events"
+    }
   }
 }
 

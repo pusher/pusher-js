@@ -35,10 +35,19 @@ describe("Channel", function() {
   });
 
   describe("#trigger", function() {
+    beforeEach(function() {
+      channel.subscribed = true;
+    });
     it("should raise an exception if the event name does not start with client-", function() {
       expect(function() {
         channel.trigger("whatever", {});
       }).toThrow(jasmine.any(Errors.BadEventName));
+    });
+    it("should raise an exception if the channel isn't subscribed", function() {
+      channel.subscribed = false;
+      expect(function() {
+        channel.trigger("client-example", {});
+      }).toThrow(jasmine.any(Errors.TriggerError));
     });
 
     it("should call send_event on connection", function() {
