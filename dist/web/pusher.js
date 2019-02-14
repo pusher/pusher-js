@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v4.3.1
+ * Pusher JavaScript Library v4.4.0
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -128,16 +128,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this.timelineSender.send(_this.connection.isUsingTLS());
 	            }
 	        });
-	        this.connection.bind('message', function (params) {
-	            var internal = (params.event.indexOf('pusher_internal:') === 0);
-	            if (params.channel) {
-	                var channel = _this.channel(params.channel);
+	        this.connection.bind('message', function (event) {
+	            var eventName = event.event;
+	            var internal = (eventName.indexOf('pusher_internal:') === 0);
+	            if (event.channel) {
+	                var channel = _this.channel(event.channel);
 	                if (channel) {
-	                    channel.handleEvent(params.event, params.data);
+	                    channel.handleEvent(event);
 	                }
 	            }
 	            if (!internal) {
-	                _this.global_emitter.emit(params.event, params.data);
+	                _this.global_emitter.emit(event.event, event.data);
 	            }
 	        });
 	        this.connection.bind('connecting', function () {
@@ -479,7 +480,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 	var Defaults = {
-	    VERSION: "4.3.1",
+	    VERSION: "4.4.0",
 	    PROTOCOL: 7,
 	    host: 'ws.pusherapp.com',
 	    ws_port: 80,
@@ -1029,6 +1030,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 	        javascriptQuickStart: {
 	            path: "/docs/javascript_quick_start"
+	        },
+	        triggeringClientEvents: {
+	            path: "/docs/client_api_guide/client_events#trigger-events"
 	        }
 	    }
 	};
@@ -1585,15 +1589,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.unbind_global();
 	        return this;
 	    };
-	    Dispatcher.prototype.emit = function (eventName, data) {
-	        var i;
-	        for (i = 0; i < this.global_callbacks.length; i++) {
+	    Dispatcher.prototype.emit = function (eventName, data, metadata) {
+	        for (var i = 0; i < this.global_callbacks.length; i++) {
 	            this.global_callbacks[i](eventName, data);
 	        }
 	        var callbacks = this.callbacks.get(eventName);
+	        var args = [];
+	        if (metadata) {
+	            args.push(data, metadata);
+	        }
+	        else if (data) {
+	            args.push(data);
+	        }
 	        if (callbacks && callbacks.length > 0) {
-	            for (i = 0; i < callbacks.length; i++) {
-	                callbacks[i].fn.call(callbacks[i].context || (window), data);
+	            for (var i = 0; i < callbacks.length; i++) {
+	                callbacks[i].fn.apply(callbacks[i].context || (window), args);
 	            }
 	        }
 	        else if (this.failThrough) {
@@ -2820,30 +2830,35 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ (function(module, exports) {
 
 	"use strict";
-	exports.decodeMessage = function (message) {
+	exports.decodeMessage = function (messageEvent) {
 	    try {
-	        var params = JSON.parse(message.data);
-	        if (typeof params.data === 'string') {
+	        var messageData = JSON.parse(messageEvent.data);
+	        var pusherEventData = messageData.data;
+	        if (typeof pusherEventData === 'string') {
 	            try {
-	                params.data = JSON.parse(params.data);
+	                pusherEventData = JSON.parse(messageData.data);
 	            }
-	            catch (e) {
-	                if (!(e instanceof SyntaxError)) {
-	                    throw e;
-	                }
-	            }
+	            catch (e) { }
 	        }
-	        return params;
+	        var pusherEvent = {
+	            event: messageData.event,
+	            channel: messageData.channel,
+	            data: pusherEventData
+	        };
+	        if (messageData.user_id) {
+	            pusherEvent.user_id = messageData.user_id;
+	        }
+	        return pusherEvent;
 	    }
 	    catch (e) {
-	        throw { type: 'MessageParseError', error: e, data: message.data };
+	        throw { type: 'MessageParseError', error: e, data: messageEvent.data };
 	    }
 	};
-	exports.encodeMessage = function (message) {
-	    return JSON.stringify(message);
+	exports.encodeMessage = function (event) {
+	    return JSON.stringify(event);
 	};
-	exports.processHandshake = function (message) {
-	    message = exports.decodeMessage(message);
+	exports.processHandshake = function (messageEvent) {
+	    var message = exports.decodeMessage(messageEvent);
 	    if (message.event === "pusher:connection_established") {
 	        if (!message.data.activity_timeout) {
 	            throw "No activity timeout specified in handshake";
@@ -2935,12 +2950,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return this.transport.send(data);
 	    };
 	    Connection.prototype.send_event = function (name, data, channel) {
-	        var message = { event: name, data: data };
+	        var event = { event: name, data: data };
 	        if (channel) {
-	            message.channel = channel;
+	            event.channel = channel;
 	        }
-	        logger_1["default"].debug('Event sent', message);
-	        return this.send(Protocol.encodeMessage(message));
+	        logger_1["default"].debug('Event sent', event);
+	        return this.send(Protocol.encodeMessage(event));
 	    };
 	    Connection.prototype.ping = function () {
 	        if (this.transport.supportsPing()) {
@@ -2956,23 +2971,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Connection.prototype.bindListeners = function () {
 	        var _this = this;
 	        var listeners = {
-	            message: function (m) {
-	                var message;
+	            message: function (messageEvent) {
+	                var pusherEvent;
 	                try {
-	                    message = Protocol.decodeMessage(m);
+	                    pusherEvent = Protocol.decodeMessage(messageEvent);
 	                }
 	                catch (e) {
 	                    _this.emit('error', {
 	                        type: 'MessageParseError',
 	                        error: e,
-	                        data: m.data
+	                        data: messageEvent.data
 	                    });
 	                }
-	                if (message !== undefined) {
-	                    logger_1["default"].debug('Event recd', message);
-	                    switch (message.event) {
+	                if (pusherEvent !== undefined) {
+	                    logger_1["default"].debug('Event recd', pusherEvent);
+	                    switch (pusherEvent.event) {
 	                        case 'pusher:error':
-	                            _this.emit('error', { type: 'PusherError', data: message.data });
+	                            _this.emit('error', { type: 'PusherError', data: pusherEvent.data });
 	                            break;
 	                        case 'pusher:ping':
 	                            _this.emit("ping");
@@ -2981,7 +2996,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            _this.emit("pong");
 	                            break;
 	                    }
-	                    _this.emit('message', message);
+	                    _this.emit('message', pusherEvent);
 	                }
 	            },
 	            activity: function () {
@@ -3119,18 +3134,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            callback(error, authData);
 	        });
 	    };
-	    PresenceChannel.prototype.handleEvent = function (event, data) {
-	        switch (event) {
+	    PresenceChannel.prototype.handleEvent = function (event) {
+	        var eventName = event.event;
+	        if (eventName.indexOf("pusher_internal:") === 0) {
+	            this.handleInternalEvent(event);
+	        }
+	        else {
+	            var data = event.data;
+	            var metadata = {};
+	            if (event.user_id) {
+	                metadata.user_id = event.user_id;
+	            }
+	            this.emit(eventName, data, metadata);
+	        }
+	    };
+	    PresenceChannel.prototype.handleInternalEvent = function (event) {
+	        var eventName = event.event;
+	        var data = event.data;
+	        switch (eventName) {
 	            case "pusher_internal:subscription_succeeded":
-	                this.subscriptionPending = false;
-	                this.subscribed = true;
-	                if (this.subscriptionCancelled) {
-	                    this.pusher.unsubscribe(this.name);
-	                }
-	                else {
-	                    this.members.onSubscription(data);
-	                    this.emit("pusher:subscription_succeeded", this.members);
-	                }
+	                this.handleSubscriptionSucceededEvent(event);
 	                break;
 	            case "pusher_internal:member_added":
 	                var addedMember = this.members.addMember(data);
@@ -3142,8 +3165,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this.emit('pusher:member_removed', removedMember);
 	                }
 	                break;
-	            default:
-	                private_channel_1["default"].prototype.handleEvent.call(this, event, data);
+	        }
+	    };
+	    PresenceChannel.prototype.handleSubscriptionSucceededEvent = function (event) {
+	        this.subscriptionPending = false;
+	        this.subscribed = true;
+	        if (this.subscriptionCancelled) {
+	            this.pusher.unsubscribe(this.name);
+	        }
+	        else {
+	            this.members.onSubscription(event.data);
+	            this.emit("pusher:subscription_succeeded", this.members);
 	        }
 	    };
 	    PresenceChannel.prototype.disconnect = function () {
@@ -3196,6 +3228,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var dispatcher_1 = __webpack_require__(24);
 	var Errors = __webpack_require__(31);
 	var logger_1 = __webpack_require__(8);
+	var url_store_1 = __webpack_require__(14);
 	var Channel = (function (_super) {
 	    __extends(Channel, _super);
 	    function Channel(name, pusher) {
@@ -3215,27 +3248,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (event.indexOf("client-") !== 0) {
 	            throw new Errors.BadEventName("Event '" + event + "' does not start with 'client-'");
 	        }
+	        if (!this.subscribed) {
+	            var suffix = url_store_1["default"].buildLogSuffix("triggeringClientEvents");
+	            logger_1["default"].warn("Client event triggered before channel 'subscription_succeeded' event . " + suffix);
+	        }
 	        return this.pusher.send_event(event, data, this.name);
 	    };
 	    Channel.prototype.disconnect = function () {
 	        this.subscribed = false;
 	        this.subscriptionPending = false;
 	    };
-	    Channel.prototype.handleEvent = function (event, data) {
-	        if (event.indexOf("pusher_internal:") === 0) {
-	            if (event === "pusher_internal:subscription_succeeded") {
-	                this.subscriptionPending = false;
-	                this.subscribed = true;
-	                if (this.subscriptionCancelled) {
-	                    this.pusher.unsubscribe(this.name);
-	                }
-	                else {
-	                    this.emit("pusher:subscription_succeeded", data);
-	                }
-	            }
+	    Channel.prototype.handleEvent = function (event) {
+	        var eventName = event.event;
+	        var data = event.data;
+	        if (eventName === "pusher_internal:subscription_succeeded") {
+	            this.handleSubscriptionSucceededEvent(event);
+	        }
+	        else if (eventName.indexOf("pusher_internal:") !== 0) {
+	            var metadata = {};
+	            this.emit(eventName, data, metadata);
+	        }
+	    };
+	    Channel.prototype.handleSubscriptionSucceededEvent = function (event) {
+	        this.subscriptionPending = false;
+	        this.subscribed = true;
+	        if (this.subscriptionCancelled) {
+	            this.pusher.unsubscribe(this.name);
 	        }
 	        else {
-	            this.emit(event, data);
+	            this.emit("pusher:subscription_succeeded", event.data);
 	        }
 	    };
 	    Channel.prototype.subscribe = function () {
@@ -3247,7 +3288,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.subscriptionCancelled = false;
 	        this.authorize(this.pusher.connection.socket_id, function (error, data) {
 	            if (error) {
-	                _this.handleEvent('pusher:subscription_error', data);
+	                _this.emit('pusher:subscription_error', data);
 	            }
 	            else {
 	                _this.pusher.send_event('pusher:subscribe', {
@@ -3381,12 +3422,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    EncryptedChannel.prototype.trigger = function (event, data) {
 	        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
 	    };
-	    EncryptedChannel.prototype.handleEvent = function (event, data) {
-	        if (event.indexOf("pusher_internal:") === 0 || event.indexOf("pusher:") === 0) {
-	            _super.prototype.handleEvent.call(this, event, data);
+	    EncryptedChannel.prototype.handleEvent = function (event) {
+	        var eventName = event.event;
+	        var data = event.data;
+	        if (eventName.indexOf("pusher_internal:") === 0 || eventName.indexOf("pusher:") === 0) {
+	            _super.prototype.handleEvent.call(this, event);
 	            return;
 	        }
-	        this.handleEncryptedEvent(event, data);
+	        this.handleEncryptedEvent(eventName, data);
 	    };
 	    EncryptedChannel.prototype.handleEncryptedEvent = function (event, data) {
 	        var _this = this;
