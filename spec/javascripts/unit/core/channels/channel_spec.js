@@ -43,12 +43,6 @@ describe("Channel", function() {
         channel.trigger("whatever", {});
       }).toThrow(jasmine.any(Errors.BadEventName));
     });
-    it("should raise an exception if the channel isn't subscribed", function() {
-      channel.subscribed = false;
-      expect(function() {
-        channel.trigger("client-example", {});
-      }).toThrow(jasmine.any(Errors.TriggerError));
-    });
 
     it("should call send_event on connection", function() {
       channel.trigger("client-test", { k: "v" });
