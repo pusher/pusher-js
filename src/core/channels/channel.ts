@@ -49,8 +49,8 @@ export default class Channel extends EventsDispatcher {
     }
     if (!this.subscribed) {
       var suffix = UrlStore.buildLogSuffix("triggeringClientEvents");
-      throw new Errors.TriggerError(
-        `Event triggered before channel subscription complete. ${suffix}`
+      Logger.warn(
+        `Client event triggered before channel 'subscription_succeeded' event . ${suffix}`
       );
     }
     return this.pusher.send_event(event, data, this.name);
