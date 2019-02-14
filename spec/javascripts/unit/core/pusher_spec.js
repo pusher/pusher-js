@@ -376,9 +376,11 @@ describe("Pusher", function() {
         event: "event",
         data: { key: "value" }
       });
-      expect(channel.handleEvent).toHaveBeenCalledWith(
-        "event", { key: "value" }
-      );
+      expect(channel.handleEvent).toHaveBeenCalledWith({
+        channel: "chan",
+        event: "event",
+        data: { key: "value" },
+      });
     });
 
     it("should not publish events to other channels", function() {

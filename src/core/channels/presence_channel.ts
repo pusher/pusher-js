@@ -3,6 +3,8 @@ import Logger from '../logger';
 import Members from './members';
 import Pusher from '../pusher';
 import UrlStore from 'core/utils/url_store';
+import {PusherEvent} from '../connection/protocol/message-types';
+import Metadata from './metadata'
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -43,21 +45,28 @@ export default class PresenceChannel extends PrivateChannel {
 
   /** Handles presence and subscription events. For internal use only.
    *
-   * @param {String} event
-   * @param {*} data
+   * @param {PusherEvent} event
    */
-  handleEvent(event : string, data : any) {
-    switch (event) {
+  handleEvent(event: PusherEvent) {
+    var eventName = event.event;
+    if (eventName.indexOf("pusher_internal:") === 0) {
+      this.handleInternalEvent(event)
+    } else {
+      var data = event.data;
+      var metadata: Metadata = {};
+      if (event.user_id) {
+        metadata.user_id = event.user_id
+      }
+      this.emit(eventName, data, metadata);
+    }
+  }
+  handleInternalEvent(event: PusherEvent) {
+    var eventName = event.event;
+    var data = event.data;
+    switch (eventName) {
       case "pusher_internal:subscription_succeeded":
-        this.subscriptionPending = false;
-        this.subscribed = true;
-        if (this.subscriptionCancelled) {
-          this.pusher.unsubscribe(this.name);
-        } else {
-          this.members.onSubscription(data);
-          this.emit("pusher:subscription_succeeded", this.members);
-        }
-        break;
+        this.handleSubscriptionSucceededEvent(event)
+        break
       case "pusher_internal:member_added":
         var addedMember = this.members.addMember(data);
         this.emit('pusher:member_added', addedMember);
@@ -68,8 +77,17 @@ export default class PresenceChannel extends PrivateChannel {
           this.emit('pusher:member_removed', removedMember);
         }
         break;
-      default:
-        PrivateChannel.prototype.handleEvent.call(this, event, data);
+    }
+  }
+
+  handleSubscriptionSucceededEvent(event: PusherEvent) {
+    this.subscriptionPending = false;
+    this.subscribed = true;
+    if (this.subscriptionCancelled) {
+      this.pusher.unsubscribe(this.name);
+    } else {
+      this.members.onSubscription(event.data);
+      this.emit("pusher:subscription_succeeded", this.members);
     }
   }
 

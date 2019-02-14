@@ -2,6 +2,9 @@ import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Errors from '../errors';
 import Logger from '../logger';
 import Pusher from '../pusher';
+import {PusherEvent} from '../connection/protocol/message-types';
+import Metadata from './metadata'
+import UrlStore from '../utils/url_store';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -46,6 +49,12 @@ export default class Channel extends EventsDispatcher {
         "Event '" + event + "' does not start with 'client-'"
       );
     }
+    if (!this.subscribed) {
+      var suffix = UrlStore.buildLogSuffix("triggeringClientEvents");
+      Logger.warn(
+        `Client event triggered before channel 'subscription_succeeded' event . ${suffix}`
+      );
+    }
     return this.pusher.send_event(event, data, this.name);
   }
 
@@ -55,24 +64,28 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionPending = false;
   }
 
-  /** Handles an event. For internal use only.
+  /** Handles a PusherEvent. For internal use only.
    *
-   * @param {String} event
-   * @param {*} data
+   * @param {PusherEvent} event
    */
-  handleEvent(event : string, data : any) {
-    if (event.indexOf("pusher_internal:") === 0) {
-      if (event === "pusher_internal:subscription_succeeded") {
-        this.subscriptionPending = false;
-        this.subscribed = true;
-        if (this.subscriptionCancelled) {
-          this.pusher.unsubscribe(this.name);
-        } else {
-          this.emit("pusher:subscription_succeeded", data);
-        }
-      }
+  handleEvent(event: PusherEvent) {
+    var eventName = event.event;
+    var data = event.data;
+    if (eventName === "pusher_internal:subscription_succeeded") {
+      this.handleSubscriptionSucceededEvent(event);
+    } else if (eventName.indexOf("pusher_internal:") !== 0) {
+      var metadata: Metadata = {}
+      this.emit(eventName, data, metadata);
+    }
+  }
+
+  handleSubscriptionSucceededEvent(event: PusherEvent) {
+    this.subscriptionPending = false;
+    this.subscribed = true;
+    if (this.subscriptionCancelled) {
+      this.pusher.unsubscribe(this.name);
     } else {
-      this.emit(event, data);
+      this.emit("pusher:subscription_succeeded", event.data);
     }
   }
 
@@ -83,7 +96,7 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionCancelled = false;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {
       if (error) {
-        this.handleEvent('pusher:subscription_error', data);
+        this.emit('pusher:subscription_error', data)
       } else {
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,

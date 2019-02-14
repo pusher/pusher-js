@@ -14,7 +14,7 @@ describe("Protocol", function() {
         event: "random",
         data: {
           foo: "bar"
-        }
+        },
       });
     });
 
@@ -28,7 +28,7 @@ describe("Protocol", function() {
 
       expect(Protocol.decodeMessage(message)).toEqual({
         event: "raw",
-        data: "just a string"
+        data: "just a string",
       });
     });
 
@@ -45,7 +45,22 @@ describe("Protocol", function() {
         data: {
           x: "y",
           z: 1
-        }
+        },
+      });
+    });
+    it("should parse user_id message with user_id", function() {
+      var message = {
+        data: JSON.stringify({
+          event: "raw",
+          data: "just a string",
+          user_id: "abc-def",
+        })
+      };
+
+      expect(Protocol.decodeMessage(message)).toEqual({
+        event: "raw",
+        data: "just a string",
+        user_id: "abc-def"
       });
     });
 

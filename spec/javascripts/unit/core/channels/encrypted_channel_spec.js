@@ -113,7 +113,9 @@ describe("EncryptedChannel", function() {
 
   describe("#disconnect", function() {
     it("should set subscribed to false", function() {
-      channel.handleEvent("pusher_internal:subscription_succeeded");
+      channel.handleEvent({
+        event: "pusher_internal:subscription_succeeded"
+      });
       channel.disconnect();
       expect(channel.subscribed).toEqual(false);
     });
@@ -125,7 +127,9 @@ describe("EncryptedChannel", function() {
       channel.bind("pusher_internal:test", callback);
       channel.bind_global(callback);
 
-      channel.handleEvent("pusher_internal:test");
+      channel.handleEvent({
+        event: "pusher_internal:test"
+      });
 
       expect(callback).not.toHaveBeenCalled();
     });
@@ -134,17 +138,26 @@ describe("EncryptedChannel", function() {
       it("should emit pusher:subscription_succeeded", function() {
         let callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(callback).toHaveBeenCalledWith("123");
       });
 
       it("should set #subscribed to true", function() {
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(channel.subscribed).toEqual(true);
       });
 
       it("should set #subscriptionPending to false", function() {
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(channel.subscriptionPending).toEqual(false);
       });
     });
@@ -154,26 +167,38 @@ describe("EncryptedChannel", function() {
         let callback = jasmine.createSpy("callback");
         channel.bind("pusher:subscription_succeeded", callback);
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(callback).not.toHaveBeenCalled();
       });
 
       it("should set #subscribed to true", function() {
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(channel.subscribed).toEqual(true);
       });
 
       it("should set #subscriptionPending to false", function() {
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(channel.subscriptionPending).toEqual(false);
       });
 
       it("should call #pusher.unsubscribe", function() {
         expect(pusher.unsubscribe).not.toHaveBeenCalled();
         channel.cancelSubscription();
-        channel.handleEvent("pusher_internal:subscription_succeeded", "123");
+        channel.handleEvent({
+          event: "pusher_internal:subscription_succeeded",
+          data: "123"
+        });
         expect(pusher.unsubscribe).toHaveBeenCalledWith(channel.name);
       });
     });
@@ -197,15 +222,21 @@ describe("EncryptedChannel", function() {
         };
         let boundCallback = jasmine.createSpy("boundCallback");
         channel.bind("something", boundCallback);
-        channel.handleEvent("something", encryptedPayload);
+        channel.handleEvent({
+          event: "something",
+          data: encryptedPayload
+        });
         expect(boundCallback).toHaveBeenCalledWith(payload);
       });
       it("should emit pusher: prefixed events unmodified", function() {
         let payload = { test: "payload" };
         let boundCallback = jasmine.createSpy("boundCallback");
         channel.bind("pusher:subscription_error", boundCallback);
-        channel.handleEvent("pusher:subscription_error", payload);
-        expect(boundCallback).toHaveBeenCalledWith(payload);
+        channel.handleEvent({
+          event: "pusher:subscription_error",
+          data: payload
+        });
+        expect(boundCallback).toHaveBeenCalledWith(payload, {});
       });
 
       describe("with rotated shared key", function() {
@@ -233,7 +264,10 @@ describe("EncryptedChannel", function() {
           };
           let boundCallback = jasmine.createSpy("boundCallback");
           channel.bind("something", boundCallback);
-          channel.handleEvent("something", encryptedPayload);
+          channel.handleEvent({
+            event: "something",
+            data: encryptedPayload
+          });
           authorizer._callback(false, {
             shared_secret: newSecretBase64,
             foo: "bar"
@@ -246,7 +280,10 @@ describe("EncryptedChannel", function() {
             ciphertext: tweetNaclUtil.encodeBase64('garbage-ciphertext')
           };
           spyOn(Logger, "warn");
-          channel.handleEvent("something", encryptedPayload);
+          channel.handleEvent({
+            event: "something",
+            data: encryptedPayload
+          });
           authorizer._callback(false, {
             shared_secret: newSecretBase64,
             foo: "bar"
@@ -262,7 +299,10 @@ describe("EncryptedChannel", function() {
             ciphertext: newTestEncrypt(payload)
           };
           spyOn(Logger, "warn");
-          channel.handleEvent("something", encryptedPayload);
+          channel.handleEvent({
+            event: "something",
+            data: encryptedPayload
+          });
           authorizer._callback(true, "ERROR");
           expect(Logger.warn).toHaveBeenCalledWith(
             "Failed to make a request to the authEndpoint: ERROR. Unable to fetch new key, so dropping encrypted event"

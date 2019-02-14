@@ -539,7 +539,7 @@ describe("TransportConnection", function() {
 
       socket.onclose();
 
-      expect(onClosed).toHaveBeenCalledWith(undefined);
+      expect(onClosed).toHaveBeenCalled();
       expect(onClosed.calls.length).toEqual(1);
     });
 
