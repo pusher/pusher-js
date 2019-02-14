@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.4.0 (2019-02-14)
+
+[NEW] Callbacks bound to client events on presence channels will be called with an extra argument containing the `user_id` of the message sender
+
+[NEW] Warn when trying to trigger client-events to a channel that isn't subscribed
+
 ## 4.3.1 (2018-09-03)
 
 [FIXED] Honour protocol error codes received after connection succeeds
