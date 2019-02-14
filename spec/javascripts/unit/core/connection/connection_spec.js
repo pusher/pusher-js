@@ -114,7 +114,7 @@ describe("Connection", function() {
       });
       expect(onMessage).toHaveBeenCalledWith({
         event: "random",
-        data: { foo: "bar" }
+        data: { foo: "bar" },
       });
     });
 

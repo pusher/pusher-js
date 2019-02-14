@@ -1,5 +1,5 @@
 import Action from './action';
-import Message from './message';
+import {PusherEvent} from './message-types';
 /**
  * Provides functions for handling Pusher protocol-specific messages.
  */
@@ -7,39 +7,49 @@ import Message from './message';
 /**
  * Decodes a message in a Pusher format.
  *
+ * The MessageEvent we receive from the transport should contain a pusher event
+ * (https://pusher.com/docs/pusher_protocol#events) serialized as JSON in the
+ * data field
+ *
+ * The pusher event may contain a data field too, and it may also be
+ * serialised as JSON
+ *
  * Throws errors when messages are not parse'able.
  *
- * @param  {Object} message
- * @return {Object}
+ * @param  {MessageEvent} messageEvent
+ * @return {PusherEvent}
  */
-export var decodeMessage = function(message : Message) : Message {
+export var decodeMessage = function(messageEvent : MessageEvent) : PusherEvent {
   try {
-    var params = JSON.parse(message.data);
-    if (typeof params.data === 'string') {
+    var messageData = JSON.parse(messageEvent.data);
+    var pusherEventData = messageData.data;
+    if (typeof pusherEventData === 'string') {
       try {
-        params.data = JSON.parse(params.data);
-      } catch (e) {
-        if (!(e instanceof SyntaxError)) {
-          // TODO looks like unreachable code
-          // https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/JSON/parse
-          throw e;
-        }
-      }
+        pusherEventData = JSON.parse(messageData.data)
+      } catch (e) {}
     }
-    return params;
+    var pusherEvent: PusherEvent = {
+      event: messageData.event,
+      channel: messageData.channel,
+      data: pusherEventData,
+    }
+    if (messageData.user_id) {
+      pusherEvent.user_id = messageData.user_id
+    }
+    return pusherEvent;
   } catch (e) {
-    throw { type: 'MessageParseError', error: e, data: message.data};
+    throw { type: 'MessageParseError', error: e, data: messageEvent.data};
   }
 };
 
 /**
  * Encodes a message to be sent.
  *
- * @param  {Object} message
+ * @param  {PusherEvent} event
  * @return {String}
  */
-export var encodeMessage = function(message : Message) : string {
-  return JSON.stringify(message);
+export var encodeMessage = function(event : PusherEvent) : string {
+  return JSON.stringify(event);
 };
 
 /** Processes a handshake message and returns appropriate actions.
@@ -55,8 +65,8 @@ export var encodeMessage = function(message : Message) : string {
  * @param {String} message
  * @result Object
  */
-export var processHandshake = function(message : Message) : Action {
-  message = decodeMessage(message);
+export var processHandshake = function(messageEvent : MessageEvent) : Action {
+  var message = decodeMessage(messageEvent);
 
   if (message.event === "pusher:connection_established") {
     if (!message.data.activity_timeout) {

@@ -1,7 +1,7 @@
 import * as Collections from '../utils/collections';
 import {default as EventsDispatcher} from '../events/dispatcher';
 import * as Protocol from './protocol/protocol';
-import Message from './protocol/message';
+import {PusherEvent} from './protocol/message-types';
 import Logger from '../logger';
 import TransportConnection from "../transports/transport_connection";
 import Socket from "../socket";
@@ -58,12 +58,12 @@ export default class Connection extends EventsDispatcher implements Socket {
    * @returns {Boolean} whether message was sent or not
    */
    send_event(name : string, data : any, channel?: string) : boolean {
-     var message : Message = { event: name, data: data };
+     var event : PusherEvent = { event: name, data: data };
      if (channel) {
-       message.channel = channel;
+       event.channel = channel;
      }
-     Logger.debug('Event sent', message);
-     return this.send(Protocol.encodeMessage(message));
+     Logger.debug('Event sent', event);
+     return this.send(Protocol.encodeMessage(event));
    }
 
    /** Sends a ping message to the server.
@@ -86,24 +86,24 @@ export default class Connection extends EventsDispatcher implements Socket {
 
    private bindListeners() {
      var listeners = {
-       message: (m)=> {
-         var message;
+       message: (messageEvent: MessageEvent)=> {
+         var pusherEvent;
          try {
-           message = Protocol.decodeMessage(m);
+           pusherEvent = Protocol.decodeMessage(messageEvent);
          } catch(e) {
            this.emit('error', {
              type: 'MessageParseError',
              error: e,
-             data: m.data
+             data: messageEvent.data
            });
          }
 
-         if (message !== undefined) {
-           Logger.debug('Event recd', message);
+         if (pusherEvent !== undefined) {
+           Logger.debug('Event recd', pusherEvent);
 
-           switch (message.event) {
+           switch (pusherEvent.event) {
              case 'pusher:error':
-               this.emit('error', { type: 'PusherError', data: message.data });
+               this.emit('error', { type: 'PusherError', data: pusherEvent.data });
                break;
              case 'pusher:ping':
                this.emit("ping");
@@ -112,7 +112,7 @@ export default class Connection extends EventsDispatcher implements Socket {
                this.emit("pong");
                break;
            }
-           this.emit('message', message);
+           this.emit('message', pusherEvent);
          }
        },
        activity: ()=> {
