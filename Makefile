@@ -2,6 +2,8 @@ SHELL := /bin/bash
 
 build_all: web react-native node worker
 
+check: web_unit web_integration worker_unit worker_integration node_unit node_integration
+
 # sockjs:
 # 	pushd src/runtimes/web/dom/sockjs && \
 # 	npm install &&  \
@@ -58,4 +60,4 @@ node_integration:
 serve:
 	node webpack/dev.server.js
 
-.PHONY: build_all
+.PHONY: build_all check
