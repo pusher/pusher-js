@@ -40,13 +40,6 @@ module.exports = function(config, suite) {
 
   config.webpack.externals.testenv = "'worker'";
 
-  if (suite == 'integration') {
-    config.webpack.resolve.alias = {
-      pusher_integration: 'core',
-      integration: 'node/integration'
-    }
-  }
-
   // only run worker test on Chrome for CI
   switch (process.env.CI) {
     case 'travis':
