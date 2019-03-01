@@ -39,7 +39,7 @@
     "karma-coverage": "^0.2.7",
     "karma-firefox-launcher": "^0.1.4",
     "karma-jasmine": "~0.1.0",
-    "karma-jasmine-web-worker": "^0.1.2",
+    "@keith_duncan/karma-jasmine-web-worker": "0.1.2",
     "karma-opera-launcher": "^0.1.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-spec-reporter": "0.0.24",

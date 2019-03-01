@@ -5,6 +5,10 @@ Sorts out the module resolution for this build and changes
 the testenv.
 */
 module.exports = function(config, suite) {
+  config.plugins = [
+    'karma-*',
+    '@keith_duncan/karma-jasmine-web-worker',
+  ];
   config.frameworks = ["jasmine-web-worker"];
   config.files = [
     '**/spec/javascripts/'+suite+'/index.worker.js'
