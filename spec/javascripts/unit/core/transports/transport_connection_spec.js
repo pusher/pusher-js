@@ -3,6 +3,7 @@ var Mocks = require("mocks");
 var TransportConnection = require('core/transports/transport_connection').default;
 var Collections = require('core/utils/collections');
 var Timer = require('core/utils/timers').OneOffTimer;
+var DependenciesModule = require('dependencies');
 
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {
@@ -20,11 +21,10 @@ describe("TransportConnection", function() {
   var socket;
   var timeline;
   var transport;
-  var Dependencies, _Dependencies, DependenciesModule;
+  var Dependencies, _Dependencies;
 
   beforeEach(function() {
     if (TestEnv === "web") {
-      DependenciesModule = require('dependencies');
       _Dependencies = DependenciesModule.Dependencies;
       DependenciesModule.Dependencies = Mocks.getDependencies();
       Dependencies = DependenciesModule.Dependencies;
