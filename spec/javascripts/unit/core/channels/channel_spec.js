@@ -228,7 +228,7 @@ describe("Channel", function() {
 
       expect(pusher.send_event).toHaveBeenCalledWith(
         "pusher:subscribe",
-        { auth: "one", channel_data: "two", channel: "test" },
+        { auth: "one", channel_data: "two", channel: "test" }
       );
     });
 
