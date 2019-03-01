@@ -11,7 +11,7 @@ baseConfig.output = {
 
 baseConfig.externals.testenv = "'node'";
 baseConfig.resolve.alias = {
-    dependencies: 'node/dependencies'
+    dependencies: 'empty'
 }
 baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
 

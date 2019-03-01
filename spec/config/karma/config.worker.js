@@ -32,15 +32,21 @@ module.exports = function(config, suite) {
     'src/runtimes',
     'spec/javascripts/helpers'
   ]
-
-  if (suite == 'integration') {
-    config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias, {
-      pusher_integration: 'core',
-      integration: 'node/integration'
-    })
-  }
-
   config.webpack.externals.testenv = "'worker'";
+
+  switch (suite) {
+    case 'integration':
+      config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias || {}, {
+        pusher_integration: 'core',
+        integration: 'node/integration',
+      });
+      break;
+    case 'unit':
+      config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias || {}, {
+        dependencies: 'empty'
+      });
+      break;
+  }
 
   // only run worker test on Chrome for CI
   switch (process.env.CI) {

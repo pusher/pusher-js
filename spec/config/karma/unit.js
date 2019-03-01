@@ -13,6 +13,10 @@ if (process.env.CI) {
 
 if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'unit');
+} else {
+  config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias || {}, {
+    dependencies: 'dom/dependencies'
+  });
 }
 
 module.exports = function(suite) {
