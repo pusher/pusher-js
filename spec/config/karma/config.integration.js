@@ -17,7 +17,8 @@ module.exports = objectAssign(commonConfig, {
   webpack: objectAssign(webpackConfig, {
     resolve: {
       alias: {
-        integration: 'web/integration'
+        integration: 'web/integration',
+        dependencies: 'dom/dependencies'
       }
     }
   })

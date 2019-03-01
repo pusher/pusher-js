@@ -12,5 +12,11 @@ module.exports = objectAssign(commonConfig,{
     '**/spec/javascripts/unit/index.web.js': ['webpack']
   },
 
-  webpack: webpackConfig
+  webpack: objectAssign(webpackConfig, {
+    resolve: {
+      alias: {
+        dependencies: 'dom/dependencies'
+      }
+    }
+  })
 });

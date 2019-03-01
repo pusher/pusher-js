@@ -24,7 +24,7 @@ describe("TransportConnection", function() {
 
   beforeEach(function() {
     if (TestEnv === "web") {
-      DependenciesModule = require('dom/dependencies');
+      DependenciesModule = require('dependencies');
       _Dependencies = DependenciesModule.Dependencies;
       DependenciesModule.Dependencies = Mocks.getDependencies();
       Dependencies = DependenciesModule.Dependencies;

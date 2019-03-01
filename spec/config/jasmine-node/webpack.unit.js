@@ -10,6 +10,9 @@ baseConfig.output = {
 },
 
 baseConfig.externals.testenv = "'node'";
+baseConfig.resolve.alias = {
+    'dependencies': 'dom/dependencies'
+}
 baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
 
 module.exports = baseConfig;

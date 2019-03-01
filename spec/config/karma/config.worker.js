@@ -26,6 +26,14 @@ module.exports = function(config, suite) {
     'src/runtimes',
     'spec/javascripts/helpers'
   ]
+
+  if (suite == 'integration') {
+    config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias, {
+      pusher_integration: 'core',
+      integration: 'node/integration'
+    })
+  }
+
   config.webpack.externals.testenv = "'worker'";
   return config;
 }
