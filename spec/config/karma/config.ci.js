@@ -47,6 +47,10 @@ var config = {
       browser_version: "5.1",
       device: null,
       os: "OS X"
+    },
+    travis_chrome: {
+      base: 'ChromeHeadless',
+      flags: ['--no-sandbox']
     }
   }
 };

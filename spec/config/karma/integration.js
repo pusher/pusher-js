@@ -5,6 +5,10 @@ if (process.env.CI) {
   var ci = require('./config.ci');
   config = objectAssign(config, ci);
   config.browsers = ci.browsers;
+
+  if (process.env.CI == 'travis') {
+    config.browsers = ['travis_chrome'];
+  }
 }
 
 if (process.env.WORKER === 'true') {
@@ -13,7 +17,16 @@ if (process.env.WORKER === 'true') {
     pusher_integration: 'core',
     integration: 'node/integration'
   }
-  if (process.env.CI) config.browsers = ['bs_chrome_49'];
+
+  // only run worker test on Chrome for CI
+  switch (process.env.CI) {
+    case 'travis':
+      config.browsers = ['travis_chrome'];
+      break;
+    default:
+      config.browsers = ['bs_chrome_49'];
+      break;
+  }
 }
 
 module.exports = function(suite) {
