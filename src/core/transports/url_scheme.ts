@@ -3,6 +3,7 @@ export interface URLSchemeParams {
   hostTLS: string;
   hostNonTLS: string;
   httpPath: string;
+  url: string;
 }
 
 interface URLScheme {
