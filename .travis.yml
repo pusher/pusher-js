@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+- "8.10"
+env:
+- TARGET=web_unit
+- TARGET=web_integration
+- TARGET=worker_unit
+- TARGET=worker_integration
+- TARGET=node_unit
+- TARGET=node_integration
+script: make $TARGET
+addons:
+  chrome: stable
