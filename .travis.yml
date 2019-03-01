@@ -11,3 +11,5 @@ env:
 script: make $TARGET
 addons:
   chrome: stable
+notifications:
+  email: false
