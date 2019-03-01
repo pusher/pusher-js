@@ -50,6 +50,15 @@ describe("Transports", function() {
       );
     });
 
+    it("should generate correct URLs with custom URL config", function() {
+      var url = Transports.ws.hooks.urls.getInitial("foobar", {
+        url: "wss://live.example.org:999/custom/path"
+      });
+      expect(url).toEqual(
+        "wss://live.example.org:999/custom/path"
+      );
+    });
+
     it("should not have a resource file", function() {
       expect(Transports.ws.hooks.file).toBe(undefined);
     });
