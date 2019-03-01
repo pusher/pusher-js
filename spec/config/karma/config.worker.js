@@ -1,3 +1,5 @@
+var objectAssign = require('object-assign-deep');
+
 /*
 Takes + modifies existing Karma config + the name of the suite,
 i.e. 'unit' or 'integration'.
