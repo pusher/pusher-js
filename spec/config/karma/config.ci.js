@@ -51,6 +51,9 @@ var config = {
     travis_chrome: {
       base: 'ChromeHeadless',
       flags: ['--no-sandbox']
+    },
+    local_chrome: {
+      base: 'Chrome'
     }
   }
 };

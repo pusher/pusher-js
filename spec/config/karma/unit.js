@@ -19,6 +19,9 @@ if (process.env.WORKER === 'true') {
     case 'travis':
       config.browsers = ['travis_chrome'];
       break;
+    case 'local':
+      config.browsers = ['local_chrome'];
+      break;
     default:
       config.browsers = ['bs_chrome_49'];
       break;
