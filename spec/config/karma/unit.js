@@ -6,8 +6,13 @@ if (process.env.CI) {
   config = objectAssign(config, ci);
   config.browsers = ci.browsers;
 
-  if (process.env.CI == 'travis') {
-    config.browsers = ['travis_chrome'];
+  switch (process.env.CI) {
+    case 'travis':
+      config.browsers = ['travis_chrome'];
+      break;
+    case 'local':
+      config.browsers = ['local_chrome'];
+      break;
   }
 }
 
