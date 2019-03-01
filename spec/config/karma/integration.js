@@ -14,9 +14,13 @@ if (process.env.CI) {
 if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'integration');
 } else {
-  config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias || {}, {
-    dependencies: 'dom/dependencies',
-    dependency_loader: 'dom/dependency_loader',
+  config.webpack = objectAssign(config.webpack, {
+    resolve: {
+      alias: {
+        dependencies: 'dom/dependencies',
+        dependency_loader: 'dom/dependency_loader',
+      }
+    }
   });
 }
 

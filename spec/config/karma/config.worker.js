@@ -34,11 +34,15 @@ module.exports = function(config, suite) {
   ]
   config.webpack.externals.testenv = "'worker'";
 
-  config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias || {}, {
-    pusher_integration: 'core',
-    integration: 'node/integration',
-    dependencies: 'empty',
-    dependency_loader: 'empty',
+  config.webpack = objectAssign(config.webpack, {
+    resolve: {
+      alias: {
+        pusher_integration: 'core',
+        integration: 'node/integration',
+        dependencies: 'empty',
+        dependency_loader: 'empty',
+      }
+    }
   });
 
   // only run worker test on Chrome for CI
