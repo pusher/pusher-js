@@ -27,5 +27,26 @@ module.exports = function(config, suite) {
     'spec/javascripts/helpers'
   ]
   config.webpack.externals.testenv = "'worker'";
+
+  if (suite == 'integration') {
+    config.webpack.resolve.alias = {
+      pusher_integration: 'core',
+      integration: 'node/integration'
+    }
+  }
+
+  // only run worker test on Chrome for CI
+  switch (process.env.CI) {
+    case 'travis':
+      config.browsers = ['travis_chrome'];
+      break;
+    case 'local':
+      config.browsers = ['local_chrome'];
+      break;
+    default:
+      config.browsers = ['bs_chrome_49'];
+      break;
+  }
+
   return config;
 }
