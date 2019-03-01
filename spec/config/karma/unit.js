@@ -6,13 +6,23 @@ if (process.env.CI) {
   config = objectAssign(config, ci);
   config.browsers = ci.browsers;
 
-  if (process.env.CI == 'travis') {
-    config.browsers = ['travis_chrome'];
+  switch (process.env.CI) {
+    case 'travis':
+      config.browsers = ['travis_chrome'];
+      break;
+    case 'local':
+      config.browsers = ['local_chrome'];
+      break;
   }
 }
 
 if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'unit');
+} else {
+  config.webpack.resolve.alias = objectAssign(config.webpack.resolve.alias || {}, {
+    dependencies: 'dom/dependencies',
+    dependency_loader: 'dom/dependency_loader',
+  });
 }
 
 module.exports = function(suite) {

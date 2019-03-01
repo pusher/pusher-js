@@ -1,3 +1,5 @@
+var objectAssign = require('object-assign-deep');
+
 /*
 Takes + modifies existing Karma config + the name of the suite,
 i.e. 'unit' or 'integration'.
@@ -32,12 +34,16 @@ module.exports = function(config, suite) {
   ]
   config.webpack.externals.testenv = "'worker'";
 
-  if (suite == 'integration') {
-    config.webpack.resolve.alias = {
-      pusher_integration: 'core',
-      integration: 'node/integration'
+  config.webpack = objectAssign(config.webpack, {
+    resolve: {
+      alias: {
+        pusher_integration: 'core',
+        integration: 'node/integration',
+        dependencies: 'empty',
+        dependency_loader: 'empty',
+      }
     }
-  }
+  });
 
   // only run worker test on Chrome for CI
   switch (process.env.CI) {

@@ -3,9 +3,9 @@ var Pusher = require('pusher_integration');
 
 if (TestEnv === "web") {
   window.Pusher = Pusher;
-  var Dependencies = require('dom/dependencies').Dependencies;
-  var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
-  var DependencyLoader = require('dom/dependency_loader').default;
+  var Dependencies = require('dependencies').Dependencies;
+  var DependenciesReceivers = require('dependencies').DependenciesReceivers;
+  var DependencyLoader = require('dependency_loader').default;
 }
 
 var Integration = require("integration");
