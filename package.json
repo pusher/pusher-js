@@ -50,7 +50,8 @@
     "ts-loader": "^0.8.2",
     "typescript": "^1.8.0",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.12.9",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
