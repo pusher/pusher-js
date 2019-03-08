@@ -83,7 +83,7 @@ export default class EncryptedChannel extends PrivateChannel {
 
     let bytes = secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
-      Logger.debug('Failed to decrypted an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+      Logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
       // Try a single time to retrieve a new auth key and decrypt the event with it
       // If this fails, a new key will be requested when a new message is received
       this.authorize(this.pusher.connection.socket_id, (error, authData) => {
