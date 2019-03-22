@@ -1,6 +1,7 @@
 var config = {
   browserStack: {
-    startTunnel: true
+    startTunnel: true,
+    timeout: 1800
   },
   customLaunchers: {
     bs_chrome_73: {
