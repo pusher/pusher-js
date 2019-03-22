@@ -13,7 +13,7 @@ if (process.env.WORKER === 'true') {
     pusher_integration: 'core',
     integration: 'node/integration'
   }
-  if (process.env.CI) config.browsers = ['bs_chrome_49'];
+  if (process.env.CI) config.browsers = ['bs_chrome_73'];
 }
 
 module.exports = function(suite) {
