@@ -12,5 +12,3 @@ make web_unit
 make web_integration
 make node_unit
 make node_integration
-make worker_unit
-make worker_integration
