@@ -16,7 +16,26 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.ts$/, loader: 'ts-loader' },
+      {
+        test: /\.ts$/,
+        use: [
+          {
+            loader: 'babel-loader',
+            options: { presets: [[ 'minify', {builtIns: false} ]] }
+          },
+          {loader: 'ts-loader' },
+        ]
+      },
+      {
+        test: /\.js$/,
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              ['minify', {builtIns: false}]
+            ]
+          }
+      },
     ]
   },
   plugins: [

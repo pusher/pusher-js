@@ -15,7 +15,7 @@ module.exports = {
 
   webpack: {
     resolve: {
-      modulesDirectories: [
+      modules: [
         'node_modules',
         'web_modules',
         'src',
