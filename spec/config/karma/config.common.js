@@ -2,7 +2,7 @@ module.exports = {
   basePath: '../../../',
   frameworks: ["jasmine"],
 
-  reporters: ['coverage', 'verbose'],
+  reporters: ['coverage', 'dots'],
 
   coverageReporter: {
     type : 'html',
@@ -33,11 +33,14 @@ module.exports = {
   colors: true,
   autoWatch: true,
 
-  browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+  browsers: ['Chrome'],
   captureTimeout: 3e5,
   browserNoActivityTimeout: 3e5,
   browserDisconnectTimeout: 3e5,
   browserDisconnectTolerance: 3,
 
-  singleRun: true
+  singleRun: true,
+  client: {
+    captureConsole: false,
+  }
 }
