@@ -28,6 +28,11 @@
   },
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
+    "@babel/core": "^7.3.4",
+    "@babel/preset-env": "^7.3.4",
+    "@babel/preset-typescript": "^7.3.3",
+    "babel-loader": "^8.0.5",
+    "babel-preset-minify": "^0.5.0",
     "es3ify-loader": "^0.2.0",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^2.2.1",
