@@ -3,7 +3,7 @@ import TransportManager from 'core/transports/transport_manager';
 import Strategy from 'core/strategies/strategy';
 import SequentialStrategy from 'core/strategies/sequential_strategy';
 import BestConnectedEverStrategy from 'core/strategies/best_connected_ever_strategy';
-import CachedStrategy from 'core/strategies/cached_strategy';
+import CachedStrategy, {TransportStrategyDictionary} from 'core/strategies/cached_strategy';
 import DelayedStrategy from 'core/strategies/delayed_strategy';
 import IfStrategy from 'core/strategies/if_strategy';
 import FirstConnectedStrategy from 'core/strategies/first_connected_strategy';
@@ -15,7 +15,7 @@ function testSupportsStrategy(strategy: Strategy) {
 }
 
 var getDefaultStrategy = function(config : any, defineTransport: Function) : Strategy {
-  var definedTransports = {};
+  var definedTransports = <TransportStrategyDictionary>{};
 
   function defineTransportStrategy(name : string, type : string, priority : number, options, manager? : TransportManager) {
     var transport = defineTransport(config, name, type, priority, options, manager);
