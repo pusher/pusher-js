@@ -5,6 +5,8 @@ var Integration = require("integration");
 var Mocks = require("mocks");
 var Runtime = require('runtime').default;
 var Network = require("net_info").Network;
+var defineTransport = require('core/strategies/strategy_builder').defineTransport;
+var BestConnectedEverStrategy = require('core/strategies/best_connected_ever_strategy').default;
 var transports = Runtime.Transports;
 
 if (TestEnv == "web") {
@@ -28,13 +30,12 @@ Integration.describe("Transport lists", function() {
     spyOn(transports[BASE_FALLBACK], "createConnection")
       .andCallFake(Mocks.getTransport);
 
-    spyOn(Runtime, "getDefaultStrategy").andCallFake(function() {
-      return [
-        [":def_transport", "a", "ws", 1, {}],
-        [":def_transport", "b", "xhr_streaming", 2, {}],
-        [":def_transport", "c", BASE_FALLBACK, 3, {}],
-        [":def", "strategy", [":best_connected_ever", ":a", ":b", ":c"]]
-      ];
+    spyOn(Runtime, "getDefaultStrategy").andCallFake(function(config) {
+      return new BestConnectedEverStrategy([
+        defineTransport(config, 'a', 'ws', 1, {}),
+        defineTransport(config, 'b', 'xhr_streaming', 2, {}),
+        defineTransport(config, 'c', BASE_FALLBACK, 3, {}),
+      ]);
     });
 
     spyOn(Network, "isOnline").andReturn(true);

@@ -1,103 +1,98 @@
-var getDefaultStrategy = function(config : any) : any {
-  var wsStrategy;
-  if (config.useTLS) {
-    wsStrategy = [
-      ":best_connected_ever",
-      ":ws_loop",
-      [":delayed", 2000, [":http_fallback_loop"]]
-    ];
-  } else {
-    wsStrategy = [
-      ":best_connected_ever",
-      ":ws_loop",
-      [":delayed", 2000, [":wss_loop"]],
-      [":delayed", 5000, [":http_fallback_loop"]]
-    ];
+import * as Collections from "core/utils/collections";
+import TransportManager from 'core/transports/transport_manager';
+import Strategy from 'core/strategies/strategy';
+import SequentialStrategy from 'core/strategies/sequential_strategy';
+import BestConnectedEverStrategy from 'core/strategies/best_connected_ever_strategy';
+import CachedStrategy from 'core/strategies/cached_strategy';
+import DelayedStrategy from 'core/strategies/delayed_strategy';
+import IfStrategy from 'core/strategies/if_strategy';
+import FirstConnectedStrategy from 'core/strategies/first_connected_strategy';
+
+function testSupportsStrategy(strategy: Strategy) {
+  return function () {
+    return strategy.isSupported();
+  }
+}
+
+var getDefaultStrategy = function(config : any, defineTransport: Function) : Strategy {
+  var definedTransports = {};
+
+  function defineTransportStrategy(name : string, type : string, priority : number, options, manager? : TransportManager) {
+    var transport = defineTransport(config, name, type, priority, options, manager);
+
+    definedTransports[name] = transport;
+
+    return transport
   }
 
-  return [
-    [":def", "ws_options", {
-      hostNonTLS: config.wsHost + ":" + config.wsPort,
-      hostTLS: config.wsHost + ":" + config.wssPort,
-      httpPath: config.wsPath
-    }],
-    [":def", "wss_options", [":extend", ":ws_options", {
-      useTLS: true
-    }]],
-    [":def", "sockjs_options", {
-      hostNonTLS: config.httpHost + ":" + config.httpPort,
-      hostTLS: config.httpHost + ":" + config.httpsPort,
-      httpPath: config.httpPath
-    }],
-    [":def", "timeouts", {
-      loop: true,
-      timeout: 15000,
-      timeoutLimit: 60000
-    }],
+  var ws_options = {
+    hostNonTLS: config.wsHost + ":" + config.wsPort,
+    hostTLS: config.wsHost + ":" + config.wssPort,
+    httpPath: config.wsPath
+  };
+  var wss_options = Collections.extend({}, ws_options, {
+    useTLS: true
+  });
+  var sockjs_options = {
+    hostNonTLS: config.httpHost + ":" + config.httpPort,
+    hostTLS: config.httpHost + ":" + config.httpsPort,
+    httpPath: config.httpPath
+  };
+  var timeouts = {
+    loop: true,
+    timeout: 15000,
+    timeoutLimit: 60000
+  };
 
-    [":def", "ws_manager", [":transport_manager", {
-      lives: 2,
-      minPingDelay: 10000,
-      maxPingDelay: config.activity_timeout
-    }]],
-    [":def", "streaming_manager", [":transport_manager", {
-      lives: 2,
-      minPingDelay: 10000,
-      maxPingDelay: config.activity_timeout
-    }]],
+  var ws_manager = new TransportManager({
+    lives: 2,
+    minPingDelay: 10000,
+    maxPingDelay: config.activity_timeout
+  });
+  var streaming_manager = new TransportManager({
+    lives: 2,
+    minPingDelay: 10000,
+    maxPingDelay: config.activity_timeout
+  });
 
-    [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
-    [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
-    [":def_transport", "sockjs", "sockjs", 1, ":sockjs_options"],
-    [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":sockjs_options", ":streaming_manager"],
-    [":def_transport", "xdr_streaming", "xdr_streaming", 1, ":sockjs_options", ":streaming_manager"],
-    [":def_transport", "xhr_polling", "xhr_polling", 1, ":sockjs_options"],
-    [":def_transport", "xdr_polling", "xdr_polling", 1, ":sockjs_options"],
+  var ws_transport = defineTransportStrategy("ws", "ws", 3, ws_options, ws_manager);
+  var wss_transport = defineTransportStrategy("wss", "ws", 3, wss_options, ws_manager);
+  var sockjs_transport = defineTransportStrategy("sockjs", "sockjs", 1, sockjs_options);
+  var xhr_streaming_transport = defineTransportStrategy("xhr_streaming", "xhr_streaming", 1, sockjs_options, streaming_manager);
+  var xdr_streaming_transport = defineTransportStrategy("xdr_streaming", "xdr_streaming", 1, sockjs_options, streaming_manager);
+  var xhr_polling_transport = defineTransportStrategy("xhr_polling", "xhr_polling", 1, sockjs_options);
+  var xdr_polling_transport = defineTransportStrategy("xdr_polling", "xdr_polling", 1, sockjs_options);
 
-    [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
-    [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
-    [":def", "sockjs_loop", [":sequential", ":timeouts", ":sockjs"]],
+  var ws_loop = new SequentialStrategy([ws_transport], timeouts);
+  var wss_loop = new SequentialStrategy([wss_transport], timeouts);
+  var sockjs_loop = new SequentialStrategy([sockjs_transport], timeouts);
+  var streaming_loop = new SequentialStrategy([new IfStrategy(testSupportsStrategy(xhr_streaming_transport), xhr_streaming_transport, xdr_streaming_transport)], timeouts);
+  var polling_loop = new SequentialStrategy([new IfStrategy(testSupportsStrategy(xhr_polling_transport), xhr_polling_transport, xdr_polling_transport)], timeouts);
 
-    [":def", "streaming_loop", [":sequential", ":timeouts",
-      [":if", [":is_supported", ":xhr_streaming"],
-        ":xhr_streaming",
-        ":xdr_streaming"
-      ]
-    ]],
-    [":def", "polling_loop", [":sequential", ":timeouts",
-      [":if", [":is_supported", ":xhr_polling"],
-        ":xhr_polling",
-        ":xdr_polling"
-      ]
-    ]],
+  var http_loop = new SequentialStrategy([new IfStrategy(
+      testSupportsStrategy(streaming_loop),
+      new BestConnectedEverStrategy([streaming_loop, new DelayedStrategy(polling_loop, { delay: 4000 })]),
+      polling_loop
+  )], timeouts);
 
-    [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
-      ":best_connected_ever",
-        ":streaming_loop",
-        [":delayed", 4000, [":polling_loop"]]
-    ], [
-      ":polling_loop"
-    ]]],
+  var http_fallback_loop = new IfStrategy(testSupportsStrategy(http_loop), http_loop, sockjs_loop);
 
-    [":def", "http_fallback_loop",
-      [":if", [":is_supported", ":http_loop"], [
-        ":http_loop"
-      ], [
-        ":sockjs_loop"
-      ]]
-    ],
+  var wsStrategy;
+  if (config.useTLS) {
+    wsStrategy = new BestConnectedEverStrategy([ws_loop, new DelayedStrategy(http_fallback_loop, { delay: 2000 })])
+  } else {
+    wsStrategy = new BestConnectedEverStrategy([
+      ws_loop,
+      new DelayedStrategy(wss_loop, { delay: 2000 }),
+      new DelayedStrategy(http_fallback_loop, { delay: 5000 })
+    ])
+  }
 
-    [":def", "strategy",
-      [":cached", 1800000,
-        [":first_connected",
-          [":if", [":is_supported", ":ws"],
-            wsStrategy,
-            ":http_fallback_loop"
-          ]
-        ]
-      ]
-    ]
-  ];
+  return new CachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_fallback_loop)), definedTransports, {
+    ttl: 1800000,
+    timeline: config.timeline,
+    useTLS: config.useTLS
+  });
 };
 
 export default getDefaultStrategy;

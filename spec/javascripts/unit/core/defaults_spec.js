@@ -10,9 +10,7 @@ describe("Default", function() {
         if (ws) {
           spyOn(WSTransport, "isSupported").andReturn(true);
         }
-        var strategy = StrategyBuilder.build(
-          Runtime.getDefaultStrategy(DefaultConfig.getGlobalConfig())
-        );
+        var strategy = Runtime.getDefaultStrategy(DefaultConfig.getGlobalConfig(), StrategyBuilder.defineTransport);
         expect(strategy.isSupported()).toBe(true);
       });
     }
