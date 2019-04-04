@@ -9,6 +9,7 @@ import HTTPFactory from 'core/http/http_factory';
 import HTTPRequest from 'core/http/http_request';
 import Pusher from 'core/pusher';
 import JSONPRequest from './web/dom/jsonp_request';
+import Strategy from "core/strategies/strategy";
 
 /*
 This interface is implemented in web/runtime, node/runtime, react-native/runtime
@@ -29,7 +30,7 @@ interface Runtime {
   createXHR() : Ajax;
   createWebSocket(url : string) : Socket;
   getNetwork() : Reachability;
-  getDefaultStrategy(config : any) : any;
+  getDefaultStrategy(config : any, defineTransport: Function) : Strategy;
   Transports: TransportsTable;
   getWebSocketAPI() : new(url: string) => Socket;
   getXHRAPI() : new() => Ajax;

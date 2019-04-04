@@ -15,12 +15,12 @@ import * as Collections from '../utils/collections';
  */
 export default class CachedStrategy implements Strategy {
   strategy: Strategy;
-  transports: TransportStrategy[];
+  transports: {};
   ttl: number;
   usingTLS: boolean;
   timeline: Timeline;
 
-  constructor(strategy : Strategy, transports: TransportStrategy[], options : StrategyOptions) {
+  constructor(strategy : Strategy, transports: {}, options : StrategyOptions) {
     this.strategy = strategy;
     this.transports = transports;
     this.ttl = options.ttl || 1800*1000;
