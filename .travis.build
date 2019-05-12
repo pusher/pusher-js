@@ -2,7 +2,7 @@
 
 set -e
 
-if [ "$TRAVIS_BRANCH" == "master" ]; then
+if [ "$TRAVIS_PULL_REQUEST" != "false" ] || [ "$TRAVIS_BRANCH" == "master" ]; then
   export CI='full' ;
 else
   export CI='basic' ;
@@ -10,9 +10,9 @@ fi
 
 echo "Running web unit tests..."
 make web_unit
+
 echo "Running web integration tests..."
 make web_integration
-
 
 echo "Running node unit tests..."
 make node_unit
