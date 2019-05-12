@@ -33,7 +33,7 @@ module.exports = {
   colors: true,
   autoWatch: true,
 
-  browsers: ['Chrome'],
+  browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
   captureTimeout: 3e5,
   browserNoActivityTimeout: 3e5,
   browserDisconnectTimeout: 3e5,
