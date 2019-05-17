@@ -6,25 +6,21 @@
     "sourceMap": true,
     "target": "es3",
     "removeComments": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "lib": [
+      "ScriptHost",
+      "DOM",
+      "ES5",
+      "ES2015"
+    ]
   },
+  "include": [
+    "src/d.ts/**/*"
+  ],
   "files": [
     "src/core/pusher.ts",
-    "src/d.ts/global/global.d.ts",
-    "src/d.ts/faye-websocket/faye-websocket.d.ts",
-    "src/d.ts/xmlhttprequest/xmlhttprequest.d.ts",
-    "src/d.ts/window/websocket.d.ts",
-    "src/d.ts/window/xmlhttprequest.d.ts",
-    "src/d.ts/window/sockjs.d.ts",
-    "src/d.ts/window/events.d.ts",
-    "src/d.ts/react-native/react-native.d.ts",
-    "src/d.ts/module/module.d.ts",
-    "src/d.ts/fetch/promise.d.ts",
-    "src/d.ts/fetch/fetch.d.ts",
     "src/runtimes/web/net_info.ts",
-    "src/runtimes/react-native/net_info.ts",
-    "src/d.ts/tweetnacl-util/index.d.ts",
-    "src/d.ts/tweetnacl/index.d.ts"
+    "src/runtimes/react-native/net_info.ts"
   ],
   "exclude": [
     "node_modules"
