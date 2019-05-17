@@ -46,11 +46,11 @@
     "karma-verbose-reporter": "0.0.3",
     "karma-webpack": "^1.7.0",
     "object-assign-deep": "0.0.4",
-    "string-replace-webpack-plugin": "0.0.3",
     "ts-loader": "^0.8.2",
     "typescript": "^1.8.0",
     "uglify-js": "^2.6.2",
-    "webpack": "^1.12.9",
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2",
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {

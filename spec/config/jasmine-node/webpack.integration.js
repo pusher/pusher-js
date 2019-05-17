@@ -14,6 +14,6 @@ baseConfig.resolve.alias = {
   pusher_integration: 'core/index',
   integration: 'node/integration'
 }
-baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
+baseConfig.resolve.modules.push('spec/javascripts/helpers')
 
 module.exports = baseConfig;
