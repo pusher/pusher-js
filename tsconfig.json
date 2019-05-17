@@ -8,6 +8,10 @@
     "removeComments": true,
     "moduleResolution": "node"
   },
+  "include": [
+    "src/core/**/*",
+    "src/runtime/**/*"
+  ],
   "files": [
     "src/core/pusher.ts",
     "src/d.ts/global/global.d.ts",
@@ -24,7 +28,8 @@
     "src/runtimes/web/net_info.ts",
     "src/runtimes/react-native/net_info.ts",
     "src/d.ts/tweetnacl-util/index.d.ts",
-    "src/d.ts/tweetnacl/index.d.ts"
+    "src/d.ts/tweetnacl/index.d.ts",
+    "src/d.ts/@react-native-community/netinfo/index.d.ts"
   ],
   "exclude": [
     "node_modules"

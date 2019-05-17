@@ -1,4 +1,4 @@
-import {NetInfo as NativeNetInfo} from 'react-native';
+import { default as NativeNetInfo }  from '@react-native-community/netinfo';
 import EventsDispatcher from 'core/events/dispatcher';
 import Util from 'core/util';
 import Reachability from 'core/reachability';

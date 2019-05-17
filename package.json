@@ -54,6 +54,7 @@
     "webpack-dev-server": "^1.14.1"
   },
   "dependencies": {
+    "@react-native-community/netinfo": "^2.0.10",
     "faye-websocket": "0.9.4",
     "tweetnacl": "^1.0.0",
     "tweetnacl-util": "^0.15.0",
