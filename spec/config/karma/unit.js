@@ -11,10 +11,10 @@ if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'unit');
 
   // only run worker test on Chrome for CI
-  if (process.env.CI) config.browsers = ['bs_chrome_49'];
+  if (process.env.CI) config.browsers = ['bs_chrome_74'];
 }
 
 module.exports = function(suite) {
-  config.logLevel = suite.LOG_INFO,
+  config.logLevel = suite.LOG_DISABLE;
   suite.set(config);
 };

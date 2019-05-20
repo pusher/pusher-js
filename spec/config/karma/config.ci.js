@@ -1,51 +1,28 @@
 var config = {
   browserStack: {
-    startTunnel: true
+    startTunnel: true,
+    timeout: 1800
   },
   customLaunchers: {
-    bs_ie8: {
+    bs_chrome_74: {
       base: 'BrowserStack',
-      browser: 'ie',
-      browser_version: '8.0',
-      os: "Windows",
-      os_version: '7'
-    },
-    bs_ie7: {
-      base: 'BrowserStack',
-      os_version: "XP",
-      browser: "ie",
-      browser_version: "7.0",
-      os: "Windows"
-    },
-    bs_opera_12_15: {
-      base: 'BrowserStack',
-      os_version: "8",
-      browser: "opera",
-      browser_version: "12.15",
-      os: "Windows"
-    },
-    bs_firefox_3_6: {
-      base: 'BrowserStack',
-      os_version: "7",
-      browser: "firefox",
-      browser_version: "3.6",
-      device: null,
-      os: "Windows"
-    },
-    bs_chrome_49: {
-      base: 'BrowserStack',
-      os_version: "El Capitan",
-      browser: "chrome",
-      browser_version: "49.0",
-      device: null,
+      os_version: "Mojave",
+      browser: "Chrome",
+      browser_version: "74.0",
       os: "OS X"
     },
-    bs_safari_5: {
+    bs_firefox_66: {
       base: 'BrowserStack',
-      os_version: "Snow Leopard",
-      browser: "safari",
-      browser_version: "5.1",
-      device: null,
+      os_version: "Mojave",
+      browser: "Firefox",
+      browser_version: "66.0",
+      os: "OS X"
+    },
+    bs_safari_12: {
+      base: 'BrowserStack',
+      os_version: "Mojave",
+      browser: "Safari",
+      browser_version: "12",
       os: "OS X"
     }
   }
@@ -54,7 +31,7 @@ var config = {
 if (process.env.CI === 'full') {
   config.browsers = Object.keys(config.customLaunchers);
 } else {
-  config.browsers = ['bs_ie7', 'bs_ie8', 'bs_opera_12_15'];
+  config.browsers = ['bs_chrome_74'];
 }
 
 module.exports = config;
