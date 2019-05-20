@@ -12,11 +12,16 @@ var objectAssign = require('object-assign-deep');
   We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
   We also add 'src/' so that the runtimes/web folder can conveniently import 'core/' modules.
 */
+
+var filename = process.env.MODE === "development" ?
+  "pusher.js":
+  "pusher.min.js";
+
 var config = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
-    filename: "pusher.js",
+    filename: filename,
     libraryTarget: "umd"
   },
   resolve: {

@@ -8,6 +8,7 @@ var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8')
 banner = banner.replace("<VERSION>", Config.version);
 
 module.exports = {
+  mode: process.env.MODE || "production",
   entry: {
     pusher: "./src/core/index",
   },
@@ -17,7 +18,16 @@ module.exports = {
   module: {
     rules: [
       { test: /\.ts$/, loader: 'ts-loader' },
-      { test : /\.js$/, loader: 'es3ify-loader'}
+      {
+        test: /\.m?js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+      }
     ]
   },
   plugins: [
