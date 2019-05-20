@@ -28,9 +28,6 @@
   },
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
-    "@babel/core": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
-    "babel-loader": "^8.0.6",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^2.2.1",
     "jasmine-node": "^1.14.5",
