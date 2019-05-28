@@ -4,7 +4,7 @@
     "outDir": "lib/",
     "declaration": false,
     "sourceMap": true,
-    "target": "es3",
+    "target": "es5",
     "removeComments": true,
     "moduleResolution": "node",
     "lib": [
@@ -12,15 +12,14 @@
       "DOM",
       "ES5",
       "ES2015"
-    ]
+    ],
+    "downlevelIteration": true
   },
   "include": [
     "src/d.ts/**/*"
   ],
   "files": [
-    "src/core/pusher.ts",
-    "src/runtimes/web/net_info.ts",
-    "src/runtimes/react-native/net_info.ts"
+    "src/core/pusher.ts"
   ],
   "exclude": [
     "node_modules"
