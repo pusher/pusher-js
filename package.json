@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
+    "@react-native-community/netinfo": "^3.2.0",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^2.2.1",
     "jasmine-node": "^1.14.5",
@@ -45,6 +46,8 @@
     "karma-verbose-reporter": "0.0.3",
     "karma-webpack": "^1.7.0",
     "object-assign-deep": "0.0.4",
+    "react": "^16.8.6",
+    "react-native": "^0.59.8",
     "ts-loader": "^6.0.0",
     "typescript": "^3.4.5",
     "uglify-js": "^2.6.2",
