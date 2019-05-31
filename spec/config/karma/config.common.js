@@ -14,6 +14,7 @@ module.exports = {
   },
 
   webpack: {
+    mode: 'development',
     resolve: {
       modules: [
         'node_modules',
@@ -33,7 +34,7 @@ module.exports = {
   colors: true,
   autoWatch: true,
 
-  browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+  browsers: ['Chrome'],
   captureTimeout: 3e5,
   browserNoActivityTimeout: 3e5,
   browserDisconnectTimeout: 3e5,

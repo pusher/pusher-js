@@ -1,5 +1,4 @@
 var Pusher = require('pusher_integration');
-// var Pusher = require('core/pusher').default;
 var TestEnv = require('testenv');
 
 if (TestEnv === "web") {
@@ -15,7 +14,7 @@ var Timer = require("core/utils/timers").OneOffTimer;
 var Collections = require('core/utils/collections');
 var Defaults = require('core/defaults').default;
 var Runtime = require('runtime').default;
-var testBuilder = require('./test_builder')
+var integrationTestBuilder = require('./test_builder')
 
 Integration.describe("Pusher", function() {
   // Integration tests in Jasmine need to have setup and teardown phases as
@@ -30,6 +29,17 @@ Integration.describe("Pusher", function() {
   var _channel_auth_endpoint;
   var _Dependencies;
 
+  // running the integration tests against a local pusher region has significant
+  // speed benefits. Allow the tester to inject a pusher app key/cluster and a
+  // suitable auth endpoint.
+  var pusherKey = process.env.PUSHER_APP_KEY || '7324d55a5eeb8f554761';
+  var basePusherConfig = {
+    cluster: process.env.PUSHER_APP_CLUSTER || 'mt1',
+    authEndpoint: process.env.PUSHER_AUTH_ENDPOINT || Integration.API_URL + "/auth",
+    authTransport: (TestEnv === 'web') ? 'jsonp' : 'ajax',
+    disableStats: true,
+  }
+
   it("should prepare the global config", function() {
     // TODO fix how versions work in unit tests
     _VERSION = Defaults.VERSION;
@@ -37,6 +47,9 @@ Integration.describe("Pusher", function() {
     _channel_auth_endpoint = Defaults.channel_auth_endpoint;
     _Dependencies = Dependencies;
 
+    // TODO I'd rather be specific with the configuration of the test instances.
+    // Should add a test to test the default config, since being explicit
+    // removes an implicit test of the handling of the default config
     Defaults.VERSION = "8.8.8";
     Defaults.channel_auth_transport = (TestEnv === 'web') ? 'jsonp' : 'ajax';
     Defaults.channel_auth_endpoint = Integration.API_URL + "/auth";
@@ -52,31 +65,15 @@ Integration.describe("Pusher", function() {
     }
   });
 
-  // buildIntegrationTests("ws", false);
-  testBuilder.buildIntegrationTests("ws", true);
+  var testConfigs = getTestConfigs()
+  if (process.env.MINIMAL_INTEGRATION_TESTS) {
+    testsConfigs = testConfigs.filter((config) => config.forceTLS && config.transport === "ws")
+  }
 
-  // if (Runtime.isXHRSupported()) {
-  //   // CORS-compatible browsers
-  //   if (TestEnv !== "web" || !/Android 2\./i.test(navigator.userAgent)) {
-  //     // Android 2.x does a lot of buffering, which kills streaming
-  //     buildIntegrationTests("xhr_streaming", false);
-  //     buildIntegrationTests("xhr_streaming", true);
-  //   }
-  //   buildIntegrationTests("xhr_polling", false);
-  //   buildIntegrationTests("xhr_polling", true);
-  // } else if (Runtime.isXDRSupported(false)) {
-  //   buildIntegrationTests("xdr_streaming", false);
-  //   buildIntegrationTests("xdr_streaming", true);
-  //   buildIntegrationTests("xdr_polling", false);
-  //   buildIntegrationTests("xdr_polling", true);
-  //   // IE can fall back to SockJS if protocols don't match
-  //   // No SockJS TLS tests due to the way JS files are served
-  //   buildIntegrationTests("sockjs", false);
-  // } else {
-  //   // Browsers using SockJS
-  //   buildIntegrationTests("sockjs", false);
-  //   buildIntegrationTests("sockjs", true);
-  // }
+  for (testConfig of testConfigs) {
+    integrationTestBuilder.build(testConfig, pusherKey, basePusherConfig)
+  }
+
 
   it("should restore the global config", function() {
     Dependencies = _Dependencies;
@@ -85,3 +82,40 @@ Integration.describe("Pusher", function() {
     Defaults.VERSION = _VERSION;
   });
 });
+
+function getTestConfigs() {
+  var testConfigs = [{
+    transport: "ws",
+    forceTLS: true,
+  },{
+    transport: "ws",
+    forceTLS: false,
+  }];
+
+  if (Runtime.isXHRSupported()) {
+    // CORS-compatible browsers
+    if (TestEnv !== "web" || !/Android 2\./i.test(navigator.userAgent)) {
+      testConfigs.push({ transport: "xhr_streaming", forceTLS: true})
+      testConfigs.push({ transport: "xhr_streaming", forceTLS: false})
+    }
+    testConfigs.push({transport: "xhr_polling", forceTLS: true})
+    testConfigs.push({transport: "xhr_polling", forceTLS: false})
+
+  } else if (Runtime.isXDRSupported(false)) {
+
+    testConfigs.push({transport: "xdr_streaming", forceTLS: true})
+    testConfigs.push({transport: "xdr_streaming", forceTLS: false})
+    testConfigs.push({transport: "xdr_polling", forceTLS: true})
+    testConfigs.push({transport: "xdr_polling", forceTLS: false})
+
+    // IE can fall back to SockJS if protocols don't match
+    // No SockJS TLS tests due to the way JS files are served
+    testConfigs.push({transport: "sockjs", forceTLS: false})
+
+  } else {
+    // Browsers using SockJS
+    testConfigs.push({ transport: "sockjs", forceTLS: true})
+    testConfigs.push({ transport: "sockjs", forceTLS: false})
+  }
+  return testConfigs
+}

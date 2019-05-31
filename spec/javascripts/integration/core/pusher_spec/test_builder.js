@@ -1,5 +1,4 @@
-// var Pusher = require('pusher_integration');
-var Pusher = require('core/pusher').default;
+var Pusher = require('pusher_integration');
 
 var Integration = require("integration");
 var Timer = require("core/utils/timers").OneOffTimer;
@@ -22,7 +21,12 @@ function subscribe(pusher, channelName, callback) {
   return channel;
 }
 
-function buildIntegrationTests(transport, forceTLS) {
+function build(testConfig, pusherKey, pusherCfg) {
+  var forceTLS = testConfig.forceTLS;
+  var transport = testConfig.transport;
+
+  pusherCfg = Collections.extend({}, pusherCfg, {forceTLS: forceTLS});
+
   if (!TRANSPORTS[transport].isSupported({ useTLS: forceTLS })) {
     return;
   }
@@ -39,15 +43,9 @@ function buildIntegrationTests(transport, forceTLS) {
 
     describe("setup", function() {
       it("should open connections", function() {
-        pusher1 = new Pusher("7324d55a5eeb8f554761", {
-          forceTLS: forceTLS,
-          disableStats: true
-        });
+        pusher1 = new Pusher(pusherKey, pusherCfg);
         if (canRunTwoConnections(transport)) {
-          pusher2 = new Pusher("7324d55a5eeb8f554761", {
-            forceTLS: forceTLS,
-            disableStats: true
-          });
+          pusher2 = new Pusher(pusherKey, pusherCfg);
           waitsFor(function() {
             return pusher2.connection.state === "connected";
           }, "second connection to be established", 20000);
@@ -752,9 +750,4 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     });
   });
 }
-module.exports = {
-  buildPublicChannelTests,
-  buildClientEventsTests,
-  buildPresenceChannelTests,
-  buildIntegrationTests,
-}
+module.exports = {build}
