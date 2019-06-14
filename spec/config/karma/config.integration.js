@@ -1,11 +1,8 @@
-var version = require('../../../package').version;
 var objectAssign = require('object-assign-deep');
-var webpackConfig = require('../../../webpack/config.shared');
 var webpack = require('webpack');
-var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var commonConfig = require('./config.common');
 
-module.exports = objectAssign(commonConfig, {
+module.exports = objectAssign({}, commonConfig, {
   files: [
     '**/spec/javascripts/integration/index.web.js'
   ],
@@ -13,8 +10,9 @@ module.exports = objectAssign(commonConfig, {
     '**/spec/javascripts/integration/index.web.js': ['webpack']
   },
 
-  webpack: objectAssign(webpackConfig, {
+  webpack: {
     resolve: {
+      modules: ['spec/javascripts/helpers/web'],
       alias: {
         integration: 'web/integration'
       }
@@ -27,5 +25,5 @@ module.exports = objectAssign(commonConfig, {
         'process.env.PUSHER_AUTH_ENDPOINT': JSON.stringify(process.env.PUSHER_AUTH_ENDPOINT),
       })
     ],
-  })
+  }
 });
