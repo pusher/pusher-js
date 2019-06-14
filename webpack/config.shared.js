@@ -1,10 +1,15 @@
 'use strict';
 
 var webpack = require('webpack');
-var fs = require('fs');
 var Config = require('./hosting_config');
-var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8')
-banner = banner.replace("<VERSION>", Config.version);
+var fs = require('fs');
+
+var banner = fs
+  .readFileSync("./src/core/pusher-licence.js", "utf8")
+  .replace("<VERSION>", Config.version);
+
+// This is the base webpack config for all runtimes. Runtime specific webpack
+// configs will overwrite/append keys where necessary. 
 
 module.exports = {
   mode: process.env.MODE || "production",
@@ -12,12 +17,13 @@ module.exports = {
     pusher: "./src/core/index",
   },
   resolve: {
-    extensions: ['.webpack.js', '.web.js', '.ts', '.js']
+    extensions: ['.webpack.js', '.web.js', '.ts', '.js'],
+    modules: ['src', 'src/runtimes', 'node_modules'],
   },
   module: {
     rules: [
       { test: /\.ts$/, loader: 'ts-loader' },
-    ]
+    ],
   },
   plugins: [
     new webpack.BannerPlugin({banner:  banner, raw: true}),

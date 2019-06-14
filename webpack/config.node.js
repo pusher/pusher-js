@@ -1,16 +1,8 @@
 var path = require("path");
 var objectAssign = require('object-assign-deep');
+var sharedConfig = require('./config.shared');
 
-/*
-  Upon importing the 'runtime' module, this node build is made to look at
-  src/runtimes/node/runtime.ts by the below webpack resolution config.
-  This is achieved by adding 'src/runtimes/node' to the resolve.modules array
-
-  -- CONVENIENCE --
-  We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
-  We also add 'src/' so that the runtimes/node folder can conveniently import 'core/' modules.
-*/
-module.exports = objectAssign(require('./config.shared'), {
+module.exports = objectAssign(sharedConfig, {
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",
@@ -19,12 +11,6 @@ module.exports = objectAssign(require('./config.shared'), {
   },
   target: "node",
   resolve: {
-    modules: ['src/', 'src/runtimes/node', 'src/runtimes']
+    modules: ['src/runtimes/node']
   },
-  externals: {
-    "faye-websocket": "commonjs faye-websocket",
-    "xmlhttprequest": "commonjs xmlhttprequest",
-    "tweetnacl": "commonjs tweetnacl",
-    "tweetnacl-util": "commonjs tweetnacl-util"
-  }
 });

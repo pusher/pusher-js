@@ -24,7 +24,7 @@ module.exports = objectAssign(require('./config.shared'),{
     "react-native": "react-native", // our Reachability implementation needs to reference react-native.
   },
   resolve: {
-    modules: ['src/', 'src/runtimes/react-native', 'src/runtimes', 'node_modules'],
+    modules: ['src/runtimes/react-native'],
     // at the moment, react-native doesn't contain the requisite crypto APIs to
     // use tweetnacl/tweetnacl-utils.
     //

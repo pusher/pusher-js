@@ -2,6 +2,7 @@ var path = require("path");
 var webpack = require('webpack');
 var NormalModuleReplacementPlugin = webpack.NormalModuleReplacementPlugin;
 var objectAssign = require('object-assign-deep');
+var sharedConfig = require('./config.shared');
 
 /*
   Upon importing the 'runtime' module, this web build is made to look at
@@ -17,7 +18,7 @@ var filename = process.env.MODE === "development" ?
   "pusher.js":
   "pusher.min.js";
 
-var config = objectAssign(require('./config.shared'),{
+var config = objectAssign(sharedConfig, {
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/web"),
@@ -25,7 +26,7 @@ var config = objectAssign(require('./config.shared'),{
     libraryTarget: "umd"
   },
   resolve: {
-    modules: ['src/', 'src/runtimes/web', 'src/runtimes', 'node_modules']
+    modules: ['src/runtimes/web']
   },
   plugins: [
     new webpack.DefinePlugin({
