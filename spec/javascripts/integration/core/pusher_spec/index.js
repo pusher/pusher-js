@@ -67,7 +67,7 @@ Integration.describe("Pusher", function() {
 
   var testConfigs = getTestConfigs()
   if (process.env.MINIMAL_INTEGRATION_TESTS) {
-    testsConfigs = testConfigs.filter((config) => config.forceTLS && config.transport === "ws")
+    testConfigs = testConfigs.filter((config) => config.forceTLS && config.transport === "ws")
   }
 
   for (testConfig of testConfigs) {

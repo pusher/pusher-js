@@ -67,10 +67,6 @@ function build(testConfig, pusherKey, pusherCfg) {
       var channelName = Integration.getRandomName("private-integration");
       var channel1, channel2;
 
-      buildPublicChannelTests(
-        function() { return pusher1; }
-      );
-
       buildSubscriptionStateTests(
         function() { return pusher1; },
         "private-"
@@ -86,10 +82,6 @@ function build(testConfig, pusherKey, pusherCfg) {
     });
 
     describe("with a presence channel", function() {
-      buildPublicChannelTests(
-        function() { return pusher1; }
-      );
-
       buildSubscriptionStateTests(
         function() { return pusher1; },
         "presence-"
