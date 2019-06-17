@@ -12,11 +12,8 @@ module.exports = {
     dir : 'coverage/'
   },
 
-  preprocessors: {
-    '**/spec/javascripts/node_modules/**/*.ts': ['webpack']
-  },
-
   webpack: objectAssign({}, webpackConfig, {
+    mode: 'development',
     resolve: {
       modules: [
         'src/runtimes/web',

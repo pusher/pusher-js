@@ -1,5 +1,12 @@
 var sharedTestsContext = require.context("./core", true, /_spec$/);
-sharedTestsContext.keys().forEach(sharedTestsContext);
+var testConfigs = [{
+  transport: "ws",
+  forceTLS: true,
+},{
+  transport: "ws",
+  forceTLS: false,
+}];
 
-// var nodeTestsContext = require.context("./node", true, /_spec$/);
-// nodeTestsContext.keys().forEach(nodeTestsContext)
+sharedTestsContext.keys().forEach((key) => {
+  sharedTestsContext(key)(testConfigs);
+})

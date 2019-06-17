@@ -10,5 +10,4 @@ class PusherIntegration extends Pusher {
     )}
 
 }
-
 module.exports = PusherIntegration;

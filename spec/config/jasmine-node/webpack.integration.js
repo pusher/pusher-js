@@ -19,10 +19,9 @@ module.exports = objectAssign({}, baseConfig, {
     libraryTarget: "var"
   },
   resolve: {
-    modules: ['spec/javascripts/helpers'],
+    modules: ['spec/javascripts/helpers', 'spec/javascripts/helpers/node'],
     alias: {
       pusher_integration: 'core/index',
-      integration: 'node/integration',
       'dom/dependencies': 'node/mock-dom-dependencies',
       'dom/dependency_loader': 'node/mock-dom-dependencies'
     },
