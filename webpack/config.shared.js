@@ -12,7 +12,9 @@ module.exports = {
     pusher: "./src/core/index",
   },
   resolve: {
-    extensions: ['.webpack.js', '.web.js', '.ts', '.js']
+    extensions: ['.webpack.js', '.web.js', '.ts', '.js'],
+    // add runtimes for easier importing of isomorphic runtime modules
+    modules: ['src', 'src/runtimes', 'node_modules'],
   },
   module: {
     rules: [

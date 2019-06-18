@@ -2,17 +2,9 @@ var path = require("path");
 var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPlugin;
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
+var configShared = require("./config.shared");
 
-/*
-  Upon importing the 'runtime' module, this react-native build is made to look at
-  src/runtimes/react-native/runtime.ts by the below webpack resolution config.
-  This is achieved by adding 'src/runtimes/react-native' to the resolve.modulesDirectories array
-
-  -- CONVENIENCE --
-  We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
-  We also add 'src/' so that the runtimes/react-native folder can conveniently import 'core/' modules.
-*/
-module.exports = objectAssign(require('./config.shared'),{
+module.exports = objectAssign({}, configShared, {
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",
@@ -24,7 +16,7 @@ module.exports = objectAssign(require('./config.shared'),{
     "react-native": "react-native", // our Reachability implementation needs to reference react-native.
   },
   resolve: {
-    modules: ['src/', 'src/runtimes/react-native', 'src/runtimes', 'node_modules'],
+    modules: ['src/runtimes/react-native'],
     // at the moment, react-native doesn't contain the requisite crypto APIs to
     // use tweetnacl/tweetnacl-utils.
     //
