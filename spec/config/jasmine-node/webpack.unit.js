@@ -1,5 +1,7 @@
 var baseConfig = require('../../../webpack/config.node');
+var webpack = require('webpack');
 var path = require('path');
+var dummyDependencies = {};
 
 baseConfig.entry = __dirname + '/../../javascripts/unit/index.node';
 
@@ -10,6 +12,8 @@ baseConfig.output = {
 },
 
 baseConfig.externals.testenv = "'node'";
-baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
+baseConfig.resolve.modules.push('spec/javascripts/helpers')
+baseConfig.resolve.alias = baseConfig.resolve.alias || {}
+baseConfig.resolve.alias['dom/dependencies'] = 'node/mock-dom-dependencies'
 
 module.exports = baseConfig;

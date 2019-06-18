@@ -18,7 +18,7 @@ module.exports = function(config, suite) {
   var index = '**/spec/javascripts/'+suite+'/index.worker.js';
   config.preprocessors[index] = ['webpack'];
 
-  config.webpack.resolve.modulesDirectories = [
+  config.webpack.resolve.modules = [
     'node_modules',
     'web_modules',
     'src',
