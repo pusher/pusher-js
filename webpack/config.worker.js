@@ -4,11 +4,15 @@ var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 var webpack = require('webpack');
 
+var filename = process.env.MODE === "development" ?
+  "pusher.worker.js":
+  "pusher.worker.min.js";
+
 var config = objectAssign(require('./config.shared'),{
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/worker"),
-    filename: "pusher.worker.js"
+    filename: filename
   },
   resolve: {
     // in order to import the appropriate runtime.ts
