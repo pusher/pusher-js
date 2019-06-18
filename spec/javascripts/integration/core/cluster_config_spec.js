@@ -1,11 +1,13 @@
 var TestEnv = require('testenv');
 var Pusher = require('pusher_integration');
+var DependenciesModule = require('dom/dependencies');
+var DependenciesReceiversModule = require('dom/dependency_loader');
 
 if (TestEnv === "web") {
   window.Pusher = Pusher;
-  var Dependencies = require('dom/dependencies').Dependencies;
-  var DependenciesReceivers = require('dom/dependencies').DependenciesReceivers;
-  var DependencyLoader = require('dom/dependency_loader').default;
+  var DependenciesReceivers = DependenciesModule.DependenciesReceivers;
+  var Dependencies = DependenciesModule.Dependencies;
+  var DependencyLoader = DependenciesReceiversModule.default;
 }
 
 var Integration = require("integration");
