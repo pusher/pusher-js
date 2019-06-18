@@ -9,11 +9,15 @@ baseConfig.output = {
     libraryTarget: "var"
 },
 
+baseConfig.externals = baseConfig.externals || {}
 baseConfig.externals.testenv = "'node'";
 baseConfig.resolve.alias = {
   pusher_integration: 'core/index',
-  integration: 'node/integration'
+  integration: 'node/integration',
+  'dom/dependencies': 'node/mock-dom-dependencies',
+  'dom/dependency_loader': 'node/mock-dom-dependencies'
 }
-baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
+
+baseConfig.resolve.modules.push('spec/javascripts/helpers')
 
 module.exports = baseConfig;
