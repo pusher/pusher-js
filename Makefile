@@ -19,7 +19,7 @@ web:
 	node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 	echo "Browser Minified Release:"
 	# cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
-	MINIFY=web node_modules/webpack/bin/webpack.js --config=webpack/config.min.js
+	MODE=development node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 
 react-native:
 	echo "React Native Release:"
@@ -33,7 +33,7 @@ worker:
 	echo "Web Worker Release:"
 	node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
 	echo "Web Worker Minified Release:"
-	MINIFY=worker node_modules/webpack/bin/webpack.js --config=webpack/config.min.js
+	MODE=development node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
 
 web_unit:
 	node_modules/karma/bin/karma start spec/config/karma/unit.js

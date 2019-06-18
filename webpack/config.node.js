@@ -4,7 +4,7 @@ var objectAssign = require('object-assign-deep');
 /*
   Upon importing the 'runtime' module, this node build is made to look at
   src/runtimes/node/runtime.ts by the below webpack resolution config.
-  This is achieved by adding 'src/runtimes/node' to the resolve.modulesDirectories array
+  This is achieved by adding 'src/runtimes/node' to the resolve.modules array
 
   -- CONVENIENCE --
   We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
@@ -19,7 +19,7 @@ module.exports = objectAssign(require('./config.shared'), {
   },
   target: "node",
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/node', 'src/runtimes']
+    modules: ['src/', 'src/runtimes/node', 'src/runtimes']
   },
   externals: {
     "faye-websocket": "commonjs faye-websocket",

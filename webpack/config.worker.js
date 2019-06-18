@@ -7,7 +7,7 @@ var webpack = require('webpack');
 /*
   Upon importing the 'runtime' module, this worker build is made to look at
   src/runtimes/worker/runtime.ts by the below webpack resolution config.
-  This is achieved by adding 'src/runtimes/worker' to the resolve.modulesDirectories array
+  This is achieved by adding 'src/runtimes/worker' to the resolve.modules array
 
   -- CONVENIENCE --
   We also add 'src/runtimes' to the list for convenient referencing of 'isomorphic/' implementations.
@@ -20,7 +20,7 @@ var config = objectAssign(require('./config.shared'),{
     filename: "pusher.worker.js"
   },
   resolve: {
-    modulesDirectories: ['src/', 'src/runtimes/worker', 'src/runtimes', 'node_modules']
+    modules: ['src/', 'src/runtimes/worker', 'src/runtimes', 'node_modules']
   },
   plugins: [
     new webpack.DefinePlugin({
