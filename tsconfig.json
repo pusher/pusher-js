@@ -1,12 +1,21 @@
 {
   "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "*": [
+        "*",
+        "runtimes/*",
+        "runtimes/react-native/*"
+      ]
+    },
     "module": "commonjs",
     "outDir": "lib/",
     "declaration": false,
     "sourceMap": true,
-    "target": "es5",
     "removeComments": true,
     "moduleResolution": "node",
+    "target": "ES6",
+    "module": "ES6",
     "lib": [
       "ScriptHost",
       "DOM",
