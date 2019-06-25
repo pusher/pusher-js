@@ -5,6 +5,7 @@ var objectAssign = require('object-assign-deep');
 var configShared = require("./config.shared");
 
 module.exports = objectAssign({}, configShared, {
+  devtool: 'none',
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",
@@ -13,7 +14,9 @@ module.exports = objectAssign({}, configShared, {
   },
   target: "node",
   externals: {
-    "react-native": "react-native", // our Reachability implementation needs to reference react-native.
+    // we depend on these packages but don't want to include them in the bundle
+    "@react-native-community/netinfo": "@react-native-community/netinfo",
+    "react-native": "react-native",
   },
   resolve: {
     modules: ['src/runtimes/react-native'],
