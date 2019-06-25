@@ -90,938 +90,4097 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = "./src/core/index.ts");
+/******/ 	return __webpack_require__(__webpack_require__.s = 16);
 /******/ })
 /************************************************************************/
-/******/ ({
+/******/ ([
+/* 0 */
+/***/ (function(module, exports, __webpack_require__) {
 
-/***/ "./node_modules/@babel/runtime/helpers/arrayWithHoles.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/arrayWithHoles.js ***!
-  \***************************************************************/
-/*! no static exports found */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var base64_1 = __webpack_require__(18);
+var util_1 = __webpack_require__(2);
+function extend(target) {
+    var sources = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        sources[_i - 1] = arguments[_i];
+    }
+    for (var i = 0; i < sources.length; i++) {
+        var extensions = sources[i];
+        for (var property in extensions) {
+            if (extensions[property] && extensions[property].constructor &&
+                extensions[property].constructor === Object) {
+                target[property] = extend(target[property] || {}, extensions[property]);
+            }
+            else {
+                target[property] = extensions[property];
+            }
+        }
+    }
+    return target;
+}
+exports.extend = extend;
+function stringify() {
+    var m = ["Pusher"];
+    for (var i = 0; i < arguments.length; i++) {
+        if (typeof arguments[i] === "string") {
+            m.push(arguments[i]);
+        }
+        else {
+            m.push(safeJSONStringify(arguments[i]));
+        }
+    }
+    return m.join(" : ");
+}
+exports.stringify = stringify;
+function arrayIndexOf(array, item) {
+    var nativeIndexOf = Array.prototype.indexOf;
+    if (array === null) {
+        return -1;
+    }
+    if (nativeIndexOf && array.indexOf === nativeIndexOf) {
+        return array.indexOf(item);
+    }
+    for (var i = 0, l = array.length; i < l; i++) {
+        if (array[i] === item) {
+            return i;
+        }
+    }
+    return -1;
+}
+exports.arrayIndexOf = arrayIndexOf;
+function objectApply(object, f) {
+    for (var key in object) {
+        if (Object.prototype.hasOwnProperty.call(object, key)) {
+            f(object[key], key, object);
+        }
+    }
+}
+exports.objectApply = objectApply;
+function keys(object) {
+    var keys = [];
+    objectApply(object, function (_, key) {
+        keys.push(key);
+    });
+    return keys;
+}
+exports.keys = keys;
+function values(object) {
+    var values = [];
+    objectApply(object, function (value) {
+        values.push(value);
+    });
+    return values;
+}
+exports.values = values;
+function apply(array, f, context) {
+    for (var i = 0; i < array.length; i++) {
+        f.call(context || global, array[i], i, array);
+    }
+}
+exports.apply = apply;
+function map(array, f) {
+    var result = [];
+    for (var i = 0; i < array.length; i++) {
+        result.push(f(array[i], i, array, result));
+    }
+    return result;
+}
+exports.map = map;
+function mapObject(object, f) {
+    var result = {};
+    objectApply(object, function (value, key) {
+        result[key] = f(value);
+    });
+    return result;
+}
+exports.mapObject = mapObject;
+function filter(array, test) {
+    test = test || function (value) { return !!value; };
+    var result = [];
+    for (var i = 0; i < array.length; i++) {
+        if (test(array[i], i, array, result)) {
+            result.push(array[i]);
+        }
+    }
+    return result;
+}
+exports.filter = filter;
+function filterObject(object, test) {
+    var result = {};
+    objectApply(object, function (value, key) {
+        if ((test && test(value, key, object, result)) || Boolean(value)) {
+            result[key] = value;
+        }
+    });
+    return result;
+}
+exports.filterObject = filterObject;
+function flatten(object) {
+    var result = [];
+    objectApply(object, function (value, key) {
+        result.push([key, value]);
+    });
+    return result;
+}
+exports.flatten = flatten;
+function any(array, test) {
+    for (var i = 0; i < array.length; i++) {
+        if (test(array[i], i, array)) {
+            return true;
+        }
+    }
+    return false;
+}
+exports.any = any;
+function all(array, test) {
+    for (var i = 0; i < array.length; i++) {
+        if (!test(array[i], i, array)) {
+            return false;
+        }
+    }
+    return true;
+}
+exports.all = all;
+function encodeParamsObject(data) {
+    return mapObject(data, function (value) {
+        if (typeof value === "object") {
+            value = safeJSONStringify(value);
+        }
+        return encodeURIComponent(base64_1.default(value.toString()));
+    });
+}
+exports.encodeParamsObject = encodeParamsObject;
+function buildQueryString(data) {
+    var params = filterObject(data, function (value) {
+        return value !== undefined;
+    });
+    var query = map(flatten(encodeParamsObject(params)), util_1.default.method("join", "=")).join("&");
+    return query;
+}
+exports.buildQueryString = buildQueryString;
+function decycleObject(object) {
+    var objects = [], paths = [];
+    return (function derez(value, path) {
+        var i, name, nu;
+        switch (typeof value) {
+            case 'object':
+                if (!value) {
+                    return null;
+                }
+                for (i = 0; i < objects.length; i += 1) {
+                    if (objects[i] === value) {
+                        return { $ref: paths[i] };
+                    }
+                }
+                objects.push(value);
+                paths.push(path);
+                if (Object.prototype.toString.apply(value) === '[object Array]') {
+                    nu = [];
+                    for (i = 0; i < value.length; i += 1) {
+                        nu[i] = derez(value[i], path + '[' + i + ']');
+                    }
+                }
+                else {
+                    nu = {};
+                    for (name in value) {
+                        if (Object.prototype.hasOwnProperty.call(value, name)) {
+                            nu[name] = derez(value[name], path + '[' + JSON.stringify(name) + ']');
+                        }
+                    }
+                }
+                return nu;
+            case 'number':
+            case 'string':
+            case 'boolean':
+                return value;
+        }
+    }(object, '$'));
+}
+exports.decycleObject = decycleObject;
+function safeJSONStringify(source) {
+    try {
+        return JSON.stringify(source);
+    }
+    catch (e) {
+        return JSON.stringify(decycleObject(source));
+    }
+}
+exports.safeJSONStringify = safeJSONStringify;
+
+
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var runtime_1 = __webpack_require__(17);
+var net_info_1 = __webpack_require__(34);
+var xhr_auth_1 = __webpack_require__(36);
+var xhr_timeline_1 = __webpack_require__(37);
+var getDefaultStrategy = runtime_1.default.getDefaultStrategy, Transports = runtime_1.default.Transports, setup = runtime_1.default.setup, getProtocol = runtime_1.default.getProtocol, isXHRSupported = runtime_1.default.isXHRSupported, getLocalStorage = runtime_1.default.getLocalStorage, createXHR = runtime_1.default.createXHR, createWebSocket = runtime_1.default.createWebSocket, addUnloadListener = runtime_1.default.addUnloadListener, removeUnloadListener = runtime_1.default.removeUnloadListener, transportConnectionInitializer = runtime_1.default.transportConnectionInitializer, createSocketRequest = runtime_1.default.createSocketRequest, HTTPFactory = runtime_1.default.HTTPFactory;
+var ReactNative = {
+    getDefaultStrategy: getDefaultStrategy,
+    Transports: Transports,
+    setup: setup,
+    getProtocol: getProtocol,
+    isXHRSupported: isXHRSupported,
+    getLocalStorage: getLocalStorage,
+    createXHR: createXHR,
+    createWebSocket: createWebSocket,
+    addUnloadListener: addUnloadListener,
+    removeUnloadListener: removeUnloadListener,
+    transportConnectionInitializer: transportConnectionInitializer,
+    createSocketRequest: createSocketRequest,
+    HTTPFactory: HTTPFactory,
+    TimelineTransport: xhr_timeline_1.default,
+    getAuthorizers: function () {
+        return { ajax: xhr_auth_1.default };
+    },
+    getWebSocketAPI: function () {
+        return WebSocket;
+    },
+    getXHRAPI: function () {
+        return XMLHttpRequest;
+    },
+    getNetwork: function () {
+        return net_info_1.Network;
+    }
+};
+exports.default = ReactNative;
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var timers_1 = __webpack_require__(5);
+var Util = {
+    now: function () {
+        if (Date.now) {
+            return Date.now();
+        }
+        else {
+            return new Date().valueOf();
+        }
+    },
+    defer: function (callback) {
+        return new timers_1.OneOffTimer(0, callback);
+    },
+    method: function (name) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
+        }
+        var boundArguments = Array.prototype.slice.call(arguments, 1);
+        return function (object) {
+            return object[name].apply(object, boundArguments.concat(arguments));
+        };
+    }
+};
+exports.default = Util;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var collections_1 = __webpack_require__(0);
+var pusher_1 = __webpack_require__(11);
+var Logger = {
+    debug: function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (!pusher_1.default.log) {
+            return;
+        }
+        pusher_1.default.log(collections_1.stringify.apply(this, arguments));
+    },
+    warn: function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        var message = collections_1.stringify.apply(this, arguments);
+        if (pusher_1.default.log) {
+            pusher_1.default.log(message);
+        }
+        else if (global.console) {
+            if (global.console.warn) {
+                global.console.warn(message);
+            }
+            else if (global.console.log) {
+                global.console.log(message);
+            }
+        }
+    }
+};
+exports.default = Logger;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var callback_registry_1 = __webpack_require__(24);
+var Dispatcher = (function () {
+    function Dispatcher(failThrough) {
+        this.callbacks = new callback_registry_1.default();
+        this.global_callbacks = [];
+        this.failThrough = failThrough;
+    }
+    Dispatcher.prototype.bind = function (eventName, callback, context) {
+        this.callbacks.add(eventName, callback, context);
+        return this;
+    };
+    Dispatcher.prototype.bind_global = function (callback) {
+        this.global_callbacks.push(callback);
+        return this;
+    };
+    Dispatcher.prototype.unbind = function (eventName, callback, context) {
+        this.callbacks.remove(eventName, callback, context);
+        return this;
+    };
+    Dispatcher.prototype.unbind_global = function (callback) {
+        if (!callback) {
+            this.global_callbacks = [];
+            return this;
+        }
+        this.global_callbacks = Collections.filter(this.global_callbacks || [], function (c) { return c !== callback; });
+        return this;
+    };
+    Dispatcher.prototype.unbind_all = function () {
+        this.unbind();
+        this.unbind_global();
+        return this;
+    };
+    Dispatcher.prototype.emit = function (eventName, data, metadata) {
+        for (var i = 0; i < this.global_callbacks.length; i++) {
+            this.global_callbacks[i](eventName, data);
+        }
+        var callbacks = this.callbacks.get(eventName);
+        var args = [];
+        if (metadata) {
+            args.push(data, metadata);
+        }
+        else if (data) {
+            args.push(data);
+        }
+        if (callbacks && callbacks.length > 0) {
+            for (var i = 0; i < callbacks.length; i++) {
+                callbacks[i].fn.apply(callbacks[i].context || global, args);
+            }
+        }
+        else if (this.failThrough) {
+            this.failThrough(eventName, data);
+        }
+        return this;
+    };
+    return Dispatcher;
+}());
+exports.default = Dispatcher;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var abstract_timer_1 = __webpack_require__(19);
+function clearTimeout(timer) {
+    global.clearTimeout(timer);
+}
+function clearInterval(timer) {
+    global.clearInterval(timer);
+}
+var OneOffTimer = (function (_super) {
+    __extends(OneOffTimer, _super);
+    function OneOffTimer(delay, callback) {
+        return _super.call(this, setTimeout, clearTimeout, delay, function (timer) {
+            callback();
+            return null;
+        }) || this;
+    }
+    return OneOffTimer;
+}(abstract_timer_1.default));
+exports.OneOffTimer = OneOffTimer;
+var PeriodicTimer = (function (_super) {
+    __extends(PeriodicTimer, _super);
+    function PeriodicTimer(delay, callback) {
+        return _super.call(this, setInterval, clearInterval, delay, function (timer) {
+            callback();
+            return timer;
+        }) || this;
+    }
+    return PeriodicTimer;
+}(abstract_timer_1.default));
+exports.PeriodicTimer = PeriodicTimer;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var assistant_to_the_transport_manager_1 = __webpack_require__(41);
+var handshake_1 = __webpack_require__(42);
+var pusher_authorizer_1 = __webpack_require__(44);
+var timeline_sender_1 = __webpack_require__(45);
+var presence_channel_1 = __webpack_require__(46);
+var private_channel_1 = __webpack_require__(10);
+var encrypted_channel_1 = __webpack_require__(48);
+var channel_1 = __webpack_require__(14);
+var connection_manager_1 = __webpack_require__(51);
+var channels_1 = __webpack_require__(52);
+var Factory = {
+    createChannels: function () {
+        return new channels_1.default();
+    },
+    createConnectionManager: function (key, options) {
+        return new connection_manager_1.default(key, options);
+    },
+    createChannel: function (name, pusher) {
+        return new channel_1.default(name, pusher);
+    },
+    createPrivateChannel: function (name, pusher) {
+        return new private_channel_1.default(name, pusher);
+    },
+    createPresenceChannel: function (name, pusher) {
+        return new presence_channel_1.default(name, pusher);
+    },
+    createEncryptedChannel: function (name, pusher) {
+        return new encrypted_channel_1.default(name, pusher);
+    },
+    createTimelineSender: function (timeline, options) {
+        return new timeline_sender_1.default(timeline, options);
+    },
+    createAuthorizer: function (channel, options) {
+        if (options.authorizer) {
+            return options.authorizer(channel, options);
+        }
+        return new pusher_authorizer_1.default(channel, options);
+    },
+    createHandshake: function (transport, callback) {
+        return new handshake_1.default(transport, callback);
+    },
+    createAssistantToTheTransportManager: function (manager, transport, options) {
+        return new assistant_to_the_transport_manager_1.default(manager, transport, options);
+    }
+};
+exports.default = Factory;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var BadEventName = (function (_super) {
+    __extends(BadEventName, _super);
+    function BadEventName(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return BadEventName;
+}(Error));
+exports.BadEventName = BadEventName;
+var RequestTimedOut = (function (_super) {
+    __extends(RequestTimedOut, _super);
+    function RequestTimedOut(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return RequestTimedOut;
+}(Error));
+exports.RequestTimedOut = RequestTimedOut;
+var TransportPriorityTooLow = (function (_super) {
+    __extends(TransportPriorityTooLow, _super);
+    function TransportPriorityTooLow(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return TransportPriorityTooLow;
+}(Error));
+exports.TransportPriorityTooLow = TransportPriorityTooLow;
+var TransportClosed = (function (_super) {
+    __extends(TransportClosed, _super);
+    function TransportClosed(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return TransportClosed;
+}(Error));
+exports.TransportClosed = TransportClosed;
+var UnsupportedFeature = (function (_super) {
+    __extends(UnsupportedFeature, _super);
+    function UnsupportedFeature(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return UnsupportedFeature;
+}(Error));
+exports.UnsupportedFeature = UnsupportedFeature;
+var UnsupportedTransport = (function (_super) {
+    __extends(UnsupportedTransport, _super);
+    function UnsupportedTransport(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return UnsupportedTransport;
+}(Error));
+exports.UnsupportedTransport = UnsupportedTransport;
+var UnsupportedStrategy = (function (_super) {
+    __extends(UnsupportedStrategy, _super);
+    function UnsupportedStrategy(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return UnsupportedStrategy;
+}(Error));
+exports.UnsupportedStrategy = UnsupportedStrategy;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var urlStore = {
+    baseUrl: "https://pusher.com",
+    urls: {
+        authenticationEndpoint: {
+            path: "/docs/authenticating_users",
+        },
+        javascriptQuickStart: {
+            path: "/docs/javascript_quick_start"
+        },
+        triggeringClientEvents: {
+            path: "/docs/client_api_guide/client_events#trigger-events"
+        }
+    }
+};
+var buildLogSuffix = function (key) {
+    var urlPrefix = "See:";
+    var urlObj = urlStore.urls[key];
+    if (!urlObj)
+        return "";
+    var url;
+    if (urlObj.fullUrl) {
+        url = urlObj.fullUrl;
+    }
+    else if (urlObj.path) {
+        url = urlStore.baseUrl + urlObj.path;
+    }
+    if (!url)
+        return "";
+    return urlPrefix + " " + url;
+};
+exports.default = { buildLogSuffix: buildLogSuffix };
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Defaults = {
+    VERSION: "4.4.0",
+    PROTOCOL: 7,
+    host: 'ws.pusherapp.com',
+    ws_port: 80,
+    wss_port: 443,
+    ws_path: '',
+    sockjs_host: 'sockjs.pusher.com',
+    sockjs_http_port: 80,
+    sockjs_https_port: 443,
+    sockjs_path: "/pusher",
+    stats_host: 'stats.pusher.com',
+    channel_auth_endpoint: '/pusher/auth',
+    channel_auth_transport: 'ajax',
+    activity_timeout: 120000,
+    pong_timeout: 30000,
+    unavailable_timeout: 10000,
+    cdn_http: "http://js.pusher.com",
+    cdn_https: "https://js.pusher.com",
+    dependency_suffix: ""
+};
+exports.default = Defaults;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var factory_1 = __webpack_require__(6);
+var channel_1 = __webpack_require__(14);
+var PrivateChannel = (function (_super) {
+    __extends(PrivateChannel, _super);
+    function PrivateChannel() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    PrivateChannel.prototype.authorize = function (socketId, callback) {
+        var authorizer = factory_1.default.createAuthorizer(this, this.pusher.config);
+        return authorizer.authorize(socketId, callback);
+    };
+    return PrivateChannel;
+}(channel_1.default));
+exports.default = PrivateChannel;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var runtime_1 = __webpack_require__(1);
+var Collections = __webpack_require__(0);
+var dispatcher_1 = __webpack_require__(4);
+var timeline_1 = __webpack_require__(38);
+var level_1 = __webpack_require__(12);
+var StrategyBuilder = __webpack_require__(39);
+var timers_1 = __webpack_require__(5);
+var defaults_1 = __webpack_require__(9);
+var DefaultConfig = __webpack_require__(59);
+var logger_1 = __webpack_require__(3);
+var factory_1 = __webpack_require__(6);
+var url_store_1 = __webpack_require__(8);
+var Pusher = (function () {
+    function Pusher(app_key, options) {
+        var _this = this;
+        checkAppKey(app_key);
+        options = options || {};
+        if (!options.cluster && !(options.wsHost || options.httpHost)) {
+            var suffix = url_store_1.default.buildLogSuffix("javascriptQuickStart");
+            logger_1.default.warn("You should always specify a cluster when connecting. " + suffix);
+        }
+        this.key = app_key;
+        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);
+        this.channels = factory_1.default.createChannels();
+        this.global_emitter = new dispatcher_1.default();
+        this.sessionID = Math.floor(Math.random() * 1000000000);
+        this.timeline = new timeline_1.default(this.key, this.sessionID, {
+            cluster: this.config.cluster,
+            features: Pusher.getClientFeatures(),
+            params: this.config.timelineParams || {},
+            limit: 50,
+            level: level_1.default.INFO,
+            version: defaults_1.default.VERSION
+        });
+        if (!this.config.disableStats) {
+            this.timelineSender = factory_1.default.createTimelineSender(this.timeline, {
+                host: this.config.statsHost,
+                path: "/timeline/v2/" + runtime_1.default.TimelineTransport.name
+            });
+        }
+        var getStrategy = function (options) {
+            var config = Collections.extend({}, _this.config, options);
+            return StrategyBuilder.build(runtime_1.default.getDefaultStrategy(config), config);
+        };
+        this.connection = factory_1.default.createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,
+            timeline: this.timeline,
+            activityTimeout: this.config.activity_timeout,
+            pongTimeout: this.config.pong_timeout,
+            unavailableTimeout: this.config.unavailable_timeout
+        }, this.config, { useTLS: this.shouldUseTLS() }));
+        this.connection.bind('connected', function () {
+            _this.subscribeAll();
+            if (_this.timelineSender) {
+                _this.timelineSender.send(_this.connection.isUsingTLS());
+            }
+        });
+        this.connection.bind('message', function (event) {
+            var eventName = event.event;
+            var internal = (eventName.indexOf('pusher_internal:') === 0);
+            if (event.channel) {
+                var channel = _this.channel(event.channel);
+                if (channel) {
+                    channel.handleEvent(event);
+                }
+            }
+            if (!internal) {
+                _this.global_emitter.emit(event.event, event.data);
+            }
+        });
+        this.connection.bind('connecting', function () {
+            _this.channels.disconnect();
+        });
+        this.connection.bind('disconnected', function () {
+            _this.channels.disconnect();
+        });
+        this.connection.bind('error', function (err) {
+            logger_1.default.warn('Error', err);
+        });
+        Pusher.instances.push(this);
+        this.timeline.info({ instances: Pusher.instances.length });
+        if (Pusher.isReady) {
+            this.connect();
+        }
+    }
+    Pusher.ready = function () {
+        Pusher.isReady = true;
+        for (var i = 0, l = Pusher.instances.length; i < l; i++) {
+            Pusher.instances[i].connect();
+        }
+    };
+    Pusher.log = function (message) {
+        if (Pusher.logToConsole && global.console && global.console.log) {
+            global.console.log(message);
+        }
+    };
+    Pusher.getClientFeatures = function () {
+        return Collections.keys(Collections.filterObject({ "ws": runtime_1.default.Transports.ws }, function (t) { return t.isSupported({}); }));
+    };
+    Pusher.prototype.channel = function (name) {
+        return this.channels.find(name);
+    };
+    Pusher.prototype.allChannels = function () {
+        return this.channels.all();
+    };
+    Pusher.prototype.connect = function () {
+        this.connection.connect();
+        if (this.timelineSender) {
+            if (!this.timelineSenderTimer) {
+                var usingTLS = this.connection.isUsingTLS();
+                var timelineSender = this.timelineSender;
+                this.timelineSenderTimer = new timers_1.PeriodicTimer(60000, function () {
+                    timelineSender.send(usingTLS);
+                });
+            }
+        }
+    };
+    Pusher.prototype.disconnect = function () {
+        this.connection.disconnect();
+        if (this.timelineSenderTimer) {
+            this.timelineSenderTimer.ensureAborted();
+            this.timelineSenderTimer = null;
+        }
+    };
+    Pusher.prototype.bind = function (event_name, callback, context) {
+        this.global_emitter.bind(event_name, callback, context);
+        return this;
+    };
+    Pusher.prototype.unbind = function (event_name, callback, context) {
+        this.global_emitter.unbind(event_name, callback, context);
+        return this;
+    };
+    Pusher.prototype.bind_global = function (callback) {
+        this.global_emitter.bind_global(callback);
+        return this;
+    };
+    Pusher.prototype.unbind_global = function (callback) {
+        this.global_emitter.unbind_global(callback);
+        return this;
+    };
+    Pusher.prototype.unbind_all = function (callback) {
+        this.global_emitter.unbind_all();
+        return this;
+    };
+    Pusher.prototype.subscribeAll = function () {
+        var channelName;
+        for (channelName in this.channels.channels) {
+            if (this.channels.channels.hasOwnProperty(channelName)) {
+                this.subscribe(channelName);
+            }
+        }
+    };
+    Pusher.prototype.subscribe = function (channel_name) {
+        var channel = this.channels.add(channel_name, this);
+        if (channel.subscriptionPending && channel.subscriptionCancelled) {
+            channel.reinstateSubscription();
+        }
+        else if (!channel.subscriptionPending && this.connection.state === "connected") {
+            channel.subscribe();
+        }
+        return channel;
+    };
+    Pusher.prototype.unsubscribe = function (channel_name) {
+        var channel = this.channels.find(channel_name);
+        if (channel && channel.subscriptionPending) {
+            channel.cancelSubscription();
+        }
+        else {
+            channel = this.channels.remove(channel_name);
+            if (channel && this.connection.state === "connected") {
+                channel.unsubscribe();
+            }
+        }
+    };
+    Pusher.prototype.send_event = function (event_name, data, channel) {
+        return this.connection.send_event(event_name, data, channel);
+    };
+    Pusher.prototype.shouldUseTLS = function () {
+        if (runtime_1.default.getProtocol() === "https:") {
+            return true;
+        }
+        else if (this.config.forceTLS === true) {
+            return true;
+        }
+        else {
+            return Boolean(this.config.encrypted);
+        }
+    };
+    Pusher.instances = [];
+    Pusher.isReady = false;
+    Pusher.logToConsole = false;
+    Pusher.Runtime = runtime_1.default;
+    Pusher.ScriptReceivers = runtime_1.default.ScriptReceivers;
+    Pusher.DependenciesReceivers = runtime_1.default.DependenciesReceivers;
+    Pusher.auth_callbacks = runtime_1.default.auth_callbacks;
+    return Pusher;
+}());
+exports.default = Pusher;
+function checkAppKey(key) {
+    if (key === null || key === undefined) {
+        throw "You must pass your app key when you instantiate Pusher.";
+    }
+}
+runtime_1.default.setup(Pusher);
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var TimelineLevel;
+(function (TimelineLevel) {
+    TimelineLevel[TimelineLevel["ERROR"] = 3] = "ERROR";
+    TimelineLevel[TimelineLevel["INFO"] = 6] = "INFO";
+    TimelineLevel[TimelineLevel["DEBUG"] = 7] = "DEBUG";
+})(TimelineLevel || (TimelineLevel = {}));
+exports.default = TimelineLevel;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.decodeMessage = function (messageEvent) {
+    try {
+        var messageData = JSON.parse(messageEvent.data);
+        var pusherEventData = messageData.data;
+        if (typeof pusherEventData === 'string') {
+            try {
+                pusherEventData = JSON.parse(messageData.data);
+            }
+            catch (e) { }
+        }
+        var pusherEvent = {
+            event: messageData.event,
+            channel: messageData.channel,
+            data: pusherEventData,
+        };
+        if (messageData.user_id) {
+            pusherEvent.user_id = messageData.user_id;
+        }
+        return pusherEvent;
+    }
+    catch (e) {
+        throw { type: 'MessageParseError', error: e, data: messageEvent.data };
+    }
+};
+exports.encodeMessage = function (event) {
+    return JSON.stringify(event);
+};
+exports.processHandshake = function (messageEvent) {
+    var message = exports.decodeMessage(messageEvent);
+    if (message.event === "pusher:connection_established") {
+        if (!message.data.activity_timeout) {
+            throw "No activity timeout specified in handshake";
+        }
+        return {
+            action: "connected",
+            id: message.data.socket_id,
+            activityTimeout: message.data.activity_timeout * 1000
+        };
+    }
+    else if (message.event === "pusher:error") {
+        return {
+            action: this.getCloseAction(message.data),
+            error: this.getCloseError(message.data)
+        };
+    }
+    else {
+        throw "Invalid handshake";
+    }
+};
+exports.getCloseAction = function (closeEvent) {
+    if (closeEvent.code < 4000) {
+        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
+            return "backoff";
+        }
+        else {
+            return null;
+        }
+    }
+    else if (closeEvent.code === 4000) {
+        return "tls_only";
+    }
+    else if (closeEvent.code < 4100) {
+        return "refused";
+    }
+    else if (closeEvent.code < 4200) {
+        return "backoff";
+    }
+    else if (closeEvent.code < 4300) {
+        return "retry";
+    }
+    else {
+        return "refused";
+    }
+};
+exports.getCloseError = function (closeEvent) {
+    if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
+        return {
+            type: 'PusherError',
+            data: {
+                code: closeEvent.code,
+                message: closeEvent.reason || closeEvent.message
+            }
+        };
+    }
+    else {
+        return null;
+    }
+};
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var dispatcher_1 = __webpack_require__(4);
+var Errors = __webpack_require__(7);
+var logger_1 = __webpack_require__(3);
+var url_store_1 = __webpack_require__(8);
+var Channel = (function (_super) {
+    __extends(Channel, _super);
+    function Channel(name, pusher) {
+        var _this = _super.call(this, function (event, data) {
+            logger_1.default.debug('No callbacks on ' + name + ' for ' + event);
+        }) || this;
+        _this.name = name;
+        _this.pusher = pusher;
+        _this.subscribed = false;
+        _this.subscriptionPending = false;
+        _this.subscriptionCancelled = false;
+        return _this;
+    }
+    Channel.prototype.authorize = function (socketId, callback) {
+        return callback(false, {});
+    };
+    Channel.prototype.trigger = function (event, data) {
+        if (event.indexOf("client-") !== 0) {
+            throw new Errors.BadEventName("Event '" + event + "' does not start with 'client-'");
+        }
+        if (!this.subscribed) {
+            var suffix = url_store_1.default.buildLogSuffix("triggeringClientEvents");
+            logger_1.default.warn("Client event triggered before channel 'subscription_succeeded' event . " + suffix);
+        }
+        return this.pusher.send_event(event, data, this.name);
+    };
+    Channel.prototype.disconnect = function () {
+        this.subscribed = false;
+        this.subscriptionPending = false;
+    };
+    Channel.prototype.handleEvent = function (event) {
+        var eventName = event.event;
+        var data = event.data;
+        if (eventName === "pusher_internal:subscription_succeeded") {
+            this.handleSubscriptionSucceededEvent(event);
+        }
+        else if (eventName.indexOf("pusher_internal:") !== 0) {
+            var metadata = {};
+            this.emit(eventName, data, metadata);
+        }
+    };
+    Channel.prototype.handleSubscriptionSucceededEvent = function (event) {
+        this.subscriptionPending = false;
+        this.subscribed = true;
+        if (this.subscriptionCancelled) {
+            this.pusher.unsubscribe(this.name);
+        }
+        else {
+            this.emit("pusher:subscription_succeeded", event.data);
+        }
+    };
+    Channel.prototype.subscribe = function () {
+        var _this = this;
+        if (this.subscribed) {
+            return;
+        }
+        this.subscriptionPending = true;
+        this.subscriptionCancelled = false;
+        this.authorize(this.pusher.connection.socket_id, function (error, data) {
+            if (error) {
+                _this.emit('pusher:subscription_error', data);
+            }
+            else {
+                _this.pusher.send_event('pusher:subscribe', {
+                    auth: data.auth,
+                    channel_data: data.channel_data,
+                    channel: _this.name
+                });
+            }
+        });
+    };
+    Channel.prototype.unsubscribe = function () {
+        this.subscribed = false;
+        this.pusher.send_event('pusher:unsubscribe', {
+            channel: this.name
+        });
+    };
+    Channel.prototype.cancelSubscription = function () {
+        this.subscriptionCancelled = true;
+    };
+    Channel.prototype.reinstateSubscription = function () {
+        this.subscriptionCancelled = false;
+    };
+    return Channel;
+}(dispatcher_1.default));
+exports.default = Channel;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var util_1 = __webpack_require__(2);
+var timers_1 = __webpack_require__(5);
+var SequentialStrategy = (function () {
+    function SequentialStrategy(strategies, options) {
+        this.strategies = strategies;
+        this.loop = Boolean(options.loop);
+        this.failFast = Boolean(options.failFast);
+        this.timeout = options.timeout;
+        this.timeoutLimit = options.timeoutLimit;
+    }
+    SequentialStrategy.prototype.isSupported = function () {
+        return Collections.any(this.strategies, util_1.default.method("isSupported"));
+    };
+    SequentialStrategy.prototype.connect = function (minPriority, callback) {
+        var _this = this;
+        var strategies = this.strategies;
+        var current = 0;
+        var timeout = this.timeout;
+        var runner = null;
+        var tryNextStrategy = function (error, handshake) {
+            if (handshake) {
+                callback(null, handshake);
+            }
+            else {
+                current = current + 1;
+                if (_this.loop) {
+                    current = current % strategies.length;
+                }
+                if (current < strategies.length) {
+                    if (timeout) {
+                        timeout = timeout * 2;
+                        if (_this.timeoutLimit) {
+                            timeout = Math.min(timeout, _this.timeoutLimit);
+                        }
+                    }
+                    runner = _this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: _this.failFast }, tryNextStrategy);
+                }
+                else {
+                    callback(true);
+                }
+            }
+        };
+        runner = this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: this.failFast }, tryNextStrategy);
+        return {
+            abort: function () {
+                runner.abort();
+            },
+            forceMinPriority: function (p) {
+                minPriority = p;
+                if (runner) {
+                    runner.forceMinPriority(p);
+                }
+            }
+        };
+    };
+    SequentialStrategy.prototype.tryStrategy = function (strategy, minPriority, options, callback) {
+        var timer = null;
+        var runner = null;
+        if (options.timeout > 0) {
+            timer = new timers_1.OneOffTimer(options.timeout, function () {
+                runner.abort();
+                callback(true);
+            });
+        }
+        runner = strategy.connect(minPriority, function (error, handshake) {
+            if (error && timer && timer.isRunning() && !options.failFast) {
+                return;
+            }
+            if (timer) {
+                timer.ensureAborted();
+            }
+            callback(error, handshake);
+        });
+        return {
+            abort: function () {
+                if (timer) {
+                    timer.ensureAborted();
+                }
+                runner.abort();
+            },
+            forceMinPriority: function (p) {
+                runner.forceMinPriority(p);
+            }
+        };
+    };
+    return SequentialStrategy;
+}());
+exports.default = SequentialStrategy;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var pusher_1 = __webpack_require__(11);
+module.exports = pusher_1.default;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var transports_1 = __webpack_require__(20);
+var default_strategy_1 = __webpack_require__(25);
+var transport_connection_initializer_1 = __webpack_require__(26);
+var http_1 = __webpack_require__(27);
+var Isomorphic = {
+    getDefaultStrategy: default_strategy_1.default,
+    Transports: transports_1.default,
+    transportConnectionInitializer: transport_connection_initializer_1.default,
+    HTTPFactory: http_1.default,
+    setup: function (PusherClass) {
+        PusherClass.ready();
+    },
+    getLocalStorage: function () {
+        return undefined;
+    },
+    getClientFeatures: function () {
+        return Collections.keys(Collections.filterObject({ "ws": transports_1.default.ws }, function (t) { return t.isSupported({}); }));
+    },
+    getProtocol: function () {
+        return "http:";
+    },
+    isXHRSupported: function () {
+        return true;
+    },
+    createSocketRequest: function (method, url) {
+        if (this.isXHRSupported()) {
+            return this.HTTPFactory.createXHR(method, url);
+        }
+        else {
+            throw "Cross-origin HTTP requests are not supported";
+        }
+    },
+    createXHR: function () {
+        var Constructor = this.getXHRAPI();
+        return new Constructor();
+    },
+    createWebSocket: function (url) {
+        var Constructor = this.getWebSocketAPI();
+        return new Constructor(url);
+    },
+    addUnloadListener: function (listener) { },
+    removeUnloadListener: function (listener) { }
+};
+exports.default = Isomorphic;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function encode(s) {
+    return btoa(utob(s));
+}
+exports.default = encode;
+var fromCharCode = String.fromCharCode;
+var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+var b64tab = {};
+for (var i = 0, l = b64chars.length; i < l; i++) {
+    b64tab[b64chars.charAt(i)] = i;
+}
+var cb_utob = function (c) {
+    var cc = c.charCodeAt(0);
+    return cc < 0x80 ? c
+        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +
+            fromCharCode(0x80 | (cc & 0x3f))
+            : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +
+                fromCharCode(0x80 | ((cc >>> 6) & 0x3f)) +
+                fromCharCode(0x80 | (cc & 0x3f));
+};
+var utob = function (u) {
+    return u.replace(/[^\x00-\x7F]/g, cb_utob);
+};
+var cb_encode = function (ccc) {
+    var padlen = [0, 2, 1][ccc.length % 3];
+    var ord = ccc.charCodeAt(0) << 16
+        | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+        | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0));
+    var chars = [
+        b64chars.charAt(ord >>> 18),
+        b64chars.charAt((ord >>> 12) & 63),
+        padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+        padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+    ];
+    return chars.join('');
+};
+var btoa = global.btoa || function (b) {
+    return b.replace(/[\s\S]{1,3}/g, cb_encode);
+};
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Timer = (function () {
+    function Timer(set, clear, delay, callback) {
+        var _this = this;
+        this.clear = clear;
+        this.timer = set(function () {
+            if (_this.timer) {
+                _this.timer = callback(_this.timer);
+            }
+        }, delay);
+    }
+    Timer.prototype.isRunning = function () {
+        return this.timer !== null;
+    };
+    Timer.prototype.ensureAborted = function () {
+        if (this.timer) {
+            this.clear(this.timer);
+            this.timer = null;
+        }
+    };
+    return Timer;
+}());
+exports.default = Timer;
+
+
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var URLSchemes = __webpack_require__(21);
+var transport_1 = __webpack_require__(22);
+var Collections = __webpack_require__(0);
+var runtime_1 = __webpack_require__(1);
+var WSTransport = new transport_1.default({
+    urls: URLSchemes.ws,
+    handlesActivityChecks: false,
+    supportsPing: false,
+    isInitialized: function () {
+        return Boolean(runtime_1.default.getWebSocketAPI());
+    },
+    isSupported: function () {
+        return Boolean(runtime_1.default.getWebSocketAPI());
+    },
+    getSocket: function (url) {
+        return runtime_1.default.createWebSocket(url);
+    }
+});
+var httpConfiguration = {
+    urls: URLSchemes.http,
+    handlesActivityChecks: false,
+    supportsPing: true,
+    isInitialized: function () {
+        return true;
+    }
+};
+exports.streamingConfiguration = Collections.extend({ getSocket: function (url) {
+        return runtime_1.default.HTTPFactory.createStreamingSocket(url);
+    }
+}, httpConfiguration);
+exports.pollingConfiguration = Collections.extend({ getSocket: function (url) {
+        return runtime_1.default.HTTPFactory.createPollingSocket(url);
+    }
+}, httpConfiguration);
+var xhrConfiguration = {
+    isSupported: function () {
+        return runtime_1.default.isXHRSupported();
+    }
+};
+var XHRStreamingTransport = new transport_1.default(Collections.extend({}, exports.streamingConfiguration, xhrConfiguration));
+var XHRPollingTransport = new transport_1.default(Collections.extend({}, exports.pollingConfiguration, xhrConfiguration));
+var Transports = {
+    ws: WSTransport,
+    xhr_streaming: XHRStreamingTransport,
+    xhr_polling: XHRPollingTransport
+};
+exports.default = Transports;
+
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var defaults_1 = __webpack_require__(9);
+function getGenericURL(baseScheme, params, path) {
+    var scheme = baseScheme + (params.useTLS ? "s" : "");
+    var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
+    return scheme + "://" + host + path;
+}
+function getGenericPath(key, queryString) {
+    var path = "/app/" + key;
+    var query = "?protocol=" + defaults_1.default.PROTOCOL +
+        "&client=js" +
+        "&version=" + defaults_1.default.VERSION +
+        (queryString ? ("&" + queryString) : "");
+    return path + query;
+}
+exports.ws = {
+    getInitial: function (key, params) {
+        var path = (params.httpPath || "") + getGenericPath(key, "flash=false");
+        return getGenericURL("ws", params, path);
+    }
+};
+exports.http = {
+    getInitial: function (key, params) {
+        var path = (params.httpPath || "/pusher") + getGenericPath(key);
+        return getGenericURL("http", params, path);
+    }
+};
+exports.sockjs = {
+    getInitial: function (key, params) {
+        return getGenericURL("http", params, params.httpPath || "/pusher");
+    },
+    getPath: function (key, params) {
+        return getGenericPath(key);
+    }
+};
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var transport_connection_1 = __webpack_require__(23);
+var Transport = (function () {
+    function Transport(hooks) {
+        this.hooks = hooks;
+    }
+    Transport.prototype.isSupported = function (environment) {
+        return this.hooks.isSupported(environment);
+    };
+    Transport.prototype.createConnection = function (name, priority, key, options) {
+        return new transport_connection_1.default(this.hooks, name, priority, key, options);
+    };
+    return Transport;
+}());
+exports.default = Transport;
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = __webpack_require__(2);
+var Collections = __webpack_require__(0);
+var dispatcher_1 = __webpack_require__(4);
+var logger_1 = __webpack_require__(3);
+var runtime_1 = __webpack_require__(1);
+var TransportConnection = (function (_super) {
+    __extends(TransportConnection, _super);
+    function TransportConnection(hooks, name, priority, key, options) {
+        var _this = _super.call(this) || this;
+        _this.initialize = runtime_1.default.transportConnectionInitializer;
+        _this.hooks = hooks;
+        _this.name = name;
+        _this.priority = priority;
+        _this.key = key;
+        _this.options = options;
+        _this.state = "new";
+        _this.timeline = options.timeline;
+        _this.activityTimeout = options.activityTimeout;
+        _this.id = _this.timeline.generateUniqueID();
+        return _this;
+    }
+    TransportConnection.prototype.handlesActivityChecks = function () {
+        return Boolean(this.hooks.handlesActivityChecks);
+    };
+    TransportConnection.prototype.supportsPing = function () {
+        return Boolean(this.hooks.supportsPing);
+    };
+    TransportConnection.prototype.connect = function () {
+        var _this = this;
+        if (this.socket || this.state !== "initialized") {
+            return false;
+        }
+        var url = this.hooks.urls.getInitial(this.key, this.options);
+        try {
+            this.socket = this.hooks.getSocket(url, this.options);
+        }
+        catch (e) {
+            util_1.default.defer(function () {
+                _this.onError(e);
+                _this.changeState("closed");
+            });
+            return false;
+        }
+        this.bindListeners();
+        logger_1.default.debug("Connecting", { transport: this.name, url: url });
+        this.changeState("connecting");
+        return true;
+    };
+    TransportConnection.prototype.close = function () {
+        if (this.socket) {
+            this.socket.close();
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    TransportConnection.prototype.send = function (data) {
+        var _this = this;
+        if (this.state === "open") {
+            util_1.default.defer(function () {
+                if (_this.socket) {
+                    _this.socket.send(data);
+                }
+            });
+            return true;
+        }
+        else {
+            return false;
+        }
+    };
+    TransportConnection.prototype.ping = function () {
+        if (this.state === "open" && this.supportsPing()) {
+            this.socket.ping();
+        }
+    };
+    TransportConnection.prototype.onOpen = function () {
+        if (this.hooks.beforeOpen) {
+            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
+        }
+        this.changeState("open");
+        this.socket.onopen = undefined;
+    };
+    TransportConnection.prototype.onError = function (error) {
+        this.emit("error", { type: 'WebSocketError', error: error });
+        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
+    };
+    TransportConnection.prototype.onClose = function (closeEvent) {
+        if (closeEvent) {
+            this.changeState("closed", {
+                code: closeEvent.code,
+                reason: closeEvent.reason,
+                wasClean: closeEvent.wasClean
+            });
+        }
+        else {
+            this.changeState("closed");
+        }
+        this.unbindListeners();
+        this.socket = undefined;
+    };
+    TransportConnection.prototype.onMessage = function (message) {
+        this.emit("message", message);
+    };
+    TransportConnection.prototype.onActivity = function () {
+        this.emit("activity");
+    };
+    TransportConnection.prototype.bindListeners = function () {
+        var _this = this;
+        this.socket.onopen = function () {
+            _this.onOpen();
+        };
+        this.socket.onerror = function (error) {
+            _this.onError(error);
+        };
+        this.socket.onclose = function (closeEvent) {
+            _this.onClose(closeEvent);
+        };
+        this.socket.onmessage = function (message) {
+            _this.onMessage(message);
+        };
+        if (this.supportsPing()) {
+            this.socket.onactivity = function () { _this.onActivity(); };
+        }
+    };
+    TransportConnection.prototype.unbindListeners = function () {
+        if (this.socket) {
+            this.socket.onopen = undefined;
+            this.socket.onerror = undefined;
+            this.socket.onclose = undefined;
+            this.socket.onmessage = undefined;
+            if (this.supportsPing()) {
+                this.socket.onactivity = undefined;
+            }
+        }
+    };
+    TransportConnection.prototype.changeState = function (state, params) {
+        this.state = state;
+        this.timeline.info(this.buildTimelineMessage({
+            state: state,
+            params: params
+        }));
+        this.emit(state, params);
+    };
+    TransportConnection.prototype.buildTimelineMessage = function (message) {
+        return Collections.extend({ cid: this.id }, message);
+    };
+    return TransportConnection;
+}(dispatcher_1.default));
+exports.default = TransportConnection;
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var CallbackRegistry = (function () {
+    function CallbackRegistry() {
+        this._callbacks = {};
+    }
+    CallbackRegistry.prototype.get = function (name) {
+        return this._callbacks[prefix(name)];
+    };
+    CallbackRegistry.prototype.add = function (name, callback, context) {
+        var prefixedEventName = prefix(name);
+        this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
+        this._callbacks[prefixedEventName].push({
+            fn: callback,
+            context: context
+        });
+    };
+    CallbackRegistry.prototype.remove = function (name, callback, context) {
+        if (!name && !callback && !context) {
+            this._callbacks = {};
+            return;
+        }
+        var names = name ? [prefix(name)] : Collections.keys(this._callbacks);
+        if (callback || context) {
+            this.removeCallback(names, callback, context);
+        }
+        else {
+            this.removeAllCallbacks(names);
+        }
+    };
+    CallbackRegistry.prototype.removeCallback = function (names, callback, context) {
+        Collections.apply(names, function (name) {
+            this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {
+                return (callback && callback !== binding.fn) ||
+                    (context && context !== binding.context);
+            });
+            if (this._callbacks[name].length === 0) {
+                delete this._callbacks[name];
+            }
+        }, this);
+    };
+    CallbackRegistry.prototype.removeAllCallbacks = function (names) {
+        Collections.apply(names, function (name) {
+            delete this._callbacks[name];
+        }, this);
+    };
+    return CallbackRegistry;
+}());
+exports.default = CallbackRegistry;
+function prefix(name) {
+    return "_" + name;
+}
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var getDefaultStrategy = function (config) {
+    var wsStrategy;
+    if (config.useTLS) {
+        wsStrategy = [
+            ":best_connected_ever",
+            ":ws_loop",
+            [":delayed", 2000, [":http_loop"]]
+        ];
+    }
+    else {
+        wsStrategy = [
+            ":best_connected_ever",
+            ":ws_loop",
+            [":delayed", 2000, [":wss_loop"]],
+            [":delayed", 5000, [":http_loop"]]
+        ];
+    }
+    return [
+        [":def", "ws_options", {
+                hostNonTLS: config.wsHost + ":" + config.wsPort,
+                hostTLS: config.wsHost + ":" + config.wssPort,
+                httpPath: config.wsPath
+            }],
+        [":def", "wss_options", [":extend", ":ws_options", {
+                    useTLS: true
+                }]],
+        [":def", "http_options", {
+                hostNonTLS: config.httpHost + ":" + config.httpPort,
+                hostTLS: config.httpHost + ":" + config.httpsPort,
+                httpPath: config.httpPath
+            }],
+        [":def", "timeouts", {
+                loop: true,
+                timeout: 15000,
+                timeoutLimit: 60000
+            }],
+        [":def", "ws_manager", [":transport_manager", {
+                    lives: 2,
+                    minPingDelay: 10000,
+                    maxPingDelay: config.activity_timeout
+                }]],
+        [":def", "streaming_manager", [":transport_manager", {
+                    lives: 2,
+                    minPingDelay: 10000,
+                    maxPingDelay: config.activity_timeout
+                }]],
+        [":def_transport", "ws", "ws", 3, ":ws_options", ":ws_manager"],
+        [":def_transport", "wss", "ws", 3, ":wss_options", ":ws_manager"],
+        [":def_transport", "xhr_streaming", "xhr_streaming", 1, ":http_options", ":streaming_manager"],
+        [":def_transport", "xhr_polling", "xhr_polling", 1, ":http_options"],
+        [":def", "ws_loop", [":sequential", ":timeouts", ":ws"]],
+        [":def", "wss_loop", [":sequential", ":timeouts", ":wss"]],
+        [":def", "streaming_loop", [":sequential", ":timeouts", ":xhr_streaming"]],
+        [":def", "polling_loop", [":sequential", ":timeouts", ":xhr_polling"]],
+        [":def", "http_loop", [":if", [":is_supported", ":streaming_loop"], [
+                    ":best_connected_ever",
+                    ":streaming_loop",
+                    [":delayed", 4000, [":polling_loop"]]
+                ], [
+                    ":polling_loop"
+                ]]],
+        [":def", "strategy",
+            [":cached", 1800000,
+                [":first_connected",
+                    [":if", [":is_supported", ":ws"],
+                        wsStrategy,
+                        ":http_loop"
+                    ]
+                ]
+            ]
+        ]
+    ];
+};
+exports.default = getDefaultStrategy;
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+function default_1() {
+    var self = this;
+    self.timeline.info(self.buildTimelineMessage({
+        transport: self.name + (self.options.useTLS ? "s" : "")
+    }));
+    if (self.hooks.isInitialized()) {
+        self.changeState("initialized");
+    }
+    else {
+        self.onClose();
+    }
+}
+exports.default = default_1;
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var http_request_1 = __webpack_require__(28);
+var http_socket_1 = __webpack_require__(29);
+var http_streaming_socket_1 = __webpack_require__(31);
+var http_polling_socket_1 = __webpack_require__(32);
+var http_xhr_request_1 = __webpack_require__(33);
+var HTTP = {
+    createStreamingSocket: function (url) {
+        return this.createSocket(http_streaming_socket_1.default, url);
+    },
+    createPollingSocket: function (url) {
+        return this.createSocket(http_polling_socket_1.default, url);
+    },
+    createSocket: function (hooks, url) {
+        return new http_socket_1.default(hooks, url);
+    },
+    createXHR: function (method, url) {
+        return this.createRequest(http_xhr_request_1.default, method, url);
+    },
+    createRequest: function (hooks, method, url) {
+        return new http_request_1.default(hooks, method, url);
+    }
+};
+exports.default = HTTP;
+
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var runtime_1 = __webpack_require__(1);
+var dispatcher_1 = __webpack_require__(4);
+var MAX_BUFFER_LENGTH = 256 * 1024;
+var HTTPRequest = (function (_super) {
+    __extends(HTTPRequest, _super);
+    function HTTPRequest(hooks, method, url) {
+        var _this = _super.call(this) || this;
+        _this.hooks = hooks;
+        _this.method = method;
+        _this.url = url;
+        return _this;
+    }
+    HTTPRequest.prototype.start = function (payload) {
+        var _this = this;
+        this.position = 0;
+        this.xhr = this.hooks.getRequest(this);
+        this.unloader = function () {
+            _this.close();
+        };
+        runtime_1.default.addUnloadListener(this.unloader);
+        this.xhr.open(this.method, this.url, true);
+        if (this.xhr.setRequestHeader) {
+            this.xhr.setRequestHeader("Content-Type", "application/json");
+        }
+        this.xhr.send(payload);
+    };
+    HTTPRequest.prototype.close = function () {
+        if (this.unloader) {
+            runtime_1.default.removeUnloadListener(this.unloader);
+            this.unloader = null;
+        }
+        if (this.xhr) {
+            this.hooks.abortRequest(this.xhr);
+            this.xhr = null;
+        }
+    };
+    HTTPRequest.prototype.onChunk = function (status, data) {
+        while (true) {
+            var chunk = this.advanceBuffer(data);
+            if (chunk) {
+                this.emit("chunk", { status: status, data: chunk });
+            }
+            else {
+                break;
+            }
+        }
+        if (this.isBufferTooLong(data)) {
+            this.emit("buffer_too_long");
+        }
+    };
+    HTTPRequest.prototype.advanceBuffer = function (buffer) {
+        var unreadData = buffer.slice(this.position);
+        var endOfLinePosition = unreadData.indexOf("\n");
+        if (endOfLinePosition !== -1) {
+            this.position += endOfLinePosition + 1;
+            return unreadData.slice(0, endOfLinePosition);
+        }
+        else {
+            return null;
+        }
+    };
+    HTTPRequest.prototype.isBufferTooLong = function (buffer) {
+        return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
+    };
+    return HTTPRequest;
+}(dispatcher_1.default));
+exports.default = HTTPRequest;
+
+
+/***/ }),
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var state_1 = __webpack_require__(30);
+var util_1 = __webpack_require__(2);
+var runtime_1 = __webpack_require__(1);
+var autoIncrement = 1;
+var HTTPSocket = (function () {
+    function HTTPSocket(hooks, url) {
+        this.hooks = hooks;
+        this.session = randomNumber(1000) + "/" + randomString(8);
+        this.location = getLocation(url);
+        this.readyState = state_1.default.CONNECTING;
+        this.openStream();
+    }
+    HTTPSocket.prototype.send = function (payload) {
+        return this.sendRaw(JSON.stringify([payload]));
+    };
+    HTTPSocket.prototype.ping = function () {
+        this.hooks.sendHeartbeat(this);
+    };
+    HTTPSocket.prototype.close = function (code, reason) {
+        this.onClose(code, reason, true);
+    };
+    HTTPSocket.prototype.sendRaw = function (payload) {
+        if (this.readyState === state_1.default.OPEN) {
+            try {
+                runtime_1.default.createSocketRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+                return true;
+            }
+            catch (e) {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+    };
+    HTTPSocket.prototype.reconnect = function () {
+        this.closeStream();
+        this.openStream();
+    };
+    ;
+    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
+        this.closeStream();
+        this.readyState = state_1.default.CLOSED;
+        if (this.onclose) {
+            this.onclose({
+                code: code,
+                reason: reason,
+                wasClean: wasClean
+            });
+        }
+    };
+    HTTPSocket.prototype.onChunk = function (chunk) {
+        if (chunk.status !== 200) {
+            return;
+        }
+        if (this.readyState === state_1.default.OPEN) {
+            this.onActivity();
+        }
+        var payload;
+        var type = chunk.data.slice(0, 1);
+        switch (type) {
+            case 'o':
+                payload = JSON.parse(chunk.data.slice(1) || '{}');
+                this.onOpen(payload);
+                break;
+            case 'a':
+                payload = JSON.parse(chunk.data.slice(1) || '[]');
+                for (var i = 0; i < payload.length; i++) {
+                    this.onEvent(payload[i]);
+                }
+                break;
+            case 'm':
+                payload = JSON.parse(chunk.data.slice(1) || 'null');
+                this.onEvent(payload);
+                break;
+            case 'h':
+                this.hooks.onHeartbeat(this);
+                break;
+            case 'c':
+                payload = JSON.parse(chunk.data.slice(1) || '[]');
+                this.onClose(payload[0], payload[1], true);
+                break;
+        }
+    };
+    HTTPSocket.prototype.onOpen = function (options) {
+        if (this.readyState === state_1.default.CONNECTING) {
+            if (options && options.hostname) {
+                this.location.base = replaceHost(this.location.base, options.hostname);
+            }
+            this.readyState = state_1.default.OPEN;
+            if (this.onopen) {
+                this.onopen();
+            }
+        }
+        else {
+            this.onClose(1006, "Server lost session", true);
+        }
+    };
+    HTTPSocket.prototype.onEvent = function (event) {
+        if (this.readyState === state_1.default.OPEN && this.onmessage) {
+            this.onmessage({ data: event });
+        }
+    };
+    HTTPSocket.prototype.onActivity = function () {
+        if (this.onactivity) {
+            this.onactivity();
+        }
+    };
+    HTTPSocket.prototype.onError = function (error) {
+        if (this.onerror) {
+            this.onerror(error);
+        }
+    };
+    HTTPSocket.prototype.openStream = function () {
+        var _this = this;
+        this.stream = runtime_1.default.createSocketRequest("POST", getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
+        this.stream.bind("chunk", function (chunk) {
+            _this.onChunk(chunk);
+        });
+        this.stream.bind("finished", function (status) {
+            _this.hooks.onFinished(_this, status);
+        });
+        this.stream.bind("buffer_too_long", function () {
+            _this.reconnect();
+        });
+        try {
+            this.stream.start();
+        }
+        catch (error) {
+            util_1.default.defer(function () {
+                _this.onError(error);
+                _this.onClose(1006, "Could not start streaming", false);
+            });
+        }
+    };
+    HTTPSocket.prototype.closeStream = function () {
+        if (this.stream) {
+            this.stream.unbind_all();
+            this.stream.close();
+            this.stream = null;
+        }
+    };
+    return HTTPSocket;
+}());
+function getLocation(url) {
+    var parts = /([^\?]*)\/*(\??.*)/.exec(url);
+    return {
+        base: parts[1],
+        queryString: parts[2]
+    };
+}
+function getSendURL(url, session) {
+    return url.base + "/" + session + "/xhr_send";
+}
+function getUniqueURL(url) {
+    var separator = (url.indexOf('?') === -1) ? "?" : "&";
+    return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
+}
+function replaceHost(url, hostname) {
+    var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
+    return urlParts[1] + hostname + urlParts[3];
+}
+function randomNumber(max) {
+    return Math.floor(Math.random() * max);
+}
+function randomString(length) {
+    var result = [];
+    for (var i = 0; i < length; i++) {
+        result.push(randomNumber(32).toString(32));
+    }
+    return result.join('');
+}
+exports.default = HTTPSocket;
+
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var State;
+(function (State) {
+    State[State["CONNECTING"] = 0] = "CONNECTING";
+    State[State["OPEN"] = 1] = "OPEN";
+    State[State["CLOSED"] = 3] = "CLOSED";
+})(State || (State = {}));
+exports.default = State;
+
+
+/***/ }),
+/* 31 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var hooks = {
+    getReceiveURL: function (url, session) {
+        return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+    },
+    onHeartbeat: function (socket) {
+        socket.sendRaw("[]");
+    },
+    sendHeartbeat: function (socket) {
+        socket.sendRaw("[]");
+    },
+    onFinished: function (socket, status) {
+        socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+    }
+};
+exports.default = hooks;
+
+
+/***/ }),
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var hooks = {
+    getReceiveURL: function (url, session) {
+        return url.base + "/" + session + "/xhr" + url.queryString;
+    },
+    onHeartbeat: function () {
+    },
+    sendHeartbeat: function (socket) {
+        socket.sendRaw("[]");
+    },
+    onFinished: function (socket, status) {
+        if (status === 200) {
+            socket.reconnect();
+        }
+        else {
+            socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+        }
+    }
+};
+exports.default = hooks;
+
+
+/***/ }),
+/* 33 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var runtime_1 = __webpack_require__(1);
+var hooks = {
+    getRequest: function (socket) {
+        var Constructor = runtime_1.default.getXHRAPI();
+        var xhr = new Constructor();
+        xhr.onreadystatechange = xhr.onprogress = function () {
+            switch (xhr.readyState) {
+                case 3:
+                    if (xhr.responseText && xhr.responseText.length > 0) {
+                        socket.onChunk(xhr.status, xhr.responseText);
+                    }
+                    break;
+                case 4:
+                    if (xhr.responseText && xhr.responseText.length > 0) {
+                        socket.onChunk(xhr.status, xhr.responseText);
+                    }
+                    socket.emit("finished", xhr.status);
+                    socket.close();
+                    break;
+            }
+        };
+        return xhr;
+    },
+    abortRequest: function (xhr) {
+        xhr.onreadystatechange = null;
+        xhr.abort();
+    }
+};
+exports.default = hooks;
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var netinfo_1 = __webpack_require__(35);
+var dispatcher_1 = __webpack_require__(4);
+function hasOnlineConnectionState(connectionState) {
+    return connectionState.type.toLowerCase() !== "none";
+}
+var NetInfo = (function (_super) {
+    __extends(NetInfo, _super);
+    function NetInfo() {
+        var _this = _super.call(this) || this;
+        _this.online = true;
+        netinfo_1.default.getConnectionInfo().then(function (connectionState) {
+            _this.online = hasOnlineConnectionState(connectionState);
+        });
+        netinfo_1.default.addEventListener('connectionChange', function (connectionState) {
+            var isNowOnline = hasOnlineConnectionState(connectionState);
+            if (_this.online === isNowOnline)
+                return;
+            _this.online = isNowOnline;
+            if (_this.online) {
+                _this.emit("online");
+            }
+            else {
+                _this.emit("offline");
+            }
+        });
+        return _this;
+    }
+    NetInfo.prototype.isOnline = function () {
+        return this.online;
+    };
+    return NetInfo;
+}(dispatcher_1.default));
+exports.NetInfo = NetInfo;
+exports.Network = new NetInfo();
+
+
+/***/ }),
+/* 35 */
 /***/ (function(module, exports) {
 
-eval("function _arrayWithHoles(arr) {\n  if (Array.isArray(arr)) return arr;\n}\n\nmodule.exports = _arrayWithHoles;\n\n//# sourceURL=webpack://Pusher/./node_modules/@babel/runtime/helpers/arrayWithHoles.js?");
+module.exports = require("@react-native-community/netinfo");
+
+/***/ }),
+/* 36 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var logger_1 = __webpack_require__(3);
+var runtime_1 = __webpack_require__(1);
+var url_store_1 = __webpack_require__(8);
+var ajax = function (context, socketId, callback) {
+    var self = this, xhr;
+    xhr = runtime_1.default.createXHR();
+    xhr.open("POST", self.options.authEndpoint, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    for (var headerName in this.authOptions.headers) {
+        xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
+    }
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                var data, parsed = false;
+                try {
+                    data = JSON.parse(xhr.responseText);
+                    parsed = true;
+                }
+                catch (e) {
+                    callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
+                }
+                if (parsed) {
+                    callback(false, data);
+                }
+            }
+            else {
+                var suffix = url_store_1.default.buildLogSuffix("authenticationEndpoint");
+                logger_1.default.warn("Couldn't retrieve authentication info. " + xhr.status +
+                    ("Clients must be authenticated to join private or presence channels. " + suffix));
+                callback(true, xhr.status);
+            }
+        }
+    };
+    xhr.send(this.composeQuery(socketId));
+    return xhr;
+};
+exports.default = ajax;
+
+
+/***/ }),
+/* 37 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var logger_1 = __webpack_require__(3);
+var Collections = __webpack_require__(0);
+var runtime_1 = __webpack_require__(1);
+var getAgent = function (sender, useTLS) {
+    return function (data, callback) {
+        var scheme = "http" + (useTLS ? "s" : "") + "://";
+        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
+        var query = Collections.buildQueryString(data);
+        url += ("/" + 2 + "?" + query);
+        var xhr = runtime_1.default.createXHR();
+        xhr.open("GET", url, true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                var status_1 = xhr.status, responseText = xhr.responseText;
+                if (status_1 !== 200) {
+                    logger_1.default.debug("TimelineSender Error: received " + status_1 + " from stats.pusher.com");
+                    return;
+                }
+                try {
+                    var host = JSON.parse(responseText).host;
+                }
+                catch (e) {
+                    logger_1.default.debug("TimelineSenderError: invalid response " + responseText);
+                }
+                if (host) {
+                    sender.host = host;
+                }
+            }
+        };
+        xhr.send();
+    };
+};
+var xhr = {
+    name: 'xhr',
+    getAgent: getAgent
+};
+exports.default = xhr;
+
+
+/***/ }),
+/* 38 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var util_1 = __webpack_require__(2);
+var level_1 = __webpack_require__(12);
+var Timeline = (function () {
+    function Timeline(key, session, options) {
+        this.key = key;
+        this.session = session;
+        this.events = [];
+        this.options = options || {};
+        this.sent = 0;
+        this.uniqueID = 0;
+    }
+    Timeline.prototype.log = function (level, event) {
+        if (level <= this.options.level) {
+            this.events.push(Collections.extend({}, event, { timestamp: util_1.default.now() }));
+            if (this.options.limit && this.events.length > this.options.limit) {
+                this.events.shift();
+            }
+        }
+    };
+    Timeline.prototype.error = function (event) {
+        this.log(level_1.default.ERROR, event);
+    };
+    Timeline.prototype.info = function (event) {
+        this.log(level_1.default.INFO, event);
+    };
+    Timeline.prototype.debug = function (event) {
+        this.log(level_1.default.DEBUG, event);
+    };
+    Timeline.prototype.isEmpty = function () {
+        return this.events.length === 0;
+    };
+    Timeline.prototype.send = function (sendfn, callback) {
+        var _this = this;
+        var data = Collections.extend({
+            session: this.session,
+            bundle: this.sent + 1,
+            key: this.key,
+            lib: "js",
+            version: this.options.version,
+            cluster: this.options.cluster,
+            features: this.options.features,
+            timeline: this.events
+        }, this.options.params);
+        this.events = [];
+        sendfn(data, function (error, result) {
+            if (!error) {
+                _this.sent++;
+            }
+            if (callback) {
+                callback(error, result);
+            }
+        });
+        return true;
+    };
+    Timeline.prototype.generateUniqueID = function () {
+        this.uniqueID++;
+        return this.uniqueID;
+    };
+    return Timeline;
+}());
+exports.default = Timeline;
+
+
+/***/ }),
+/* 39 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var util_1 = __webpack_require__(2);
+var transport_manager_1 = __webpack_require__(40);
+var Errors = __webpack_require__(7);
+var transport_strategy_1 = __webpack_require__(53);
+var sequential_strategy_1 = __webpack_require__(15);
+var best_connected_ever_strategy_1 = __webpack_require__(54);
+var cached_strategy_1 = __webpack_require__(55);
+var delayed_strategy_1 = __webpack_require__(56);
+var if_strategy_1 = __webpack_require__(57);
+var first_connected_strategy_1 = __webpack_require__(58);
+var runtime_1 = __webpack_require__(1);
+var Transports = runtime_1.default.Transports;
+exports.build = function (scheme, options) {
+    var context = Collections.extend({}, globalContext, options);
+    return evaluate(scheme, context)[1].strategy;
+};
+var UnsupportedStrategy = {
+    isSupported: function () {
+        return false;
+    },
+    connect: function (_, callback) {
+        var deferred = util_1.default.defer(function () {
+            callback(new Errors.UnsupportedStrategy());
+        });
+        return {
+            abort: function () {
+                deferred.ensureAborted();
+            },
+            forceMinPriority: function () { }
+        };
+    }
+};
+function returnWithOriginalContext(f) {
+    return function (context) {
+        return [f.apply(this, arguments), context];
+    };
+}
+var globalContext = {
+    extend: function (context, first, second) {
+        return [Collections.extend({}, first, second), context];
+    },
+    def: function (context, name, value) {
+        if (context[name] !== undefined) {
+            throw "Redefining symbol " + name;
+        }
+        context[name] = value;
+        return [undefined, context];
+    },
+    def_transport: function (context, name, type, priority, options, manager) {
+        var transportClass = Transports[type];
+        if (!transportClass) {
+            throw new Errors.UnsupportedTransport(type);
+        }
+        var enabled = (!context.enabledTransports ||
+            Collections.arrayIndexOf(context.enabledTransports, name) !== -1) &&
+            (!context.disabledTransports ||
+                Collections.arrayIndexOf(context.disabledTransports, name) === -1);
+        var transport;
+        if (enabled) {
+            transport = new transport_strategy_1.default(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, Collections.extend({
+                key: context.key,
+                useTLS: context.useTLS,
+                timeline: context.timeline,
+                ignoreNullOrigin: context.ignoreNullOrigin
+            }, options));
+        }
+        else {
+            transport = UnsupportedStrategy;
+        }
+        var newContext = context.def(context, name, transport)[1];
+        newContext.Transports = context.Transports || {};
+        newContext.Transports[name] = transport;
+        return [undefined, newContext];
+    },
+    transport_manager: returnWithOriginalContext(function (_, options) {
+        return new transport_manager_1.default(options);
+    }),
+    sequential: returnWithOriginalContext(function (_, options) {
+        var strategies = Array.prototype.slice.call(arguments, 2);
+        return new sequential_strategy_1.default(strategies, options);
+    }),
+    cached: returnWithOriginalContext(function (context, ttl, strategy) {
+        return new cached_strategy_1.default(strategy, context.Transports, {
+            ttl: ttl,
+            timeline: context.timeline,
+            useTLS: context.useTLS
+        });
+    }),
+    first_connected: returnWithOriginalContext(function (_, strategy) {
+        return new first_connected_strategy_1.default(strategy);
+    }),
+    best_connected_ever: returnWithOriginalContext(function () {
+        var strategies = Array.prototype.slice.call(arguments, 1);
+        return new best_connected_ever_strategy_1.default(strategies);
+    }),
+    delayed: returnWithOriginalContext(function (_, delay, strategy) {
+        return new delayed_strategy_1.default(strategy, { delay: delay });
+    }),
+    "if": returnWithOriginalContext(function (_, test, trueBranch, falseBranch) {
+        return new if_strategy_1.default(test, trueBranch, falseBranch);
+    }),
+    is_supported: returnWithOriginalContext(function (_, strategy) {
+        return function () {
+            return strategy.isSupported();
+        };
+    })
+};
+function isSymbol(expression) {
+    return (typeof expression === "string") && expression.charAt(0) === ":";
+}
+function getSymbolValue(expression, context) {
+    return context[expression.slice(1)];
+}
+function evaluateListOfExpressions(expressions, context) {
+    if (expressions.length === 0) {
+        return [[], context];
+    }
+    var head = evaluate(expressions[0], context);
+    var tail = evaluateListOfExpressions(expressions.slice(1), head[1]);
+    return [[head[0]].concat(tail[0]), tail[1]];
+}
+function evaluateString(expression, context) {
+    if (!isSymbol(expression)) {
+        return [expression, context];
+    }
+    var value = getSymbolValue(expression, context);
+    if (value === undefined) {
+        throw "Undefined symbol " + expression;
+    }
+    return [value, context];
+}
+function evaluateArray(expression, context) {
+    if (isSymbol(expression[0])) {
+        var f = getSymbolValue(expression[0], context);
+        if (expression.length > 1) {
+            if (typeof f !== "function") {
+                throw "Calling non-function " + expression[0];
+            }
+            var args = [Collections.extend({}, context)].concat(Collections.map(expression.slice(1), function (arg) {
+                return evaluate(arg, Collections.extend({}, context))[0];
+            }));
+            return f.apply(this, args);
+        }
+        else {
+            return [f, context];
+        }
+    }
+    else {
+        return evaluateListOfExpressions(expression, context);
+    }
+}
+function evaluate(expression, context) {
+    if (typeof expression === "string") {
+        return evaluateString(expression, context);
+    }
+    else if (typeof expression === "object") {
+        if (expression instanceof Array && expression.length > 0) {
+            return evaluateArray(expression, context);
+        }
+    }
+    return [expression, context];
+}
+
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var factory_1 = __webpack_require__(6);
+var TransportManager = (function () {
+    function TransportManager(options) {
+        this.options = options || {};
+        this.livesLeft = this.options.lives || Infinity;
+    }
+    TransportManager.prototype.getAssistant = function (transport) {
+        return factory_1.default.createAssistantToTheTransportManager(this, transport, {
+            minPingDelay: this.options.minPingDelay,
+            maxPingDelay: this.options.maxPingDelay
+        });
+    };
+    TransportManager.prototype.isAlive = function () {
+        return this.livesLeft > 0;
+    };
+    TransportManager.prototype.reportDeath = function () {
+        this.livesLeft -= 1;
+    };
+    return TransportManager;
+}());
+exports.default = TransportManager;
+
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = __webpack_require__(2);
+var Collections = __webpack_require__(0);
+var AssistantToTheTransportManager = (function () {
+    function AssistantToTheTransportManager(manager, transport, options) {
+        this.manager = manager;
+        this.transport = transport;
+        this.minPingDelay = options.minPingDelay;
+        this.maxPingDelay = options.maxPingDelay;
+        this.pingDelay = undefined;
+    }
+    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
+        var _this = this;
+        options = Collections.extend({}, options, {
+            activityTimeout: this.pingDelay
+        });
+        var connection = this.transport.createConnection(name, priority, key, options);
+        var openTimestamp = null;
+        var onOpen = function () {
+            connection.unbind("open", onOpen);
+            connection.bind("closed", onClosed);
+            openTimestamp = util_1.default.now();
+        };
+        var onClosed = function (closeEvent) {
+            connection.unbind("closed", onClosed);
+            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
+                _this.manager.reportDeath();
+            }
+            else if (!closeEvent.wasClean && openTimestamp) {
+                var lifespan = util_1.default.now() - openTimestamp;
+                if (lifespan < 2 * _this.maxPingDelay) {
+                    _this.manager.reportDeath();
+                    _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);
+                }
+            }
+        };
+        connection.bind("open", onOpen);
+        return connection;
+    };
+    AssistantToTheTransportManager.prototype.isSupported = function (environment) {
+        return this.manager.isAlive() && this.transport.isSupported(environment);
+    };
+    return AssistantToTheTransportManager;
+}());
+exports.default = AssistantToTheTransportManager;
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var Protocol = __webpack_require__(13);
+var connection_1 = __webpack_require__(43);
+var Handshake = (function () {
+    function Handshake(transport, callback) {
+        this.transport = transport;
+        this.callback = callback;
+        this.bindListeners();
+    }
+    Handshake.prototype.close = function () {
+        this.unbindListeners();
+        this.transport.close();
+    };
+    Handshake.prototype.bindListeners = function () {
+        var _this = this;
+        this.onMessage = function (m) {
+            _this.unbindListeners();
+            var result;
+            try {
+                result = Protocol.processHandshake(m);
+            }
+            catch (e) {
+                _this.finish("error", { error: e });
+                _this.transport.close();
+                return;
+            }
+            if (result.action === "connected") {
+                _this.finish("connected", {
+                    connection: new connection_1.default(result.id, _this.transport),
+                    activityTimeout: result.activityTimeout
+                });
+            }
+            else {
+                _this.finish(result.action, { error: result.error });
+                _this.transport.close();
+            }
+        };
+        this.onClosed = function (closeEvent) {
+            _this.unbindListeners();
+            var action = Protocol.getCloseAction(closeEvent) || "backoff";
+            var error = Protocol.getCloseError(closeEvent);
+            _this.finish(action, { error: error });
+        };
+        this.transport.bind("message", this.onMessage);
+        this.transport.bind("closed", this.onClosed);
+    };
+    Handshake.prototype.unbindListeners = function () {
+        this.transport.unbind("message", this.onMessage);
+        this.transport.unbind("closed", this.onClosed);
+    };
+    Handshake.prototype.finish = function (action, params) {
+        this.callback(Collections.extend({ transport: this.transport, action: action }, params));
+    };
+    return Handshake;
+}());
+exports.default = Handshake;
+
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var dispatcher_1 = __webpack_require__(4);
+var Protocol = __webpack_require__(13);
+var logger_1 = __webpack_require__(3);
+var Connection = (function (_super) {
+    __extends(Connection, _super);
+    function Connection(id, transport) {
+        var _this = _super.call(this) || this;
+        _this.id = id;
+        _this.transport = transport;
+        _this.activityTimeout = transport.activityTimeout;
+        _this.bindListeners();
+        return _this;
+    }
+    Connection.prototype.handlesActivityChecks = function () {
+        return this.transport.handlesActivityChecks();
+    };
+    Connection.prototype.send = function (data) {
+        return this.transport.send(data);
+    };
+    Connection.prototype.send_event = function (name, data, channel) {
+        var event = { event: name, data: data };
+        if (channel) {
+            event.channel = channel;
+        }
+        logger_1.default.debug('Event sent', event);
+        return this.send(Protocol.encodeMessage(event));
+    };
+    Connection.prototype.ping = function () {
+        if (this.transport.supportsPing()) {
+            this.transport.ping();
+        }
+        else {
+            this.send_event('pusher:ping', {});
+        }
+    };
+    Connection.prototype.close = function () {
+        this.transport.close();
+    };
+    Connection.prototype.bindListeners = function () {
+        var _this = this;
+        var listeners = {
+            message: function (messageEvent) {
+                var pusherEvent;
+                try {
+                    pusherEvent = Protocol.decodeMessage(messageEvent);
+                }
+                catch (e) {
+                    _this.emit('error', {
+                        type: 'MessageParseError',
+                        error: e,
+                        data: messageEvent.data
+                    });
+                }
+                if (pusherEvent !== undefined) {
+                    logger_1.default.debug('Event recd', pusherEvent);
+                    switch (pusherEvent.event) {
+                        case 'pusher:error':
+                            _this.emit('error', { type: 'PusherError', data: pusherEvent.data });
+                            break;
+                        case 'pusher:ping':
+                            _this.emit("ping");
+                            break;
+                        case 'pusher:pong':
+                            _this.emit("pong");
+                            break;
+                    }
+                    _this.emit('message', pusherEvent);
+                }
+            },
+            activity: function () {
+                _this.emit("activity");
+            },
+            error: function (error) {
+                _this.emit("error", { type: "WebSocketError", error: error });
+            },
+            closed: function (closeEvent) {
+                unbindListeners();
+                if (closeEvent && closeEvent.code) {
+                    _this.handleCloseEvent(closeEvent);
+                }
+                _this.transport = null;
+                _this.emit("closed");
+            }
+        };
+        var unbindListeners = function () {
+            Collections.objectApply(listeners, function (listener, event) {
+                _this.transport.unbind(event, listener);
+            });
+        };
+        Collections.objectApply(listeners, function (listener, event) {
+            _this.transport.bind(event, listener);
+        });
+    };
+    Connection.prototype.handleCloseEvent = function (closeEvent) {
+        var action = Protocol.getCloseAction(closeEvent);
+        var error = Protocol.getCloseError(closeEvent);
+        if (error) {
+            this.emit('error', error);
+        }
+        if (action) {
+            this.emit(action, { action: action, error: error });
+        }
+    };
+    return Connection;
+}(dispatcher_1.default));
+exports.default = Connection;
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var runtime_1 = __webpack_require__(1);
+var PusherAuthorizer = (function () {
+    function PusherAuthorizer(channel, options) {
+        this.channel = channel;
+        var authTransport = options.authTransport;
+        if (typeof runtime_1.default.getAuthorizers()[authTransport] === "undefined") {
+            throw "'" + authTransport + "' is not a recognized auth transport";
+        }
+        this.type = authTransport;
+        this.options = options;
+        this.authOptions = (options || {}).auth || {};
+    }
+    PusherAuthorizer.prototype.composeQuery = function (socketId) {
+        var query = 'socket_id=' + encodeURIComponent(socketId) +
+            '&channel_name=' + encodeURIComponent(this.channel.name);
+        for (var i in this.authOptions.params) {
+            query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
+        }
+        return query;
+    };
+    PusherAuthorizer.prototype.authorize = function (socketId, callback) {
+        PusherAuthorizer.authorizers = PusherAuthorizer.authorizers || runtime_1.default.getAuthorizers();
+        return PusherAuthorizer.authorizers[this.type].call(this, runtime_1.default, socketId, callback);
+    };
+    return PusherAuthorizer;
+}());
+exports.default = PusherAuthorizer;
+
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var runtime_1 = __webpack_require__(1);
+var TimelineSender = (function () {
+    function TimelineSender(timeline, options) {
+        this.timeline = timeline;
+        this.options = options || {};
+    }
+    TimelineSender.prototype.send = function (useTLS, callback) {
+        if (this.timeline.isEmpty()) {
+            return;
+        }
+        this.timeline.send(runtime_1.default.TimelineTransport.getAgent(this, useTLS), callback);
+    };
+    return TimelineSender;
+}());
+exports.default = TimelineSender;
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var private_channel_1 = __webpack_require__(10);
+var logger_1 = __webpack_require__(3);
+var members_1 = __webpack_require__(47);
+var url_store_1 = __webpack_require__(8);
+var PresenceChannel = (function (_super) {
+    __extends(PresenceChannel, _super);
+    function PresenceChannel(name, pusher) {
+        var _this = _super.call(this, name, pusher) || this;
+        _this.members = new members_1.default();
+        return _this;
+    }
+    PresenceChannel.prototype.authorize = function (socketId, callback) {
+        var _this = this;
+        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+            if (!error) {
+                if (authData.channel_data === undefined) {
+                    var suffix = url_store_1.default.buildLogSuffix("authenticationEndpoint");
+                    logger_1.default.warn("Invalid auth response for channel '" + _this.name + "'," +
+                        ("expected 'channel_data' field. " + suffix));
+                    callback("Invalid auth response");
+                    return;
+                }
+                var channelData = JSON.parse(authData.channel_data);
+                _this.members.setMyID(channelData.user_id);
+            }
+            callback(error, authData);
+        });
+    };
+    PresenceChannel.prototype.handleEvent = function (event) {
+        var eventName = event.event;
+        if (eventName.indexOf("pusher_internal:") === 0) {
+            this.handleInternalEvent(event);
+        }
+        else {
+            var data = event.data;
+            var metadata = {};
+            if (event.user_id) {
+                metadata.user_id = event.user_id;
+            }
+            this.emit(eventName, data, metadata);
+        }
+    };
+    PresenceChannel.prototype.handleInternalEvent = function (event) {
+        var eventName = event.event;
+        var data = event.data;
+        switch (eventName) {
+            case "pusher_internal:subscription_succeeded":
+                this.handleSubscriptionSucceededEvent(event);
+                break;
+            case "pusher_internal:member_added":
+                var addedMember = this.members.addMember(data);
+                this.emit('pusher:member_added', addedMember);
+                break;
+            case "pusher_internal:member_removed":
+                var removedMember = this.members.removeMember(data);
+                if (removedMember) {
+                    this.emit('pusher:member_removed', removedMember);
+                }
+                break;
+        }
+    };
+    PresenceChannel.prototype.handleSubscriptionSucceededEvent = function (event) {
+        this.subscriptionPending = false;
+        this.subscribed = true;
+        if (this.subscriptionCancelled) {
+            this.pusher.unsubscribe(this.name);
+        }
+        else {
+            this.members.onSubscription(event.data);
+            this.emit("pusher:subscription_succeeded", this.members);
+        }
+    };
+    PresenceChannel.prototype.disconnect = function () {
+        this.members.reset();
+        _super.prototype.disconnect.call(this);
+    };
+    return PresenceChannel;
+}(private_channel_1.default));
+exports.default = PresenceChannel;
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var Members = (function () {
+    function Members() {
+        this.reset();
+    }
+    Members.prototype.get = function (id) {
+        if (Object.prototype.hasOwnProperty.call(this.members, id)) {
+            return {
+                id: id,
+                info: this.members[id]
+            };
+        }
+        else {
+            return null;
+        }
+    };
+    Members.prototype.each = function (callback) {
+        var _this = this;
+        Collections.objectApply(this.members, function (member, id) {
+            callback(_this.get(id));
+        });
+    };
+    Members.prototype.setMyID = function (id) {
+        this.myID = id;
+    };
+    Members.prototype.onSubscription = function (subscriptionData) {
+        this.members = subscriptionData.presence.hash;
+        this.count = subscriptionData.presence.count;
+        this.me = this.get(this.myID);
+    };
+    Members.prototype.addMember = function (memberData) {
+        if (this.get(memberData.user_id) === null) {
+            this.count++;
+        }
+        this.members[memberData.user_id] = memberData.user_info;
+        return this.get(memberData.user_id);
+    };
+    Members.prototype.removeMember = function (memberData) {
+        var member = this.get(memberData.user_id);
+        if (member) {
+            delete this.members[memberData.user_id];
+            this.count--;
+        }
+        return member;
+    };
+    Members.prototype.reset = function () {
+        this.members = {};
+        this.count = 0;
+        this.myID = null;
+        this.me = null;
+    };
+    return Members;
+}());
+exports.default = Members;
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var private_channel_1 = __webpack_require__(10);
+var Errors = __webpack_require__(7);
+var logger_1 = __webpack_require__(3);
+var tweetnacl_1 = __webpack_require__(49);
+var tweetnacl_util_1 = __webpack_require__(50);
+var EncryptedChannel = (function (_super) {
+    __extends(EncryptedChannel, _super);
+    function EncryptedChannel() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.key = null;
+        return _this;
+    }
+    EncryptedChannel.prototype.authorize = function (socketId, callback) {
+        var _this = this;
+        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+            if (error) {
+                callback(true, authData);
+                return;
+            }
+            var sharedSecret = authData["shared_secret"];
+            if (!sharedSecret) {
+                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
+                callback(true, errorMsg);
+                logger_1.default.warn("Error: " + errorMsg);
+                return;
+            }
+            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);
+            delete authData["shared_secret"];
+            callback(false, authData);
+        });
+    };
+    EncryptedChannel.prototype.trigger = function (event, data) {
+        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');
+    };
+    EncryptedChannel.prototype.handleEvent = function (event) {
+        var eventName = event.event;
+        var data = event.data;
+        if (eventName.indexOf("pusher_internal:") === 0 || eventName.indexOf("pusher:") === 0) {
+            _super.prototype.handleEvent.call(this, event);
+            return;
+        }
+        this.handleEncryptedEvent(eventName, data);
+    };
+    EncryptedChannel.prototype.handleEncryptedEvent = function (event, data) {
+        var _this = this;
+        if (!this.key) {
+            logger_1.default.debug('Received encrypted event before key has been retrieved from the authEndpoint');
+            return;
+        }
+        if (!data.ciphertext || !data.nonce) {
+            logger_1.default.warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+            return;
+        }
+        var cipherText = tweetnacl_util_1.decodeBase64(data.ciphertext);
+        if (cipherText.length < tweetnacl_1.secretbox.overheadLength) {
+            logger_1.default.warn("Expected encrypted event ciphertext length to be " + tweetnacl_1.secretbox.overheadLength + ", got: " + cipherText.length);
+            return;
+        }
+        var nonce = tweetnacl_util_1.decodeBase64(data.nonce);
+        if (nonce.length < tweetnacl_1.secretbox.nonceLength) {
+            logger_1.default.warn("Expected encrypted event nonce length to be " + tweetnacl_1.secretbox.nonceLength + ", got: " + nonce.length);
+            return;
+        }
+        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);
+        if (bytes === null) {
+            logger_1.default.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+            this.authorize(this.pusher.connection.socket_id, function (error, authData) {
+                if (error) {
+                    logger_1.default.warn("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
+                    return;
+                }
+                bytes = tweetnacl_1.secretbox.open(cipherText, nonce, _this.key);
+                if (bytes === null) {
+                    logger_1.default.warn("Failed to decrypt event with new key. Dropping encrypted event");
+                    return;
+                }
+                _this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));
+                return;
+            });
+            return;
+        }
+        this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));
+    };
+    EncryptedChannel.prototype.emitJSON = function (eventName, data) {
+        try {
+            this.emit(eventName, JSON.parse(data));
+        }
+        catch (e) {
+            this.emit(eventName, data);
+        }
+        return this;
+    };
+    return EncryptedChannel;
+}(private_channel_1.default));
+exports.default = EncryptedChannel;
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = {
+    secretbox: {},
+    randomBytes: {},
+};
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = {
+    encodeUTF8: {},
+    decodeUTF8: {},
+    encodeBase64: {},
+    decodeBase64: {},
+};
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+var dispatcher_1 = __webpack_require__(4);
+var timers_1 = __webpack_require__(5);
+var logger_1 = __webpack_require__(3);
+var Collections = __webpack_require__(0);
+var runtime_1 = __webpack_require__(1);
+var ConnectionManager = (function (_super) {
+    __extends(ConnectionManager, _super);
+    function ConnectionManager(key, options) {
+        var _this = _super.call(this) || this;
+        _this.key = key;
+        _this.options = options || {};
+        _this.state = "initialized";
+        _this.connection = null;
+        _this.usingTLS = !!options.useTLS;
+        _this.timeline = _this.options.timeline;
+        _this.errorCallbacks = _this.buildErrorCallbacks();
+        _this.connectionCallbacks = _this.buildConnectionCallbacks(_this.errorCallbacks);
+        _this.handshakeCallbacks = _this.buildHandshakeCallbacks(_this.errorCallbacks);
+        var Network = runtime_1.default.getNetwork();
+        Network.bind("online", function () {
+            _this.timeline.info({ netinfo: "online" });
+            if (_this.state === "connecting" || _this.state === "unavailable") {
+                _this.retryIn(0);
+            }
+        });
+        Network.bind("offline", function () {
+            _this.timeline.info({ netinfo: "offline" });
+            if (_this.connection) {
+                _this.sendActivityCheck();
+            }
+        });
+        _this.updateStrategy();
+        return _this;
+    }
+    ConnectionManager.prototype.connect = function () {
+        if (this.connection || this.runner) {
+            return;
+        }
+        if (!this.strategy.isSupported()) {
+            this.updateState("failed");
+            return;
+        }
+        this.updateState("connecting");
+        this.startConnecting();
+        this.setUnavailableTimer();
+    };
+    ;
+    ConnectionManager.prototype.send = function (data) {
+        if (this.connection) {
+            return this.connection.send(data);
+        }
+        else {
+            return false;
+        }
+    };
+    ;
+    ConnectionManager.prototype.send_event = function (name, data, channel) {
+        if (this.connection) {
+            return this.connection.send_event(name, data, channel);
+        }
+        else {
+            return false;
+        }
+    };
+    ;
+    ConnectionManager.prototype.disconnect = function () {
+        this.disconnectInternally();
+        this.updateState("disconnected");
+    };
+    ;
+    ConnectionManager.prototype.isUsingTLS = function () {
+        return this.usingTLS;
+    };
+    ;
+    ConnectionManager.prototype.startConnecting = function () {
+        var _this = this;
+        var callback = function (error, handshake) {
+            if (error) {
+                _this.runner = _this.strategy.connect(0, callback);
+            }
+            else {
+                if (handshake.action === "error") {
+                    _this.emit("error", { type: "HandshakeError", error: handshake.error });
+                    _this.timeline.error({ handshakeError: handshake.error });
+                }
+                else {
+                    _this.abortConnecting();
+                    _this.handshakeCallbacks[handshake.action](handshake);
+                }
+            }
+        };
+        this.runner = this.strategy.connect(0, callback);
+    };
+    ;
+    ConnectionManager.prototype.abortConnecting = function () {
+        if (this.runner) {
+            this.runner.abort();
+            this.runner = null;
+        }
+    };
+    ;
+    ConnectionManager.prototype.disconnectInternally = function () {
+        this.abortConnecting();
+        this.clearRetryTimer();
+        this.clearUnavailableTimer();
+        if (this.connection) {
+            var connection = this.abandonConnection();
+            connection.close();
+        }
+    };
+    ;
+    ConnectionManager.prototype.updateStrategy = function () {
+        this.strategy = this.options.getStrategy({
+            key: this.key,
+            timeline: this.timeline,
+            useTLS: this.usingTLS
+        });
+    };
+    ;
+    ConnectionManager.prototype.retryIn = function (delay) {
+        var _this = this;
+        this.timeline.info({ action: "retry", delay: delay });
+        if (delay > 0) {
+            this.emit("connecting_in", Math.round(delay / 1000));
+        }
+        this.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {
+            _this.disconnectInternally();
+            _this.connect();
+        });
+    };
+    ;
+    ConnectionManager.prototype.clearRetryTimer = function () {
+        if (this.retryTimer) {
+            this.retryTimer.ensureAborted();
+            this.retryTimer = null;
+        }
+    };
+    ;
+    ConnectionManager.prototype.setUnavailableTimer = function () {
+        var _this = this;
+        this.unavailableTimer = new timers_1.OneOffTimer(this.options.unavailableTimeout, function () {
+            _this.updateState("unavailable");
+        });
+    };
+    ;
+    ConnectionManager.prototype.clearUnavailableTimer = function () {
+        if (this.unavailableTimer) {
+            this.unavailableTimer.ensureAborted();
+        }
+    };
+    ;
+    ConnectionManager.prototype.sendActivityCheck = function () {
+        var _this = this;
+        this.stopActivityCheck();
+        this.connection.ping();
+        this.activityTimer = new timers_1.OneOffTimer(this.options.pongTimeout, function () {
+            _this.timeline.error({ pong_timed_out: _this.options.pongTimeout });
+            _this.retryIn(0);
+        });
+    };
+    ;
+    ConnectionManager.prototype.resetActivityCheck = function () {
+        var _this = this;
+        this.stopActivityCheck();
+        if (this.connection && !this.connection.handlesActivityChecks()) {
+            this.activityTimer = new timers_1.OneOffTimer(this.activityTimeout, function () {
+                _this.sendActivityCheck();
+            });
+        }
+    };
+    ;
+    ConnectionManager.prototype.stopActivityCheck = function () {
+        if (this.activityTimer) {
+            this.activityTimer.ensureAborted();
+        }
+    };
+    ;
+    ConnectionManager.prototype.buildConnectionCallbacks = function (errorCallbacks) {
+        var _this = this;
+        return Collections.extend({}, errorCallbacks, {
+            message: function (message) {
+                _this.resetActivityCheck();
+                _this.emit('message', message);
+            },
+            ping: function () {
+                _this.send_event('pusher:pong', {});
+            },
+            activity: function () {
+                _this.resetActivityCheck();
+            },
+            error: function (error) {
+                _this.emit("error", { type: "WebSocketError", error: error });
+            },
+            closed: function () {
+                _this.abandonConnection();
+                if (_this.shouldRetry()) {
+                    _this.retryIn(1000);
+                }
+            }
+        });
+    };
+    ;
+    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
+        var _this = this;
+        return Collections.extend({}, errorCallbacks, {
+            connected: function (handshake) {
+                _this.activityTimeout = Math.min(_this.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
+                _this.clearUnavailableTimer();
+                _this.setConnection(handshake.connection);
+                _this.socket_id = _this.connection.id;
+                _this.updateState("connected", { socket_id: _this.socket_id });
+            }
+        });
+    };
+    ;
+    ConnectionManager.prototype.buildErrorCallbacks = function () {
+        var _this = this;
+        var withErrorEmitted = function (callback) {
+            return function (result) {
+                if (result.error) {
+                    _this.emit("error", { type: "WebSocketError", error: result.error });
+                }
+                callback(result);
+            };
+        };
+        return {
+            tls_only: withErrorEmitted(function () {
+                _this.usingTLS = true;
+                _this.updateStrategy();
+                _this.retryIn(0);
+            }),
+            refused: withErrorEmitted(function () {
+                _this.disconnect();
+            }),
+            backoff: withErrorEmitted(function () {
+                _this.retryIn(1000);
+            }),
+            retry: withErrorEmitted(function () {
+                _this.retryIn(0);
+            })
+        };
+    };
+    ;
+    ConnectionManager.prototype.setConnection = function (connection) {
+        this.connection = connection;
+        for (var event in this.connectionCallbacks) {
+            this.connection.bind(event, this.connectionCallbacks[event]);
+        }
+        this.resetActivityCheck();
+    };
+    ;
+    ConnectionManager.prototype.abandonConnection = function () {
+        if (!this.connection) {
+            return;
+        }
+        this.stopActivityCheck();
+        for (var event in this.connectionCallbacks) {
+            this.connection.unbind(event, this.connectionCallbacks[event]);
+        }
+        var connection = this.connection;
+        this.connection = null;
+        return connection;
+    };
+    ConnectionManager.prototype.updateState = function (newState, data) {
+        var previousState = this.state;
+        this.state = newState;
+        if (previousState !== newState) {
+            var newStateDescription = newState;
+            if (newStateDescription === "connected") {
+                newStateDescription += " with new socket ID " + data.socket_id;
+            }
+            logger_1.default.debug('State changed', previousState + ' -> ' + newStateDescription);
+            this.timeline.info({ state: newState, params: data });
+            this.emit('state_change', { previous: previousState, current: newState });
+            this.emit(newState, data);
+        }
+    };
+    ConnectionManager.prototype.shouldRetry = function () {
+        return this.state === "connecting" || this.state === "connected";
+    };
+    return ConnectionManager;
+}(dispatcher_1.default));
+exports.default = ConnectionManager;
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var factory_1 = __webpack_require__(6);
+var Errors = __webpack_require__(7);
+var Channels = (function () {
+    function Channels() {
+        this.channels = {};
+    }
+    Channels.prototype.add = function (name, pusher) {
+        if (!this.channels[name]) {
+            this.channels[name] = createChannel(name, pusher);
+        }
+        return this.channels[name];
+    };
+    Channels.prototype.all = function () {
+        return Collections.values(this.channels);
+    };
+    Channels.prototype.find = function (name) {
+        return this.channels[name];
+    };
+    Channels.prototype.remove = function (name) {
+        var channel = this.channels[name];
+        delete this.channels[name];
+        return channel;
+    };
+    Channels.prototype.disconnect = function () {
+        Collections.objectApply(this.channels, function (channel) {
+            channel.disconnect();
+        });
+    };
+    return Channels;
+}());
+exports.default = Channels;
+function createChannel(name, pusher) {
+    if (name.indexOf('private-encrypted-') === 0) {
+        if (navigator.product == "ReactNative") {
+            var errorMsg = "Encrypted channels are not yet supported when using React Native builds.";
+            throw new Errors.UnsupportedFeature(errorMsg);
+        }
+        return factory_1.default.createEncryptedChannel(name, pusher);
+    }
+    else if (name.indexOf('private-') === 0) {
+        return factory_1.default.createPrivateChannel(name, pusher);
+    }
+    else if (name.indexOf('presence-') === 0) {
+        return factory_1.default.createPresenceChannel(name, pusher);
+    }
+    else {
+        return factory_1.default.createChannel(name, pusher);
+    }
+}
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var factory_1 = __webpack_require__(6);
+var util_1 = __webpack_require__(2);
+var Errors = __webpack_require__(7);
+var Collections = __webpack_require__(0);
+var TransportStrategy = (function () {
+    function TransportStrategy(name, priority, transport, options) {
+        this.name = name;
+        this.priority = priority;
+        this.transport = transport;
+        this.options = options || {};
+    }
+    TransportStrategy.prototype.isSupported = function () {
+        return this.transport.isSupported({
+            useTLS: this.options.useTLS
+        });
+    };
+    TransportStrategy.prototype.connect = function (minPriority, callback) {
+        var _this = this;
+        if (!this.isSupported()) {
+            return failAttempt(new Errors.UnsupportedStrategy(), callback);
+        }
+        else if (this.priority < minPriority) {
+            return failAttempt(new Errors.TransportPriorityTooLow(), callback);
+        }
+        var connected = false;
+        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
+        var handshake = null;
+        var onInitialized = function () {
+            transport.unbind("initialized", onInitialized);
+            transport.connect();
+        };
+        var onOpen = function () {
+            handshake = factory_1.default.createHandshake(transport, function (result) {
+                connected = true;
+                unbindListeners();
+                callback(null, result);
+            });
+        };
+        var onError = function (error) {
+            unbindListeners();
+            callback(error);
+        };
+        var onClosed = function () {
+            unbindListeners();
+            var serializedTransport;
+            serializedTransport = Collections.safeJSONStringify(transport);
+            callback(new Errors.TransportClosed(serializedTransport));
+        };
+        var unbindListeners = function () {
+            transport.unbind("initialized", onInitialized);
+            transport.unbind("open", onOpen);
+            transport.unbind("error", onError);
+            transport.unbind("closed", onClosed);
+        };
+        transport.bind("initialized", onInitialized);
+        transport.bind("open", onOpen);
+        transport.bind("error", onError);
+        transport.bind("closed", onClosed);
+        transport.initialize();
+        return {
+            abort: function () {
+                if (connected) {
+                    return;
+                }
+                unbindListeners();
+                if (handshake) {
+                    handshake.close();
+                }
+                else {
+                    transport.close();
+                }
+            },
+            forceMinPriority: function (p) {
+                if (connected) {
+                    return;
+                }
+                if (_this.priority < p) {
+                    if (handshake) {
+                        handshake.close();
+                    }
+                    else {
+                        transport.close();
+                    }
+                }
+            }
+        };
+    };
+    return TransportStrategy;
+}());
+exports.default = TransportStrategy;
+function failAttempt(error, callback) {
+    util_1.default.defer(function () {
+        callback(error);
+    });
+    return {
+        abort: function () { },
+        forceMinPriority: function () { }
+    };
+}
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Collections = __webpack_require__(0);
+var util_1 = __webpack_require__(2);
+var BestConnectedEverStrategy = (function () {
+    function BestConnectedEverStrategy(strategies) {
+        this.strategies = strategies;
+    }
+    BestConnectedEverStrategy.prototype.isSupported = function () {
+        return Collections.any(this.strategies, util_1.default.method("isSupported"));
+    };
+    BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {
+        return connect(this.strategies, minPriority, function (i, runners) {
+            return function (error, handshake) {
+                runners[i].error = error;
+                if (error) {
+                    if (allRunnersFailed(runners)) {
+                        callback(true);
+                    }
+                    return;
+                }
+                Collections.apply(runners, function (runner) {
+                    runner.forceMinPriority(handshake.transport.priority);
+                });
+                callback(null, handshake);
+            };
+        });
+    };
+    return BestConnectedEverStrategy;
+}());
+exports.default = BestConnectedEverStrategy;
+function connect(strategies, minPriority, callbackBuilder) {
+    var runners = Collections.map(strategies, function (strategy, i, _, rs) {
+        return strategy.connect(minPriority, callbackBuilder(i, rs));
+    });
+    return {
+        abort: function () {
+            Collections.apply(runners, abortRunner);
+        },
+        forceMinPriority: function (p) {
+            Collections.apply(runners, function (runner) {
+                runner.forceMinPriority(p);
+            });
+        }
+    };
+}
+function allRunnersFailed(runners) {
+    return Collections.all(runners, function (runner) {
+        return Boolean(runner.error);
+    });
+}
+function abortRunner(runner) {
+    if (!runner.error && !runner.aborted) {
+        runner.abort();
+        runner.aborted = true;
+    }
+}
+
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var util_1 = __webpack_require__(2);
+var runtime_1 = __webpack_require__(1);
+var sequential_strategy_1 = __webpack_require__(15);
+var Collections = __webpack_require__(0);
+var CachedStrategy = (function () {
+    function CachedStrategy(strategy, transports, options) {
+        this.strategy = strategy;
+        this.transports = transports;
+        this.ttl = options.ttl || 1800 * 1000;
+        this.usingTLS = options.useTLS;
+        this.timeline = options.timeline;
+    }
+    CachedStrategy.prototype.isSupported = function () {
+        return this.strategy.isSupported();
+    };
+    CachedStrategy.prototype.connect = function (minPriority, callback) {
+        var usingTLS = this.usingTLS;
+        var info = fetchTransportCache(usingTLS);
+        var strategies = [this.strategy];
+        if (info && info.timestamp + this.ttl >= util_1.default.now()) {
+            var transport = this.transports[info.transport];
+            if (transport) {
+                this.timeline.info({
+                    cached: true,
+                    transport: info.transport,
+                    latency: info.latency
+                });
+                strategies.push(new sequential_strategy_1.default([transport], {
+                    timeout: info.latency * 2 + 1000,
+                    failFast: true
+                }));
+            }
+        }
+        var startTimestamp = util_1.default.now();
+        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {
+            if (error) {
+                flushTransportCache(usingTLS);
+                if (strategies.length > 0) {
+                    startTimestamp = util_1.default.now();
+                    runner = strategies.pop().connect(minPriority, cb);
+                }
+                else {
+                    callback(error);
+                }
+            }
+            else {
+                storeTransportCache(usingTLS, handshake.transport.name, util_1.default.now() - startTimestamp);
+                callback(null, handshake);
+            }
+        });
+        return {
+            abort: function () {
+                runner.abort();
+            },
+            forceMinPriority: function (p) {
+                minPriority = p;
+                if (runner) {
+                    runner.forceMinPriority(p);
+                }
+            }
+        };
+    };
+    return CachedStrategy;
+}());
+exports.default = CachedStrategy;
+function getTransportCacheKey(usingTLS) {
+    return "pusherTransport" + (usingTLS ? "TLS" : "NonTLS");
+}
+function fetchTransportCache(usingTLS) {
+    var storage = runtime_1.default.getLocalStorage();
+    if (storage) {
+        try {
+            var serializedCache = storage[getTransportCacheKey(usingTLS)];
+            if (serializedCache) {
+                return JSON.parse(serializedCache);
+            }
+        }
+        catch (e) {
+            flushTransportCache(usingTLS);
+        }
+    }
+    return null;
+}
+function storeTransportCache(usingTLS, transport, latency) {
+    var storage = runtime_1.default.getLocalStorage();
+    if (storage) {
+        try {
+            storage[getTransportCacheKey(usingTLS)] = Collections.safeJSONStringify({
+                timestamp: util_1.default.now(),
+                transport: transport,
+                latency: latency
+            });
+        }
+        catch (e) {
+        }
+    }
+}
+function flushTransportCache(usingTLS) {
+    var storage = runtime_1.default.getLocalStorage();
+    if (storage) {
+        try {
+            delete storage[getTransportCacheKey(usingTLS)];
+        }
+        catch (e) {
+        }
+    }
+}
+
+
+/***/ }),
+/* 56 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var timers_1 = __webpack_require__(5);
+var DelayedStrategy = (function () {
+    function DelayedStrategy(strategy, _a) {
+        var number = _a.delay;
+        this.strategy = strategy;
+        this.options = { delay: number };
+    }
+    DelayedStrategy.prototype.isSupported = function () {
+        return this.strategy.isSupported();
+    };
+    DelayedStrategy.prototype.connect = function (minPriority, callback) {
+        var strategy = this.strategy;
+        var runner;
+        var timer = new timers_1.OneOffTimer(this.options.delay, function () {
+            runner = strategy.connect(minPriority, callback);
+        });
+        return {
+            abort: function () {
+                timer.ensureAborted();
+                if (runner) {
+                    runner.abort();
+                }
+            },
+            forceMinPriority: function (p) {
+                minPriority = p;
+                if (runner) {
+                    runner.forceMinPriority(p);
+                }
+            }
+        };
+    };
+    return DelayedStrategy;
+}());
+exports.default = DelayedStrategy;
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var IfStrategy = (function () {
+    function IfStrategy(test, trueBranch, falseBranch) {
+        this.test = test;
+        this.trueBranch = trueBranch;
+        this.falseBranch = falseBranch;
+    }
+    IfStrategy.prototype.isSupported = function () {
+        var branch = this.test() ? this.trueBranch : this.falseBranch;
+        return branch.isSupported();
+    };
+    IfStrategy.prototype.connect = function (minPriority, callback) {
+        var branch = this.test() ? this.trueBranch : this.falseBranch;
+        return branch.connect(minPriority, callback);
+    };
+    return IfStrategy;
+}());
+exports.default = IfStrategy;
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var FirstConnectedStrategy = (function () {
+    function FirstConnectedStrategy(strategy) {
+        this.strategy = strategy;
+    }
+    FirstConnectedStrategy.prototype.isSupported = function () {
+        return this.strategy.isSupported();
+    };
+    FirstConnectedStrategy.prototype.connect = function (minPriority, callback) {
+        var runner = this.strategy.connect(minPriority, function (error, handshake) {
+            if (handshake) {
+                runner.abort();
+            }
+            callback(error, handshake);
+        });
+        return runner;
+    };
+    return FirstConnectedStrategy;
+}());
+exports.default = FirstConnectedStrategy;
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var defaults_1 = __webpack_require__(9);
+exports.getGlobalConfig = function () {
+    return {
+        wsHost: defaults_1.default.host,
+        wsPort: defaults_1.default.ws_port,
+        wssPort: defaults_1.default.wss_port,
+        wsPath: defaults_1.default.ws_path,
+        httpHost: defaults_1.default.sockjs_host,
+        httpPort: defaults_1.default.sockjs_http_port,
+        httpsPort: defaults_1.default.sockjs_https_port,
+        httpPath: defaults_1.default.sockjs_path,
+        statsHost: defaults_1.default.stats_host,
+        authEndpoint: defaults_1.default.channel_auth_endpoint,
+        authTransport: defaults_1.default.channel_auth_transport,
+        activity_timeout: defaults_1.default.activity_timeout,
+        pong_timeout: defaults_1.default.pong_timeout,
+        unavailable_timeout: defaults_1.default.unavailable_timeout
+    };
+};
+exports.getClusterConfig = function (clusterName) {
+    return {
+        wsHost: "ws-" + clusterName + ".pusher.com",
+        httpHost: "sockjs-" + clusterName + ".pusher.com"
+    };
+};
 
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/defineProperty.js":
-/*!***************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/defineProperty.js ***!
-  \***************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("function _defineProperty(obj, key, value) {\n  if (key in obj) {\n    Object.defineProperty(obj, key, {\n      value: value,\n      enumerable: true,\n      configurable: true,\n      writable: true\n    });\n  } else {\n    obj[key] = value;\n  }\n\n  return obj;\n}\n\nmodule.exports = _defineProperty;\n\n//# sourceURL=webpack://Pusher/./node_modules/@babel/runtime/helpers/defineProperty.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/iterableToArrayLimit.js":
-/*!*********************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/iterableToArrayLimit.js ***!
-  \*********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("function _iterableToArrayLimit(arr, i) {\n  var _arr = [];\n  var _n = true;\n  var _d = false;\n  var _e = undefined;\n\n  try {\n    for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {\n      _arr.push(_s.value);\n\n      if (i && _arr.length === i) break;\n    }\n  } catch (err) {\n    _d = true;\n    _e = err;\n  } finally {\n    try {\n      if (!_n && _i[\"return\"] != null) _i[\"return\"]();\n    } finally {\n      if (_d) throw _e;\n    }\n  }\n\n  return _arr;\n}\n\nmodule.exports = _iterableToArrayLimit;\n\n//# sourceURL=webpack://Pusher/./node_modules/@babel/runtime/helpers/iterableToArrayLimit.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/nonIterableRest.js":
-/*!****************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/nonIterableRest.js ***!
-  \****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("function _nonIterableRest() {\n  throw new TypeError(\"Invalid attempt to destructure non-iterable instance\");\n}\n\nmodule.exports = _nonIterableRest;\n\n//# sourceURL=webpack://Pusher/./node_modules/@babel/runtime/helpers/nonIterableRest.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/objectSpread.js":
-/*!*************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/objectSpread.js ***!
-  \*************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("var defineProperty = __webpack_require__(/*! ./defineProperty */ \"./node_modules/@babel/runtime/helpers/defineProperty.js\");\n\nfunction _objectSpread(target) {\n  for (var i = 1; i < arguments.length; i++) {\n    var source = arguments[i] != null ? arguments[i] : {};\n    var ownKeys = Object.keys(source);\n\n    if (typeof Object.getOwnPropertySymbols === 'function') {\n      ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) {\n        return Object.getOwnPropertyDescriptor(source, sym).enumerable;\n      }));\n    }\n\n    ownKeys.forEach(function (key) {\n      defineProperty(target, key, source[key]);\n    });\n  }\n\n  return target;\n}\n\nmodule.exports = _objectSpread;\n\n//# sourceURL=webpack://Pusher/./node_modules/@babel/runtime/helpers/objectSpread.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@babel/runtime/helpers/slicedToArray.js":
-/*!**************************************************************!*\
-  !*** ./node_modules/@babel/runtime/helpers/slicedToArray.js ***!
-  \**************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-eval("var arrayWithHoles = __webpack_require__(/*! ./arrayWithHoles */ \"./node_modules/@babel/runtime/helpers/arrayWithHoles.js\");\n\nvar iterableToArrayLimit = __webpack_require__(/*! ./iterableToArrayLimit */ \"./node_modules/@babel/runtime/helpers/iterableToArrayLimit.js\");\n\nvar nonIterableRest = __webpack_require__(/*! ./nonIterableRest */ \"./node_modules/@babel/runtime/helpers/nonIterableRest.js\");\n\nfunction _slicedToArray(arr, i) {\n  return arrayWithHoles(arr) || iterableToArrayLimit(arr, i) || nonIterableRest();\n}\n\nmodule.exports = _slicedToArray;\n\n//# sourceURL=webpack://Pusher/./node_modules/@babel/runtime/helpers/slicedToArray.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/index.js":
-/*!**************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/index.js ***!
-  \**************************************************************************/
-/*! exports provided: fetch, addEventListener, useNetInfo, removeEventListener, getConnectionInfo, isConnectionExpensive, isConnected, default, NetInfoStateType, NetInfoCellularGeneration, CHANGE_EVENT_NAME */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"fetch\", function() { return fetch; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"addEventListener\", function() { return addEventListener; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"useNetInfo\", function() { return useNetInfo; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"removeEventListener\", function() { return removeEventListener; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"getConnectionInfo\", function() { return getConnectionInfo; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isConnectionExpensive\", function() { return isConnectionExpensive; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isConnected\", function() { return isConnected; });\n/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ \"./node_modules/@babel/runtime/helpers/slicedToArray.js\");\n/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react */ \"./node_modules/react/index.js\");\n/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_1__);\n/* harmony import */ var _internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./internal/deprecatedUtils */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedUtils.js\");\n/* harmony import */ var _internal_deprecatedSubscriptions__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./internal/deprecatedSubscriptions */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedSubscriptions.js\");\n/* harmony import */ var _internal_deprecatedTypes__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./internal/deprecatedTypes */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedTypes.js\");\n/* harmony import */ var _internal_subscriptions__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./internal/subscriptions */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/subscriptions.js\");\n/* harmony import */ var _internal_types__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./internal/types */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/types.js\");\n/* harmony import */ var _internal_nativeInterface__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./internal/nativeInterface */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/nativeInterface.js\");\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"NetInfoStateType\", function() { return _internal_types__WEBPACK_IMPORTED_MODULE_6__[\"NetInfoStateType\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"NetInfoCellularGeneration\", function() { return _internal_types__WEBPACK_IMPORTED_MODULE_6__[\"NetInfoCellularGeneration\"]; });\n\n/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, \"CHANGE_EVENT_NAME\", function() { return _internal_deprecatedTypes__WEBPACK_IMPORTED_MODULE_4__[\"CHANGE_EVENT_NAME\"]; });\n\nvar _isConnectedListeners=new Map();function fetch(){return _internal_nativeInterface__WEBPACK_IMPORTED_MODULE_7__[\"default\"].getCurrentState();}function addEventListener(listenerOrType){var deprecatedHandler=arguments.length>1&&arguments[1]!==undefined?arguments[1]:undefined;if(typeof listenerOrType==='string'){_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].warnOnce();if(listenerOrType===_internal_deprecatedTypes__WEBPACK_IMPORTED_MODULE_4__[\"CHANGE_EVENT_NAME\"]&&deprecatedHandler){_internal_deprecatedSubscriptions__WEBPACK_IMPORTED_MODULE_3__[\"default\"].add(deprecatedHandler);return{remove:function remove(){_internal_deprecatedSubscriptions__WEBPACK_IMPORTED_MODULE_3__[\"default\"].remove(deprecatedHandler);}};}else{return{remove:function remove(){}};}}else{var _listener=listenerOrType;_internal_subscriptions__WEBPACK_IMPORTED_MODULE_5__[\"default\"].add(_listener);return function(){_internal_subscriptions__WEBPACK_IMPORTED_MODULE_5__[\"default\"].remove(_listener);};}}function useNetInfo(){var _useState=Object(react__WEBPACK_IMPORTED_MODULE_1__[\"useState\"])({type:_internal_types__WEBPACK_IMPORTED_MODULE_6__[\"NetInfoStateType\"].unknown,isConnected:false,details:null}),_useState2=_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState,2),netInfo=_useState2[0],setNetInfo=_useState2[1];Object(react__WEBPACK_IMPORTED_MODULE_1__[\"useEffect\"])(function(){return addEventListener(setNetInfo);},[]);return netInfo;}function removeEventListener(type,handler){_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].warnOnce();if(type===_internal_deprecatedTypes__WEBPACK_IMPORTED_MODULE_4__[\"CHANGE_EVENT_NAME\"]){_internal_deprecatedSubscriptions__WEBPACK_IMPORTED_MODULE_3__[\"default\"].remove(handler);}}function getConnectionInfo(){_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].warnOnce();return _internal_nativeInterface__WEBPACK_IMPORTED_MODULE_7__[\"default\"].getCurrentState().then(_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].convertState);}function isConnectionExpensive(){_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].warnOnce();return _internal_nativeInterface__WEBPACK_IMPORTED_MODULE_7__[\"default\"].getCurrentState().then(_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].isConnectionExpensive);}var isConnected={addEventListener:function addEventListener(eventName,handler){if(eventName!==_internal_deprecatedTypes__WEBPACK_IMPORTED_MODULE_4__[\"CHANGE_EVENT_NAME\"]){return{remove:function remove(){}};}var listener=function listener(state){handler(_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].isConnected(state));};_isConnectedListeners.set(handler,listener);_internal_subscriptions__WEBPACK_IMPORTED_MODULE_5__[\"default\"].add(listener);return{remove:function remove(){_internal_subscriptions__WEBPACK_IMPORTED_MODULE_5__[\"default\"].remove(listener);}};},removeEventListener:function removeEventListener(_eventName,handler){var listener=_isConnectedListeners.get(handler);listener&&_internal_subscriptions__WEBPACK_IMPORTED_MODULE_5__[\"default\"].remove(listener);_isConnectedListeners.delete(handler);},fetch:function fetch(){return _internal_nativeInterface__WEBPACK_IMPORTED_MODULE_7__[\"default\"].getCurrentState().then(_internal_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].isConnected);}};/* harmony default export */ __webpack_exports__[\"default\"] = ({fetch:fetch,addEventListener:addEventListener,useNetInfo:useNetInfo,removeEventListener:removeEventListener,getConnectionInfo:getConnectionInfo,isConnectionExpensive:isConnectionExpensive,isConnected:isConnected});\n//# sourceMappingURL=index.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/index.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedSubscriptions.js":
-/*!*****************************************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedSubscriptions.js ***!
-  \*****************************************************************************************************/
-/*! exports provided: add, remove, clear, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"add\", function() { return add; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"remove\", function() { return remove; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"clear\", function() { return clear; });\n/* harmony import */ var _subscriptions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./subscriptions */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/subscriptions.js\");\n/* harmony import */ var _nativeInterface__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./nativeInterface */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/nativeInterface.js\");\n/* harmony import */ var _deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./deprecatedUtils */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedUtils.js\");\nvar _subscriptions=new Set();var _latestState=null;var _isListening=false;function _listenerHandler(state){var convertedState=_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].convertState(state);_latestState=convertedState;_subscriptions.forEach(function(handler){return handler(convertedState);});}function add(handler){_subscriptions.add(handler);if(_latestState){handler(_latestState);}else{_nativeInterface__WEBPACK_IMPORTED_MODULE_1__[\"default\"].getCurrentState().then(function(state){_latestState=_deprecatedUtils__WEBPACK_IMPORTED_MODULE_2__[\"default\"].convertState(state);handler(_latestState);});}if(_subscriptions.size>0&&!_isListening){_subscriptions__WEBPACK_IMPORTED_MODULE_0__[\"default\"].add(_listenerHandler,false);_isListening=true;}}function remove(handler){_subscriptions.delete(handler);if(_subscriptions.size===0&&_isListening){_subscriptions__WEBPACK_IMPORTED_MODULE_0__[\"default\"].remove(_listenerHandler);_isListening=false;}}function clear(){_subscriptions.clear();if(_isListening){_subscriptions__WEBPACK_IMPORTED_MODULE_0__[\"default\"].remove(_listenerHandler);_isListening=false;}}/* harmony default export */ __webpack_exports__[\"default\"] = ({add:add,remove:remove,clear:clear});\n//# sourceMappingURL=deprecatedSubscriptions.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedSubscriptions.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedTypes.js":
-/*!*********************************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedTypes.js ***!
-  \*********************************************************************************************/
-/*! exports provided: CHANGE_EVENT_NAME */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"CHANGE_EVENT_NAME\", function() { return CHANGE_EVENT_NAME; });\nvar CHANGE_EVENT_NAME='connectionChange';\n//# sourceMappingURL=deprecatedTypes.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedTypes.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedUtils.js":
-/*!*********************************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedUtils.js ***!
-  \*********************************************************************************************/
-/*! exports provided: convertState, isConnectionExpensive, isConnected, warnOnce, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"convertState\", function() { return convertState; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isConnectionExpensive\", function() { return isConnectionExpensive; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"isConnected\", function() { return isConnected; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"warnOnce\", function() { return warnOnce; });\n/* harmony import */ var react_native__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react-native */ \"react-native\");\n/* harmony import */ var react_native__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react_native__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var _types__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./types */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/types.js\");\nfunction convertState(input){var effectiveType='unknown';if(input.type==='cellular'){effectiveType=input.details.cellularGeneration||'unknown';}var type=input.type===_types__WEBPACK_IMPORTED_MODULE_1__[\"NetInfoStateType\"].vpn||input.type===_types__WEBPACK_IMPORTED_MODULE_1__[\"NetInfoStateType\"].other?'unknown':input.type;return{type:type,effectiveType:effectiveType};}function isConnectionExpensive(input){if(react_native__WEBPACK_IMPORTED_MODULE_0__[\"Platform\"].OS==='android'){if(input.type!==_types__WEBPACK_IMPORTED_MODULE_1__[\"NetInfoStateType\"].none&&input.type!==_types__WEBPACK_IMPORTED_MODULE_1__[\"NetInfoStateType\"].unknown){return input.details.isConnectionExpensive;}else{return false;}}else{throw new Error('Currently not supported on iOS');}}function isConnected(input){return input.isConnected;}var warned=false;function warnOnce(){if(warned){return;}console.warn('Warning: RNCNetInfo - You are using the deprecated API. It will still work, but you must upgrade to the new API to receive the new features. The old API will be removed in the future');warned=true;}/* harmony default export */ __webpack_exports__[\"default\"] = ({convertState:convertState,isConnectionExpensive:isConnectionExpensive,isConnected:isConnected,warnOnce:warnOnce});\n//# sourceMappingURL=deprecatedUtils.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/internal/deprecatedUtils.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/internal/nativeInterface.js":
-/*!*********************************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/internal/nativeInterface.js ***!
-  \*********************************************************************************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/objectSpread */ \"./node_modules/@babel/runtime/helpers/objectSpread.js\");\n/* harmony import */ var _babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_0__);\n/* harmony import */ var react_native__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react-native */ \"react-native\");\n/* harmony import */ var react_native__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(react_native__WEBPACK_IMPORTED_MODULE_1__);\nvar RNCNetInfo=react_native__WEBPACK_IMPORTED_MODULE_1__[\"NativeModules\"].RNCNetInfo;if(!RNCNetInfo){throw new Error(\"@react-native-community/netinfo: NativeModule.RNCNetInfo is null. To fix this issue try these steps:\\n\\n\\u2022 Run `react-native link @react-native-community/netinfo` in the project root.\\n\\u2022 Rebuild and re-run the app.\\n\\u2022 If you are using CocoaPods on iOS, run `pod install` in the `ios` directory and then rebuild and re-run the app. You may also need to re-open Xcode to get the new pods.\\n\\u2022 Check that the library was linked correctly when you used the link command by running through the manual installation instructions in the README.\\n* If you are getting this error while unit testing you need to mock the native module. Follow the guide in the README.\\n\\nIf none of these fix the issue, please open an issue on the Github repository: https://github.com/react-native-community/react-native-netinfo\");}var nativeEventEmitter=null;/* harmony default export */ __webpack_exports__[\"default\"] = (_babel_runtime_helpers_objectSpread__WEBPACK_IMPORTED_MODULE_0___default()({},RNCNetInfo,{get eventEmitter(){if(!nativeEventEmitter){nativeEventEmitter=new react_native__WEBPACK_IMPORTED_MODULE_1__[\"NativeEventEmitter\"](RNCNetInfo);}return nativeEventEmitter;}}));\n//# sourceMappingURL=nativeInterface.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/internal/nativeInterface.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/internal/subscriptions.js":
-/*!*******************************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/internal/subscriptions.js ***!
-  \*******************************************************************************************/
-/*! exports provided: add, remove, clear, default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"add\", function() { return add; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"remove\", function() { return remove; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"clear\", function() { return clear; });\n/* harmony import */ var _nativeInterface__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./nativeInterface */ \"./node_modules/@react-native-community/netinfo/lib/module/internal/nativeInterface.js\");\nvar DEVICE_CONNECTIVITY_EVENT='netInfo.networkStatusDidChange';var _subscriptions=new Set();var _latestState=null;var _nativeEventSubscription=null;function _listenerHandler(state){_latestState=state;_subscriptions.forEach(function(handler){return handler(state);});}function add(handler){var latestOnListen=arguments.length>1&&arguments[1]!==undefined?arguments[1]:true;_subscriptions.add(handler);if(latestOnListen){if(_latestState){handler(_latestState);}else{_nativeInterface__WEBPACK_IMPORTED_MODULE_0__[\"default\"].getCurrentState().then(function(state){_latestState=state;handler(_latestState);});}}if(_subscriptions.size>0&&!_nativeEventSubscription){_nativeEventSubscription=_nativeInterface__WEBPACK_IMPORTED_MODULE_0__[\"default\"].eventEmitter.addListener(DEVICE_CONNECTIVITY_EVENT,_listenerHandler);}}function remove(handler){_subscriptions.delete(handler);if(_subscriptions.size===0&&_nativeEventSubscription){_nativeEventSubscription.remove();_nativeEventSubscription=null;}}function clear(){_subscriptions.clear();if(_nativeEventSubscription){_nativeEventSubscription.remove();_nativeEventSubscription=null;}}/* harmony default export */ __webpack_exports__[\"default\"] = ({add:add,remove:remove,clear:clear});\n//# sourceMappingURL=subscriptions.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/internal/subscriptions.js?");
-
-/***/ }),
-
-/***/ "./node_modules/@react-native-community/netinfo/lib/module/internal/types.js":
-/*!***********************************************************************************!*\
-  !*** ./node_modules/@react-native-community/netinfo/lib/module/internal/types.js ***!
-  \***********************************************************************************/
-/*! exports provided: NetInfoStateType, NetInfoCellularGeneration */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"NetInfoStateType\", function() { return NetInfoStateType; });\n/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, \"NetInfoCellularGeneration\", function() { return NetInfoCellularGeneration; });\nvar NetInfoStateType;(function(NetInfoStateType){NetInfoStateType[\"unknown\"]=\"unknown\";NetInfoStateType[\"none\"]=\"none\";NetInfoStateType[\"cellular\"]=\"cellular\";NetInfoStateType[\"wifi\"]=\"wifi\";NetInfoStateType[\"bluetooth\"]=\"bluetooth\";NetInfoStateType[\"ethernet\"]=\"ethernet\";NetInfoStateType[\"wimax\"]=\"wimax\";NetInfoStateType[\"vpn\"]=\"vpn\";NetInfoStateType[\"other\"]=\"other\";})(NetInfoStateType||(NetInfoStateType={}));var NetInfoCellularGeneration;(function(NetInfoCellularGeneration){NetInfoCellularGeneration[\"2g\"]=\"2g\";NetInfoCellularGeneration[\"3g\"]=\"3g\";NetInfoCellularGeneration[\"4g\"]=\"4g\";})(NetInfoCellularGeneration||(NetInfoCellularGeneration={}));\n//# sourceMappingURL=types.js.map\n\n//# sourceURL=webpack://Pusher/./node_modules/@react-native-community/netinfo/lib/module/internal/types.js?");
-
-/***/ }),
-
-/***/ "./node_modules/prop-types/checkPropTypes.js":
-/*!***************************************************!*\
-  !*** ./node_modules/prop-types/checkPropTypes.js ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("/**\n * Copyright (c) 2013-present, Facebook, Inc.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the root directory of this source tree.\n */\n\n\n\nvar printWarning = function() {};\n\nif (true) {\n  var ReactPropTypesSecret = __webpack_require__(/*! ./lib/ReactPropTypesSecret */ \"./node_modules/prop-types/lib/ReactPropTypesSecret.js\");\n  var loggedTypeFailures = {};\n  var has = Function.call.bind(Object.prototype.hasOwnProperty);\n\n  printWarning = function(text) {\n    var message = 'Warning: ' + text;\n    if (typeof console !== 'undefined') {\n      console.error(message);\n    }\n    try {\n      // --- Welcome to debugging React ---\n      // This error was thrown as a convenience so that you can use this stack\n      // to find the callsite that caused this warning to fire.\n      throw new Error(message);\n    } catch (x) {}\n  };\n}\n\n/**\n * Assert that the values match with the type specs.\n * Error messages are memorized and will only be shown once.\n *\n * @param {object} typeSpecs Map of name to a ReactPropType\n * @param {object} values Runtime values that need to be type-checked\n * @param {string} location e.g. \"prop\", \"context\", \"child context\"\n * @param {string} componentName Name of the component for error messages.\n * @param {?Function} getStack Returns the component stack.\n * @private\n */\nfunction checkPropTypes(typeSpecs, values, location, componentName, getStack) {\n  if (true) {\n    for (var typeSpecName in typeSpecs) {\n      if (has(typeSpecs, typeSpecName)) {\n        var error;\n        // Prop type validation may throw. In case they do, we don't want to\n        // fail the render phase where it didn't fail before. So we log it.\n        // After these have been cleaned up, we'll let them throw.\n        try {\n          // This is intentionally an invariant that gets caught. It's the same\n          // behavior as without this statement except with a better message.\n          if (typeof typeSpecs[typeSpecName] !== 'function') {\n            var err = Error(\n              (componentName || 'React class') + ': ' + location + ' type `' + typeSpecName + '` is invalid; ' +\n              'it must be a function, usually from the `prop-types` package, but received `' + typeof typeSpecs[typeSpecName] + '`.'\n            );\n            err.name = 'Invariant Violation';\n            throw err;\n          }\n          error = typeSpecs[typeSpecName](values, typeSpecName, componentName, location, null, ReactPropTypesSecret);\n        } catch (ex) {\n          error = ex;\n        }\n        if (error && !(error instanceof Error)) {\n          printWarning(\n            (componentName || 'React class') + ': type specification of ' +\n            location + ' `' + typeSpecName + '` is invalid; the type checker ' +\n            'function must return `null` or an `Error` but returned a ' + typeof error + '. ' +\n            'You may have forgotten to pass an argument to the type checker ' +\n            'creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and ' +\n            'shape all require an argument).'\n          );\n        }\n        if (error instanceof Error && !(error.message in loggedTypeFailures)) {\n          // Only monitor this failure once because there tends to be a lot of the\n          // same error.\n          loggedTypeFailures[error.message] = true;\n\n          var stack = getStack ? getStack() : '';\n\n          printWarning(\n            'Failed ' + location + ' type: ' + error.message + (stack != null ? stack : '')\n          );\n        }\n      }\n    }\n  }\n}\n\n/**\n * Resets warning cache when testing.\n *\n * @private\n */\ncheckPropTypes.resetWarningCache = function() {\n  if (true) {\n    loggedTypeFailures = {};\n  }\n}\n\nmodule.exports = checkPropTypes;\n\n\n//# sourceURL=webpack://Pusher/./node_modules/prop-types/checkPropTypes.js?");
-
-/***/ }),
-
-/***/ "./node_modules/prop-types/lib/ReactPropTypesSecret.js":
-/*!*************************************************************!*\
-  !*** ./node_modules/prop-types/lib/ReactPropTypesSecret.js ***!
-  \*************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("/**\n * Copyright (c) 2013-present, Facebook, Inc.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the root directory of this source tree.\n */\n\n\n\nvar ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';\n\nmodule.exports = ReactPropTypesSecret;\n\n\n//# sourceURL=webpack://Pusher/./node_modules/prop-types/lib/ReactPropTypesSecret.js?");
-
-/***/ }),
-
-/***/ "./node_modules/react/cjs/react.development.js":
-/*!*****************************************************!*\
-  !*** ./node_modules/react/cjs/react.development.js ***!
-  \*****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("/** @license React v16.8.6\n * react.development.js\n *\n * Copyright (c) Facebook, Inc. and its affiliates.\n *\n * This source code is licensed under the MIT license found in the\n * LICENSE file in the root directory of this source tree.\n */\n\n\n\n\n\nif (true) {\n  (function() {\n'use strict';\n\nvar _assign = __webpack_require__(/*! object-assign */ \"./node_modules/react/node_modules/object-assign/index.js\");\nvar checkPropTypes = __webpack_require__(/*! prop-types/checkPropTypes */ \"./node_modules/prop-types/checkPropTypes.js\");\n\n// TODO: this is special because it gets imported during build.\n\nvar ReactVersion = '16.8.6';\n\n// The Symbol used to tag the ReactElement-like types. If there is no native Symbol\n// nor polyfill, then a plain number is used for performance.\nvar hasSymbol = typeof Symbol === 'function' && Symbol.for;\n\nvar REACT_ELEMENT_TYPE = hasSymbol ? Symbol.for('react.element') : 0xeac7;\nvar REACT_PORTAL_TYPE = hasSymbol ? Symbol.for('react.portal') : 0xeaca;\nvar REACT_FRAGMENT_TYPE = hasSymbol ? Symbol.for('react.fragment') : 0xeacb;\nvar REACT_STRICT_MODE_TYPE = hasSymbol ? Symbol.for('react.strict_mode') : 0xeacc;\nvar REACT_PROFILER_TYPE = hasSymbol ? Symbol.for('react.profiler') : 0xead2;\nvar REACT_PROVIDER_TYPE = hasSymbol ? Symbol.for('react.provider') : 0xeacd;\nvar REACT_CONTEXT_TYPE = hasSymbol ? Symbol.for('react.context') : 0xeace;\n\nvar REACT_CONCURRENT_MODE_TYPE = hasSymbol ? Symbol.for('react.concurrent_mode') : 0xeacf;\nvar REACT_FORWARD_REF_TYPE = hasSymbol ? Symbol.for('react.forward_ref') : 0xead0;\nvar REACT_SUSPENSE_TYPE = hasSymbol ? Symbol.for('react.suspense') : 0xead1;\nvar REACT_MEMO_TYPE = hasSymbol ? Symbol.for('react.memo') : 0xead3;\nvar REACT_LAZY_TYPE = hasSymbol ? Symbol.for('react.lazy') : 0xead4;\n\nvar MAYBE_ITERATOR_SYMBOL = typeof Symbol === 'function' && Symbol.iterator;\nvar FAUX_ITERATOR_SYMBOL = '@@iterator';\n\nfunction getIteratorFn(maybeIterable) {\n  if (maybeIterable === null || typeof maybeIterable !== 'object') {\n    return null;\n  }\n  var maybeIterator = MAYBE_ITERATOR_SYMBOL && maybeIterable[MAYBE_ITERATOR_SYMBOL] || maybeIterable[FAUX_ITERATOR_SYMBOL];\n  if (typeof maybeIterator === 'function') {\n    return maybeIterator;\n  }\n  return null;\n}\n\n/**\n * Use invariant() to assert state which your program assumes to be true.\n *\n * Provide sprintf-style format (only %s is supported) and arguments\n * to provide information about what broke and what you were\n * expecting.\n *\n * The invariant message will be stripped in production, but the invariant\n * will remain to ensure logic does not differ in production.\n */\n\nvar validateFormat = function () {};\n\n{\n  validateFormat = function (format) {\n    if (format === undefined) {\n      throw new Error('invariant requires an error message argument');\n    }\n  };\n}\n\nfunction invariant(condition, format, a, b, c, d, e, f) {\n  validateFormat(format);\n\n  if (!condition) {\n    var error = void 0;\n    if (format === undefined) {\n      error = new Error('Minified exception occurred; use the non-minified dev environment ' + 'for the full error message and additional helpful warnings.');\n    } else {\n      var args = [a, b, c, d, e, f];\n      var argIndex = 0;\n      error = new Error(format.replace(/%s/g, function () {\n        return args[argIndex++];\n      }));\n      error.name = 'Invariant Violation';\n    }\n\n    error.framesToPop = 1; // we don't care about invariant's own frame\n    throw error;\n  }\n}\n\n// Relying on the `invariant()` implementation lets us\n// preserve the format and params in the www builds.\n\n/**\n * Forked from fbjs/warning:\n * https://github.com/facebook/fbjs/blob/e66ba20ad5be433eb54423f2b097d829324d9de6/packages/fbjs/src/__forks__/warning.js\n *\n * Only change is we use console.warn instead of console.error,\n * and do nothing when 'console' is not supported.\n * This really simplifies the code.\n * ---\n * Similar to invariant but only logs a warning if the condition is not met.\n * This can be used to log issues in development environments in critical\n * paths. Removing the logging code for production environments will keep the\n * same logic and follow the same code paths.\n */\n\nvar lowPriorityWarning = function () {};\n\n{\n  var printWarning = function (format) {\n    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {\n      args[_key - 1] = arguments[_key];\n    }\n\n    var argIndex = 0;\n    var message = 'Warning: ' + format.replace(/%s/g, function () {\n      return args[argIndex++];\n    });\n    if (typeof console !== 'undefined') {\n      console.warn(message);\n    }\n    try {\n      // --- Welcome to debugging React ---\n      // This error was thrown as a convenience so that you can use this stack\n      // to find the callsite that caused this warning to fire.\n      throw new Error(message);\n    } catch (x) {}\n  };\n\n  lowPriorityWarning = function (condition, format) {\n    if (format === undefined) {\n      throw new Error('`lowPriorityWarning(condition, format, ...args)` requires a warning ' + 'message argument');\n    }\n    if (!condition) {\n      for (var _len2 = arguments.length, args = Array(_len2 > 2 ? _len2 - 2 : 0), _key2 = 2; _key2 < _len2; _key2++) {\n        args[_key2 - 2] = arguments[_key2];\n      }\n\n      printWarning.apply(undefined, [format].concat(args));\n    }\n  };\n}\n\nvar lowPriorityWarning$1 = lowPriorityWarning;\n\n/**\n * Similar to invariant but only logs a warning if the condition is not met.\n * This can be used to log issues in development environments in critical\n * paths. Removing the logging code for production environments will keep the\n * same logic and follow the same code paths.\n */\n\nvar warningWithoutStack = function () {};\n\n{\n  warningWithoutStack = function (condition, format) {\n    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {\n      args[_key - 2] = arguments[_key];\n    }\n\n    if (format === undefined) {\n      throw new Error('`warningWithoutStack(condition, format, ...args)` requires a warning ' + 'message argument');\n    }\n    if (args.length > 8) {\n      // Check before the condition to catch violations early.\n      throw new Error('warningWithoutStack() currently supports at most 8 arguments.');\n    }\n    if (condition) {\n      return;\n    }\n    if (typeof console !== 'undefined') {\n      var argsWithFormat = args.map(function (item) {\n        return '' + item;\n      });\n      argsWithFormat.unshift('Warning: ' + format);\n\n      // We intentionally don't use spread (or .apply) directly because it\n      // breaks IE9: https://github.com/facebook/react/issues/13610\n      Function.prototype.apply.call(console.error, console, argsWithFormat);\n    }\n    try {\n      // --- Welcome to debugging React ---\n      // This error was thrown as a convenience so that you can use this stack\n      // to find the callsite that caused this warning to fire.\n      var argIndex = 0;\n      var message = 'Warning: ' + format.replace(/%s/g, function () {\n        return args[argIndex++];\n      });\n      throw new Error(message);\n    } catch (x) {}\n  };\n}\n\nvar warningWithoutStack$1 = warningWithoutStack;\n\nvar didWarnStateUpdateForUnmountedComponent = {};\n\nfunction warnNoop(publicInstance, callerName) {\n  {\n    var _constructor = publicInstance.constructor;\n    var componentName = _constructor && (_constructor.displayName || _constructor.name) || 'ReactClass';\n    var warningKey = componentName + '.' + callerName;\n    if (didWarnStateUpdateForUnmountedComponent[warningKey]) {\n      return;\n    }\n    warningWithoutStack$1(false, \"Can't call %s on a component that is not yet mounted. \" + 'This is a no-op, but it might indicate a bug in your application. ' + 'Instead, assign to `this.state` directly or define a `state = {};` ' + 'class property with the desired state in the %s component.', callerName, componentName);\n    didWarnStateUpdateForUnmountedComponent[warningKey] = true;\n  }\n}\n\n/**\n * This is the abstract API for an update queue.\n */\nvar ReactNoopUpdateQueue = {\n  /**\n   * Checks whether or not this composite component is mounted.\n   * @param {ReactClass} publicInstance The instance we want to test.\n   * @return {boolean} True if mounted, false otherwise.\n   * @protected\n   * @final\n   */\n  isMounted: function (publicInstance) {\n    return false;\n  },\n\n  /**\n   * Forces an update. This should only be invoked when it is known with\n   * certainty that we are **not** in a DOM transaction.\n   *\n   * You may want to call this when you know that some deeper aspect of the\n   * component's state has changed but `setState` was not called.\n   *\n   * This will not invoke `shouldComponentUpdate`, but it will invoke\n   * `componentWillUpdate` and `componentDidUpdate`.\n   *\n   * @param {ReactClass} publicInstance The instance that should rerender.\n   * @param {?function} callback Called after component is updated.\n   * @param {?string} callerName name of the calling function in the public API.\n   * @internal\n   */\n  enqueueForceUpdate: function (publicInstance, callback, callerName) {\n    warnNoop(publicInstance, 'forceUpdate');\n  },\n\n  /**\n   * Replaces all of the state. Always use this or `setState` to mutate state.\n   * You should treat `this.state` as immutable.\n   *\n   * There is no guarantee that `this.state` will be immediately updated, so\n   * accessing `this.state` after calling this method may return the old value.\n   *\n   * @param {ReactClass} publicInstance The instance that should rerender.\n   * @param {object} completeState Next state.\n   * @param {?function} callback Called after component is updated.\n   * @param {?string} callerName name of the calling function in the public API.\n   * @internal\n   */\n  enqueueReplaceState: function (publicInstance, completeState, callback, callerName) {\n    warnNoop(publicInstance, 'replaceState');\n  },\n\n  /**\n   * Sets a subset of the state. This only exists because _pendingState is\n   * internal. This provides a merging strategy that is not available to deep\n   * properties which is confusing. TODO: Expose pendingState or don't use it\n   * during the merge.\n   *\n   * @param {ReactClass} publicInstance The instance that should rerender.\n   * @param {object} partialState Next partial state to be merged with state.\n   * @param {?function} callback Called after component is updated.\n   * @param {?string} Name of the calling function in the public API.\n   * @internal\n   */\n  enqueueSetState: function (publicInstance, partialState, callback, callerName) {\n    warnNoop(publicInstance, 'setState');\n  }\n};\n\nvar emptyObject = {};\n{\n  Object.freeze(emptyObject);\n}\n\n/**\n * Base class helpers for the updating state of a component.\n */\nfunction Component(props, context, updater) {\n  this.props = props;\n  this.context = context;\n  // If a component has string refs, we will assign a different object later.\n  this.refs = emptyObject;\n  // We initialize the default updater but the real one gets injected by the\n  // renderer.\n  this.updater = updater || ReactNoopUpdateQueue;\n}\n\nComponent.prototype.isReactComponent = {};\n\n/**\n * Sets a subset of the state. Always use this to mutate\n * state. You should treat `this.state` as immutable.\n *\n * There is no guarantee that `this.state` will be immediately updated, so\n * accessing `this.state` after calling this method may return the old value.\n *\n * There is no guarantee that calls to `setState` will run synchronously,\n * as they may eventually be batched together.  You can provide an optional\n * callback that will be executed when the call to setState is actually\n * completed.\n *\n * When a function is provided to setState, it will be called at some point in\n * the future (not synchronously). It will be called with the up to date\n * component arguments (state, props, context). These values can be different\n * from this.* because your function may be called after receiveProps but before\n * shouldComponentUpdate, and this new state, props, and context will not yet be\n * assigned to this.\n *\n * @param {object|function} partialState Next partial state or function to\n *        produce next partial state to be merged with current state.\n * @param {?function} callback Called after state is updated.\n * @final\n * @protected\n */\nComponent.prototype.setState = function (partialState, callback) {\n  !(typeof partialState === 'object' || typeof partialState === 'function' || partialState == null) ? invariant(false, 'setState(...): takes an object of state variables to update or a function which returns an object of state variables.') : void 0;\n  this.updater.enqueueSetState(this, partialState, callback, 'setState');\n};\n\n/**\n * Forces an update. This should only be invoked when it is known with\n * certainty that we are **not** in a DOM transaction.\n *\n * You may want to call this when you know that some deeper aspect of the\n * component's state has changed but `setState` was not called.\n *\n * This will not invoke `shouldComponentUpdate`, but it will invoke\n * `componentWillUpdate` and `componentDidUpdate`.\n *\n * @param {?function} callback Called after update is complete.\n * @final\n * @protected\n */\nComponent.prototype.forceUpdate = function (callback) {\n  this.updater.enqueueForceUpdate(this, callback, 'forceUpdate');\n};\n\n/**\n * Deprecated APIs. These APIs used to exist on classic React classes but since\n * we would like to deprecate them, we're not going to move them over to this\n * modern base class. Instead, we define a getter that warns if it's accessed.\n */\n{\n  var deprecatedAPIs = {\n    isMounted: ['isMounted', 'Instead, make sure to clean up subscriptions and pending requests in ' + 'componentWillUnmount to prevent memory leaks.'],\n    replaceState: ['replaceState', 'Refactor your code to use setState instead (see ' + 'https://github.com/facebook/react/issues/3236).']\n  };\n  var defineDeprecationWarning = function (methodName, info) {\n    Object.defineProperty(Component.prototype, methodName, {\n      get: function () {\n        lowPriorityWarning$1(false, '%s(...) is deprecated in plain JavaScript React classes. %s', info[0], info[1]);\n        return undefined;\n      }\n    });\n  };\n  for (var fnName in deprecatedAPIs) {\n    if (deprecatedAPIs.hasOwnProperty(fnName)) {\n      defineDeprecationWarning(fnName, deprecatedAPIs[fnName]);\n    }\n  }\n}\n\nfunction ComponentDummy() {}\nComponentDummy.prototype = Component.prototype;\n\n/**\n * Convenience component with default shallow equality check for sCU.\n */\nfunction PureComponent(props, context, updater) {\n  this.props = props;\n  this.context = context;\n  // If a component has string refs, we will assign a different object later.\n  this.refs = emptyObject;\n  this.updater = updater || ReactNoopUpdateQueue;\n}\n\nvar pureComponentPrototype = PureComponent.prototype = new ComponentDummy();\npureComponentPrototype.constructor = PureComponent;\n// Avoid an extra prototype jump for these methods.\n_assign(pureComponentPrototype, Component.prototype);\npureComponentPrototype.isPureReactComponent = true;\n\n// an immutable object with a single mutable value\nfunction createRef() {\n  var refObject = {\n    current: null\n  };\n  {\n    Object.seal(refObject);\n  }\n  return refObject;\n}\n\n/**\n * Keeps track of the current dispatcher.\n */\nvar ReactCurrentDispatcher = {\n  /**\n   * @internal\n   * @type {ReactComponent}\n   */\n  current: null\n};\n\n/**\n * Keeps track of the current owner.\n *\n * The current owner is the component who should own any components that are\n * currently being constructed.\n */\nvar ReactCurrentOwner = {\n  /**\n   * @internal\n   * @type {ReactComponent}\n   */\n  current: null\n};\n\nvar BEFORE_SLASH_RE = /^(.*)[\\\\\\/]/;\n\nvar describeComponentFrame = function (name, source, ownerName) {\n  var sourceInfo = '';\n  if (source) {\n    var path = source.fileName;\n    var fileName = path.replace(BEFORE_SLASH_RE, '');\n    {\n      // In DEV, include code for a common special case:\n      // prefer \"folder/index.js\" instead of just \"index.js\".\n      if (/^index\\./.test(fileName)) {\n        var match = path.match(BEFORE_SLASH_RE);\n        if (match) {\n          var pathBeforeSlash = match[1];\n          if (pathBeforeSlash) {\n            var folderName = pathBeforeSlash.replace(BEFORE_SLASH_RE, '');\n            fileName = folderName + '/' + fileName;\n          }\n        }\n      }\n    }\n    sourceInfo = ' (at ' + fileName + ':' + source.lineNumber + ')';\n  } else if (ownerName) {\n    sourceInfo = ' (created by ' + ownerName + ')';\n  }\n  return '\\n    in ' + (name || 'Unknown') + sourceInfo;\n};\n\nvar Resolved = 1;\n\n\nfunction refineResolvedLazyComponent(lazyComponent) {\n  return lazyComponent._status === Resolved ? lazyComponent._result : null;\n}\n\nfunction getWrappedName(outerType, innerType, wrapperName) {\n  var functionName = innerType.displayName || innerType.name || '';\n  return outerType.displayName || (functionName !== '' ? wrapperName + '(' + functionName + ')' : wrapperName);\n}\n\nfunction getComponentName(type) {\n  if (type == null) {\n    // Host root, text node or just invalid type.\n    return null;\n  }\n  {\n    if (typeof type.tag === 'number') {\n      warningWithoutStack$1(false, 'Received an unexpected object in getComponentName(). ' + 'This is likely a bug in React. Please file an issue.');\n    }\n  }\n  if (typeof type === 'function') {\n    return type.displayName || type.name || null;\n  }\n  if (typeof type === 'string') {\n    return type;\n  }\n  switch (type) {\n    case REACT_CONCURRENT_MODE_TYPE:\n      return 'ConcurrentMode';\n    case REACT_FRAGMENT_TYPE:\n      return 'Fragment';\n    case REACT_PORTAL_TYPE:\n      return 'Portal';\n    case REACT_PROFILER_TYPE:\n      return 'Profiler';\n    case REACT_STRICT_MODE_TYPE:\n      return 'StrictMode';\n    case REACT_SUSPENSE_TYPE:\n      return 'Suspense';\n  }\n  if (typeof type === 'object') {\n    switch (type.$$typeof) {\n      case REACT_CONTEXT_TYPE:\n        return 'Context.Consumer';\n      case REACT_PROVIDER_TYPE:\n        return 'Context.Provider';\n      case REACT_FORWARD_REF_TYPE:\n        return getWrappedName(type, type.render, 'ForwardRef');\n      case REACT_MEMO_TYPE:\n        return getComponentName(type.type);\n      case REACT_LAZY_TYPE:\n        {\n          var thenable = type;\n          var resolvedThenable = refineResolvedLazyComponent(thenable);\n          if (resolvedThenable) {\n            return getComponentName(resolvedThenable);\n          }\n        }\n    }\n  }\n  return null;\n}\n\nvar ReactDebugCurrentFrame = {};\n\nvar currentlyValidatingElement = null;\n\nfunction setCurrentlyValidatingElement(element) {\n  {\n    currentlyValidatingElement = element;\n  }\n}\n\n{\n  // Stack implementation injected by the current renderer.\n  ReactDebugCurrentFrame.getCurrentStack = null;\n\n  ReactDebugCurrentFrame.getStackAddendum = function () {\n    var stack = '';\n\n    // Add an extra top frame while an element is being validated\n    if (currentlyValidatingElement) {\n      var name = getComponentName(currentlyValidatingElement.type);\n      var owner = currentlyValidatingElement._owner;\n      stack += describeComponentFrame(name, currentlyValidatingElement._source, owner && getComponentName(owner.type));\n    }\n\n    // Delegate to the injected renderer-specific implementation\n    var impl = ReactDebugCurrentFrame.getCurrentStack;\n    if (impl) {\n      stack += impl() || '';\n    }\n\n    return stack;\n  };\n}\n\nvar ReactSharedInternals = {\n  ReactCurrentDispatcher: ReactCurrentDispatcher,\n  ReactCurrentOwner: ReactCurrentOwner,\n  // Used by renderers to avoid bundling object-assign twice in UMD bundles:\n  assign: _assign\n};\n\n{\n  _assign(ReactSharedInternals, {\n    // These should not be included in production.\n    ReactDebugCurrentFrame: ReactDebugCurrentFrame,\n    // Shim for React DOM 16.0.0 which still destructured (but not used) this.\n    // TODO: remove in React 17.0.\n    ReactComponentTreeHook: {}\n  });\n}\n\n/**\n * Similar to invariant but only logs a warning if the condition is not met.\n * This can be used to log issues in development environments in critical\n * paths. Removing the logging code for production environments will keep the\n * same logic and follow the same code paths.\n */\n\nvar warning = warningWithoutStack$1;\n\n{\n  warning = function (condition, format) {\n    if (condition) {\n      return;\n    }\n    var ReactDebugCurrentFrame = ReactSharedInternals.ReactDebugCurrentFrame;\n    var stack = ReactDebugCurrentFrame.getStackAddendum();\n    // eslint-disable-next-line react-internal/warning-and-invariant-args\n\n    for (var _len = arguments.length, args = Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {\n      args[_key - 2] = arguments[_key];\n    }\n\n    warningWithoutStack$1.apply(undefined, [false, format + '%s'].concat(args, [stack]));\n  };\n}\n\nvar warning$1 = warning;\n\nvar hasOwnProperty = Object.prototype.hasOwnProperty;\n\nvar RESERVED_PROPS = {\n  key: true,\n  ref: true,\n  __self: true,\n  __source: true\n};\n\nvar specialPropKeyWarningShown = void 0;\nvar specialPropRefWarningShown = void 0;\n\nfunction hasValidRef(config) {\n  {\n    if (hasOwnProperty.call(config, 'ref')) {\n      var getter = Object.getOwnPropertyDescriptor(config, 'ref').get;\n      if (getter && getter.isReactWarning) {\n        return false;\n      }\n    }\n  }\n  return config.ref !== undefined;\n}\n\nfunction hasValidKey(config) {\n  {\n    if (hasOwnProperty.call(config, 'key')) {\n      var getter = Object.getOwnPropertyDescriptor(config, 'key').get;\n      if (getter && getter.isReactWarning) {\n        return false;\n      }\n    }\n  }\n  return config.key !== undefined;\n}\n\nfunction defineKeyPropWarningGetter(props, displayName) {\n  var warnAboutAccessingKey = function () {\n    if (!specialPropKeyWarningShown) {\n      specialPropKeyWarningShown = true;\n      warningWithoutStack$1(false, '%s: `key` is not a prop. Trying to access it will result ' + 'in `undefined` being returned. If you need to access the same ' + 'value within the child component, you should pass it as a different ' + 'prop. (https://fb.me/react-special-props)', displayName);\n    }\n  };\n  warnAboutAccessingKey.isReactWarning = true;\n  Object.defineProperty(props, 'key', {\n    get: warnAboutAccessingKey,\n    configurable: true\n  });\n}\n\nfunction defineRefPropWarningGetter(props, displayName) {\n  var warnAboutAccessingRef = function () {\n    if (!specialPropRefWarningShown) {\n      specialPropRefWarningShown = true;\n      warningWithoutStack$1(false, '%s: `ref` is not a prop. Trying to access it will result ' + 'in `undefined` being returned. If you need to access the same ' + 'value within the child component, you should pass it as a different ' + 'prop. (https://fb.me/react-special-props)', displayName);\n    }\n  };\n  warnAboutAccessingRef.isReactWarning = true;\n  Object.defineProperty(props, 'ref', {\n    get: warnAboutAccessingRef,\n    configurable: true\n  });\n}\n\n/**\n * Factory method to create a new React element. This no longer adheres to\n * the class pattern, so do not use new to call it. Also, no instanceof check\n * will work. Instead test $$typeof field against Symbol.for('react.element') to check\n * if something is a React Element.\n *\n * @param {*} type\n * @param {*} key\n * @param {string|object} ref\n * @param {*} self A *temporary* helper to detect places where `this` is\n * different from the `owner` when React.createElement is called, so that we\n * can warn. We want to get rid of owner and replace string `ref`s with arrow\n * functions, and as long as `this` and owner are the same, there will be no\n * change in behavior.\n * @param {*} source An annotation object (added by a transpiler or otherwise)\n * indicating filename, line number, and/or other information.\n * @param {*} owner\n * @param {*} props\n * @internal\n */\nvar ReactElement = function (type, key, ref, self, source, owner, props) {\n  var element = {\n    // This tag allows us to uniquely identify this as a React Element\n    $$typeof: REACT_ELEMENT_TYPE,\n\n    // Built-in properties that belong on the element\n    type: type,\n    key: key,\n    ref: ref,\n    props: props,\n\n    // Record the component responsible for creating this element.\n    _owner: owner\n  };\n\n  {\n    // The validation flag is currently mutative. We put it on\n    // an external backing store so that we can freeze the whole object.\n    // This can be replaced with a WeakMap once they are implemented in\n    // commonly used development environments.\n    element._store = {};\n\n    // To make comparing ReactElements easier for testing purposes, we make\n    // the validation flag non-enumerable (where possible, which should\n    // include every environment we run tests in), so the test framework\n    // ignores it.\n    Object.defineProperty(element._store, 'validated', {\n      configurable: false,\n      enumerable: false,\n      writable: true,\n      value: false\n    });\n    // self and source are DEV only properties.\n    Object.defineProperty(element, '_self', {\n      configurable: false,\n      enumerable: false,\n      writable: false,\n      value: self\n    });\n    // Two elements created in two different places should be considered\n    // equal for testing purposes and therefore we hide it from enumeration.\n    Object.defineProperty(element, '_source', {\n      configurable: false,\n      enumerable: false,\n      writable: false,\n      value: source\n    });\n    if (Object.freeze) {\n      Object.freeze(element.props);\n      Object.freeze(element);\n    }\n  }\n\n  return element;\n};\n\n/**\n * Create and return a new ReactElement of the given type.\n * See https://reactjs.org/docs/react-api.html#createelement\n */\nfunction createElement(type, config, children) {\n  var propName = void 0;\n\n  // Reserved names are extracted\n  var props = {};\n\n  var key = null;\n  var ref = null;\n  var self = null;\n  var source = null;\n\n  if (config != null) {\n    if (hasValidRef(config)) {\n      ref = config.ref;\n    }\n    if (hasValidKey(config)) {\n      key = '' + config.key;\n    }\n\n    self = config.__self === undefined ? null : config.__self;\n    source = config.__source === undefined ? null : config.__source;\n    // Remaining properties are added to a new props object\n    for (propName in config) {\n      if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {\n        props[propName] = config[propName];\n      }\n    }\n  }\n\n  // Children can be more than one argument, and those are transferred onto\n  // the newly allocated props object.\n  var childrenLength = arguments.length - 2;\n  if (childrenLength === 1) {\n    props.children = children;\n  } else if (childrenLength > 1) {\n    var childArray = Array(childrenLength);\n    for (var i = 0; i < childrenLength; i++) {\n      childArray[i] = arguments[i + 2];\n    }\n    {\n      if (Object.freeze) {\n        Object.freeze(childArray);\n      }\n    }\n    props.children = childArray;\n  }\n\n  // Resolve default props\n  if (type && type.defaultProps) {\n    var defaultProps = type.defaultProps;\n    for (propName in defaultProps) {\n      if (props[propName] === undefined) {\n        props[propName] = defaultProps[propName];\n      }\n    }\n  }\n  {\n    if (key || ref) {\n      var displayName = typeof type === 'function' ? type.displayName || type.name || 'Unknown' : type;\n      if (key) {\n        defineKeyPropWarningGetter(props, displayName);\n      }\n      if (ref) {\n        defineRefPropWarningGetter(props, displayName);\n      }\n    }\n  }\n  return ReactElement(type, key, ref, self, source, ReactCurrentOwner.current, props);\n}\n\n/**\n * Return a function that produces ReactElements of a given type.\n * See https://reactjs.org/docs/react-api.html#createfactory\n */\n\n\nfunction cloneAndReplaceKey(oldElement, newKey) {\n  var newElement = ReactElement(oldElement.type, newKey, oldElement.ref, oldElement._self, oldElement._source, oldElement._owner, oldElement.props);\n\n  return newElement;\n}\n\n/**\n * Clone and return a new ReactElement using element as the starting point.\n * See https://reactjs.org/docs/react-api.html#cloneelement\n */\nfunction cloneElement(element, config, children) {\n  !!(element === null || element === undefined) ? invariant(false, 'React.cloneElement(...): The argument must be a React element, but you passed %s.', element) : void 0;\n\n  var propName = void 0;\n\n  // Original props are copied\n  var props = _assign({}, element.props);\n\n  // Reserved names are extracted\n  var key = element.key;\n  var ref = element.ref;\n  // Self is preserved since the owner is preserved.\n  var self = element._self;\n  // Source is preserved since cloneElement is unlikely to be targeted by a\n  // transpiler, and the original source is probably a better indicator of the\n  // true owner.\n  var source = element._source;\n\n  // Owner will be preserved, unless ref is overridden\n  var owner = element._owner;\n\n  if (config != null) {\n    if (hasValidRef(config)) {\n      // Silently steal the ref from the parent.\n      ref = config.ref;\n      owner = ReactCurrentOwner.current;\n    }\n    if (hasValidKey(config)) {\n      key = '' + config.key;\n    }\n\n    // Remaining properties override existing props\n    var defaultProps = void 0;\n    if (element.type && element.type.defaultProps) {\n      defaultProps = element.type.defaultProps;\n    }\n    for (propName in config) {\n      if (hasOwnProperty.call(config, propName) && !RESERVED_PROPS.hasOwnProperty(propName)) {\n        if (config[propName] === undefined && defaultProps !== undefined) {\n          // Resolve default props\n          props[propName] = defaultProps[propName];\n        } else {\n          props[propName] = config[propName];\n        }\n      }\n    }\n  }\n\n  // Children can be more than one argument, and those are transferred onto\n  // the newly allocated props object.\n  var childrenLength = arguments.length - 2;\n  if (childrenLength === 1) {\n    props.children = children;\n  } else if (childrenLength > 1) {\n    var childArray = Array(childrenLength);\n    for (var i = 0; i < childrenLength; i++) {\n      childArray[i] = arguments[i + 2];\n    }\n    props.children = childArray;\n  }\n\n  return ReactElement(element.type, key, ref, self, source, owner, props);\n}\n\n/**\n * Verifies the object is a ReactElement.\n * See https://reactjs.org/docs/react-api.html#isvalidelement\n * @param {?object} object\n * @return {boolean} True if `object` is a ReactElement.\n * @final\n */\nfunction isValidElement(object) {\n  return typeof object === 'object' && object !== null && object.$$typeof === REACT_ELEMENT_TYPE;\n}\n\nvar SEPARATOR = '.';\nvar SUBSEPARATOR = ':';\n\n/**\n * Escape and wrap key so it is safe to use as a reactid\n *\n * @param {string} key to be escaped.\n * @return {string} the escaped key.\n */\nfunction escape(key) {\n  var escapeRegex = /[=:]/g;\n  var escaperLookup = {\n    '=': '=0',\n    ':': '=2'\n  };\n  var escapedString = ('' + key).replace(escapeRegex, function (match) {\n    return escaperLookup[match];\n  });\n\n  return '$' + escapedString;\n}\n\n/**\n * TODO: Test that a single child and an array with one item have the same key\n * pattern.\n */\n\nvar didWarnAboutMaps = false;\n\nvar userProvidedKeyEscapeRegex = /\\/+/g;\nfunction escapeUserProvidedKey(text) {\n  return ('' + text).replace(userProvidedKeyEscapeRegex, '$&/');\n}\n\nvar POOL_SIZE = 10;\nvar traverseContextPool = [];\nfunction getPooledTraverseContext(mapResult, keyPrefix, mapFunction, mapContext) {\n  if (traverseContextPool.length) {\n    var traverseContext = traverseContextPool.pop();\n    traverseContext.result = mapResult;\n    traverseContext.keyPrefix = keyPrefix;\n    traverseContext.func = mapFunction;\n    traverseContext.context = mapContext;\n    traverseContext.count = 0;\n    return traverseContext;\n  } else {\n    return {\n      result: mapResult,\n      keyPrefix: keyPrefix,\n      func: mapFunction,\n      context: mapContext,\n      count: 0\n    };\n  }\n}\n\nfunction releaseTraverseContext(traverseContext) {\n  traverseContext.result = null;\n  traverseContext.keyPrefix = null;\n  traverseContext.func = null;\n  traverseContext.context = null;\n  traverseContext.count = 0;\n  if (traverseContextPool.length < POOL_SIZE) {\n    traverseContextPool.push(traverseContext);\n  }\n}\n\n/**\n * @param {?*} children Children tree container.\n * @param {!string} nameSoFar Name of the key path so far.\n * @param {!function} callback Callback to invoke with each child found.\n * @param {?*} traverseContext Used to pass information throughout the traversal\n * process.\n * @return {!number} The number of children in this subtree.\n */\nfunction traverseAllChildrenImpl(children, nameSoFar, callback, traverseContext) {\n  var type = typeof children;\n\n  if (type === 'undefined' || type === 'boolean') {\n    // All of the above are perceived as null.\n    children = null;\n  }\n\n  var invokeCallback = false;\n\n  if (children === null) {\n    invokeCallback = true;\n  } else {\n    switch (type) {\n      case 'string':\n      case 'number':\n        invokeCallback = true;\n        break;\n      case 'object':\n        switch (children.$$typeof) {\n          case REACT_ELEMENT_TYPE:\n          case REACT_PORTAL_TYPE:\n            invokeCallback = true;\n        }\n    }\n  }\n\n  if (invokeCallback) {\n    callback(traverseContext, children,\n    // If it's the only child, treat the name as if it was wrapped in an array\n    // so that it's consistent if the number of children grows.\n    nameSoFar === '' ? SEPARATOR + getComponentKey(children, 0) : nameSoFar);\n    return 1;\n  }\n\n  var child = void 0;\n  var nextName = void 0;\n  var subtreeCount = 0; // Count of children found in the current subtree.\n  var nextNamePrefix = nameSoFar === '' ? SEPARATOR : nameSoFar + SUBSEPARATOR;\n\n  if (Array.isArray(children)) {\n    for (var i = 0; i < children.length; i++) {\n      child = children[i];\n      nextName = nextNamePrefix + getComponentKey(child, i);\n      subtreeCount += traverseAllChildrenImpl(child, nextName, callback, traverseContext);\n    }\n  } else {\n    var iteratorFn = getIteratorFn(children);\n    if (typeof iteratorFn === 'function') {\n      {\n        // Warn about using Maps as children\n        if (iteratorFn === children.entries) {\n          !didWarnAboutMaps ? warning$1(false, 'Using Maps as children is unsupported and will likely yield ' + 'unexpected results. Convert it to a sequence/iterable of keyed ' + 'ReactElements instead.') : void 0;\n          didWarnAboutMaps = true;\n        }\n      }\n\n      var iterator = iteratorFn.call(children);\n      var step = void 0;\n      var ii = 0;\n      while (!(step = iterator.next()).done) {\n        child = step.value;\n        nextName = nextNamePrefix + getComponentKey(child, ii++);\n        subtreeCount += traverseAllChildrenImpl(child, nextName, callback, traverseContext);\n      }\n    } else if (type === 'object') {\n      var addendum = '';\n      {\n        addendum = ' If you meant to render a collection of children, use an array ' + 'instead.' + ReactDebugCurrentFrame.getStackAddendum();\n      }\n      var childrenString = '' + children;\n      invariant(false, 'Objects are not valid as a React child (found: %s).%s', childrenString === '[object Object]' ? 'object with keys {' + Object.keys(children).join(', ') + '}' : childrenString, addendum);\n    }\n  }\n\n  return subtreeCount;\n}\n\n/**\n * Traverses children that are typically specified as `props.children`, but\n * might also be specified through attributes:\n *\n * - `traverseAllChildren(this.props.children, ...)`\n * - `traverseAllChildren(this.props.leftPanelChildren, ...)`\n *\n * The `traverseContext` is an optional argument that is passed through the\n * entire traversal. It can be used to store accumulations or anything else that\n * the callback might find relevant.\n *\n * @param {?*} children Children tree object.\n * @param {!function} callback To invoke upon traversing each child.\n * @param {?*} traverseContext Context for traversal.\n * @return {!number} The number of children in this subtree.\n */\nfunction traverseAllChildren(children, callback, traverseContext) {\n  if (children == null) {\n    return 0;\n  }\n\n  return traverseAllChildrenImpl(children, '', callback, traverseContext);\n}\n\n/**\n * Generate a key string that identifies a component within a set.\n *\n * @param {*} component A component that could contain a manual key.\n * @param {number} index Index that is used if a manual key is not provided.\n * @return {string}\n */\nfunction getComponentKey(component, index) {\n  // Do some typechecking here since we call this blindly. We want to ensure\n  // that we don't block potential future ES APIs.\n  if (typeof component === 'object' && component !== null && component.key != null) {\n    // Explicit key\n    return escape(component.key);\n  }\n  // Implicit key determined by the index in the set\n  return index.toString(36);\n}\n\nfunction forEachSingleChild(bookKeeping, child, name) {\n  var func = bookKeeping.func,\n      context = bookKeeping.context;\n\n  func.call(context, child, bookKeeping.count++);\n}\n\n/**\n * Iterates through children that are typically specified as `props.children`.\n *\n * See https://reactjs.org/docs/react-api.html#reactchildrenforeach\n *\n * The provided forEachFunc(child, index) will be called for each\n * leaf child.\n *\n * @param {?*} children Children tree container.\n * @param {function(*, int)} forEachFunc\n * @param {*} forEachContext Context for forEachContext.\n */\nfunction forEachChildren(children, forEachFunc, forEachContext) {\n  if (children == null) {\n    return children;\n  }\n  var traverseContext = getPooledTraverseContext(null, null, forEachFunc, forEachContext);\n  traverseAllChildren(children, forEachSingleChild, traverseContext);\n  releaseTraverseContext(traverseContext);\n}\n\nfunction mapSingleChildIntoContext(bookKeeping, child, childKey) {\n  var result = bookKeeping.result,\n      keyPrefix = bookKeeping.keyPrefix,\n      func = bookKeeping.func,\n      context = bookKeeping.context;\n\n\n  var mappedChild = func.call(context, child, bookKeeping.count++);\n  if (Array.isArray(mappedChild)) {\n    mapIntoWithKeyPrefixInternal(mappedChild, result, childKey, function (c) {\n      return c;\n    });\n  } else if (mappedChild != null) {\n    if (isValidElement(mappedChild)) {\n      mappedChild = cloneAndReplaceKey(mappedChild,\n      // Keep both the (mapped) and old keys if they differ, just as\n      // traverseAllChildren used to do for objects as children\n      keyPrefix + (mappedChild.key && (!child || child.key !== mappedChild.key) ? escapeUserProvidedKey(mappedChild.key) + '/' : '') + childKey);\n    }\n    result.push(mappedChild);\n  }\n}\n\nfunction mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {\n  var escapedPrefix = '';\n  if (prefix != null) {\n    escapedPrefix = escapeUserProvidedKey(prefix) + '/';\n  }\n  var traverseContext = getPooledTraverseContext(array, escapedPrefix, func, context);\n  traverseAllChildren(children, mapSingleChildIntoContext, traverseContext);\n  releaseTraverseContext(traverseContext);\n}\n\n/**\n * Maps children that are typically specified as `props.children`.\n *\n * See https://reactjs.org/docs/react-api.html#reactchildrenmap\n *\n * The provided mapFunction(child, key, index) will be called for each\n * leaf child.\n *\n * @param {?*} children Children tree container.\n * @param {function(*, int)} func The map function.\n * @param {*} context Context for mapFunction.\n * @return {object} Object containing the ordered map of results.\n */\nfunction mapChildren(children, func, context) {\n  if (children == null) {\n    return children;\n  }\n  var result = [];\n  mapIntoWithKeyPrefixInternal(children, result, null, func, context);\n  return result;\n}\n\n/**\n * Count the number of children that are typically specified as\n * `props.children`.\n *\n * See https://reactjs.org/docs/react-api.html#reactchildrencount\n *\n * @param {?*} children Children tree container.\n * @return {number} The number of children.\n */\nfunction countChildren(children) {\n  return traverseAllChildren(children, function () {\n    return null;\n  }, null);\n}\n\n/**\n * Flatten a children object (typically specified as `props.children`) and\n * return an array with appropriately re-keyed children.\n *\n * See https://reactjs.org/docs/react-api.html#reactchildrentoarray\n */\nfunction toArray(children) {\n  var result = [];\n  mapIntoWithKeyPrefixInternal(children, result, null, function (child) {\n    return child;\n  });\n  return result;\n}\n\n/**\n * Returns the first child in a collection of children and verifies that there\n * is only one child in the collection.\n *\n * See https://reactjs.org/docs/react-api.html#reactchildrenonly\n *\n * The current implementation of this function assumes that a single child gets\n * passed without a wrapper, but the purpose of this helper function is to\n * abstract away the particular structure of children.\n *\n * @param {?object} children Child collection structure.\n * @return {ReactElement} The first and only `ReactElement` contained in the\n * structure.\n */\nfunction onlyChild(children) {\n  !isValidElement(children) ? invariant(false, 'React.Children.only expected to receive a single React element child.') : void 0;\n  return children;\n}\n\nfunction createContext(defaultValue, calculateChangedBits) {\n  if (calculateChangedBits === undefined) {\n    calculateChangedBits = null;\n  } else {\n    {\n      !(calculateChangedBits === null || typeof calculateChangedBits === 'function') ? warningWithoutStack$1(false, 'createContext: Expected the optional second argument to be a ' + 'function. Instead received: %s', calculateChangedBits) : void 0;\n    }\n  }\n\n  var context = {\n    $$typeof: REACT_CONTEXT_TYPE,\n    _calculateChangedBits: calculateChangedBits,\n    // As a workaround to support multiple concurrent renderers, we categorize\n    // some renderers as primary and others as secondary. We only expect\n    // there to be two concurrent renderers at most: React Native (primary) and\n    // Fabric (secondary); React DOM (primary) and React ART (secondary).\n    // Secondary renderers store their context values on separate fields.\n    _currentValue: defaultValue,\n    _currentValue2: defaultValue,\n    // Used to track how many concurrent renderers this context currently\n    // supports within in a single renderer. Such as parallel server rendering.\n    _threadCount: 0,\n    // These are circular\n    Provider: null,\n    Consumer: null\n  };\n\n  context.Provider = {\n    $$typeof: REACT_PROVIDER_TYPE,\n    _context: context\n  };\n\n  var hasWarnedAboutUsingNestedContextConsumers = false;\n  var hasWarnedAboutUsingConsumerProvider = false;\n\n  {\n    // A separate object, but proxies back to the original context object for\n    // backwards compatibility. It has a different $$typeof, so we can properly\n    // warn for the incorrect usage of Context as a Consumer.\n    var Consumer = {\n      $$typeof: REACT_CONTEXT_TYPE,\n      _context: context,\n      _calculateChangedBits: context._calculateChangedBits\n    };\n    // $FlowFixMe: Flow complains about not setting a value, which is intentional here\n    Object.defineProperties(Consumer, {\n      Provider: {\n        get: function () {\n          if (!hasWarnedAboutUsingConsumerProvider) {\n            hasWarnedAboutUsingConsumerProvider = true;\n            warning$1(false, 'Rendering <Context.Consumer.Provider> is not supported and will be removed in ' + 'a future major release. Did you mean to render <Context.Provider> instead?');\n          }\n          return context.Provider;\n        },\n        set: function (_Provider) {\n          context.Provider = _Provider;\n        }\n      },\n      _currentValue: {\n        get: function () {\n          return context._currentValue;\n        },\n        set: function (_currentValue) {\n          context._currentValue = _currentValue;\n        }\n      },\n      _currentValue2: {\n        get: function () {\n          return context._currentValue2;\n        },\n        set: function (_currentValue2) {\n          context._currentValue2 = _currentValue2;\n        }\n      },\n      _threadCount: {\n        get: function () {\n          return context._threadCount;\n        },\n        set: function (_threadCount) {\n          context._threadCount = _threadCount;\n        }\n      },\n      Consumer: {\n        get: function () {\n          if (!hasWarnedAboutUsingNestedContextConsumers) {\n            hasWarnedAboutUsingNestedContextConsumers = true;\n            warning$1(false, 'Rendering <Context.Consumer.Consumer> is not supported and will be removed in ' + 'a future major release. Did you mean to render <Context.Consumer> instead?');\n          }\n          return context.Consumer;\n        }\n      }\n    });\n    // $FlowFixMe: Flow complains about missing properties because it doesn't understand defineProperty\n    context.Consumer = Consumer;\n  }\n\n  {\n    context._currentRenderer = null;\n    context._currentRenderer2 = null;\n  }\n\n  return context;\n}\n\nfunction lazy(ctor) {\n  var lazyType = {\n    $$typeof: REACT_LAZY_TYPE,\n    _ctor: ctor,\n    // React uses these fields to store the result.\n    _status: -1,\n    _result: null\n  };\n\n  {\n    // In production, this would just set it on the object.\n    var defaultProps = void 0;\n    var propTypes = void 0;\n    Object.defineProperties(lazyType, {\n      defaultProps: {\n        configurable: true,\n        get: function () {\n          return defaultProps;\n        },\n        set: function (newDefaultProps) {\n          warning$1(false, 'React.lazy(...): It is not supported to assign `defaultProps` to ' + 'a lazy component import. Either specify them where the component ' + 'is defined, or create a wrapping component around it.');\n          defaultProps = newDefaultProps;\n          // Match production behavior more closely:\n          Object.defineProperty(lazyType, 'defaultProps', {\n            enumerable: true\n          });\n        }\n      },\n      propTypes: {\n        configurable: true,\n        get: function () {\n          return propTypes;\n        },\n        set: function (newPropTypes) {\n          warning$1(false, 'React.lazy(...): It is not supported to assign `propTypes` to ' + 'a lazy component import. Either specify them where the component ' + 'is defined, or create a wrapping component around it.');\n          propTypes = newPropTypes;\n          // Match production behavior more closely:\n          Object.defineProperty(lazyType, 'propTypes', {\n            enumerable: true\n          });\n        }\n      }\n    });\n  }\n\n  return lazyType;\n}\n\nfunction forwardRef(render) {\n  {\n    if (render != null && render.$$typeof === REACT_MEMO_TYPE) {\n      warningWithoutStack$1(false, 'forwardRef requires a render function but received a `memo` ' + 'component. Instead of forwardRef(memo(...)), use ' + 'memo(forwardRef(...)).');\n    } else if (typeof render !== 'function') {\n      warningWithoutStack$1(false, 'forwardRef requires a render function but was given %s.', render === null ? 'null' : typeof render);\n    } else {\n      !(\n      // Do not warn for 0 arguments because it could be due to usage of the 'arguments' object\n      render.length === 0 || render.length === 2) ? warningWithoutStack$1(false, 'forwardRef render functions accept exactly two parameters: props and ref. %s', render.length === 1 ? 'Did you forget to use the ref parameter?' : 'Any additional parameter will be undefined.') : void 0;\n    }\n\n    if (render != null) {\n      !(render.defaultProps == null && render.propTypes == null) ? warningWithoutStack$1(false, 'forwardRef render functions do not support propTypes or defaultProps. ' + 'Did you accidentally pass a React component?') : void 0;\n    }\n  }\n\n  return {\n    $$typeof: REACT_FORWARD_REF_TYPE,\n    render: render\n  };\n}\n\nfunction isValidElementType(type) {\n  return typeof type === 'string' || typeof type === 'function' ||\n  // Note: its typeof might be other than 'symbol' or 'number' if it's a polyfill.\n  type === REACT_FRAGMENT_TYPE || type === REACT_CONCURRENT_MODE_TYPE || type === REACT_PROFILER_TYPE || type === REACT_STRICT_MODE_TYPE || type === REACT_SUSPENSE_TYPE || typeof type === 'object' && type !== null && (type.$$typeof === REACT_LAZY_TYPE || type.$$typeof === REACT_MEMO_TYPE || type.$$typeof === REACT_PROVIDER_TYPE || type.$$typeof === REACT_CONTEXT_TYPE || type.$$typeof === REACT_FORWARD_REF_TYPE);\n}\n\nfunction memo(type, compare) {\n  {\n    if (!isValidElementType(type)) {\n      warningWithoutStack$1(false, 'memo: The first argument must be a component. Instead ' + 'received: %s', type === null ? 'null' : typeof type);\n    }\n  }\n  return {\n    $$typeof: REACT_MEMO_TYPE,\n    type: type,\n    compare: compare === undefined ? null : compare\n  };\n}\n\nfunction resolveDispatcher() {\n  var dispatcher = ReactCurrentDispatcher.current;\n  !(dispatcher !== null) ? invariant(false, 'Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:\\n1. You might have mismatching versions of React and the renderer (such as React DOM)\\n2. You might be breaking the Rules of Hooks\\n3. You might have more than one copy of React in the same app\\nSee https://fb.me/react-invalid-hook-call for tips about how to debug and fix this problem.') : void 0;\n  return dispatcher;\n}\n\nfunction useContext(Context, unstable_observedBits) {\n  var dispatcher = resolveDispatcher();\n  {\n    !(unstable_observedBits === undefined) ? warning$1(false, 'useContext() second argument is reserved for future ' + 'use in React. Passing it is not supported. ' + 'You passed: %s.%s', unstable_observedBits, typeof unstable_observedBits === 'number' && Array.isArray(arguments[2]) ? '\\n\\nDid you call array.map(useContext)? ' + 'Calling Hooks inside a loop is not supported. ' + 'Learn more at https://fb.me/rules-of-hooks' : '') : void 0;\n\n    // TODO: add a more generic warning for invalid values.\n    if (Context._context !== undefined) {\n      var realContext = Context._context;\n      // Don't deduplicate because this legitimately causes bugs\n      // and nobody should be using this in existing code.\n      if (realContext.Consumer === Context) {\n        warning$1(false, 'Calling useContext(Context.Consumer) is not supported, may cause bugs, and will be ' + 'removed in a future major release. Did you mean to call useContext(Context) instead?');\n      } else if (realContext.Provider === Context) {\n        warning$1(false, 'Calling useContext(Context.Provider) is not supported. ' + 'Did you mean to call useContext(Context) instead?');\n      }\n    }\n  }\n  return dispatcher.useContext(Context, unstable_observedBits);\n}\n\nfunction useState(initialState) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useState(initialState);\n}\n\nfunction useReducer(reducer, initialArg, init) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useReducer(reducer, initialArg, init);\n}\n\nfunction useRef(initialValue) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useRef(initialValue);\n}\n\nfunction useEffect(create, inputs) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useEffect(create, inputs);\n}\n\nfunction useLayoutEffect(create, inputs) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useLayoutEffect(create, inputs);\n}\n\nfunction useCallback(callback, inputs) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useCallback(callback, inputs);\n}\n\nfunction useMemo(create, inputs) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useMemo(create, inputs);\n}\n\nfunction useImperativeHandle(ref, create, inputs) {\n  var dispatcher = resolveDispatcher();\n  return dispatcher.useImperativeHandle(ref, create, inputs);\n}\n\nfunction useDebugValue(value, formatterFn) {\n  {\n    var dispatcher = resolveDispatcher();\n    return dispatcher.useDebugValue(value, formatterFn);\n  }\n}\n\n/**\n * ReactElementValidator provides a wrapper around a element factory\n * which validates the props passed to the element. This is intended to be\n * used only in DEV and could be replaced by a static type checker for languages\n * that support it.\n */\n\nvar propTypesMisspellWarningShown = void 0;\n\n{\n  propTypesMisspellWarningShown = false;\n}\n\nfunction getDeclarationErrorAddendum() {\n  if (ReactCurrentOwner.current) {\n    var name = getComponentName(ReactCurrentOwner.current.type);\n    if (name) {\n      return '\\n\\nCheck the render method of `' + name + '`.';\n    }\n  }\n  return '';\n}\n\nfunction getSourceInfoErrorAddendum(elementProps) {\n  if (elementProps !== null && elementProps !== undefined && elementProps.__source !== undefined) {\n    var source = elementProps.__source;\n    var fileName = source.fileName.replace(/^.*[\\\\\\/]/, '');\n    var lineNumber = source.lineNumber;\n    return '\\n\\nCheck your code at ' + fileName + ':' + lineNumber + '.';\n  }\n  return '';\n}\n\n/**\n * Warn if there's no key explicitly set on dynamic arrays of children or\n * object keys are not valid. This allows us to keep track of children between\n * updates.\n */\nvar ownerHasKeyUseWarning = {};\n\nfunction getCurrentComponentErrorInfo(parentType) {\n  var info = getDeclarationErrorAddendum();\n\n  if (!info) {\n    var parentName = typeof parentType === 'string' ? parentType : parentType.displayName || parentType.name;\n    if (parentName) {\n      info = '\\n\\nCheck the top-level render call using <' + parentName + '>.';\n    }\n  }\n  return info;\n}\n\n/**\n * Warn if the element doesn't have an explicit key assigned to it.\n * This element is in an array. The array could grow and shrink or be\n * reordered. All children that haven't already been validated are required to\n * have a \"key\" property assigned to it. Error statuses are cached so a warning\n * will only be shown once.\n *\n * @internal\n * @param {ReactElement} element Element that requires a key.\n * @param {*} parentType element's parent's type.\n */\nfunction validateExplicitKey(element, parentType) {\n  if (!element._store || element._store.validated || element.key != null) {\n    return;\n  }\n  element._store.validated = true;\n\n  var currentComponentErrorInfo = getCurrentComponentErrorInfo(parentType);\n  if (ownerHasKeyUseWarning[currentComponentErrorInfo]) {\n    return;\n  }\n  ownerHasKeyUseWarning[currentComponentErrorInfo] = true;\n\n  // Usually the current owner is the offender, but if it accepts children as a\n  // property, it may be the creator of the child that's responsible for\n  // assigning it a key.\n  var childOwner = '';\n  if (element && element._owner && element._owner !== ReactCurrentOwner.current) {\n    // Give the component that originally created this child.\n    childOwner = ' It was passed a child from ' + getComponentName(element._owner.type) + '.';\n  }\n\n  setCurrentlyValidatingElement(element);\n  {\n    warning$1(false, 'Each child in a list should have a unique \"key\" prop.' + '%s%s See https://fb.me/react-warning-keys for more information.', currentComponentErrorInfo, childOwner);\n  }\n  setCurrentlyValidatingElement(null);\n}\n\n/**\n * Ensure that every element either is passed in a static location, in an\n * array with an explicit keys property defined, or in an object literal\n * with valid key property.\n *\n * @internal\n * @param {ReactNode} node Statically passed child of any type.\n * @param {*} parentType node's parent's type.\n */\nfunction validateChildKeys(node, parentType) {\n  if (typeof node !== 'object') {\n    return;\n  }\n  if (Array.isArray(node)) {\n    for (var i = 0; i < node.length; i++) {\n      var child = node[i];\n      if (isValidElement(child)) {\n        validateExplicitKey(child, parentType);\n      }\n    }\n  } else if (isValidElement(node)) {\n    // This element was passed in a valid location.\n    if (node._store) {\n      node._store.validated = true;\n    }\n  } else if (node) {\n    var iteratorFn = getIteratorFn(node);\n    if (typeof iteratorFn === 'function') {\n      // Entry iterators used to provide implicit keys,\n      // but now we print a separate warning for them later.\n      if (iteratorFn !== node.entries) {\n        var iterator = iteratorFn.call(node);\n        var step = void 0;\n        while (!(step = iterator.next()).done) {\n          if (isValidElement(step.value)) {\n            validateExplicitKey(step.value, parentType);\n          }\n        }\n      }\n    }\n  }\n}\n\n/**\n * Given an element, validate that its props follow the propTypes definition,\n * provided by the type.\n *\n * @param {ReactElement} element\n */\nfunction validatePropTypes(element) {\n  var type = element.type;\n  if (type === null || type === undefined || typeof type === 'string') {\n    return;\n  }\n  var name = getComponentName(type);\n  var propTypes = void 0;\n  if (typeof type === 'function') {\n    propTypes = type.propTypes;\n  } else if (typeof type === 'object' && (type.$$typeof === REACT_FORWARD_REF_TYPE ||\n  // Note: Memo only checks outer props here.\n  // Inner props are checked in the reconciler.\n  type.$$typeof === REACT_MEMO_TYPE)) {\n    propTypes = type.propTypes;\n  } else {\n    return;\n  }\n  if (propTypes) {\n    setCurrentlyValidatingElement(element);\n    checkPropTypes(propTypes, element.props, 'prop', name, ReactDebugCurrentFrame.getStackAddendum);\n    setCurrentlyValidatingElement(null);\n  } else if (type.PropTypes !== undefined && !propTypesMisspellWarningShown) {\n    propTypesMisspellWarningShown = true;\n    warningWithoutStack$1(false, 'Component %s declared `PropTypes` instead of `propTypes`. Did you misspell the property assignment?', name || 'Unknown');\n  }\n  if (typeof type.getDefaultProps === 'function') {\n    !type.getDefaultProps.isReactClassApproved ? warningWithoutStack$1(false, 'getDefaultProps is only used on classic React.createClass ' + 'definitions. Use a static property named `defaultProps` instead.') : void 0;\n  }\n}\n\n/**\n * Given a fragment, validate that it can only be provided with fragment props\n * @param {ReactElement} fragment\n */\nfunction validateFragmentProps(fragment) {\n  setCurrentlyValidatingElement(fragment);\n\n  var keys = Object.keys(fragment.props);\n  for (var i = 0; i < keys.length; i++) {\n    var key = keys[i];\n    if (key !== 'children' && key !== 'key') {\n      warning$1(false, 'Invalid prop `%s` supplied to `React.Fragment`. ' + 'React.Fragment can only have `key` and `children` props.', key);\n      break;\n    }\n  }\n\n  if (fragment.ref !== null) {\n    warning$1(false, 'Invalid attribute `ref` supplied to `React.Fragment`.');\n  }\n\n  setCurrentlyValidatingElement(null);\n}\n\nfunction createElementWithValidation(type, props, children) {\n  var validType = isValidElementType(type);\n\n  // We warn in this case but don't throw. We expect the element creation to\n  // succeed and there will likely be errors in render.\n  if (!validType) {\n    var info = '';\n    if (type === undefined || typeof type === 'object' && type !== null && Object.keys(type).length === 0) {\n      info += ' You likely forgot to export your component from the file ' + \"it's defined in, or you might have mixed up default and named imports.\";\n    }\n\n    var sourceInfo = getSourceInfoErrorAddendum(props);\n    if (sourceInfo) {\n      info += sourceInfo;\n    } else {\n      info += getDeclarationErrorAddendum();\n    }\n\n    var typeString = void 0;\n    if (type === null) {\n      typeString = 'null';\n    } else if (Array.isArray(type)) {\n      typeString = 'array';\n    } else if (type !== undefined && type.$$typeof === REACT_ELEMENT_TYPE) {\n      typeString = '<' + (getComponentName(type.type) || 'Unknown') + ' />';\n      info = ' Did you accidentally export a JSX literal instead of a component?';\n    } else {\n      typeString = typeof type;\n    }\n\n    warning$1(false, 'React.createElement: type is invalid -- expected a string (for ' + 'built-in components) or a class/function (for composite ' + 'components) but got: %s.%s', typeString, info);\n  }\n\n  var element = createElement.apply(this, arguments);\n\n  // The result can be nullish if a mock or a custom function is used.\n  // TODO: Drop this when these are no longer allowed as the type argument.\n  if (element == null) {\n    return element;\n  }\n\n  // Skip key warning if the type isn't valid since our key validation logic\n  // doesn't expect a non-string/function type and can throw confusing errors.\n  // We don't want exception behavior to differ between dev and prod.\n  // (Rendering will throw with a helpful message and as soon as the type is\n  // fixed, the key warnings will appear.)\n  if (validType) {\n    for (var i = 2; i < arguments.length; i++) {\n      validateChildKeys(arguments[i], type);\n    }\n  }\n\n  if (type === REACT_FRAGMENT_TYPE) {\n    validateFragmentProps(element);\n  } else {\n    validatePropTypes(element);\n  }\n\n  return element;\n}\n\nfunction createFactoryWithValidation(type) {\n  var validatedFactory = createElementWithValidation.bind(null, type);\n  validatedFactory.type = type;\n  // Legacy hook: remove it\n  {\n    Object.defineProperty(validatedFactory, 'type', {\n      enumerable: false,\n      get: function () {\n        lowPriorityWarning$1(false, 'Factory.type is deprecated. Access the class directly ' + 'before passing it to createFactory.');\n        Object.defineProperty(this, 'type', {\n          value: type\n        });\n        return type;\n      }\n    });\n  }\n\n  return validatedFactory;\n}\n\nfunction cloneElementWithValidation(element, props, children) {\n  var newElement = cloneElement.apply(this, arguments);\n  for (var i = 2; i < arguments.length; i++) {\n    validateChildKeys(arguments[i], newElement.type);\n  }\n  validatePropTypes(newElement);\n  return newElement;\n}\n\n// Helps identify side effects in begin-phase lifecycle hooks and setState reducers:\n\n\n// In some cases, StrictMode should also double-render lifecycles.\n// This can be confusing for tests though,\n// And it can be bad for performance in production.\n// This feature flag can be used to control the behavior:\n\n\n// To preserve the \"Pause on caught exceptions\" behavior of the debugger, we\n// replay the begin phase of a failed component inside invokeGuardedCallback.\n\n\n// Warn about deprecated, async-unsafe lifecycles; relates to RFC #6:\n\n\n// Gather advanced timing metrics for Profiler subtrees.\n\n\n// Trace which interactions trigger each commit.\n\n\n// Only used in www builds.\n // TODO: true? Here it might just be false.\n\n// Only used in www builds.\n\n\n// Only used in www builds.\n\n\n// React Fire: prevent the value and checked attributes from syncing\n// with their related DOM properties\n\n\n// These APIs will no longer be \"unstable\" in the upcoming 16.7 release,\n// Control this behavior with a flag to support 16.6 minor releases in the meanwhile.\nvar enableStableConcurrentModeAPIs = false;\n\nvar React = {\n  Children: {\n    map: mapChildren,\n    forEach: forEachChildren,\n    count: countChildren,\n    toArray: toArray,\n    only: onlyChild\n  },\n\n  createRef: createRef,\n  Component: Component,\n  PureComponent: PureComponent,\n\n  createContext: createContext,\n  forwardRef: forwardRef,\n  lazy: lazy,\n  memo: memo,\n\n  useCallback: useCallback,\n  useContext: useContext,\n  useEffect: useEffect,\n  useImperativeHandle: useImperativeHandle,\n  useDebugValue: useDebugValue,\n  useLayoutEffect: useLayoutEffect,\n  useMemo: useMemo,\n  useReducer: useReducer,\n  useRef: useRef,\n  useState: useState,\n\n  Fragment: REACT_FRAGMENT_TYPE,\n  StrictMode: REACT_STRICT_MODE_TYPE,\n  Suspense: REACT_SUSPENSE_TYPE,\n\n  createElement: createElementWithValidation,\n  cloneElement: cloneElementWithValidation,\n  createFactory: createFactoryWithValidation,\n  isValidElement: isValidElement,\n\n  version: ReactVersion,\n\n  unstable_ConcurrentMode: REACT_CONCURRENT_MODE_TYPE,\n  unstable_Profiler: REACT_PROFILER_TYPE,\n\n  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals\n};\n\n// Note: some APIs are added with feature flags.\n// Make sure that stable builds for open source\n// don't modify the React object to avoid deopts.\n// Also let's not expose their names in stable builds.\n\nif (enableStableConcurrentModeAPIs) {\n  React.ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;\n  React.Profiler = REACT_PROFILER_TYPE;\n  React.unstable_ConcurrentMode = undefined;\n  React.unstable_Profiler = undefined;\n}\n\n\n\nvar React$2 = Object.freeze({\n\tdefault: React\n});\n\nvar React$3 = ( React$2 && React ) || React$2;\n\n// TODO: decide on the top-level export form.\n// This is hacky but makes it work with both Rollup and Jest.\nvar react = React$3.default || React$3;\n\nmodule.exports = react;\n  })();\n}\n\n\n//# sourceURL=webpack://Pusher/./node_modules/react/cjs/react.development.js?");
-
-/***/ }),
-
-/***/ "./node_modules/react/index.js":
-/*!*************************************!*\
-  !*** ./node_modules/react/index.js ***!
-  \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\n\nif (false) {} else {\n  module.exports = __webpack_require__(/*! ./cjs/react.development.js */ \"./node_modules/react/cjs/react.development.js\");\n}\n\n\n//# sourceURL=webpack://Pusher/./node_modules/react/index.js?");
-
-/***/ }),
-
-/***/ "./node_modules/react/node_modules/object-assign/index.js":
-/*!****************************************************************!*\
-  !*** ./node_modules/react/node_modules/object-assign/index.js ***!
-  \****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("/*\nobject-assign\n(c) Sindre Sorhus\n@license MIT\n*/\n\n\n/* eslint-disable no-unused-vars */\nvar getOwnPropertySymbols = Object.getOwnPropertySymbols;\nvar hasOwnProperty = Object.prototype.hasOwnProperty;\nvar propIsEnumerable = Object.prototype.propertyIsEnumerable;\n\nfunction toObject(val) {\n\tif (val === null || val === undefined) {\n\t\tthrow new TypeError('Object.assign cannot be called with null or undefined');\n\t}\n\n\treturn Object(val);\n}\n\nfunction shouldUseNative() {\n\ttry {\n\t\tif (!Object.assign) {\n\t\t\treturn false;\n\t\t}\n\n\t\t// Detect buggy property enumeration order in older V8 versions.\n\n\t\t// https://bugs.chromium.org/p/v8/issues/detail?id=4118\n\t\tvar test1 = new String('abc');  // eslint-disable-line no-new-wrappers\n\t\ttest1[5] = 'de';\n\t\tif (Object.getOwnPropertyNames(test1)[0] === '5') {\n\t\t\treturn false;\n\t\t}\n\n\t\t// https://bugs.chromium.org/p/v8/issues/detail?id=3056\n\t\tvar test2 = {};\n\t\tfor (var i = 0; i < 10; i++) {\n\t\t\ttest2['_' + String.fromCharCode(i)] = i;\n\t\t}\n\t\tvar order2 = Object.getOwnPropertyNames(test2).map(function (n) {\n\t\t\treturn test2[n];\n\t\t});\n\t\tif (order2.join('') !== '0123456789') {\n\t\t\treturn false;\n\t\t}\n\n\t\t// https://bugs.chromium.org/p/v8/issues/detail?id=3056\n\t\tvar test3 = {};\n\t\t'abcdefghijklmnopqrst'.split('').forEach(function (letter) {\n\t\t\ttest3[letter] = letter;\n\t\t});\n\t\tif (Object.keys(Object.assign({}, test3)).join('') !==\n\t\t\t\t'abcdefghijklmnopqrst') {\n\t\t\treturn false;\n\t\t}\n\n\t\treturn true;\n\t} catch (err) {\n\t\t// We don't expect any of the above to throw, but better to be safe.\n\t\treturn false;\n\t}\n}\n\nmodule.exports = shouldUseNative() ? Object.assign : function (target, source) {\n\tvar from;\n\tvar to = toObject(target);\n\tvar symbols;\n\n\tfor (var s = 1; s < arguments.length; s++) {\n\t\tfrom = Object(arguments[s]);\n\n\t\tfor (var key in from) {\n\t\t\tif (hasOwnProperty.call(from, key)) {\n\t\t\t\tto[key] = from[key];\n\t\t\t}\n\t\t}\n\n\t\tif (getOwnPropertySymbols) {\n\t\t\tsymbols = getOwnPropertySymbols(from);\n\t\t\tfor (var i = 0; i < symbols.length; i++) {\n\t\t\t\tif (propIsEnumerable.call(from, symbols[i])) {\n\t\t\t\t\tto[symbols[i]] = from[symbols[i]];\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n\n\treturn to;\n};\n\n\n//# sourceURL=webpack://Pusher/./node_modules/react/node_modules/object-assign/index.js?");
-
-/***/ }),
-
-/***/ "./src/core/auth/pusher_authorizer.ts":
-/*!********************************************!*\
-  !*** ./src/core/auth/pusher_authorizer.ts ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar PusherAuthorizer = (function () {\n    function PusherAuthorizer(channel, options) {\n        this.channel = channel;\n        var authTransport = options.authTransport;\n        if (typeof runtime_1.default.getAuthorizers()[authTransport] === \"undefined\") {\n            throw \"'\" + authTransport + \"' is not a recognized auth transport\";\n        }\n        this.type = authTransport;\n        this.options = options;\n        this.authOptions = (options || {}).auth || {};\n    }\n    PusherAuthorizer.prototype.composeQuery = function (socketId) {\n        var query = 'socket_id=' + encodeURIComponent(socketId) +\n            '&channel_name=' + encodeURIComponent(this.channel.name);\n        for (var i in this.authOptions.params) {\n            query += \"&\" + encodeURIComponent(i) + \"=\" + encodeURIComponent(this.authOptions.params[i]);\n        }\n        return query;\n    };\n    PusherAuthorizer.prototype.authorize = function (socketId, callback) {\n        PusherAuthorizer.authorizers = PusherAuthorizer.authorizers || runtime_1.default.getAuthorizers();\n        return PusherAuthorizer.authorizers[this.type].call(this, runtime_1.default, socketId, callback);\n    };\n    return PusherAuthorizer;\n}());\nexports.default = PusherAuthorizer;\n\n\n//# sourceURL=webpack://Pusher/./src/core/auth/pusher_authorizer.ts?");
-
-/***/ }),
-
-/***/ "./src/core/base64.ts":
-/*!****************************!*\
-  !*** ./src/core/base64.ts ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nfunction encode(s) {\n    return btoa(utob(s));\n}\nexports.default = encode;\nvar fromCharCode = String.fromCharCode;\nvar b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';\nvar b64tab = {};\nfor (var i = 0, l = b64chars.length; i < l; i++) {\n    b64tab[b64chars.charAt(i)] = i;\n}\nvar cb_utob = function (c) {\n    var cc = c.charCodeAt(0);\n    return cc < 0x80 ? c\n        : cc < 0x800 ? fromCharCode(0xc0 | (cc >>> 6)) +\n            fromCharCode(0x80 | (cc & 0x3f))\n            : fromCharCode(0xe0 | ((cc >>> 12) & 0x0f)) +\n                fromCharCode(0x80 | ((cc >>> 6) & 0x3f)) +\n                fromCharCode(0x80 | (cc & 0x3f));\n};\nvar utob = function (u) {\n    return u.replace(/[^\\x00-\\x7F]/g, cb_utob);\n};\nvar cb_encode = function (ccc) {\n    var padlen = [0, 2, 1][ccc.length % 3];\n    var ord = ccc.charCodeAt(0) << 16\n        | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)\n        | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0));\n    var chars = [\n        b64chars.charAt(ord >>> 18),\n        b64chars.charAt((ord >>> 12) & 63),\n        padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),\n        padlen >= 1 ? '=' : b64chars.charAt(ord & 63)\n    ];\n    return chars.join('');\n};\nvar btoa = global.btoa || function (b) {\n    return b.replace(/[\\s\\S]{1,3}/g, cb_encode);\n};\n\n\n//# sourceURL=webpack://Pusher/./src/core/base64.ts?");
-
-/***/ }),
-
-/***/ "./src/core/channels/channel.ts":
-/*!**************************************!*\
-  !*** ./src/core/channels/channel.ts ***!
-  \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar dispatcher_1 = __webpack_require__(/*! ../events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nvar Errors = __webpack_require__(/*! ../errors */ \"./src/core/errors.ts\");\nvar logger_1 = __webpack_require__(/*! ../logger */ \"./src/core/logger.ts\");\nvar url_store_1 = __webpack_require__(/*! ../utils/url_store */ \"./src/core/utils/url_store.ts\");\nvar Channel = (function (_super) {\n    __extends(Channel, _super);\n    function Channel(name, pusher) {\n        var _this = _super.call(this, function (event, data) {\n            logger_1.default.debug('No callbacks on ' + name + ' for ' + event);\n        }) || this;\n        _this.name = name;\n        _this.pusher = pusher;\n        _this.subscribed = false;\n        _this.subscriptionPending = false;\n        _this.subscriptionCancelled = false;\n        return _this;\n    }\n    Channel.prototype.authorize = function (socketId, callback) {\n        return callback(false, {});\n    };\n    Channel.prototype.trigger = function (event, data) {\n        if (event.indexOf(\"client-\") !== 0) {\n            throw new Errors.BadEventName(\"Event '\" + event + \"' does not start with 'client-'\");\n        }\n        if (!this.subscribed) {\n            var suffix = url_store_1.default.buildLogSuffix(\"triggeringClientEvents\");\n            logger_1.default.warn(\"Client event triggered before channel 'subscription_succeeded' event . \" + suffix);\n        }\n        return this.pusher.send_event(event, data, this.name);\n    };\n    Channel.prototype.disconnect = function () {\n        this.subscribed = false;\n        this.subscriptionPending = false;\n    };\n    Channel.prototype.handleEvent = function (event) {\n        var eventName = event.event;\n        var data = event.data;\n        if (eventName === \"pusher_internal:subscription_succeeded\") {\n            this.handleSubscriptionSucceededEvent(event);\n        }\n        else if (eventName.indexOf(\"pusher_internal:\") !== 0) {\n            var metadata = {};\n            this.emit(eventName, data, metadata);\n        }\n    };\n    Channel.prototype.handleSubscriptionSucceededEvent = function (event) {\n        this.subscriptionPending = false;\n        this.subscribed = true;\n        if (this.subscriptionCancelled) {\n            this.pusher.unsubscribe(this.name);\n        }\n        else {\n            this.emit(\"pusher:subscription_succeeded\", event.data);\n        }\n    };\n    Channel.prototype.subscribe = function () {\n        var _this = this;\n        if (this.subscribed) {\n            return;\n        }\n        this.subscriptionPending = true;\n        this.subscriptionCancelled = false;\n        this.authorize(this.pusher.connection.socket_id, function (error, data) {\n            if (error) {\n                _this.emit('pusher:subscription_error', data);\n            }\n            else {\n                _this.pusher.send_event('pusher:subscribe', {\n                    auth: data.auth,\n                    channel_data: data.channel_data,\n                    channel: _this.name\n                });\n            }\n        });\n    };\n    Channel.prototype.unsubscribe = function () {\n        this.subscribed = false;\n        this.pusher.send_event('pusher:unsubscribe', {\n            channel: this.name\n        });\n    };\n    Channel.prototype.cancelSubscription = function () {\n        this.subscriptionCancelled = true;\n    };\n    Channel.prototype.reinstateSubscription = function () {\n        this.subscriptionCancelled = false;\n    };\n    return Channel;\n}(dispatcher_1.default));\nexports.default = Channel;\n\n\n//# sourceURL=webpack://Pusher/./src/core/channels/channel.ts?");
-
-/***/ }),
-
-/***/ "./src/core/channels/channels.ts":
-/*!***************************************!*\
-  !*** ./src/core/channels/channels.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar factory_1 = __webpack_require__(/*! ../utils/factory */ \"./src/core/utils/factory.ts\");\nvar Errors = __webpack_require__(/*! ../errors */ \"./src/core/errors.ts\");\nvar Channels = (function () {\n    function Channels() {\n        this.channels = {};\n    }\n    Channels.prototype.add = function (name, pusher) {\n        if (!this.channels[name]) {\n            this.channels[name] = createChannel(name, pusher);\n        }\n        return this.channels[name];\n    };\n    Channels.prototype.all = function () {\n        return Collections.values(this.channels);\n    };\n    Channels.prototype.find = function (name) {\n        return this.channels[name];\n    };\n    Channels.prototype.remove = function (name) {\n        var channel = this.channels[name];\n        delete this.channels[name];\n        return channel;\n    };\n    Channels.prototype.disconnect = function () {\n        Collections.objectApply(this.channels, function (channel) {\n            channel.disconnect();\n        });\n    };\n    return Channels;\n}());\nexports.default = Channels;\nfunction createChannel(name, pusher) {\n    if (name.indexOf('private-encrypted-') === 0) {\n        if (navigator.product == \"ReactNative\") {\n            var errorMsg = \"Encrypted channels are not yet supported when using React Native builds.\";\n            throw new Errors.UnsupportedFeature(errorMsg);\n        }\n        return factory_1.default.createEncryptedChannel(name, pusher);\n    }\n    else if (name.indexOf('private-') === 0) {\n        return factory_1.default.createPrivateChannel(name, pusher);\n    }\n    else if (name.indexOf('presence-') === 0) {\n        return factory_1.default.createPresenceChannel(name, pusher);\n    }\n    else {\n        return factory_1.default.createChannel(name, pusher);\n    }\n}\n\n\n//# sourceURL=webpack://Pusher/./src/core/channels/channels.ts?");
-
-/***/ }),
-
-/***/ "./src/core/channels/encrypted_channel.ts":
-/*!************************************************!*\
-  !*** ./src/core/channels/encrypted_channel.ts ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar private_channel_1 = __webpack_require__(/*! ./private_channel */ \"./src/core/channels/private_channel.ts\");\nvar Errors = __webpack_require__(/*! ../errors */ \"./src/core/errors.ts\");\nvar logger_1 = __webpack_require__(/*! ../logger */ \"./src/core/logger.ts\");\nvar tweetnacl_1 = __webpack_require__(/*! tweetnacl */ \"./src/runtimes/react-native/tweetnacl-dummy.ts\");\nvar tweetnacl_util_1 = __webpack_require__(/*! tweetnacl-util */ \"./src/runtimes/react-native/tweetnacl-util-dummy.ts\");\nvar EncryptedChannel = (function (_super) {\n    __extends(EncryptedChannel, _super);\n    function EncryptedChannel() {\n        var _this = _super !== null && _super.apply(this, arguments) || this;\n        _this.key = null;\n        return _this;\n    }\n    EncryptedChannel.prototype.authorize = function (socketId, callback) {\n        var _this = this;\n        _super.prototype.authorize.call(this, socketId, function (error, authData) {\n            if (error) {\n                callback(true, authData);\n                return;\n            }\n            var sharedSecret = authData[\"shared_secret\"];\n            if (!sharedSecret) {\n                var errorMsg = \"No shared_secret key in auth payload for encrypted channel: \" + _this.name;\n                callback(true, errorMsg);\n                logger_1.default.warn(\"Error: \" + errorMsg);\n                return;\n            }\n            _this.key = tweetnacl_util_1.decodeBase64(sharedSecret);\n            delete authData[\"shared_secret\"];\n            callback(false, authData);\n        });\n    };\n    EncryptedChannel.prototype.trigger = function (event, data) {\n        throw new Errors.UnsupportedFeature('Client events are not currently supported for encrypted channels');\n    };\n    EncryptedChannel.prototype.handleEvent = function (event) {\n        var eventName = event.event;\n        var data = event.data;\n        if (eventName.indexOf(\"pusher_internal:\") === 0 || eventName.indexOf(\"pusher:\") === 0) {\n            _super.prototype.handleEvent.call(this, event);\n            return;\n        }\n        this.handleEncryptedEvent(eventName, data);\n    };\n    EncryptedChannel.prototype.handleEncryptedEvent = function (event, data) {\n        var _this = this;\n        if (!this.key) {\n            logger_1.default.debug('Received encrypted event before key has been retrieved from the authEndpoint');\n            return;\n        }\n        if (!data.ciphertext || !data.nonce) {\n            logger_1.default.warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);\n            return;\n        }\n        var cipherText = tweetnacl_util_1.decodeBase64(data.ciphertext);\n        if (cipherText.length < tweetnacl_1.secretbox.overheadLength) {\n            logger_1.default.warn(\"Expected encrypted event ciphertext length to be \" + tweetnacl_1.secretbox.overheadLength + \", got: \" + cipherText.length);\n            return;\n        }\n        var nonce = tweetnacl_util_1.decodeBase64(data.nonce);\n        if (nonce.length < tweetnacl_1.secretbox.nonceLength) {\n            logger_1.default.warn(\"Expected encrypted event nonce length to be \" + tweetnacl_1.secretbox.nonceLength + \", got: \" + nonce.length);\n            return;\n        }\n        var bytes = tweetnacl_1.secretbox.open(cipherText, nonce, this.key);\n        if (bytes === null) {\n            logger_1.default.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');\n            this.authorize(this.pusher.connection.socket_id, function (error, authData) {\n                if (error) {\n                    logger_1.default.warn(\"Failed to make a request to the authEndpoint: \" + authData + \". Unable to fetch new key, so dropping encrypted event\");\n                    return;\n                }\n                bytes = tweetnacl_1.secretbox.open(cipherText, nonce, _this.key);\n                if (bytes === null) {\n                    logger_1.default.warn(\"Failed to decrypt event with new key. Dropping encrypted event\");\n                    return;\n                }\n                _this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));\n                return;\n            });\n            return;\n        }\n        this.emitJSON(event, tweetnacl_util_1.encodeUTF8(bytes));\n    };\n    EncryptedChannel.prototype.emitJSON = function (eventName, data) {\n        try {\n            this.emit(eventName, JSON.parse(data));\n        }\n        catch (e) {\n            this.emit(eventName, data);\n        }\n        return this;\n    };\n    return EncryptedChannel;\n}(private_channel_1.default));\nexports.default = EncryptedChannel;\n\n\n//# sourceURL=webpack://Pusher/./src/core/channels/encrypted_channel.ts?");
-
-/***/ }),
-
-/***/ "./src/core/channels/members.ts":
-/*!**************************************!*\
-  !*** ./src/core/channels/members.ts ***!
-  \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar Members = (function () {\n    function Members() {\n        this.reset();\n    }\n    Members.prototype.get = function (id) {\n        if (Object.prototype.hasOwnProperty.call(this.members, id)) {\n            return {\n                id: id,\n                info: this.members[id]\n            };\n        }\n        else {\n            return null;\n        }\n    };\n    Members.prototype.each = function (callback) {\n        var _this = this;\n        Collections.objectApply(this.members, function (member, id) {\n            callback(_this.get(id));\n        });\n    };\n    Members.prototype.setMyID = function (id) {\n        this.myID = id;\n    };\n    Members.prototype.onSubscription = function (subscriptionData) {\n        this.members = subscriptionData.presence.hash;\n        this.count = subscriptionData.presence.count;\n        this.me = this.get(this.myID);\n    };\n    Members.prototype.addMember = function (memberData) {\n        if (this.get(memberData.user_id) === null) {\n            this.count++;\n        }\n        this.members[memberData.user_id] = memberData.user_info;\n        return this.get(memberData.user_id);\n    };\n    Members.prototype.removeMember = function (memberData) {\n        var member = this.get(memberData.user_id);\n        if (member) {\n            delete this.members[memberData.user_id];\n            this.count--;\n        }\n        return member;\n    };\n    Members.prototype.reset = function () {\n        this.members = {};\n        this.count = 0;\n        this.myID = null;\n        this.me = null;\n    };\n    return Members;\n}());\nexports.default = Members;\n\n\n//# sourceURL=webpack://Pusher/./src/core/channels/members.ts?");
-
-/***/ }),
-
-/***/ "./src/core/channels/presence_channel.ts":
-/*!***********************************************!*\
-  !*** ./src/core/channels/presence_channel.ts ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar private_channel_1 = __webpack_require__(/*! ./private_channel */ \"./src/core/channels/private_channel.ts\");\nvar logger_1 = __webpack_require__(/*! ../logger */ \"./src/core/logger.ts\");\nvar members_1 = __webpack_require__(/*! ./members */ \"./src/core/channels/members.ts\");\nvar url_store_1 = __webpack_require__(/*! core/utils/url_store */ \"./src/core/utils/url_store.ts\");\nvar PresenceChannel = (function (_super) {\n    __extends(PresenceChannel, _super);\n    function PresenceChannel(name, pusher) {\n        var _this = _super.call(this, name, pusher) || this;\n        _this.members = new members_1.default();\n        return _this;\n    }\n    PresenceChannel.prototype.authorize = function (socketId, callback) {\n        var _this = this;\n        _super.prototype.authorize.call(this, socketId, function (error, authData) {\n            if (!error) {\n                if (authData.channel_data === undefined) {\n                    var suffix = url_store_1.default.buildLogSuffix(\"authenticationEndpoint\");\n                    logger_1.default.warn(\"Invalid auth response for channel '\" + _this.name + \"',\" +\n                        (\"expected 'channel_data' field. \" + suffix));\n                    callback(\"Invalid auth response\");\n                    return;\n                }\n                var channelData = JSON.parse(authData.channel_data);\n                _this.members.setMyID(channelData.user_id);\n            }\n            callback(error, authData);\n        });\n    };\n    PresenceChannel.prototype.handleEvent = function (event) {\n        var eventName = event.event;\n        if (eventName.indexOf(\"pusher_internal:\") === 0) {\n            this.handleInternalEvent(event);\n        }\n        else {\n            var data = event.data;\n            var metadata = {};\n            if (event.user_id) {\n                metadata.user_id = event.user_id;\n            }\n            this.emit(eventName, data, metadata);\n        }\n    };\n    PresenceChannel.prototype.handleInternalEvent = function (event) {\n        var eventName = event.event;\n        var data = event.data;\n        switch (eventName) {\n            case \"pusher_internal:subscription_succeeded\":\n                this.handleSubscriptionSucceededEvent(event);\n                break;\n            case \"pusher_internal:member_added\":\n                var addedMember = this.members.addMember(data);\n                this.emit('pusher:member_added', addedMember);\n                break;\n            case \"pusher_internal:member_removed\":\n                var removedMember = this.members.removeMember(data);\n                if (removedMember) {\n                    this.emit('pusher:member_removed', removedMember);\n                }\n                break;\n        }\n    };\n    PresenceChannel.prototype.handleSubscriptionSucceededEvent = function (event) {\n        this.subscriptionPending = false;\n        this.subscribed = true;\n        if (this.subscriptionCancelled) {\n            this.pusher.unsubscribe(this.name);\n        }\n        else {\n            this.members.onSubscription(event.data);\n            this.emit(\"pusher:subscription_succeeded\", this.members);\n        }\n    };\n    PresenceChannel.prototype.disconnect = function () {\n        this.members.reset();\n        _super.prototype.disconnect.call(this);\n    };\n    return PresenceChannel;\n}(private_channel_1.default));\nexports.default = PresenceChannel;\n\n\n//# sourceURL=webpack://Pusher/./src/core/channels/presence_channel.ts?");
-
-/***/ }),
-
-/***/ "./src/core/channels/private_channel.ts":
-/*!**********************************************!*\
-  !*** ./src/core/channels/private_channel.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar factory_1 = __webpack_require__(/*! ../utils/factory */ \"./src/core/utils/factory.ts\");\nvar channel_1 = __webpack_require__(/*! ./channel */ \"./src/core/channels/channel.ts\");\nvar PrivateChannel = (function (_super) {\n    __extends(PrivateChannel, _super);\n    function PrivateChannel() {\n        return _super !== null && _super.apply(this, arguments) || this;\n    }\n    PrivateChannel.prototype.authorize = function (socketId, callback) {\n        var authorizer = factory_1.default.createAuthorizer(this, this.pusher.config);\n        return authorizer.authorize(socketId, callback);\n    };\n    return PrivateChannel;\n}(channel_1.default));\nexports.default = PrivateChannel;\n\n\n//# sourceURL=webpack://Pusher/./src/core/channels/private_channel.ts?");
-
-/***/ }),
-
-/***/ "./src/core/config.ts":
-/*!****************************!*\
-  !*** ./src/core/config.ts ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar defaults_1 = __webpack_require__(/*! ./defaults */ \"./src/core/defaults.ts\");\nexports.getGlobalConfig = function () {\n    return {\n        wsHost: defaults_1.default.host,\n        wsPort: defaults_1.default.ws_port,\n        wssPort: defaults_1.default.wss_port,\n        wsPath: defaults_1.default.ws_path,\n        httpHost: defaults_1.default.sockjs_host,\n        httpPort: defaults_1.default.sockjs_http_port,\n        httpsPort: defaults_1.default.sockjs_https_port,\n        httpPath: defaults_1.default.sockjs_path,\n        statsHost: defaults_1.default.stats_host,\n        authEndpoint: defaults_1.default.channel_auth_endpoint,\n        authTransport: defaults_1.default.channel_auth_transport,\n        activity_timeout: defaults_1.default.activity_timeout,\n        pong_timeout: defaults_1.default.pong_timeout,\n        unavailable_timeout: defaults_1.default.unavailable_timeout\n    };\n};\nexports.getClusterConfig = function (clusterName) {\n    return {\n        wsHost: \"ws-\" + clusterName + \".pusher.com\",\n        httpHost: \"sockjs-\" + clusterName + \".pusher.com\"\n    };\n};\n\n\n//# sourceURL=webpack://Pusher/./src/core/config.ts?");
-
-/***/ }),
-
-/***/ "./src/core/connection/connection.ts":
-/*!*******************************************!*\
-  !*** ./src/core/connection/connection.ts ***!
-  \*******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar dispatcher_1 = __webpack_require__(/*! ../events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nvar Protocol = __webpack_require__(/*! ./protocol/protocol */ \"./src/core/connection/protocol/protocol.ts\");\nvar logger_1 = __webpack_require__(/*! ../logger */ \"./src/core/logger.ts\");\nvar Connection = (function (_super) {\n    __extends(Connection, _super);\n    function Connection(id, transport) {\n        var _this = _super.call(this) || this;\n        _this.id = id;\n        _this.transport = transport;\n        _this.activityTimeout = transport.activityTimeout;\n        _this.bindListeners();\n        return _this;\n    }\n    Connection.prototype.handlesActivityChecks = function () {\n        return this.transport.handlesActivityChecks();\n    };\n    Connection.prototype.send = function (data) {\n        return this.transport.send(data);\n    };\n    Connection.prototype.send_event = function (name, data, channel) {\n        var event = { event: name, data: data };\n        if (channel) {\n            event.channel = channel;\n        }\n        logger_1.default.debug('Event sent', event);\n        return this.send(Protocol.encodeMessage(event));\n    };\n    Connection.prototype.ping = function () {\n        if (this.transport.supportsPing()) {\n            this.transport.ping();\n        }\n        else {\n            this.send_event('pusher:ping', {});\n        }\n    };\n    Connection.prototype.close = function () {\n        this.transport.close();\n    };\n    Connection.prototype.bindListeners = function () {\n        var _this = this;\n        var listeners = {\n            message: function (messageEvent) {\n                var pusherEvent;\n                try {\n                    pusherEvent = Protocol.decodeMessage(messageEvent);\n                }\n                catch (e) {\n                    _this.emit('error', {\n                        type: 'MessageParseError',\n                        error: e,\n                        data: messageEvent.data\n                    });\n                }\n                if (pusherEvent !== undefined) {\n                    logger_1.default.debug('Event recd', pusherEvent);\n                    switch (pusherEvent.event) {\n                        case 'pusher:error':\n                            _this.emit('error', { type: 'PusherError', data: pusherEvent.data });\n                            break;\n                        case 'pusher:ping':\n                            _this.emit(\"ping\");\n                            break;\n                        case 'pusher:pong':\n                            _this.emit(\"pong\");\n                            break;\n                    }\n                    _this.emit('message', pusherEvent);\n                }\n            },\n            activity: function () {\n                _this.emit(\"activity\");\n            },\n            error: function (error) {\n                _this.emit(\"error\", { type: \"WebSocketError\", error: error });\n            },\n            closed: function (closeEvent) {\n                unbindListeners();\n                if (closeEvent && closeEvent.code) {\n                    _this.handleCloseEvent(closeEvent);\n                }\n                _this.transport = null;\n                _this.emit(\"closed\");\n            }\n        };\n        var unbindListeners = function () {\n            Collections.objectApply(listeners, function (listener, event) {\n                _this.transport.unbind(event, listener);\n            });\n        };\n        Collections.objectApply(listeners, function (listener, event) {\n            _this.transport.bind(event, listener);\n        });\n    };\n    Connection.prototype.handleCloseEvent = function (closeEvent) {\n        var action = Protocol.getCloseAction(closeEvent);\n        var error = Protocol.getCloseError(closeEvent);\n        if (error) {\n            this.emit('error', error);\n        }\n        if (action) {\n            this.emit(action, { action: action, error: error });\n        }\n    };\n    return Connection;\n}(dispatcher_1.default));\nexports.default = Connection;\n\n\n//# sourceURL=webpack://Pusher/./src/core/connection/connection.ts?");
-
-/***/ }),
-
-/***/ "./src/core/connection/connection_manager.ts":
-/*!***************************************************!*\
-  !*** ./src/core/connection/connection_manager.ts ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar dispatcher_1 = __webpack_require__(/*! ../events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nvar timers_1 = __webpack_require__(/*! ../utils/timers */ \"./src/core/utils/timers/index.ts\");\nvar logger_1 = __webpack_require__(/*! ../logger */ \"./src/core/logger.ts\");\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar ConnectionManager = (function (_super) {\n    __extends(ConnectionManager, _super);\n    function ConnectionManager(key, options) {\n        var _this = _super.call(this) || this;\n        _this.key = key;\n        _this.options = options || {};\n        _this.state = \"initialized\";\n        _this.connection = null;\n        _this.usingTLS = !!options.useTLS;\n        _this.timeline = _this.options.timeline;\n        _this.errorCallbacks = _this.buildErrorCallbacks();\n        _this.connectionCallbacks = _this.buildConnectionCallbacks(_this.errorCallbacks);\n        _this.handshakeCallbacks = _this.buildHandshakeCallbacks(_this.errorCallbacks);\n        var Network = runtime_1.default.getNetwork();\n        Network.bind(\"online\", function () {\n            _this.timeline.info({ netinfo: \"online\" });\n            if (_this.state === \"connecting\" || _this.state === \"unavailable\") {\n                _this.retryIn(0);\n            }\n        });\n        Network.bind(\"offline\", function () {\n            _this.timeline.info({ netinfo: \"offline\" });\n            if (_this.connection) {\n                _this.sendActivityCheck();\n            }\n        });\n        _this.updateStrategy();\n        return _this;\n    }\n    ConnectionManager.prototype.connect = function () {\n        if (this.connection || this.runner) {\n            return;\n        }\n        if (!this.strategy.isSupported()) {\n            this.updateState(\"failed\");\n            return;\n        }\n        this.updateState(\"connecting\");\n        this.startConnecting();\n        this.setUnavailableTimer();\n    };\n    ;\n    ConnectionManager.prototype.send = function (data) {\n        if (this.connection) {\n            return this.connection.send(data);\n        }\n        else {\n            return false;\n        }\n    };\n    ;\n    ConnectionManager.prototype.send_event = function (name, data, channel) {\n        if (this.connection) {\n            return this.connection.send_event(name, data, channel);\n        }\n        else {\n            return false;\n        }\n    };\n    ;\n    ConnectionManager.prototype.disconnect = function () {\n        this.disconnectInternally();\n        this.updateState(\"disconnected\");\n    };\n    ;\n    ConnectionManager.prototype.isUsingTLS = function () {\n        return this.usingTLS;\n    };\n    ;\n    ConnectionManager.prototype.startConnecting = function () {\n        var _this = this;\n        var callback = function (error, handshake) {\n            if (error) {\n                _this.runner = _this.strategy.connect(0, callback);\n            }\n            else {\n                if (handshake.action === \"error\") {\n                    _this.emit(\"error\", { type: \"HandshakeError\", error: handshake.error });\n                    _this.timeline.error({ handshakeError: handshake.error });\n                }\n                else {\n                    _this.abortConnecting();\n                    _this.handshakeCallbacks[handshake.action](handshake);\n                }\n            }\n        };\n        this.runner = this.strategy.connect(0, callback);\n    };\n    ;\n    ConnectionManager.prototype.abortConnecting = function () {\n        if (this.runner) {\n            this.runner.abort();\n            this.runner = null;\n        }\n    };\n    ;\n    ConnectionManager.prototype.disconnectInternally = function () {\n        this.abortConnecting();\n        this.clearRetryTimer();\n        this.clearUnavailableTimer();\n        if (this.connection) {\n            var connection = this.abandonConnection();\n            connection.close();\n        }\n    };\n    ;\n    ConnectionManager.prototype.updateStrategy = function () {\n        this.strategy = this.options.getStrategy({\n            key: this.key,\n            timeline: this.timeline,\n            useTLS: this.usingTLS\n        });\n    };\n    ;\n    ConnectionManager.prototype.retryIn = function (delay) {\n        var _this = this;\n        this.timeline.info({ action: \"retry\", delay: delay });\n        if (delay > 0) {\n            this.emit(\"connecting_in\", Math.round(delay / 1000));\n        }\n        this.retryTimer = new timers_1.OneOffTimer(delay || 0, function () {\n            _this.disconnectInternally();\n            _this.connect();\n        });\n    };\n    ;\n    ConnectionManager.prototype.clearRetryTimer = function () {\n        if (this.retryTimer) {\n            this.retryTimer.ensureAborted();\n            this.retryTimer = null;\n        }\n    };\n    ;\n    ConnectionManager.prototype.setUnavailableTimer = function () {\n        var _this = this;\n        this.unavailableTimer = new timers_1.OneOffTimer(this.options.unavailableTimeout, function () {\n            _this.updateState(\"unavailable\");\n        });\n    };\n    ;\n    ConnectionManager.prototype.clearUnavailableTimer = function () {\n        if (this.unavailableTimer) {\n            this.unavailableTimer.ensureAborted();\n        }\n    };\n    ;\n    ConnectionManager.prototype.sendActivityCheck = function () {\n        var _this = this;\n        this.stopActivityCheck();\n        this.connection.ping();\n        this.activityTimer = new timers_1.OneOffTimer(this.options.pongTimeout, function () {\n            _this.timeline.error({ pong_timed_out: _this.options.pongTimeout });\n            _this.retryIn(0);\n        });\n    };\n    ;\n    ConnectionManager.prototype.resetActivityCheck = function () {\n        var _this = this;\n        this.stopActivityCheck();\n        if (this.connection && !this.connection.handlesActivityChecks()) {\n            this.activityTimer = new timers_1.OneOffTimer(this.activityTimeout, function () {\n                _this.sendActivityCheck();\n            });\n        }\n    };\n    ;\n    ConnectionManager.prototype.stopActivityCheck = function () {\n        if (this.activityTimer) {\n            this.activityTimer.ensureAborted();\n        }\n    };\n    ;\n    ConnectionManager.prototype.buildConnectionCallbacks = function (errorCallbacks) {\n        var _this = this;\n        return Collections.extend({}, errorCallbacks, {\n            message: function (message) {\n                _this.resetActivityCheck();\n                _this.emit('message', message);\n            },\n            ping: function () {\n                _this.send_event('pusher:pong', {});\n            },\n            activity: function () {\n                _this.resetActivityCheck();\n            },\n            error: function (error) {\n                _this.emit(\"error\", { type: \"WebSocketError\", error: error });\n            },\n            closed: function () {\n                _this.abandonConnection();\n                if (_this.shouldRetry()) {\n                    _this.retryIn(1000);\n                }\n            }\n        });\n    };\n    ;\n    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {\n        var _this = this;\n        return Collections.extend({}, errorCallbacks, {\n            connected: function (handshake) {\n                _this.activityTimeout = Math.min(_this.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);\n                _this.clearUnavailableTimer();\n                _this.setConnection(handshake.connection);\n                _this.socket_id = _this.connection.id;\n                _this.updateState(\"connected\", { socket_id: _this.socket_id });\n            }\n        });\n    };\n    ;\n    ConnectionManager.prototype.buildErrorCallbacks = function () {\n        var _this = this;\n        var withErrorEmitted = function (callback) {\n            return function (result) {\n                if (result.error) {\n                    _this.emit(\"error\", { type: \"WebSocketError\", error: result.error });\n                }\n                callback(result);\n            };\n        };\n        return {\n            tls_only: withErrorEmitted(function () {\n                _this.usingTLS = true;\n                _this.updateStrategy();\n                _this.retryIn(0);\n            }),\n            refused: withErrorEmitted(function () {\n                _this.disconnect();\n            }),\n            backoff: withErrorEmitted(function () {\n                _this.retryIn(1000);\n            }),\n            retry: withErrorEmitted(function () {\n                _this.retryIn(0);\n            })\n        };\n    };\n    ;\n    ConnectionManager.prototype.setConnection = function (connection) {\n        this.connection = connection;\n        for (var event in this.connectionCallbacks) {\n            this.connection.bind(event, this.connectionCallbacks[event]);\n        }\n        this.resetActivityCheck();\n    };\n    ;\n    ConnectionManager.prototype.abandonConnection = function () {\n        if (!this.connection) {\n            return;\n        }\n        this.stopActivityCheck();\n        for (var event in this.connectionCallbacks) {\n            this.connection.unbind(event, this.connectionCallbacks[event]);\n        }\n        var connection = this.connection;\n        this.connection = null;\n        return connection;\n    };\n    ConnectionManager.prototype.updateState = function (newState, data) {\n        var previousState = this.state;\n        this.state = newState;\n        if (previousState !== newState) {\n            var newStateDescription = newState;\n            if (newStateDescription === \"connected\") {\n                newStateDescription += \" with new socket ID \" + data.socket_id;\n            }\n            logger_1.default.debug('State changed', previousState + ' -> ' + newStateDescription);\n            this.timeline.info({ state: newState, params: data });\n            this.emit('state_change', { previous: previousState, current: newState });\n            this.emit(newState, data);\n        }\n    };\n    ConnectionManager.prototype.shouldRetry = function () {\n        return this.state === \"connecting\" || this.state === \"connected\";\n    };\n    return ConnectionManager;\n}(dispatcher_1.default));\nexports.default = ConnectionManager;\n\n\n//# sourceURL=webpack://Pusher/./src/core/connection/connection_manager.ts?");
-
-/***/ }),
-
-/***/ "./src/core/connection/handshake/index.ts":
-/*!************************************************!*\
-  !*** ./src/core/connection/handshake/index.ts ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../../utils/collections */ \"./src/core/utils/collections.ts\");\nvar Protocol = __webpack_require__(/*! ../protocol/protocol */ \"./src/core/connection/protocol/protocol.ts\");\nvar connection_1 = __webpack_require__(/*! ../connection */ \"./src/core/connection/connection.ts\");\nvar Handshake = (function () {\n    function Handshake(transport, callback) {\n        this.transport = transport;\n        this.callback = callback;\n        this.bindListeners();\n    }\n    Handshake.prototype.close = function () {\n        this.unbindListeners();\n        this.transport.close();\n    };\n    Handshake.prototype.bindListeners = function () {\n        var _this = this;\n        this.onMessage = function (m) {\n            _this.unbindListeners();\n            var result;\n            try {\n                result = Protocol.processHandshake(m);\n            }\n            catch (e) {\n                _this.finish(\"error\", { error: e });\n                _this.transport.close();\n                return;\n            }\n            if (result.action === \"connected\") {\n                _this.finish(\"connected\", {\n                    connection: new connection_1.default(result.id, _this.transport),\n                    activityTimeout: result.activityTimeout\n                });\n            }\n            else {\n                _this.finish(result.action, { error: result.error });\n                _this.transport.close();\n            }\n        };\n        this.onClosed = function (closeEvent) {\n            _this.unbindListeners();\n            var action = Protocol.getCloseAction(closeEvent) || \"backoff\";\n            var error = Protocol.getCloseError(closeEvent);\n            _this.finish(action, { error: error });\n        };\n        this.transport.bind(\"message\", this.onMessage);\n        this.transport.bind(\"closed\", this.onClosed);\n    };\n    Handshake.prototype.unbindListeners = function () {\n        this.transport.unbind(\"message\", this.onMessage);\n        this.transport.unbind(\"closed\", this.onClosed);\n    };\n    Handshake.prototype.finish = function (action, params) {\n        this.callback(Collections.extend({ transport: this.transport, action: action }, params));\n    };\n    return Handshake;\n}());\nexports.default = Handshake;\n\n\n//# sourceURL=webpack://Pusher/./src/core/connection/handshake/index.ts?");
-
-/***/ }),
-
-/***/ "./src/core/connection/protocol/protocol.ts":
-/*!**************************************************!*\
-  !*** ./src/core/connection/protocol/protocol.ts ***!
-  \**************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nexports.decodeMessage = function (messageEvent) {\n    try {\n        var messageData = JSON.parse(messageEvent.data);\n        var pusherEventData = messageData.data;\n        if (typeof pusherEventData === 'string') {\n            try {\n                pusherEventData = JSON.parse(messageData.data);\n            }\n            catch (e) { }\n        }\n        var pusherEvent = {\n            event: messageData.event,\n            channel: messageData.channel,\n            data: pusherEventData,\n        };\n        if (messageData.user_id) {\n            pusherEvent.user_id = messageData.user_id;\n        }\n        return pusherEvent;\n    }\n    catch (e) {\n        throw { type: 'MessageParseError', error: e, data: messageEvent.data };\n    }\n};\nexports.encodeMessage = function (event) {\n    return JSON.stringify(event);\n};\nexports.processHandshake = function (messageEvent) {\n    var message = exports.decodeMessage(messageEvent);\n    if (message.event === \"pusher:connection_established\") {\n        if (!message.data.activity_timeout) {\n            throw \"No activity timeout specified in handshake\";\n        }\n        return {\n            action: \"connected\",\n            id: message.data.socket_id,\n            activityTimeout: message.data.activity_timeout * 1000\n        };\n    }\n    else if (message.event === \"pusher:error\") {\n        return {\n            action: this.getCloseAction(message.data),\n            error: this.getCloseError(message.data)\n        };\n    }\n    else {\n        throw \"Invalid handshake\";\n    }\n};\nexports.getCloseAction = function (closeEvent) {\n    if (closeEvent.code < 4000) {\n        if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {\n            return \"backoff\";\n        }\n        else {\n            return null;\n        }\n    }\n    else if (closeEvent.code === 4000) {\n        return \"tls_only\";\n    }\n    else if (closeEvent.code < 4100) {\n        return \"refused\";\n    }\n    else if (closeEvent.code < 4200) {\n        return \"backoff\";\n    }\n    else if (closeEvent.code < 4300) {\n        return \"retry\";\n    }\n    else {\n        return \"refused\";\n    }\n};\nexports.getCloseError = function (closeEvent) {\n    if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {\n        return {\n            type: 'PusherError',\n            data: {\n                code: closeEvent.code,\n                message: closeEvent.reason || closeEvent.message\n            }\n        };\n    }\n    else {\n        return null;\n    }\n};\n\n\n//# sourceURL=webpack://Pusher/./src/core/connection/protocol/protocol.ts?");
-
-/***/ }),
-
-/***/ "./src/core/defaults.ts":
-/*!******************************!*\
-  !*** ./src/core/defaults.ts ***!
-  \******************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Defaults = {\n    VERSION: \"4.4.0\",\n    PROTOCOL: 7,\n    host: 'ws.pusherapp.com',\n    ws_port: 80,\n    wss_port: 443,\n    ws_path: '',\n    sockjs_host: 'sockjs.pusher.com',\n    sockjs_http_port: 80,\n    sockjs_https_port: 443,\n    sockjs_path: \"/pusher\",\n    stats_host: 'stats.pusher.com',\n    channel_auth_endpoint: '/pusher/auth',\n    channel_auth_transport: 'ajax',\n    activity_timeout: 120000,\n    pong_timeout: 30000,\n    unavailable_timeout: 10000,\n    cdn_http: \"http://js.pusher.com\",\n    cdn_https: \"https://js.pusher.com\",\n    dependency_suffix: \"\"\n};\nexports.default = Defaults;\n\n\n//# sourceURL=webpack://Pusher/./src/core/defaults.ts?");
-
-/***/ }),
-
-/***/ "./src/core/errors.ts":
-/*!****************************!*\
-  !*** ./src/core/errors.ts ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar BadEventName = (function (_super) {\n    __extends(BadEventName, _super);\n    function BadEventName(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return BadEventName;\n}(Error));\nexports.BadEventName = BadEventName;\nvar RequestTimedOut = (function (_super) {\n    __extends(RequestTimedOut, _super);\n    function RequestTimedOut(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return RequestTimedOut;\n}(Error));\nexports.RequestTimedOut = RequestTimedOut;\nvar TransportPriorityTooLow = (function (_super) {\n    __extends(TransportPriorityTooLow, _super);\n    function TransportPriorityTooLow(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return TransportPriorityTooLow;\n}(Error));\nexports.TransportPriorityTooLow = TransportPriorityTooLow;\nvar TransportClosed = (function (_super) {\n    __extends(TransportClosed, _super);\n    function TransportClosed(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return TransportClosed;\n}(Error));\nexports.TransportClosed = TransportClosed;\nvar UnsupportedFeature = (function (_super) {\n    __extends(UnsupportedFeature, _super);\n    function UnsupportedFeature(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return UnsupportedFeature;\n}(Error));\nexports.UnsupportedFeature = UnsupportedFeature;\nvar UnsupportedTransport = (function (_super) {\n    __extends(UnsupportedTransport, _super);\n    function UnsupportedTransport(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return UnsupportedTransport;\n}(Error));\nexports.UnsupportedTransport = UnsupportedTransport;\nvar UnsupportedStrategy = (function (_super) {\n    __extends(UnsupportedStrategy, _super);\n    function UnsupportedStrategy(msg) {\n        var _newTarget = this.constructor;\n        var _this = _super.call(this, msg) || this;\n        Object.setPrototypeOf(_this, _newTarget.prototype);\n        return _this;\n    }\n    return UnsupportedStrategy;\n}(Error));\nexports.UnsupportedStrategy = UnsupportedStrategy;\n\n\n//# sourceURL=webpack://Pusher/./src/core/errors.ts?");
-
-/***/ }),
-
-/***/ "./src/core/events/callback_registry.ts":
-/*!**********************************************!*\
-  !*** ./src/core/events/callback_registry.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar CallbackRegistry = (function () {\n    function CallbackRegistry() {\n        this._callbacks = {};\n    }\n    CallbackRegistry.prototype.get = function (name) {\n        return this._callbacks[prefix(name)];\n    };\n    CallbackRegistry.prototype.add = function (name, callback, context) {\n        var prefixedEventName = prefix(name);\n        this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];\n        this._callbacks[prefixedEventName].push({\n            fn: callback,\n            context: context\n        });\n    };\n    CallbackRegistry.prototype.remove = function (name, callback, context) {\n        if (!name && !callback && !context) {\n            this._callbacks = {};\n            return;\n        }\n        var names = name ? [prefix(name)] : Collections.keys(this._callbacks);\n        if (callback || context) {\n            this.removeCallback(names, callback, context);\n        }\n        else {\n            this.removeAllCallbacks(names);\n        }\n    };\n    CallbackRegistry.prototype.removeCallback = function (names, callback, context) {\n        Collections.apply(names, function (name) {\n            this._callbacks[name] = Collections.filter(this._callbacks[name] || [], function (binding) {\n                return (callback && callback !== binding.fn) ||\n                    (context && context !== binding.context);\n            });\n            if (this._callbacks[name].length === 0) {\n                delete this._callbacks[name];\n            }\n        }, this);\n    };\n    CallbackRegistry.prototype.removeAllCallbacks = function (names) {\n        Collections.apply(names, function (name) {\n            delete this._callbacks[name];\n        }, this);\n    };\n    return CallbackRegistry;\n}());\nexports.default = CallbackRegistry;\nfunction prefix(name) {\n    return \"_\" + name;\n}\n\n\n//# sourceURL=webpack://Pusher/./src/core/events/callback_registry.ts?");
-
-/***/ }),
-
-/***/ "./src/core/events/dispatcher.ts":
-/*!***************************************!*\
-  !*** ./src/core/events/dispatcher.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar callback_registry_1 = __webpack_require__(/*! ./callback_registry */ \"./src/core/events/callback_registry.ts\");\nvar Dispatcher = (function () {\n    function Dispatcher(failThrough) {\n        this.callbacks = new callback_registry_1.default();\n        this.global_callbacks = [];\n        this.failThrough = failThrough;\n    }\n    Dispatcher.prototype.bind = function (eventName, callback, context) {\n        this.callbacks.add(eventName, callback, context);\n        return this;\n    };\n    Dispatcher.prototype.bind_global = function (callback) {\n        this.global_callbacks.push(callback);\n        return this;\n    };\n    Dispatcher.prototype.unbind = function (eventName, callback, context) {\n        this.callbacks.remove(eventName, callback, context);\n        return this;\n    };\n    Dispatcher.prototype.unbind_global = function (callback) {\n        if (!callback) {\n            this.global_callbacks = [];\n            return this;\n        }\n        this.global_callbacks = Collections.filter(this.global_callbacks || [], function (c) { return c !== callback; });\n        return this;\n    };\n    Dispatcher.prototype.unbind_all = function () {\n        this.unbind();\n        this.unbind_global();\n        return this;\n    };\n    Dispatcher.prototype.emit = function (eventName, data, metadata) {\n        for (var i = 0; i < this.global_callbacks.length; i++) {\n            this.global_callbacks[i](eventName, data);\n        }\n        var callbacks = this.callbacks.get(eventName);\n        var args = [];\n        if (metadata) {\n            args.push(data, metadata);\n        }\n        else if (data) {\n            args.push(data);\n        }\n        if (callbacks && callbacks.length > 0) {\n            for (var i = 0; i < callbacks.length; i++) {\n                callbacks[i].fn.apply(callbacks[i].context || global, args);\n            }\n        }\n        else if (this.failThrough) {\n            this.failThrough(eventName, data);\n        }\n        return this;\n    };\n    return Dispatcher;\n}());\nexports.default = Dispatcher;\n\n\n//# sourceURL=webpack://Pusher/./src/core/events/dispatcher.ts?");
-
-/***/ }),
-
-/***/ "./src/core/http/http_polling_socket.ts":
-/*!**********************************************!*\
-  !*** ./src/core/http/http_polling_socket.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar hooks = {\n    getReceiveURL: function (url, session) {\n        return url.base + \"/\" + session + \"/xhr\" + url.queryString;\n    },\n    onHeartbeat: function () {\n    },\n    sendHeartbeat: function (socket) {\n        socket.sendRaw(\"[]\");\n    },\n    onFinished: function (socket, status) {\n        if (status === 200) {\n            socket.reconnect();\n        }\n        else {\n            socket.onClose(1006, \"Connection interrupted (\" + status + \")\", false);\n        }\n    }\n};\nexports.default = hooks;\n\n\n//# sourceURL=webpack://Pusher/./src/core/http/http_polling_socket.ts?");
-
-/***/ }),
-
-/***/ "./src/core/http/http_request.ts":
-/*!***************************************!*\
-  !*** ./src/core/http/http_request.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar dispatcher_1 = __webpack_require__(/*! ../events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nvar MAX_BUFFER_LENGTH = 256 * 1024;\nvar HTTPRequest = (function (_super) {\n    __extends(HTTPRequest, _super);\n    function HTTPRequest(hooks, method, url) {\n        var _this = _super.call(this) || this;\n        _this.hooks = hooks;\n        _this.method = method;\n        _this.url = url;\n        return _this;\n    }\n    HTTPRequest.prototype.start = function (payload) {\n        var _this = this;\n        this.position = 0;\n        this.xhr = this.hooks.getRequest(this);\n        this.unloader = function () {\n            _this.close();\n        };\n        runtime_1.default.addUnloadListener(this.unloader);\n        this.xhr.open(this.method, this.url, true);\n        if (this.xhr.setRequestHeader) {\n            this.xhr.setRequestHeader(\"Content-Type\", \"application/json\");\n        }\n        this.xhr.send(payload);\n    };\n    HTTPRequest.prototype.close = function () {\n        if (this.unloader) {\n            runtime_1.default.removeUnloadListener(this.unloader);\n            this.unloader = null;\n        }\n        if (this.xhr) {\n            this.hooks.abortRequest(this.xhr);\n            this.xhr = null;\n        }\n    };\n    HTTPRequest.prototype.onChunk = function (status, data) {\n        while (true) {\n            var chunk = this.advanceBuffer(data);\n            if (chunk) {\n                this.emit(\"chunk\", { status: status, data: chunk });\n            }\n            else {\n                break;\n            }\n        }\n        if (this.isBufferTooLong(data)) {\n            this.emit(\"buffer_too_long\");\n        }\n    };\n    HTTPRequest.prototype.advanceBuffer = function (buffer) {\n        var unreadData = buffer.slice(this.position);\n        var endOfLinePosition = unreadData.indexOf(\"\\n\");\n        if (endOfLinePosition !== -1) {\n            this.position += endOfLinePosition + 1;\n            return unreadData.slice(0, endOfLinePosition);\n        }\n        else {\n            return null;\n        }\n    };\n    HTTPRequest.prototype.isBufferTooLong = function (buffer) {\n        return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;\n    };\n    return HTTPRequest;\n}(dispatcher_1.default));\nexports.default = HTTPRequest;\n\n\n//# sourceURL=webpack://Pusher/./src/core/http/http_request.ts?");
-
-/***/ }),
-
-/***/ "./src/core/http/http_socket.ts":
-/*!**************************************!*\
-  !*** ./src/core/http/http_socket.ts ***!
-  \**************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar state_1 = __webpack_require__(/*! ./state */ \"./src/core/http/state.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar autoIncrement = 1;\nvar HTTPSocket = (function () {\n    function HTTPSocket(hooks, url) {\n        this.hooks = hooks;\n        this.session = randomNumber(1000) + \"/\" + randomString(8);\n        this.location = getLocation(url);\n        this.readyState = state_1.default.CONNECTING;\n        this.openStream();\n    }\n    HTTPSocket.prototype.send = function (payload) {\n        return this.sendRaw(JSON.stringify([payload]));\n    };\n    HTTPSocket.prototype.ping = function () {\n        this.hooks.sendHeartbeat(this);\n    };\n    HTTPSocket.prototype.close = function (code, reason) {\n        this.onClose(code, reason, true);\n    };\n    HTTPSocket.prototype.sendRaw = function (payload) {\n        if (this.readyState === state_1.default.OPEN) {\n            try {\n                runtime_1.default.createSocketRequest(\"POST\", getUniqueURL(getSendURL(this.location, this.session))).start(payload);\n                return true;\n            }\n            catch (e) {\n                return false;\n            }\n        }\n        else {\n            return false;\n        }\n    };\n    HTTPSocket.prototype.reconnect = function () {\n        this.closeStream();\n        this.openStream();\n    };\n    ;\n    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {\n        this.closeStream();\n        this.readyState = state_1.default.CLOSED;\n        if (this.onclose) {\n            this.onclose({\n                code: code,\n                reason: reason,\n                wasClean: wasClean\n            });\n        }\n    };\n    HTTPSocket.prototype.onChunk = function (chunk) {\n        if (chunk.status !== 200) {\n            return;\n        }\n        if (this.readyState === state_1.default.OPEN) {\n            this.onActivity();\n        }\n        var payload;\n        var type = chunk.data.slice(0, 1);\n        switch (type) {\n            case 'o':\n                payload = JSON.parse(chunk.data.slice(1) || '{}');\n                this.onOpen(payload);\n                break;\n            case 'a':\n                payload = JSON.parse(chunk.data.slice(1) || '[]');\n                for (var i = 0; i < payload.length; i++) {\n                    this.onEvent(payload[i]);\n                }\n                break;\n            case 'm':\n                payload = JSON.parse(chunk.data.slice(1) || 'null');\n                this.onEvent(payload);\n                break;\n            case 'h':\n                this.hooks.onHeartbeat(this);\n                break;\n            case 'c':\n                payload = JSON.parse(chunk.data.slice(1) || '[]');\n                this.onClose(payload[0], payload[1], true);\n                break;\n        }\n    };\n    HTTPSocket.prototype.onOpen = function (options) {\n        if (this.readyState === state_1.default.CONNECTING) {\n            if (options && options.hostname) {\n                this.location.base = replaceHost(this.location.base, options.hostname);\n            }\n            this.readyState = state_1.default.OPEN;\n            if (this.onopen) {\n                this.onopen();\n            }\n        }\n        else {\n            this.onClose(1006, \"Server lost session\", true);\n        }\n    };\n    HTTPSocket.prototype.onEvent = function (event) {\n        if (this.readyState === state_1.default.OPEN && this.onmessage) {\n            this.onmessage({ data: event });\n        }\n    };\n    HTTPSocket.prototype.onActivity = function () {\n        if (this.onactivity) {\n            this.onactivity();\n        }\n    };\n    HTTPSocket.prototype.onError = function (error) {\n        if (this.onerror) {\n            this.onerror(error);\n        }\n    };\n    HTTPSocket.prototype.openStream = function () {\n        var _this = this;\n        this.stream = runtime_1.default.createSocketRequest(\"POST\", getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));\n        this.stream.bind(\"chunk\", function (chunk) {\n            _this.onChunk(chunk);\n        });\n        this.stream.bind(\"finished\", function (status) {\n            _this.hooks.onFinished(_this, status);\n        });\n        this.stream.bind(\"buffer_too_long\", function () {\n            _this.reconnect();\n        });\n        try {\n            this.stream.start();\n        }\n        catch (error) {\n            util_1.default.defer(function () {\n                _this.onError(error);\n                _this.onClose(1006, \"Could not start streaming\", false);\n            });\n        }\n    };\n    HTTPSocket.prototype.closeStream = function () {\n        if (this.stream) {\n            this.stream.unbind_all();\n            this.stream.close();\n            this.stream = null;\n        }\n    };\n    return HTTPSocket;\n}());\nfunction getLocation(url) {\n    var parts = /([^\\?]*)\\/*(\\??.*)/.exec(url);\n    return {\n        base: parts[1],\n        queryString: parts[2]\n    };\n}\nfunction getSendURL(url, session) {\n    return url.base + \"/\" + session + \"/xhr_send\";\n}\nfunction getUniqueURL(url) {\n    var separator = (url.indexOf('?') === -1) ? \"?\" : \"&\";\n    return url + separator + \"t=\" + (+new Date()) + \"&n=\" + autoIncrement++;\n}\nfunction replaceHost(url, hostname) {\n    var urlParts = /(https?:\\/\\/)([^\\/:]+)((\\/|:)?.*)/.exec(url);\n    return urlParts[1] + hostname + urlParts[3];\n}\nfunction randomNumber(max) {\n    return Math.floor(Math.random() * max);\n}\nfunction randomString(length) {\n    var result = [];\n    for (var i = 0; i < length; i++) {\n        result.push(randomNumber(32).toString(32));\n    }\n    return result.join('');\n}\nexports.default = HTTPSocket;\n\n\n//# sourceURL=webpack://Pusher/./src/core/http/http_socket.ts?");
-
-/***/ }),
-
-/***/ "./src/core/http/http_streaming_socket.ts":
-/*!************************************************!*\
-  !*** ./src/core/http/http_streaming_socket.ts ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar hooks = {\n    getReceiveURL: function (url, session) {\n        return url.base + \"/\" + session + \"/xhr_streaming\" + url.queryString;\n    },\n    onHeartbeat: function (socket) {\n        socket.sendRaw(\"[]\");\n    },\n    sendHeartbeat: function (socket) {\n        socket.sendRaw(\"[]\");\n    },\n    onFinished: function (socket, status) {\n        socket.onClose(1006, \"Connection interrupted (\" + status + \")\", false);\n    }\n};\nexports.default = hooks;\n\n\n//# sourceURL=webpack://Pusher/./src/core/http/http_streaming_socket.ts?");
-
-/***/ }),
-
-/***/ "./src/core/http/state.ts":
-/*!********************************!*\
-  !*** ./src/core/http/state.ts ***!
-  \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar State;\n(function (State) {\n    State[State[\"CONNECTING\"] = 0] = \"CONNECTING\";\n    State[State[\"OPEN\"] = 1] = \"OPEN\";\n    State[State[\"CLOSED\"] = 3] = \"CLOSED\";\n})(State || (State = {}));\nexports.default = State;\n\n\n//# sourceURL=webpack://Pusher/./src/core/http/state.ts?");
-
-/***/ }),
-
-/***/ "./src/core/index.ts":
-/*!***************************!*\
-  !*** ./src/core/index.ts ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar pusher_1 = __webpack_require__(/*! ./pusher */ \"./src/core/pusher.ts\");\nmodule.exports = pusher_1.default;\n\n\n//# sourceURL=webpack://Pusher/./src/core/index.ts?");
-
-/***/ }),
-
-/***/ "./src/core/logger.ts":
-/*!****************************!*\
-  !*** ./src/core/logger.ts ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar collections_1 = __webpack_require__(/*! ./utils/collections */ \"./src/core/utils/collections.ts\");\nvar pusher_1 = __webpack_require__(/*! ./pusher */ \"./src/core/pusher.ts\");\nvar Logger = {\n    debug: function () {\n        var args = [];\n        for (var _i = 0; _i < arguments.length; _i++) {\n            args[_i] = arguments[_i];\n        }\n        if (!pusher_1.default.log) {\n            return;\n        }\n        pusher_1.default.log(collections_1.stringify.apply(this, arguments));\n    },\n    warn: function () {\n        var args = [];\n        for (var _i = 0; _i < arguments.length; _i++) {\n            args[_i] = arguments[_i];\n        }\n        var message = collections_1.stringify.apply(this, arguments);\n        if (pusher_1.default.log) {\n            pusher_1.default.log(message);\n        }\n        else if (global.console) {\n            if (global.console.warn) {\n                global.console.warn(message);\n            }\n            else if (global.console.log) {\n                global.console.log(message);\n            }\n        }\n    }\n};\nexports.default = Logger;\n\n\n//# sourceURL=webpack://Pusher/./src/core/logger.ts?");
-
-/***/ }),
-
-/***/ "./src/core/pusher.ts":
-/*!****************************!*\
-  !*** ./src/core/pusher.ts ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar Collections = __webpack_require__(/*! ./utils/collections */ \"./src/core/utils/collections.ts\");\nvar dispatcher_1 = __webpack_require__(/*! ./events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nvar timeline_1 = __webpack_require__(/*! ./timeline/timeline */ \"./src/core/timeline/timeline.ts\");\nvar level_1 = __webpack_require__(/*! ./timeline/level */ \"./src/core/timeline/level.ts\");\nvar StrategyBuilder = __webpack_require__(/*! ./strategies/strategy_builder */ \"./src/core/strategies/strategy_builder.ts\");\nvar timers_1 = __webpack_require__(/*! ./utils/timers */ \"./src/core/utils/timers/index.ts\");\nvar defaults_1 = __webpack_require__(/*! ./defaults */ \"./src/core/defaults.ts\");\nvar DefaultConfig = __webpack_require__(/*! ./config */ \"./src/core/config.ts\");\nvar logger_1 = __webpack_require__(/*! ./logger */ \"./src/core/logger.ts\");\nvar factory_1 = __webpack_require__(/*! ./utils/factory */ \"./src/core/utils/factory.ts\");\nvar url_store_1 = __webpack_require__(/*! core/utils/url_store */ \"./src/core/utils/url_store.ts\");\nvar Pusher = (function () {\n    function Pusher(app_key, options) {\n        var _this = this;\n        checkAppKey(app_key);\n        options = options || {};\n        if (!options.cluster && !(options.wsHost || options.httpHost)) {\n            var suffix = url_store_1.default.buildLogSuffix(\"javascriptQuickStart\");\n            logger_1.default.warn(\"You should always specify a cluster when connecting. \" + suffix);\n        }\n        this.key = app_key;\n        this.config = Collections.extend(DefaultConfig.getGlobalConfig(), options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {}, options);\n        this.channels = factory_1.default.createChannels();\n        this.global_emitter = new dispatcher_1.default();\n        this.sessionID = Math.floor(Math.random() * 1000000000);\n        this.timeline = new timeline_1.default(this.key, this.sessionID, {\n            cluster: this.config.cluster,\n            features: Pusher.getClientFeatures(),\n            params: this.config.timelineParams || {},\n            limit: 50,\n            level: level_1.default.INFO,\n            version: defaults_1.default.VERSION\n        });\n        if (!this.config.disableStats) {\n            this.timelineSender = factory_1.default.createTimelineSender(this.timeline, {\n                host: this.config.statsHost,\n                path: \"/timeline/v2/\" + runtime_1.default.TimelineTransport.name\n            });\n        }\n        var getStrategy = function (options) {\n            var config = Collections.extend({}, _this.config, options);\n            return StrategyBuilder.build(runtime_1.default.getDefaultStrategy(config), config);\n        };\n        this.connection = factory_1.default.createConnectionManager(this.key, Collections.extend({ getStrategy: getStrategy,\n            timeline: this.timeline,\n            activityTimeout: this.config.activity_timeout,\n            pongTimeout: this.config.pong_timeout,\n            unavailableTimeout: this.config.unavailable_timeout\n        }, this.config, { useTLS: this.shouldUseTLS() }));\n        this.connection.bind('connected', function () {\n            _this.subscribeAll();\n            if (_this.timelineSender) {\n                _this.timelineSender.send(_this.connection.isUsingTLS());\n            }\n        });\n        this.connection.bind('message', function (event) {\n            var eventName = event.event;\n            var internal = (eventName.indexOf('pusher_internal:') === 0);\n            if (event.channel) {\n                var channel = _this.channel(event.channel);\n                if (channel) {\n                    channel.handleEvent(event);\n                }\n            }\n            if (!internal) {\n                _this.global_emitter.emit(event.event, event.data);\n            }\n        });\n        this.connection.bind('connecting', function () {\n            _this.channels.disconnect();\n        });\n        this.connection.bind('disconnected', function () {\n            _this.channels.disconnect();\n        });\n        this.connection.bind('error', function (err) {\n            logger_1.default.warn('Error', err);\n        });\n        Pusher.instances.push(this);\n        this.timeline.info({ instances: Pusher.instances.length });\n        if (Pusher.isReady) {\n            this.connect();\n        }\n    }\n    Pusher.ready = function () {\n        Pusher.isReady = true;\n        for (var i = 0, l = Pusher.instances.length; i < l; i++) {\n            Pusher.instances[i].connect();\n        }\n    };\n    Pusher.log = function (message) {\n        if (Pusher.logToConsole && global.console && global.console.log) {\n            global.console.log(message);\n        }\n    };\n    Pusher.getClientFeatures = function () {\n        return Collections.keys(Collections.filterObject({ \"ws\": runtime_1.default.Transports.ws }, function (t) { return t.isSupported({}); }));\n    };\n    Pusher.prototype.channel = function (name) {\n        return this.channels.find(name);\n    };\n    Pusher.prototype.allChannels = function () {\n        return this.channels.all();\n    };\n    Pusher.prototype.connect = function () {\n        this.connection.connect();\n        if (this.timelineSender) {\n            if (!this.timelineSenderTimer) {\n                var usingTLS = this.connection.isUsingTLS();\n                var timelineSender = this.timelineSender;\n                this.timelineSenderTimer = new timers_1.PeriodicTimer(60000, function () {\n                    timelineSender.send(usingTLS);\n                });\n            }\n        }\n    };\n    Pusher.prototype.disconnect = function () {\n        this.connection.disconnect();\n        if (this.timelineSenderTimer) {\n            this.timelineSenderTimer.ensureAborted();\n            this.timelineSenderTimer = null;\n        }\n    };\n    Pusher.prototype.bind = function (event_name, callback, context) {\n        this.global_emitter.bind(event_name, callback, context);\n        return this;\n    };\n    Pusher.prototype.unbind = function (event_name, callback, context) {\n        this.global_emitter.unbind(event_name, callback, context);\n        return this;\n    };\n    Pusher.prototype.bind_global = function (callback) {\n        this.global_emitter.bind_global(callback);\n        return this;\n    };\n    Pusher.prototype.unbind_global = function (callback) {\n        this.global_emitter.unbind_global(callback);\n        return this;\n    };\n    Pusher.prototype.unbind_all = function (callback) {\n        this.global_emitter.unbind_all();\n        return this;\n    };\n    Pusher.prototype.subscribeAll = function () {\n        var channelName;\n        for (channelName in this.channels.channels) {\n            if (this.channels.channels.hasOwnProperty(channelName)) {\n                this.subscribe(channelName);\n            }\n        }\n    };\n    Pusher.prototype.subscribe = function (channel_name) {\n        var channel = this.channels.add(channel_name, this);\n        if (channel.subscriptionPending && channel.subscriptionCancelled) {\n            channel.reinstateSubscription();\n        }\n        else if (!channel.subscriptionPending && this.connection.state === \"connected\") {\n            channel.subscribe();\n        }\n        return channel;\n    };\n    Pusher.prototype.unsubscribe = function (channel_name) {\n        var channel = this.channels.find(channel_name);\n        if (channel && channel.subscriptionPending) {\n            channel.cancelSubscription();\n        }\n        else {\n            channel = this.channels.remove(channel_name);\n            if (channel && this.connection.state === \"connected\") {\n                channel.unsubscribe();\n            }\n        }\n    };\n    Pusher.prototype.send_event = function (event_name, data, channel) {\n        return this.connection.send_event(event_name, data, channel);\n    };\n    Pusher.prototype.shouldUseTLS = function () {\n        if (runtime_1.default.getProtocol() === \"https:\") {\n            return true;\n        }\n        else if (this.config.forceTLS === true) {\n            return true;\n        }\n        else {\n            return Boolean(this.config.encrypted);\n        }\n    };\n    Pusher.instances = [];\n    Pusher.isReady = false;\n    Pusher.logToConsole = false;\n    Pusher.Runtime = runtime_1.default;\n    Pusher.ScriptReceivers = runtime_1.default.ScriptReceivers;\n    Pusher.DependenciesReceivers = runtime_1.default.DependenciesReceivers;\n    Pusher.auth_callbacks = runtime_1.default.auth_callbacks;\n    return Pusher;\n}());\nexports.default = Pusher;\nfunction checkAppKey(key) {\n    if (key === null || key === undefined) {\n        throw \"You must pass your app key when you instantiate Pusher.\";\n    }\n}\nruntime_1.default.setup(Pusher);\n\n\n//# sourceURL=webpack://Pusher/./src/core/pusher.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/best_connected_ever_strategy.ts":
-/*!*************************************************************!*\
-  !*** ./src/core/strategies/best_connected_ever_strategy.ts ***!
-  \*************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar BestConnectedEverStrategy = (function () {\n    function BestConnectedEverStrategy(strategies) {\n        this.strategies = strategies;\n    }\n    BestConnectedEverStrategy.prototype.isSupported = function () {\n        return Collections.any(this.strategies, util_1.default.method(\"isSupported\"));\n    };\n    BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {\n        return connect(this.strategies, minPriority, function (i, runners) {\n            return function (error, handshake) {\n                runners[i].error = error;\n                if (error) {\n                    if (allRunnersFailed(runners)) {\n                        callback(true);\n                    }\n                    return;\n                }\n                Collections.apply(runners, function (runner) {\n                    runner.forceMinPriority(handshake.transport.priority);\n                });\n                callback(null, handshake);\n            };\n        });\n    };\n    return BestConnectedEverStrategy;\n}());\nexports.default = BestConnectedEverStrategy;\nfunction connect(strategies, minPriority, callbackBuilder) {\n    var runners = Collections.map(strategies, function (strategy, i, _, rs) {\n        return strategy.connect(minPriority, callbackBuilder(i, rs));\n    });\n    return {\n        abort: function () {\n            Collections.apply(runners, abortRunner);\n        },\n        forceMinPriority: function (p) {\n            Collections.apply(runners, function (runner) {\n                runner.forceMinPriority(p);\n            });\n        }\n    };\n}\nfunction allRunnersFailed(runners) {\n    return Collections.all(runners, function (runner) {\n        return Boolean(runner.error);\n    });\n}\nfunction abortRunner(runner) {\n    if (!runner.error && !runner.aborted) {\n        runner.abort();\n        runner.aborted = true;\n    }\n}\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/best_connected_ever_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/cached_strategy.ts":
-/*!************************************************!*\
-  !*** ./src/core/strategies/cached_strategy.ts ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar sequential_strategy_1 = __webpack_require__(/*! ./sequential_strategy */ \"./src/core/strategies/sequential_strategy.ts\");\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar CachedStrategy = (function () {\n    function CachedStrategy(strategy, transports, options) {\n        this.strategy = strategy;\n        this.transports = transports;\n        this.ttl = options.ttl || 1800 * 1000;\n        this.usingTLS = options.useTLS;\n        this.timeline = options.timeline;\n    }\n    CachedStrategy.prototype.isSupported = function () {\n        return this.strategy.isSupported();\n    };\n    CachedStrategy.prototype.connect = function (minPriority, callback) {\n        var usingTLS = this.usingTLS;\n        var info = fetchTransportCache(usingTLS);\n        var strategies = [this.strategy];\n        if (info && info.timestamp + this.ttl >= util_1.default.now()) {\n            var transport = this.transports[info.transport];\n            if (transport) {\n                this.timeline.info({\n                    cached: true,\n                    transport: info.transport,\n                    latency: info.latency\n                });\n                strategies.push(new sequential_strategy_1.default([transport], {\n                    timeout: info.latency * 2 + 1000,\n                    failFast: true\n                }));\n            }\n        }\n        var startTimestamp = util_1.default.now();\n        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {\n            if (error) {\n                flushTransportCache(usingTLS);\n                if (strategies.length > 0) {\n                    startTimestamp = util_1.default.now();\n                    runner = strategies.pop().connect(minPriority, cb);\n                }\n                else {\n                    callback(error);\n                }\n            }\n            else {\n                storeTransportCache(usingTLS, handshake.transport.name, util_1.default.now() - startTimestamp);\n                callback(null, handshake);\n            }\n        });\n        return {\n            abort: function () {\n                runner.abort();\n            },\n            forceMinPriority: function (p) {\n                minPriority = p;\n                if (runner) {\n                    runner.forceMinPriority(p);\n                }\n            }\n        };\n    };\n    return CachedStrategy;\n}());\nexports.default = CachedStrategy;\nfunction getTransportCacheKey(usingTLS) {\n    return \"pusherTransport\" + (usingTLS ? \"TLS\" : \"NonTLS\");\n}\nfunction fetchTransportCache(usingTLS) {\n    var storage = runtime_1.default.getLocalStorage();\n    if (storage) {\n        try {\n            var serializedCache = storage[getTransportCacheKey(usingTLS)];\n            if (serializedCache) {\n                return JSON.parse(serializedCache);\n            }\n        }\n        catch (e) {\n            flushTransportCache(usingTLS);\n        }\n    }\n    return null;\n}\nfunction storeTransportCache(usingTLS, transport, latency) {\n    var storage = runtime_1.default.getLocalStorage();\n    if (storage) {\n        try {\n            storage[getTransportCacheKey(usingTLS)] = Collections.safeJSONStringify({\n                timestamp: util_1.default.now(),\n                transport: transport,\n                latency: latency\n            });\n        }\n        catch (e) {\n        }\n    }\n}\nfunction flushTransportCache(usingTLS) {\n    var storage = runtime_1.default.getLocalStorage();\n    if (storage) {\n        try {\n            delete storage[getTransportCacheKey(usingTLS)];\n        }\n        catch (e) {\n        }\n    }\n}\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/cached_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/delayed_strategy.ts":
-/*!*************************************************!*\
-  !*** ./src/core/strategies/delayed_strategy.ts ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar timers_1 = __webpack_require__(/*! ../utils/timers */ \"./src/core/utils/timers/index.ts\");\nvar DelayedStrategy = (function () {\n    function DelayedStrategy(strategy, _a) {\n        var number = _a.delay;\n        this.strategy = strategy;\n        this.options = { delay: number };\n    }\n    DelayedStrategy.prototype.isSupported = function () {\n        return this.strategy.isSupported();\n    };\n    DelayedStrategy.prototype.connect = function (minPriority, callback) {\n        var strategy = this.strategy;\n        var runner;\n        var timer = new timers_1.OneOffTimer(this.options.delay, function () {\n            runner = strategy.connect(minPriority, callback);\n        });\n        return {\n            abort: function () {\n                timer.ensureAborted();\n                if (runner) {\n                    runner.abort();\n                }\n            },\n            forceMinPriority: function (p) {\n                minPriority = p;\n                if (runner) {\n                    runner.forceMinPriority(p);\n                }\n            }\n        };\n    };\n    return DelayedStrategy;\n}());\nexports.default = DelayedStrategy;\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/delayed_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/first_connected_strategy.ts":
-/*!*********************************************************!*\
-  !*** ./src/core/strategies/first_connected_strategy.ts ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar FirstConnectedStrategy = (function () {\n    function FirstConnectedStrategy(strategy) {\n        this.strategy = strategy;\n    }\n    FirstConnectedStrategy.prototype.isSupported = function () {\n        return this.strategy.isSupported();\n    };\n    FirstConnectedStrategy.prototype.connect = function (minPriority, callback) {\n        var runner = this.strategy.connect(minPriority, function (error, handshake) {\n            if (handshake) {\n                runner.abort();\n            }\n            callback(error, handshake);\n        });\n        return runner;\n    };\n    return FirstConnectedStrategy;\n}());\nexports.default = FirstConnectedStrategy;\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/first_connected_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/if_strategy.ts":
-/*!********************************************!*\
-  !*** ./src/core/strategies/if_strategy.ts ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar IfStrategy = (function () {\n    function IfStrategy(test, trueBranch, falseBranch) {\n        this.test = test;\n        this.trueBranch = trueBranch;\n        this.falseBranch = falseBranch;\n    }\n    IfStrategy.prototype.isSupported = function () {\n        var branch = this.test() ? this.trueBranch : this.falseBranch;\n        return branch.isSupported();\n    };\n    IfStrategy.prototype.connect = function (minPriority, callback) {\n        var branch = this.test() ? this.trueBranch : this.falseBranch;\n        return branch.connect(minPriority, callback);\n    };\n    return IfStrategy;\n}());\nexports.default = IfStrategy;\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/if_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/sequential_strategy.ts":
-/*!****************************************************!*\
-  !*** ./src/core/strategies/sequential_strategy.ts ***!
-  \****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar timers_1 = __webpack_require__(/*! ../utils/timers */ \"./src/core/utils/timers/index.ts\");\nvar SequentialStrategy = (function () {\n    function SequentialStrategy(strategies, options) {\n        this.strategies = strategies;\n        this.loop = Boolean(options.loop);\n        this.failFast = Boolean(options.failFast);\n        this.timeout = options.timeout;\n        this.timeoutLimit = options.timeoutLimit;\n    }\n    SequentialStrategy.prototype.isSupported = function () {\n        return Collections.any(this.strategies, util_1.default.method(\"isSupported\"));\n    };\n    SequentialStrategy.prototype.connect = function (minPriority, callback) {\n        var _this = this;\n        var strategies = this.strategies;\n        var current = 0;\n        var timeout = this.timeout;\n        var runner = null;\n        var tryNextStrategy = function (error, handshake) {\n            if (handshake) {\n                callback(null, handshake);\n            }\n            else {\n                current = current + 1;\n                if (_this.loop) {\n                    current = current % strategies.length;\n                }\n                if (current < strategies.length) {\n                    if (timeout) {\n                        timeout = timeout * 2;\n                        if (_this.timeoutLimit) {\n                            timeout = Math.min(timeout, _this.timeoutLimit);\n                        }\n                    }\n                    runner = _this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: _this.failFast }, tryNextStrategy);\n                }\n                else {\n                    callback(true);\n                }\n            }\n        };\n        runner = this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: this.failFast }, tryNextStrategy);\n        return {\n            abort: function () {\n                runner.abort();\n            },\n            forceMinPriority: function (p) {\n                minPriority = p;\n                if (runner) {\n                    runner.forceMinPriority(p);\n                }\n            }\n        };\n    };\n    SequentialStrategy.prototype.tryStrategy = function (strategy, minPriority, options, callback) {\n        var timer = null;\n        var runner = null;\n        if (options.timeout > 0) {\n            timer = new timers_1.OneOffTimer(options.timeout, function () {\n                runner.abort();\n                callback(true);\n            });\n        }\n        runner = strategy.connect(minPriority, function (error, handshake) {\n            if (error && timer && timer.isRunning() && !options.failFast) {\n                return;\n            }\n            if (timer) {\n                timer.ensureAborted();\n            }\n            callback(error, handshake);\n        });\n        return {\n            abort: function () {\n                if (timer) {\n                    timer.ensureAborted();\n                }\n                runner.abort();\n            },\n            forceMinPriority: function (p) {\n                runner.forceMinPriority(p);\n            }\n        };\n    };\n    return SequentialStrategy;\n}());\nexports.default = SequentialStrategy;\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/sequential_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/strategy_builder.ts":
-/*!*************************************************!*\
-  !*** ./src/core/strategies/strategy_builder.ts ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar transport_manager_1 = __webpack_require__(/*! ../transports/transport_manager */ \"./src/core/transports/transport_manager.ts\");\nvar Errors = __webpack_require__(/*! ../errors */ \"./src/core/errors.ts\");\nvar transport_strategy_1 = __webpack_require__(/*! ./transport_strategy */ \"./src/core/strategies/transport_strategy.ts\");\nvar sequential_strategy_1 = __webpack_require__(/*! ./sequential_strategy */ \"./src/core/strategies/sequential_strategy.ts\");\nvar best_connected_ever_strategy_1 = __webpack_require__(/*! ./best_connected_ever_strategy */ \"./src/core/strategies/best_connected_ever_strategy.ts\");\nvar cached_strategy_1 = __webpack_require__(/*! ./cached_strategy */ \"./src/core/strategies/cached_strategy.ts\");\nvar delayed_strategy_1 = __webpack_require__(/*! ./delayed_strategy */ \"./src/core/strategies/delayed_strategy.ts\");\nvar if_strategy_1 = __webpack_require__(/*! ./if_strategy */ \"./src/core/strategies/if_strategy.ts\");\nvar first_connected_strategy_1 = __webpack_require__(/*! ./first_connected_strategy */ \"./src/core/strategies/first_connected_strategy.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar Transports = runtime_1.default.Transports;\nexports.build = function (scheme, options) {\n    var context = Collections.extend({}, globalContext, options);\n    return evaluate(scheme, context)[1].strategy;\n};\nvar UnsupportedStrategy = {\n    isSupported: function () {\n        return false;\n    },\n    connect: function (_, callback) {\n        var deferred = util_1.default.defer(function () {\n            callback(new Errors.UnsupportedStrategy());\n        });\n        return {\n            abort: function () {\n                deferred.ensureAborted();\n            },\n            forceMinPriority: function () { }\n        };\n    }\n};\nfunction returnWithOriginalContext(f) {\n    return function (context) {\n        return [f.apply(this, arguments), context];\n    };\n}\nvar globalContext = {\n    extend: function (context, first, second) {\n        return [Collections.extend({}, first, second), context];\n    },\n    def: function (context, name, value) {\n        if (context[name] !== undefined) {\n            throw \"Redefining symbol \" + name;\n        }\n        context[name] = value;\n        return [undefined, context];\n    },\n    def_transport: function (context, name, type, priority, options, manager) {\n        var transportClass = Transports[type];\n        if (!transportClass) {\n            throw new Errors.UnsupportedTransport(type);\n        }\n        var enabled = (!context.enabledTransports ||\n            Collections.arrayIndexOf(context.enabledTransports, name) !== -1) &&\n            (!context.disabledTransports ||\n                Collections.arrayIndexOf(context.disabledTransports, name) === -1);\n        var transport;\n        if (enabled) {\n            transport = new transport_strategy_1.default(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, Collections.extend({\n                key: context.key,\n                useTLS: context.useTLS,\n                timeline: context.timeline,\n                ignoreNullOrigin: context.ignoreNullOrigin\n            }, options));\n        }\n        else {\n            transport = UnsupportedStrategy;\n        }\n        var newContext = context.def(context, name, transport)[1];\n        newContext.Transports = context.Transports || {};\n        newContext.Transports[name] = transport;\n        return [undefined, newContext];\n    },\n    transport_manager: returnWithOriginalContext(function (_, options) {\n        return new transport_manager_1.default(options);\n    }),\n    sequential: returnWithOriginalContext(function (_, options) {\n        var strategies = Array.prototype.slice.call(arguments, 2);\n        return new sequential_strategy_1.default(strategies, options);\n    }),\n    cached: returnWithOriginalContext(function (context, ttl, strategy) {\n        return new cached_strategy_1.default(strategy, context.Transports, {\n            ttl: ttl,\n            timeline: context.timeline,\n            useTLS: context.useTLS\n        });\n    }),\n    first_connected: returnWithOriginalContext(function (_, strategy) {\n        return new first_connected_strategy_1.default(strategy);\n    }),\n    best_connected_ever: returnWithOriginalContext(function () {\n        var strategies = Array.prototype.slice.call(arguments, 1);\n        return new best_connected_ever_strategy_1.default(strategies);\n    }),\n    delayed: returnWithOriginalContext(function (_, delay, strategy) {\n        return new delayed_strategy_1.default(strategy, { delay: delay });\n    }),\n    \"if\": returnWithOriginalContext(function (_, test, trueBranch, falseBranch) {\n        return new if_strategy_1.default(test, trueBranch, falseBranch);\n    }),\n    is_supported: returnWithOriginalContext(function (_, strategy) {\n        return function () {\n            return strategy.isSupported();\n        };\n    })\n};\nfunction isSymbol(expression) {\n    return (typeof expression === \"string\") && expression.charAt(0) === \":\";\n}\nfunction getSymbolValue(expression, context) {\n    return context[expression.slice(1)];\n}\nfunction evaluateListOfExpressions(expressions, context) {\n    if (expressions.length === 0) {\n        return [[], context];\n    }\n    var head = evaluate(expressions[0], context);\n    var tail = evaluateListOfExpressions(expressions.slice(1), head[1]);\n    return [[head[0]].concat(tail[0]), tail[1]];\n}\nfunction evaluateString(expression, context) {\n    if (!isSymbol(expression)) {\n        return [expression, context];\n    }\n    var value = getSymbolValue(expression, context);\n    if (value === undefined) {\n        throw \"Undefined symbol \" + expression;\n    }\n    return [value, context];\n}\nfunction evaluateArray(expression, context) {\n    if (isSymbol(expression[0])) {\n        var f = getSymbolValue(expression[0], context);\n        if (expression.length > 1) {\n            if (typeof f !== \"function\") {\n                throw \"Calling non-function \" + expression[0];\n            }\n            var args = [Collections.extend({}, context)].concat(Collections.map(expression.slice(1), function (arg) {\n                return evaluate(arg, Collections.extend({}, context))[0];\n            }));\n            return f.apply(this, args);\n        }\n        else {\n            return [f, context];\n        }\n    }\n    else {\n        return evaluateListOfExpressions(expression, context);\n    }\n}\nfunction evaluate(expression, context) {\n    if (typeof expression === \"string\") {\n        return evaluateString(expression, context);\n    }\n    else if (typeof expression === \"object\") {\n        if (expression instanceof Array && expression.length > 0) {\n            return evaluateArray(expression, context);\n        }\n    }\n    return [expression, context];\n}\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/strategy_builder.ts?");
-
-/***/ }),
-
-/***/ "./src/core/strategies/transport_strategy.ts":
-/*!***************************************************!*\
-  !*** ./src/core/strategies/transport_strategy.ts ***!
-  \***************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar factory_1 = __webpack_require__(/*! ../utils/factory */ \"./src/core/utils/factory.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar Errors = __webpack_require__(/*! ../errors */ \"./src/core/errors.ts\");\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar TransportStrategy = (function () {\n    function TransportStrategy(name, priority, transport, options) {\n        this.name = name;\n        this.priority = priority;\n        this.transport = transport;\n        this.options = options || {};\n    }\n    TransportStrategy.prototype.isSupported = function () {\n        return this.transport.isSupported({\n            useTLS: this.options.useTLS\n        });\n    };\n    TransportStrategy.prototype.connect = function (minPriority, callback) {\n        var _this = this;\n        if (!this.isSupported()) {\n            return failAttempt(new Errors.UnsupportedStrategy(), callback);\n        }\n        else if (this.priority < minPriority) {\n            return failAttempt(new Errors.TransportPriorityTooLow(), callback);\n        }\n        var connected = false;\n        var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);\n        var handshake = null;\n        var onInitialized = function () {\n            transport.unbind(\"initialized\", onInitialized);\n            transport.connect();\n        };\n        var onOpen = function () {\n            handshake = factory_1.default.createHandshake(transport, function (result) {\n                connected = true;\n                unbindListeners();\n                callback(null, result);\n            });\n        };\n        var onError = function (error) {\n            unbindListeners();\n            callback(error);\n        };\n        var onClosed = function () {\n            unbindListeners();\n            var serializedTransport;\n            serializedTransport = Collections.safeJSONStringify(transport);\n            callback(new Errors.TransportClosed(serializedTransport));\n        };\n        var unbindListeners = function () {\n            transport.unbind(\"initialized\", onInitialized);\n            transport.unbind(\"open\", onOpen);\n            transport.unbind(\"error\", onError);\n            transport.unbind(\"closed\", onClosed);\n        };\n        transport.bind(\"initialized\", onInitialized);\n        transport.bind(\"open\", onOpen);\n        transport.bind(\"error\", onError);\n        transport.bind(\"closed\", onClosed);\n        transport.initialize();\n        return {\n            abort: function () {\n                if (connected) {\n                    return;\n                }\n                unbindListeners();\n                if (handshake) {\n                    handshake.close();\n                }\n                else {\n                    transport.close();\n                }\n            },\n            forceMinPriority: function (p) {\n                if (connected) {\n                    return;\n                }\n                if (_this.priority < p) {\n                    if (handshake) {\n                        handshake.close();\n                    }\n                    else {\n                        transport.close();\n                    }\n                }\n            }\n        };\n    };\n    return TransportStrategy;\n}());\nexports.default = TransportStrategy;\nfunction failAttempt(error, callback) {\n    util_1.default.defer(function () {\n        callback(error);\n    });\n    return {\n        abort: function () { },\n        forceMinPriority: function () { }\n    };\n}\n\n\n//# sourceURL=webpack://Pusher/./src/core/strategies/transport_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/core/timeline/level.ts":
-/*!************************************!*\
-  !*** ./src/core/timeline/level.ts ***!
-  \************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar TimelineLevel;\n(function (TimelineLevel) {\n    TimelineLevel[TimelineLevel[\"ERROR\"] = 3] = \"ERROR\";\n    TimelineLevel[TimelineLevel[\"INFO\"] = 6] = \"INFO\";\n    TimelineLevel[TimelineLevel[\"DEBUG\"] = 7] = \"DEBUG\";\n})(TimelineLevel || (TimelineLevel = {}));\nexports.default = TimelineLevel;\n\n\n//# sourceURL=webpack://Pusher/./src/core/timeline/level.ts?");
-
-/***/ }),
-
-/***/ "./src/core/timeline/timeline.ts":
-/*!***************************************!*\
-  !*** ./src/core/timeline/timeline.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar level_1 = __webpack_require__(/*! ./level */ \"./src/core/timeline/level.ts\");\nvar Timeline = (function () {\n    function Timeline(key, session, options) {\n        this.key = key;\n        this.session = session;\n        this.events = [];\n        this.options = options || {};\n        this.sent = 0;\n        this.uniqueID = 0;\n    }\n    Timeline.prototype.log = function (level, event) {\n        if (level <= this.options.level) {\n            this.events.push(Collections.extend({}, event, { timestamp: util_1.default.now() }));\n            if (this.options.limit && this.events.length > this.options.limit) {\n                this.events.shift();\n            }\n        }\n    };\n    Timeline.prototype.error = function (event) {\n        this.log(level_1.default.ERROR, event);\n    };\n    Timeline.prototype.info = function (event) {\n        this.log(level_1.default.INFO, event);\n    };\n    Timeline.prototype.debug = function (event) {\n        this.log(level_1.default.DEBUG, event);\n    };\n    Timeline.prototype.isEmpty = function () {\n        return this.events.length === 0;\n    };\n    Timeline.prototype.send = function (sendfn, callback) {\n        var _this = this;\n        var data = Collections.extend({\n            session: this.session,\n            bundle: this.sent + 1,\n            key: this.key,\n            lib: \"js\",\n            version: this.options.version,\n            cluster: this.options.cluster,\n            features: this.options.features,\n            timeline: this.events\n        }, this.options.params);\n        this.events = [];\n        sendfn(data, function (error, result) {\n            if (!error) {\n                _this.sent++;\n            }\n            if (callback) {\n                callback(error, result);\n            }\n        });\n        return true;\n    };\n    Timeline.prototype.generateUniqueID = function () {\n        this.uniqueID++;\n        return this.uniqueID;\n    };\n    return Timeline;\n}());\nexports.default = Timeline;\n\n\n//# sourceURL=webpack://Pusher/./src/core/timeline/timeline.ts?");
-
-/***/ }),
-
-/***/ "./src/core/timeline/timeline_sender.ts":
-/*!**********************************************!*\
-  !*** ./src/core/timeline/timeline_sender.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar TimelineSender = (function () {\n    function TimelineSender(timeline, options) {\n        this.timeline = timeline;\n        this.options = options || {};\n    }\n    TimelineSender.prototype.send = function (useTLS, callback) {\n        if (this.timeline.isEmpty()) {\n            return;\n        }\n        this.timeline.send(runtime_1.default.TimelineTransport.getAgent(this, useTLS), callback);\n    };\n    return TimelineSender;\n}());\nexports.default = TimelineSender;\n\n\n//# sourceURL=webpack://Pusher/./src/core/timeline/timeline_sender.ts?");
-
-/***/ }),
-
-/***/ "./src/core/transports/assistant_to_the_transport_manager.ts":
-/*!*******************************************************************!*\
-  !*** ./src/core/transports/assistant_to_the_transport_manager.ts ***!
-  \*******************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar AssistantToTheTransportManager = (function () {\n    function AssistantToTheTransportManager(manager, transport, options) {\n        this.manager = manager;\n        this.transport = transport;\n        this.minPingDelay = options.minPingDelay;\n        this.maxPingDelay = options.maxPingDelay;\n        this.pingDelay = undefined;\n    }\n    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {\n        var _this = this;\n        options = Collections.extend({}, options, {\n            activityTimeout: this.pingDelay\n        });\n        var connection = this.transport.createConnection(name, priority, key, options);\n        var openTimestamp = null;\n        var onOpen = function () {\n            connection.unbind(\"open\", onOpen);\n            connection.bind(\"closed\", onClosed);\n            openTimestamp = util_1.default.now();\n        };\n        var onClosed = function (closeEvent) {\n            connection.unbind(\"closed\", onClosed);\n            if (closeEvent.code === 1002 || closeEvent.code === 1003) {\n                _this.manager.reportDeath();\n            }\n            else if (!closeEvent.wasClean && openTimestamp) {\n                var lifespan = util_1.default.now() - openTimestamp;\n                if (lifespan < 2 * _this.maxPingDelay) {\n                    _this.manager.reportDeath();\n                    _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);\n                }\n            }\n        };\n        connection.bind(\"open\", onOpen);\n        return connection;\n    };\n    AssistantToTheTransportManager.prototype.isSupported = function (environment) {\n        return this.manager.isAlive() && this.transport.isSupported(environment);\n    };\n    return AssistantToTheTransportManager;\n}());\nexports.default = AssistantToTheTransportManager;\n\n\n//# sourceURL=webpack://Pusher/./src/core/transports/assistant_to_the_transport_manager.ts?");
-
-/***/ }),
-
-/***/ "./src/core/transports/transport.ts":
-/*!******************************************!*\
-  !*** ./src/core/transports/transport.ts ***!
-  \******************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar transport_connection_1 = __webpack_require__(/*! ./transport_connection */ \"./src/core/transports/transport_connection.ts\");\nvar Transport = (function () {\n    function Transport(hooks) {\n        this.hooks = hooks;\n    }\n    Transport.prototype.isSupported = function (environment) {\n        return this.hooks.isSupported(environment);\n    };\n    Transport.prototype.createConnection = function (name, priority, key, options) {\n        return new transport_connection_1.default(this.hooks, name, priority, key, options);\n    };\n    return Transport;\n}());\nexports.default = Transport;\n\n\n//# sourceURL=webpack://Pusher/./src/core/transports/transport.ts?");
-
-/***/ }),
-
-/***/ "./src/core/transports/transport_connection.ts":
-/*!*****************************************************!*\
-  !*** ./src/core/transports/transport_connection.ts ***!
-  \*****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nvar Collections = __webpack_require__(/*! ../utils/collections */ \"./src/core/utils/collections.ts\");\nvar dispatcher_1 = __webpack_require__(/*! ../events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nvar logger_1 = __webpack_require__(/*! ../logger */ \"./src/core/logger.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar TransportConnection = (function (_super) {\n    __extends(TransportConnection, _super);\n    function TransportConnection(hooks, name, priority, key, options) {\n        var _this = _super.call(this) || this;\n        _this.initialize = runtime_1.default.transportConnectionInitializer;\n        _this.hooks = hooks;\n        _this.name = name;\n        _this.priority = priority;\n        _this.key = key;\n        _this.options = options;\n        _this.state = \"new\";\n        _this.timeline = options.timeline;\n        _this.activityTimeout = options.activityTimeout;\n        _this.id = _this.timeline.generateUniqueID();\n        return _this;\n    }\n    TransportConnection.prototype.handlesActivityChecks = function () {\n        return Boolean(this.hooks.handlesActivityChecks);\n    };\n    TransportConnection.prototype.supportsPing = function () {\n        return Boolean(this.hooks.supportsPing);\n    };\n    TransportConnection.prototype.connect = function () {\n        var _this = this;\n        if (this.socket || this.state !== \"initialized\") {\n            return false;\n        }\n        var url = this.hooks.urls.getInitial(this.key, this.options);\n        try {\n            this.socket = this.hooks.getSocket(url, this.options);\n        }\n        catch (e) {\n            util_1.default.defer(function () {\n                _this.onError(e);\n                _this.changeState(\"closed\");\n            });\n            return false;\n        }\n        this.bindListeners();\n        logger_1.default.debug(\"Connecting\", { transport: this.name, url: url });\n        this.changeState(\"connecting\");\n        return true;\n    };\n    TransportConnection.prototype.close = function () {\n        if (this.socket) {\n            this.socket.close();\n            return true;\n        }\n        else {\n            return false;\n        }\n    };\n    TransportConnection.prototype.send = function (data) {\n        var _this = this;\n        if (this.state === \"open\") {\n            util_1.default.defer(function () {\n                if (_this.socket) {\n                    _this.socket.send(data);\n                }\n            });\n            return true;\n        }\n        else {\n            return false;\n        }\n    };\n    TransportConnection.prototype.ping = function () {\n        if (this.state === \"open\" && this.supportsPing()) {\n            this.socket.ping();\n        }\n    };\n    TransportConnection.prototype.onOpen = function () {\n        if (this.hooks.beforeOpen) {\n            this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));\n        }\n        this.changeState(\"open\");\n        this.socket.onopen = undefined;\n    };\n    TransportConnection.prototype.onError = function (error) {\n        this.emit(\"error\", { type: 'WebSocketError', error: error });\n        this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));\n    };\n    TransportConnection.prototype.onClose = function (closeEvent) {\n        if (closeEvent) {\n            this.changeState(\"closed\", {\n                code: closeEvent.code,\n                reason: closeEvent.reason,\n                wasClean: closeEvent.wasClean\n            });\n        }\n        else {\n            this.changeState(\"closed\");\n        }\n        this.unbindListeners();\n        this.socket = undefined;\n    };\n    TransportConnection.prototype.onMessage = function (message) {\n        this.emit(\"message\", message);\n    };\n    TransportConnection.prototype.onActivity = function () {\n        this.emit(\"activity\");\n    };\n    TransportConnection.prototype.bindListeners = function () {\n        var _this = this;\n        this.socket.onopen = function () {\n            _this.onOpen();\n        };\n        this.socket.onerror = function (error) {\n            _this.onError(error);\n        };\n        this.socket.onclose = function (closeEvent) {\n            _this.onClose(closeEvent);\n        };\n        this.socket.onmessage = function (message) {\n            _this.onMessage(message);\n        };\n        if (this.supportsPing()) {\n            this.socket.onactivity = function () { _this.onActivity(); };\n        }\n    };\n    TransportConnection.prototype.unbindListeners = function () {\n        if (this.socket) {\n            this.socket.onopen = undefined;\n            this.socket.onerror = undefined;\n            this.socket.onclose = undefined;\n            this.socket.onmessage = undefined;\n            if (this.supportsPing()) {\n                this.socket.onactivity = undefined;\n            }\n        }\n    };\n    TransportConnection.prototype.changeState = function (state, params) {\n        this.state = state;\n        this.timeline.info(this.buildTimelineMessage({\n            state: state,\n            params: params\n        }));\n        this.emit(state, params);\n    };\n    TransportConnection.prototype.buildTimelineMessage = function (message) {\n        return Collections.extend({ cid: this.id }, message);\n    };\n    return TransportConnection;\n}(dispatcher_1.default));\nexports.default = TransportConnection;\n\n\n//# sourceURL=webpack://Pusher/./src/core/transports/transport_connection.ts?");
-
-/***/ }),
-
-/***/ "./src/core/transports/transport_manager.ts":
-/*!**************************************************!*\
-  !*** ./src/core/transports/transport_manager.ts ***!
-  \**************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar factory_1 = __webpack_require__(/*! ../utils/factory */ \"./src/core/utils/factory.ts\");\nvar TransportManager = (function () {\n    function TransportManager(options) {\n        this.options = options || {};\n        this.livesLeft = this.options.lives || Infinity;\n    }\n    TransportManager.prototype.getAssistant = function (transport) {\n        return factory_1.default.createAssistantToTheTransportManager(this, transport, {\n            minPingDelay: this.options.minPingDelay,\n            maxPingDelay: this.options.maxPingDelay\n        });\n    };\n    TransportManager.prototype.isAlive = function () {\n        return this.livesLeft > 0;\n    };\n    TransportManager.prototype.reportDeath = function () {\n        this.livesLeft -= 1;\n    };\n    return TransportManager;\n}());\nexports.default = TransportManager;\n\n\n//# sourceURL=webpack://Pusher/./src/core/transports/transport_manager.ts?");
-
-/***/ }),
-
-/***/ "./src/core/transports/url_schemes.ts":
-/*!********************************************!*\
-  !*** ./src/core/transports/url_schemes.ts ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar defaults_1 = __webpack_require__(/*! ../defaults */ \"./src/core/defaults.ts\");\nfunction getGenericURL(baseScheme, params, path) {\n    var scheme = baseScheme + (params.useTLS ? \"s\" : \"\");\n    var host = params.useTLS ? params.hostTLS : params.hostNonTLS;\n    return scheme + \"://\" + host + path;\n}\nfunction getGenericPath(key, queryString) {\n    var path = \"/app/\" + key;\n    var query = \"?protocol=\" + defaults_1.default.PROTOCOL +\n        \"&client=js\" +\n        \"&version=\" + defaults_1.default.VERSION +\n        (queryString ? (\"&\" + queryString) : \"\");\n    return path + query;\n}\nexports.ws = {\n    getInitial: function (key, params) {\n        var path = (params.httpPath || \"\") + getGenericPath(key, \"flash=false\");\n        return getGenericURL(\"ws\", params, path);\n    }\n};\nexports.http = {\n    getInitial: function (key, params) {\n        var path = (params.httpPath || \"/pusher\") + getGenericPath(key);\n        return getGenericURL(\"http\", params, path);\n    }\n};\nexports.sockjs = {\n    getInitial: function (key, params) {\n        return getGenericURL(\"http\", params, params.httpPath || \"/pusher\");\n    },\n    getPath: function (key, params) {\n        return getGenericPath(key);\n    }\n};\n\n\n//# sourceURL=webpack://Pusher/./src/core/transports/url_schemes.ts?");
-
-/***/ }),
-
-/***/ "./src/core/util.ts":
-/*!**************************!*\
-  !*** ./src/core/util.ts ***!
-  \**************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar timers_1 = __webpack_require__(/*! ./utils/timers */ \"./src/core/utils/timers/index.ts\");\nvar Util = {\n    now: function () {\n        if (Date.now) {\n            return Date.now();\n        }\n        else {\n            return new Date().valueOf();\n        }\n    },\n    defer: function (callback) {\n        return new timers_1.OneOffTimer(0, callback);\n    },\n    method: function (name) {\n        var args = [];\n        for (var _i = 1; _i < arguments.length; _i++) {\n            args[_i - 1] = arguments[_i];\n        }\n        var boundArguments = Array.prototype.slice.call(arguments, 1);\n        return function (object) {\n            return object[name].apply(object, boundArguments.concat(arguments));\n        };\n    }\n};\nexports.default = Util;\n\n\n//# sourceURL=webpack://Pusher/./src/core/util.ts?");
-
-/***/ }),
-
-/***/ "./src/core/utils/collections.ts":
-/*!***************************************!*\
-  !*** ./src/core/utils/collections.ts ***!
-  \***************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar base64_1 = __webpack_require__(/*! ../base64 */ \"./src/core/base64.ts\");\nvar util_1 = __webpack_require__(/*! ../util */ \"./src/core/util.ts\");\nfunction extend(target) {\n    var sources = [];\n    for (var _i = 1; _i < arguments.length; _i++) {\n        sources[_i - 1] = arguments[_i];\n    }\n    for (var i = 0; i < sources.length; i++) {\n        var extensions = sources[i];\n        for (var property in extensions) {\n            if (extensions[property] && extensions[property].constructor &&\n                extensions[property].constructor === Object) {\n                target[property] = extend(target[property] || {}, extensions[property]);\n            }\n            else {\n                target[property] = extensions[property];\n            }\n        }\n    }\n    return target;\n}\nexports.extend = extend;\nfunction stringify() {\n    var m = [\"Pusher\"];\n    for (var i = 0; i < arguments.length; i++) {\n        if (typeof arguments[i] === \"string\") {\n            m.push(arguments[i]);\n        }\n        else {\n            m.push(safeJSONStringify(arguments[i]));\n        }\n    }\n    return m.join(\" : \");\n}\nexports.stringify = stringify;\nfunction arrayIndexOf(array, item) {\n    var nativeIndexOf = Array.prototype.indexOf;\n    if (array === null) {\n        return -1;\n    }\n    if (nativeIndexOf && array.indexOf === nativeIndexOf) {\n        return array.indexOf(item);\n    }\n    for (var i = 0, l = array.length; i < l; i++) {\n        if (array[i] === item) {\n            return i;\n        }\n    }\n    return -1;\n}\nexports.arrayIndexOf = arrayIndexOf;\nfunction objectApply(object, f) {\n    for (var key in object) {\n        if (Object.prototype.hasOwnProperty.call(object, key)) {\n            f(object[key], key, object);\n        }\n    }\n}\nexports.objectApply = objectApply;\nfunction keys(object) {\n    var keys = [];\n    objectApply(object, function (_, key) {\n        keys.push(key);\n    });\n    return keys;\n}\nexports.keys = keys;\nfunction values(object) {\n    var values = [];\n    objectApply(object, function (value) {\n        values.push(value);\n    });\n    return values;\n}\nexports.values = values;\nfunction apply(array, f, context) {\n    for (var i = 0; i < array.length; i++) {\n        f.call(context || global, array[i], i, array);\n    }\n}\nexports.apply = apply;\nfunction map(array, f) {\n    var result = [];\n    for (var i = 0; i < array.length; i++) {\n        result.push(f(array[i], i, array, result));\n    }\n    return result;\n}\nexports.map = map;\nfunction mapObject(object, f) {\n    var result = {};\n    objectApply(object, function (value, key) {\n        result[key] = f(value);\n    });\n    return result;\n}\nexports.mapObject = mapObject;\nfunction filter(array, test) {\n    test = test || function (value) { return !!value; };\n    var result = [];\n    for (var i = 0; i < array.length; i++) {\n        if (test(array[i], i, array, result)) {\n            result.push(array[i]);\n        }\n    }\n    return result;\n}\nexports.filter = filter;\nfunction filterObject(object, test) {\n    var result = {};\n    objectApply(object, function (value, key) {\n        if ((test && test(value, key, object, result)) || Boolean(value)) {\n            result[key] = value;\n        }\n    });\n    return result;\n}\nexports.filterObject = filterObject;\nfunction flatten(object) {\n    var result = [];\n    objectApply(object, function (value, key) {\n        result.push([key, value]);\n    });\n    return result;\n}\nexports.flatten = flatten;\nfunction any(array, test) {\n    for (var i = 0; i < array.length; i++) {\n        if (test(array[i], i, array)) {\n            return true;\n        }\n    }\n    return false;\n}\nexports.any = any;\nfunction all(array, test) {\n    for (var i = 0; i < array.length; i++) {\n        if (!test(array[i], i, array)) {\n            return false;\n        }\n    }\n    return true;\n}\nexports.all = all;\nfunction encodeParamsObject(data) {\n    return mapObject(data, function (value) {\n        if (typeof value === \"object\") {\n            value = safeJSONStringify(value);\n        }\n        return encodeURIComponent(base64_1.default(value.toString()));\n    });\n}\nexports.encodeParamsObject = encodeParamsObject;\nfunction buildQueryString(data) {\n    var params = filterObject(data, function (value) {\n        return value !== undefined;\n    });\n    var query = map(flatten(encodeParamsObject(params)), util_1.default.method(\"join\", \"=\")).join(\"&\");\n    return query;\n}\nexports.buildQueryString = buildQueryString;\nfunction decycleObject(object) {\n    var objects = [], paths = [];\n    return (function derez(value, path) {\n        var i, name, nu;\n        switch (typeof value) {\n            case 'object':\n                if (!value) {\n                    return null;\n                }\n                for (i = 0; i < objects.length; i += 1) {\n                    if (objects[i] === value) {\n                        return { $ref: paths[i] };\n                    }\n                }\n                objects.push(value);\n                paths.push(path);\n                if (Object.prototype.toString.apply(value) === '[object Array]') {\n                    nu = [];\n                    for (i = 0; i < value.length; i += 1) {\n                        nu[i] = derez(value[i], path + '[' + i + ']');\n                    }\n                }\n                else {\n                    nu = {};\n                    for (name in value) {\n                        if (Object.prototype.hasOwnProperty.call(value, name)) {\n                            nu[name] = derez(value[name], path + '[' + JSON.stringify(name) + ']');\n                        }\n                    }\n                }\n                return nu;\n            case 'number':\n            case 'string':\n            case 'boolean':\n                return value;\n        }\n    }(object, '$'));\n}\nexports.decycleObject = decycleObject;\nfunction safeJSONStringify(source) {\n    try {\n        return JSON.stringify(source);\n    }\n    catch (e) {\n        return JSON.stringify(decycleObject(source));\n    }\n}\nexports.safeJSONStringify = safeJSONStringify;\n\n\n//# sourceURL=webpack://Pusher/./src/core/utils/collections.ts?");
-
-/***/ }),
-
-/***/ "./src/core/utils/factory.ts":
-/*!***********************************!*\
-  !*** ./src/core/utils/factory.ts ***!
-  \***********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar assistant_to_the_transport_manager_1 = __webpack_require__(/*! ../transports/assistant_to_the_transport_manager */ \"./src/core/transports/assistant_to_the_transport_manager.ts\");\nvar handshake_1 = __webpack_require__(/*! ../connection/handshake */ \"./src/core/connection/handshake/index.ts\");\nvar pusher_authorizer_1 = __webpack_require__(/*! ../auth/pusher_authorizer */ \"./src/core/auth/pusher_authorizer.ts\");\nvar timeline_sender_1 = __webpack_require__(/*! ../timeline/timeline_sender */ \"./src/core/timeline/timeline_sender.ts\");\nvar presence_channel_1 = __webpack_require__(/*! ../channels/presence_channel */ \"./src/core/channels/presence_channel.ts\");\nvar private_channel_1 = __webpack_require__(/*! ../channels/private_channel */ \"./src/core/channels/private_channel.ts\");\nvar encrypted_channel_1 = __webpack_require__(/*! ../channels/encrypted_channel */ \"./src/core/channels/encrypted_channel.ts\");\nvar channel_1 = __webpack_require__(/*! ../channels/channel */ \"./src/core/channels/channel.ts\");\nvar connection_manager_1 = __webpack_require__(/*! ../connection/connection_manager */ \"./src/core/connection/connection_manager.ts\");\nvar channels_1 = __webpack_require__(/*! ../channels/channels */ \"./src/core/channels/channels.ts\");\nvar Factory = {\n    createChannels: function () {\n        return new channels_1.default();\n    },\n    createConnectionManager: function (key, options) {\n        return new connection_manager_1.default(key, options);\n    },\n    createChannel: function (name, pusher) {\n        return new channel_1.default(name, pusher);\n    },\n    createPrivateChannel: function (name, pusher) {\n        return new private_channel_1.default(name, pusher);\n    },\n    createPresenceChannel: function (name, pusher) {\n        return new presence_channel_1.default(name, pusher);\n    },\n    createEncryptedChannel: function (name, pusher) {\n        return new encrypted_channel_1.default(name, pusher);\n    },\n    createTimelineSender: function (timeline, options) {\n        return new timeline_sender_1.default(timeline, options);\n    },\n    createAuthorizer: function (channel, options) {\n        if (options.authorizer) {\n            return options.authorizer(channel, options);\n        }\n        return new pusher_authorizer_1.default(channel, options);\n    },\n    createHandshake: function (transport, callback) {\n        return new handshake_1.default(transport, callback);\n    },\n    createAssistantToTheTransportManager: function (manager, transport, options) {\n        return new assistant_to_the_transport_manager_1.default(manager, transport, options);\n    }\n};\nexports.default = Factory;\n\n\n//# sourceURL=webpack://Pusher/./src/core/utils/factory.ts?");
-
-/***/ }),
-
-/***/ "./src/core/utils/timers/abstract_timer.ts":
-/*!*************************************************!*\
-  !*** ./src/core/utils/timers/abstract_timer.ts ***!
-  \*************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Timer = (function () {\n    function Timer(set, clear, delay, callback) {\n        var _this = this;\n        this.clear = clear;\n        this.timer = set(function () {\n            if (_this.timer) {\n                _this.timer = callback(_this.timer);\n            }\n        }, delay);\n    }\n    Timer.prototype.isRunning = function () {\n        return this.timer !== null;\n    };\n    Timer.prototype.ensureAborted = function () {\n        if (this.timer) {\n            this.clear(this.timer);\n            this.timer = null;\n        }\n    };\n    return Timer;\n}());\nexports.default = Timer;\n\n\n//# sourceURL=webpack://Pusher/./src/core/utils/timers/abstract_timer.ts?");
-
-/***/ }),
-
-/***/ "./src/core/utils/timers/index.ts":
-/*!****************************************!*\
-  !*** ./src/core/utils/timers/index.ts ***!
-  \****************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar abstract_timer_1 = __webpack_require__(/*! ./abstract_timer */ \"./src/core/utils/timers/abstract_timer.ts\");\nfunction clearTimeout(timer) {\n    global.clearTimeout(timer);\n}\nfunction clearInterval(timer) {\n    global.clearInterval(timer);\n}\nvar OneOffTimer = (function (_super) {\n    __extends(OneOffTimer, _super);\n    function OneOffTimer(delay, callback) {\n        return _super.call(this, setTimeout, clearTimeout, delay, function (timer) {\n            callback();\n            return null;\n        }) || this;\n    }\n    return OneOffTimer;\n}(abstract_timer_1.default));\nexports.OneOffTimer = OneOffTimer;\nvar PeriodicTimer = (function (_super) {\n    __extends(PeriodicTimer, _super);\n    function PeriodicTimer(delay, callback) {\n        return _super.call(this, setInterval, clearInterval, delay, function (timer) {\n            callback();\n            return timer;\n        }) || this;\n    }\n    return PeriodicTimer;\n}(abstract_timer_1.default));\nexports.PeriodicTimer = PeriodicTimer;\n\n\n//# sourceURL=webpack://Pusher/./src/core/utils/timers/index.ts?");
-
-/***/ }),
-
-/***/ "./src/core/utils/url_store.ts":
-/*!*************************************!*\
-  !*** ./src/core/utils/url_store.ts ***!
-  \*************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar urlStore = {\n    baseUrl: \"https://pusher.com\",\n    urls: {\n        authenticationEndpoint: {\n            path: \"/docs/authenticating_users\",\n        },\n        javascriptQuickStart: {\n            path: \"/docs/javascript_quick_start\"\n        },\n        triggeringClientEvents: {\n            path: \"/docs/client_api_guide/client_events#trigger-events\"\n        }\n    }\n};\nvar buildLogSuffix = function (key) {\n    var urlPrefix = \"See:\";\n    var urlObj = urlStore.urls[key];\n    if (!urlObj)\n        return \"\";\n    var url;\n    if (urlObj.fullUrl) {\n        url = urlObj.fullUrl;\n    }\n    else if (urlObj.path) {\n        url = urlStore.baseUrl + urlObj.path;\n    }\n    if (!url)\n        return \"\";\n    return urlPrefix + \" \" + url;\n};\nexports.default = { buildLogSuffix: buildLogSuffix };\n\n\n//# sourceURL=webpack://Pusher/./src/core/utils/url_store.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/auth/xhr_auth.ts":
-/*!**************************************************!*\
-  !*** ./src/runtimes/isomorphic/auth/xhr_auth.ts ***!
-  \**************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar logger_1 = __webpack_require__(/*! core/logger */ \"./src/core/logger.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar url_store_1 = __webpack_require__(/*! core/utils/url_store */ \"./src/core/utils/url_store.ts\");\nvar ajax = function (context, socketId, callback) {\n    var self = this, xhr;\n    xhr = runtime_1.default.createXHR();\n    xhr.open(\"POST\", self.options.authEndpoint, true);\n    xhr.setRequestHeader(\"Content-Type\", \"application/x-www-form-urlencoded\");\n    for (var headerName in this.authOptions.headers) {\n        xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);\n    }\n    xhr.onreadystatechange = function () {\n        if (xhr.readyState === 4) {\n            if (xhr.status === 200) {\n                var data, parsed = false;\n                try {\n                    data = JSON.parse(xhr.responseText);\n                    parsed = true;\n                }\n                catch (e) {\n                    callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);\n                }\n                if (parsed) {\n                    callback(false, data);\n                }\n            }\n            else {\n                var suffix = url_store_1.default.buildLogSuffix(\"authenticationEndpoint\");\n                logger_1.default.warn(\"Couldn't retrieve authentication info. \" + xhr.status +\n                    (\"Clients must be authenticated to join private or presence channels. \" + suffix));\n                callback(true, xhr.status);\n            }\n        }\n    };\n    xhr.send(this.composeQuery(socketId));\n    return xhr;\n};\nexports.default = ajax;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/auth/xhr_auth.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/default_strategy.ts":
-/*!*****************************************************!*\
-  !*** ./src/runtimes/isomorphic/default_strategy.ts ***!
-  \*****************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar getDefaultStrategy = function (config) {\n    var wsStrategy;\n    if (config.useTLS) {\n        wsStrategy = [\n            \":best_connected_ever\",\n            \":ws_loop\",\n            [\":delayed\", 2000, [\":http_loop\"]]\n        ];\n    }\n    else {\n        wsStrategy = [\n            \":best_connected_ever\",\n            \":ws_loop\",\n            [\":delayed\", 2000, [\":wss_loop\"]],\n            [\":delayed\", 5000, [\":http_loop\"]]\n        ];\n    }\n    return [\n        [\":def\", \"ws_options\", {\n                hostNonTLS: config.wsHost + \":\" + config.wsPort,\n                hostTLS: config.wsHost + \":\" + config.wssPort,\n                httpPath: config.wsPath\n            }],\n        [\":def\", \"wss_options\", [\":extend\", \":ws_options\", {\n                    useTLS: true\n                }]],\n        [\":def\", \"http_options\", {\n                hostNonTLS: config.httpHost + \":\" + config.httpPort,\n                hostTLS: config.httpHost + \":\" + config.httpsPort,\n                httpPath: config.httpPath\n            }],\n        [\":def\", \"timeouts\", {\n                loop: true,\n                timeout: 15000,\n                timeoutLimit: 60000\n            }],\n        [\":def\", \"ws_manager\", [\":transport_manager\", {\n                    lives: 2,\n                    minPingDelay: 10000,\n                    maxPingDelay: config.activity_timeout\n                }]],\n        [\":def\", \"streaming_manager\", [\":transport_manager\", {\n                    lives: 2,\n                    minPingDelay: 10000,\n                    maxPingDelay: config.activity_timeout\n                }]],\n        [\":def_transport\", \"ws\", \"ws\", 3, \":ws_options\", \":ws_manager\"],\n        [\":def_transport\", \"wss\", \"ws\", 3, \":wss_options\", \":ws_manager\"],\n        [\":def_transport\", \"xhr_streaming\", \"xhr_streaming\", 1, \":http_options\", \":streaming_manager\"],\n        [\":def_transport\", \"xhr_polling\", \"xhr_polling\", 1, \":http_options\"],\n        [\":def\", \"ws_loop\", [\":sequential\", \":timeouts\", \":ws\"]],\n        [\":def\", \"wss_loop\", [\":sequential\", \":timeouts\", \":wss\"]],\n        [\":def\", \"streaming_loop\", [\":sequential\", \":timeouts\", \":xhr_streaming\"]],\n        [\":def\", \"polling_loop\", [\":sequential\", \":timeouts\", \":xhr_polling\"]],\n        [\":def\", \"http_loop\", [\":if\", [\":is_supported\", \":streaming_loop\"], [\n                    \":best_connected_ever\",\n                    \":streaming_loop\",\n                    [\":delayed\", 4000, [\":polling_loop\"]]\n                ], [\n                    \":polling_loop\"\n                ]]],\n        [\":def\", \"strategy\",\n            [\":cached\", 1800000,\n                [\":first_connected\",\n                    [\":if\", [\":is_supported\", \":ws\"],\n                        wsStrategy,\n                        \":http_loop\"\n                    ]\n                ]\n            ]\n        ]\n    ];\n};\nexports.default = getDefaultStrategy;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/default_strategy.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/http/http.ts":
-/*!**********************************************!*\
-  !*** ./src/runtimes/isomorphic/http/http.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar http_request_1 = __webpack_require__(/*! core/http/http_request */ \"./src/core/http/http_request.ts\");\nvar http_socket_1 = __webpack_require__(/*! core/http/http_socket */ \"./src/core/http/http_socket.ts\");\nvar http_streaming_socket_1 = __webpack_require__(/*! core/http/http_streaming_socket */ \"./src/core/http/http_streaming_socket.ts\");\nvar http_polling_socket_1 = __webpack_require__(/*! core/http/http_polling_socket */ \"./src/core/http/http_polling_socket.ts\");\nvar http_xhr_request_1 = __webpack_require__(/*! ./http_xhr_request */ \"./src/runtimes/isomorphic/http/http_xhr_request.ts\");\nvar HTTP = {\n    createStreamingSocket: function (url) {\n        return this.createSocket(http_streaming_socket_1.default, url);\n    },\n    createPollingSocket: function (url) {\n        return this.createSocket(http_polling_socket_1.default, url);\n    },\n    createSocket: function (hooks, url) {\n        return new http_socket_1.default(hooks, url);\n    },\n    createXHR: function (method, url) {\n        return this.createRequest(http_xhr_request_1.default, method, url);\n    },\n    createRequest: function (hooks, method, url) {\n        return new http_request_1.default(hooks, method, url);\n    }\n};\nexports.default = HTTP;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/http/http.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/http/http_xhr_request.ts":
-/*!**********************************************************!*\
-  !*** ./src/runtimes/isomorphic/http/http_xhr_request.ts ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar hooks = {\n    getRequest: function (socket) {\n        var Constructor = runtime_1.default.getXHRAPI();\n        var xhr = new Constructor();\n        xhr.onreadystatechange = xhr.onprogress = function () {\n            switch (xhr.readyState) {\n                case 3:\n                    if (xhr.responseText && xhr.responseText.length > 0) {\n                        socket.onChunk(xhr.status, xhr.responseText);\n                    }\n                    break;\n                case 4:\n                    if (xhr.responseText && xhr.responseText.length > 0) {\n                        socket.onChunk(xhr.status, xhr.responseText);\n                    }\n                    socket.emit(\"finished\", xhr.status);\n                    socket.close();\n                    break;\n            }\n        };\n        return xhr;\n    },\n    abortRequest: function (xhr) {\n        xhr.onreadystatechange = null;\n        xhr.abort();\n    }\n};\nexports.default = hooks;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/http/http_xhr_request.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/runtime.ts":
-/*!********************************************!*\
-  !*** ./src/runtimes/isomorphic/runtime.ts ***!
-  \********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar Collections = __webpack_require__(/*! core/utils/collections */ \"./src/core/utils/collections.ts\");\nvar transports_1 = __webpack_require__(/*! isomorphic/transports/transports */ \"./src/runtimes/isomorphic/transports/transports.ts\");\nvar default_strategy_1 = __webpack_require__(/*! ./default_strategy */ \"./src/runtimes/isomorphic/default_strategy.ts\");\nvar transport_connection_initializer_1 = __webpack_require__(/*! ./transports/transport_connection_initializer */ \"./src/runtimes/isomorphic/transports/transport_connection_initializer.ts\");\nvar http_1 = __webpack_require__(/*! ./http/http */ \"./src/runtimes/isomorphic/http/http.ts\");\nvar Isomorphic = {\n    getDefaultStrategy: default_strategy_1.default,\n    Transports: transports_1.default,\n    transportConnectionInitializer: transport_connection_initializer_1.default,\n    HTTPFactory: http_1.default,\n    setup: function (PusherClass) {\n        PusherClass.ready();\n    },\n    getLocalStorage: function () {\n        return undefined;\n    },\n    getClientFeatures: function () {\n        return Collections.keys(Collections.filterObject({ \"ws\": transports_1.default.ws }, function (t) { return t.isSupported({}); }));\n    },\n    getProtocol: function () {\n        return \"http:\";\n    },\n    isXHRSupported: function () {\n        return true;\n    },\n    createSocketRequest: function (method, url) {\n        if (this.isXHRSupported()) {\n            return this.HTTPFactory.createXHR(method, url);\n        }\n        else {\n            throw \"Cross-origin HTTP requests are not supported\";\n        }\n    },\n    createXHR: function () {\n        var Constructor = this.getXHRAPI();\n        return new Constructor();\n    },\n    createWebSocket: function (url) {\n        var Constructor = this.getWebSocketAPI();\n        return new Constructor(url);\n    },\n    addUnloadListener: function (listener) { },\n    removeUnloadListener: function (listener) { }\n};\nexports.default = Isomorphic;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/runtime.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/timeline/xhr_timeline.ts":
-/*!**********************************************************!*\
-  !*** ./src/runtimes/isomorphic/timeline/xhr_timeline.ts ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar logger_1 = __webpack_require__(/*! core/logger */ \"./src/core/logger.ts\");\nvar Collections = __webpack_require__(/*! core/utils/collections */ \"./src/core/utils/collections.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar getAgent = function (sender, useTLS) {\n    return function (data, callback) {\n        var scheme = \"http\" + (useTLS ? \"s\" : \"\") + \"://\";\n        var url = scheme + (sender.host || sender.options.host) + sender.options.path;\n        var query = Collections.buildQueryString(data);\n        url += (\"/\" + 2 + \"?\" + query);\n        var xhr = runtime_1.default.createXHR();\n        xhr.open(\"GET\", url, true);\n        xhr.onreadystatechange = function () {\n            if (xhr.readyState === 4) {\n                var status_1 = xhr.status, responseText = xhr.responseText;\n                if (status_1 !== 200) {\n                    logger_1.default.debug(\"TimelineSender Error: received \" + status_1 + \" from stats.pusher.com\");\n                    return;\n                }\n                try {\n                    var host = JSON.parse(responseText).host;\n                }\n                catch (e) {\n                    logger_1.default.debug(\"TimelineSenderError: invalid response \" + responseText);\n                }\n                if (host) {\n                    sender.host = host;\n                }\n            }\n        };\n        xhr.send();\n    };\n};\nvar xhr = {\n    name: 'xhr',\n    getAgent: getAgent\n};\nexports.default = xhr;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/timeline/xhr_timeline.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/transports/transport_connection_initializer.ts":
-/*!********************************************************************************!*\
-  !*** ./src/runtimes/isomorphic/transports/transport_connection_initializer.ts ***!
-  \********************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nfunction default_1() {\n    var self = this;\n    self.timeline.info(self.buildTimelineMessage({\n        transport: self.name + (self.options.useTLS ? \"s\" : \"\")\n    }));\n    if (self.hooks.isInitialized()) {\n        self.changeState(\"initialized\");\n    }\n    else {\n        self.onClose();\n    }\n}\nexports.default = default_1;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/transports/transport_connection_initializer.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/isomorphic/transports/transports.ts":
-/*!**********************************************************!*\
-  !*** ./src/runtimes/isomorphic/transports/transports.ts ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar URLSchemes = __webpack_require__(/*! core/transports/url_schemes */ \"./src/core/transports/url_schemes.ts\");\nvar transport_1 = __webpack_require__(/*! core/transports/transport */ \"./src/core/transports/transport.ts\");\nvar Collections = __webpack_require__(/*! core/utils/collections */ \"./src/core/utils/collections.ts\");\nvar runtime_1 = __webpack_require__(/*! runtime */ \"./src/runtimes/react-native/runtime.ts\");\nvar WSTransport = new transport_1.default({\n    urls: URLSchemes.ws,\n    handlesActivityChecks: false,\n    supportsPing: false,\n    isInitialized: function () {\n        return Boolean(runtime_1.default.getWebSocketAPI());\n    },\n    isSupported: function () {\n        return Boolean(runtime_1.default.getWebSocketAPI());\n    },\n    getSocket: function (url) {\n        return runtime_1.default.createWebSocket(url);\n    }\n});\nvar httpConfiguration = {\n    urls: URLSchemes.http,\n    handlesActivityChecks: false,\n    supportsPing: true,\n    isInitialized: function () {\n        return true;\n    }\n};\nexports.streamingConfiguration = Collections.extend({ getSocket: function (url) {\n        return runtime_1.default.HTTPFactory.createStreamingSocket(url);\n    }\n}, httpConfiguration);\nexports.pollingConfiguration = Collections.extend({ getSocket: function (url) {\n        return runtime_1.default.HTTPFactory.createPollingSocket(url);\n    }\n}, httpConfiguration);\nvar xhrConfiguration = {\n    isSupported: function () {\n        return runtime_1.default.isXHRSupported();\n    }\n};\nvar XHRStreamingTransport = new transport_1.default(Collections.extend({}, exports.streamingConfiguration, xhrConfiguration));\nvar XHRPollingTransport = new transport_1.default(Collections.extend({}, exports.pollingConfiguration, xhrConfiguration));\nvar Transports = {\n    ws: WSTransport,\n    xhr_streaming: XHRStreamingTransport,\n    xhr_polling: XHRPollingTransport\n};\nexports.default = Transports;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/isomorphic/transports/transports.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/react-native/net_info.ts":
-/*!***********************************************!*\
-  !*** ./src/runtimes/react-native/net_info.ts ***!
-  \***********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nvar __extends = (this && this.__extends) || (function () {\n    var extendStatics = function (d, b) {\n        extendStatics = Object.setPrototypeOf ||\n            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||\n            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };\n        return extendStatics(d, b);\n    };\n    return function (d, b) {\n        extendStatics(d, b);\n        function __() { this.constructor = d; }\n        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());\n    };\n})();\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar netinfo_1 = __webpack_require__(/*! @react-native-community/netinfo */ \"./node_modules/@react-native-community/netinfo/lib/module/index.js\");\nvar dispatcher_1 = __webpack_require__(/*! core/events/dispatcher */ \"./src/core/events/dispatcher.ts\");\nfunction hasOnlineConnectionState(connectionState) {\n    return connectionState.type.toLowerCase() !== \"none\";\n}\nvar NetInfo = (function (_super) {\n    __extends(NetInfo, _super);\n    function NetInfo() {\n        var _this = _super.call(this) || this;\n        _this.online = true;\n        netinfo_1.default.getConnectionInfo().then(function (connectionState) {\n            _this.online = hasOnlineConnectionState(connectionState);\n        });\n        netinfo_1.default.addEventListener('connectionChange', function (connectionState) {\n            var isNowOnline = hasOnlineConnectionState(connectionState);\n            if (_this.online === isNowOnline)\n                return;\n            _this.online = isNowOnline;\n            if (_this.online) {\n                _this.emit(\"online\");\n            }\n            else {\n                _this.emit(\"offline\");\n            }\n        });\n        return _this;\n    }\n    NetInfo.prototype.isOnline = function () {\n        return this.online;\n    };\n    return NetInfo;\n}(dispatcher_1.default));\nexports.NetInfo = NetInfo;\nexports.Network = new NetInfo();\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/react-native/net_info.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/react-native/runtime.ts":
-/*!**********************************************!*\
-  !*** ./src/runtimes/react-native/runtime.ts ***!
-  \**********************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nvar runtime_1 = __webpack_require__(/*! isomorphic/runtime */ \"./src/runtimes/isomorphic/runtime.ts\");\nvar net_info_1 = __webpack_require__(/*! ./net_info */ \"./src/runtimes/react-native/net_info.ts\");\nvar xhr_auth_1 = __webpack_require__(/*! isomorphic/auth/xhr_auth */ \"./src/runtimes/isomorphic/auth/xhr_auth.ts\");\nvar xhr_timeline_1 = __webpack_require__(/*! isomorphic/timeline/xhr_timeline */ \"./src/runtimes/isomorphic/timeline/xhr_timeline.ts\");\nvar getDefaultStrategy = runtime_1.default.getDefaultStrategy, Transports = runtime_1.default.Transports, setup = runtime_1.default.setup, getProtocol = runtime_1.default.getProtocol, isXHRSupported = runtime_1.default.isXHRSupported, getLocalStorage = runtime_1.default.getLocalStorage, createXHR = runtime_1.default.createXHR, createWebSocket = runtime_1.default.createWebSocket, addUnloadListener = runtime_1.default.addUnloadListener, removeUnloadListener = runtime_1.default.removeUnloadListener, transportConnectionInitializer = runtime_1.default.transportConnectionInitializer, createSocketRequest = runtime_1.default.createSocketRequest, HTTPFactory = runtime_1.default.HTTPFactory;\nvar ReactNative = {\n    getDefaultStrategy: getDefaultStrategy,\n    Transports: Transports,\n    setup: setup,\n    getProtocol: getProtocol,\n    isXHRSupported: isXHRSupported,\n    getLocalStorage: getLocalStorage,\n    createXHR: createXHR,\n    createWebSocket: createWebSocket,\n    addUnloadListener: addUnloadListener,\n    removeUnloadListener: removeUnloadListener,\n    transportConnectionInitializer: transportConnectionInitializer,\n    createSocketRequest: createSocketRequest,\n    HTTPFactory: HTTPFactory,\n    TimelineTransport: xhr_timeline_1.default,\n    getAuthorizers: function () {\n        return { ajax: xhr_auth_1.default };\n    },\n    getWebSocketAPI: function () {\n        return WebSocket;\n    },\n    getXHRAPI: function () {\n        return XMLHttpRequest;\n    },\n    getNetwork: function () {\n        return net_info_1.Network;\n    }\n};\nexports.default = ReactNative;\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/react-native/runtime.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/react-native/tweetnacl-dummy.ts":
-/*!******************************************************!*\
-  !*** ./src/runtimes/react-native/tweetnacl-dummy.ts ***!
-  \******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nexports.default = {\n    secretbox: {},\n    randomBytes: {},\n};\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/react-native/tweetnacl-dummy.ts?");
-
-/***/ }),
-
-/***/ "./src/runtimes/react-native/tweetnacl-util-dummy.ts":
-/*!***********************************************************!*\
-  !*** ./src/runtimes/react-native/tweetnacl-util-dummy.ts ***!
-  \***********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-eval("\nObject.defineProperty(exports, \"__esModule\", { value: true });\nexports.default = {\n    encodeUTF8: {},\n    decodeUTF8: {},\n    encodeBase64: {},\n    decodeBase64: {},\n};\n\n\n//# sourceURL=webpack://Pusher/./src/runtimes/react-native/tweetnacl-util-dummy.ts?");
-
-/***/ }),
-
-/***/ "react-native":
-/*!*******************************!*\
-  !*** external "react-native" ***!
-  \*******************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-eval("module.exports = require(\"react-native\");\n\n//# sourceURL=webpack://Pusher/external_%22react-native%22?");
 
 /***/ })
-
-/******/ });
+/******/ ]);

@@ -13,6 +13,10 @@ var objectAssign = require('object-assign-deep');
   We also add 'src/' so that the runtimes/react-native folder can conveniently import 'core/' modules.
 */
 module.exports = objectAssign(require('./config.shared'),{
+  optimization: {
+    minimize: false
+  },
+  devtool: 'none',
   output: {
     library: "Pusher",
     libraryTarget:"commonjs2",
@@ -21,7 +25,9 @@ module.exports = objectAssign(require('./config.shared'),{
   },
   target: "node",
   externals: {
-    "react-native": "react-native", // our Reachability implementation needs to reference react-native.
+    // we depend on these packages but don't want to include them in the bundle
+    "@react-native-community/netinfo": "@react-native-community/netinfo",
+    "react-native": "react-native",
   },
   resolve: {
     modules: ['src/', 'src/runtimes/react-native', 'src/runtimes', 'node_modules'],
