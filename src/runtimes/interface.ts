@@ -8,6 +8,7 @@ import Socket from 'core/socket';
 import HTTPFactory from 'core/http/http_factory';
 import HTTPRequest from 'core/http/http_request';
 import Pusher from 'core/pusher';
+import JSONPRequest from './web/dom/jsonp_request';
 
 /*
 This interface is implemented in web/runtime, node/runtime, react-native/runtime
@@ -38,6 +39,14 @@ interface Runtime {
   HTTPFactory: HTTPFactory;
   isXHRSupported() : boolean;
   createSocketRequest(method : string, url : string) : HTTPRequest;
+
+  // these methods/types are only implemented in the web Runtime, so they're
+  // optional but must be included in the interface
+  getDocument?(): Document;
+  createScriptRequest?(url: string): any;
+  createJSONPRequest?(url: string, data: any): JSONPRequest;
+  ScriptReceivers?: any;
+  isXDRSupported?(useTLS?: boolean): boolean;
 }
 
 export default Runtime;
