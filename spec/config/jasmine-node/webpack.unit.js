@@ -30,4 +30,3 @@ module.exports =  objectAssign({}, baseConfig, {
     }
   }
 });
->>>>>>> update test configs
