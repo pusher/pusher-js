@@ -1,12 +1,12 @@
-# Pusher Javascript Client
+# Pusher Channels Javascript Client
 
-This Pusher client library supports web browsers, web workers, Node.js and
-React Native.
+This Pusher Channels client library supports web browsers, web workers, Node.js
+and React Native.
 
-If you're looking for the Pusher server library for Node.js, use
+If you're looking for the Pusher Channels server library for Node.js, use
 [pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
 
-For tutorials and more in-depth information about the Pusher platform, visit
+For tutorials and more in-depth information about Pusher Channels, visit
 our [official docs](https://pusher.com/docs/javascript_quick_start).
 
 ## Usage Overview
@@ -36,7 +36,7 @@ The following topics are covered:
 
 ### Web
 
-If you're using Pusher on a web page, you can install the library via:
+If you're using Pusher Channels on a web page, you can install the library via:
 
 #### Yarn (or NPM)
 
@@ -124,11 +124,11 @@ const socket = new Pusher(APP_KEY, {
 });
 ```
 
-You can get your `APP_KEY` and `APP_CLUSTER` from the [Pusher dashboard](https://dashboard.pusher.com/).
+You can get your `APP_KEY` and `APP_CLUSTER` from the [Pusher Channels dashboard](https://dashboard.pusher.com/).
 
 ## Configuration
 
-There are a number of configuration parameters which can be set for the Pusher client, which can be passed as an object to the Pusher constructor, i.e.:
+There are a number of configuration parameters which can be set for the client, which can be passed as an object to the Pusher constructor, i.e.:
 
 ```js
 const socket = new Pusher(APP_KEY, {
@@ -209,7 +209,7 @@ const socket = new Pusher(APP_KEY, {
 
 #### `cluster` (String)
 
-Specifies the cluster that PusherJS should connect to. [If you'd like to see a full list of our clusters, click here](https://pusher.com/docs/clusters). If you do not specify a cluster, `mt1` will be used by default.
+Specifies the cluster that pusher-js should connect to. [If you'd like to see a full list of our clusters, click here](https://pusher.com/docs/clusters). If you do not specify a cluster, `mt1` will be used by default.
 
 ```js
 const socket = new Pusher(APP_KEY, {
@@ -223,7 +223,7 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 #### `enabledTransports` (Array)
 
-Specifies which transports should be used by Pusher to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. If you specify your transports in this way, you may miss out on new transports we add in the future.
+Specifies which transports should be used by pusher-js to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. If you specify your transports in this way, you may miss out on new transports we add in the future.
 
 ```js
 // Only use WebSockets
@@ -235,7 +235,7 @@ const socket = new Pusher(APP_KEY, {
 
 #### `disabledTransports` (Array)
 
-Specifies which transports must not be used by Pusher to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. This is a whitelist, so any new transports we introduce in the future will be used until you explicitly add them to this list.
+Specifies which transports must not be used by pusher-js to establish a connection. This settings overwrites transports whitelisted via the `enabledTransports` options. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. This is a whitelist, so any new transports we introduce in the future will be used until you explicitly add them to this list.
 
 ```js
 // Use all transports except for sockjs
@@ -254,7 +254,7 @@ const socket = new Pusher(APP_KEY, {
 
 #### `wsHost`, `wsPort`, `wssPort`, `httpHost`, `httpPort`, `httpsPort`
 
-These can be changed to point to alternative Pusher URLs (used internally for our staging server).
+These can be changed to point to alternative Pusher Channels URLs (used internally for our staging server).
 
 #### `wsPath`
 
@@ -280,7 +280,7 @@ Enables logging to the browser console via calls to `console.log`.
 
 ### `Pusher.log` (Function)
 
-Assign a custom log handler for the Pusher library logging. For example:
+Assign a custom log handler for the pusher-js library logging. For example:
 
 ```js
 Pusher.log = (msg) => {
@@ -292,7 +292,7 @@ By setting the `log` property you also override the use of `Pusher.enableLogging
 
 ## Connection
 
-A connection to Pusher is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
+A connection to Pusher Channels is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
 
 ```js
 const socket = new Pusher(APP_KEY, {
@@ -485,7 +485,7 @@ pusher.connection.bind('state_change', function(states) {
 
 ## Connection Events
 
-To listen for when you connect to Pusher:
+To listen for when you connect to Pusher Channels:
 
 ```js
 socket.connection.bind('connected', callback);
@@ -521,7 +521,7 @@ Minified files should have `.min` in their names, as in the `dist/web` directory
 
 ## SockJS compatibility
 
-Most browsers have a limit of 6 simultaneous connections to a single domain, but Internet Explorer 6 and 7 have a limit of just 2. This means that you can only use a single Pusher connection in these browsers, because SockJS requires an HTTP connection for incoming data and another one for sending. Opening the second connection will break the first one as the client won't be able to respond to ping messages and get disconnected eventually.
+Most browsers have a limit of 6 simultaneous connections to a single domain, but Internet Explorer 6 and 7 have a limit of just 2. This means that you can only use a single Pusher Channels connection in these browsers, because SockJS requires an HTTP connection for incoming data and another one for sending. Opening the second connection will break the first one as the client won't be able to respond to ping messages and get disconnected eventually.
 
 All other browsers work fine with two or three connections.
 
@@ -545,7 +545,7 @@ This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respecti
 
 ### Core Vs. Platform-Specific Code
 
-New to PusherJS 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
+New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
 Web Workers.
 
 In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
