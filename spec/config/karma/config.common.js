@@ -3,9 +3,10 @@ var objectAssign = require('object-assign-deep');
 
 var browserList;
 if (process.env.MINIMAL_INTEGRATION_TESTS) {
-  browserList = ['Chrome'];
+  browserList = ['ChromeHeadless'];
 } else {
-  browserList = ['Chrome', 'Firefox', 'Opera', 'Safari'];
+  // browserList = ['ChromeHeadless', 'FirefoxHeadless'];
+  browserList = [ 'FirefoxHeadless'];
 }
 
 module.exports = {
