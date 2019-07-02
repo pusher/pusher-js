@@ -6,6 +6,16 @@ var Collections = require('core/utils/collections');
 var Runtime = require('runtime').default;
 var TRANSPORTS = Runtime.Transports;
 
+function delay(time) {
+  var val = false;
+  setTimeout(function(){
+    val = true;
+  }, time)
+  return function() {
+    return val;
+  }
+
+}
 function canRunTwoConnections(transport) {
   if (transport !== "sockjs") {
     return true;
@@ -619,9 +629,11 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
+
+    var unsubDelayFn = delay(5000)
     waitsFor(function() {
-      return !pusher.channel(channelName);
-    }, "unsubscription to finish", 10000);
+      return unsubDelayFn()
+    }, "unsubscription to finish", 5500)
 
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
@@ -695,9 +707,10 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
+    var unsubDelayFn = delay(5000)
     waitsFor(function() {
-      return !pusher.channel(channelName);
-    }, "unsubscription to finish", 10000);
+      return unsubDelayFn()
+    }, "unsubscription to finish", 5500)
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
 
@@ -737,9 +750,10 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
+    var unsubDelayFn = delay(5000)
     waitsFor(function() {
-      return !pusher.channel(channelName);
-    }, "unsubscription to finish", 10000);
+      return unsubDelayFn()
+    }, "unsubscription to finish", 5500)
 
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
