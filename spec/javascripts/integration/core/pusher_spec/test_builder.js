@@ -6,6 +6,22 @@ var Collections = require('core/utils/collections');
 var Runtime = require('runtime').default;
 var TRANSPORTS = Runtime.Transports;
 
+// this is a slightly horrible function that allows easy placement of arbitrary
+// delays in jasmine async tests. e.g:
+// waitsFor(sleep(3000), "thing to happen", 3500)
+function sleep(time) {
+  var fn = function() {
+    var val = false;
+    setTimeout(function(){
+      val = true;
+    }, time)
+    return function() {
+      return val;
+    }
+  }
+  return fn();
+}
+
 function canRunTwoConnections(transport) {
   if (transport !== "sockjs") {
     return true;
@@ -619,9 +635,9 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
-    waitsFor(function() {
-      return !pusher.channel(channelName);
-    }, "unsubscription to finish", 10000);
+    // there is no easy way to know when an unsubscribe request has been
+    // actioned by the server, so we just wait a while
+    waitsFor(sleep(3000), "unsubscription to finish", 3500)
 
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
@@ -695,9 +711,9 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
-    waitsFor(function() {
-      return !pusher.channel(channelName);
-    }, "unsubscription to finish", 10000);
+    // there is no easy way to know when an unsubscribe request has been
+    // actioned by the server, so we just wait a while
+    waitsFor(sleep(3000), "unsubscription to finish", 3500)
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
 
@@ -737,9 +753,9 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
-    waitsFor(function() {
-      return !pusher.channel(channelName);
-    }, "unsubscription to finish", 10000);
+    // there is no easy way to know when an unsubscribe request has been
+    // actioned by the server, so we just wait a while
+    waitsFor(sleep(3000), "unsubscription to finish", 3500)
 
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);

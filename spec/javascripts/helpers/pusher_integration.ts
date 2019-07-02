@@ -1,5 +1,5 @@
-import Pusher from 'core/pusher';
-import {ScriptReceiverFactory} from 'dom/script_receiver_factory';
+import Pusher from '../../../src/core/pusher';
+import {ScriptReceiverFactory} from '../../../src/runtimes/web/dom/script_receiver_factory';
 
 class PusherIntegration extends Pusher {
 
