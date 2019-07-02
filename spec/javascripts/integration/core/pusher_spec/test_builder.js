@@ -6,15 +6,14 @@ var Collections = require('core/utils/collections');
 var Runtime = require('runtime').default;
 var TRANSPORTS = Runtime.Transports;
 
+// returns a function that returns false until <time> has passed. Used to force
+// tests to wait.
 function delay(time) {
   var val = false;
   setTimeout(function(){
     val = true;
   }, time)
-  return function() {
-    return val;
-  }
-
+  return () => val;
 }
 function canRunTwoConnections(transport) {
   if (transport !== "sockjs") {
@@ -629,11 +628,12 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
-
-    var unsubDelayFn = delay(5000)
+    // there is no easy way to know when an unsubscribe request has been
+    // actioned by the server, so we just wait a while
+    var unsubDelayFn = delay(3000)
     waitsFor(function() {
       return unsubDelayFn()
-    }, "unsubscription to finish", 5500)
+    }, "unsubscription to finish", 3500)
 
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
@@ -707,10 +707,12 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
-    var unsubDelayFn = delay(5000)
+    // there is no easy way to know when an unsubscribe request has been
+    // actioned by the server, so we just wait a while
+    var unsubDelayFn = delay(3000)
     waitsFor(function() {
       return unsubDelayFn()
-    }, "unsubscription to finish", 5500)
+    }, "unsubscription to finish", 3500)
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
 
@@ -750,10 +752,12 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(true);
 
-    var unsubDelayFn = delay(5000)
+    // there is no easy way to know when an unsubscribe request has been
+    // actioned by the server, so we just wait a while
+    var unsubDelayFn = delay(3000)
     waitsFor(function() {
       return unsubDelayFn()
-    }, "unsubscription to finish", 5500)
+    }, "unsubscription to finish", 3500)
 
     runs(function() {
       expect(pusher.channel(channelName)).toBe(undefined);
