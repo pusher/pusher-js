@@ -1,19 +1,33 @@
+var objectAssign = require('object-assign-deep');
 var baseConfig = require('../../../webpack/config.node');
 var path = require('path');
 
-baseConfig.entry = __dirname + '/../../javascripts/integration/index.node';
-
-baseConfig.output = {
+module.exports = objectAssign({}, baseConfig, {
+  entry: {
+    pusher: path.join(
+      __dirname,
+      "..",
+      "..",
+      "javascripts",
+      "integration",
+      "index.node"
+    )
+  },
+  output: {
     filename: "integration_tests_spec.js",
-    path: __dirname +"/../../../tmp/node_integration",
+    path: path.join(__dirname, "..", "..", "..", "tmp", "node_integration"),
     libraryTarget: "var"
-},
-
-baseConfig.externals.testenv = "'node'";
-baseConfig.resolve.alias = {
-  pusher_integration: 'core/index',
-  integration: 'node/integration'
-}
-baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
-
-module.exports = baseConfig;
+  },
+  resolve: {
+    modules: ['spec/javascripts/helpers'],
+    alias: {
+      pusher_integration: 'core/index',
+      integration: 'node/integration',
+      'dom/dependencies': 'node/mock-dom-dependencies',
+      'dom/dependency_loader': 'node/mock-dom-dependencies'
+    },
+  },
+  externals: {
+    testenv: "'node'"
+  }
+});

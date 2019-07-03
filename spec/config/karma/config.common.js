@@ -1,39 +1,42 @@
+var webpackConfig = require('../../../webpack/config.shared');
+var objectAssign = require('object-assign-deep');
+
+var browserList;
+if (process.env.MINIMAL_INTEGRATION_TESTS) {
+  browserList = ['Chrome'];
+} else {
+  browserList = ['Chrome', 'Firefox', 'Opera', 'Safari'];
+}
+
 module.exports = {
   basePath: '../../../',
   frameworks: ["jasmine"],
 
-  reporters: ['coverage', 'dots'],
+  reporters: ['coverage', 'verbose'],
 
   coverageReporter: {
     type : 'html',
     dir : 'coverage/'
   },
 
-  preprocessors: {
-    '**/spec/javascripts/node_modules/**/*.ts': ['webpack']
-  },
-
-  webpack: {
+  webpack: objectAssign({}, webpackConfig, {
+    mode: 'development',
     resolve: {
-      modulesDirectories: [
-        'node_modules',
-        'web_modules',
-        'src',
+      modules: [
         'src/runtimes/web',
-        'src/runtimes',
         'spec/javascripts/helpers'
       ]
     },
     externals: {
       testenv: "'web'"
     }
-  },
+  }),
   port: 9876,
   runnerPort: 9100,
   colors: true,
   autoWatch: true,
 
-  browsers: ['Chrome', 'Firefox', 'Opera', 'Safari'],
+  browsers: browserList,
   captureTimeout: 3e5,
   browserNoActivityTimeout: 3e5,
   browserDisconnectTimeout: 3e5,

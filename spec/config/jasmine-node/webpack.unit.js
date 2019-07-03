@@ -1,15 +1,32 @@
-var baseConfig = require('../../../webpack/config.node');
-var path = require('path');
+var objectAssign = require("object-assign-deep");
+var webpack = require("webpack");
+var baseConfig = require("../../../webpack/config.node");
+var path = require("path");
+var dummyDependencies = {};
 
-baseConfig.entry = __dirname + '/../../javascripts/unit/index.node';
-
-baseConfig.output = {
+module.exports =  objectAssign({}, baseConfig, {
+  entry: {
+    pusher: path.join(
+      __dirname,
+      "..",
+      "..",
+      "javascripts",
+      "unit",
+      "index.node"
+    )
+  },
+  output: {
     filename: "unit_tests_spec.js",
-    path: __dirname +"/../../../tmp/node_unit",
+    path: path.join(__dirname, "..", "..", "..", "tmp", "node_unit"),
     libraryTarget: "var"
-},
-
-baseConfig.externals.testenv = "'node'";
-baseConfig.resolve.modulesDirectories.push('spec/javascripts/helpers')
-
-module.exports = baseConfig;
+  },
+  externals: {
+    testenv: "'node'"
+  },
+  resolve: {
+    modules: ['spec/javascripts/helpers'],
+    alias: {
+      "dom/dependencies": "node/mock-dom-dependencies"
+    }
+  }
+});

@@ -104,11 +104,20 @@ describe("StrategyBuilder", function() {
   });
 
   it("should throw an error on unsupported transport", function() {
-    expect(function() {
+    // we can't use toThrow with jasmine.any because it compares
+    // (exception.message || exception) with (expected.message || expected)
+    // the thrown exception has a message so it's passed to the matcher. The
+    // message is a string, and *not* an instanceof the expected class
+    // https://github.com/jasmine/jasmine/blob/v1.3.1/src/core/Matchers.js#L331-L333
+    var exception;
+    try {
       StrategyBuilder.build([
         [":def_transport", "one", "fake", 1]
       ]);
-    }).toThrow(jasmine.any(Errors.UnsupportedTransport));
+    } catch(e) {
+      exception = e
+    }
+    expect(exception).toMatch(jasmine.any(Errors.UnsupportedTransport));
   });
 
 

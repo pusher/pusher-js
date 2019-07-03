@@ -52,7 +52,7 @@ var Runtime : Browser = {
     }
   },
 
-  getDocument() : any {
+  getDocument() : Document {
     return document;
   },
 
