@@ -13,8 +13,12 @@ var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callbac
   xhr = Runtime.createXHR();
   xhr.open("POST", self.options.authEndpoint, true);
 
+  // check for content-type override before adding default
+  if (!this.authOptions.hasOwnProperty('Content-Type')) {
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+  }
+
   // add request headers
-  xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
   for(var headerName in this.authOptions.headers) {
     xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
   }
