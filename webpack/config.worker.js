@@ -3,12 +3,14 @@ var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPl
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 var webpack = require('webpack');
+var configShared = require("./config.shared");
 
-var filename = process.env.MODE === "development" ?
-  "pusher.worker.js":
-  "pusher.worker.min.js";
 
-var config = objectAssign(require('./config.shared'),{
+var filename = configShared.optimization.minimize ?
+  "pusher.worker.min.js":
+  "pusher.worker.js";
+
+var config = objectAssign(configShared,{
   output: {
     library: "Pusher",
     path: path.join(__dirname, "../dist/worker"),
