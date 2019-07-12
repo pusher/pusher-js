@@ -6,8 +6,13 @@ var Config = require('./hosting_config');
 var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8')
 banner = banner.replace("<VERSION>", Config.version);
 
+var minimize = process.env.MINIMIZE === 'false' ? false : true;
+
 module.exports = {
   mode: process.env.MODE || "production",
+  optimization: {
+    minimize: minimize,
+  },
   entry: {
     pusher: "./src/core/index",
   },
@@ -29,5 +34,5 @@ module.exports = {
       "CDN_HTTPS": JSON.stringify(Config.cdn_https),
       "DEPENDENCY_SUFFIX": JSON.stringify(Config.dependency_suffix)
     })
-  ]
+  ],
 }
