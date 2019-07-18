@@ -28,7 +28,7 @@ module.exports = objectAssign({}, configShared, {
       'tweetnacl': path.resolve(__dirname, '../src/runtimes/react-native/tweetnacl-dummy.ts'),
       'tweetnacl-util': path.resolve(__dirname, '../src/runtimes/react-native/tweetnacl-util-dummy.ts'),
     }
-  }
+  },
   plugins: [
     new webpack.DefinePlugin({
       RUNTIME: JSON.stringify("react-native"),
