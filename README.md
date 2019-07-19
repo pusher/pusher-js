@@ -83,6 +83,18 @@ and then:
 
 ### React Native
 
+**Warning it's now necessary to install
+[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
+in order to use pusher-js with react-native.** pusher-js depends on NetInfo.
+NetInfo. NetInfo was included within react-native core until v0.60, when it was
+moved to the
+[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
+library. Please follow the [install
+instructions](https://github.com/react-native-community/react-native-netinfo#getting-started)
+for the
+[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
+library before trying to use pusher-js in your react-native project.
+
 Use a package manager like Yarn or NPM to install `pusher-js` and then import
 it as follows:
 
