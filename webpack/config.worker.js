@@ -22,7 +22,7 @@ var config = objectAssign(configShared,{
   },
   plugins: [
     new webpack.DefinePlugin({
-      global: "self"
+      global: "self",
       RUNTIME: JSON.stringify("worker"),
     })
   ]
