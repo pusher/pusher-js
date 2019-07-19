@@ -8,7 +8,7 @@ import {default as EventsDispatcher} from './events/dispatcher';
 import Timeline from './timeline/timeline';
 import TimelineSender from './timeline/timeline_sender';
 import TimelineLevel from './timeline/level';
-import * as StrategyBuilder from './strategies/strategy_builder';
+import {defineTransport} from './strategies/strategy_builder';
 import ConnectionManager from './connection/connection_manager';
 import ConnectionManagerOptions from './connection/connection_manager_options';
 import {PeriodicTimer} from './utils/timers';
@@ -103,9 +103,7 @@ export default class Pusher {
 
     var getStrategy = (options)=> {
       var config = Collections.extend({}, this.config, options);
-      return StrategyBuilder.build(
-        Runtime.getDefaultStrategy(config), config
-      );
+      return Runtime.getDefaultStrategy(config, defineTransport);
     };
 
     this.connection = Factory.createConnectionManager(

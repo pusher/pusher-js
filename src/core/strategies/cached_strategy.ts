@@ -7,6 +7,10 @@ import TransportStrategy from './transport_strategy';
 import Timeline from '../timeline/timeline';
 import * as Collections from '../utils/collections';
 
+export interface TransportStrategyDictionary {
+  [key: string]: TransportStrategy
+}
+
 /** Caches last successful transport and uses it for following attempts.
  *
  * @param {Strategy} strategy
@@ -15,12 +19,12 @@ import * as Collections from '../utils/collections';
  */
 export default class CachedStrategy implements Strategy {
   strategy: Strategy;
-  transports: TransportStrategy[];
+  transports: TransportStrategyDictionary;
   ttl: number;
   usingTLS: boolean;
   timeline: Timeline;
 
-  constructor(strategy : Strategy, transports: TransportStrategy[], options : StrategyOptions) {
+  constructor(strategy : Strategy, transports: TransportStrategyDictionary, options : StrategyOptions) {
     this.strategy = strategy;
     this.transports = transports;
     this.ttl = options.ttl || 1800*1000;

@@ -2,7 +2,6 @@ var TestEnv = require('testenv');
 var Util = require('core/util').default;
 var Collections = require('core/utils/collections');
 var Logger = require('core/logger').default;
-var StrategyBuilder = require('core/strategies/strategy_builder');
 var Defaults = require('core/defaults').default;
 var DefaultConfig = require('core/config');
 var TimelineSender = require('core/timeline/timeline_sender').default;
@@ -33,9 +32,8 @@ describe("Pusher", function() {
     Pusher.isReady = false;
     Pusher.instances = [];
 
-    spyOn(StrategyBuilder, "build").andCallFake(function(definition, options) {
+    spyOn(Runtime, "getDefaultStrategy").andCallFake(function(options) {
       var strategy = Mocks.getStrategy(true);
-      strategy.definition = definition;
       strategy.options = options;
       return strategy;
     });
@@ -184,9 +182,6 @@ describe("Pusher", function() {
 
         var getStrategy = pusher.connection.options.getStrategy;
         expect(getStrategy().options).toEqual(expectedConfig);
-        expect(getStrategy().definition).toEqual(
-          Runtime.getDefaultStrategy(expectedConfig)
-        );
       });
 
       it("should pass options to the strategy builder", function() {
@@ -198,9 +193,6 @@ describe("Pusher", function() {
         var getStrategy = pusher.connection.options.getStrategy;
         expect(getStrategy({ useTLS: true }).options).toEqual(
           expectedConfig
-        );
-        expect(getStrategy({ useTLS: true }).definition).toEqual(
-          Runtime.getDefaultStrategy(expectedConfig)
         );
       });
     });
