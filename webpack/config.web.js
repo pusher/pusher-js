@@ -4,10 +4,9 @@ var NormalModuleReplacementPlugin = webpack.NormalModuleReplacementPlugin;
 var objectAssign = require('object-assign-deep');
 var configShared = require("./config.shared");
 
-
-var filename = process.env.MODE === "development" ?
-  "pusher.js":
-  "pusher.min.js";
+var filename = configShared.optimization.minimize ?
+  "pusher.min.js":
+  "pusher.js";
 
 module.exports = objectAssign({}, configShared, {
   output: {

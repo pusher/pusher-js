@@ -16,10 +16,10 @@ web:
 	echo "Browser Release:"
 	# make sockjs
 	# cp src/runtimes/web/dom/sockjs/sockjs.js dist/web
-	node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
+	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 	echo "Browser Minified Release:"
 	# cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
-	MODE=development node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
+	node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 
 react-native:
 	echo "React Native Release:"
@@ -27,13 +27,13 @@ react-native:
 
 node:
 	echo "NodeJS Release":
-	MODE=development node_modules/webpack/bin/webpack.js --config=webpack/config.node.js
+	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.node.js
 
 worker:
 	echo "Web Worker Release:"
-	node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
+	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
 	echo "Web Worker Minified Release:"
-	MODE=development node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
+	node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
 
 web_unit:
 	node_modules/karma/bin/karma start spec/config/karma/unit.js
@@ -58,4 +58,4 @@ node_integration:
 serve:
 	node webpack/dev.server.js
 
-.PHONY: build_all
+.PHONY: react-native build_all
