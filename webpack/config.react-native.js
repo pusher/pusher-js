@@ -3,6 +3,7 @@ var NormalModuleReplacementPlugin = require('webpack').NormalModuleReplacementPl
 var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 var configShared = require("./config.shared");
+var webpack = require("webpack");
 
 module.exports = objectAssign({}, configShared, {
   output: {
@@ -27,5 +28,10 @@ module.exports = objectAssign({}, configShared, {
       'tweetnacl': path.resolve(__dirname, '../src/runtimes/react-native/tweetnacl-dummy.ts'),
       'tweetnacl-util': path.resolve(__dirname, '../src/runtimes/react-native/tweetnacl-util-dummy.ts'),
     }
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      RUNTIME: JSON.stringify("react-native"),
+    })
+  ]
 })

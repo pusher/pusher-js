@@ -20,7 +20,8 @@ module.exports = objectAssign({}, configShared, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      global: "window"
+      global: "window",
+      RUNTIME: JSON.stringify("web"),
     })
   ]
 });
