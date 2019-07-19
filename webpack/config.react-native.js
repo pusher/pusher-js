@@ -14,7 +14,8 @@ module.exports = objectAssign({}, configShared, {
   },
   target: "node",
   externals: {
-    "react-native": "react-native", // our Reachability implementation needs to reference react-native.
+    // our Reachability implementation needs to reference @react-native-community/netinfo.
+    "@react-native-community/netinfo": "@react-native-community/netinfo",
   },
   resolve: {
     modules: ['src/runtimes/react-native'],
