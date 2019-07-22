@@ -1,5 +1,30 @@
 # Changelog
 
+## 5.0.0 (2019-07-19)
+
+This is a major version bump but should only contain breaking change for
+react-native users.
+
+[CHANGED] The react-native build now assumes @react-native-community/netinfo is
+available in the host project. This change was necessary since netinfo was
+removed from react-native core.
+
+[CHANGED] The reconnect strategy is no longer built with a DSL. This makes the
+code much more easily optimised by the javascript engine and should improve
+load times significantly. Thanks to @stof for his contribution.
+
+[CHANGED] The project is now built with recent versions of webpack and
+typescript. All other build deps were updated and the build process was
+simplified.
+
+[FIXED] An issue that broke encrypted channels in node has been resolved
+
+[FIXED] Some consistently flaky tests were fixed and we switched to headless
+browsers for test runs where possible (including in CI).
+
+[CHANGED] The node dependencies are now bundled in the node dist file so that
+web/react-native users don't need to install unnecessary dependencies
+
 ## 4.4.0 (2019-02-14)
 
 [NEW] Callbacks bound to client events on presence channels will be called with an extra argument containing the `user_id` of the message sender
