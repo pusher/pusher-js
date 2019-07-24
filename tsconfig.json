@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "sourceMap": true,
-    "module": "commonjs",
+    "module": "es6",
     "declaration": false,
     "target": "es3",
     "removeComments": true,
