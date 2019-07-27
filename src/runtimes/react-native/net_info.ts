@@ -1,4 +1,4 @@
-import {default as NativeNetInfo} from '@react-native-community/netinfo';
+import NativeNetInfo from '@react-native-community/netinfo';
 import EventsDispatcher from 'core/events/dispatcher';
 import Util from 'core/util';
 import Reachability from 'core/reachability';
@@ -14,11 +14,11 @@ export class NetInfo extends EventsDispatcher implements Reachability {
     super();
     this.online = true;
 
-    NativeNetInfo.getConnectionInfo().then(connectionState => {
+    NativeNetInfo.fetch().then(connectionState => {
       this.online = hasOnlineConnectionState(connectionState);
     });
 
-    NativeNetInfo.addEventListener('connectionChange', (connectionState)=>{
+    NativeNetInfo.addEventListener((connectionState)=>{
       var isNowOnline = hasOnlineConnectionState(connectionState);
 
       // React Native counts the switch from Wi-Fi to Cellular
