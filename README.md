@@ -37,14 +37,14 @@ The following topics are covered:
 * Web
 
   * We test against Chrome, Firefox and Safari.
-  * Works [in web pages](https://github.com/pusher/pusher-js#web), 
-    [in Web Workers](https://github.com/pusher/pusher-js#web-workers),
-    and in Service Workers.
+  * Works [in web pages](https://github.com/pusher/pusher-js#web), [web
+    workers and service
+    workers](https://github.com/pusher/pusher-js#web-workers)
   * Works with all major web frameworks, including
 
-    * Angular via [our pusher-angular SDK](https://github.com/pusher/pusher-angular). [See Angular tutorial.](https://pusher.com/tutorials/angular-realtime))
-    * React. [See React tutorial.](https://pusher.com/tutorials/react-websockets)
-    * Vue.js. ([see Vue.js tutorial.](https://pusher.com/tutorials/realtime-app-vuejs)
+    * Angular ([See Angular tutorial](https://pusher.com/tutorials/angular-realtime))
+    * React ([See React tutorial](https://pusher.com/tutorials/react-websockets))
+    * Vue.js ([see Vue.js tutorial](https://pusher.com/tutorials/realtime-app-vuejs))
 
 * [React Native](https://github.com/pusher/pusher-js#react-native)
 * [Node.js](https://github.com/pusher/pusher-js#nodejs)
