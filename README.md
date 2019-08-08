@@ -32,6 +32,23 @@ The following topics are covered:
   * [Building](https://github.com/pusher/pusher-js#building)
   * [Testing](https://github.com/pusher/pusher-js#testing)
 
+## Supported platforms
+
+* Web
+
+  * We test against Chrome, Firefox and Safari.
+  * Works [in web pages](https://github.com/pusher/pusher-js#web), [web
+    workers and service
+    workers](https://github.com/pusher/pusher-js#web-workers)
+  * Works with all major web frameworks, including
+
+    * Angular ([See Angular tutorial](https://pusher.com/tutorials/angular-realtime))
+    * React ([See React tutorial](https://pusher.com/tutorials/react-websockets))
+    * Vue.js ([see Vue.js tutorial](https://pusher.com/tutorials/realtime-app-vuejs))
+
+* [React Native](https://github.com/pusher/pusher-js#react-native)
+* [Node.js](https://github.com/pusher/pusher-js#nodejs)
+
 ## Installation
 
 ### Web
@@ -117,7 +134,7 @@ importScripts('https://js.pusher.com/5.0/pusher.worker.min.js');
 
 ### Node.js
 
-Having installed `pusher-js` via an NPM-compatible package manager, simply:
+Having installed `pusher-js` via an NPM-compatible package manager, run:
 
 ```javascript
 import Pusher from 'pusher-js';
@@ -583,7 +600,7 @@ git submodule init
 git submodule update
 ```
 
-Then simply run:
+Then run:
 
 ```bash
 make web
