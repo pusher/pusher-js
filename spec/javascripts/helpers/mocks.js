@@ -64,14 +64,6 @@ var Mocks = {
     return request;
   },
 
-  getDependencies: function() {
-    return {
-      load: jasmine.createSpy("load"),
-      getRoot: jasmine.createSpy("getRoot"),
-      getPath: jasmine.createSpy("getPath")
-    };
-  },
-
   getJSONPSender: function() {
     return {
       send: jasmine.createSpy("send")
