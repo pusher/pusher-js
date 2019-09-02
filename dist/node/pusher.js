@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v5.0.0
+ * Pusher JavaScript Library v5.0.1
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -1120,7 +1120,7 @@ module.exports = Event;
 
 exports.__esModule = true;
 var Defaults = {
-    VERSION: "5.0.0",
+    VERSION: "5.0.1",
     PROTOCOL: 7,
     host: 'ws.pusherapp.com',
     ws_port: 80,

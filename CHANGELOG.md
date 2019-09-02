@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.0.1 (2019-09-02)
+
+[FIXED] We no longer include an unnecessary Buffer polyfill in bundles
+
 ## 5.0.0 (2019-07-19)
 
 This is a major version bump but should only contain breaking change for
