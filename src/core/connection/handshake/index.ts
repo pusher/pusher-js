@@ -1,6 +1,6 @@
 import Util from '../../util';
 import * as Collections from '../../utils/collections';
-import * as Protocol from '../protocol/protocol';
+import Protocol from '../protocol/protocol';
 import Connection from '../connection';
 import TransportConnection from "../../transports/transport_connection";
 import HandshakePayload from './handshake_payload';
