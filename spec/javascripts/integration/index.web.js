@@ -11,7 +11,7 @@ var TestEnv = require('testenv');
 
 var testConfigs = getTestConfigs();
 
-// We can ccess this 'env var' here because there's a webpack.DefinePlugin
+// We can access this 'env var' here because there's a webpack.DefinePlugin
 // overwriting this value with whatever is set at compile time
 if (process.env.MINIMAL_INTEGRATION_TESTS) {
   testConfigs = testConfigs.filter((config) => config.forceTLS && config.transport === "ws")
