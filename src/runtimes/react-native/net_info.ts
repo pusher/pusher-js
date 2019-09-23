@@ -18,7 +18,7 @@ export class NetInfo extends EventsDispatcher implements Reachability {
       this.online = hasOnlineConnectionState(connectionState);
     });
 
-    NativeNetInfo.addEventListener('connectionChange', (connectionState)=>{
+    NativeNetInfo.addEventListener(connectionState => {
       var isNowOnline = hasOnlineConnectionState(connectionState);
 
       // React Native counts the switch from Wi-Fi to Cellular
