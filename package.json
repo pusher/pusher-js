@@ -6,7 +6,8 @@
   "browser": "dist/web/pusher.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "fmt": "prettier --config .prettierrc --check --write src/**/*.ts"
+    "format": "prettier --config .prettierrc --write src/**/*.ts webpack/**/*.js",
+    "check-format": "prettier --config .prettierrc --check src/**/*.ts webpack/**/*.js"
   },
   "repository": {
     "type": "git",
