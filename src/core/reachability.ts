@@ -1,4 +1,4 @@
-import {default as EventsDispatcher} from './events/dispatcher';
+import { default as EventsDispatcher } from './events/dispatcher';
 
 interface Reachability extends EventsDispatcher {
   isOnline(): boolean;

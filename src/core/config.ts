@@ -22,7 +22,7 @@ export var getGlobalConfig = function() {
 
 export var getClusterConfig = function(clusterName) {
   return {
-    wsHost: "ws-" + clusterName + ".pusher.com",
-    httpHost: "sockjs-" + clusterName + ".pusher.com"
+    wsHost: 'ws-' + clusterName + '.pusher.com',
+    httpHost: 'sockjs-' + clusterName + '.pusher.com'
   };
 };

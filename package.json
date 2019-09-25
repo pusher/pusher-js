@@ -5,7 +5,9 @@
   "main": "dist/node/pusher.js",
   "browser": "dist/web/pusher.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --config .prettierrc --write src/**/*.ts webpack/**/*.js",
+    "check-format": "prettier --config .prettierrc --check src/**/*.ts webpack/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -47,6 +49,7 @@
     "karma-verbose-reporter": "0.0.6",
     "karma-webpack": "^4.0.2",
     "object-assign-deep": "0.0.4",
+    "prettier": "^1.18.2",
     "ts-loader": "^6.0.4",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",

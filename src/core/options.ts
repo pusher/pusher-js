@@ -1,5 +1,5 @@
 import ConnectionManager from './connection/connection_manager';
-import {AuthOptions, AuthorizerGenerator} from './auth/options';
+import { AuthOptions, AuthorizerGenerator } from './auth/options';
 
 interface PusherOptions {
   cluster: string;
@@ -11,7 +11,7 @@ interface PusherOptions {
   forceTLS: boolean;
   encrypted: boolean;
   timelineParams: any;
-  authTransport: "ajax" | "jsonp";
+  authTransport: 'ajax' | 'jsonp';
   auth: AuthOptions;
   authorizer: AuthorizerGenerator;
 }

@@ -21,7 +21,7 @@ export interface DefaultConfig {
   dependency_suffix?: string;
 }
 
-var Defaults : DefaultConfig = {
+var Defaults: DefaultConfig = {
   VERSION: VERSION,
   PROTOCOL: 7,
 
@@ -34,7 +34,7 @@ var Defaults : DefaultConfig = {
   sockjs_host: 'sockjs.pusher.com',
   sockjs_http_port: 80,
   sockjs_https_port: 443,
-  sockjs_path: "/pusher",
+  sockjs_path: '/pusher',
   // DEPRECATED: Stats
   stats_host: 'stats.pusher.com',
   // DEPRECATED: Other settings
@@ -48,6 +48,6 @@ var Defaults : DefaultConfig = {
   cdn_http: CDN_HTTP,
   cdn_https: CDN_HTTPS,
   dependency_suffix: DEPENDENCY_SUFFIX
-}
+};
 
 export default Defaults;

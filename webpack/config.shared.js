@@ -3,28 +3,26 @@
 var webpack = require('webpack');
 var fs = require('fs');
 var Config = require('./hosting_config');
-var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8')
-banner = banner.replace("<VERSION>", Config.version);
+var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8');
+banner = banner.replace('<VERSION>', Config.version);
 
 var minimize = process.env.MINIMIZE === 'false' ? false : true;
 
 module.exports = {
-  mode: process.env.MODE || "production",
+  mode: process.env.MODE || 'production',
   optimization: {
-    minimize: minimize,
+    minimize: minimize
   },
   entry: {
-    pusher: "./src/core/index",
+    pusher: './src/core/index'
   },
   resolve: {
     extensions: ['.webpack.js', '.web.js', '.ts', '.js'],
     // add runtimes for easier importing of isomorphic runtime modules
-    modules: ['src', 'src/runtimes', 'node_modules'],
+    modules: ['src', 'src/runtimes', 'node_modules']
   },
   module: {
-    rules: [
-      { test: /\.ts$/, loader: 'ts-loader' },
-    ]
+    rules: [{ test: /\.ts$/, loader: 'ts-loader' }]
   },
   node: {
     // nacl uses Buffer on node.js but has a different code path for the browser.
@@ -33,12 +31,12 @@ module.exports = {
     Buffer: false
   },
   plugins: [
-    new webpack.BannerPlugin({banner:  banner, raw: true}),
+    new webpack.BannerPlugin({ banner: banner, raw: true }),
     new webpack.DefinePlugin({
-      "VERSION": JSON.stringify(Config.version),
-      "CDN_HTTP": JSON.stringify(Config.cdn_http),
-      "CDN_HTTPS": JSON.stringify(Config.cdn_https),
-      "DEPENDENCY_SUFFIX": JSON.stringify(Config.dependency_suffix)
+      VERSION: JSON.stringify(Config.version),
+      CDN_HTTP: JSON.stringify(Config.cdn_http),
+      CDN_HTTPS: JSON.stringify(Config.cdn_https),
+      DEPENDENCY_SUFFIX: JSON.stringify(Config.dependency_suffix)
     })
-  ],
-}
+  ]
+};
