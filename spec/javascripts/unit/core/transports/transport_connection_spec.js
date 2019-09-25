@@ -3,7 +3,7 @@ var Mocks = require("mocks");
 var TransportConnection = require('core/transports/transport_connection').default;
 var Collections = require('core/utils/collections');
 var Timer = require('core/utils/timers').OneOffTimer;
-var DependenciesModule = require('dom/dependencies');
+var Dependencies = require('dom/dependencies').Dependencies;
 
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {
@@ -21,13 +21,18 @@ describe("TransportConnection", function() {
   var socket;
   var timeline;
   var transport;
-  var Dependencies, _Dependencies;
+  var _DependenciesBackup;
 
   beforeEach(function() {
     if (TestEnv === "web") {
-      _Dependencies = DependenciesModule.Dependencies;
-      DependenciesModule.Dependencies = Mocks.getDependencies();
-      Dependencies = DependenciesModule.Dependencies;
+      _DependenciesBackup = {
+        load: Dependencies.load,
+        getRoot: Dependencies.getRoot,
+        getPath: Dependencies.getPath
+      }
+      Dependencies.load = jasmine.createSpy("load")
+      Dependencies.getRoot = jasmine.createSpy("getRoot")
+      Dependencies.getPath = jasmine.createSpy("getPath")
     }
 
     timeline = Mocks.getTimeline();
@@ -53,7 +58,9 @@ describe("TransportConnection", function() {
 
   afterEach(function(){
     if (TestEnv === "web") {
-      DependenciesModule.Dependencies = _Dependencies;
+      Dependencies.load = _DependenciesBackup.load
+      Dependencies.getRoot = _DependenciesBackup.getRoot
+      Dependencies.getPath = _DependenciesBackup.getPath
     }
   });
 

@@ -1,6 +1,6 @@
 import * as Collections from '../utils/collections';
 import {default as EventsDispatcher} from '../events/dispatcher';
-import * as Protocol from './protocol/protocol';
+import Protocol from './protocol/protocol';
 import {PusherEvent} from './protocol/message-types';
 import Logger from '../logger';
 import TransportConnection from "../transports/transport_connection";
