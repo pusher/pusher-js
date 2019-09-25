@@ -1,5 +1,15 @@
 # Changelog
 
+## 5.0.2 (2019-09-25)
+
+[FIXED] Utilise new API for @react-native-community/netinfo suppressing
+deprecation warnings
+
+[CHANGED] output an ES6 module from typescript to allow webpack to optimise the
+bundle more effectively (thanks to @stof for this change)
+
+[CHANGED] Use prettier to format source
+
 ## 5.0.1 (2019-09-02)
 
 [FIXED] We no longer include an unnecessary Buffer polyfill in bundles
