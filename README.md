@@ -262,14 +262,14 @@ const socket = new Pusher(APP_KEY, {
 });
 ```
 
-Note: if you intend to use secure websockets, or `wss`, you can not simply specify `wss` in `enabledTransports`, you must specify `ws` in `enabledTransports` as well as set the `encrypted` option to `true`.
+Note: if you intend to use secure websockets, or `wss`, you can not simply specify `wss` in `enabledTransports`, you must specify `ws` in `enabledTransports` as well as set the `forceTLS` option to `true`.
 
 ```js
 // Only use secure WebSockets
 const socket = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws'],
-  encrypted: true
+  forceTLS: true
 });
 ```
 
