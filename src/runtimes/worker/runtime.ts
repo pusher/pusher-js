@@ -13,7 +13,6 @@ const {
   Transports,
   setup,
   getProtocol,
-  isXHRSupported,
   getLocalStorage,
   createXHR,
   createWebSocket,
@@ -29,7 +28,6 @@ const Worker : Runtime = {
   Transports,
   setup,
   getProtocol,
-  isXHRSupported,
   getLocalStorage,
   createXHR,
   createWebSocket,
@@ -55,7 +53,15 @@ const Worker : Runtime = {
 
   getNetwork() {
     return Network;
-  }
+  },
+
+  isXHRSupported() : boolean {
+    if('caches' in self) {
+      return false;
+    }
+    return true;
+  },
+
 };
 
 export default Worker;
