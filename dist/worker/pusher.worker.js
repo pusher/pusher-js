@@ -5594,13 +5594,12 @@ var fetchTimeline = {
 
 
 
-var runtime_getDefaultStrategy = runtime.getDefaultStrategy, runtime_Transports = runtime.Transports, setup = runtime.setup, getProtocol = runtime.getProtocol, isXHRSupported = runtime.isXHRSupported, getLocalStorage = runtime.getLocalStorage, createXHR = runtime.createXHR, createWebSocket = runtime.createWebSocket, addUnloadListener = runtime.addUnloadListener, removeUnloadListener = runtime.removeUnloadListener, transportConnectionInitializer = runtime.transportConnectionInitializer, createSocketRequest = runtime.createSocketRequest, HTTPFactory = runtime.HTTPFactory;
+var runtime_getDefaultStrategy = runtime.getDefaultStrategy, runtime_Transports = runtime.Transports, setup = runtime.setup, getProtocol = runtime.getProtocol, getLocalStorage = runtime.getLocalStorage, createXHR = runtime.createXHR, createWebSocket = runtime.createWebSocket, addUnloadListener = runtime.addUnloadListener, removeUnloadListener = runtime.removeUnloadListener, transportConnectionInitializer = runtime.transportConnectionInitializer, createSocketRequest = runtime.createSocketRequest, HTTPFactory = runtime.HTTPFactory;
 var Worker = {
     getDefaultStrategy: runtime_getDefaultStrategy,
     Transports: runtime_Transports,
     setup: setup,
     getProtocol: getProtocol,
-    isXHRSupported: isXHRSupported,
     getLocalStorage: getLocalStorage,
     createXHR: createXHR,
     createWebSocket: createWebSocket,
@@ -5621,7 +5620,13 @@ var Worker = {
     },
     getNetwork: function () {
         return net_info_Network;
-    }
+    },
+    isXHRSupported: function () {
+        if ('caches' in self) {
+            return false;
+        }
+        return true;
+    },
 };
 /* harmony default export */ var worker_runtime = (Worker);
 

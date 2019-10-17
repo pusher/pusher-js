@@ -56,10 +56,10 @@ const Worker : Runtime = {
   },
 
   isXHRSupported() : boolean {
-    if('caches' in self) {
-      return false;
+    if('XMLHttpRequest' in self) {
+      return true;
     }
-    return true;
+    return false;
   },
 
 };
