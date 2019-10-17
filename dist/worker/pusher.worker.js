@@ -5622,10 +5622,10 @@ var Worker = {
         return net_info_Network;
     },
     isXHRSupported: function () {
-        if ('caches' in self) {
-            return false;
+        if ('XMLHttpRequest' in self) {
+            return true;
         }
-        return true;
+        return false;
     },
 };
 /* harmony default export */ var worker_runtime = (Worker);
