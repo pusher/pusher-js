@@ -38,11 +38,7 @@ export default class Pusher {
     }
   }
 
-  static log(message: any) {
-    if (Pusher.logToConsole && global.console && global.console.log) {
-      global.console.log(message);
-    }
-  }
+  static log: (message: any) => void;
 
   private static getClientFeatures(): string[] {
     return Collections.keys(
