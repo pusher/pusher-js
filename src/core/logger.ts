@@ -23,6 +23,20 @@ const Logger = {
         global.console.log(message);
       }
     }
+  },
+  error(...args: any[]) {
+    var message = stringify.apply(this, arguments);
+    if (Pusher.log) {
+      Pusher.log(message);
+    } else if (Pusher.logToConsole && global.console) {
+      if (global.console.error) {
+        global.console.error(message);
+      } else if (global.console.warn) {
+        global.console.warn(message);
+      } else if (global.console.log) {
+        global.console.log(message);
+      }
+    }
   }
 };
 
