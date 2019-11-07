@@ -142,7 +142,7 @@ export default class Pusher {
       this.channels.disconnect();
     });
     this.connection.bind('error', err => {
-      Logger.warn('Error', err);
+      Logger.warn(err);
     });
 
     Pusher.instances.push(this);

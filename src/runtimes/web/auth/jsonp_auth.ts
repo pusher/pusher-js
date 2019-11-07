@@ -6,7 +6,7 @@ import {AuthTransport} from 'core/auth/auth_transports';
 
 var jsonp : AuthTransport = function(context : Browser, socketId, callback){
   if(this.authOptions.headers !== undefined) {
-    Logger.warn("Warn", "To send headers with the auth request, you must use AJAX, rather than JSONP.");
+    Logger.warn('To send headers with the auth request, you must use AJAX, rather than JSONP.');
   }
 
   var callbackName = context.nextAuthCallbackID.toString();
