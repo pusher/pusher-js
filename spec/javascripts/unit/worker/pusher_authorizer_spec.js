@@ -102,7 +102,7 @@ describe("Fetch Authorizer", function(){
       expect(callback.calls.length).toEqual(1);
       expect(callback).toHaveBeenCalledWith(
         true,
-        "JSON returned from webapp was invalid, yet status code was 200. " +
+        "JSON returned from auth endpoint was invalid, yet status code was 200. " +
           "Data was: " +
           invalidJSON
       );
