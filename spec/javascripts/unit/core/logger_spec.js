@@ -37,62 +37,96 @@ describe("Logger", function() {
     global.console.error = _nativeConsoleError;
   });
 
-  it("logToConsole should be disabled by default", function() {
-    expect(Pusher.logToConsole).toEqual(false);
+  // logToConsole should be disabled by default
+  describe("with logToConsole == false", function() {
+    it("should not log to the console", function() {
+      Logger.debug("test", "this is a test");
+
+      expect(_consoleLogCalls.length).toEqual(0);
+      expect(_consoleWarnCalls.length).toEqual(0);
+      expect(_consoleErrorCalls.length).toEqual(0);
+    });
+
+    it("should not warn to the console", function() {
+      Logger.warn("test", "this is a test");
+
+      expect(_consoleLogCalls.length).toEqual(0);
+      expect(_consoleWarnCalls.length).toEqual(0);
+      expect(_consoleErrorCalls.length).toEqual(0);
+    });
+
+    it("should not error to the console", function() {
+      Logger.error("test", "this is a test");
+
+      expect(_consoleLogCalls.length).toEqual(0);
+      expect(_consoleWarnCalls.length).toEqual(0);
+      expect(_consoleErrorCalls.length).toEqual(0);
+    });
   });
 
-  it("should not log to the console if logToConsole set to false", function() {
-    Logger.debug("test", "this is a test");
-    Logger.warn("test", "this is a test");
-    Logger.error("test", "this is a test");
+  describe("with logToConsole == true", function() {
+    beforeEach(function() {
+      Pusher.logToConsole = true;
+    })
 
-    expect(_consoleLogCalls.length).toEqual(0);
-    expect(_consoleWarnCalls.length).toEqual(0);
-    expect(_consoleErrorCalls.length).toEqual(0);
-  });
+    it("should log to the console", function() {
+      Logger.debug("test", "this is a test");
 
-  it("should log to the console if logToConsole set to true", function() {
-    Pusher.logToConsole = true;
-    Logger.debug("test", "this is a test");
-    Logger.warn("test", "this is a test");
-    Logger.error("test", "this is a test");
+      expect(_consoleLogCalls.length).toEqual(1);
+      expect(_consoleWarnCalls.length).toEqual(0);
+      expect(_consoleErrorCalls.length).toEqual(0);
+    });
 
-    expect(_consoleLogCalls.length).toEqual(1);
-    expect(_consoleWarnCalls.length).toEqual(1);
-    expect(_consoleErrorCalls.length).toEqual(1);
-  });
+    it("should warn to the console", function() {
+      Logger.warn("test", "this is a test");
 
-  it("should fallback to warn if error not available when logging error", function() {
-    Pusher.logToConsole = true;
-    global.console.error = undefined;
+      expect(_consoleLogCalls.length).toEqual(0);
+      expect(_consoleWarnCalls.length).toEqual(1);
+      expect(_consoleErrorCalls.length).toEqual(0);
+    });
 
-    Logger.error("test", "this is a test");
+    it("should error to the console", function() {
+      Logger.error("test", "this is a test");
 
-    expect(_consoleLogCalls.length).toEqual(0);
-    expect(_consoleWarnCalls.length).toEqual(1);
-    expect(_consoleErrorCalls.length).toEqual(0);
-  });
+      expect(_consoleLogCalls.length).toEqual(0);
+      expect(_consoleWarnCalls.length).toEqual(0);
+      expect(_consoleErrorCalls.length).toEqual(1);
+    });
 
-  it("should fallback to log if error and warn not available when logging error", function() {
-    Pusher.logToConsole = true;
-    global.console.error = undefined;
-    global.console.warn = undefined;
+    describe("with console.error == undefined", function() {
+      beforeEach(function() {
+        global.console.error = undefined;
+      })
 
-    Logger.error("test", "this is a test");
+      it("should fallback error logs to warn", function() {
+        Logger.error("test", "this is a test");
+    
+        expect(_consoleLogCalls.length).toEqual(0);
+        expect(_consoleWarnCalls.length).toEqual(1);
+        expect(_consoleErrorCalls.length).toEqual(0);
+      });
 
-    expect(_consoleLogCalls.length).toEqual(1);
-    expect(_consoleWarnCalls.length).toEqual(0);
-    expect(_consoleErrorCalls.length).toEqual(0);
-  });
+      describe("with console.warn == undefined", function() {
+        beforeEach(function() {
+          global.console.warn = undefined;
+        })
 
-  it("should fallback to log if warn not available when logging warn", function() {
-    Pusher.logToConsole = true;
-    global.console.warn = undefined;
+        it("should fallback warn logs to log", function() {
+          Logger.warn("test", "this is a test");
+      
+          expect(_consoleLogCalls.length).toEqual(1);
+          expect(_consoleWarnCalls.length).toEqual(0);
+          expect(_consoleErrorCalls.length).toEqual(0);
+        });
 
-    Logger.warn("test", "this is a test");
-
-    expect(_consoleLogCalls.length).toEqual(1);
-    expect(_consoleWarnCalls.length).toEqual(0);
-    expect(_consoleErrorCalls.length).toEqual(0);
+        it("should fallback error logs to log", function() {
+          Logger.error("test", "this is a test");
+      
+          expect(_consoleLogCalls.length).toEqual(1);
+          expect(_consoleWarnCalls.length).toEqual(0);
+          expect(_consoleErrorCalls.length).toEqual(0);
+        });
+      });
+    });
   });
 });
