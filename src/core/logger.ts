@@ -1,13 +1,13 @@
 import { stringify } from './utils/collections';
 import Pusher from './pusher';
 
-function globalLog(message) {
+function globalLog(message: string) {
   if (global.console && global.console.log) {
     global.console.log(message);
   }
 }
 
-function globalLogWarn(message) {
+function globalLogWarn(message: string) {
   if (global.console && global.console.warn) {
     global.console.warn(message);
   } else {
@@ -15,7 +15,7 @@ function globalLogWarn(message) {
   }
 }
 
-function globalLogError(message) {
+function globalLogError(message: string) {
   if (global.console && global.console.error) {
     global.console.error(message);
   } else {
@@ -23,7 +23,10 @@ function globalLogError(message) {
   }
 }
 
-function log(defaultLoggingFunction, ...args: any[]) {
+function log(
+  defaultLoggingFunction: (message: string) => void,
+  ...args: any[]
+) {
   var message = stringify.apply(this, arguments);
   if (Pusher.log) {
     Pusher.log(message);
