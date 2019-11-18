@@ -96,7 +96,11 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionCancelled = false;
     this.authorize(this.pusher.connection.socket_id, (error, data)=> {
       if (error) {
-        this.emit('pusher:subscription_error', data)
+        // Why not bind to 'pusher:subscription_error' a level up, and log there?
+        // Binding to this event would cause the warning about no callbacks being
+        // bound (see constructor) to be suppressed, that's not what we want.
+        Logger.error(data);
+        this.emit('pusher:subscription_error', data);
       } else {
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,

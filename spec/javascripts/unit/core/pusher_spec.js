@@ -470,7 +470,7 @@ describe("Pusher", function() {
 
       spyOn(Logger, "warn");
       pusher.connection.emit("error", "something");
-      expect(Logger.warn).toHaveBeenCalledWith("Error", "something");
+      expect(Logger.warn).toHaveBeenCalledWith("something");
     });
   });
 

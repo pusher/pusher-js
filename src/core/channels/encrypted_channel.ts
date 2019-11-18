@@ -32,7 +32,6 @@ export default class EncryptedChannel extends PrivateChannel {
       if (!sharedSecret) {
         let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
         callback(true, errorMsg);
-        Logger.warn(`Error: ${errorMsg}`);
         return;
       }
       this.key = decodeBase64(sharedSecret);
@@ -67,17 +66,17 @@ export default class EncryptedChannel extends PrivateChannel {
       return;
     }
     if (!data.ciphertext || !data.nonce) {
-      Logger.warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+      Logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
       return;
     }
     let cipherText = decodeBase64(data.ciphertext);
     if (cipherText.length < secretbox.overheadLength) {
-      Logger.warn(`Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`);
+      Logger.error(`Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`);
       return;
     }
     let nonce = decodeBase64(data.nonce);
     if (nonce.length < secretbox.nonceLength) {
-      Logger.warn(`Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`);
+      Logger.error(`Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`);
       return;
     }
 
@@ -88,12 +87,12 @@ export default class EncryptedChannel extends PrivateChannel {
       // If this fails, a new key will be requested when a new message is received
       this.authorize(this.pusher.connection.socket_id, (error, authData) => {
         if (error) {
-          Logger.warn(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
+          Logger.error(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
           return;
         }
         bytes = secretbox.open(cipherText, nonce, this.key);
         if (bytes === null) {
-          Logger.warn(`Failed to decrypt event with new key. Dropping encrypted event`);
+          Logger.error(`Failed to decrypt event with new key. Dropping encrypted event`);
           return;
         }
         this.emitJSON(event, encodeUTF8(bytes));

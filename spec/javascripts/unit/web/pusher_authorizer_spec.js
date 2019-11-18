@@ -31,7 +31,6 @@ describe("JSONP Authorizer", function() {
     authorizer.authorize("1.23", function() {});
 
     expect(Logger.warn).toHaveBeenCalledWith(
-      "Warn",
       "To send headers with the auth request, you must use AJAX, rather than JSONP."
     );
   });

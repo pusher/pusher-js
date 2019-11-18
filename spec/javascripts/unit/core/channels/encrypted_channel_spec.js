@@ -288,7 +288,7 @@ describe("EncryptedChannel", function() {
             nonce: nonceBase64,
             ciphertext: tweetNaclUtil.encodeBase64('garbage-ciphertext')
           };
-          spyOn(Logger, "warn");
+          spyOn(Logger, "error");
           channel.handleEvent({
             event: "something",
             data: encryptedPayload
@@ -297,7 +297,7 @@ describe("EncryptedChannel", function() {
             shared_secret: newSecretBase64,
             foo: "bar"
           });
-          expect(Logger.warn).toHaveBeenCalledWith(
+          expect(Logger.error).toHaveBeenCalledWith(
             "Failed to decrypt event with new key. Dropping encrypted event"
           );
         });
@@ -307,13 +307,13 @@ describe("EncryptedChannel", function() {
             nonce: nonceBase64,
             ciphertext: newTestEncrypt(payload)
           };
-          spyOn(Logger, "warn");
+          spyOn(Logger, "error");
           channel.handleEvent({
             event: "something",
             data: encryptedPayload
           });
           authorizer._callback(true, "ERROR");
-          expect(Logger.warn).toHaveBeenCalledWith(
+          expect(Logger.error).toHaveBeenCalledWith(
             "Failed to make a request to the authEndpoint: ERROR. Unable to fetch new key, so dropping encrypted event"
           );
         });

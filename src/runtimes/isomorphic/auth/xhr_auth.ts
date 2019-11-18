@@ -28,7 +28,7 @@ var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callbac
           data = JSON.parse(xhr.responseText);
           parsed = true;
         } catch (e) {
-          callback(true, 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + xhr.responseText);
+          callback(true, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' + xhr.responseText);
         }
 
         if (parsed) { // prevents double execution.
@@ -36,7 +36,7 @@ var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callbac
         }
       } else {
         var suffix = UrlStore.buildLogSuffix("authenticationEndpoint");
-        Logger.warn(
+        Logger.error(
           'Unable to retrieve auth string from auth endpoint - ' +
           `received status ${xhr.status} from ${self.options.authEndpoint}. ` +
           `Clients must be authenticated to join private or presence channels. ${suffix}`

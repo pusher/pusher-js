@@ -23,15 +23,15 @@ var fetchAuth : AuthTransport = function(context, socketId, callback){
     if (status === 200) {
       return response.text();
     } else {
-      Logger.warn("Couldn't get auth info from your webapp", status);
+      Logger.error("Couldn't get auth info from your auth endpoint", status);
       throw status;
     }
   }).then((data)=>{
     try {
       data = JSON.parse(data);
     } catch (e) {
-      var message = 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + data;
-      Logger.warn(message);
+      var message = 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' + data;
+      Logger.error(message);
       throw message;
     }
     callback(false, data);

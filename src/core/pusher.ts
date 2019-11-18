@@ -38,11 +38,7 @@ export default class Pusher {
     }
   }
 
-  static log(message: any) {
-    if (Pusher.logToConsole && global.console && global.console.log) {
-      global.console.log(message);
-    }
-  }
+  static log: (message: any) => void;
 
   private static getClientFeatures(): string[] {
     return Collections.keys(
@@ -146,7 +142,7 @@ export default class Pusher {
       this.channels.disconnect();
     });
     this.connection.bind('error', err => {
-      Logger.warn('Error', err);
+      Logger.warn(err);
     });
 
     Pusher.instances.push(this);
