@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v5.0.2
+ * Pusher JavaScript Library v5.0.3
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -2915,7 +2915,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "5.0.2",
+    VERSION: "5.0.3",
     PROTOCOL: 7,
     host: 'ws.pusherapp.com',
     ws_port: 80,
@@ -3089,37 +3089,68 @@ var dispatcher_Dispatcher = (function () {
 // CONCATENATED MODULE: ./src/core/logger.ts
 
 
-var Logger = {
-    debug: function () {
+var logger_Logger = (function () {
+    function Logger() {
+        this.globalLog = function (message) {
+            if (self.console && self.console.log) {
+                self.console.log(message);
+            }
+        };
+    }
+    Logger.prototype.debug = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
         }
-        if (!core_pusher.log) {
-            return;
-        }
-        core_pusher.log(stringify.apply(this, arguments));
-    },
-    warn: function () {
+        this.log(this.globalLog, args);
+    };
+    Logger.prototype.warn = function () {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
             args[_i] = arguments[_i];
+        }
+        this.log(this.globalLogWarn, args);
+    };
+    Logger.prototype.error = function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        this.log(this.globalLogError, args);
+    };
+    Logger.prototype.globalLogWarn = function (message) {
+        if (self.console && self.console.warn) {
+            self.console.warn(message);
+        }
+        else {
+            this.globalLog(message);
+        }
+    };
+    Logger.prototype.globalLogError = function (message) {
+        if (self.console && self.console.error) {
+            self.console.error(message);
+        }
+        else {
+            this.globalLogWarn(message);
+        }
+    };
+    Logger.prototype.log = function (defaultLoggingFunction) {
+        var args = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            args[_i - 1] = arguments[_i];
         }
         var message = stringify.apply(this, arguments);
         if (core_pusher.log) {
             core_pusher.log(message);
         }
-        else if (self.console) {
-            if (self.console.warn) {
-                self.console.warn(message);
-            }
-            else if (self.console.log) {
-                self.console.log(message);
-            }
+        else if (core_pusher.logToConsole) {
+            var log = defaultLoggingFunction.bind(this);
+            log(message);
         }
-    }
-};
-/* harmony default export */ var logger = (Logger);
+    };
+    return Logger;
+}());
+/* harmony default export */ var logger = (new logger_Logger());
 
 // CONCATENATED MODULE: ./src/core/transports/transport_connection.ts
 var transport_connection_extends = (undefined && undefined.__extends) || (function () {
@@ -3919,6 +3950,7 @@ var channel_Channel = (function (_super) {
         this.subscriptionCancelled = false;
         this.authorize(this.pusher.connection.socket_id, function (error, data) {
             if (error) {
+                logger.error(data);
                 _this.emit('pusher:subscription_error', data);
             }
             else {
@@ -4062,7 +4094,7 @@ var presence_channel_PresenceChannel = (function (_super) {
             if (!error) {
                 if (authData.channel_data === undefined) {
                     var suffix = url_store.buildLogSuffix("authenticationEndpoint");
-                    logger.warn("Invalid auth response for channel '" + _this.name + "'," +
+                    logger.error("Invalid auth response for channel '" + _this.name + "'," +
                         ("expected 'channel_data' field. " + suffix));
                     callback("Invalid auth response");
                     return;
@@ -4168,7 +4200,6 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
             if (!sharedSecret) {
                 var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
                 callback(true, errorMsg);
-                logger.warn("Error: " + errorMsg);
                 return;
             }
             _this.key = Object(nacl_util["decodeBase64"])(sharedSecret);
@@ -4195,17 +4226,17 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
             return;
         }
         if (!data.ciphertext || !data.nonce) {
-            logger.warn('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+            logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
             return;
         }
         var cipherText = Object(nacl_util["decodeBase64"])(data.ciphertext);
         if (cipherText.length < nacl_fast["secretbox"].overheadLength) {
-            logger.warn("Expected encrypted event ciphertext length to be " + nacl_fast["secretbox"].overheadLength + ", got: " + cipherText.length);
+            logger.error("Expected encrypted event ciphertext length to be " + nacl_fast["secretbox"].overheadLength + ", got: " + cipherText.length);
             return;
         }
         var nonce = Object(nacl_util["decodeBase64"])(data.nonce);
         if (nonce.length < nacl_fast["secretbox"].nonceLength) {
-            logger.warn("Expected encrypted event nonce length to be " + nacl_fast["secretbox"].nonceLength + ", got: " + nonce.length);
+            logger.error("Expected encrypted event nonce length to be " + nacl_fast["secretbox"].nonceLength + ", got: " + nonce.length);
             return;
         }
         var bytes = nacl_fast["secretbox"].open(cipherText, nonce, this.key);
@@ -4213,12 +4244,12 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
             logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
             this.authorize(this.pusher.connection.socket_id, function (error, authData) {
                 if (error) {
-                    logger.warn("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
+                    logger.error("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
                     return;
                 }
                 bytes = nacl_fast["secretbox"].open(cipherText, nonce, _this.key);
                 if (bytes === null) {
-                    logger.warn("Failed to decrypt event with new key. Dropping encrypted event");
+                    logger.error("Failed to decrypt event with new key. Dropping encrypted event");
                     return;
                 }
                 _this.emitJSON(event, Object(nacl_util["encodeUTF8"])(bytes));
@@ -5539,7 +5570,7 @@ var fetchAuth = function (context, socketId, callback) {
             return response.text();
         }
         else {
-            logger.warn("Couldn't get auth info from your webapp", status);
+            logger.error("Couldn't get auth info from your auth endpoint", status);
             throw status;
         }
     }).then(function (data) {
@@ -5547,8 +5578,8 @@ var fetchAuth = function (context, socketId, callback) {
             data = JSON.parse(data);
         }
         catch (e) {
-            var message = 'JSON returned from webapp was invalid, yet status code was 200. Data was: ' + data;
-            logger.warn(message);
+            var message = 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' + data;
+            logger.error(message);
             throw message;
         }
         callback(false, data);
@@ -5951,7 +5982,7 @@ var pusher_Pusher = (function () {
             _this.channels.disconnect();
         });
         this.connection.bind('error', function (err) {
-            logger.warn('Error', err);
+            logger.warn(err);
         });
         Pusher.instances.push(this);
         this.timeline.info({ instances: Pusher.instances.length });
@@ -5963,11 +5994,6 @@ var pusher_Pusher = (function () {
         Pusher.isReady = true;
         for (var i = 0, l = Pusher.instances.length; i < l; i++) {
             Pusher.instances[i].connect();
-        }
-    };
-    Pusher.log = function (message) {
-        if (Pusher.logToConsole && self.console && self.console.log) {
-            self.console.log(message);
         }
     };
     Pusher.getClientFeatures = function () {

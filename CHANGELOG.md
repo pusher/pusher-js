@@ -1,5 +1,13 @@
 # Changelog
 
+## 5.0.3 (2019-11-18)
+
+[NEW] Log a warning when there is an auth error
+
+[CHANGED] Default logger now uses console.warn and console.error
+
+[CHANGED] Improved log messages
+
 ## 5.0.2 (2019-09-25)
 
 [FIXED] Utilise new API for @react-native-community/netinfo suppressing
