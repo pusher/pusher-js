@@ -9,7 +9,7 @@ import ScriptRequest from './dom/script_request';
 import JSONPRequest from './dom/jsonp_request';
 import * as Collections from 'core/utils/collections';
 import {ScriptReceivers} from './dom/script_receiver_factory';
-import jsonpTimeline from './timeline/jsonp_timeline';
+import xhrTimeline from '../isomorphic/timeline/xhr_timeline';
 import Transports from './transports/transports';
 import Ajax from "core/http/ajax";
 import {Network} from './net_info';
@@ -30,7 +30,11 @@ var Runtime : Browser = {
   transportConnectionInitializer,
   HTTPFactory,
 
-  TimelineTransport: jsonpTimeline,
+  // We don't use jsonpTimeline here, because the <script> tag unnecessarily 
+  // sends cookies in the request, resulting in an ugly warning in the console: 
+  // "A cookie associated with a cross-site resource at http://pusher.com/ 
+  // was set without the `SameSite` attribute."
+  TimelineTransport: xhrTimeline,
 
   getXHRAPI() {
     return window.XMLHttpRequest
