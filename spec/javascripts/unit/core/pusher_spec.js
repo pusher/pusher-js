@@ -12,18 +12,7 @@ var Runtime = require('runtime').default;
 
 describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
-
-  switch (TestEnv) {
-    case "worker":
-    case "node":
-      var timelineTransport = "xhr";
-      break;
-    case "web":
-      var timelineTransport = "jsonp";
-      break
-    default:
-      throw("Please specify the test environment as an external.")
-  }
+  var timelineTransport = "xhr";
 
   beforeEach(function() {
     _instances = Pusher.instances;

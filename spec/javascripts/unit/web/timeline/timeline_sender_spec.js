@@ -2,23 +2,27 @@ var Mocks = require('mocks');
 var TimelineSender = require('core/timeline/timeline_sender').default;
 var Runtime = require('runtime').default;
 var ScriptReceivers = require('dom/script_receiver_factory').ScriptReceivers;
+var Collections = require('core/utils/collections');
+
 
 describe("TimelineSender", function() {
-  var jsonpRequest;
-  var timeline, onSend, sender;
+  var xhrRequest;
+  var timeline, onSend, sender, qs;
 
   beforeEach(function() {
     timeline = Mocks.getTimeline();
     timeline.isEmpty.andReturn(false);
-    timeline.send.andCallFake(function(sendJSONP, callback) {
-      sendJSONP({ events: [1, 2, 3]}, callback);
+    var eventData = { events: [1, 2, 3]}
+
+    timeline.send.andCallFake(function(sendFn, callback) {
+      sendFn(eventData, callback);
     });
+    qs = Collections.buildQueryString(eventData);
 
     onSend = jasmine.createSpy("onSend");
-    spyOn(Runtime, "createJSONPRequest").andCallFake(function() {
-      // JSONPRequest and ScriptRequest have compatible interfaces
-      jsonpRequest = Mocks.getScriptRequest();
-      return jsonpRequest;
+    spyOn(Runtime, "createXHR").andCallFake(function() {
+      xhrRequest = Mocks.getXHR();
+      return xhrRequest;
     });
 
     sender = new TimelineSender(timeline, {
@@ -44,15 +48,19 @@ describe("TimelineSender", function() {
     it("should send a non-empty timeline", function() {
       sender.send(false, onSend);
 
-      expect(Runtime.createJSONPRequest.calls.length).toEqual(1);
-      expect(Runtime.createJSONPRequest).toHaveBeenCalledWith(
-        "http://example.com/timeline",
-        { "events": [1, 2, 3] }
+      expect(Runtime.createXHR.calls.length).toEqual(1);
+      expect(xhrRequest.open.calls.length).toEqual(1);
+      expect(xhrRequest.send.calls.length).toEqual(1);
+
+      var qs = Collections.buildQueryString({ events: [1, 2, 3]})
+      expect(xhrRequest.open).toHaveBeenCalledWith(
+        "GET",
+        `http://example.com/timeline/2?${qs}`,
+        true,
       );
-      expect(jsonpRequest.send).toHaveBeenCalled();
     });
 
-    it("should send secure JSONP requests when using TLS", function() {
+    it("should send secure XHR requests when using TLS", function() {
       var sender = new TimelineSender(timeline, {
         useTLS: true,
         host: "example.com",
@@ -60,71 +68,65 @@ describe("TimelineSender", function() {
       });
       sender.send(true, onSend);
 
-      expect(Runtime.createJSONPRequest.calls.length).toEqual(1);
-      expect(Runtime.createJSONPRequest).toHaveBeenCalledWith(
-        "https://example.com/timeline",
-        { "events": [1, 2, 3] }
+      expect(Runtime.createXHR).toHaveBeenCalled()
+      expect(xhrRequest.open).toHaveBeenCalledWith(
+        "GET",
+        `https://example.com/timeline/2?${qs}`,
+        true,
       );
     });
 
-    it("should register a receiver using ScriptReceivers", function() {
-      sender.send(false, onSend);
-
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      expect(ScriptReceivers[jsonpReceiver.number]).toBe(jsonpReceiver.callback);
-    });
-
-    it("should call back after a successful JSONP request", function() {
+    it("should call back after a successful XHR request", function() {
       sender.send(false, onSend);
 
       expect(onSend).not.toHaveBeenCalled();
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      jsonpReceiver.callback(null, { result: "ok" });
+
+      xhrRequest.readyState = 4
+      xhrRequest.responseText = JSON.stringify({result: "ok"})
+      xhrRequest.status = 200
+      xhrRequest.onreadystatechange()
+
+      expect(onSend).toHaveBeenCalled();
+
       expect(onSend).toHaveBeenCalledWith(null, { result: "ok" });
     });
 
-    it("should call back after an unsuccessful JSONP request", function() {
+    it("should call back after an unsuccessful XHR request", function() {
       sender.send(false, onSend);
 
       expect(onSend).not.toHaveBeenCalled();
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      jsonpReceiver.callback("ERROR!", undefined);
-      expect(onSend).toHaveBeenCalledWith("ERROR!", undefined);
-    });
 
-    it("should remove the receiver from ScriptReceivers", function() {
-      sender.send(false, onSend);
+      xhrRequest.readyState = 4
+      xhrRequest.status = 400
+      xhrRequest.onreadystatechange()
 
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      jsonpReceiver.callback(null, {});
-      expect(ScriptReceivers[jsonpReceiver.number]).toBe(undefined);
-    });
+      expect(onSend).toHaveBeenCalled();
 
-    it("should clean up the JSONP request", function() {
-      sender.send(false, onSend);
-
-      expect(jsonpRequest.cleanup).not.toHaveBeenCalled();
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      jsonpReceiver.callback(null, {});
-      expect(jsonpRequest.cleanup).toHaveBeenCalled();
+      expect(onSend).toHaveBeenCalledWith(jasmine.any(String), null)
+      var errorArg = onSend.calls[0].args
+      expect(errorArg).toMatch(/Error.*400/)
     });
 
     it("should not send an empty timeline", function() {
       timeline.isEmpty.andReturn(true);
       sender.send(false, onSend);
-      expect(Runtime.createJSONPRequest).not.toHaveBeenCalled();
+      expect(Runtime.createXHR).not.toHaveBeenCalled();
     });
 
     it("should use returned hostname for subsequent requests", function() {
       sender.send(false);
 
-      var jsonpReceiver = jsonpRequest.send.calls[0].args[0];
-      jsonpReceiver.callback(null, { host: "returned.example.com" });
+      xhrRequest.readyState = 4
+      xhrRequest.responseText = JSON.stringify({host: "returned.example.com"})
+      xhrRequest.status = 200
+      xhrRequest.onreadystatechange()
 
       sender.send(false);
-      expect(Runtime.createJSONPRequest).toHaveBeenCalledWith(
-        "http://returned.example.com/timeline",
-        { "events": [1, 2, 3] }
+      expect(Runtime.createXHR).toHaveBeenCalled()
+      expect(xhrRequest.open).toHaveBeenCalledWith(
+        "GET",
+        `http://returned.example.com/timeline/2?${qs}`,
+        true,
       );
     });
   });

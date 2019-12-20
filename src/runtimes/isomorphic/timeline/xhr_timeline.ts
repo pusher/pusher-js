@@ -21,16 +21,25 @@ var getAgent = function(sender : TimelineSender, useTLS : boolean) {
         let {status, responseText} = xhr;
         if (status !== 200) {
           Logger.debug(`TimelineSender Error: received ${status} from stats.pusher.com`);
+          if (callback) {
+            callback(`Error: received ${status} from stats.pusher.com`, null)
+          }
           return;
         }
 
+        var result;
         try {
-          var {host} = JSON.parse(responseText);
+          var result = JSON.parse(responseText);
         } catch(e) {
           Logger.debug(`TimelineSenderError: invalid response ${responseText}`);
+          return
         }
-        if (host) {
-          sender.host = host;
+
+        if (result && result.host) {
+          sender.host = result.host;
+        }
+        if (callback) {
+          callback(null, result)
         }
       }
     }
