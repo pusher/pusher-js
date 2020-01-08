@@ -246,9 +246,14 @@ const pusher = new Pusher(APP_KEY, {
 });
 ```
 
-#### `disableStats` (Boolean)
+#### `disableStats` (deprecated) (Boolean)
 
 Disables stats collection, so that connection metrics are not submitted to Pusher’s servers. These stats are used for internal monitoring only and they do not affect the account stats.
+*This option is deprecated since stats collection is now disabled by default*
+
+#### `enableStats` (Boolean)
+
+Enables stats collection, so that connection metrics are submitted to Pusher’s servers. These stats can help pusher engineers debug connection issues.
 
 #### `enabledTransports` (Array)
 
