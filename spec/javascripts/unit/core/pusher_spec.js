@@ -504,7 +504,7 @@ describe("Pusher", function() {
       );
     });
 
-    it("should not be sent by defaul", function() {
+    it("should not be sent by default", function() {
       var pusher = new Pusher("foo");
       pusher.connect();
       pusher.connection.options.timeline.info({});
