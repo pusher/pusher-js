@@ -340,7 +340,7 @@ const pusher = new Pusher(APP_KEY, {
 });
 ```
 
-This returns a socket object which can then be used to subscribe to channels.
+This returns a pusher object which can then be used to subscribe to channels.
 
 One reason this connection might fail is your account being over its' limits. You can detect this in the client by binding to the `error` event on the `pusher.connection` object. For example:
 
@@ -356,7 +356,7 @@ pusher.connection.bind( 'error', function( err ) {
 You may disconnect again by invoking the `disconnect` method:
 
 ```js
-socket.disconnect();
+pusher.disconnect();
 ```
 
 ### Connection States
@@ -381,10 +381,10 @@ It is also stored within the socket, and used as a token for generating signatur
 
 ### Public channels
 
-The default method for subscribing to a channel involves invoking the `subscribe` method of your socket object:
+The default method for subscribing to a channel involves invoking the `subscribe` method of your pusher object:
 
 ```js
-const channel = socket.subscribe('my-channel');
+const channel = pusher.subscribe('my-channel');
 ```
 
 This returns a Channel object which events can be bound to.
@@ -394,7 +394,7 @@ This returns a Channel object which events can be bound to.
 Private channels are created in exactly the same way as normal channels, except that they reside in the 'private-' namespace. This means prefixing the channel name:
 
 ```js
-const channel = socket.subscribe('private-my-channel');
+const channel = pusher.subscribe('private-my-channel');
 ```
 
 ### Encrypted Channels (BETA)
@@ -404,7 +404,7 @@ Like private channels, encrypted channels have their own namespace, 'private-enc
 Please note that encrypted channels are only officially supported for our 'web' and 'node' clients for now. We know for sure this won't work in React Native builds since the React Native runtime does not include the required crypto functionality we depend on. Please let us know if you need this functionality in our web-worker or React Native builds!
 
 ```js
-const channel = socket.subscribe('private-encrypted-my-channel');
+const channel = pusher.subscribe('private-encrypted-my-channel');
 ```
 
 ## Accessing Channels
@@ -412,29 +412,29 @@ const channel = socket.subscribe('private-encrypted-my-channel');
 It is possible to access channels by name, through the `channel` function:
 
 ```js
-const channel = socket.channel('private-my-channel');
+const channel = pusher.channel('private-my-channel');
 ```
 
 It is possible to access all subscribed channels through the `allChannels` function:
 
 ```js
-socket.allChannels().forEach(channel => console.log(channel.name));
+pusher.allChannels().forEach(channel => console.log(channel.name));
 ```
 
 Private, presence and encrypted channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
 
 ## Unsubscribing from channels
 
-To unsubscribe from a channel, invoke the `unsubscribe` method of your socket object:
+To unsubscribe from a channel, invoke the `unsubscribe` method of your pusher object:
 
 ```js
-socket.unsubscribe('my-channel');
+pusher.unsubscribe('my-channel');
 ```
 
 Unsubscribing from private channels is done in exactly the same way, just with the additional `private-` prefix:
 
 ```js
-socket.unsubscribe('private-my-channel');
+pusher.unsubscribe('private-my-channel');
 ```
 
 ## Binding to events
@@ -528,13 +528,13 @@ pusher.connection.bind('state_change', function(states) {
 To listen for when you connect to Pusher Channels:
 
 ```js
-socket.connection.bind('connected', callback);
+pusher.connection.bind('connected', callback);
 ```
 
 And to bind to disconnections:
 
 ```js
-socket.connection.bind('disconnected', callback);
+pusher.connection.bind('disconnected', callback);
 ```
 
 ## Self-serving JS files
