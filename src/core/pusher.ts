@@ -68,12 +68,12 @@ export default class Pusher {
         `You should always specify a cluster when connecting. ${suffix}`
       );
     }
-    if ("disableStats" in options) {
+    if ('disableStats' in options) {
       Logger.warn(
         'The disableStats option is deprecated, stats are now disabled by default'
       );
-      if (!("enableStats" in options)) {
-        options.enableStats = !options.disableStats
+      if (!('enableStats' in options)) {
+        options.enableStats = !options.disableStats;
       }
     }
 
