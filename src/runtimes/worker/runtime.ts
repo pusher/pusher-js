@@ -55,13 +55,15 @@ const Worker: Runtime = {
     return Network;
   },
 
-  isXHRSupported() : boolean {
-    if('caches' in self) {
+  isXHRSupported(): boolean {
+    if (
+      'registration' in self &&
+      (self['registration'] as any) instanceof ServiceWorkerRegistration
+    ) {
       return false;
     }
     return true;
-  },
-
+  }
 };
 
 export default Worker;
