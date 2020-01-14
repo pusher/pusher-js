@@ -148,7 +148,7 @@ Notes:
 ## Initialization
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
@@ -160,7 +160,7 @@ You can get your `APP_KEY` and `APP_CLUSTER` from the [Pusher Channels dashboard
 There are a number of configuration parameters which can be set for the client, which can be passed as an object to the Pusher constructor, i.e.:
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   authEndpoint: 'http://example.com/pusher/auth',
   forceTLS: true
@@ -193,7 +193,7 @@ For more information see the [Channel authentication transport section of our au
 Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   auth: {
     params: { foo: 'bar' },
@@ -209,7 +209,7 @@ Additional parameters to be sent when the channel authentication endpoint is cal
 If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   auth: {
     params: { foo: 'bar' },
@@ -223,7 +223,7 @@ const socket = new Pusher(APP_KEY, {
 If you need custom authorization behavior you can provide your own `authorizer` function as follows:
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   authorizer: function (channel, options) {
     return {
@@ -241,7 +241,7 @@ const socket = new Pusher(APP_KEY, {
 Specifies the cluster that pusher-js should connect to. [If you'd like to see a full list of our clusters, click here](https://pusher.com/docs/clusters). If you do not specify a cluster, `mt1` will be used by default.
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
@@ -256,7 +256,7 @@ Specifies which transports should be used by pusher-js to establish a connection
 
 ```js
 // Only use WebSockets
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws']
 });
@@ -266,7 +266,7 @@ Note: if you intend to use secure websockets, or `wss`, you can not simply speci
 
 ```js
 // Only use secure WebSockets
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws'],
   forceTLS: true
@@ -279,13 +279,13 @@ Specifies which transports must not be used by pusher-js to establish a connecti
 
 ```js
 // Use all transports except for sockjs
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   disabledTransports: ['sockjs']
 });
 
 // Only use WebSockets
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
   enabledTransports: ['ws', 'xhr_streaming'],
   disabledTransports: ['xhr_streaming']
@@ -335,7 +335,7 @@ By setting the `log` property you also override the use of `Pusher.enableLogging
 A connection to Pusher Channels is established by providing your `APP_KEY` and `APP_CLUSTER` to the constructor function:
 
 ```js
-const socket = new Pusher(APP_KEY, {
+const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
 });
 ```
@@ -345,7 +345,7 @@ This returns a socket object which can then be used to subscribe to channels.
 One reason this connection might fail is your account being over its' limits. You can detect this in the client by binding to the `error` event on the `pusher.connection` object. For example:
 
 ```js
-var pusher = new Pusher('app_key');
+const pusher = new Pusher('app_key');
 pusher.connection.bind( 'error', function( err ) {
   if( err.error.data.code === 4004 ) {
     log('Over limit!');
