@@ -70,7 +70,7 @@ export default class Pusher {
     }
     if ('disableStats' in options) {
       Logger.warn(
-        'The disableStats option is deprecated, stats are now disabled by default'
+        'The disableStats option is deprecated in favor of enableStats'
       );
       if (!('enableStats' in options)) {
         options.enableStats = !options.disableStats;
