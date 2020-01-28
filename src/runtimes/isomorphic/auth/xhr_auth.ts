@@ -41,7 +41,7 @@ var ajax : AuthTransport = function(context : AbstractRuntime, socketId, callbac
           `received status ${xhr.status} from ${self.options.authEndpoint}. ` +
           `Clients must be authenticated to join private or presence channels. ${suffix}`
         );
-        callback(true, xhr.status);
+        callback(true, `Received status: '${xhr.status}' from auth endpoint: '${self.options.authEndpoint}'`);
       }
     }
   };
