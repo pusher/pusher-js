@@ -3,5 +3,4 @@ node_js: "10"
 before_script:
   - npm install
 script:
-  - npm run check-format
-  - ./.travis.build
+  - npm run check-format && ./.travis.build
