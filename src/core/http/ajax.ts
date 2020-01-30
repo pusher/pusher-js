@@ -1,9 +1,15 @@
 interface Ajax {
-  open(method : string, url : string, async?: boolean, user?: string, password?: string) : void;
-  send(payload?: any) : void;
-  setRequestHeader(key : string, value : string) : void;
-  onreadystatechange : Function;
-  readyState : number;
+  open(
+    method: string,
+    url: string,
+    async?: boolean,
+    user?: string,
+    password?: string
+  ): void;
+  send(payload?: any): void;
+  setRequestHeader(key: string, value: string): void;
+  onreadystatechange: Function;
+  readyState: number;
   responseText: string;
   status: number;
   withCredentials?: boolean;

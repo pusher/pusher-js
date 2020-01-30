@@ -1,4 +1,4 @@
 export default {
-    secretbox: {},
-    randomBytes: {},
-  }
+  secretbox: {},
+  randomBytes: {}
+};

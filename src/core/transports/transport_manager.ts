@@ -1,7 +1,7 @@
 import AssistantToTheTransportManager from './assistant_to_the_transport_manager';
-import Transport from "./transport";
-import PingDelayOptions from "./ping_delay_options";
-import Factory from "../utils/factory";
+import Transport from './transport';
+import PingDelayOptions from './ping_delay_options';
+import Factory from '../utils/factory';
 
 export interface TransportManagerOptions extends PingDelayOptions {
   lives?: number;
@@ -20,7 +20,7 @@ export default class TransportManager {
   options: TransportManagerOptions;
   livesLeft: number;
 
-  constructor(options : TransportManagerOptions){
+  constructor(options: TransportManagerOptions) {
     this.options = options || {};
     this.livesLeft = this.options.lives || Infinity;
   }
@@ -30,7 +30,7 @@ export default class TransportManager {
    * @param {Transport} transport
    * @returns {AssistantToTheTransportManager}
    */
-  getAssistant(transport : Transport) : AssistantToTheTransportManager {
+  getAssistant(transport: Transport): AssistantToTheTransportManager {
     return Factory.createAssistantToTheTransportManager(this, transport, {
       minPingDelay: this.options.minPingDelay,
       maxPingDelay: this.options.maxPingDelay
@@ -41,7 +41,7 @@ export default class TransportManager {
    *
    * @returns {Boolean}
    */
-  isAlive() : boolean {
+  isAlive(): boolean {
     return this.livesLeft > 0;
   }
 

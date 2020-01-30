@@ -1,10 +1,10 @@
 import Isomorphic from 'isomorphic/runtime';
-import {Client as WebSocket} from "faye-websocket";
-import {XMLHttpRequest} from "xmlhttprequest";
-import Runtime from "../interface";
-import {Network} from './net_info';
+import { Client as WebSocket } from 'faye-websocket';
+import { XMLHttpRequest } from 'xmlhttprequest';
+import Runtime from '../interface';
+import { Network } from './net_info';
 import xhrAuth from 'isomorphic/auth/xhr_auth';
-import {AuthTransports} from 'core/auth/auth_transports';
+import { AuthTransports } from 'core/auth/auth_transports';
 import xhrTimeline from 'isomorphic/timeline/xhr_timeline';
 
 // Very verbose but until unavoidable until
@@ -26,7 +26,7 @@ const {
   HTTPFactory
 } = Isomorphic;
 
-const NodeJS : Runtime = {
+const NodeJS: Runtime = {
   getDefaultStrategy,
   Transports,
   setup,
@@ -43,8 +43,8 @@ const NodeJS : Runtime = {
 
   TimelineTransport: xhrTimeline,
 
-  getAuthorizers() : AuthTransports {
-    return {ajax: xhrAuth};
+  getAuthorizers(): AuthTransports {
+    return { ajax: xhrAuth };
   },
 
   getWebSocketAPI() {

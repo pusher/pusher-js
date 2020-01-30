@@ -1,6 +1,6 @@
-import Timer from "./abstract_timer";
-import TimedCallback from "./timed_callback";
-import {Delay} from "./scheduling";
+import Timer from './abstract_timer';
+import TimedCallback from './timed_callback';
+import { Delay } from './scheduling';
 
 // We need to bind clear functions this way to avoid exceptions on IE8
 function clearTimeout(timer) {
@@ -16,11 +16,11 @@ function clearInterval(timer) {
  * @param {Function} callback
  */
 export class OneOffTimer extends Timer {
-  constructor(delay : Delay, callback : TimedCallback) {
-    super(setTimeout, clearTimeout, delay, function(timer){
+  constructor(delay: Delay, callback: TimedCallback) {
+    super(setTimeout, clearTimeout, delay, function(timer) {
       callback();
       return null;
-    })
+    });
   }
 }
 
@@ -30,10 +30,10 @@ export class OneOffTimer extends Timer {
  * @param {Function} callback
  */
 export class PeriodicTimer extends Timer {
-  constructor(delay : Delay, callback : TimedCallback) {
-    super(setInterval, clearInterval, delay, function(timer){
+  constructor(delay: Delay, callback: TimedCallback) {
+    super(setInterval, clearInterval, delay, function(timer) {
       callback();
       return timer;
-    })
+    });
   }
 }

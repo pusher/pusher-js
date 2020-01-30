@@ -1,10 +1,10 @@
 import * as Collections from '../utils/collections';
-import {default as EventsDispatcher} from '../events/dispatcher';
+import { default as EventsDispatcher } from '../events/dispatcher';
 import Protocol from './protocol/protocol';
-import {PusherEvent} from './protocol/message-types';
+import { PusherEvent } from './protocol/message-types';
 import Logger from '../logger';
-import TransportConnection from "../transports/transport_connection";
-import Socket from "../socket";
+import TransportConnection from '../transports/transport_connection';
+import Socket from '../socket';
 /**
  * Provides Pusher protocol interface for transports.
  *
@@ -26,7 +26,7 @@ export default class Connection extends EventsDispatcher implements Socket {
   transport: TransportConnection;
   activityTimeout: number;
 
-  constructor(id : string, transport : TransportConnection) {
+  constructor(id: string, transport: TransportConnection) {
     super();
     this.id = id;
     this.transport = transport;
@@ -38,7 +38,7 @@ export default class Connection extends EventsDispatcher implements Socket {
    *
    * @returns {Boolean} true if activity checks are handled by the transport
    */
-  handlesActivityChecks(){
+  handlesActivityChecks() {
     return this.transport.handlesActivityChecks();
   }
 
@@ -46,7 +46,7 @@ export default class Connection extends EventsDispatcher implements Socket {
    *
    * @param {String} data
    */
-  send(data : any) : boolean {
+  send(data: any): boolean {
     return this.transport.send(data);
   }
 
@@ -57,101 +57,104 @@ export default class Connection extends EventsDispatcher implements Socket {
    * @param {String} [channel]
    * @returns {Boolean} whether message was sent or not
    */
-   send_event(name : string, data : any, channel?: string) : boolean {
-     var event : PusherEvent = { event: name, data: data };
-     if (channel) {
-       event.channel = channel;
-     }
-     Logger.debug('Event sent', event);
-     return this.send(Protocol.encodeMessage(event));
-   }
+  send_event(name: string, data: any, channel?: string): boolean {
+    var event: PusherEvent = { event: name, data: data };
+    if (channel) {
+      event.channel = channel;
+    }
+    Logger.debug('Event sent', event);
+    return this.send(Protocol.encodeMessage(event));
+  }
 
-   /** Sends a ping message to the server.
-    *
-    * Basing on the underlying transport, it might send either transport's
-    * protocol-specific ping or pusher:ping event.
-    */
-   ping() {
-     if (this.transport.supportsPing()) {
-       this.transport.ping();
-     } else {
-       this.send_event('pusher:ping', {});
-     }
-   }
+  /** Sends a ping message to the server.
+   *
+   * Basing on the underlying transport, it might send either transport's
+   * protocol-specific ping or pusher:ping event.
+   */
+  ping() {
+    if (this.transport.supportsPing()) {
+      this.transport.ping();
+    } else {
+      this.send_event('pusher:ping', {});
+    }
+  }
 
-   /** Closes the connection. */
-   close() {
-     this.transport.close();
-   }
+  /** Closes the connection. */
+  close() {
+    this.transport.close();
+  }
 
-   private bindListeners() {
-     var listeners = {
-       message: (messageEvent: MessageEvent)=> {
-         var pusherEvent;
-         try {
-           pusherEvent = Protocol.decodeMessage(messageEvent);
-         } catch(e) {
-           this.emit('error', {
-             type: 'MessageParseError',
-             error: e,
-             data: messageEvent.data
-           });
-         }
+  private bindListeners() {
+    var listeners = {
+      message: (messageEvent: MessageEvent) => {
+        var pusherEvent;
+        try {
+          pusherEvent = Protocol.decodeMessage(messageEvent);
+        } catch (e) {
+          this.emit('error', {
+            type: 'MessageParseError',
+            error: e,
+            data: messageEvent.data
+          });
+        }
 
-         if (pusherEvent !== undefined) {
-           Logger.debug('Event recd', pusherEvent);
+        if (pusherEvent !== undefined) {
+          Logger.debug('Event recd', pusherEvent);
 
-           switch (pusherEvent.event) {
-             case 'pusher:error':
-               this.emit('error', { type: 'PusherError', data: pusherEvent.data });
-               break;
-             case 'pusher:ping':
-               this.emit("ping");
-               break;
-             case 'pusher:pong':
-               this.emit("pong");
-               break;
-           }
-           this.emit('message', pusherEvent);
-         }
-       },
-       activity: ()=> {
-         this.emit("activity");
-       },
-       error: (error)=> {
-         this.emit("error", { type: "WebSocketError", error: error });
-       },
-       closed: (closeEvent)=> {
-         unbindListeners();
+          switch (pusherEvent.event) {
+            case 'pusher:error':
+              this.emit('error', {
+                type: 'PusherError',
+                data: pusherEvent.data
+              });
+              break;
+            case 'pusher:ping':
+              this.emit('ping');
+              break;
+            case 'pusher:pong':
+              this.emit('pong');
+              break;
+          }
+          this.emit('message', pusherEvent);
+        }
+      },
+      activity: () => {
+        this.emit('activity');
+      },
+      error: error => {
+        this.emit('error', { type: 'WebSocketError', error: error });
+      },
+      closed: closeEvent => {
+        unbindListeners();
 
-         if (closeEvent && closeEvent.code) {
-           this.handleCloseEvent(closeEvent);
-         }
+        if (closeEvent && closeEvent.code) {
+          this.handleCloseEvent(closeEvent);
+        }
 
-         this.transport = null;
-         this.emit("closed");
-       }
-     };
+        this.transport = null;
+        this.emit('closed');
+      }
+    };
 
-     var unbindListeners = ()=> {
-       Collections.objectApply(listeners, (listener, event)=> {
-         this.transport.unbind(event, listener);
-       });
-     };
+    var unbindListeners = () => {
+      Collections.objectApply(listeners, (listener, event) => {
+        this.transport.unbind(event, listener);
+      });
+    };
 
-     Collections.objectApply(listeners, (listener, event)=> {
-       this.transport.bind(event, listener);
-     });
-   }
+    Collections.objectApply(listeners, (listener, event) => {
+      this.transport.bind(event, listener);
+    });
+  }
 
-   private handleCloseEvent(closeEvent : any) {
-     var action = Protocol.getCloseAction(closeEvent);
-     var error = Protocol.getCloseError(closeEvent);
-     if (error) {
-       this.emit('error', error);
-     }
-     if (action) {
-       this.emit(action, {action: action, error: error});
-     }
-   }
+  private handleCloseEvent(closeEvent: any) {
+    var action = Protocol.getCloseAction(closeEvent);
+    var error = Protocol.getCloseError(closeEvent);
+    if (error) {
+      this.emit('error', error);
+    }
+    if (action) {
+      this.emit(action, { action: action, error: error });
+    }
+  }
 }

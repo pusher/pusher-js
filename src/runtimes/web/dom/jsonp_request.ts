@@ -18,35 +18,35 @@ import Runtime from '../runtime';
  * @param {String} url
  * @param {Object} data key-value map of data to be submitted
  */
- export default class JSONPRequest {
-   url: string;
-   data: any;
-   request: ScriptRequest;
+export default class JSONPRequest {
+  url: string;
+  data: any;
+  request: ScriptRequest;
 
-   constructor(url : string, data : any) {
-     this.url = url;
-     this.data = data;
-   }
+  constructor(url: string, data: any) {
+    this.url = url;
+    this.data = data;
+  }
 
-   /** Sends the actual JSONP request.
-    *
-    * @param {ScriptReceiver} receiver
-    */
-   send(receiver : ScriptReceiver) {
-     if (this.request) {
-       return;
-     }
+  /** Sends the actual JSONP request.
+   *
+   * @param {ScriptReceiver} receiver
+   */
+  send(receiver: ScriptReceiver) {
+    if (this.request) {
+      return;
+    }
 
-     var query = Collections.buildQueryString(this.data);
-     var url = this.url + "/" + receiver.number + "?" + query;
-     this.request = Runtime.createScriptRequest(url);
-     this.request.send(receiver);
-   }
+    var query = Collections.buildQueryString(this.data);
+    var url = this.url + '/' + receiver.number + '?' + query;
+    this.request = Runtime.createScriptRequest(url);
+    this.request.send(receiver);
+  }
 
-   /** Cleans up the DOM remains of the JSONP request. */
-   cleanup() {
-     if (this.request) {
-       this.request.cleanup();
-     }
-   }
- }
+  /** Cleans up the DOM remains of the JSONP request. */
+  cleanup() {
+    if (this.request) {
+      this.request.cleanup();
+    }
+  }
+}

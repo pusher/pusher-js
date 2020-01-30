@@ -1,8 +1,8 @@
 import * as Collections from '../utils/collections';
 import Util from '../util';
-import {OneOffTimer as Timer} from '../utils/timers';
-import Strategy from "./strategy";
-import StrategyOptions from "./strategy_options";
+import { OneOffTimer as Timer } from '../utils/timers';
+import Strategy from './strategy';
+import StrategyOptions from './strategy_options';
 
 /** Loops through strategies with optional timeouts.
  *
@@ -15,14 +15,13 @@ import StrategyOptions from "./strategy_options";
  * @param {Object} options
  */
 export default class SequentialStrategy implements Strategy {
-
   strategies: Strategy[];
   loop: boolean;
   failFast: boolean;
   timeout: number;
   timeoutLimit: number;
 
-  constructor(strategies : Strategy[], options : StrategyOptions) {
+  constructor(strategies: Strategy[], options: StrategyOptions) {
     this.strategies = strategies;
     this.loop = Boolean(options.loop);
     this.failFast = Boolean(options.failFast);
@@ -30,17 +29,17 @@ export default class SequentialStrategy implements Strategy {
     this.timeoutLimit = options.timeoutLimit;
   }
 
-  isSupported() : boolean {
-    return Collections.any(this.strategies, Util.method("isSupported"));
+  isSupported(): boolean {
+    return Collections.any(this.strategies, Util.method('isSupported'));
   }
 
-  connect(minPriority : number, callback : Function) {
+  connect(minPriority: number, callback: Function) {
     var strategies = this.strategies;
     var current = 0;
     var timeout = this.timeout;
     var runner = null;
 
-    var tryNextStrategy = (error, handshake)=> {
+    var tryNextStrategy = (error, handshake) => {
       if (handshake) {
         callback(null, handshake);
       } else {
@@ -88,7 +87,12 @@ export default class SequentialStrategy implements Strategy {
     };
   }
 
-  private tryStrategy(strategy : Strategy, minPriority : number, options : StrategyOptions, callback : Function) {
+  private tryStrategy(
+    strategy: Strategy,
+    minPriority: number,
+    options: StrategyOptions,
+    callback: Function
+  ) {
     var timer = null;
     var runner = null;
 

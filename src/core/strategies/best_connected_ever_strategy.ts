@@ -9,15 +9,15 @@ import Strategy from './strategy';
 export default class BestConnectedEverStrategy implements Strategy {
   strategies: Strategy[];
 
-  constructor(strategies : Strategy[]) {
+  constructor(strategies: Strategy[]) {
     this.strategies = strategies;
   }
 
-  isSupported() : boolean {
-    return Collections.any(this.strategies, Util.method("isSupported"));
+  isSupported(): boolean {
+    return Collections.any(this.strategies, Util.method('isSupported'));
   }
 
-  connect(minPriority : number, callback : Function) {
+  connect(minPriority: number, callback: Function) {
     return connect(this.strategies, minPriority, function(i, runners) {
       return function(error, handshake) {
         runners[i].error = error;
@@ -47,7 +47,11 @@ export default class BestConnectedEverStrategy implements Strategy {
  * @param  {Function} callbackBuilder
  * @return {Object} strategy runner
  */
-function connect(strategies : Strategy[], minPriority : number, callbackBuilder : Function) {
+function connect(
+  strategies: Strategy[],
+  minPriority: number,
+  callbackBuilder: Function
+) {
   var runners = Collections.map(strategies, function(strategy, i, _, rs) {
     return strategy.connect(minPriority, callbackBuilder(i, rs));
   });
@@ -63,7 +67,7 @@ function connect(strategies : Strategy[], minPriority : number, callbackBuilder 
   };
 }
 
-function allRunnersFailed(runners) : boolean {
+function allRunnersFailed(runners): boolean {
   return Collections.all(runners, function(runner) {
     return Boolean(runner.error);
   });

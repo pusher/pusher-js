@@ -1,4 +1,4 @@
-declare module "faye-websocket" {
+declare module 'faye-websocket' {
   interface MessageEvent {
     data: any;
   }

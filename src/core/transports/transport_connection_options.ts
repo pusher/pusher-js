@@ -1,7 +1,7 @@
 import Timeline from '../timeline/timeline';
 
 interface TransportConnectionOptions {
-  timeline: Timeline,
+  timeline: Timeline;
   activityTimeout: number;
 }
 

@@ -1,4 +1,4 @@
-import {Dependencies} from '../dom/dependencies';
+import { Dependencies } from '../dom/dependencies';
 
 /** Initializes the transport.
  *
@@ -7,20 +7,22 @@ import {Dependencies} from '../dom/dependencies';
 export default function() {
   var self = this;
 
-  self.timeline.info(self.buildTimelineMessage({
-    transport: self.name + (self.options.useTLS ? "s" : "")
-  }));
+  self.timeline.info(
+    self.buildTimelineMessage({
+      transport: self.name + (self.options.useTLS ? 's' : '')
+    })
+  );
 
   if (self.hooks.isInitialized()) {
-    self.changeState("initialized");
+    self.changeState('initialized');
   } else if (self.hooks.file) {
-    self.changeState("initializing");
+    self.changeState('initializing');
     Dependencies.load(
       self.hooks.file,
       { useTLS: self.options.useTLS },
       function(error, callback) {
         if (self.hooks.isInitialized()) {
-          self.changeState("initialized");
+          self.changeState('initialized');
           callback(true);
         } else {
           if (error) {

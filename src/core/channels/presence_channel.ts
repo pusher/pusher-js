@@ -3,8 +3,8 @@ import Logger from '../logger';
 import Members from './members';
 import Pusher from '../pusher';
 import UrlStore from 'core/utils/url_store';
-import {PusherEvent} from '../connection/protocol/message-types';
-import Metadata from './metadata'
+import { PusherEvent } from '../connection/protocol/message-types';
+import Metadata from './metadata';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -14,7 +14,7 @@ export default class PresenceChannel extends PrivateChannel {
    * @param {String} name
    * @param {Pusher} pusher
    */
-  constructor(name : string, pusher : Pusher) {
+  constructor(name: string, pusher: Pusher) {
     super(name, pusher);
     this.members = new Members();
   }
@@ -24,16 +24,16 @@ export default class PresenceChannel extends PrivateChannel {
    * @param  {String} socketId
    * @param  {Function} callback
    */
-  authorize(socketId : string, callback : Function) {
+  authorize(socketId: string, callback: Function) {
     super.authorize(socketId, (error, authData) => {
       if (!error) {
         if (authData.channel_data === undefined) {
-          let suffix = UrlStore.buildLogSuffix("authenticationEndpoint");
+          let suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
           Logger.error(
             `Invalid auth response for channel '${this.name}',` +
-            `expected 'channel_data' field. ${suffix}`
+              `expected 'channel_data' field. ${suffix}`
           );
-          callback("Invalid auth response");
+          callback('Invalid auth response');
           return;
         }
         var channelData = JSON.parse(authData.channel_data);
@@ -49,13 +49,13 @@ export default class PresenceChannel extends PrivateChannel {
    */
   handleEvent(event: PusherEvent) {
     var eventName = event.event;
-    if (eventName.indexOf("pusher_internal:") === 0) {
-      this.handleInternalEvent(event)
+    if (eventName.indexOf('pusher_internal:') === 0) {
+      this.handleInternalEvent(event);
     } else {
       var data = event.data;
       var metadata: Metadata = {};
       if (event.user_id) {
-        metadata.user_id = event.user_id
+        metadata.user_id = event.user_id;
       }
       this.emit(eventName, data, metadata);
     }
@@ -64,14 +64,14 @@ export default class PresenceChannel extends PrivateChannel {
     var eventName = event.event;
     var data = event.data;
     switch (eventName) {
-      case "pusher_internal:subscription_succeeded":
-        this.handleSubscriptionSucceededEvent(event)
-        break
-      case "pusher_internal:member_added":
+      case 'pusher_internal:subscription_succeeded':
+        this.handleSubscriptionSucceededEvent(event);
+        break;
+      case 'pusher_internal:member_added':
         var addedMember = this.members.addMember(data);
         this.emit('pusher:member_added', addedMember);
         break;
-      case "pusher_internal:member_removed":
+      case 'pusher_internal:member_removed':
         var removedMember = this.members.removeMember(data);
         if (removedMember) {
           this.emit('pusher:member_removed', removedMember);
@@ -87,7 +87,7 @@ export default class PresenceChannel extends PrivateChannel {
       this.pusher.unsubscribe(this.name);
     } else {
       this.members.onSubscription(event.data);
-      this.emit("pusher:subscription_succeeded", this.members);
+      this.emit('pusher:subscription_succeeded', this.members);
     }
   }
 

@@ -1,7 +1,7 @@
-import Callback from "./callback";
+import Callback from './callback';
 
 interface CallbackTable {
-  [index : string] : Callback[];
+  [index: string]: Callback[];
 }
 
 export default CallbackTable;

@@ -1,41 +1,41 @@
 /**
-* A place to store help URLs for error messages etc
-*/
+ * A place to store help URLs for error messages etc
+ */
 
 const urlStore = {
-  baseUrl: "https://pusher.com",
+  baseUrl: 'https://pusher.com',
   urls: {
     authenticationEndpoint: {
-      path: "/docs/authenticating_users",
+      path: '/docs/authenticating_users'
     },
     javascriptQuickStart: {
-      path: "/docs/javascript_quick_start"
+      path: '/docs/javascript_quick_start'
     },
     triggeringClientEvents: {
-      path: "/docs/client_api_guide/client_events#trigger-events"
+      path: '/docs/client_api_guide/client_events#trigger-events'
     }
   }
-}
+};
 
 /** Builds a consistent string with links to pusher documentation
-*
-* @param {string} key - relevant key in the url_store.urls object
-* @return {string} suffix string to append to log message
-*/
-const buildLogSuffix = function(key: string) : string {
-  const urlPrefix = "See:";
+ *
+ * @param {string} key - relevant key in the url_store.urls object
+ * @return {string} suffix string to append to log message
+ */
+const buildLogSuffix = function(key: string): string {
+  const urlPrefix = 'See:';
   const urlObj = urlStore.urls[key];
-  if(!urlObj) return "";
+  if (!urlObj) return '';
 
   let url;
   if (urlObj.fullUrl) {
     url = urlObj.fullUrl;
-  } else if(urlObj.path) {
+  } else if (urlObj.path) {
     url = urlStore.baseUrl + urlObj.path;
   }
 
-  if(!url) return "";
-  return `${urlPrefix} ${url}`
-}
+  if (!url) return '';
+  return `${urlPrefix} ${url}`;
+};
 
 export default { buildLogSuffix };

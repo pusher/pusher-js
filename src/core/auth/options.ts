@@ -1,20 +1,20 @@
-import Channel from "../channels/channel";
+import Channel from '../channels/channel';
 
 export interface AuthOptions {
   params: any;
-  headers : any;
+  headers: any;
 }
 
 export interface Authorizer {
-	authorize(socketId : string, callback : Function)
+  authorize(socketId: string, callback: Function);
 }
 
 export interface AuthorizerGenerator {
-  (channel: Channel, options : AuthorizerOptions): Authorizer
+  (channel: Channel, options: AuthorizerOptions): Authorizer;
 }
 
 export interface AuthorizerOptions {
-  authTransport: "ajax" | "jsonp";
+  authTransport: 'ajax' | 'jsonp';
   auth: AuthOptions;
   authorizer: AuthorizerGenerator;
 }

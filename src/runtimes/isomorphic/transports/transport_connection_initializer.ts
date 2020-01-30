@@ -5,12 +5,14 @@
 export default function() {
   var self = this;
 
-  self.timeline.info(self.buildTimelineMessage({
-    transport: self.name + (self.options.useTLS ? "s" : "")
-  }));
+  self.timeline.info(
+    self.buildTimelineMessage({
+      transport: self.name + (self.options.useTLS ? 's' : '')
+    })
+  );
 
   if (self.hooks.isInitialized()) {
-    self.changeState("initialized");
+    self.changeState('initialized');
   } else {
     self.onClose();
   }

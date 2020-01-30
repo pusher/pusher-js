@@ -1,4 +1,4 @@
-import Channel from "./channel";
+import Channel from './channel';
 import * as Collections from '../utils/collections';
 import ChannelTable from './channel_table';
 import Factory from '../utils/factory';
@@ -19,7 +19,7 @@ export default class Channels {
    * @param {Pusher} pusher
    * @return {Channel}
    */
-  add(name : string, pusher : Pusher) {
+  add(name: string, pusher: Pusher) {
     if (!this.channels[name]) {
       this.channels[name] = createChannel(name, pusher);
     }
@@ -30,7 +30,7 @@ export default class Channels {
    *
    * @return {Array}
    */
-  all() : Channel[] {
+  all(): Channel[] {
     return Collections.values(this.channels);
   }
 
@@ -47,7 +47,7 @@ export default class Channels {
    *
    * @param {String} name
    */
-  remove(name : string) {
+  remove(name: string) {
     var channel = this.channels[name];
     delete this.channels[name];
     return channel;
@@ -61,11 +61,11 @@ export default class Channels {
   }
 }
 
-function createChannel(name : string, pusher : Pusher) : Channel {
+function createChannel(name: string, pusher: Pusher): Channel {
   if (name.indexOf('private-encrypted-') === 0) {
     // We don't currently support e2e on React Native due to missing functionality.
     // This prevents any weirdness by just returning a private channel instead.
-    if(RUNTIME === "react-native") {
+    if (RUNTIME === 'react-native') {
       let errorMsg = `Encrypted channels are not yet supported when using React Native builds.`;
       throw new Errors.UnsupportedFeature(errorMsg);
     }

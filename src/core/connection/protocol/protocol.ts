@@ -1,5 +1,5 @@
 import Action from './action';
-import {PusherEvent} from './message-types';
+import { PusherEvent } from './message-types';
 /**
  * Provides functions for handling Pusher protocol-specific messages.
  */
@@ -20,26 +20,26 @@ const Protocol = {
    * @param  {MessageEvent} messageEvent
    * @return {PusherEvent}
    */
-  decodeMessage: function(messageEvent : MessageEvent) : PusherEvent {
+  decodeMessage: function(messageEvent: MessageEvent): PusherEvent {
     try {
       var messageData = JSON.parse(messageEvent.data);
       var pusherEventData = messageData.data;
       if (typeof pusherEventData === 'string') {
         try {
-          pusherEventData = JSON.parse(messageData.data)
+          pusherEventData = JSON.parse(messageData.data);
         } catch (e) {}
       }
       var pusherEvent: PusherEvent = {
         event: messageData.event,
         channel: messageData.channel,
-        data: pusherEventData,
-      }
+        data: pusherEventData
+      };
       if (messageData.user_id) {
-        pusherEvent.user_id = messageData.user_id
+        pusherEvent.user_id = messageData.user_id;
       }
       return pusherEvent;
     } catch (e) {
-      throw { type: 'MessageParseError', error: e, data: messageEvent.data};
+      throw { type: 'MessageParseError', error: e, data: messageEvent.data };
     }
   },
 
@@ -49,7 +49,7 @@ const Protocol = {
    * @param  {PusherEvent} event
    * @return {String}
    */
-  encodeMessage: function(event : PusherEvent) : string {
+  encodeMessage: function(event: PusherEvent): string {
     return JSON.stringify(event);
   },
 
@@ -67,19 +67,19 @@ const Protocol = {
    * @param {String} message
    * @result Object
    */
-  processHandshake: function(messageEvent : MessageEvent) : Action {
+  processHandshake: function(messageEvent: MessageEvent): Action {
     var message = Protocol.decodeMessage(messageEvent);
 
-    if (message.event === "pusher:connection_established") {
+    if (message.event === 'pusher:connection_established') {
       if (!message.data.activity_timeout) {
-        throw "No activity timeout specified in handshake";
+        throw 'No activity timeout specified in handshake';
       }
       return {
-        action: "connected",
+        action: 'connected',
         id: message.data.socket_id,
         activityTimeout: message.data.activity_timeout * 1000
       };
-    } else if (message.event === "pusher:error") {
+    } else if (message.event === 'pusher:error') {
       // From protocol 6 close codes are sent only once, so this only
       // happens when connection does not support close codes
       return {
@@ -87,7 +87,7 @@ const Protocol = {
         error: this.getCloseError(message.data)
       };
     } else {
-      throw "Invalid handshake";
+      throw 'Invalid handshake';
     }
   },
 
@@ -101,7 +101,7 @@ const Protocol = {
    * @param  {CloseEvent} closeEvent
    * @return {String} close action name
    */
-  getCloseAction: function(closeEvent) : string {
+  getCloseAction: function(closeEvent): string {
     if (closeEvent.code < 4000) {
       // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
       //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
@@ -109,21 +109,21 @@ const Protocol = {
       // handle 1002 CLOSE_PROTOCOL_ERROR, 1003 CLOSE_UNSUPPORTED,
       //        1004 CLOSE_TOO_LARGE
       if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-        return "backoff";
+        return 'backoff';
       } else {
         return null;
       }
     } else if (closeEvent.code === 4000) {
-      return "tls_only";
+      return 'tls_only';
     } else if (closeEvent.code < 4100) {
-      return "refused";
+      return 'refused';
     } else if (closeEvent.code < 4200) {
-      return "backoff";
+      return 'backoff';
     } else if (closeEvent.code < 4300) {
-      return "retry";
+      return 'retry';
     } else {
       // unknown error
-      return "refused";
+      return 'refused';
     }
   },
 
@@ -136,7 +136,7 @@ const Protocol = {
    * @param  {CloseEvent} closeEvent
    * @return {Object} error object
    */
-  getCloseError: function(closeEvent) : any {
+  getCloseError: function(closeEvent): any {
     if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
       return {
         type: 'PusherError',

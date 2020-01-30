@@ -1,6 +1,6 @@
 import Util from '../util';
 import * as Collections from '../utils/collections';
-import {default as EventsDispatcher} from "../events/dispatcher";
+import { default as EventsDispatcher } from '../events/dispatcher';
 import Logger from '../logger';
 import TransportHooks from './transport_hooks';
 import Socket from '../socket';
@@ -50,7 +50,13 @@ export default class TransportConnection extends EventsDispatcher {
   beforeOpen: Function;
   initialize: Function;
 
-  constructor(hooks : TransportHooks, name : string, priority : number, key : string, options : TransportConnectionOptions) {
+  constructor(
+    hooks: TransportHooks,
+    name: string,
+    priority: number,
+    key: string,
+    options: TransportConnectionOptions
+  ) {
     super();
     this.initialize = Runtime.transportConnectionInitializer;
     this.hooks = hooks;
@@ -59,7 +65,7 @@ export default class TransportConnection extends EventsDispatcher {
     this.key = key;
     this.options = options;
 
-    this.state = "new";
+    this.state = 'new';
     this.timeline = options.timeline;
     this.activityTimeout = options.activityTimeout;
     this.id = this.timeline.generateUniqueID();
@@ -69,7 +75,7 @@ export default class TransportConnection extends EventsDispatcher {
    *
    * @return {Boolean}
    */
-  handlesActivityChecks() : boolean {
+  handlesActivityChecks(): boolean {
     return Boolean(this.hooks.handlesActivityChecks);
   }
 
@@ -77,7 +83,7 @@ export default class TransportConnection extends EventsDispatcher {
    *
    * @return {Boolean}
    */
-  supportsPing() : boolean {
+  supportsPing(): boolean {
     return Boolean(this.hooks.supportsPing);
   }
 
@@ -85,8 +91,8 @@ export default class TransportConnection extends EventsDispatcher {
    *
    * @returns {Boolean} false if transport is in invalid state
    */
-  connect() : boolean {
-    if (this.socket || this.state !== "initialized") {
+  connect(): boolean {
+    if (this.socket || this.state !== 'initialized') {
       return false;
     }
 
@@ -94,17 +100,17 @@ export default class TransportConnection extends EventsDispatcher {
     try {
       this.socket = this.hooks.getSocket(url, this.options);
     } catch (e) {
-      Util.defer(()=> {
+      Util.defer(() => {
         this.onError(e);
-        this.changeState("closed");
+        this.changeState('closed');
       });
       return false;
     }
 
     this.bindListeners();
 
-    Logger.debug("Connecting", { transport: this.name, url});
-    this.changeState("connecting");
+    Logger.debug('Connecting', { transport: this.name, url });
+    this.changeState('connecting');
     return true;
   }
 
@@ -112,7 +118,7 @@ export default class TransportConnection extends EventsDispatcher {
    *
    * @return {Boolean} true if there was a connection to close
    */
-  close() : boolean {
+  close(): boolean {
     if (this.socket) {
       this.socket.close();
       return true;
@@ -126,10 +132,10 @@ export default class TransportConnection extends EventsDispatcher {
    * @param {String} data
    * @return {Boolean} true only when in the "open" state
    */
-  send(data : any) : boolean {
-    if (this.state === "open") {
+  send(data: any): boolean {
+    if (this.state === 'open') {
       // Workaround for MobileSafari bug (see https://gist.github.com/2052006)
-      Util.defer(()=> {
+      Util.defer(() => {
         if (this.socket) {
           this.socket.send(data);
         }
@@ -142,7 +148,7 @@ export default class TransportConnection extends EventsDispatcher {
 
   /** Sends a ping if the connection is open and transport supports it. */
   ping() {
-    if (this.state === "open" && this.supportsPing()) {
+    if (this.state === 'open' && this.supportsPing()) {
       this.socket.ping();
     }
   }
@@ -150,56 +156,59 @@ export default class TransportConnection extends EventsDispatcher {
   private onOpen() {
     if (this.hooks.beforeOpen) {
       this.hooks.beforeOpen(
-        this.socket, this.hooks.urls.getPath(this.key, this.options)
+        this.socket,
+        this.hooks.urls.getPath(this.key, this.options)
       );
     }
-    this.changeState("open");
+    this.changeState('open');
     this.socket.onopen = undefined;
   }
 
   private onError(error) {
-    this.emit("error", { type: 'WebSocketError', error: error });
+    this.emit('error', { type: 'WebSocketError', error: error });
     this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
   }
 
-  private onClose(closeEvent?:any) {
+  private onClose(closeEvent?: any) {
     if (closeEvent) {
-      this.changeState("closed", {
+      this.changeState('closed', {
         code: closeEvent.code,
         reason: closeEvent.reason,
         wasClean: closeEvent.wasClean
       });
     } else {
-      this.changeState("closed");
+      this.changeState('closed');
     }
     this.unbindListeners();
     this.socket = undefined;
   }
 
   private onMessage(message) {
-    this.emit("message", message);
+    this.emit('message', message);
   }
 
   private onActivity() {
-    this.emit("activity");
+    this.emit('activity');
   }
 
   private bindListeners() {
-    this.socket.onopen = ()=> {
+    this.socket.onopen = () => {
       this.onOpen();
     };
-    this.socket.onerror = (error) => {
+    this.socket.onerror = error => {
       this.onError(error);
     };
-    this.socket.onclose = (closeEvent) => {
+    this.socket.onclose = closeEvent => {
       this.onClose(closeEvent);
     };
-    this.socket.onmessage = (message) => {
+    this.socket.onmessage = message => {
       this.onMessage(message);
     };
 
     if (this.supportsPing()) {
-      this.socket.onactivity = ()=> { this.onActivity(); };
+      this.socket.onactivity = () => {
+        this.onActivity();
+      };
     }
   }
 
@@ -215,17 +224,18 @@ export default class TransportConnection extends EventsDispatcher {
     }
   }
 
-  private changeState(state : string, params?:any) {
+  private changeState(state: string, params?: any) {
     this.state = state;
-    this.timeline.info(this.buildTimelineMessage({
-      state: state,
-      params: params
-    }));
+    this.timeline.info(
+      this.buildTimelineMessage({
+        state: state,
+        params: params
+      })
+    );
     this.emit(state, params);
   }
 
-  buildTimelineMessage(message) : any {
+  buildTimelineMessage(message): any {
     return Collections.extend({ cid: this.id }, message);
   }
-
 }

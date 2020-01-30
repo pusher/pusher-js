@@ -1,6 +1,6 @@
-import * as Collections from "../utils/collections";
-import Util from "../util";
-import {default as Level} from "./level";
+import * as Collections from '../utils/collections';
+import Util from '../util';
+import { default as Level } from './level';
 
 export interface TimelineOptions {
   level?: Level;
@@ -19,7 +19,7 @@ export default class Timeline {
   sent: number;
   uniqueID: number;
 
-  constructor(key : string, session : number, options : TimelineOptions) {
+  constructor(key: string, session: number, options: TimelineOptions) {
     this.key = key;
     this.session = session;
     this.events = [];
@@ -56,19 +56,22 @@ export default class Timeline {
   }
 
   send(sendfn, callback) {
-    var data = Collections.extend({
-      session: this.session,
-      bundle: this.sent + 1,
-      key: this.key,
-      lib: "js",
-      version: this.options.version,
-      cluster: this.options.cluster,
-      features: this.options.features,
-      timeline: this.events
-    }, this.options.params);
+    var data = Collections.extend(
+      {
+        session: this.session,
+        bundle: this.sent + 1,
+        key: this.key,
+        lib: 'js',
+        version: this.options.version,
+        cluster: this.options.cluster,
+        features: this.options.features,
+        timeline: this.events
+      },
+      this.options.params
+    );
 
     this.events = [];
-    sendfn(data, (error, result)=> {
+    sendfn(data, (error, result) => {
       if (!error) {
         this.sent++;
       }
@@ -80,7 +83,7 @@ export default class Timeline {
     return true;
   }
 
-  generateUniqueID() : number {
+  generateUniqueID(): number {
     this.uniqueID++;
     return this.uniqueID;
   }

@@ -5,7 +5,7 @@ interface secretbox {
   open(data: Uint8Array, nonce: Uint8Array, key: Uint8Array): Uint8Array;
 }
 
-declare module "tweetnacl" {
+declare module 'tweetnacl' {
   var secretbox: secretbox;
   export function randomBytes(num: number): Uint8Array;
 }
