@@ -49,7 +49,7 @@
     "karma-verbose-reporter": "0.0.6",
     "karma-webpack": "^4.0.2",
     "object-assign-deep": "0.0.4",
-    "prettier": "^1.18.2",
+    "prettier": "^1.19.1",
     "ts-loader": "^6.0.4",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",
