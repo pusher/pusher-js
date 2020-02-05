@@ -5,6 +5,7 @@ import Pusher from '../pusher';
 import { PusherEvent } from '../connection/protocol/message-types';
 import Metadata from './metadata';
 import UrlStore from '../utils/url_store';
+import { AuthData, AuthorizerCallback } from '../auth/options';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -38,8 +39,8 @@ export default class Channel extends EventsDispatcher {
    *
    * @param {Function} callback
    */
-  authorize(socketId: string, callback: Function) {
-    return callback(false, {});
+  authorize(socketId: string, callback: AuthorizerCallback) {
+    return callback(false, {auth: ''});
   }
 
   /** Triggers an event */
@@ -104,6 +105,7 @@ export default class Channel extends EventsDispatcher {
         Logger.error(data);
         this.emit('pusher:subscription_error', data);
       } else {
+        data = (data as AuthData)
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,
           channel_data: data.channel_data,

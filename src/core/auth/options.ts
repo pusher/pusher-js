@@ -5,8 +5,17 @@ export interface AuthOptions {
   headers: any;
 }
 
+export interface AuthData {
+  auth: string;
+  channel_data?: string;
+}
+
+export type AuthInfo = AuthData | string
+
+export type AuthorizerCallback = (error: boolean, authInfo: AuthInfo)=> void;
+
 export interface Authorizer {
-  authorize(socketId: string, callback: Function);
+  authorize(socketId: string, callback: AuthorizerCallback): void;
 }
 
 export interface AuthorizerGenerator {
