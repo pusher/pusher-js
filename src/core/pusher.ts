@@ -16,7 +16,7 @@ import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
-import {PusherOptions, Options} from './options';
+import { PusherOptions, Options } from './options';
 import UrlStore from 'core/utils/url_store';
 
 export default class Pusher {

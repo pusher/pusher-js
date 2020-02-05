@@ -1,6 +1,7 @@
 import { default as EventsDispatcher } from '../events/dispatcher';
 import Pusher from '../pusher';
 import { PusherEvent } from '../connection/protocol/message-types';
+import { AuthorizerCallback } from '../auth/options';
 export default class Channel extends EventsDispatcher {
     name: string;
     pusher: Pusher;
@@ -8,7 +9,7 @@ export default class Channel extends EventsDispatcher {
     subscriptionPending: boolean;
     subscriptionCancelled: boolean;
     constructor(name: string, pusher: Pusher);
-    authorize(socketId: string, callback: Function): any;
+    authorize(socketId: string, callback: AuthorizerCallback): void;
     trigger(event: string, data: any): boolean;
     disconnect(): void;
     handleEvent(event: PusherEvent): void;
