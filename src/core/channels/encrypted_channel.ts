@@ -5,6 +5,7 @@ import { secretbox } from 'tweetnacl';
 import { encodeUTF8, decodeBase64 } from 'tweetnacl-util';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
+import { AuthorizerCallback } from '../auth/options';
 
 /** Extends private channels to provide encrypted channel interface.
  *
@@ -19,7 +20,7 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {String} socketId
    * @param  {Function} callback
    */
-  authorize(socketId: string, callback: Function) {
+  authorize(socketId: string, callback: AuthorizerCallback) {
     super.authorize(socketId, (error, authData) => {
       if (error) {
         callback(true, authData);
