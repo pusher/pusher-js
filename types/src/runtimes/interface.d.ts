@@ -1,0 +1,40 @@
+import { AuthTransports } from 'core/auth/auth_transports';
+import TimelineTransport from 'core/timeline/timeline_transport';
+import Ajax from 'core/http/ajax';
+import Reachability from 'core/reachability';
+import TransportsTable from 'core/transports/transports_table';
+import Socket from 'core/socket';
+import HTTPFactory from 'core/http/http_factory';
+import HTTPRequest from 'core/http/http_request';
+import Pusher from 'core/pusher';
+import JSONPRequest from './web/dom/jsonp_request';
+import Strategy from 'core/strategies/strategy';
+interface Runtime {
+    setup(PusherClass: {
+        new (key: string, options: any): Pusher;
+        ready(): void;
+    }): void;
+    getProtocol(): string;
+    getAuthorizers(): AuthTransports;
+    getLocalStorage(): any;
+    TimelineTransport: TimelineTransport;
+    createXHR(): Ajax;
+    createWebSocket(url: string): Socket;
+    getNetwork(): Reachability;
+    getDefaultStrategy(config: any, defineTransport: Function): Strategy;
+    Transports: TransportsTable;
+    getWebSocketAPI(): new (url: string) => Socket;
+    getXHRAPI(): new () => Ajax;
+    addUnloadListener(listener: Function): void;
+    removeUnloadListener(listener: Function): void;
+    transportConnectionInitializer: Function;
+    HTTPFactory: HTTPFactory;
+    isXHRSupported(): boolean;
+    createSocketRequest(method: string, url: string): HTTPRequest;
+    getDocument?(): Document;
+    createScriptRequest?(url: string): any;
+    createJSONPRequest?(url: string, data: any): JSONPRequest;
+    ScriptReceivers?: any;
+    isXDRSupported?(useTLS?: boolean): boolean;
+}
+export default Runtime;

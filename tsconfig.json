@@ -2,7 +2,8 @@
   "compilerOptions": {
     "sourceMap": true,
     "module": "es6",
-    "declaration": false,
+    "declaration": true,
+    "declarationDir": "types",
     "target": "es3",
     "removeComments": true,
     "moduleResolution": "node",
