@@ -10,9 +10,9 @@ export declare var getGlobalConfig: () => {
     statsHost: string;
     authEndpoint: string;
     authTransport: string;
-    activityTimeout: number;
-    pongTimeout: number;
-    unavailableTimeout: number;
+    activity_timeout: number;
+    pong_timeout: number;
+    unavailable_timeout: number;
 };
 export declare var getClusterConfig: (clusterName: any) => {
     wsHost: string;

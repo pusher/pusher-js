@@ -3,7 +3,12 @@ import Channel from '../channels/channel';
 import Factory from '../utils/factory';
 import Runtime from 'runtime';
 import { AuthTransports } from './auth_transports';
-import { AuthOptions, AuthorizerOptions, Authorizer, AuthorizerCallback } from './options';
+import {
+  AuthOptions,
+  AuthorizerOptions,
+  Authorizer,
+  AuthorizerCallback
+} from './options';
 
 export default class PusherAuthorizer implements Authorizer {
   static authorizers: AuthTransports;
@@ -46,7 +51,8 @@ export default class PusherAuthorizer implements Authorizer {
   }
 
   authorize(socketId: string, callback: AuthorizerCallback): void {
-    PusherAuthorizer.authorizers = PusherAuthorizer.authorizers || Runtime.getAuthorizers();
+    PusherAuthorizer.authorizers =
+      PusherAuthorizer.authorizers || Runtime.getAuthorizers();
     PusherAuthorizer.authorizers[this.type].call(
       this,
       Runtime,
