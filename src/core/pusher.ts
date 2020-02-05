@@ -16,7 +16,7 @@ import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
-import PusherOptions from './options';
+import {PusherOptions, Options} from './options';
 import UrlStore from 'core/utils/url_store';
 
 export default class Pusher {
@@ -59,7 +59,7 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
 
-  constructor(app_key: string, options: any) {
+  constructor(app_key: string, options: Options) {
     checkAppKey(app_key);
     options = options || {};
     if (!options.cluster && !(options.wsHost || options.httpHost)) {
@@ -88,6 +88,7 @@ export default class Pusher {
       level: TimelineLevel.INFO,
       version: Defaults.VERSION
     });
+
     if (!this.config.disableStats) {
       this.timelineSender = Factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
