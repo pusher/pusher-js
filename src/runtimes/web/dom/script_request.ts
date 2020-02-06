@@ -14,19 +14,19 @@ export default class ScriptRequest {
   script: any;
   errorScript: any;
 
-  constructor(src : string) {
+  constructor(src: string) {
     this.src = src;
   }
 
-  send(receiver : ScriptReceiver) {
+  send(receiver: ScriptReceiver) {
     var self = this;
-    var errorString = "Error loading " + self.src;
+    var errorString = 'Error loading ' + self.src;
 
-    self.script = document.createElement("script");
+    self.script = document.createElement('script');
     self.script.id = receiver.id;
     self.script.src = self.src;
-    self.script.type = "text/javascript";
-    self.script.charset = "UTF-8";
+    self.script.type = 'text/javascript';
+    self.script.charset = 'UTF-8';
 
     if (self.script.addEventListener) {
       self.script.onerror = function() {
@@ -37,18 +37,23 @@ export default class ScriptRequest {
       };
     } else {
       self.script.onreadystatechange = function() {
-        if (self.script.readyState === 'loaded' ||
-            self.script.readyState === 'complete') {
+        if (
+          self.script.readyState === 'loaded' ||
+          self.script.readyState === 'complete'
+        ) {
           receiver.callback(null);
         }
       };
     }
 
     // Opera<11.6 hack for missing onerror callback
-    if (self.script.async === undefined && (<any>document).attachEvent &&
-        /opera/i.test(navigator.userAgent)) {
-      self.errorScript = document.createElement("script");
-      self.errorScript.id = receiver.id + "_error";
+    if (
+      self.script.async === undefined &&
+      (<any>document).attachEvent &&
+      /opera/i.test(navigator.userAgent)
+    ) {
+      self.errorScript = document.createElement('script');
+      self.errorScript.id = receiver.id + '_error';
       self.errorScript.text = receiver.name + "('" + errorString + "');";
       self.script.async = self.errorScript.async = false;
     } else {

@@ -7,11 +7,11 @@ import Transport from 'core/transports/transport';
 import TransportHooks from 'core/transports/transport_hooks';
 import * as URLSchemes from 'core/transports/url_schemes';
 import Runtime from 'runtime';
-import {Dependencies} from '../dom/dependencies';
-import * as Collections from "core/utils/collections";
+import { Dependencies } from '../dom/dependencies';
+import * as Collections from 'core/utils/collections';
 
 var SockJSTransport = new Transport(<TransportHooks>{
-  file: "sockjs",
+  file: 'sockjs',
   urls: URLSchemes.sockjs,
   handlesActivityChecks: true,
   supportsPing: false,
@@ -24,21 +24,23 @@ var SockJSTransport = new Transport(<TransportHooks>{
   },
   getSocket: function(url, options) {
     return new window.SockJS(url, null, {
-      js_path: Dependencies.getPath("sockjs", {
+      js_path: Dependencies.getPath('sockjs', {
         useTLS: options.useTLS
       }),
       ignore_null_origin: options.ignoreNullOrigin
     });
   },
   beforeOpen: function(socket, path) {
-    socket.send(JSON.stringify({
-      path: path
-    }));
+    socket.send(
+      JSON.stringify({
+        path: path
+      })
+    );
   }
 });
 
 var xdrConfiguration = {
-  isSupported: function(environment) : boolean {
+  isSupported: function(environment): boolean {
     var yes = Runtime.isXDRSupported(environment.useTLS);
     return yes;
   }
@@ -46,12 +48,14 @@ var xdrConfiguration = {
 
 /** HTTP streaming transport using XDomainRequest (IE 8,9). */
 var XDRStreamingTransport = new Transport(
-  <TransportHooks> Collections.extend({}, streamingConfiguration, xdrConfiguration)
+  <TransportHooks>(
+    Collections.extend({}, streamingConfiguration, xdrConfiguration)
+  )
 );
 
 /** HTTP long-polling transport using XDomainRequest (IE 8,9). */
 var XDRPollingTransport = new Transport(
-  <TransportHooks> Collections.extend({}, pollingConfiguration, xdrConfiguration)
+  <TransportHooks>Collections.extend({}, pollingConfiguration, xdrConfiguration)
 );
 
 Transports.xdr_streaming = XDRStreamingTransport;

@@ -1,4 +1,4 @@
-import {OneOffTimer as Timer} from '../utils/timers';
+import { OneOffTimer as Timer } from '../utils/timers';
 import Strategy from './strategy';
 import StrategyOptions from './strategy_options';
 
@@ -12,18 +12,18 @@ import StrategyOptions from './strategy_options';
  */
 export default class DelayedStrategy implements Strategy {
   strategy: Strategy;
-  options: {delay: number};
+  options: { delay: number };
 
-  constructor(strategy : Strategy, {delay : number}) {
+  constructor(strategy: Strategy, { delay: number }) {
     this.strategy = strategy;
-    this.options = {delay : number};
+    this.options = { delay: number };
   }
 
-  isSupported() : boolean {
+  isSupported(): boolean {
     return this.strategy.isSupported();
   }
 
-  connect(minPriority : number, callback : Function) {
+  connect(minPriority: number, callback: Function) {
     var strategy = this.strategy;
     var runner;
     var timer = new Timer(this.options.delay, function() {

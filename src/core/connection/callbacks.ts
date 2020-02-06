@@ -16,6 +16,6 @@ export interface ConnectionCallbacks {
   message: (message: any) => void;
   ping: () => void;
   activity: () => void;
-  error: (error : any) => void;
+  error: (error: any) => void;
   closed: () => void;
 }

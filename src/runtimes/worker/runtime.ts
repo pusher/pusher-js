@@ -1,8 +1,8 @@
 import Isomorphic from 'isomorphic/runtime';
-import Runtime from "../interface";
-import {Network} from './net_info';
+import Runtime from '../interface';
+import { Network } from './net_info';
 import fetchAuth from './auth/fetch_auth';
-import {AuthTransports} from 'core/auth/auth_transports';
+import { AuthTransports } from 'core/auth/auth_transports';
 import fetchTimeline from './timeline/fetch_timeline';
 
 // Very verbose but until unavoidable until
@@ -24,7 +24,7 @@ const {
   HTTPFactory
 } = Isomorphic;
 
-const Worker : Runtime = {
+const Worker: Runtime = {
   getDefaultStrategy,
   Transports,
   setup,
@@ -41,8 +41,8 @@ const Worker : Runtime = {
 
   TimelineTransport: fetchTimeline,
 
-  getAuthorizers() : AuthTransports {
-    return {ajax: fetchAuth};
+  getAuthorizers(): AuthTransports {
+    return { ajax: fetchAuth };
   },
 
   getWebSocketAPI() {

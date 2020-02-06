@@ -5,4 +5,4 @@ interface PusherEvent {
   user_id?: string;
 }
 
-export {PusherEvent}
+export { PusherEvent };

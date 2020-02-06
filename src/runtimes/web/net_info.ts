@@ -1,5 +1,5 @@
 import Reachability from 'core/reachability';
-import {default as EventsDispatcher} from 'core/events/dispatcher'
+import { default as EventsDispatcher } from 'core/events/dispatcher';
 
 /** Really basic interface providing network availability info.
  *
@@ -8,18 +8,25 @@ import {default as EventsDispatcher} from 'core/events/dispatcher'
  * - offline - when browser goes offline
  */
 export class NetInfo extends EventsDispatcher implements Reachability {
-
   constructor() {
     super();
     var self = this;
     // This is okay, as IE doesn't support this stuff anyway.
     if (window.addEventListener !== undefined) {
-      window.addEventListener("online", function() {
-        self.emit('online');
-      }, false);
-      window.addEventListener("offline", function() {
-        self.emit('offline');
-      }, false);
+      window.addEventListener(
+        'online',
+        function() {
+          self.emit('online');
+        },
+        false
+      );
+      window.addEventListener(
+        'offline',
+        function() {
+          self.emit('offline');
+        },
+        false
+      );
     }
   }
 
@@ -31,7 +38,7 @@ export class NetInfo extends EventsDispatcher implements Reachability {
    *
    * @return {Boolean}
    */
-  isOnline() : boolean {
+  isOnline(): boolean {
     if (window.navigator.onLine === undefined) {
       return true;
     } else {

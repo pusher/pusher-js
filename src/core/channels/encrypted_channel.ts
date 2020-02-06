@@ -1,13 +1,10 @@
-import PrivateChannel from "./private_channel";
-import * as Errors from "../errors";
-import Logger from '../logger'
-import { secretbox } from "tweetnacl";
-import {
-  encodeUTF8,
-  decodeBase64
-} from "tweetnacl-util";
-import Dispatcher from "../events/dispatcher";
-import {PusherEvent} from '../connection/protocol/message-types';
+import PrivateChannel from './private_channel';
+import * as Errors from '../errors';
+import Logger from '../logger';
+import { secretbox } from 'tweetnacl';
+import { encodeUTF8, decodeBase64 } from 'tweetnacl-util';
+import Dispatcher from '../events/dispatcher';
+import { PusherEvent } from '../connection/protocol/message-types';
 
 /** Extends private channels to provide encrypted channel interface.
  *
@@ -28,14 +25,14 @@ export default class EncryptedChannel extends PrivateChannel {
         callback(true, authData);
         return;
       }
-      let sharedSecret = authData["shared_secret"];
+      let sharedSecret = authData['shared_secret'];
       if (!sharedSecret) {
         let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
         callback(true, errorMsg);
         return;
       }
       this.key = decodeBase64(sharedSecret);
-      delete authData["shared_secret"];
+      delete authData['shared_secret'];
       callback(false, authData);
     });
   }
@@ -53,46 +50,64 @@ export default class EncryptedChannel extends PrivateChannel {
   handleEvent(event: PusherEvent) {
     var eventName = event.event;
     var data = event.data;
-    if (eventName.indexOf("pusher_internal:") === 0 || eventName.indexOf("pusher:") === 0) {
+    if (
+      eventName.indexOf('pusher_internal:') === 0 ||
+      eventName.indexOf('pusher:') === 0
+    ) {
       super.handleEvent(event);
-      return
+      return;
     }
-    this.handleEncryptedEvent(eventName, data)
+    this.handleEncryptedEvent(eventName, data);
   }
 
   private handleEncryptedEvent(event: string, data: any): void {
     if (!this.key) {
-      Logger.debug('Received encrypted event before key has been retrieved from the authEndpoint');
+      Logger.debug(
+        'Received encrypted event before key has been retrieved from the authEndpoint'
+      );
       return;
     }
     if (!data.ciphertext || !data.nonce) {
-      Logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+      Logger.error(
+        'Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' +
+          data
+      );
       return;
     }
     let cipherText = decodeBase64(data.ciphertext);
     if (cipherText.length < secretbox.overheadLength) {
-      Logger.error(`Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`);
+      Logger.error(
+        `Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`
+      );
       return;
     }
     let nonce = decodeBase64(data.nonce);
     if (nonce.length < secretbox.nonceLength) {
-      Logger.error(`Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`);
+      Logger.error(
+        `Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`
+      );
       return;
     }
 
     let bytes = secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
-      Logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
+      Logger.debug(
+        'Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...'
+      );
       // Try a single time to retrieve a new auth key and decrypt the event with it
       // If this fails, a new key will be requested when a new message is received
       this.authorize(this.pusher.connection.socket_id, (error, authData) => {
         if (error) {
-          Logger.error(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
+          Logger.error(
+            `Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`
+          );
           return;
         }
         bytes = secretbox.open(cipherText, nonce, this.key);
         if (bytes === null) {
-          Logger.error(`Failed to decrypt event with new key. Dropping encrypted event`);
+          Logger.error(
+            `Failed to decrypt event with new key. Dropping encrypted event`
+          );
           return;
         }
         this.emitJSON(event, encodeUTF8(bytes));

@@ -1,6 +1,6 @@
-import Callback from "./callback";
+import Callback from './callback';
 import * as Collections from '../utils/collections';
-import CallbackTable from "./callback_table";
+import CallbackTable from './callback_table';
 
 export default class CallbackRegistry {
   _callbacks: CallbackTable;
@@ -9,13 +9,14 @@ export default class CallbackRegistry {
     this._callbacks = {};
   }
 
-  get(name : string) : Callback[] {
+  get(name: string): Callback[] {
     return this._callbacks[prefix(name)];
   }
 
-  add(name : string, callback : Function, context : any) {
+  add(name: string, callback: Function, context: any) {
     var prefixedEventName = prefix(name);
-    this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
+    this._callbacks[prefixedEventName] =
+      this._callbacks[prefixedEventName] || [];
     this._callbacks[prefixedEventName].push({
       fn: callback,
       context: context
@@ -37,28 +38,38 @@ export default class CallbackRegistry {
     }
   }
 
-  private removeCallback(names : string[], callback : Function, context : any) {
-    Collections.apply(names, function(name) {
-      this._callbacks[name] = Collections.filter(
-        this._callbacks[name] || [],
-        function(binding) {
-          return (callback && callback !== binding.fn) ||
-                 (context && context !== binding.context);
+  private removeCallback(names: string[], callback: Function, context: any) {
+    Collections.apply(
+      names,
+      function(name) {
+        this._callbacks[name] = Collections.filter(
+          this._callbacks[name] || [],
+          function(binding) {
+            return (
+              (callback && callback !== binding.fn) ||
+              (context && context !== binding.context)
+            );
+          }
+        );
+        if (this._callbacks[name].length === 0) {
+          delete this._callbacks[name];
         }
-      );
-      if (this._callbacks[name].length === 0) {
-        delete this._callbacks[name];
-      }
-    }, this);
+      },
+      this
+    );
   }
 
-  private removeAllCallbacks(names : string[]) {
-    Collections.apply(names, function(name) {
-      delete this._callbacks[name];
-    }, this);
+  private removeAllCallbacks(names: string[]) {
+    Collections.apply(
+      names,
+      function(name) {
+        delete this._callbacks[name];
+      },
+      this
+    );
   }
 }
 
-function prefix(name : string) : string {
-  return "_" + name;
+function prefix(name: string): string {
+  return '_' + name;
 }

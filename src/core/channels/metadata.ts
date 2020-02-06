@@ -1,5 +1,5 @@
 interface Metadata {
-  user_id?: string
+  user_id?: string;
 }
 
-export default Metadata
+export default Metadata;

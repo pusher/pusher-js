@@ -1,6 +1,6 @@
-import Factory from "../utils/factory";
-import TransportHooks from "./transport_hooks";
-import TransportConnection from "./transport_connection";
+import Factory from '../utils/factory';
+import TransportHooks from './transport_hooks';
+import TransportConnection from './transport_connection';
 
 /** Provides interface for transport connection instantiation.
  *
@@ -21,19 +21,18 @@ import TransportConnection from "./transport_connection";
 export default class Transport {
   hooks: TransportHooks;
 
-  constructor(hooks : TransportHooks) {
+  constructor(hooks: TransportHooks) {
     this.hooks = hooks;
   }
 
-/** Returns whether the transport is supported in the environment.
- *
- * @param {Object} envronment te environment details (encryption, settings)
- * @returns {Boolean} true when the transport is supported
- */
-  isSupported(environment : any) : boolean {
+  /** Returns whether the transport is supported in the environment.
+   *
+   * @param {Object} envronment te environment details (encryption, settings)
+   * @returns {Boolean} true when the transport is supported
+   */
+  isSupported(environment: any): boolean {
     return this.hooks.isSupported(environment);
   }
-
 
   /** Creates a transport connection.
    *
@@ -43,9 +42,12 @@ export default class Transport {
    * @param {Object} options
    * @returns {TransportConnection}
    */
-  createConnection(name : string, priority : number, key : string, options : any) : TransportConnection {
-    return new TransportConnection(
-      this.hooks, name, priority, key, options
-    );
+  createConnection(
+    name: string,
+    priority: number,
+    key: string,
+    options: any
+  ): TransportConnection {
+    return new TransportConnection(this.hooks, name, priority, key, options);
   }
 }

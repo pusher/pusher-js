@@ -18,17 +18,17 @@ export default class Dispatcher {
     this.failThrough = failThrough;
   }
 
-  bind(eventName : string, callback : Function, context?: any) {
+  bind(eventName: string, callback: Function, context?: any) {
     this.callbacks.add(eventName, callback, context);
     return this;
   }
 
-  bind_global(callback : Function) {
+  bind_global(callback: Function) {
     this.global_callbacks.push(callback);
     return this;
   }
 
-  unbind(eventName? : string, callback? : Function, context?: any) {
+  unbind(eventName?: string, callback?: Function, context?: any) {
     this.callbacks.remove(eventName, callback, context);
     return this;
   }
@@ -53,7 +53,7 @@ export default class Dispatcher {
     return this;
   }
 
-  emit(eventName : string, data?: any, metadata?: Metadata) : Dispatcher {
+  emit(eventName: string, data?: any, metadata?: Metadata): Dispatcher {
     for (var i = 0; i < this.global_callbacks.length; i++) {
       this.global_callbacks[i](eventName, data);
     }
@@ -62,15 +62,13 @@ export default class Dispatcher {
     var args = [];
 
     if (metadata) {
-
       // if there's a metadata argument, we need to call the callback with both
       // data and metadata regardless of whether data is undefined
-      args.push(data, metadata)
+      args.push(data, metadata);
     } else if (data) {
-
       // metadata is undefined, so we only need to call the callback with data
       // if data exists
-      args.push(data)
+      args.push(data);
     }
 
     if (callbacks && callbacks.length > 0) {

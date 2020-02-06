@@ -1,1 +1,1 @@
-declare const global : any;
+declare const global: any;

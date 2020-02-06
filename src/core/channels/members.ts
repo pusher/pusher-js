@@ -2,13 +2,12 @@ import * as Collections from '../utils/collections';
 
 /** Represents a collection of members of a presence channel. */
 export default class Members {
-
   members: any;
   count: number;
   myID: any;
   me: any;
 
-  constructor(){
+  constructor() {
     this.reset();
   }
 
@@ -19,7 +18,7 @@ export default class Members {
    * @param {Number} id
    * @return {Object} member's info or null
    */
-  get(id : string) : any {
+  get(id: string): any {
     if (Object.prototype.hasOwnProperty.call(this.members, id)) {
       return {
         id: id,
@@ -34,26 +33,26 @@ export default class Members {
    *
    * @param  {Function} callback
    */
-  each(callback : Function) {
-    Collections.objectApply(this.members, (member, id)=> {
+  each(callback: Function) {
+    Collections.objectApply(this.members, (member, id) => {
       callback(this.get(id));
     });
   }
 
   /** Updates the id for connected member. For internal use only. */
-  setMyID(id : string) {
+  setMyID(id: string) {
     this.myID = id;
   }
 
   /** Handles subscription data. For internal use only. */
-  onSubscription(subscriptionData : any) {
+  onSubscription(subscriptionData: any) {
     this.members = subscriptionData.presence.hash;
     this.count = subscriptionData.presence.count;
     this.me = this.get(this.myID);
   }
 
   /** Adds a new member to the collection. For internal use only. */
-  addMember(memberData : any) {
+  addMember(memberData: any) {
     if (this.get(memberData.user_id) === null) {
       this.count++;
     }
@@ -62,7 +61,7 @@ export default class Members {
   }
 
   /** Adds a member from the collection. For internal use only. */
-  removeMember(memberData : any) {
+  removeMember(memberData: any) {
     var member = this.get(memberData.user_id);
     if (member) {
       delete this.members[memberData.user_id];

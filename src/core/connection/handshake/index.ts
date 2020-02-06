@@ -2,7 +2,7 @@ import Util from '../../util';
 import * as Collections from '../../utils/collections';
 import Protocol from '../protocol/protocol';
 import Connection from '../connection';
-import TransportConnection from "../../transports/transport_connection";
+import TransportConnection from '../../transports/transport_connection';
 import HandshakePayload from './handshake_payload';
 
 /**
@@ -23,11 +23,14 @@ import HandshakePayload from './handshake_payload';
  */
 export default class Handshake {
   transport: TransportConnection;
-  callback: (HandshakePayload)=>void;
+  callback: (HandshakePayload) => void;
   onMessage: Function;
   onClosed: Function;
 
-  constructor(transport : TransportConnection, callback : (HandshakePayload)=>void) {
+  constructor(
+    transport: TransportConnection,
+    callback: (HandshakePayload) => void
+  ) {
     this.transport = transport;
     this.callback = callback;
     this.bindListeners();
@@ -39,20 +42,20 @@ export default class Handshake {
   }
 
   private bindListeners() {
-    this.onMessage = (m)=> {
+    this.onMessage = m => {
       this.unbindListeners();
 
       var result;
       try {
         result = Protocol.processHandshake(m);
       } catch (e) {
-        this.finish("error", { error: e });
+        this.finish('error', { error: e });
         this.transport.close();
         return;
       }
 
-      if (result.action === "connected") {
-        this.finish("connected", {
+      if (result.action === 'connected') {
+        this.finish('connected', {
           connection: new Connection(result.id, this.transport),
           activityTimeout: result.activityTimeout
         });
@@ -62,27 +65,26 @@ export default class Handshake {
       }
     };
 
-    this.onClosed = (closeEvent) => {
+    this.onClosed = closeEvent => {
       this.unbindListeners();
 
-      var action = Protocol.getCloseAction(closeEvent) || "backoff";
+      var action = Protocol.getCloseAction(closeEvent) || 'backoff';
       var error = Protocol.getCloseError(closeEvent);
       this.finish(action, { error: error });
     };
 
-    this.transport.bind("message", this.onMessage);
-    this.transport.bind("closed", this.onClosed);
+    this.transport.bind('message', this.onMessage);
+    this.transport.bind('closed', this.onClosed);
   }
 
   private unbindListeners() {
-    this.transport.unbind("message", this.onMessage);
-    this.transport.unbind("closed", this.onClosed);
+    this.transport.unbind('message', this.onMessage);
+    this.transport.unbind('closed', this.onClosed);
   }
 
-  private finish(action : string, params : any) {
+  private finish(action: string, params: any) {
     this.callback(
       Collections.extend({ transport: this.transport, action: action }, params)
     );
   }
-
 }

@@ -1,4 +1,4 @@
 interface Window {
-     WebSocket: any;
-     MozWebSocket: any;
+  WebSocket: any;
+  MozWebSocket: any;
 }

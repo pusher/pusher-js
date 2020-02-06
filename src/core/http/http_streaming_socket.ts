@@ -1,18 +1,18 @@
-import SocketHooks from "./socket_hooks";
-import HTTPSocket from "./http_socket";
+import SocketHooks from './socket_hooks';
+import HTTPSocket from './http_socket';
 
-var hooks : SocketHooks = {
+var hooks: SocketHooks = {
   getReceiveURL: function(url, session) {
-    return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+    return url.base + '/' + session + '/xhr_streaming' + url.queryString;
   },
   onHeartbeat: function(socket) {
-    socket.sendRaw("[]");
+    socket.sendRaw('[]');
   },
   sendHeartbeat: function(socket) {
-    socket.sendRaw("[]");
+    socket.sendRaw('[]');
   },
   onFinished: function(socket, status) {
-    socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+    socket.onClose(1006, 'Connection interrupted (' + status + ')', false);
   }
 };
 

@@ -1,10 +1,10 @@
-import {default as NativeNetInfo} from '@react-native-community/netinfo';
+import { default as NativeNetInfo } from '@react-native-community/netinfo';
 import EventsDispatcher from 'core/events/dispatcher';
 import Util from 'core/util';
 import Reachability from 'core/reachability';
 
-function hasOnlineConnectionState(connectionState) : boolean{
-  return connectionState.type.toLowerCase() !== "none";
+function hasOnlineConnectionState(connectionState): boolean {
+  return connectionState.type.toLowerCase() !== 'none';
 }
 
 export class NetInfo extends EventsDispatcher implements Reachability {
@@ -26,15 +26,15 @@ export class NetInfo extends EventsDispatcher implements Reachability {
       // are both online/offline
       if (this.online === isNowOnline) return;
       this.online = isNowOnline;
-      if (this.online){
-        this.emit("online");
+      if (this.online) {
+        this.emit('online');
       } else {
-        this.emit("offline");
+        this.emit('offline');
       }
     });
   }
 
-  isOnline() : boolean {
+  isOnline(): boolean {
     return this.online;
   }
 }
