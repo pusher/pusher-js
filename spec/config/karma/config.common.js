@@ -3,21 +3,16 @@ var objectAssign = require('object-assign-deep');
 
 var browserList;
 if (process.env.MINIMAL_INTEGRATION_TESTS) {
-  browserList = ['Chrome'];
+  browserList = ['ChromeHeadless'];
 } else {
-  browserList = ['Chrome', 'Firefox', 'Opera', 'Safari'];
+  browserList = ['ChromeHeadless', 'FirefoxHeadless'];
 }
 
 module.exports = {
   basePath: '../../../',
   frameworks: ["jasmine"],
 
-  reporters: ['coverage', 'verbose'],
-
-  coverageReporter: {
-    type : 'html',
-    dir : 'coverage/'
-  },
+  reporters: ['verbose'],
 
   webpack: objectAssign({}, webpackConfig, {
     mode: 'development',
@@ -37,9 +32,9 @@ module.exports = {
   autoWatch: true,
 
   browsers: browserList,
-  captureTimeout: 3e5,
-  browserNoActivityTimeout: 3e5,
-  browserDisconnectTimeout: 3e5,
+  captureTimeout: 5e3,
+  browserNoActivityTimeout: 5e3,
+  browserDisconnectTimeout: 5e3,
   browserDisconnectTolerance: 3,
 
   singleRun: true,
@@ -47,3 +42,4 @@ module.exports = {
     captureConsole: false,
   }
 }
+
