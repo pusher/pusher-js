@@ -14,8 +14,12 @@ var config = {
     }
   }
 };
-if (process.env.CI === 'full') {
+if (process.env.CI === 'full' && browserStackCredsAvailable()) {
   config.browsers.push('bs_safari_12');
+}
+
+function browserStackCredsAvailable() {
+  return process.env.BROWSER_STACK_USERNAME && process.env.BROWSER_STACK_ACCESS_KEY
 }
 
 module.exports = config;

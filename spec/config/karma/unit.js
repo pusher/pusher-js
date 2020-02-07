@@ -15,6 +15,6 @@ if (process.env.WORKER === 'true') {
 }
 
 module.exports = function(suite) {
-  config.logLevel = suite.LOG_DISABLE;
+  config.logLevel = suite.LOG_WARN;
   suite.set(config);
 };
