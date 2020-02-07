@@ -1,5 +1,6 @@
 import { default as EventsDispatcher } from '../events/dispatcher';
 import { OneOffTimer as Timer } from '../utils/timers';
+import { Config } from '../config';
 import Logger from '../logger';
 import HandshakePayload from './handshake/handshake_payload';
 import Connection from './connection';
@@ -9,6 +10,7 @@ import * as Collections from '../utils/collections';
 import Timeline from '../timeline/timeline';
 import ConnectionManagerOptions from './connection_manager_options';
 import Runtime from 'runtime';
+
 import {
   ErrorCallbacks,
   HandshakeCallbacks,
@@ -60,13 +62,13 @@ export default class ConnectionManager extends EventsDispatcher {
   handshakeCallbacks: HandshakeCallbacks;
   connectionCallbacks: ConnectionCallbacks;
 
-  constructor(key: string, options: any) {
+  constructor(key: string, options: ConnectionManagerOptions, config: Config) {
     super();
     this.key = key;
-    this.options = options || {};
+    this.options = options;
     this.state = 'initialized';
     this.connection = null;
-    this.usingTLS = !!options.useTLS;
+    this.usingTLS = !!config.useTLS;
     this.timeline = this.options.timeline;
 
     this.errorCallbacks = this.buildErrorCallbacks();

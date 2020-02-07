@@ -16,8 +16,10 @@ import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
-import { PusherOptions, Options } from './options';
 import UrlStore from 'core/utils/url_store';
+import { Options } from './options';
+import { Config, getConfig } from './config';
+import StrategyOptions from './strategies/strategy_options';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -50,7 +52,7 @@ export default class Pusher {
 
   /* INSTANCE PROPERTIES */
   key: string;
-  config: PusherOptions;
+  config: Config;
   channels: Channels;
   global_emitter: EventsDispatcher;
   sessionID: number;
@@ -59,7 +61,7 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
 
-  constructor(app_key: string, options: Options) {
+  constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
     options = options || {};
     if (!options.cluster && !(options.wsHost || options.httpHost)) {
@@ -70,11 +72,7 @@ export default class Pusher {
     }
 
     this.key = app_key;
-    this.config = Collections.extend<PusherOptions>(
-      DefaultConfig.getGlobalConfig(),
-      options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {},
-      options
-    );
+    this.config = getConfig(options);
 
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
@@ -96,24 +94,20 @@ export default class Pusher {
       });
     }
 
-    var getStrategy = options => {
-      var config = Collections.extend({}, this.config, options);
-      return Runtime.getDefaultStrategy(config, defineTransport);
+    var getStrategy = (options: StrategyOptions) => {
+      return Runtime.getDefaultStrategy(this.config, options, defineTransport);
     };
 
     this.connection = Factory.createConnectionManager(
       this.key,
-      Collections.extend<ConnectionManagerOptions>(
-        {
-          getStrategy: getStrategy,
-          timeline: this.timeline,
-          activityTimeout: this.config.activity_timeout,
-          pongTimeout: this.config.pong_timeout,
-          unavailableTimeout: this.config.unavailable_timeout
-        },
-        this.config,
-        { useTLS: this.shouldUseTLS() }
-      )
+      {
+        getStrategy: getStrategy,
+        timeline: this.timeline,
+        activityTimeout: this.config.activityTimeout,
+        pongTimeout: this.config.pongTimeout,
+        unavailableTimeout: this.config.unavailableTimeout
+      },
+      this.config
     );
 
     this.connection.bind('connected', () => {
@@ -122,6 +116,7 @@ export default class Pusher {
         this.timelineSender.send(this.connection.isUsingTLS());
       }
     });
+
     this.connection.bind('message', event => {
       var eventName = event.event;
       var internal = eventName.indexOf('pusher_internal:') === 0;
@@ -246,17 +241,6 @@ export default class Pusher {
 
   send_event(event_name: string, data: any, channel?: string) {
     return this.connection.send_event(event_name, data, channel);
-  }
-
-  shouldUseTLS(): boolean {
-    if (Runtime.getProtocol() === 'https:') {
-      return true;
-    } else if (this.config.forceTLS === true) {
-      return true;
-    } else {
-      // `encrypted` deprecated in favor of `forceTLS`
-      return Boolean(this.config.encrypted);
-    }
   }
 }
 
