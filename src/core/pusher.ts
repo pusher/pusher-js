@@ -68,6 +68,14 @@ export default class Pusher {
         `You should always specify a cluster when connecting. ${suffix}`
       );
     }
+    if ('disableStats' in options) {
+      Logger.warn(
+        'The disableStats option is deprecated in favor of enableStats'
+      );
+      if (!('enableStats' in options)) {
+        options.enableStats = !options.disableStats;
+      }
+    }
 
     this.key = app_key;
     this.config = Collections.extend<PusherOptions>(
@@ -88,7 +96,7 @@ export default class Pusher {
       level: TimelineLevel.INFO,
       version: Defaults.VERSION
     });
-    if (!this.config.disableStats) {
+    if (this.config.enableStats) {
       this.timelineSender = Factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
         path: '/timeline/v2/' + Runtime.TimelineTransport.name

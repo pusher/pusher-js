@@ -4,6 +4,7 @@ import { AuthOptions, AuthorizerGenerator } from './auth/options';
 interface PusherOptions {
   cluster: string;
   disableStats: boolean;
+  enableStats: boolean;
   statsHost: string;
   activity_timeout: number;
   pong_timeout: number;

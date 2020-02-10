@@ -55,7 +55,6 @@ module.exports = function(testConfigs) {
             authEndpoint: Integration.API_EU_URL + "/auth",
             cluster: "eu",
             forceTLS: options.forceTLS,
-            disableStats: true
           });
           waitsFor(function() {
             return pusher.connection.state === "connected";

@@ -49,7 +49,7 @@ module.exports = function() {
 
       var timer;
       runs(function() {
-        pusher = new Pusher("foobar", { disableStats: true });
+        pusher = new Pusher("foobar");
         pusher.connect();
       });
       waitsFor(function() {
@@ -131,7 +131,7 @@ module.exports = function() {
 
         runs(function() {
           // use TLS connection, to force sockjs to be the primary fallback
-          pusher = new Pusher("foobar", { forceTLS: true, disableStats: true });
+          pusher = new Pusher("foobar", { forceTLS: true });
           pusher.connect();
         });
         waitsFor(function() {

@@ -59,12 +59,10 @@ function build(testConfig) {
       it("should open connections", function() {
         pusher1 = new Pusher("7324d55a5eeb8f554761", {
           forceTLS: forceTLS,
-          disableStats: true
         });
         if (canRunTwoConnections(transport)) {
           pusher2 = new Pusher("7324d55a5eeb8f554761", {
             forceTLS: forceTLS,
-            disableStats: true
           });
           waitsFor(function() {
             return pusher2.connection.state === "connected";
