@@ -22,7 +22,8 @@ type AuthTransport = 'ajax' | 'jsonp';
 
 export interface Options {
   activityTimeout?: number;
-  disableStats?: boolean;
+  enableStats?: boolean;
+  disableStats?: boolean; // deprecated
   authEndpoint?: string;
   auth?: AuthOptions;
   authTransport?: AuthTransport;
