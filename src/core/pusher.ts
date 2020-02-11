@@ -59,7 +59,7 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
 
-  constructor(app_key: string, options: Options) {
+  constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
     options = options || {};
     if (!options.cluster && !(options.wsHost || options.httpHost)) {

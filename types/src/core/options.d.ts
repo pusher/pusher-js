@@ -2,6 +2,7 @@ import { AuthOptions, AuthorizerGenerator } from './auth/options';
 export interface PusherOptions {
     cluster: string;
     disableStats: boolean;
+    enableStats: boolean;
     statsHost: string;
     activity_timeout: number;
     pong_timeout: number;
@@ -17,6 +18,7 @@ declare type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockj
 declare type AuthTransport = 'ajax' | 'jsonp';
 export interface Options {
     activityTimeout?: number;
+    enableStats?: boolean;
     disableStats?: boolean;
     authEndpoint?: string;
     auth?: AuthOptions;
