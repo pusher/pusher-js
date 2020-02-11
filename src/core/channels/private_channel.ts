@@ -1,5 +1,6 @@
 import Factory from '../utils/factory';
 import Channel from './channel';
+import { AuthorizerCallback } from '../auth/options';
 
 /** Extends public channels to provide private channel interface.
  *
@@ -12,7 +13,7 @@ export default class PrivateChannel extends Channel {
    * @param  {String} socketId
    * @param  {Function} callback
    */
-  authorize(socketId: string, callback: Function) {
+  authorize(socketId: string, callback: AuthorizerCallback) {
     var authorizer = Factory.createAuthorizer(this, this.pusher.config);
     return authorizer.authorize(socketId, callback);
   }
