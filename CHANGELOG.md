@@ -1,5 +1,17 @@
 # Changelog
 
+## 5.1.0 (2020-02-11)
+
+[NEW] Include typescript declarations
+
+[CHANGED] Make stats opt in rather than opt out - Previously we sent some
+metrics about connection strategies to stats.pusher.com by default, it could be
+disabled by passing the `disableStats` option. This functionality is now off by
+default and can be enabled by passing the `enableStats` option
+
+[FIXED] An issue where local tests would hang for 300s if a browser wasn't
+available
+
 ## 5.0.3 (2019-11-18)
 
 [NEW] Log a warning when there is an auth error
