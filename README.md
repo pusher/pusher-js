@@ -98,6 +98,20 @@ and then:
 <script src="bower_components/pusher/dist/web/pusher.min.js"></script>
 ```
 
+### Typescript
+
+We've provided typescript declarations since v5.1.0. Most things should work
+out of the box but if you need access to specific types you can import them
+like so:
+
+```
+import Pusher from 'pusher-js';
+import * as PusherTypes from 'pusher-js';
+
+var presenceChannel: PusherTypes.PresenceChannel;
+...
+```
+
 ### React Native
 
 **Warning it's now necessary to install
