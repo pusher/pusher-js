@@ -1,4 +1,4 @@
-import AbstractRuntime from 'runtimes/interface';
+import AbstractRuntime from '../runtimes/interface';
 import Channels from './channels/channels';
 import Channel from './channels/channel';
 import { default as EventsDispatcher } from './events/dispatcher';
