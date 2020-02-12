@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.1.1 (2020-02-12)
+
+[FIXED] An issue with typescript declarations which caused builds to fail on
+typescript projects dependent on pusher-js
+
 ## 5.1.0 (2020-02-11)
 
 [NEW] Include typescript declarations
