@@ -1,4 +1,4 @@
-import AbstractRuntime from 'runtimes/interface';
+import AbstractRuntime from '../../runtimes/interface';
 
 interface AuthTransport {
   (context: AbstractRuntime, socketId: string, callback: Function): void;

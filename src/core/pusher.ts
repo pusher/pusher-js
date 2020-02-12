@@ -1,4 +1,4 @@
-import AbstractRuntime from 'runtimes/interface';
+import AbstractRuntime from '../runtimes/interface';
 import Runtime from 'runtime';
 import Util from './util';
 import * as Collections from './utils/collections';
