@@ -1,15 +1,15 @@
-import { AuthTransports } from 'core/auth/auth_transports';
-import TimelineSender from 'core/timeline/timeline_sender';
-import TimelineTransport from 'core/timeline/timeline_transport';
-import Ajax from 'core/http/ajax';
-import Reachability from 'core/reachability';
-import TransportsTable from 'core/transports/transports_table';
-import Socket from 'core/socket';
-import HTTPFactory from 'core/http/http_factory';
-import HTTPRequest from 'core/http/http_request';
-import Pusher from 'core/pusher';
+import { AuthTransports } from '../core/auth/auth_transports';
+import TimelineSender from '../core/timeline/timeline_sender';
+import TimelineTransport from '../core/timeline/timeline_transport';
+import Ajax from '../core/http/ajax';
+import Reachability from '../core/reachability';
+import TransportsTable from '../core/transports/transports_table';
+import Socket from '../core/socket';
+import HTTPFactory from '../core/http/http_factory';
+import HTTPRequest from '../core/http/http_request';
+import Pusher from '../core/pusher';
 import JSONPRequest from './web/dom/jsonp_request';
-import Strategy from 'core/strategies/strategy';
+import Strategy from '../core/strategies/strategy';
 
 /*
 This interface is implemented in web/runtime, node/runtime, react-native/runtime
