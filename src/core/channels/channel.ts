@@ -105,7 +105,7 @@ export default class Channel extends EventsDispatcher {
         Logger.error(data);
         this.emit('pusher:subscription_error', data);
       } else {
-        data = data as AuthData;
+        data = typeof data === 'string' ? { auth: data } : (data as AuthData);
         this.pusher.send_event('pusher:subscribe', {
           auth: data.auth,
           channel_data: data.channel_data,
