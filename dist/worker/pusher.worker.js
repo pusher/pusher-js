@@ -2,7 +2,7 @@
  * Pusher JavaScript Library v5.1.1
  * https://pusher.com/
  *
- * Copyright 2020, Pusher
+ * Copyright 2017, Pusher
  * Released under the MIT licence.
  */
 
