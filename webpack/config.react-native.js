@@ -18,22 +18,28 @@ module.exports = objectAssign({}, configShared, {
     // our Reachability implementation needs to reference @react-native-community/netinfo.
     '@react-native-community/netinfo': '@react-native-community/netinfo'
   },
+  // React Native implementation not using randomBytes generation of tweenacl and therefore require("crypto"),
+  // we're decieving the tweetnacl, that we're not Node platform and not including require("crypto") into the pusher
+  // Partly from tweetnacl wiki https://github.com/dchest/tweetnacl-js/wiki/Using-with-Webpack
+  module: {
+    rules: [
+      {
+        test: /[\\\/]tweetnacl[\\\/]/,
+        use: 'imports-loader?require\=\>undefined'
+     }
+    ],
+    noParse: [
+      /[\\\/]tweetnacl[\\\/]/,
+    ],
+  },
   resolve: {
     modules: ['src/runtimes/react-native'],
-    // at the moment, react-native doesn't contain the requisite crypto APIs to
-    // use tweetnacl/tweetnacl-utils.
-    //
-    // As a result encrypted channels cannot be supported in react native at
-    // this time. In order for the build to work, we need to replace the
-    // tweetnacl-utils with 'mocks'
     alias: {
-      tweetnacl: path.resolve(
-        __dirname,
-        '../src/runtimes/react-native/tweetnacl-dummy.ts'
-      ),
+      // Using stable libs instead of tweetnacl-utils like the owner is suggesting
+      // https://github.com/dchest/tweetnacl-util-js/blob/master/README.md#notice
       'tweetnacl-util': path.resolve(
         __dirname,
-        '../src/runtimes/react-native/tweetnacl-util-dummy.ts'
+        '../src/runtimes/react-native/tweetnacl-util-rn.ts'
       )
     }
   },
