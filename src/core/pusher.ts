@@ -19,6 +19,7 @@ import Factory from './utils/factory';
 import UrlStore from 'core/utils/url_store';
 import { Options } from './options';
 import { Config, getConfig } from './config';
+import StrategyOptions from './strategies/strategy_options';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -97,24 +98,21 @@ export default class Pusher {
       });
     }
 
-    var getStrategy = options => {
-      var config = Collections.extend({}, this.config, options);
-      return Runtime.getDefaultStrategy(config, defineTransport);
+    var getStrategy = (options: StrategyOptions) => {
+      return Runtime.getDefaultStrategy(this.config, options, defineTransport);
     };
 
     this.connection = Factory.createConnectionManager(
       this.key,
-      Collections.extend<ConnectionManagerOptions>(
-        {
-          getStrategy: getStrategy,
-          timeline: this.timeline,
-          activityTimeout: this.config.activity_timeout,
-          pongTimeout: this.config.pong_timeout,
-          unavailableTimeout: this.config.unavailable_timeout
-        },
-        this.config,
-        { useTLS: this.shouldUseTLS() }
-      )
+      {
+        getStrategy: getStrategy,
+        timeline: this.timeline,
+        // TODO we pass the config anyway, do we need this?
+        activityTimeout: this.config.activityTimeout,
+        pongTimeout: this.config.pongTimeout,
+        unavailableTimeout: this.config.unavailableTimeout
+      },
+      this.config
     );
 
     this.connection.bind('connected', () => {

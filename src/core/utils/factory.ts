@@ -22,6 +22,7 @@ import ConnectionManagerOptions from '../connection/connection_manager_options';
 import Ajax from '../http/ajax';
 import Channels from '../channels/channels';
 import Pusher from '../pusher';
+import { Config } from '../config';
 
 var Factory = {
   createChannels(): Channels {
@@ -30,9 +31,10 @@ var Factory = {
 
   createConnectionManager(
     key: string,
-    options: ConnectionManagerOptions
+    options: ConnectionManagerOptions,
+    config: Config
   ): ConnectionManager {
-    return new ConnectionManager(key, options);
+    return new ConnectionManager(key, options, config);
   },
 
   createChannel(name: string, pusher: Pusher): Channel {
