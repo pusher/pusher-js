@@ -73,9 +73,6 @@ export default class Pusher {
       Logger.warn(
         'The disableStats option is deprecated in favor of enableStats'
       );
-      if (!('enableStats' in options)) {
-        options.enableStats = !options.disableStats;
-      }
     }
 
     this.key = app_key;

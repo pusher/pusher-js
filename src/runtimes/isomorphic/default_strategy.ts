@@ -9,6 +9,8 @@ import CachedStrategy, {
 import DelayedStrategy from 'core/strategies/delayed_strategy';
 import IfStrategy from 'core/strategies/if_strategy';
 import FirstConnectedStrategy from 'core/strategies/first_connected_strategy';
+import { Config } from 'core/config';
+import StrategyOptions from 'core/strategies/strategy_options';
 
 function testSupportsStrategy(strategy: Strategy) {
   return function() {
@@ -17,7 +19,8 @@ function testSupportsStrategy(strategy: Strategy) {
 }
 
 var getDefaultStrategy = function(
-  config: any,
+  config: Config,
+  strategyOptions: StrategyOptions,
   defineTransport: Function
 ): Strategy {
   var definedTransports = <TransportStrategyDictionary>{};
@@ -65,12 +68,12 @@ var getDefaultStrategy = function(
   var ws_manager = new TransportManager({
     lives: 2,
     minPingDelay: 10000,
-    maxPingDelay: config.activity_timeout
+    maxPingDelay: config.activityTimeout
   });
   var streaming_manager = new TransportManager({
     lives: 2,
     minPingDelay: 10000,
-    maxPingDelay: config.activity_timeout
+    maxPingDelay: config.activityTimeout
   });
 
   var ws_transport = defineTransportStrategy(
@@ -144,7 +147,7 @@ var getDefaultStrategy = function(
     definedTransports,
     {
       ttl: 1800000,
-      timeline: config.timeline,
+      timeline: strategyOptions.timeline,
       useTLS: config.useTLS
     }
   );
