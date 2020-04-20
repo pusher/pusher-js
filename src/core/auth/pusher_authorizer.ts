@@ -29,7 +29,7 @@ export default class PusherAuthorizer implements Authorizer {
 
     this.type = authTransport;
     this.options = options;
-    this.authOptions = (options || <any>{}).auth || {};
+    this.authOptions = options.auth;
   }
 
   composeQuery(socketId: string): string {

@@ -24,6 +24,6 @@ export interface AuthorizerGenerator {
 
 export interface AuthorizerOptions {
   authTransport: 'ajax' | 'jsonp';
-  auth: AuthOptions;
-  authorizer: AuthorizerGenerator;
+  auth?: AuthOptions;
+  authorizer?: AuthorizerGenerator;
 }
