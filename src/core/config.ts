@@ -37,7 +37,6 @@ export interface Config {
   auth?: AuthOptions;
   authorizer?: AuthorizerGenerator;
   cluster?: string;
-  disableStats?: boolean;
   disabledTransports?: Transport[];
   enabledTransports?: Transport[];
   ignoreNullOrigin?: boolean;
