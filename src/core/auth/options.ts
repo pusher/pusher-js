@@ -1,8 +1,8 @@
 import Channel from '../channels/channel';
 
 export interface AuthOptions {
-  params: any;
-  headers: any;
+  params?: any;
+  headers?: any;
 }
 
 export interface AuthData {
