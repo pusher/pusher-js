@@ -29,7 +29,7 @@ var getDefaultStrategy = function(
     name: string,
     type: string,
     priority: number,
-    options,
+    options: StrategyOptions,
     manager?: TransportManager
   ) {
     var transport = defineTransport(
@@ -46,19 +46,19 @@ var getDefaultStrategy = function(
     return transport;
   }
 
-  var ws_options = {
+  var ws_options: StrategyOptions = Object.assign({}, strategyOptions, {
     hostNonTLS: config.wsHost + ':' + config.wsPort,
     hostTLS: config.wsHost + ':' + config.wssPort,
     httpPath: config.wsPath
-  };
-  var wss_options = Collections.extend({}, ws_options, {
+  });
+  var wss_options: StrategyOptions = Object.assign({}, ws_options, {
     useTLS: true
   });
-  var sockjs_options = {
+  var sockjs_options: StrategyOptions = Object.assign({}, strategyOptions, {
     hostNonTLS: config.httpHost + ':' + config.httpPort,
     hostTLS: config.httpHost + ':' + config.httpsPort,
     httpPath: config.httpPath
-  };
+  });
   var timeouts = {
     loop: true,
     timeout: 15000,

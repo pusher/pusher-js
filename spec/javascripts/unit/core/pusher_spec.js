@@ -32,16 +32,15 @@ describe("Pusher", function() {
     Pusher.isReady = false;
     Pusher.instances = [];
 
-    spyOn(Runtime, "getDefaultStrategy").andCallFake(function(options) {
-      var strategy = Mocks.getStrategy(true);
-      strategy.options = options;
-      return strategy;
+    spyOn(Runtime, "getDefaultStrategy").andCallFake(function() {
+      return Mocks.getStrategy(true);
     });
 
-    spyOn(Factory, "createConnectionManager").andCallFake(function(key, options) {
+    spyOn(Factory, "createConnectionManager").andCallFake(function(key, options, config) {
       var manager = Mocks.getConnectionManager();
       manager.key = key;
       manager.options = options;
+      manager.config = config;
       return manager;
     });
     spyOn(Factory, "createChannel").andCallFake(function(name, _) {
@@ -110,7 +109,7 @@ describe("Pusher", function() {
 
     it("should pass the cluster name to the timeline", function() {
       var pusher = new Pusher("foo");
-      expect(pusher.timeline.options.cluster).toBe(undefined);
+      expect(pusher.timeline.options.cluster).toBe(Defaults.cluster);
 
       pusher = new Pusher("foo", { cluster: "spec" });
       expect(pusher.timeline.options.cluster).toEqual("spec");
@@ -160,6 +159,7 @@ describe("Pusher", function() {
               protocol: "https:"
             }
           });
+          var pusher = new Pusher("foo");
           expect(pusher.shouldUseTLS()).toBe(true);
         });
       }
@@ -172,28 +172,17 @@ describe("Pusher", function() {
         expect(strategy.connect).toEqual(jasmine.any(Function));
       });
 
-      it("should pass per-connection strategy options", function() {
-        pusher = new Pusher("foo", { forceTLS: true });
-
-        var expectedConfig = Collections.extend(
-          DefaultConfig.getGlobalConfig(),
-          { forceTLS: true }
-        );
+      it("should pass config and options to the strategy builder", function() {
+        var config = DefaultConfig.getConfig({});
+        var options = { useTLS: true }
 
         var getStrategy = pusher.connection.options.getStrategy;
-        expect(getStrategy().options).toEqual(expectedConfig);
-      });
-
-      it("should pass options to the strategy builder", function() {
-        var expectedConfig = Collections.extend(
-          DefaultConfig.getGlobalConfig(),
-          { useTLS: true }
-        );
-
-        var getStrategy = pusher.connection.options.getStrategy;
-        expect(getStrategy({ useTLS: true }).options).toEqual(
-          expectedConfig
-        );
+        getStrategy(options)
+        expect(Runtime.getDefaultStrategy).toHaveBeenCalledWith(
+          pusher.config,
+          options,
+          jasmine.any(Function),
+        )
       });
     });
 
@@ -207,9 +196,9 @@ describe("Pusher", function() {
         var pusher = new Pusher("foo");
         var options = pusher.connection.options;
 
-        expect(options.activityTimeout).toEqual(Defaults.activity_timeout);
-        expect(options.pongTimeout).toEqual(Defaults.pong_timeout);
-        expect(options.unavailableTimeout).toEqual(Defaults.unavailable_timeout);
+        expect(options.activityTimeout).toEqual(Defaults.activityTimeout);
+        expect(options.pongTimeout).toEqual(Defaults.pongTimeout);
+        expect(options.unavailableTimeout).toEqual(Defaults.unavailableTimeout);
       });
 
       it("should use user-specified timeouts", function() {
@@ -224,28 +213,6 @@ describe("Pusher", function() {
         expect(options.pongTimeout).toEqual(456);
         expect(options.unavailableTimeout).toEqual(789);
       });
-
-      it("should not use TLS by default", function() {
-        var pusher = new Pusher("foo");
-        expect(pusher.connection.options.useTLS).toBe(false);
-      });
-
-      it("should use TLS when specified in Pusher constructor", function() {
-        var pusher = new Pusher("foo", { forceTLS: true });
-        expect(pusher.connection.options.useTLS).toBe(true);
-      });
-
-      if (TestEnv === "web") {
-        it("should use TLS when using HTTPS", function() {
-          Runtime.getDocument.andReturn({
-            location: {
-              protocol: "https:"
-            }
-          });
-          var pusher = new Pusher("foo", { forceTLS: true });
-          expect(pusher.connection.options.useTLS).toBe(true);
-        });
-      }
     });
   });
 
