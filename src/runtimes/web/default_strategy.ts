@@ -193,7 +193,7 @@ var getDefaultStrategy = function(
     {
       ttl: 1800000,
       timeline: strategyOptions.timeline,
-      useTLS: config.useTLS || strategyOptions.useTLS,
+      useTLS: config.useTLS || strategyOptions.useTLS
     }
   );
 };

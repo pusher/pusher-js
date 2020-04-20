@@ -33,17 +33,20 @@ export var defineTransport = function(
   if (enabled) {
     // TODO should the config for useTLS be overridden here? Is it overridden
     // elsewhere?
-    options = Object.assign({
-      useTLS: config.useTLS,
-      ignoreNullOrigin: config.ignoreNullOrigin
-    }, options)
+    options = Object.assign(
+      {
+        useTLS: config.useTLS,
+        ignoreNullOrigin: config.ignoreNullOrigin
+      },
+      options
+    );
 
     transport = new TransportStrategy(
       name,
       priority,
       manager ? manager.getAssistant(transportClass) : transportClass,
-      options,
-    )
+      options
+    );
   } else {
     transport = UnsupportedStrategy;
   }
