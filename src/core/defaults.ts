@@ -15,6 +15,7 @@ export interface DefaultConfig {
   activity_timeout: number;
   pong_timeout: number;
   unavailable_timeout: number;
+  cluster: string;
 
   cdn_http?: string;
   cdn_https?: string;
@@ -43,6 +44,7 @@ var Defaults: DefaultConfig = {
   activity_timeout: 120000,
   pong_timeout: 30000,
   unavailable_timeout: 10000,
+  cluster: 'mt1',
 
   // CDN configuration
   cdn_http: CDN_HTTP,

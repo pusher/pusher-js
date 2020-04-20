@@ -16,8 +16,9 @@ import Defaults from './defaults';
 import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
-import { PusherOptions, Options } from './options';
 import UrlStore from 'core/utils/url_store';
+import { Options } from './options';
+import { Config, getConfig } from './config';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -50,7 +51,7 @@ export default class Pusher {
 
   /* INSTANCE PROPERTIES */
   key: string;
-  config: PusherOptions;
+  config: Config;
   channels: Channels;
   global_emitter: EventsDispatcher;
   sessionID: number;
@@ -78,11 +79,7 @@ export default class Pusher {
     }
 
     this.key = app_key;
-    this.config = Collections.extend<PusherOptions>(
-      DefaultConfig.getGlobalConfig(),
-      options.cluster ? DefaultConfig.getClusterConfig(options.cluster) : {},
-      options
-    );
+    this.config = getConfig(options);
 
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
@@ -253,17 +250,6 @@ export default class Pusher {
 
   send_event(event_name: string, data: any, channel?: string) {
     return this.connection.send_event(event_name, data, channel);
-  }
-
-  shouldUseTLS(): boolean {
-    if (Runtime.getProtocol() === 'https:') {
-      return true;
-    } else if (this.config.forceTLS === true) {
-      return true;
-    } else {
-      // `encrypted` deprecated in favor of `forceTLS`
-      return Boolean(this.config.encrypted);
-    }
   }
 }
 
