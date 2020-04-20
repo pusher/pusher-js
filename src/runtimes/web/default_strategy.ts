@@ -1,6 +1,7 @@
 import * as Collections from 'core/utils/collections';
 import TransportManager from 'core/transports/transport_manager';
 import Strategy from 'core/strategies/strategy';
+import StrategyOptions from 'core/strategies/strategy_options';
 import SequentialStrategy from 'core/strategies/sequential_strategy';
 import BestConnectedEverStrategy from 'core/strategies/best_connected_ever_strategy';
 import CachedStrategy, {
@@ -9,6 +10,7 @@ import CachedStrategy, {
 import DelayedStrategy from 'core/strategies/delayed_strategy';
 import IfStrategy from 'core/strategies/if_strategy';
 import FirstConnectedStrategy from 'core/strategies/first_connected_strategy';
+import { Config } from 'core/config';
 
 function testSupportsStrategy(strategy: Strategy) {
   return function() {
@@ -17,7 +19,8 @@ function testSupportsStrategy(strategy: Strategy) {
 }
 
 var getDefaultStrategy = function(
-  config: any,
+  config: Config,
+  baseOptions: StrategyOptions,
   defineTransport: Function
 ): Strategy {
   var definedTransports = <TransportStrategyDictionary>{};
@@ -26,7 +29,7 @@ var getDefaultStrategy = function(
     name: string,
     type: string,
     priority: number,
-    options,
+    options: StrategyOptions,
     manager?: TransportManager
   ) {
     var transport = defineTransport(
@@ -43,19 +46,20 @@ var getDefaultStrategy = function(
     return transport;
   }
 
-  var ws_options = {
+  var ws_options: StrategyOptions = Object.assign({}, baseOptions, {
     hostNonTLS: config.wsHost + ':' + config.wsPort,
     hostTLS: config.wsHost + ':' + config.wssPort,
     httpPath: config.wsPath
-  };
-  var wss_options = Collections.extend({}, ws_options, {
+  });
+  var wss_options: StrategyOptions = Object.assign({}, ws_options, {
     useTLS: true
   });
-  var sockjs_options = {
+  var sockjs_options: StrategyOptions = Object.assign({}, baseOptions, {
     hostNonTLS: config.httpHost + ':' + config.httpPort,
     hostTLS: config.httpHost + ':' + config.httpsPort,
     httpPath: config.httpPath
-  };
+  });
+
   var timeouts = {
     loop: true,
     timeout: 15000,
@@ -65,12 +69,12 @@ var getDefaultStrategy = function(
   var ws_manager = new TransportManager({
     lives: 2,
     minPingDelay: 10000,
-    maxPingDelay: config.activity_timeout
+    maxPingDelay: config.activityTimeout
   });
   var streaming_manager = new TransportManager({
     lives: 2,
     minPingDelay: 10000,
-    maxPingDelay: config.activity_timeout
+    maxPingDelay: config.activityTimeout
   });
 
   var ws_transport = defineTransportStrategy(
@@ -165,7 +169,7 @@ var getDefaultStrategy = function(
   );
 
   var wsStrategy;
-  if (config.useTLS) {
+  if (baseOptions.useTLS) {
     wsStrategy = new BestConnectedEverStrategy([
       ws_loop,
       new DelayedStrategy(http_fallback_loop, { delay: 2000 })
@@ -189,8 +193,8 @@ var getDefaultStrategy = function(
     definedTransports,
     {
       ttl: 1800000,
-      timeline: config.timeline,
-      useTLS: config.useTLS
+      timeline: baseOptions.timeline,
+      useTLS: baseOptions.useTLS
     }
   );
 };

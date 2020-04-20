@@ -4,16 +4,18 @@ import TransportManager from '../transports/transport_manager';
 import * as Errors from '../errors';
 import Strategy from './strategy';
 import TransportStrategy from './transport_strategy';
+import StrategyOptions from '../strategies/strategy_options';
+import { Config } from '../config';
 import Runtime from 'runtime';
 
 const { Transports } = Runtime;
 
 export var defineTransport = function(
-  config: any,
+  config: Config,
   name: string,
   type: string,
   priority: number,
-  options,
+  options: StrategyOptions,
   manager?: TransportManager
 ): Strategy {
   var transportClass = Transports[type];
@@ -29,19 +31,16 @@ export var defineTransport = function(
 
   var transport;
   if (enabled) {
+    options = Object.assign(
+      { ignoreNullOrigin: config.ignoreNullOrigin },
+      options
+    );
+
     transport = new TransportStrategy(
       name,
       priority,
       manager ? manager.getAssistant(transportClass) : transportClass,
-      Collections.extend(
-        {
-          key: config.key,
-          useTLS: config.useTLS,
-          timeline: config.timeline,
-          ignoreNullOrigin: config.ignoreNullOrigin
-        },
-        options
-      )
+      options
     );
   } else {
     transport = UnsupportedStrategy;

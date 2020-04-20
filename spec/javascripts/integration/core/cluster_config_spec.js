@@ -101,20 +101,20 @@ module.exports = function(testConfigs) {
     }
 
     var _VERSION;
-    var _channel_auth_transport;
-    var _channel_auth_endpoint;
+    var _authTransport;
+    var _authEndpoint;
     var _Dependencies;
 
     it("should prepare the global config", function() {
       // TODO fix how versions work in unit tests
       _VERSION = Defaults.VERSION;
-      _channel_auth_transport = Defaults.channel_auth_transport;
-      _channel_auth_endpoint = Defaults.channel_auth_endpoint;
+      _authTransport = Defaults.authTransport;
+      _authEndpoint = Defaults.authEndpoint;
       _Dependencies = Dependencies;
 
       Defaults.VERSION = "8.8.8";
-      Defaults.channel_auth_transport = "";
-      Defaults.channel_auth_endpoint = "";
+      Defaults.authTransport = "";
+      Defaults.authEndpoint = "";
 
       if (TestEnv === "web") {
         Dependencies = new DependencyLoader({

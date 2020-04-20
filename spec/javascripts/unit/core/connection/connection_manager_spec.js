@@ -21,7 +21,8 @@ describe("ConnectionManager", function() {
       timeline: timeline,
       activityTimeout: 3456,
       pongTimeout: 2345,
-      unavailableTimeout: 1234
+      unavailableTimeout: 1234,
+      useTLS: false,
     };
     manager = new ConnectionManager("foo", managerOptions);
   });
@@ -47,7 +48,7 @@ describe("ConnectionManager", function() {
         activityTimeout: 3456,
         pongTimeout: 2345,
         unavailableTimeout: 1234
-      });
+      }, {});
       expect(getStrategy).toHaveBeenCalled();
     });
 
@@ -63,7 +64,8 @@ describe("ConnectionManager", function() {
 
     it("should return true if the manager has been created with useTLS=true", function() {
       var manager = new ConnectionManager(
-        "foo", Collections.extend(managerOptions, { useTLS: true })
+        "foo",
+        Object.assign({}, managerOptions, { useTLS: true })
       );
       expect(manager.isUsingTLS()).toEqual(true);
     });

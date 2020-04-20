@@ -1,6 +1,7 @@
 import Factory from '../utils/factory';
 import TransportHooks from './transport_hooks';
 import TransportConnection from './transport_connection';
+import TransportConnectionOptions from './transport_connection_options';
 
 /** Provides interface for transport connection instantiation.
  *
