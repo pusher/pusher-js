@@ -168,7 +168,7 @@ var getDefaultStrategy = function(
   );
 
   var wsStrategy;
-  if (config.useTLS) {
+  if (config.useTLS || strategyOptions.useTLS) {
     wsStrategy = new BestConnectedEverStrategy([
       ws_loop,
       new DelayedStrategy(http_fallback_loop, { delay: 2000 })
@@ -193,7 +193,7 @@ var getDefaultStrategy = function(
     {
       ttl: 1800000,
       timeline: strategyOptions.timeline,
-      useTLS: config.useTLS
+      useTLS: config.useTLS || strategyOptions.useTLS,
     }
   );
 };

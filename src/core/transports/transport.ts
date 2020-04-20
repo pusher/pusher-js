@@ -1,6 +1,7 @@
 import Factory from '../utils/factory';
 import TransportHooks from './transport_hooks';
 import TransportConnection from './transport_connection';
+import TransportConnectionOptions from './transport_connection_options';
 
 /** Provides interface for transport connection instantiation.
  *
@@ -46,7 +47,8 @@ export default class Transport {
     name: string,
     priority: number,
     key: string,
-    options: any
+    options: any, // TODO
+    // options: TransportConnectionOptions,
   ): TransportConnection {
     return new TransportConnection(this.hooks, name, priority, key, options);
   }
