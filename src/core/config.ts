@@ -65,7 +65,14 @@ export function getConfig(opts: Options): Config {
     wsHost: getWebsocketHost(opts),
     wsPath: opts.wsPath || Defaults.ws_path,
     wsPort: opts.wsPort || Defaults.ws_port,
-    wssPort: opts.wssPort || Defaults.wss_port
+    wssPort: opts.wssPort || Defaults.wss_port,
+
+    auth: opts.auth || undefined,
+    authorizer: opts.authorizer || undefined,
+    disabledTransports: opts.disabledTransports || undefined,
+    enabledTransports: opts.enabledTransports || undefined,
+    ignoreNullOrigin: opts.ignoreNullOrigin || undefined,
+    timelineParams: opts.timelineParams || undefined
   };
 
   if ('auth' in opts) config.auth = opts.auth;
