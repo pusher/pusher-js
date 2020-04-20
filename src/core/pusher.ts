@@ -121,6 +121,7 @@ export default class Pusher {
         this.timelineSender.send(this.connection.isUsingTLS());
       }
     });
+
     this.connection.bind('message', event => {
       var eventName = event.event;
       var internal = eventName.indexOf('pusher_internal:') === 0;
@@ -245,6 +246,10 @@ export default class Pusher {
 
   send_event(event_name: string, data: any, channel?: string) {
     return this.connection.send_event(event_name, data, channel);
+  }
+
+  shouldUseTLS(): boolean {
+    return this.config.useTLS;
   }
 }
 
