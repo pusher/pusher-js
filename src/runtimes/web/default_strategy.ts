@@ -20,7 +20,7 @@ function testSupportsStrategy(strategy: Strategy) {
 
 var getDefaultStrategy = function(
   config: Config,
-  strategyOptions: StrategyOptions,
+  baseOptions: StrategyOptions,
   defineTransport: Function
 ): Strategy {
   var definedTransports = <TransportStrategyDictionary>{};
@@ -46,7 +46,7 @@ var getDefaultStrategy = function(
     return transport;
   }
 
-  var ws_options: StrategyOptions = Object.assign({}, strategyOptions, {
+  var ws_options: StrategyOptions = Object.assign({}, baseOptions, {
     hostNonTLS: config.wsHost + ':' + config.wsPort,
     hostTLS: config.wsHost + ':' + config.wssPort,
     httpPath: config.wsPath
@@ -54,11 +54,12 @@ var getDefaultStrategy = function(
   var wss_options: StrategyOptions = Object.assign({}, ws_options, {
     useTLS: true
   });
-  var sockjs_options: StrategyOptions = Object.assign({}, strategyOptions, {
+  var sockjs_options: StrategyOptions = Object.assign({}, baseOptions, {
     hostNonTLS: config.httpHost + ':' + config.httpPort,
     hostTLS: config.httpHost + ':' + config.httpsPort,
     httpPath: config.httpPath
   });
+
   var timeouts = {
     loop: true,
     timeout: 15000,
@@ -168,7 +169,7 @@ var getDefaultStrategy = function(
   );
 
   var wsStrategy;
-  if (strategyOptions.useTLS) {
+  if (baseOptions.useTLS) {
     wsStrategy = new BestConnectedEverStrategy([
       ws_loop,
       new DelayedStrategy(http_fallback_loop, { delay: 2000 })
@@ -192,8 +193,8 @@ var getDefaultStrategy = function(
     definedTransports,
     {
       ttl: 1800000,
-      timeline: strategyOptions.timeline,
-      useTLS: strategyOptions.useTLS
+      timeline: baseOptions.timeline,
+      useTLS: baseOptions.useTLS
     }
   );
 };
