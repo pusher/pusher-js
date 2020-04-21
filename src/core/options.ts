@@ -1,8 +1,11 @@
 import ConnectionManager from './connection/connection_manager';
 import { AuthOptions, AuthorizerGenerator } from './auth/options';
 import { AuthTransport, Transport } from './config';
+import * as nacl from 'tweetnacl';
 
 export interface Options {
+  nacl?: nacl;
+
   activityTimeout?: number;
   auth?: AuthOptions;
   authEndpoint?: string;
