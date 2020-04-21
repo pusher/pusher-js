@@ -1,4 +1,4 @@
-import { AuthTransport } from './config'
+import { AuthTransport } from './config';
 
 export interface DefaultConfig {
   VERSION: string;

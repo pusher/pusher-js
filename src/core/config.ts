@@ -62,7 +62,7 @@ export function getConfig(opts: Options): Config {
     enableStats: getEnableStatsConfig(opts),
     httpHost: getHttpHost(opts),
     useTLS: shouldUseTLS(opts),
-    wsHost: getWebsocketHost(opts),
+    wsHost: getWebsocketHost(opts)
   };
 
   if ('auth' in opts) config.auth = opts.auth;
@@ -93,13 +93,13 @@ function getWebsocketHost(opts: Options): string {
     return opts.wsHost;
   }
   if (opts.cluster) {
-    return getWebsocketHostFromCluster(opts.cluster)
+    return getWebsocketHostFromCluster(opts.cluster);
   }
-  return getWebsocketHostFromCluster(Defaults.cluster)
+  return getWebsocketHostFromCluster(Defaults.cluster);
 }
 
 function getWebsocketHostFromCluster(cluster: string): string {
-    return `ws-${cluster}.pusher.com`;
+  return `ws-${cluster}.pusher.com`;
 }
 
 function shouldUseTLS(opts: Options): boolean {
