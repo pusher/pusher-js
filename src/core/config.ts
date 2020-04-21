@@ -2,6 +2,7 @@ import { Options } from './options';
 import Defaults from './defaults';
 import { AuthOptions, AuthorizerGenerator } from './auth/options';
 import Runtime from 'runtime';
+import * as nacl from 'tweetnacl';
 
 export type AuthTransport = 'ajax' | 'jsonp';
 export type Transport =
@@ -31,6 +32,8 @@ export interface Config {
   wsPort: number;
   wssPort: number;
 
+  nacl?: nacl;
+
   // these are all optional parameters or overrrides. The customer can set these
   // but it's not strictly necessary
   forceTLS?: boolean;
@@ -58,6 +61,8 @@ export function getConfig(opts: Options): Config {
     wsPath: opts.wsPath || Defaults.wsPath,
     wsPort: opts.wsPort || Defaults.wsPort,
     wssPort: opts.wssPort || Defaults.wssPort,
+
+    nacl: opts.nacl || null,
 
     enableStats: getEnableStatsConfig(opts),
     httpHost: getHttpHost(opts),
