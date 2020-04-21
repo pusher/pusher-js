@@ -1,3 +1,5 @@
+import { AuthTransport } from './config'
+
 export interface DefaultConfig {
   VERSION: string;
   PROTOCOL: number;
@@ -10,7 +12,7 @@ export interface DefaultConfig {
   httpPath: string;
   stats_host: string;
   authEndpoint: string;
-  authTransport: string;
+  authTransport: AuthTransport;
   activityTimeout: number;
   pongTimeout: number;
   unavailableTimeout: number;

@@ -44,27 +44,25 @@ export interface Config {
 }
 
 export function getConfig(opts: Options): Config {
-  let authTransport =
-    opts.authTransport || (Defaults.authTransport as AuthTransport);
-
   let config: Config = {
     activityTimeout: opts.activityTimeout || Defaults.activityTimeout,
     authEndpoint: opts.authEndpoint || Defaults.authEndpoint,
-    authTransport: authTransport,
+    authTransport: opts.authTransport || Defaults.authTransport,
     cluster: opts.cluster || Defaults.cluster,
-    enableStats: getEnableStatsConfig(opts),
-    httpHost: getHttpHost(opts),
     httpPath: opts.httpPath || Defaults.httpPath,
     httpPort: opts.httpPort || Defaults.httpPort,
     httpsPort: opts.httpsPort || Defaults.httpsPort,
     pongTimeout: opts.pongTimeout || Defaults.pongTimeout,
     statsHost: opts.statsHost || Defaults.stats_host,
     unavailableTimeout: opts.unavailableTimeout || Defaults.unavailableTimeout,
-    useTLS: shouldUseTLS(opts),
-    wsHost: getWebsocketHost(opts),
     wsPath: opts.wsPath || Defaults.wsPath,
     wsPort: opts.wsPort || Defaults.wsPort,
-    wssPort: opts.wssPort || Defaults.wssPort
+    wssPort: opts.wssPort || Defaults.wssPort,
+
+    enableStats: getEnableStatsConfig(opts),
+    httpHost: getHttpHost(opts),
+    useTLS: shouldUseTLS(opts),
+    wsHost: getWebsocketHost(opts),
   };
 
   if ('auth' in opts) config.auth = opts.auth;
