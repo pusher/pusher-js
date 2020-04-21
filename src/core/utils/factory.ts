@@ -31,10 +31,9 @@ var Factory = {
 
   createConnectionManager(
     key: string,
-    options: ConnectionManagerOptions,
-    config: Config
+    options: ConnectionManagerOptions
   ): ConnectionManager {
-    return new ConnectionManager(key, options, config);
+    return new ConnectionManager(key, options);
   },
 
   createChannel(name: string, pusher: Pusher): Channel {

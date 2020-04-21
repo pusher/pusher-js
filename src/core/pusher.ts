@@ -102,18 +102,14 @@ export default class Pusher {
       return Runtime.getDefaultStrategy(this.config, options, defineTransport);
     };
 
-    this.connection = Factory.createConnectionManager(
-      this.key,
-      {
-        getStrategy: getStrategy,
-        timeline: this.timeline,
-        // TODO we pass the config anyway, do we need this?
-        activityTimeout: this.config.activityTimeout,
-        pongTimeout: this.config.pongTimeout,
-        unavailableTimeout: this.config.unavailableTimeout
-      },
-      this.config
-    );
+    this.connection = Factory.createConnectionManager(this.key, {
+      getStrategy: getStrategy,
+      timeline: this.timeline,
+      activityTimeout: this.config.activityTimeout,
+      pongTimeout: this.config.pongTimeout,
+      unavailableTimeout: this.config.unavailableTimeout,
+      useTLS: Boolean(this.config.useTLS)
+    });
 
     this.connection.bind('connected', () => {
       this.subscribeAll();

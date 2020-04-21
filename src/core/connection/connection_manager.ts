@@ -62,7 +62,7 @@ export default class ConnectionManager extends EventsDispatcher {
   handshakeCallbacks: HandshakeCallbacks;
   connectionCallbacks: ConnectionCallbacks;
 
-  constructor(key: string, options: ConnectionManagerOptions, config: Config) {
+  constructor(key: string, options: ConnectionManagerOptions) {
     super();
     this.state = 'initialized';
     this.connection = null;
@@ -70,7 +70,7 @@ export default class ConnectionManager extends EventsDispatcher {
     this.key = key;
     this.options = options;
     this.timeline = this.options.timeline;
-    this.usingTLS = !!config.useTLS;
+    this.usingTLS = this.options.useTLS;
 
     this.errorCallbacks = this.buildErrorCallbacks();
     this.connectionCallbacks = this.buildConnectionCallbacks(
