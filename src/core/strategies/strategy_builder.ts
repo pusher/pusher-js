@@ -31,13 +31,8 @@ export var defineTransport = function(
 
   var transport;
   if (enabled) {
-    // TODO should the config for useTLS be overridden here? Is it overridden
-    // elsewhere?
     options = Object.assign(
-      {
-        useTLS: config.useTLS,
-        ignoreNullOrigin: config.ignoreNullOrigin
-      },
+      { ignoreNullOrigin: config.ignoreNullOrigin },
       options
     );
 

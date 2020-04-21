@@ -8,6 +8,7 @@ interface ConnectionManagerOptions {
   unavailableTimeout: number;
   pongTimeout: number;
   activityTimeout: number;
+  useTLS: boolean;
 }
 
 export default ConnectionManagerOptions;
