@@ -49,7 +49,7 @@ module.exports = function() {
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
-      jasmine.Clock.tick(Defaults.unavailable_timeout - 1);
+      jasmine.Clock.tick(Defaults.unavailableTimeout - 1);
       expect(onUnavailable).not.toHaveBeenCalled();
       jasmine.Clock.tick(1);
       expect(onUnavailable).toHaveBeenCalled();
@@ -94,7 +94,7 @@ module.exports = function() {
       jasmine.Clock.tick(1);
       expect(firstTransport.send).toHaveBeenCalled();
 
-      jasmine.Clock.tick(Defaults.pong_timeout - 1);
+      jasmine.Clock.tick(Defaults.pongTimeout - 1);
       expect(firstTransport.close).not.toHaveBeenCalled();
       jasmine.Clock.tick(1);
       expect(firstTransport.close).toHaveBeenCalled();

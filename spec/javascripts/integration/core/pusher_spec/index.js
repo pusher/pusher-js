@@ -26,20 +26,20 @@ module.exports = function(testConfigs) {
     // significant delays and triggers security mechanisms in some browsers.
 
     var _VERSION;
-    var _channel_auth_transport;
-    var _channel_auth_endpoint;
+    var _authTransport;
+    var _authEndpoint;
     var _Dependencies;
 
     it("should prepare the global config", function() {
       // TODO fix how versions work in unit tests
       _VERSION = Defaults.VERSION;
-      _channel_auth_transport = Defaults.channel_auth_transport;
-      _channel_auth_endpoint = Defaults.channel_auth_endpoint;
+      _authTransport = Defaults.authTransport;
+      _authEndpoint = Defaults.authEndpoint;
       _Dependencies = Dependencies;
 
       Defaults.VERSION = "8.8.8";
-      Defaults.channel_auth_transport = (TestEnv === 'web') ? 'jsonp' : 'ajax';
-      Defaults.channel_auth_endpoint = Integration.API_URL + "/auth";
+      Defaults.authTransport = (TestEnv === 'web') ? 'jsonp' : 'ajax';
+      Defaults.authEndpoint = Integration.API_URL + "/auth";
 
       if (TestEnv === "web") {
         Dependencies = new DependencyLoader({
@@ -59,8 +59,8 @@ module.exports = function(testConfigs) {
 
     it("should restore the global config", function() {
       Dependencies = _Dependencies;
-      Defaults.channel_auth_endpoint = _channel_auth_endpoint;
-      Defaults.channel_auth_transport = _channel_auth_transport;
+      Defaults.authEndpoint = _authEndpoint;
+      Defaults.authTransport = _authTransport;
       Defaults.VERSION = _VERSION;
     });
   });

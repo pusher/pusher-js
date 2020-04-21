@@ -45,33 +45,26 @@ export interface Config {
 
 export function getConfig(opts: Options): Config {
   let authTransport =
-    opts.authTransport || (Defaults.channel_auth_transport as AuthTransport);
+    opts.authTransport || (Defaults.authTransport as AuthTransport);
 
   let config: Config = {
-    activityTimeout: opts.activityTimeout || Defaults.activity_timeout,
-    authEndpoint: opts.authEndpoint || Defaults.channel_auth_endpoint,
+    activityTimeout: opts.activityTimeout || Defaults.activityTimeout,
+    authEndpoint: opts.authEndpoint || Defaults.authEndpoint,
     authTransport: authTransport,
     cluster: opts.cluster || Defaults.cluster,
     enableStats: getEnableStatsConfig(opts),
     httpHost: getHttpHost(opts),
-    httpPath: opts.httpPath || Defaults.sockjs_path,
-    httpPort: opts.httpPort || Defaults.sockjs_http_port,
-    httpsPort: opts.httpsPort || Defaults.sockjs_https_port,
-    pongTimeout: opts.pongTimeout || Defaults.pong_timeout,
+    httpPath: opts.httpPath || Defaults.httpPath,
+    httpPort: opts.httpPort || Defaults.httpPort,
+    httpsPort: opts.httpsPort || Defaults.httpsPort,
+    pongTimeout: opts.pongTimeout || Defaults.pongTimeout,
     statsHost: opts.statsHost || Defaults.stats_host,
-    unavailableTimeout: opts.unavailableTimeout || Defaults.unavailable_timeout,
+    unavailableTimeout: opts.unavailableTimeout || Defaults.unavailableTimeout,
     useTLS: shouldUseTLS(opts),
     wsHost: getWebsocketHost(opts),
-    wsPath: opts.wsPath || Defaults.ws_path,
-    wsPort: opts.wsPort || Defaults.ws_port,
-    wssPort: opts.wssPort || Defaults.wss_port,
-
-    auth: opts.auth || undefined,
-    authorizer: opts.authorizer || undefined,
-    disabledTransports: opts.disabledTransports || undefined,
-    enabledTransports: opts.enabledTransports || undefined,
-    ignoreNullOrigin: opts.ignoreNullOrigin || undefined,
-    timelineParams: opts.timelineParams || undefined
+    wsPath: opts.wsPath || Defaults.wsPath,
+    wsPort: opts.wsPort || Defaults.wsPort,
+    wssPort: opts.wssPort || Defaults.wssPort
   };
 
   if ('auth' in opts) config.auth = opts.auth;
@@ -94,7 +87,7 @@ function getHttpHost(opts: Options): string {
   if (opts.cluster) {
     return `sockjs-${opts.cluster}.pusher.com`;
   }
-  return Defaults.sockjs_host;
+  return Defaults.httpHost;
 }
 
 function getWebsocketHost(opts: Options): string {
