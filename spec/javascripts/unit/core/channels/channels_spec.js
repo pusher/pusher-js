@@ -2,6 +2,7 @@ var Channels = require('core/channels/channels').default;
 var Channel = require('core/channels/channel').default;
 var PrivateChannel = require('core/channels/private_channel').default;
 var PresenceChannel = require('core/channels/presence_channel').default;
+var EncryptedChannel = require('core/channels/encrypted_channel').default;
 var Factory = require('core/utils/factory').default;
 var Mocks = require("mocks");
 
@@ -27,16 +28,28 @@ describe("Channels", function() {
     });
 
     it("should create a regular channel when name doesn't have known prefix", function() {
-      expect(channels.add("test")).toEqual(jasmine.any(Channel));
+      expect(channels.add("test", {})).toEqual(jasmine.any(Channel));
     });
 
     it("should create a private channel when name starts with 'private-'", function() {
-      expect(channels.add("private-test")).toEqual(jasmine.any(PrivateChannel));
+      expect(channels.add("private-test", {})).toEqual(jasmine.any(PrivateChannel));
     });
 
     it("should create a presence channel when name starts with 'presence-'", function() {
-      expect(channels.add("presence-test")).toEqual(jasmine.any(PresenceChannel));
+      expect(channels.add("presence-test", {})).toEqual(jasmine.any(PresenceChannel));
     });
+    describe("Subscribing to channel with name starting 'private-encrypted-'", function() {
+      it("should create an encrypted channel when nacl is available", function() {
+        var pusher = Mocks.getPusher({ nacl: {} })
+        expect(channels.add("private-encrypted-test", pusher))
+          .toEqual(jasmine.any(EncryptedChannel));
+      });
+      it("should throw an error if nacl is not available", function() {
+        var pusher = Mocks.getPusher({})
+        var fn = () => channels.add("private-encrypted-test", pusher)
+        expect(fn).toThrow();
+      });
+    })
   });
 
   describe("#find", function() {
