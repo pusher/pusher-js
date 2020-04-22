@@ -4,8 +4,6 @@ import { AuthTransport, Transport } from './config';
 import * as nacl from 'tweetnacl';
 
 export interface Options {
-  nacl?: nacl;
-
   activityTimeout?: number;
   auth?: AuthOptions;
   authEndpoint?: string;
@@ -23,6 +21,7 @@ export interface Options {
   httpPort?: number;
   httpsPort?: number;
   ignoreNullOrigin?: boolean;
+  nacl?: nacl;
   pongTimeout?: number;
   statsHost?: string;
   timelineParams?: any;

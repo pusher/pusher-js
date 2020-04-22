@@ -32,8 +32,6 @@ export interface Config {
   wsPort: number;
   wssPort: number;
 
-  nacl?: nacl;
-
   // these are all optional parameters or overrrides. The customer can set these
   // but it's not strictly necessary
   forceTLS?: boolean;
@@ -43,6 +41,7 @@ export interface Config {
   disabledTransports?: Transport[];
   enabledTransports?: Transport[];
   ignoreNullOrigin?: boolean;
+  nacl?: nacl;
   timelineParams?: any;
 }
 
