@@ -3,6 +3,8 @@ import Defaults from './defaults';
 import { AuthOptions, AuthorizerGenerator } from './auth/options';
 import Runtime from 'runtime';
 import * as nacl from 'tweetnacl';
+import { encodeBase64 } from 'tweetnacl-util';
+import Logger from './logger';
 
 export type AuthTransport = 'ajax' | 'jsonp';
 export type Transport =
@@ -61,8 +63,6 @@ export function getConfig(opts: Options): Config {
     wsPort: opts.wsPort || Defaults.wsPort,
     wssPort: opts.wssPort || Defaults.wssPort,
 
-    nacl: opts.nacl || null,
-
     enableStats: getEnableStatsConfig(opts),
     httpHost: getHttpHost(opts),
     useTLS: shouldUseTLS(opts),
@@ -78,6 +78,16 @@ export function getConfig(opts: Options): Config {
   if ('ignoreNullOrigin' in opts)
     config.ignoreNullOrigin = opts.ignoreNullOrigin;
   if ('timelineParams' in opts) config.timelineParams = opts.timelineParams;
+  if ('nacl' in opts) {
+    if (naclIsValid(opts.nacl)) {
+      config.nacl = opts.nacl;
+    } else {
+      // TODO add links to documentation
+      Logger.warn(
+        "An invalid 'nacl' implementation was passed as an option, encrypted channels will not work"
+      );
+    }
+  }
 
   return config;
 }
@@ -126,6 +136,22 @@ function getEnableStatsConfig(opts: Options): boolean {
   }
   if ('disableStats' in opts) {
     return !opts.disableStats;
+  }
+  return false;
+}
+
+function naclIsValid(nacl: nacl): boolean {
+  if (
+    'randomBytes' in nacl &&
+    'secretbox' in nacl &&
+    'open' in nacl.secretbox
+  ) {
+    let key = nacl.randomBytes(32);
+    let nonce = nacl.randomBytes(24);
+    let data = nacl.randomBytes(40);
+    let ciphertext = nacl.secretbox(data, nonce, key);
+    let res = nacl.secretbox.open(ciphertext, nonce, key);
+    return encodeBase64(data) === encodeBase64(res);
   }
   return false;
 }
