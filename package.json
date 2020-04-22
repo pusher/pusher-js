@@ -50,7 +50,7 @@
     "object-assign-deep": "0.0.4",
     "prettier": "^1.19.1",
     "ts-loader": "^6.0.4",
-    "tweetnacl": "^1.0.2",
+    "tweetnacl": "^1.0.3",
     "tweetnacl-util": "^0.15.1",
     "typescript": "^3.4.5",
     "uglify-js": "^2.6.2",
