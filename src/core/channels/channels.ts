@@ -67,9 +67,10 @@ function createChannel(name: string, pusher: Pusher): Channel {
     if (pusher.config.nacl) {
       return Factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
     }
-    let errorMsg =
-      'Trying to subscribe to encrypted channel but no nacl provided';
-    throw new Errors.UnsupportedFeature(errorMsg);
+    throw new Errors.UnsupportedFeature(
+      // TODO insert link to docs here
+      'Trying to subscribe to encrypted channel but no nacl provided'
+    );
   } else if (name.indexOf('private-') === 0) {
     return Factory.createPrivateChannel(name, pusher);
   } else if (name.indexOf('presence-') === 0) {
