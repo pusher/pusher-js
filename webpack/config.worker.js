@@ -10,7 +10,16 @@ var filename = configShared.optimization.minimize
   ? 'pusher.worker.min.js'
   : 'pusher.worker.js';
 
+var entry = './src/core/pusher.js';
+if (process.env.INCLUDE_TWEETNACL === 'true') {
+  entry = './src/core/pusher-with-encryption.js';
+  filename = filename.replace('pusher', 'pusher-with-encryption')
+}
+
 var config = objectAssign(configShared, {
+  entry: {
+    pusher: entry,
+  },
   output: {
     library: 'Pusher',
     path: path.join(__dirname, '../dist/worker'),
@@ -27,10 +36,5 @@ var config = objectAssign(configShared, {
     })
   ]
 });
-
-// the file should be pusher.worker.js not pusher.js
-config.entry = {
-  'pusher.worker': './src/core/index'
-};
 
 module.exports = config;
