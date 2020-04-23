@@ -10,6 +10,12 @@ var filename = configShared.optimization.minimize
   ? 'pusher.worker.min.js'
   : 'pusher.worker.js';
 
+var entry = './src/core/pusher';
+if (process.env.INCLUDE_TWEETNACL === 'true') {
+  entry = './src/core/pusher-with-encryption' :
+  filename = filename.replace('pusher', 'pusher-with-encryption')
+}
+
 var config = objectAssign(configShared, {
   output: {
     library: 'Pusher',
