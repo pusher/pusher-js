@@ -14,7 +14,7 @@ module.exports = {
     minimize: minimize
   },
   entry: {
-    pusher: './src/core/index'
+    pusher: 'src/core/pusher',
   },
   resolve: {
     extensions: ['.webpack.js', '.web.js', '.ts', '.js'],
