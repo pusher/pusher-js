@@ -13,27 +13,38 @@ json2:
 	node_modules/.bin/uglifyjs dist/web/json2.js -o dist/web/json2.min.js
 
 web:
-	echo "Browser Release:"
-	# make sockjs
-	# cp src/runtimes/web/dom/sockjs/sockjs.js dist/web
+	@echo "Browser Release:"
 	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
-	echo "Browser Minified Release:"
-	# cp src/runtimes/web/dom/sockjs/sockjs.min.js dist/web
+
+	@echo "Browser Release (with encryption)"
+	INCLUDE_TWEETNACL=true MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
+
+	@echo "Minified Browser Release:"
 	node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
 
+	@echo "Minified Browser Release (with encryption)"
+	INCLUDE_TWEETNACL=true node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
+
 react-native:
-	echo "React Native Release:"
+	@echo "React Native Release:"
 	node_modules/webpack/bin/webpack.js --config=webpack/config.react-native.js
 
 node:
-	echo "NodeJS Release":
+	@echo "NodeJS Release":
 	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.node.js
 
 worker:
-	echo "Web Worker Release:"
+	@echo "Web Worker Release"
 	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
-	echo "Web Worker Minified Release:"
+
+	@echo "Web Worker Release (with encryption)"
+	INCLUDE_TWEETNACL=true MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
+
+	@echo "Minified Web Worker Release"
 	node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
+
+	@echo "Minified Web Worker Release (with encryption)"
+	INCLUDE_TWEETNACL=true node_modules/webpack/bin/webpack.js --config=webpack/config.worker.js
 
 web_unit:
 	node_modules/karma/bin/karma start spec/config/karma/unit.js

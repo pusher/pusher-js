@@ -20,22 +20,6 @@ module.exports = objectAssign({}, configShared, {
   },
   resolve: {
     modules: ['src/runtimes/react-native'],
-    // at the moment, react-native doesn't contain the requisite crypto APIs to
-    // use tweetnacl/tweetnacl-utils.
-    //
-    // As a result encrypted channels cannot be supported in react native at
-    // this time. In order for the build to work, we need to replace the
-    // tweetnacl-utils with 'mocks'
-    alias: {
-      tweetnacl: path.resolve(
-        __dirname,
-        '../src/runtimes/react-native/tweetnacl-dummy.ts'
-      ),
-      'tweetnacl-util': path.resolve(
-        __dirname,
-        '../src/runtimes/react-native/tweetnacl-util-dummy.ts'
-      )
-    }
   },
   plugins: [
     new webpack.DefinePlugin({
