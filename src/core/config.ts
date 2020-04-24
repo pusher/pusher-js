@@ -131,4 +131,3 @@ function getEnableStatsConfig(opts: Options): boolean {
   }
   return false;
 }
-

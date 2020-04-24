@@ -13,12 +13,12 @@ var filename = configShared.optimization.minimize
 var entry = './src/core/pusher.js';
 if (process.env.INCLUDE_TWEETNACL === 'true') {
   entry = './src/core/pusher-with-encryption.js';
-  filename = filename.replace('pusher', 'pusher-with-encryption')
+  filename = filename.replace('pusher', 'pusher-with-encryption');
 }
 
 var config = objectAssign(configShared, {
   entry: {
-    pusher: entry,
+    pusher: entry
   },
   output: {
     library: 'Pusher',

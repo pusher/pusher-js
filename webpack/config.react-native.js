@@ -9,7 +9,7 @@ var buffer = require('buffer');
 
 module.exports = objectAssign({}, configShared, {
   entry: {
-    pusher: './src/core/pusher-with-encryption.js',
+    pusher: './src/core/pusher-with-encryption.js'
   },
   output: {
     library: 'Pusher',
@@ -22,7 +22,7 @@ module.exports = objectAssign({}, configShared, {
     '@react-native-community/netinfo': '@react-native-community/netinfo'
   },
   resolve: {
-    modules: ['src/runtimes/react-native'],
+    modules: ['src/runtimes/react-native']
   },
   plugins: [
     new webpack.DefinePlugin({

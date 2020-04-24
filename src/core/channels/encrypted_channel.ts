@@ -2,7 +2,7 @@ import PrivateChannel from './private_channel';
 import * as Errors from '../errors';
 import Logger from '../logger';
 import Pusher from '../pusher';
-import { decode as encodeUTF8 } from '@stablelib/utf8'
+import { decode as encodeUTF8 } from '@stablelib/utf8';
 import { decode as decodeBase64 } from '@stablelib/base64';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
