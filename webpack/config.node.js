@@ -5,7 +5,7 @@ var webpack = require('webpack');
 
 module.exports = objectAssign({}, configShared, {
   entry: {
-    pusher: './src/core/pusher-with-encryption',
+    pusher: './src/core/index-with-encryption',
   },
   output: {
     library: 'Pusher',

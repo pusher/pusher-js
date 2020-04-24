@@ -10,9 +10,9 @@ var filename = configShared.optimization.minimize
   ? 'pusher.worker.min.js'
   : 'pusher.worker.js';
 
-var entry = './src/core/pusher';
+var entry = './src/core/index';
 if (process.env.INCLUDE_TWEETNACL === 'true') {
-  entry = './src/core/pusher-with-encryption' :
+  entry = './src/core/index-with-encryption';
   filename = filename.replace('pusher', 'pusher-with-encryption')
 }
 
