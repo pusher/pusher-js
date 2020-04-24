@@ -49,7 +49,7 @@ module.exports = function() {
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
-      jasmine.Clock.tick(Defaults.unavailable_timeout - 1);
+      jasmine.Clock.tick(Defaults.unavailableTimeout - 1);
       expect(onUnavailable).not.toHaveBeenCalled();
       jasmine.Clock.tick(1);
       expect(onUnavailable).toHaveBeenCalled();
@@ -58,7 +58,7 @@ module.exports = function() {
     it("should transition to unavailable after timeout passed as an option", function() {
       var onUnavailable = jasmine.createSpy("onUnavailable");
 
-      pusher = new Pusher("foobar", { unavailable_timeout: 2345 });
+      pusher = new Pusher("foobar", { unavailableTimeout: 2345 });
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
@@ -94,7 +94,7 @@ module.exports = function() {
       jasmine.Clock.tick(1);
       expect(firstTransport.send).toHaveBeenCalled();
 
-      jasmine.Clock.tick(Defaults.pong_timeout - 1);
+      jasmine.Clock.tick(Defaults.pongTimeout - 1);
       expect(firstTransport.close).not.toHaveBeenCalled();
       jasmine.Clock.tick(1);
       expect(firstTransport.close).toHaveBeenCalled();
@@ -102,8 +102,8 @@ module.exports = function() {
 
     it("should obey the activity timeout from the handshake if it's lower than one specified in options", function() {
       pusher = new Pusher("foobar", {
-        activity_timeout: 16000,
-        pong_timeout: 2222
+        activityTimeout: 16000,
+        pongTimeout: 2222
       });
       pusher.connect();
 
@@ -132,8 +132,8 @@ module.exports = function() {
 
     it("should obey the activity timeout specified in options if it's lower than one from the handshake", function() {
       pusher = new Pusher("foobar", {
-        activity_timeout: 15555,
-        pong_timeout: 2222
+        activityTimeout: 15555,
+        pongTimeout: 2222
       });
       pusher.connect();
 
@@ -162,7 +162,7 @@ module.exports = function() {
 
     it("should obey the pong timeout passed in options", function() {
       pusher = new Pusher("foobar", {
-        pong_timeout: 2222
+        pongTimeout: 2222
       });
       pusher.connect();
 

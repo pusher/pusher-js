@@ -1,7 +1,7 @@
 var WSTransport = require('runtime').default.Transports.ws;
 var StrategyBuilder = require('core/strategies/strategy_builder');
 var Runtime = require('runtime').default;
-var DefaultConfig = require('core/config');
+var Config = require('core/config');
 
 describe("Default", function() {
   describe("strategy", function() {
@@ -10,7 +10,11 @@ describe("Default", function() {
         if (ws) {
           spyOn(WSTransport, "isSupported").andReturn(true);
         }
-        var strategy = Runtime.getDefaultStrategy(DefaultConfig.getGlobalConfig(), StrategyBuilder.defineTransport);
+        var strategy = Runtime.getDefaultStrategy(
+          Config.getConfig({}),
+          {},
+          StrategyBuilder.defineTransport,
+        );
         expect(strategy.isSupported()).toBe(true);
       });
     }

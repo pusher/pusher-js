@@ -41,21 +41,21 @@ describe("Host/Port Configuration", function() {
       spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
     });
 
-    it("should connect to ws://ws.pusherapp.com:80 by default", function() {
+    it("should connect to ws://ws-mt1.pusher.com:80 by default", function() {
       pusher = new Pusher("foobar");
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(
-        "ws://ws.pusherapp.com:80/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
+        "ws://ws-mt1.pusher.com:80/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
 
-    it("should connect to wss://ws.pusherapp.com:443 by default when forcing TLS", function() {
+    it("should connect to wss://ws-mt1.pusher.com:443 by default when forcing TLS", function() {
       pusher = new Pusher("foobar", { forceTLS: true });
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(
-        "wss://ws.pusherapp.com:443/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
+        "wss://ws-mt1.pusher.com:443/app/foobar?protocol=7&client=js&version="+version+"&flash=false"
       );
     });
 

@@ -55,7 +55,6 @@ export default class TransportStrategy implements Strategy {
     }
 
     var connected = false;
-
     var transport = this.transport.createConnection(
       this.name,
       this.priority,
