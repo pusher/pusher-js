@@ -1,12 +1,16 @@
+import Timeline from '../timeline/timeline';
 interface StrategyOptions {
-    ttl?: number;
-    timeline?: any;
-    useTLS?: boolean;
-    ignoreNullOrigin?: boolean;
-    loop?: boolean;
     failFast?: boolean;
+    hostNonTLS?: string;
+    hostTLS?: string;
+    httpPath?: string;
+    ignoreNullOrigin?: boolean;
+    key?: string;
+    loop?: boolean;
+    timeline?: Timeline;
     timeout?: number;
     timeoutLimit?: number;
-    key?: string;
+    ttl?: number;
+    useTLS?: boolean;
 }
 export default StrategyOptions;

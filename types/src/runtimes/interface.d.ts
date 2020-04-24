@@ -9,6 +9,8 @@ import HTTPRequest from '../core/http/http_request';
 import Pusher from '../core/pusher';
 import JSONPRequest from './web/dom/jsonp_request';
 import Strategy from '../core/strategies/strategy';
+import { Config } from '../core/config';
+import StrategyOptions from '../core/strategies/strategy_options';
 interface Runtime {
     setup(PusherClass: {
         new (key: string, options: any): Pusher;
@@ -21,7 +23,7 @@ interface Runtime {
     createXHR(): Ajax;
     createWebSocket(url: string): Socket;
     getNetwork(): Reachability;
-    getDefaultStrategy(config: any, defineTransport: Function): Strategy;
+    getDefaultStrategy(config: Config, options: StrategyOptions, defineTransport: Function): Strategy;
     Transports: TransportsTable;
     getWebSocketAPI(): new (url: string) => Socket;
     getXHRAPI(): new () => Ajax;
