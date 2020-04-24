@@ -5,6 +5,7 @@ import Factory from '../utils/factory';
 import Pusher from '../pusher';
 import Logger from '../logger';
 import * as Errors from '../errors';
+import urlStore from '../utils/url_store';
 
 /** Handles a channel map. */
 export default class Channels {
@@ -67,10 +68,9 @@ function createChannel(name: string, pusher: Pusher): Channel {
     if (pusher.config.nacl) {
       return Factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
     }
-    throw new Errors.UnsupportedFeature(
-      // TODO insert link to docs here
-      'Trying to subscribe to encrypted channel but no nacl provided'
-    );
+    let errMsg = 'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
+    let suffix = urlStore.buildLogSuffix('encryptedChannelSupport')
+    throw new Errors.UnsupportedFeature(`${errMsg}. ${suffix}`)
   } else if (name.indexOf('private-') === 0) {
     return Factory.createPrivateChannel(name, pusher);
   } else if (name.indexOf('presence-') === 0) {
