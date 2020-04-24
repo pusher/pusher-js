@@ -91,12 +91,11 @@ describe('Config', function() {
     }
   });
 
-  it('should set nacl on config if no valid nacl provided', function() {
-    spyOn(nacl.secretbox, 'open').andReturn(nacl.randomBytes(25))
-    let config = Config.getConfig({ nacl: nacl });
+  it('should not set nacl on config if no nacl provided', function() {
+    let config = Config.getConfig({});
     expect('nacl' in config).toEqual(false)
   });
-  it('should set nacl on config if valid nacl provided', function() {
+  it('should set nacl on config if nacl provided', function() {
     let config = Config.getConfig({ nacl: nacl });
     expect(config.nacl).toEqual(nacl);
   });
