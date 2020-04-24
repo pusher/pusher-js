@@ -10,7 +10,7 @@ if (process.env.CI) {
 if (process.env.WORKER === 'true') {
   config = require('./config.worker')(config, 'integration');
   config.webpack.resolve.alias = {
-    pusher_integration: 'core',
+    pusher_integration: 'core/pusher',
     integration: 'node/integration'
   }
   if (process.env.CI) config.browsers = ['bs_chrome_74'];
