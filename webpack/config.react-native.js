@@ -5,6 +5,7 @@ var version = require('../package').version;
 var objectAssign = require('object-assign-deep');
 var configShared = require('./config.shared');
 var webpack = require('webpack');
+var buffer = require('buffer');
 
 module.exports = objectAssign({}, configShared, {
   entry: {
@@ -16,7 +17,6 @@ module.exports = objectAssign({}, configShared, {
     path: path.join(__dirname, '../dist/react-native'),
     filename: 'pusher.js'
   },
-  target: 'node',
   externals: {
     // our Reachability implementation needs to reference @react-native-community/netinfo.
     '@react-native-community/netinfo': '@react-native-community/netinfo'
@@ -27,6 +27,9 @@ module.exports = objectAssign({}, configShared, {
   plugins: [
     new webpack.DefinePlugin({
       RUNTIME: JSON.stringify('react-native')
+    }),
+    new webpack.ProvidePlugin({
+      buffer: 'buffer'
     })
   ]
 });
