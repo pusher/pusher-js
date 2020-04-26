@@ -55,53 +55,53 @@ describe("Host/Port Configuration", function() {
       window.SockJS = _SockJS;
     });
 
-    it("should connect to http://sockjs.pusher.com:80 by default", function() {
+    it("should connect to https://sockjs.pusher.com:443 by default", function() {
       pusher = new Pusher("foobar");
-      pusher.connect();
-
-      expect(window.SockJS).toHaveBeenCalledWith(
-        "http://sockjs.pusher.com:80/pusher",
-        null,
-        { js_path: cdn_http + '/' + version + '/sockjs'+dependency_suffix+'.js',
-          ignore_null_origin: undefined
-        }
-      );
-    });
-
-    it("should connect to https://sockjs.pusher.com:443 by default when forcing TLS", function() {
-      pusher = new Pusher("foobar", { forceTLS: true });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
         "https://sockjs.pusher.com:443/pusher",
         null,
-        { js_path: cdn_https+'/'+version +'/sockjs'+dependency_suffix+'.js',
+        { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
     });
 
-    it("should connect using httpHost and httpPort when specified in options", function() {
-      pusher = new Pusher("foobar", { httpHost: "example.com", httpPort: 1999 });
+    it("should connect to http://sockjs.pusher.com:80 by default when forceTLS disabled", function() {
+      pusher = new Pusher("foobar", { forceTLS: false });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "http://example.com:1999/pusher",
+        "http://sockjs.pusher.com:80/pusher",
         null,
-        { js_path: cdn_http + '/' + version + '/sockjs'+dependency_suffix+'.js',
+        { js_path: cdn_http+'/'+version +'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
     });
 
-    it("should connect using httpHost and httpsPort when specified in options and forcing TLS", function() {
-      pusher = new Pusher("foobar", { httpHost: "example.org", httpsPort: 4444, forceTLS: true });
+    it("should connect using httpHost and httpsPort when specified in options", function() {
+      pusher = new Pusher("foobar", { httpHost: "example.com", httpsPort: 1999 });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "https://example.org:4444/pusher",
+        "https://example.com:1999/pusher",
         null,
-        { js_path: cdn_https+'/'+version +'/sockjs'+dependency_suffix+'.js',
+        { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
+          ignore_null_origin: undefined
+        }
+      );
+    });
+
+    it("should connect using httpHost and httpPort when specified in options and forceTLS disabled", function() {
+      pusher = new Pusher("foobar", { httpHost: "example.org", httpPort: 4444, forceTLS: false });
+      pusher.connect();
+
+      expect(window.SockJS).toHaveBeenCalledWith(
+        "http://example.org:4444/pusher",
+        null,
+        { js_path: cdn_http+'/'+version +'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
@@ -112,9 +112,9 @@ describe("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "http://sockjs.pusher.com:80/test",
+        "https://sockjs.pusher.com:443/test",
         null,
-        { js_path: cdn_http + '/' + version + '/sockjs'+dependency_suffix+'.js',
+        { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
         }
       );
