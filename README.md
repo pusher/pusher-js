@@ -211,8 +211,7 @@ There are a number of configuration parameters which can be set for the client, 
 ```js
 const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
-  authEndpoint: 'http://example.com/pusher/auth',
-  forceTLS: true
+  authEndpoint: 'http://example.com/pusher/auth'
 });
 ```
 
@@ -220,7 +219,7 @@ For most users, there is little need to change these. See [client API guide](htt
 
 #### `forceTLS` (Boolean)
 
-Forces the connection to use TLS.
+Forces the connection to use TLS. When set to `false` the library will attempt non-TLS connections first. Defaults to `true`.
 
 #### `authEndpoint` (String)
 

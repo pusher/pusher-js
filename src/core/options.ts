@@ -14,7 +14,6 @@ export interface Options {
   disableStats?: boolean;
   disabledTransports?: Transport[];
   enabledTransports?: Transport[];
-  encrypted?: boolean;
   forceTLS?: boolean;
   httpHost?: string;
   httpPath?: string;

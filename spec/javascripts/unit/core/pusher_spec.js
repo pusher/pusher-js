@@ -144,12 +144,12 @@ describe("Pusher", function() {
 
     describe("TLS", function() {
       it("should be off by default", function() {
-        expect(pusher.shouldUseTLS()).toBe(false);
+        expect(pusher.shouldUseTLS()).toBe(true);
       });
 
-      it("should be on when 'forceTLS' parameter is passed", function() {
-        var pusher = new Pusher("foo", { forceTLS: true });
-        expect(pusher.shouldUseTLS()).toBe(true);
+      it("should be off when 'forceTLS' parameter is passed", function() {
+        var pusher = new Pusher("foo", { forceTLS: false });
+        expect(pusher.shouldUseTLS()).toBe(false);
       });
 
       if (TestEnv === "web") {
@@ -159,7 +159,7 @@ describe("Pusher", function() {
               protocol: "https:"
             }
           });
-          var pusher = new Pusher("foo");
+          var pusher = new Pusher("foo", { forceTLS: false });
           expect(pusher.shouldUseTLS()).toBe(true);
         });
       }

@@ -111,12 +111,10 @@ function getWebsocketHostFromCluster(cluster: string): string {
 function shouldUseTLS(opts: Options): boolean {
   if (Runtime.getProtocol() === 'https:') {
     return true;
-  } else if (opts.forceTLS === true) {
-    return true;
-  } else {
-    // `encrypted` deprecated in favor of `forceTLS`
-    return Boolean(opts.encrypted);
+  } else if (opts.forceTLS === false) {
+    return false;
   }
+  return true;
 }
 
 // if enableStats is set take the value
