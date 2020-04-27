@@ -3,8 +3,9 @@ const Logger = require('core/logger').default;
 const EncryptedChannel = require("core/channels/encrypted_channel").default;
 const Factory = require("core/utils/factory").default;
 const Mocks = require("mocks");
-const tweetNacl = require("tweetnacl");
-const tweetNaclUtil = require("tweetnacl-util");
+const nacl = require("tweetnacl");
+const utf8 = require("@stablelib/utf8");
+const base64 = require("@stablelib/base64");
 
 describe("EncryptedChannel", function() {
   var pusher;
@@ -12,20 +13,20 @@ describe("EncryptedChannel", function() {
   var authorizer;
   var factorySpy;
   const secretUTF8 = "It Must Be Thirty Two Characters";
-  const secretBytes = tweetNaclUtil.decodeUTF8(secretUTF8);
-  const secretBase64 = tweetNaclUtil.encodeBase64(secretBytes);
+  const secretBytes = utf8.encode(secretUTF8);
+  const secretBase64 = base64.encode(secretBytes);
   const nonceUTF8 = "aaaaaaaaaaaaaaaaaaaaaaaa";
-  const nonceBytes = tweetNaclUtil.decodeUTF8(nonceUTF8);
-  const nonceBase64 = tweetNaclUtil.encodeBase64(nonceBytes);
+  const nonceBytes = utf8.encode(nonceUTF8);
+  const nonceBase64 = base64.encode(nonceBytes);
   const testEncrypt = function(payload) {
-    let payloadBytes = tweetNaclUtil.decodeUTF8(JSON.stringify(payload));
-    let bytes = tweetNacl.secretbox(payloadBytes, nonceBytes, secretBytes);
-    return tweetNaclUtil.encodeBase64(bytes);
+    let payloadBytes = utf8.encode(JSON.stringify(payload));
+    let bytes = nacl.secretbox(payloadBytes, nonceBytes, secretBytes);
+    return base64.encode(bytes);
   };
 
   beforeEach(function() {
     pusher = Mocks.getPusher({ foo: "bar" });
-    channel = new EncryptedChannel("private-encrypted-test", pusher);
+    channel = new EncryptedChannel("private-encrypted-test", pusher, nacl);
     authorizer = Mocks.getAuthorizer();
     factorySpy = spyOn(Factory, "createAuthorizer").andReturn(authorizer);
   });
@@ -83,7 +84,7 @@ describe("EncryptedChannel", function() {
             return authorizer;
           }
         });
-        channel = new EncryptedChannel("private-test-custom-auth", pusher);
+        channel = new EncryptedChannel("private-test-custom-auth", pusher, nacl);
         factorySpy.andCallThrough();
       });
 
@@ -250,12 +251,12 @@ describe("EncryptedChannel", function() {
 
       describe("with rotated shared key", function() {
         const newSecretUTF8 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-        const newSecretBytes = tweetNaclUtil.decodeUTF8(newSecretUTF8);
-        const newSecretBase64 = tweetNaclUtil.encodeBase64(newSecretBytes);
+        const newSecretBytes = utf8.encode(newSecretUTF8);
+        const newSecretBase64 = base64.encode(newSecretBytes);
         const newTestEncrypt = function(payload) {
-          let payloadBytes = tweetNaclUtil.decodeUTF8(JSON.stringify(payload));
-          let bytes = tweetNacl.secretbox(payloadBytes, nonceBytes, newSecretBytes);
-          return tweetNaclUtil.encodeBase64(bytes);
+          let payloadBytes = utf8.encode(JSON.stringify(payload));
+          let bytes = nacl.secretbox(payloadBytes, nonceBytes, newSecretBytes);
+          return base64.encode(bytes);
         };
 
         beforeEach(function() {
@@ -286,7 +287,7 @@ describe("EncryptedChannel", function() {
         it("should log a warning if it fails to decrypt event after requesting a new key from the auth endpoint", function() {
           let encryptedPayload = {
             nonce: nonceBase64,
-            ciphertext: tweetNaclUtil.encodeBase64('garbage-ciphertext')
+            ciphertext: base64.encode('garbage-ciphertext')
           };
           spyOn(Logger, "error");
           channel.handleEvent({

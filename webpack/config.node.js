@@ -4,6 +4,9 @@ var configShared = require('./config.shared');
 var webpack = require('webpack');
 
 module.exports = objectAssign({}, configShared, {
+  entry: {
+    pusher: './src/core/pusher-with-encryption.js'
+  },
   output: {
     library: 'Pusher',
     libraryTarget: 'commonjs2',

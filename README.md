@@ -55,6 +55,17 @@ The following topics are covered:
 
 If you're using Pusher Channels on a web page, you can install the library via:
 
+#### Encrypted Channel Support
+
+The encryption primitives required to power [encrypted
+channels](https://github.com/pusher/pusher-js#encrypted-channels) increase the
+bundle size quite significantly. In order to keep bundle sizes down, the
+default web and worker builds of pusher-js no longer support [encrypted
+channels](https://github.com/pusher/pusher-js#encrypted-channels).
+
+If you'd like to make use of encrypted-channels, you need to import the
+`with-encryption` builds as described below.
+
 #### Yarn (or NPM)
 
 You can use any NPM-compatible package manager, including NPM itself and Yarn.
@@ -69,16 +80,34 @@ Then:
 import Pusher from 'pusher-js';
 ```
 
+If you'd like to use encrypted channels:
+
+```javascript
+import Pusher from 'pusher-js/with-encryption';
+```
+
 Or, if you're not using ES6 modules:
 
 ```javascript
 const Pusher = require('pusher-js');
 ```
 
+If you'd like to use encrypted channels:
+
+```javascript
+const Pusher = require('pusher-js/with-encryption');
+```
+
 #### CDN
 
 ```html
 <script src="https://js.pusher.com/5.1/pusher.min.js"></script>
+```
+
+If you'd like to use encrypted channels:
+
+```html
+<script src="https://js.pusher.com/5.1/pusher-with-encryption.min.js"></script>
 ```
 
 You can also use [cdnjs.com](https://cdnjs.com/libraries/pusher) if you prefer
@@ -144,6 +173,12 @@ You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the 
 
 ```javascript
 importScripts('https://js.pusher.com/5.1/pusher.worker.min.js');
+```
+
+If you'd like to use encrypted channels:
+
+```javascript
+importScripts('https://js.pusher.com/5.1/pusher-with-encryption.worker.min.js');
 ```
 
 ### Node.js

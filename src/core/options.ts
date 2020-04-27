@@ -1,6 +1,7 @@
 import ConnectionManager from './connection/connection_manager';
 import { AuthOptions, AuthorizerGenerator } from './auth/options';
 import { AuthTransport, Transport } from './config';
+import * as nacl from 'tweetnacl';
 
 export interface Options {
   activityTimeout?: number;
@@ -20,6 +21,7 @@ export interface Options {
   httpPort?: number;
   httpsPort?: number;
   ignoreNullOrigin?: boolean;
+  nacl?: nacl;
   pongTimeout?: number;
   statsHost?: string;
   timelineParams?: any;

@@ -13,6 +13,10 @@ const urlStore = {
     },
     triggeringClientEvents: {
       path: '/docs/client_api_guide/client_events#trigger-events'
+    },
+    encryptedChannelSupport: {
+      fullUrl:
+        'https://github.com/pusher/pusher-js/tree/cc491015371a4bde5743d1c87a0fbac0feb53195#encrypted-channel-support'
     }
   }
 };

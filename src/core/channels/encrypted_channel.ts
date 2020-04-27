@@ -1,11 +1,13 @@
 import PrivateChannel from './private_channel';
 import * as Errors from '../errors';
 import Logger from '../logger';
-import { secretbox } from 'tweetnacl';
-import { encodeUTF8, decodeBase64 } from 'tweetnacl-util';
+import Pusher from '../pusher';
+import { decode as encodeUTF8 } from '@stablelib/utf8';
+import { decode as decodeBase64 } from '@stablelib/base64';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
 import { AuthorizerCallback } from '../auth/options';
+import * as nacl from 'tweetnacl';
 
 /** Extends private channels to provide encrypted channel interface.
  *
@@ -14,6 +16,12 @@ import { AuthorizerCallback } from '../auth/options';
  */
 export default class EncryptedChannel extends PrivateChannel {
   key: Uint8Array = null;
+  nacl: nacl;
+
+  constructor(name: string, pusher: Pusher, nacl: nacl) {
+    super(name, pusher);
+    this.nacl = nacl;
+  }
 
   /** Authorizes the connection to use the channel.
    *
@@ -76,21 +84,21 @@ export default class EncryptedChannel extends PrivateChannel {
       return;
     }
     let cipherText = decodeBase64(data.ciphertext);
-    if (cipherText.length < secretbox.overheadLength) {
+    if (cipherText.length < this.nacl.secretbox.overheadLength) {
       Logger.error(
-        `Expected encrypted event ciphertext length to be ${secretbox.overheadLength}, got: ${cipherText.length}`
+        `Expected encrypted event ciphertext length to be ${this.nacl.secretbox.overheadLength}, got: ${cipherText.length}`
       );
       return;
     }
     let nonce = decodeBase64(data.nonce);
-    if (nonce.length < secretbox.nonceLength) {
+    if (nonce.length < this.nacl.secretbox.nonceLength) {
       Logger.error(
-        `Expected encrypted event nonce length to be ${secretbox.nonceLength}, got: ${nonce.length}`
+        `Expected encrypted event nonce length to be ${this.nacl.secretbox.nonceLength}, got: ${nonce.length}`
       );
       return;
     }
 
-    let bytes = secretbox.open(cipherText, nonce, this.key);
+    let bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
     if (bytes === null) {
       Logger.debug(
         'Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...'
@@ -104,7 +112,7 @@ export default class EncryptedChannel extends PrivateChannel {
           );
           return;
         }
-        bytes = secretbox.open(cipherText, nonce, this.key);
+        bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
         if (bytes === null) {
           Logger.error(
             `Failed to decrypt event with new key. Dropping encrypted event`

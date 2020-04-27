@@ -21,7 +21,7 @@ module.exports = objectAssign({}, baseConfig, {
   resolve: {
     modules: ['spec/javascripts/helpers'],
     alias: {
-      pusher_integration: 'core/index',
+      pusher_integration: 'core/pusher.js',
       integration: 'node/integration',
       'dom/dependencies': 'node/mock-dom-dependencies',
       'dom/dependency_loader': 'node/mock-dom-dependencies'

@@ -2,6 +2,7 @@ var TestEnv = require('testenv');
 var Config = require('core/config');
 var Defaults = require('core/defaults').default;
 var Runtime = require('runtime').default;
+var nacl = require('tweetnacl')
 
 describe('Config', function() {
   beforeEach(function() {
@@ -88,6 +89,15 @@ describe('Config', function() {
         expect(config.useTLS).toEqual(true);
       });
     }
+  });
+
+  it('should not set nacl on config if no nacl provided', function() {
+    let config = Config.getConfig({});
+    expect('nacl' in config).toEqual(false)
+  });
+  it('should set nacl on config if nacl provided', function() {
+    let config = Config.getConfig({ nacl: nacl });
+    expect(config.nacl).toEqual(nacl);
   });
 });
 function getStaticDefaultKeys() {

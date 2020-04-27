@@ -2,6 +2,8 @@ import { Options } from './options';
 import Defaults from './defaults';
 import { AuthOptions, AuthorizerGenerator } from './auth/options';
 import Runtime from 'runtime';
+import * as nacl from 'tweetnacl';
+import Logger from './logger';
 
 export type AuthTransport = 'ajax' | 'jsonp';
 export type Transport =
@@ -40,6 +42,7 @@ export interface Config {
   disabledTransports?: Transport[];
   enabledTransports?: Transport[];
   ignoreNullOrigin?: boolean;
+  nacl?: nacl;
   timelineParams?: any;
 }
 
@@ -74,6 +77,9 @@ export function getConfig(opts: Options): Config {
   if ('ignoreNullOrigin' in opts)
     config.ignoreNullOrigin = opts.ignoreNullOrigin;
   if ('timelineParams' in opts) config.timelineParams = opts.timelineParams;
+  if ('nacl' in opts) {
+    config.nacl = opts.nacl;
+  }
 
   return config;
 }

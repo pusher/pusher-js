@@ -23,6 +23,7 @@ import Ajax from '../http/ajax';
 import Channels from '../channels/channels';
 import Pusher from '../pusher';
 import { Config } from '../config';
+import * as nacl from 'tweetnacl';
 
 var Factory = {
   createChannels(): Channels {
@@ -48,8 +49,12 @@ var Factory = {
     return new PresenceChannel(name, pusher);
   },
 
-  createEncryptedChannel(name: string, pusher: Pusher): EncryptedChannel {
-    return new EncryptedChannel(name, pusher);
+  createEncryptedChannel(
+    name: string,
+    pusher: Pusher,
+    nacl: nacl
+  ): EncryptedChannel {
+    return new EncryptedChannel(name, pusher, nacl);
   },
 
   createTimelineSender(timeline: Timeline, options: TimelineSenderOptions) {

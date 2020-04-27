@@ -5,6 +5,8 @@ import Factory from '../utils/factory';
 import Pusher from '../pusher';
 import Logger from '../logger';
 import * as Errors from '../errors';
+import urlStore from '../utils/url_store';
+
 /** Handles a channel map. */
 export default class Channels {
   channels: ChannelTable;
@@ -63,13 +65,13 @@ export default class Channels {
 
 function createChannel(name: string, pusher: Pusher): Channel {
   if (name.indexOf('private-encrypted-') === 0) {
-    // We don't currently support e2e on React Native due to missing functionality.
-    // This prevents any weirdness by just returning a private channel instead.
-    if (RUNTIME === 'react-native') {
-      let errorMsg = `Encrypted channels are not yet supported when using React Native builds.`;
-      throw new Errors.UnsupportedFeature(errorMsg);
+    if (pusher.config.nacl) {
+      return Factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
     }
-    return Factory.createEncryptedChannel(name, pusher);
+    let errMsg =
+      'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
+    let suffix = urlStore.buildLogSuffix('encryptedChannelSupport');
+    throw new Errors.UnsupportedFeature(`${errMsg}. ${suffix}`);
   } else if (name.indexOf('private-') === 0) {
     return Factory.createPrivateChannel(name, pusher);
   } else if (name.indexOf('presence-') === 0) {
