@@ -1,5 +1,25 @@
 # Changelog
 
+## 6.0.0 (2020-04-27)
+
+[CHANGED] The default builds for web and worker no longer support encrypted
+channels. To use encrypted channels in web/worker you must import
+`pusher-js/with-encryption` or use the
+`pusher-with-encryption.js`/`pusher-with-encryption.min.js` bundles
+
+[CHANGED] `forceTLS` now defaults to `true`
+
+[REMOVED] the `encrypted` option - this was deprecated in `4.3.0`. The library
+defaults to TLS anyway. Setting `encrypted` to `false` will **NOT** change
+behaviour
+
+[FIXED] `activityTimeout` and `pongTimeout` options now work as described in
+the docs.
+
+[NEW] Typescript declarations for react-native
+
+[NEW] Support for encrypted-channels in react-native and workers
+
 ## 5.1.1 (2020-02-12)
 
 [FIXED] An issue with typescript declarations which caused builds to fail on

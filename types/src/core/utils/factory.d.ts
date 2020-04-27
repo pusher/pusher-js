@@ -15,13 +15,14 @@ import ConnectionManager from '../connection/connection_manager';
 import ConnectionManagerOptions from '../connection/connection_manager_options';
 import Channels from '../channels/channels';
 import Pusher from '../pusher';
+import * as nacl from 'tweetnacl';
 declare var Factory: {
     createChannels(): Channels;
     createConnectionManager(key: string, options: ConnectionManagerOptions): ConnectionManager;
     createChannel(name: string, pusher: Pusher): Channel;
     createPrivateChannel(name: string, pusher: Pusher): PrivateChannel;
     createPresenceChannel(name: string, pusher: Pusher): PresenceChannel;
-    createEncryptedChannel(name: string, pusher: Pusher): EncryptedChannel;
+    createEncryptedChannel(name: string, pusher: Pusher, nacl: nacl): EncryptedChannel;
     createTimelineSender(timeline: Timeline, options: TimelineSenderOptions): TimelineSender;
     createAuthorizer(channel: Channel, options: AuthorizerOptions): Authorizer;
     createHandshake(transport: TransportConnection, callback: (HandshakePayload: any) => void): Handshake;
