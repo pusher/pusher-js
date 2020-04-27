@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v5.0.3
+ * Pusher JavaScript Library v6.0.0
  * https://pusher.com/
  *
  * Copyright 2017, Pusher
@@ -90,7 +90,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 20);
+/******/ 	return __webpack_require__(__webpack_require__.s = 21);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -104,7 +104,7 @@ module.exports = require("util");
 /***/ (function(module, exports, __webpack_require__) {
 
 /* eslint-disable node/no-deprecated-api */
-var buffer = __webpack_require__(21)
+var buffer = __webpack_require__(22)
 var Buffer = buffer.Buffer
 
 // alternative to using Object.keys for old browsers
@@ -124,8 +124,6 @@ if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow)
 function SafeBuffer (arg, encodingOrOffset, length) {
   return Buffer(arg, encodingOrOffset, length)
 }
-
-SafeBuffer.prototype = Object.create(Buffer.prototype)
 
 // Copy static methods from Buffer
 copyProps(Buffer, SafeBuffer)
@@ -177,11 +175,11 @@ SafeBuffer.allocUnsafeSlow = function (size) {
 
 
 var Buffer  = __webpack_require__(1).Buffer,
-    Emitter = __webpack_require__(22).EventEmitter,
+    Emitter = __webpack_require__(23).EventEmitter,
     util    = __webpack_require__(0),
-    streams = __webpack_require__(23),
-    Headers = __webpack_require__(10),
-    Reader  = __webpack_require__(24);
+    streams = __webpack_require__(24),
+    Headers = __webpack_require__(9),
+    Reader  = __webpack_require__(25);
 
 var Base = function(request, url, options) {
   Emitter.call(this);
@@ -371,6 +369,2359 @@ module.exports = Base;
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("crypto");
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// Protocol references:
+//
+// * http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75
+// * http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76
+// * http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17
+
+var Base   = __webpack_require__(2),
+    Client = __webpack_require__(26),
+    Server = __webpack_require__(37);
+
+var Driver = {
+  client: function(url, options) {
+    options = options || {};
+    if (options.masking === undefined) options.masking = true;
+    return new Client(url, options);
+  },
+
+  server: function(options) {
+    options = options || {};
+    if (options.requireMasking === undefined) options.requireMasking = true;
+    return new Server(options);
+  },
+
+  http: function() {
+    return Server.http.apply(Server, arguments);
+  },
+
+  isSecureRequest: function(request) {
+    return Server.isSecureRequest(request);
+  },
+
+  isWebSocket: function(request) {
+    return Base.isWebSocket(request);
+  },
+
+  validateOptions: function(options, validKeys) {
+    Base.validateOptions(options, validKeys);
+  }
+};
+
+module.exports = Driver;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("stream");
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+module.exports = require("url");
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+var Event = function(eventType, options) {
+  this.type = eventType;
+  for (var key in options)
+    this[key] = options[key];
+};
+
+Event.prototype.initEvent = function(eventType, canBubble, cancelable) {
+  this.type       = eventType;
+  this.bubbles    = canBubble;
+  this.cancelable = cancelable;
+};
+
+Event.prototype.stopPropagation = function() {};
+Event.prototype.preventDefault  = function() {};
+
+Event.CAPTURING_PHASE = 1;
+Event.AT_TARGET       = 2;
+Event.BUBBLING_PHASE  = 3;
+
+module.exports = Event;
+
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// Copyright (C) 2016 Dmitry Chestnykh
+// MIT License. See LICENSE file for details.
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Package base64 implements Base64 encoding and decoding.
+ */
+// Invalid character used in decoding to indicate
+// that the character to decode is out of range of
+// alphabet and cannot be decoded.
+var INVALID_BYTE = 256;
+/**
+ * Implements standard Base64 encoding.
+ *
+ * Operates in constant time.
+ */
+var Coder = /** @class */ (function () {
+    // TODO(dchest): methods to encode chunk-by-chunk.
+    function Coder(_paddingCharacter) {
+        if (_paddingCharacter === void 0) { _paddingCharacter = "="; }
+        this._paddingCharacter = _paddingCharacter;
+    }
+    Coder.prototype.encodedLength = function (length) {
+        if (!this._paddingCharacter) {
+            return (length * 8 + 5) / 6 | 0;
+        }
+        return (length + 2) / 3 * 4 | 0;
+    };
+    Coder.prototype.encode = function (data) {
+        var out = "";
+        var i = 0;
+        for (; i < data.length - 2; i += 3) {
+            var c = (data[i] << 16) | (data[i + 1] << 8) | (data[i + 2]);
+            out += this._encodeByte((c >>> 3 * 6) & 63);
+            out += this._encodeByte((c >>> 2 * 6) & 63);
+            out += this._encodeByte((c >>> 1 * 6) & 63);
+            out += this._encodeByte((c >>> 0 * 6) & 63);
+        }
+        var left = data.length - i;
+        if (left > 0) {
+            var c = (data[i] << 16) | (left === 2 ? data[i + 1] << 8 : 0);
+            out += this._encodeByte((c >>> 3 * 6) & 63);
+            out += this._encodeByte((c >>> 2 * 6) & 63);
+            if (left === 2) {
+                out += this._encodeByte((c >>> 1 * 6) & 63);
+            }
+            else {
+                out += this._paddingCharacter || "";
+            }
+            out += this._paddingCharacter || "";
+        }
+        return out;
+    };
+    Coder.prototype.maxDecodedLength = function (length) {
+        if (!this._paddingCharacter) {
+            return (length * 6 + 7) / 8 | 0;
+        }
+        return length / 4 * 3 | 0;
+    };
+    Coder.prototype.decodedLength = function (s) {
+        return this.maxDecodedLength(s.length - this._getPaddingLength(s));
+    };
+    Coder.prototype.decode = function (s) {
+        if (s.length === 0) {
+            return new Uint8Array(0);
+        }
+        var paddingLength = this._getPaddingLength(s);
+        var length = s.length - paddingLength;
+        var out = new Uint8Array(this.maxDecodedLength(length));
+        var op = 0;
+        var i = 0;
+        var haveBad = 0;
+        var v0 = 0, v1 = 0, v2 = 0, v3 = 0;
+        for (; i < length - 4; i += 4) {
+            v0 = this._decodeChar(s.charCodeAt(i + 0));
+            v1 = this._decodeChar(s.charCodeAt(i + 1));
+            v2 = this._decodeChar(s.charCodeAt(i + 2));
+            v3 = this._decodeChar(s.charCodeAt(i + 3));
+            out[op++] = (v0 << 2) | (v1 >>> 4);
+            out[op++] = (v1 << 4) | (v2 >>> 2);
+            out[op++] = (v2 << 6) | v3;
+            haveBad |= v0 & INVALID_BYTE;
+            haveBad |= v1 & INVALID_BYTE;
+            haveBad |= v2 & INVALID_BYTE;
+            haveBad |= v3 & INVALID_BYTE;
+        }
+        if (i < length - 1) {
+            v0 = this._decodeChar(s.charCodeAt(i));
+            v1 = this._decodeChar(s.charCodeAt(i + 1));
+            out[op++] = (v0 << 2) | (v1 >>> 4);
+            haveBad |= v0 & INVALID_BYTE;
+            haveBad |= v1 & INVALID_BYTE;
+        }
+        if (i < length - 2) {
+            v2 = this._decodeChar(s.charCodeAt(i + 2));
+            out[op++] = (v1 << 4) | (v2 >>> 2);
+            haveBad |= v2 & INVALID_BYTE;
+        }
+        if (i < length - 3) {
+            v3 = this._decodeChar(s.charCodeAt(i + 3));
+            out[op++] = (v2 << 6) | v3;
+            haveBad |= v3 & INVALID_BYTE;
+        }
+        if (haveBad !== 0) {
+            throw new Error("Base64Coder: incorrect characters for decoding");
+        }
+        return out;
+    };
+    // Standard encoding have the following encoded/decoded ranges,
+    // which we need to convert between.
+    //
+    // ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789  +   /
+    // Index:   0 - 25                    26 - 51              52 - 61   62  63
+    // ASCII:  65 - 90                    97 - 122             48 - 57   43  47
+    //
+    // Encode 6 bits in b into a new character.
+    Coder.prototype._encodeByte = function (b) {
+        // Encoding uses constant time operations as follows:
+        //
+        // 1. Define comparison of A with B using (A - B) >>> 8:
+        //          if A > B, then result is positive integer
+        //          if A <= B, then result is 0
+        //
+        // 2. Define selection of C or 0 using bitwise AND: X & C:
+        //          if X == 0, then result is 0
+        //          if X != 0, then result is C
+        //
+        // 3. Start with the smallest comparison (b >= 0), which is always
+        //    true, so set the result to the starting ASCII value (65).
+        //
+        // 4. Continue comparing b to higher ASCII values, and selecting
+        //    zero if comparison isn't true, otherwise selecting a value
+        //    to add to result, which:
+        //
+        //          a) undoes the previous addition
+        //          b) provides new value to add
+        //
+        var result = b;
+        // b >= 0
+        result += 65;
+        // b > 25
+        result += ((25 - b) >>> 8) & ((0 - 65) - 26 + 97);
+        // b > 51
+        result += ((51 - b) >>> 8) & ((26 - 97) - 52 + 48);
+        // b > 61
+        result += ((61 - b) >>> 8) & ((52 - 48) - 62 + 43);
+        // b > 62
+        result += ((62 - b) >>> 8) & ((62 - 43) - 63 + 47);
+        return String.fromCharCode(result);
+    };
+    // Decode a character code into a byte.
+    // Must return 256 if character is out of alphabet range.
+    Coder.prototype._decodeChar = function (c) {
+        // Decoding works similar to encoding: using the same comparison
+        // function, but now it works on ranges: result is always incremented
+        // by value, but this value becomes zero if the range is not
+        // satisfied.
+        //
+        // Decoding starts with invalid value, 256, which is then
+        // subtracted when the range is satisfied. If none of the ranges
+        // apply, the function returns 256, which is then checked by
+        // the caller to throw error.
+        var result = INVALID_BYTE; // start with invalid character
+        // c == 43 (c > 42 and c < 44)
+        result += (((42 - c) & (c - 44)) >>> 8) & (-INVALID_BYTE + c - 43 + 62);
+        // c == 47 (c > 46 and c < 48)
+        result += (((46 - c) & (c - 48)) >>> 8) & (-INVALID_BYTE + c - 47 + 63);
+        // c > 47 and c < 58
+        result += (((47 - c) & (c - 58)) >>> 8) & (-INVALID_BYTE + c - 48 + 52);
+        // c > 64 and c < 91
+        result += (((64 - c) & (c - 91)) >>> 8) & (-INVALID_BYTE + c - 65 + 0);
+        // c > 96 and c < 123
+        result += (((96 - c) & (c - 123)) >>> 8) & (-INVALID_BYTE + c - 97 + 26);
+        return result;
+    };
+    Coder.prototype._getPaddingLength = function (s) {
+        var paddingLength = 0;
+        if (this._paddingCharacter) {
+            for (var i = s.length - 1; i >= 0; i--) {
+                if (s[i] !== this._paddingCharacter) {
+                    break;
+                }
+                paddingLength++;
+            }
+            if (s.length < 4 || paddingLength > 2) {
+                throw new Error("Base64Coder: incorrect padding");
+            }
+        }
+        return paddingLength;
+    };
+    return Coder;
+}());
+exports.Coder = Coder;
+var stdCoder = new Coder();
+function encode(data) {
+    return stdCoder.encode(data);
+}
+exports.encode = encode;
+function decode(s) {
+    return stdCoder.decode(s);
+}
+exports.decode = decode;
+/**
+ * Implements URL-safe Base64 encoding.
+ * (Same as Base64, but '+' is replaced with '-', and '/' with '_').
+ *
+ * Operates in constant time.
+ */
+var URLSafeCoder = /** @class */ (function (_super) {
+    __extends(URLSafeCoder, _super);
+    function URLSafeCoder() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    // URL-safe encoding have the following encoded/decoded ranges:
+    //
+    // ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789  -   _
+    // Index:   0 - 25                    26 - 51              52 - 61   62  63
+    // ASCII:  65 - 90                    97 - 122             48 - 57   45  95
+    //
+    URLSafeCoder.prototype._encodeByte = function (b) {
+        var result = b;
+        // b >= 0
+        result += 65;
+        // b > 25
+        result += ((25 - b) >>> 8) & ((0 - 65) - 26 + 97);
+        // b > 51
+        result += ((51 - b) >>> 8) & ((26 - 97) - 52 + 48);
+        // b > 61
+        result += ((61 - b) >>> 8) & ((52 - 48) - 62 + 45);
+        // b > 62
+        result += ((62 - b) >>> 8) & ((62 - 45) - 63 + 95);
+        return String.fromCharCode(result);
+    };
+    URLSafeCoder.prototype._decodeChar = function (c) {
+        var result = INVALID_BYTE;
+        // c == 45 (c > 44 and c < 46)
+        result += (((44 - c) & (c - 46)) >>> 8) & (-INVALID_BYTE + c - 45 + 62);
+        // c == 95 (c > 94 and c < 96)
+        result += (((94 - c) & (c - 96)) >>> 8) & (-INVALID_BYTE + c - 95 + 63);
+        // c > 47 and c < 58
+        result += (((47 - c) & (c - 58)) >>> 8) & (-INVALID_BYTE + c - 48 + 52);
+        // c > 64 and c < 91
+        result += (((64 - c) & (c - 91)) >>> 8) & (-INVALID_BYTE + c - 65 + 0);
+        // c > 96 and c < 123
+        result += (((96 - c) & (c - 123)) >>> 8) & (-INVALID_BYTE + c - 97 + 26);
+        return result;
+    };
+    return URLSafeCoder;
+}(Coder));
+exports.URLSafeCoder = URLSafeCoder;
+var urlSafeCoder = new URLSafeCoder();
+function encodeURLSafe(data) {
+    return urlSafeCoder.encode(data);
+}
+exports.encodeURLSafe = encodeURLSafe;
+function decodeURLSafe(s) {
+    return urlSafeCoder.decode(s);
+}
+exports.decodeURLSafe = decodeURLSafe;
+exports.encodedLength = function (length) {
+    return stdCoder.encodedLength(length);
+};
+exports.maxDecodedLength = function (length) {
+    return stdCoder.maxDecodedLength(length);
+};
+exports.decodedLength = function (s) {
+    return stdCoder.decodedLength(s);
+};
+//# sourceMappingURL=base64.js.map
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Headers = function() {
+  this.clear();
+};
+
+Headers.prototype.ALLOWED_DUPLICATES = ['set-cookie', 'set-cookie2', 'warning', 'www-authenticate'];
+
+Headers.prototype.clear = function() {
+  this._sent  = {};
+  this._lines = [];
+};
+
+Headers.prototype.set = function(name, value) {
+  if (value === undefined) return;
+
+  name = this._strip(name);
+  value = this._strip(value);
+
+  var key = name.toLowerCase();
+  if (!this._sent.hasOwnProperty(key) || this.ALLOWED_DUPLICATES.indexOf(key) >= 0) {
+    this._sent[key] = true;
+    this._lines.push(name + ': ' + value + '\r\n');
+  }
+};
+
+Headers.prototype.toString = function() {
+  return this._lines.join('');
+};
+
+Headers.prototype._strip = function(string) {
+  return string.toString().replace(/^ */, '').replace(/ *$/, '');
+};
+
+module.exports = Headers;
+
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var NodeHTTPParser = __webpack_require__(27).HTTPParser,
+    Buffer         = __webpack_require__(1).Buffer;
+
+var TYPES = {
+  request:  NodeHTTPParser.REQUEST  || 'request',
+  response: NodeHTTPParser.RESPONSE || 'response'
+};
+
+var HttpParser = function(type) {
+  this._type     = type;
+  this._parser   = new NodeHTTPParser(TYPES[type]);
+  this._complete = false;
+  this.headers   = {};
+
+  var current = null,
+      self    = this;
+
+  this._parser.onHeaderField = function(b, start, length) {
+    current = b.toString('utf8', start, start + length).toLowerCase();
+  };
+
+  this._parser.onHeaderValue = function(b, start, length) {
+    var value = b.toString('utf8', start, start + length);
+
+    if (self.headers.hasOwnProperty(current))
+      self.headers[current] += ', ' + value;
+    else
+      self.headers[current] = value;
+  };
+
+  this._parser.onHeadersComplete = this._parser[NodeHTTPParser.kOnHeadersComplete] =
+  function(majorVersion, minorVersion, headers, method, pathname, statusCode) {
+    var info = arguments[0];
+
+    if (typeof info === 'object') {
+      method     = info.method;
+      pathname   = info.url;
+      statusCode = info.statusCode;
+      headers    = info.headers;
+    }
+
+    self.method     = (typeof method === 'number') ? HttpParser.METHODS[method] : method;
+    self.statusCode = statusCode;
+    self.url        = pathname;
+
+    if (!headers) return;
+
+    for (var i = 0, n = headers.length, key, value; i < n; i += 2) {
+      key   = headers[i].toLowerCase();
+      value = headers[i+1];
+      if (self.headers.hasOwnProperty(key))
+        self.headers[key] += ', ' + value;
+      else
+        self.headers[key] = value;
+    }
+
+    self._complete = true;
+  };
+};
+
+HttpParser.METHODS = {
+  0:  'DELETE',
+  1:  'GET',
+  2:  'HEAD',
+  3:  'POST',
+  4:  'PUT',
+  5:  'CONNECT',
+  6:  'OPTIONS',
+  7:  'TRACE',
+  8:  'COPY',
+  9:  'LOCK',
+  10: 'MKCOL',
+  11: 'MOVE',
+  12: 'PROPFIND',
+  13: 'PROPPATCH',
+  14: 'SEARCH',
+  15: 'UNLOCK',
+  16: 'BIND',
+  17: 'REBIND',
+  18: 'UNBIND',
+  19: 'ACL',
+  20: 'REPORT',
+  21: 'MKACTIVITY',
+  22: 'CHECKOUT',
+  23: 'MERGE',
+  24: 'M-SEARCH',
+  25: 'NOTIFY',
+  26: 'SUBSCRIBE',
+  27: 'UNSUBSCRIBE',
+  28: 'PATCH',
+  29: 'PURGE',
+  30: 'MKCALENDAR',
+  31: 'LINK',
+  32: 'UNLINK'
+};
+
+var VERSION = (process.version || '')
+              .match(/[0-9]+/g)
+              .map(function(n) { return parseInt(n, 10) });
+
+if (VERSION[0] === 0 && VERSION[1] === 12) {
+  HttpParser.METHODS[16] = 'REPORT';
+  HttpParser.METHODS[17] = 'MKACTIVITY';
+  HttpParser.METHODS[18] = 'CHECKOUT';
+  HttpParser.METHODS[19] = 'MERGE';
+  HttpParser.METHODS[20] = 'M-SEARCH';
+  HttpParser.METHODS[21] = 'NOTIFY';
+  HttpParser.METHODS[22] = 'SUBSCRIBE';
+  HttpParser.METHODS[23] = 'UNSUBSCRIBE';
+  HttpParser.METHODS[24] = 'PATCH';
+  HttpParser.METHODS[25] = 'PURGE';
+}
+
+HttpParser.prototype.isComplete = function() {
+  return this._complete;
+};
+
+HttpParser.prototype.parse = function(chunk) {
+  var consumed = this._parser.execute(chunk, 0, chunk.length);
+
+  if (typeof consumed !== 'number') {
+    this.error     = consumed;
+    this._complete = true;
+    return;
+  }
+
+  if (this._complete)
+    this.body = (consumed < chunk.length)
+              ? chunk.slice(consumed)
+              : Buffer.alloc(0);
+};
+
+module.exports = HttpParser;
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Stream      = __webpack_require__(5).Stream,
+    util        = __webpack_require__(0),
+    driver      = __webpack_require__(4),
+    EventTarget = __webpack_require__(17),
+    Event       = __webpack_require__(7);
+
+var API = function(options) {
+  options = options || {};
+  driver.validateOptions(options, ['headers', 'extensions', 'maxLength', 'ping', 'proxy', 'tls', 'ca']);
+
+  this.readable = this.writable = true;
+
+  var headers = options.headers;
+  if (headers) {
+    for (var name in headers) this._driver.setHeader(name, headers[name]);
+  }
+
+  var extensions = options.extensions;
+  if (extensions) {
+    [].concat(extensions).forEach(this._driver.addExtension, this._driver);
+  }
+
+  this._ping          = options.ping;
+  this._pingId        = 0;
+  this.readyState     = API.CONNECTING;
+  this.bufferedAmount = 0;
+  this.protocol       = '';
+  this.url            = this._driver.url;
+  this.version        = this._driver.version;
+
+  var self = this;
+
+  this._driver.on('open',    function(e) { self._open() });
+  this._driver.on('message', function(e) { self._receiveMessage(e.data) });
+  this._driver.on('close',   function(e) { self._beginClose(e.reason, e.code) });
+
+  this._driver.on('error', function(error) {
+    self._emitError(error.message);
+  });
+  this.on('error', function() {});
+
+  this._driver.messages.on('drain', function() {
+    self.emit('drain');
+  });
+
+  if (this._ping)
+    this._pingTimer = setInterval(function() {
+      self._pingId += 1;
+      self.ping(self._pingId.toString());
+    }, this._ping * 1000);
+
+  this._configureStream();
+
+  if (!this._proxy) {
+    this._stream.pipe(this._driver.io);
+    this._driver.io.pipe(this._stream);
+  }
+};
+util.inherits(API, Stream);
+
+API.CONNECTING = 0;
+API.OPEN       = 1;
+API.CLOSING    = 2;
+API.CLOSED     = 3;
+
+var instance = {
+  write: function(data) {
+    return this.send(data);
+  },
+
+  end: function(data) {
+    if (data !== undefined) this.send(data);
+    this.close();
+  },
+
+  pause: function() {
+    return this._driver.messages.pause();
+  },
+
+  resume: function() {
+    return this._driver.messages.resume();
+  },
+
+  send: function(data) {
+    if (this.readyState > API.OPEN) return false;
+    if (!(data instanceof Buffer)) data = String(data);
+    return this._driver.messages.write(data);
+  },
+
+  ping: function(message, callback) {
+    if (this.readyState > API.OPEN) return false;
+    return this._driver.ping(message, callback);
+  },
+
+  close: function() {
+    if (this.readyState !== API.CLOSED) this.readyState = API.CLOSING;
+    this._driver.close();
+  },
+
+  _configureStream: function() {
+    var self = this;
+
+    this._stream.setTimeout(0);
+    this._stream.setNoDelay(true);
+
+    ['close', 'end'].forEach(function(event) {
+      this._stream.on(event, function() { self._finalizeClose() });
+    }, this);
+
+    this._stream.on('error', function(error) {
+      self._emitError('Network error: ' + self.url + ': ' + error.message);
+      self._finalizeClose();
+    });
+  },
+
+ _open: function() {
+    if (this.readyState !== API.CONNECTING) return;
+
+    this.readyState = API.OPEN;
+    this.protocol = this._driver.protocol || '';
+
+    var event = new Event('open');
+    event.initEvent('open', false, false);
+    this.dispatchEvent(event);
+  },
+
+  _receiveMessage: function(data) {
+    if (this.readyState > API.OPEN) return false;
+
+    if (this.readable) this.emit('data', data);
+
+    var event = new Event('message', {data: data});
+    event.initEvent('message', false, false);
+    this.dispatchEvent(event);
+  },
+
+  _emitError: function(message) {
+    if (this.readyState >= API.CLOSING) return;
+
+    var event = new Event('error', {message: message});
+    event.initEvent('error', false, false);
+    this.dispatchEvent(event);
+  },
+
+  _beginClose: function(reason, code) {
+    if (this.readyState === API.CLOSED) return;
+    this.readyState = API.CLOSING;
+
+    if (this._stream) {
+      this._stream.end();
+      if (!this._stream.readable) this._finalizeClose();
+    }
+    this._closeParams = [reason, code];
+  },
+
+  _finalizeClose: function() {
+    if (this.readyState === API.CLOSED) return;
+    this.readyState = API.CLOSED;
+
+    if (this._pingTimer) clearInterval(this._pingTimer);
+    if (this._stream) this._stream.end();
+
+    if (this.readable) this.emit('end');
+    this.readable = this.writable = false;
+
+    var reason = this._closeParams ? this._closeParams[0] : '',
+        code   = this._closeParams ? this._closeParams[1] : 1006;
+
+    var event = new Event('close', {code: code, reason: reason});
+    event.initEvent('close', false, false);
+    this.dispatchEvent(event);
+  }
+};
+
+for (var method in instance) API.prototype[method] = instance[method];
+for (var key in EventTarget) API.prototype[key] = EventTarget[key];
+
+module.exports = API;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// Copyright (C) 2016 Dmitry Chestnykh
+// MIT License. See LICENSE file for details.
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Package utf8 implements UTF-8 encoding and decoding.
+ */
+var INVALID_UTF16 = "utf8: invalid string";
+var INVALID_UTF8 = "utf8: invalid source encoding";
+/**
+ * Encodes the given string into UTF-8 byte array.
+ * Throws if the source string has invalid UTF-16 encoding.
+ */
+function encode(s) {
+    // Calculate result length and allocate output array.
+    // encodedLength() also validates string and throws errors,
+    // so we don't need repeat validation here.
+    var arr = new Uint8Array(encodedLength(s));
+    var pos = 0;
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        if (c < 0x80) {
+            arr[pos++] = c;
+        }
+        else if (c < 0x800) {
+            arr[pos++] = 0xc0 | c >> 6;
+            arr[pos++] = 0x80 | c & 0x3f;
+        }
+        else if (c < 0xd800) {
+            arr[pos++] = 0xe0 | c >> 12;
+            arr[pos++] = 0x80 | (c >> 6) & 0x3f;
+            arr[pos++] = 0x80 | c & 0x3f;
+        }
+        else {
+            i++; // get one more character
+            c = (c & 0x3ff) << 10;
+            c |= s.charCodeAt(i) & 0x3ff;
+            c += 0x10000;
+            arr[pos++] = 0xf0 | c >> 18;
+            arr[pos++] = 0x80 | (c >> 12) & 0x3f;
+            arr[pos++] = 0x80 | (c >> 6) & 0x3f;
+            arr[pos++] = 0x80 | c & 0x3f;
+        }
+    }
+    return arr;
+}
+exports.encode = encode;
+/**
+ * Returns the number of bytes required to encode the given string into UTF-8.
+ * Throws if the source string has invalid UTF-16 encoding.
+ */
+function encodedLength(s) {
+    var result = 0;
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        if (c < 0x80) {
+            result += 1;
+        }
+        else if (c < 0x800) {
+            result += 2;
+        }
+        else if (c < 0xd800) {
+            result += 3;
+        }
+        else if (c <= 0xdfff) {
+            if (i >= s.length - 1) {
+                throw new Error(INVALID_UTF16);
+            }
+            i++; // "eat" next character
+            result += 4;
+        }
+        else {
+            throw new Error(INVALID_UTF16);
+        }
+    }
+    return result;
+}
+exports.encodedLength = encodedLength;
+/**
+ * Decodes the given byte array from UTF-8 into a string.
+ * Throws if encoding is invalid.
+ */
+function decode(arr) {
+    var chars = [];
+    for (var i = 0; i < arr.length; i++) {
+        var b = arr[i];
+        if (b & 0x80) {
+            var min = void 0;
+            if (b < 0xe0) {
+                // Need 1 more byte.
+                if (i >= arr.length) {
+                    throw new Error(INVALID_UTF8);
+                }
+                var n1 = arr[++i];
+                if ((n1 & 0xc0) !== 0x80) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b = (b & 0x1f) << 6 | (n1 & 0x3f);
+                min = 0x80;
+            }
+            else if (b < 0xf0) {
+                // Need 2 more bytes.
+                if (i >= arr.length - 1) {
+                    throw new Error(INVALID_UTF8);
+                }
+                var n1 = arr[++i];
+                var n2 = arr[++i];
+                if ((n1 & 0xc0) !== 0x80 || (n2 & 0xc0) !== 0x80) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b = (b & 0x0f) << 12 | (n1 & 0x3f) << 6 | (n2 & 0x3f);
+                min = 0x800;
+            }
+            else if (b < 0xf8) {
+                // Need 3 more bytes.
+                if (i >= arr.length - 2) {
+                    throw new Error(INVALID_UTF8);
+                }
+                var n1 = arr[++i];
+                var n2 = arr[++i];
+                var n3 = arr[++i];
+                if ((n1 & 0xc0) !== 0x80 || (n2 & 0xc0) !== 0x80 || (n3 & 0xc0) !== 0x80) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b = (b & 0x0f) << 18 | (n1 & 0x3f) << 12 | (n2 & 0x3f) << 6 | (n3 & 0x3f);
+                min = 0x10000;
+            }
+            else {
+                throw new Error(INVALID_UTF8);
+            }
+            if (b < min || (b >= 0xd800 && b <= 0xdfff)) {
+                throw new Error(INVALID_UTF8);
+            }
+            if (b >= 0x10000) {
+                // Surrogate pair.
+                if (b > 0x10ffff) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b -= 0x10000;
+                chars.push(String.fromCharCode(0xd800 | (b >> 10)));
+                b = 0xdc00 | (b & 0x3ff);
+            }
+        }
+        chars.push(String.fromCharCode(b));
+    }
+    return chars.join("");
+}
+exports.decode = decode;
+//# sourceMappingURL=utf8.js.map
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Buffer     = __webpack_require__(1).Buffer,
+    crypto     = __webpack_require__(3),
+    util       = __webpack_require__(0),
+    Extensions = __webpack_require__(29),
+    Base       = __webpack_require__(2),
+    Frame      = __webpack_require__(34),
+    Message    = __webpack_require__(35);
+
+var Hybi = function(request, url, options) {
+  Base.apply(this, arguments);
+
+  this._extensions     = new Extensions();
+  this._stage          = 0;
+  this._masking        = this._options.masking;
+  this._protocols      = this._options.protocols || [];
+  this._requireMasking = this._options.requireMasking;
+  this._pingCallbacks  = {};
+
+  if (typeof this._protocols === 'string')
+    this._protocols = this._protocols.split(/ *, */);
+
+  if (!this._request) return;
+
+  var protos    = this._request.headers['sec-websocket-protocol'],
+      supported = this._protocols;
+
+  if (protos !== undefined) {
+    if (typeof protos === 'string') protos = protos.split(/ *, */);
+    this.protocol = protos.filter(function(p) { return supported.indexOf(p) >= 0 })[0];
+  }
+
+  this.version = 'hybi-' + Hybi.VERSION;
+};
+util.inherits(Hybi, Base);
+
+Hybi.VERSION = '13';
+
+Hybi.mask = function(payload, mask, offset) {
+  if (!mask || mask.length === 0) return payload;
+  offset = offset || 0;
+
+  for (var i = 0, n = payload.length - offset; i < n; i++) {
+    payload[offset + i] = payload[offset + i] ^ mask[i % 4];
+  }
+  return payload;
+};
+
+Hybi.generateAccept = function(key) {
+  var sha1 = crypto.createHash('sha1');
+  sha1.update(key + Hybi.GUID);
+  return sha1.digest('base64');
+};
+
+Hybi.GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
+
+var instance = {
+  FIN:    0x80,
+  MASK:   0x80,
+  RSV1:   0x40,
+  RSV2:   0x20,
+  RSV3:   0x10,
+  OPCODE: 0x0F,
+  LENGTH: 0x7F,
+
+  OPCODES: {
+    continuation: 0,
+    text:         1,
+    binary:       2,
+    close:        8,
+    ping:         9,
+    pong:         10
+  },
+
+  OPCODE_CODES:    [0, 1, 2, 8, 9, 10],
+  MESSAGE_OPCODES: [0, 1, 2],
+  OPENING_OPCODES: [1, 2],
+
+  ERRORS: {
+    normal_closure:       1000,
+    going_away:           1001,
+    protocol_error:       1002,
+    unacceptable:         1003,
+    encoding_error:       1007,
+    policy_violation:     1008,
+    too_large:            1009,
+    extension_error:      1010,
+    unexpected_condition: 1011
+  },
+
+  ERROR_CODES:        [1000, 1001, 1002, 1003, 1007, 1008, 1009, 1010, 1011],
+  DEFAULT_ERROR_CODE: 1000,
+  MIN_RESERVED_ERROR: 3000,
+  MAX_RESERVED_ERROR: 4999,
+
+  // http://www.w3.org/International/questions/qa-forms-utf-8.en.php
+  UTF8_MATCH: /^([\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})*$/,
+
+  addExtension: function(extension) {
+    this._extensions.add(extension);
+    return true;
+  },
+
+  parse: function(chunk) {
+    this._reader.put(chunk);
+    var buffer = true;
+    while (buffer) {
+      switch (this._stage) {
+        case 0:
+          buffer = this._reader.read(1);
+          if (buffer) this._parseOpcode(buffer[0]);
+          break;
+
+        case 1:
+          buffer = this._reader.read(1);
+          if (buffer) this._parseLength(buffer[0]);
+          break;
+
+        case 2:
+          buffer = this._reader.read(this._frame.lengthBytes);
+          if (buffer) this._parseExtendedLength(buffer);
+          break;
+
+        case 3:
+          buffer = this._reader.read(4);
+          if (buffer) {
+            this._stage = 4;
+            this._frame.maskingKey = buffer;
+          }
+          break;
+
+        case 4:
+          buffer = this._reader.read(this._frame.length);
+          if (buffer) {
+            this._stage = 0;
+            this._emitFrame(buffer);
+          }
+          break;
+
+        default:
+          buffer = null;
+      }
+    }
+  },
+
+  text: function(message) {
+    if (this.readyState > 1) return false;
+    return this.frame(message, 'text');
+  },
+
+  binary: function(message) {
+    if (this.readyState > 1) return false;
+    return this.frame(message, 'binary');
+  },
+
+  ping: function(message, callback) {
+    if (this.readyState > 1) return false;
+    message = message || '';
+    if (callback) this._pingCallbacks[message] = callback;
+    return this.frame(message, 'ping');
+  },
+
+  pong: function(message) {
+      if (this.readyState > 1) return false;
+      message = message ||'';
+      return this.frame(message, 'pong');
+  },
+
+  close: function(reason, code) {
+    reason = reason || '';
+    code   = code   || this.ERRORS.normal_closure;
+
+    if (this.readyState <= 0) {
+      this.readyState = 3;
+      this.emit('close', new Base.CloseEvent(code, reason));
+      return true;
+    } else if (this.readyState === 1) {
+      this.readyState = 2;
+      this._extensions.close(function() { this.frame(reason, 'close', code) }, this);
+      return true;
+    } else {
+      return false;
+    }
+  },
+
+  frame: function(buffer, type, code) {
+    if (this.readyState <= 0) return this._queue([buffer, type, code]);
+    if (this.readyState > 2) return false;
+
+    if (buffer instanceof Array)    buffer = Buffer.from(buffer);
+    if (typeof buffer === 'number') buffer = buffer.toString();
+
+    var message = new Message(),
+        isText  = (typeof buffer === 'string'),
+        payload, copy;
+
+    message.rsv1   = message.rsv2 = message.rsv3 = false;
+    message.opcode = this.OPCODES[type || (isText ? 'text' : 'binary')];
+
+    payload = isText ? Buffer.from(buffer, 'utf8') : buffer;
+
+    if (code) {
+      copy = payload;
+      payload = Buffer.allocUnsafe(2 + copy.length);
+      payload.writeUInt16BE(code, 0);
+      copy.copy(payload, 2);
+    }
+    message.data = payload;
+
+    var onMessageReady = function(message) {
+      var frame = new Frame();
+
+      frame.final   = true;
+      frame.rsv1    = message.rsv1;
+      frame.rsv2    = message.rsv2;
+      frame.rsv3    = message.rsv3;
+      frame.opcode  = message.opcode;
+      frame.masked  = !!this._masking;
+      frame.length  = message.data.length;
+      frame.payload = message.data;
+
+      if (frame.masked) frame.maskingKey = crypto.randomBytes(4);
+
+      this._sendFrame(frame);
+    };
+
+    if (this.MESSAGE_OPCODES.indexOf(message.opcode) >= 0)
+      this._extensions.processOutgoingMessage(message, function(error, message) {
+        if (error) return this._fail('extension_error', error.message);
+        onMessageReady.call(this, message);
+      }, this);
+    else
+      onMessageReady.call(this, message);
+
+    return true;
+  },
+
+  _sendFrame: function(frame) {
+    var length = frame.length,
+        header = (length <= 125) ? 2 : (length <= 65535 ? 4 : 10),
+        offset = header + (frame.masked ? 4 : 0),
+        buffer = Buffer.allocUnsafe(offset + length),
+        masked = frame.masked ? this.MASK : 0;
+
+    buffer[0] = (frame.final ? this.FIN : 0) |
+                (frame.rsv1 ? this.RSV1 : 0) |
+                (frame.rsv2 ? this.RSV2 : 0) |
+                (frame.rsv3 ? this.RSV3 : 0) |
+                frame.opcode;
+
+    if (length <= 125) {
+      buffer[1] = masked | length;
+    } else if (length <= 65535) {
+      buffer[1] = masked | 126;
+      buffer.writeUInt16BE(length, 2);
+    } else {
+      buffer[1] = masked | 127;
+      buffer.writeUInt32BE(Math.floor(length / 0x100000000), 2);
+      buffer.writeUInt32BE(length % 0x100000000, 6);
+    }
+
+    frame.payload.copy(buffer, offset);
+
+    if (frame.masked) {
+      frame.maskingKey.copy(buffer, header);
+      Hybi.mask(buffer, frame.maskingKey, offset);
+    }
+
+    this._write(buffer);
+  },
+
+  _handshakeResponse: function() {
+    var secKey  = this._request.headers['sec-websocket-key'],
+        version = this._request.headers['sec-websocket-version'];
+
+    if (version !== Hybi.VERSION)
+      throw new Error('Unsupported WebSocket version: ' + version);
+
+    if (typeof secKey !== 'string')
+      throw new Error('Missing handshake request header: Sec-WebSocket-Key');
+
+    this._headers.set('Upgrade', 'websocket');
+    this._headers.set('Connection', 'Upgrade');
+    this._headers.set('Sec-WebSocket-Accept', Hybi.generateAccept(secKey));
+
+    if (this.protocol) this._headers.set('Sec-WebSocket-Protocol', this.protocol);
+
+    var extensions = this._extensions.generateResponse(this._request.headers['sec-websocket-extensions']);
+    if (extensions) this._headers.set('Sec-WebSocket-Extensions', extensions);
+
+    var start   = 'HTTP/1.1 101 Switching Protocols',
+        headers = [start, this._headers.toString(), ''];
+
+    return Buffer.from(headers.join('\r\n'), 'utf8');
+  },
+
+  _shutdown: function(code, reason, error) {
+    delete this._frame;
+    delete this._message;
+    this._stage = 5;
+
+    var sendCloseFrame = (this.readyState === 1);
+    this.readyState = 2;
+
+    this._extensions.close(function() {
+      if (sendCloseFrame) this.frame(reason, 'close', code);
+      this.readyState = 3;
+      if (error) this.emit('error', new Error(reason));
+      this.emit('close', new Base.CloseEvent(code, reason));
+    }, this);
+  },
+
+  _fail: function(type, message) {
+    if (this.readyState > 1) return;
+    this._shutdown(this.ERRORS[type], message, true);
+  },
+
+  _parseOpcode: function(octet) {
+    var rsvs = [this.RSV1, this.RSV2, this.RSV3].map(function(rsv) {
+      return (octet & rsv) === rsv;
+    });
+
+    var frame = this._frame = new Frame();
+
+    frame.final  = (octet & this.FIN) === this.FIN;
+    frame.rsv1   = rsvs[0];
+    frame.rsv2   = rsvs[1];
+    frame.rsv3   = rsvs[2];
+    frame.opcode = (octet & this.OPCODE);
+
+    this._stage = 1;
+
+    if (!this._extensions.validFrameRsv(frame))
+      return this._fail('protocol_error',
+          'One or more reserved bits are on: reserved1 = ' + (frame.rsv1 ? 1 : 0) +
+          ', reserved2 = ' + (frame.rsv2 ? 1 : 0) +
+          ', reserved3 = ' + (frame.rsv3 ? 1 : 0));
+
+    if (this.OPCODE_CODES.indexOf(frame.opcode) < 0)
+      return this._fail('protocol_error', 'Unrecognized frame opcode: ' + frame.opcode);
+
+    if (this.MESSAGE_OPCODES.indexOf(frame.opcode) < 0 && !frame.final)
+      return this._fail('protocol_error', 'Received fragmented control frame: opcode = ' + frame.opcode);
+
+    if (this._message && this.OPENING_OPCODES.indexOf(frame.opcode) >= 0)
+      return this._fail('protocol_error', 'Received new data frame but previous continuous frame is unfinished');
+  },
+
+  _parseLength: function(octet) {
+    var frame = this._frame;
+    frame.masked = (octet & this.MASK) === this.MASK;
+    frame.length = (octet & this.LENGTH);
+
+    if (frame.length >= 0 && frame.length <= 125) {
+      this._stage = frame.masked ? 3 : 4;
+      if (!this._checkFrameLength()) return;
+    } else {
+      this._stage = 2;
+      frame.lengthBytes = (frame.length === 126 ? 2 : 8);
+    }
+
+    if (this._requireMasking && !frame.masked)
+      return this._fail('unacceptable', 'Received unmasked frame but masking is required');
+  },
+
+  _parseExtendedLength: function(buffer) {
+    var frame = this._frame;
+    frame.length = this._readUInt(buffer);
+
+    this._stage = frame.masked ? 3 : 4;
+
+    if (this.MESSAGE_OPCODES.indexOf(frame.opcode) < 0 && frame.length > 125)
+      return this._fail('protocol_error', 'Received control frame having too long payload: ' + frame.length);
+
+    if (!this._checkFrameLength()) return;
+  },
+
+  _checkFrameLength: function() {
+    var length = this._message ? this._message.length : 0;
+
+    if (length + this._frame.length > this._maxLength) {
+      this._fail('too_large', 'WebSocket frame length too large');
+      return false;
+    } else {
+      return true;
+    }
+  },
+
+  _emitFrame: function(buffer) {
+    var frame   = this._frame,
+        payload = frame.payload = Hybi.mask(buffer, frame.maskingKey),
+        opcode  = frame.opcode,
+        message,
+        code, reason,
+        callbacks, callback;
+
+    delete this._frame;
+
+    if (opcode === this.OPCODES.continuation) {
+      if (!this._message) return this._fail('protocol_error', 'Received unexpected continuation frame');
+      this._message.pushFrame(frame);
+    }
+
+    if (opcode === this.OPCODES.text || opcode === this.OPCODES.binary) {
+      this._message = new Message();
+      this._message.pushFrame(frame);
+    }
+
+    if (frame.final && this.MESSAGE_OPCODES.indexOf(opcode) >= 0)
+      return this._emitMessage(this._message);
+
+    if (opcode === this.OPCODES.close) {
+      code   = (payload.length >= 2) ? payload.readUInt16BE(0) : null;
+      reason = (payload.length > 2) ? this._encode(payload.slice(2)) : null;
+
+      if (!(payload.length === 0) &&
+          !(code !== null && code >= this.MIN_RESERVED_ERROR && code <= this.MAX_RESERVED_ERROR) &&
+          this.ERROR_CODES.indexOf(code) < 0)
+        code = this.ERRORS.protocol_error;
+
+      if (payload.length > 125 || (payload.length > 2 && !reason))
+        code = this.ERRORS.protocol_error;
+
+      this._shutdown(code || this.DEFAULT_ERROR_CODE, reason || '');
+    }
+
+    if (opcode === this.OPCODES.ping) {
+      this.frame(payload, 'pong');
+      this.emit('ping', new Base.PingEvent(payload.toString()))
+    }
+
+    if (opcode === this.OPCODES.pong) {
+      callbacks = this._pingCallbacks;
+      message   = this._encode(payload);
+      callback  = callbacks[message];
+
+      delete callbacks[message];
+      if (callback) callback()
+
+      this.emit('pong', new Base.PongEvent(payload.toString()))
+    }
+  },
+
+  _emitMessage: function(message) {
+    var message = this._message;
+    message.read();
+
+    delete this._message;
+
+    this._extensions.processIncomingMessage(message, function(error, message) {
+      if (error) return this._fail('extension_error', error.message);
+
+      var payload = message.data;
+      if (message.opcode === this.OPCODES.text) payload = this._encode(payload);
+
+      if (payload === null)
+        return this._fail('encoding_error', 'Could not decode a text frame as UTF-8');
+      else
+        this.emit('message', new Base.MessageEvent(payload));
+    }, this);
+  },
+
+  _encode: function(buffer) {
+    try {
+      var string = buffer.toString('binary', 0, buffer.length);
+      if (!this.UTF8_MATCH.test(string)) return null;
+    } catch (e) {}
+    return buffer.toString('utf8', 0, buffer.length);
+  },
+
+  _readUInt: function(buffer) {
+    if (buffer.length === 2) return buffer.readUInt16BE(0);
+
+    return buffer.readUInt32BE(0) * 0x100000000 +
+           buffer.readUInt32BE(4);
+  }
+};
+
+for (var key in instance)
+  Hybi.prototype[key] = instance[key];
+
+module.exports = Hybi;
+
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var RingBuffer = function(bufferSize) {
+  this._bufferSize = bufferSize;
+  this.clear();
+};
+
+RingBuffer.prototype.clear = function() {
+  this._buffer     = new Array(this._bufferSize);
+  this._ringOffset = 0;
+  this._ringSize   = this._bufferSize;
+  this._head       = 0;
+  this._tail       = 0;
+  this.length      = 0;
+};
+
+RingBuffer.prototype.push = function(value) {
+  var expandBuffer = false,
+      expandRing   = false;
+
+  if (this._ringSize < this._bufferSize) {
+    expandBuffer = (this._tail === 0);
+  } else if (this._ringOffset === this._ringSize) {
+    expandBuffer = true;
+    expandRing   = (this._tail === 0);
+  }
+
+  if (expandBuffer) {
+    this._tail       = this._bufferSize;
+    this._buffer     = this._buffer.concat(new Array(this._bufferSize));
+    this._bufferSize = this._buffer.length;
+
+    if (expandRing)
+      this._ringSize = this._bufferSize;
+  }
+
+  this._buffer[this._tail] = value;
+  this.length += 1;
+  if (this._tail < this._ringSize) this._ringOffset += 1;
+  this._tail = (this._tail + 1) % this._bufferSize;
+};
+
+RingBuffer.prototype.peek = function() {
+  if (this.length === 0) return void 0;
+  return this._buffer[this._head];
+};
+
+RingBuffer.prototype.shift = function() {
+  if (this.length === 0) return void 0;
+
+  var value = this._buffer[this._head];
+  this._buffer[this._head] = void 0;
+  this.length -= 1;
+  this._ringOffset -= 1;
+
+  if (this._ringOffset === 0 && this.length > 0) {
+    this._head       = this._ringSize;
+    this._ringOffset = this.length;
+    this._ringSize   = this._bufferSize;
+  } else {
+    this._head = (this._head + 1) % this._ringSize;
+  }
+  return value;
+};
+
+module.exports = RingBuffer;
+
+
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var RingBuffer = __webpack_require__(14);
+
+var Pledge = function() {
+  this._complete  = false;
+  this._callbacks = new RingBuffer(Pledge.QUEUE_SIZE);
+};
+
+Pledge.QUEUE_SIZE = 4;
+
+Pledge.all = function(list) {
+  var pledge  = new Pledge(),
+      pending = list.length,
+      n       = pending;
+
+  if (pending === 0) pledge.done();
+
+  while (n--) list[n].then(function() {
+    pending -= 1;
+    if (pending === 0) pledge.done();
+  });
+  return pledge;
+};
+
+Pledge.prototype.then = function(callback) {
+  if (this._complete) callback();
+  else this._callbacks.push(callback);
+};
+
+Pledge.prototype.done = function() {
+  this._complete = true;
+  var callbacks = this._callbacks, callback;
+  while (callback = callbacks.shift()) callback();
+};
+
+module.exports = Pledge;
+
+
+/***/ }),
+/* 16 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Buffer = __webpack_require__(1).Buffer,
+    Base   = __webpack_require__(2),
+    util   = __webpack_require__(0);
+
+var Draft75 = function(request, url, options) {
+  Base.apply(this, arguments);
+  this._stage  = 0;
+  this.version = 'hixie-75';
+
+  this._headers.set('Upgrade', 'WebSocket');
+  this._headers.set('Connection', 'Upgrade');
+  this._headers.set('WebSocket-Origin', this._request.headers.origin);
+  this._headers.set('WebSocket-Location', this.url);
+};
+util.inherits(Draft75, Base);
+
+var instance = {
+  close: function() {
+    if (this.readyState === 3) return false;
+    this.readyState = 3;
+    this.emit('close', new Base.CloseEvent(null, null));
+    return true;
+  },
+
+  parse: function(chunk) {
+    if (this.readyState > 1) return;
+
+    this._reader.put(chunk);
+
+    this._reader.eachByte(function(octet) {
+      var message;
+
+      switch (this._stage) {
+        case -1:
+          this._body.push(octet);
+          this._sendHandshakeBody();
+          break;
+
+        case 0:
+          this._parseLeadingByte(octet);
+          break;
+
+        case 1:
+          this._length = (octet & 0x7F) + 128 * this._length;
+
+          if (this._closing && this._length === 0) {
+            return this.close();
+          }
+          else if ((octet & 0x80) !== 0x80) {
+            if (this._length === 0) {
+              this._stage = 0;
+            }
+            else {
+              this._skipped = 0;
+              this._stage   = 2;
+            }
+          }
+          break;
+
+        case 2:
+          if (octet === 0xFF) {
+            this._stage = 0;
+            message = Buffer.from(this._buffer).toString('utf8', 0, this._buffer.length);
+            this.emit('message', new Base.MessageEvent(message));
+          }
+          else {
+            if (this._length) {
+              this._skipped += 1;
+              if (this._skipped === this._length)
+                this._stage = 0;
+            } else {
+              this._buffer.push(octet);
+              if (this._buffer.length > this._maxLength) return this.close();
+            }
+          }
+          break;
+      }
+    }, this);
+  },
+
+  frame: function(buffer) {
+    if (this.readyState === 0) return this._queue([buffer]);
+    if (this.readyState > 1) return false;
+
+    if (typeof buffer !== 'string') buffer = buffer.toString();
+
+    var length = Buffer.byteLength(buffer),
+        frame  = Buffer.allocUnsafe(length + 2);
+
+    frame[0] = 0x00;
+    frame.write(buffer, 1);
+    frame[frame.length - 1] = 0xFF;
+
+    this._write(frame);
+    return true;
+  },
+
+  _handshakeResponse: function() {
+    var start   = 'HTTP/1.1 101 Web Socket Protocol Handshake',
+        headers = [start, this._headers.toString(), ''];
+
+    return Buffer.from(headers.join('\r\n'), 'utf8');
+  },
+
+  _parseLeadingByte: function(octet) {
+    if ((octet & 0x80) === 0x80) {
+      this._length = 0;
+      this._stage  = 1;
+    } else {
+      delete this._length;
+      delete this._skipped;
+      this._buffer = [];
+      this._stage  = 2;
+    }
+  }
+};
+
+for (var key in instance)
+  Draft75.prototype[key] = instance[key];
+
+module.exports = Draft75;
+
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var Event = __webpack_require__(7);
+
+var EventTarget = {
+  onopen:     null,
+  onmessage:  null,
+  onerror:    null,
+  onclose:    null,
+
+  addEventListener: function(eventType, listener, useCapture) {
+    this.on(eventType, listener);
+  },
+
+  removeEventListener: function(eventType, listener, useCapture) {
+    this.removeListener(eventType, listener);
+  },
+
+  dispatchEvent: function(event) {
+    event.target = event.currentTarget = this;
+    event.eventPhase = Event.AT_TARGET;
+
+    if (this['on' + event.type])
+      this['on' + event.type](event);
+
+    this.emit(event.type, event);
+  }
+};
+
+module.exports = EventTarget;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// API references:
+//
+// * http://dev.w3.org/html5/websockets/
+// * http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-eventtarget
+// * http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-event
+
+var util   = __webpack_require__(0),
+    driver = __webpack_require__(4),
+    API    = __webpack_require__(11);
+
+var WebSocket = function(request, socket, body, protocols, options) {
+  options = options || {};
+
+  this._stream = socket;
+  this._driver = driver.http(request, {maxLength: options.maxLength, protocols: protocols});
+
+  var self = this;
+  if (!this._stream || !this._stream.writable) return;
+  if (!this._stream.readable) return this._stream.end();
+
+  var catchup = function() { self._stream.removeListener('data', catchup) };
+  this._stream.on('data', catchup);
+
+  API.call(this, options);
+
+  process.nextTick(function() {
+    self._driver.start();
+    self._driver.io.write(body);
+  });
+};
+util.inherits(WebSocket, API);
+
+WebSocket.isWebSocket = function(request) {
+  return driver.isWebSocket(request);
+};
+
+WebSocket.validateOptions = function(options, validKeys) {
+  driver.validateOptions(options, validKeys);
+};
+
+WebSocket.WebSocket   = WebSocket;
+WebSocket.Client      = __webpack_require__(39);
+WebSocket.EventSource = __webpack_require__(42);
+
+module.exports        = WebSocket;
+
+
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
+ *
+ * This can be used with JS designed for browsers to improve reuse of code and
+ * allow the use of existing libraries.
+ *
+ * Usage: include("XMLHttpRequest.js") and use XMLHttpRequest per W3C specs.
+ *
+ * @author Dan DeFelippi <dan@driverdan.com>
+ * @contributor David Ellis <d.f.ellis@ieee.org>
+ * @license MIT
+ */
+
+var Url = __webpack_require__(6);
+var spawn = __webpack_require__(43).spawn;
+var fs = __webpack_require__(44);
+
+exports.XMLHttpRequest = function() {
+  "use strict";
+
+  /**
+   * Private variables
+   */
+  var self = this;
+  var http = __webpack_require__(45);
+  var https = __webpack_require__(46);
+
+  // Holds http.js objects
+  var request;
+  var response;
+
+  // Request settings
+  var settings = {};
+
+  // Disable header blacklist.
+  // Not part of XHR specs.
+  var disableHeaderCheck = false;
+
+  // Set some default headers
+  var defaultHeaders = {
+    "User-Agent": "node-XMLHttpRequest",
+    "Accept": "*/*",
+  };
+
+  var headers = {};
+  var headersCase = {};
+
+  // These headers are not user setable.
+  // The following are allowed but banned in the spec:
+  // * user-agent
+  var forbiddenRequestHeaders = [
+    "accept-charset",
+    "accept-encoding",
+    "access-control-request-headers",
+    "access-control-request-method",
+    "connection",
+    "content-length",
+    "content-transfer-encoding",
+    "cookie",
+    "cookie2",
+    "date",
+    "expect",
+    "host",
+    "keep-alive",
+    "origin",
+    "referer",
+    "te",
+    "trailer",
+    "transfer-encoding",
+    "upgrade",
+    "via"
+  ];
+
+  // These request methods are not allowed
+  var forbiddenRequestMethods = [
+    "TRACE",
+    "TRACK",
+    "CONNECT"
+  ];
+
+  // Send flag
+  var sendFlag = false;
+  // Error flag, used when errors occur or abort is called
+  var errorFlag = false;
+
+  // Event listeners
+  var listeners = {};
+
+  /**
+   * Constants
+   */
+
+  this.UNSENT = 0;
+  this.OPENED = 1;
+  this.HEADERS_RECEIVED = 2;
+  this.LOADING = 3;
+  this.DONE = 4;
+
+  /**
+   * Public vars
+   */
+
+  // Current state
+  this.readyState = this.UNSENT;
+
+  // default ready state change handler in case one is not set or is set late
+  this.onreadystatechange = null;
+
+  // Result & response
+  this.responseText = "";
+  this.responseXML = "";
+  this.status = null;
+  this.statusText = null;
+  
+  // Whether cross-site Access-Control requests should be made using
+  // credentials such as cookies or authorization headers
+  this.withCredentials = false;
+
+  /**
+   * Private methods
+   */
+
+  /**
+   * Check if the specified header is allowed.
+   *
+   * @param string header Header to validate
+   * @return boolean False if not allowed, otherwise true
+   */
+  var isAllowedHttpHeader = function(header) {
+    return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
+  };
+
+  /**
+   * Check if the specified method is allowed.
+   *
+   * @param string method Request method to validate
+   * @return boolean False if not allowed, otherwise true
+   */
+  var isAllowedHttpMethod = function(method) {
+    return (method && forbiddenRequestMethods.indexOf(method) === -1);
+  };
+
+  /**
+   * Public methods
+   */
+
+  /**
+   * Open the connection. Currently supports local server requests.
+   *
+   * @param string method Connection method (eg GET, POST)
+   * @param string url URL for the connection.
+   * @param boolean async Asynchronous connection. Default is true.
+   * @param string user Username for basic authentication (optional)
+   * @param string password Password for basic authentication (optional)
+   */
+  this.open = function(method, url, async, user, password) {
+    this.abort();
+    errorFlag = false;
+
+    // Check for valid request method
+    if (!isAllowedHttpMethod(method)) {
+      throw new Error("SecurityError: Request method not allowed");
+    }
+
+    settings = {
+      "method": method,
+      "url": url.toString(),
+      "async": (typeof async !== "boolean" ? true : async),
+      "user": user || null,
+      "password": password || null
+    };
+
+    setState(this.OPENED);
+  };
+
+  /**
+   * Disables or enables isAllowedHttpHeader() check the request. Enabled by default.
+   * This does not conform to the W3C spec.
+   *
+   * @param boolean state Enable or disable header checking.
+   */
+  this.setDisableHeaderCheck = function(state) {
+    disableHeaderCheck = state;
+  };
+
+  /**
+   * Sets a header for the request or appends the value if one is already set.
+   *
+   * @param string header Header name
+   * @param string value Header value
+   */
+  this.setRequestHeader = function(header, value) {
+    if (this.readyState !== this.OPENED) {
+      throw new Error("INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN");
+    }
+    if (!isAllowedHttpHeader(header)) {
+      console.warn("Refused to set unsafe header \"" + header + "\"");
+      return;
+    }
+    if (sendFlag) {
+      throw new Error("INVALID_STATE_ERR: send flag is true");
+    }
+    header = headersCase[header.toLowerCase()] || header;
+    headersCase[header.toLowerCase()] = header;
+    headers[header] = headers[header] ? headers[header] + ', ' + value : value;
+  };
+
+  /**
+   * Gets a header from the server response.
+   *
+   * @param string header Name of header to get.
+   * @return string Text of the header or null if it doesn't exist.
+   */
+  this.getResponseHeader = function(header) {
+    if (typeof header === "string"
+      && this.readyState > this.OPENED
+      && response
+      && response.headers
+      && response.headers[header.toLowerCase()]
+      && !errorFlag
+    ) {
+      return response.headers[header.toLowerCase()];
+    }
+
+    return null;
+  };
+
+  /**
+   * Gets all the response headers.
+   *
+   * @return string A string with all response headers separated by CR+LF
+   */
+  this.getAllResponseHeaders = function() {
+    if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
+      return "";
+    }
+    var result = "";
+
+    for (var i in response.headers) {
+      // Cookie headers are excluded
+      if (i !== "set-cookie" && i !== "set-cookie2") {
+        result += i + ": " + response.headers[i] + "\r\n";
+      }
+    }
+    return result.substr(0, result.length - 2);
+  };
+
+  /**
+   * Gets a request header
+   *
+   * @param string name Name of header to get
+   * @return string Returns the request header or empty string if not set
+   */
+  this.getRequestHeader = function(name) {
+    if (typeof name === "string" && headersCase[name.toLowerCase()]) {
+      return headers[headersCase[name.toLowerCase()]];
+    }
+
+    return "";
+  };
+
+  /**
+   * Sends the request to the server.
+   *
+   * @param string data Optional data to send as request body.
+   */
+  this.send = function(data) {
+    if (this.readyState !== this.OPENED) {
+      throw new Error("INVALID_STATE_ERR: connection must be opened before send() is called");
+    }
+
+    if (sendFlag) {
+      throw new Error("INVALID_STATE_ERR: send has already been called");
+    }
+
+    var ssl = false, local = false;
+    var url = Url.parse(settings.url);
+    var host;
+    // Determine the server
+    switch (url.protocol) {
+      case "https:":
+        ssl = true;
+        // SSL & non-SSL both need host, no break here.
+      case "http:":
+        host = url.hostname;
+        break;
+
+      case "file:":
+        local = true;
+        break;
+
+      case undefined:
+      case null:
+      case "":
+        host = "localhost";
+        break;
+
+      default:
+        throw new Error("Protocol not supported.");
+    }
+
+    // Load files off the local filesystem (file://)
+    if (local) {
+      if (settings.method !== "GET") {
+        throw new Error("XMLHttpRequest: Only GET method is supported");
+      }
+
+      if (settings.async) {
+        fs.readFile(url.pathname, "utf8", function(error, data) {
+          if (error) {
+            self.handleError(error);
+          } else {
+            self.status = 200;
+            self.responseText = data;
+            setState(self.DONE);
+          }
+        });
+      } else {
+        try {
+          this.responseText = fs.readFileSync(url.pathname, "utf8");
+          this.status = 200;
+          setState(self.DONE);
+        } catch(e) {
+          this.handleError(e);
+        }
+      }
+
+      return;
+    }
+
+    // Default to port 80. If accessing localhost on another port be sure
+    // to use http://localhost:port/path
+    var port = url.port || (ssl ? 443 : 80);
+    // Add query string if one is used
+    var uri = url.pathname + (url.search ? url.search : "");
+
+    // Set the defaults if they haven't been set
+    for (var name in defaultHeaders) {
+      if (!headersCase[name.toLowerCase()]) {
+        headers[name] = defaultHeaders[name];
+      }
+    }
+
+    // Set the Host header or the server may reject the request
+    headers.Host = host;
+    if (!((ssl && port === 443) || port === 80)) {
+      headers.Host += ":" + url.port;
+    }
+
+    // Set Basic Auth if necessary
+    if (settings.user) {
+      if (typeof settings.password === "undefined") {
+        settings.password = "";
+      }
+      var authBuf = new Buffer(settings.user + ":" + settings.password);
+      headers.Authorization = "Basic " + authBuf.toString("base64");
+    }
+
+    // Set content length header
+    if (settings.method === "GET" || settings.method === "HEAD") {
+      data = null;
+    } else if (data) {
+      headers["Content-Length"] = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data);
+
+      if (!headers["Content-Type"]) {
+        headers["Content-Type"] = "text/plain;charset=UTF-8";
+      }
+    } else if (settings.method === "POST") {
+      // For a post with no data set Content-Length: 0.
+      // This is required by buggy servers that don't meet the specs.
+      headers["Content-Length"] = 0;
+    }
+
+    var options = {
+      host: host,
+      port: port,
+      path: uri,
+      method: settings.method,
+      headers: headers,
+      agent: false,
+      withCredentials: self.withCredentials
+    };
+
+    // Reset error flag
+    errorFlag = false;
+
+    // Handle async requests
+    if (settings.async) {
+      // Use the proper protocol
+      var doRequest = ssl ? https.request : http.request;
+
+      // Request is being sent, set send flag
+      sendFlag = true;
+
+      // As per spec, this is called here for historical reasons.
+      self.dispatchEvent("readystatechange");
+
+      // Handler for the response
+      var responseHandler = function responseHandler(resp) {
+        // Set response var to the response we got back
+        // This is so it remains accessable outside this scope
+        response = resp;
+        // Check for redirect
+        // @TODO Prevent looped redirects
+        if (response.statusCode === 301 || response.statusCode === 302 || response.statusCode === 303 || response.statusCode === 307) {
+          // Change URL to the redirect location
+          settings.url = response.headers.location;
+          var url = Url.parse(settings.url);
+          // Set host var in case it's used later
+          host = url.hostname;
+          // Options for the new request
+          var newOptions = {
+            hostname: url.hostname,
+            port: url.port,
+            path: url.path,
+            method: response.statusCode === 303 ? "GET" : settings.method,
+            headers: headers,
+            withCredentials: self.withCredentials
+          };
+
+          // Issue the new request
+          request = doRequest(newOptions, responseHandler).on("error", errorHandler);
+          request.end();
+          // @TODO Check if an XHR event needs to be fired here
+          return;
+        }
+
+        response.setEncoding("utf8");
+
+        setState(self.HEADERS_RECEIVED);
+        self.status = response.statusCode;
+
+        response.on("data", function(chunk) {
+          // Make sure there's some data
+          if (chunk) {
+            self.responseText += chunk;
+          }
+          // Don't emit state changes if the connection has been aborted.
+          if (sendFlag) {
+            setState(self.LOADING);
+          }
+        });
+
+        response.on("end", function() {
+          if (sendFlag) {
+            // Discard the end event if the connection has been aborted
+            setState(self.DONE);
+            sendFlag = false;
+          }
+        });
+
+        response.on("error", function(error) {
+          self.handleError(error);
+        });
+      };
+
+      // Error handler for the request
+      var errorHandler = function errorHandler(error) {
+        self.handleError(error);
+      };
+
+      // Create the request
+      request = doRequest(options, responseHandler).on("error", errorHandler);
+
+      // Node 0.4 and later won't accept empty data. Make sure it's needed.
+      if (data) {
+        request.write(data);
+      }
+
+      request.end();
+
+      self.dispatchEvent("loadstart");
+    } else { // Synchronous
+      // Create a temporary file for communication with the other Node process
+      var contentFile = ".node-xmlhttprequest-content-" + process.pid;
+      var syncFile = ".node-xmlhttprequest-sync-" + process.pid;
+      fs.writeFileSync(syncFile, "", "utf8");
+      // The async request the other Node process executes
+      var execString = "var http = require('http'), https = require('https'), fs = require('fs');"
+        + "var doRequest = http" + (ssl ? "s" : "") + ".request;"
+        + "var options = " + JSON.stringify(options) + ";"
+        + "var responseText = '';"
+        + "var req = doRequest(options, function(response) {"
+        + "response.setEncoding('utf8');"
+        + "response.on('data', function(chunk) {"
+        + "  responseText += chunk;"
+        + "});"
+        + "response.on('end', function() {"
+        + "fs.writeFileSync('" + contentFile + "', JSON.stringify({err: null, data: {statusCode: response.statusCode, headers: response.headers, text: responseText}}), 'utf8');"
+        + "fs.unlinkSync('" + syncFile + "');"
+        + "});"
+        + "response.on('error', function(error) {"
+        + "fs.writeFileSync('" + contentFile + "', JSON.stringify({err: error}), 'utf8');"
+        + "fs.unlinkSync('" + syncFile + "');"
+        + "});"
+        + "}).on('error', function(error) {"
+        + "fs.writeFileSync('" + contentFile + "', JSON.stringify({err: error}), 'utf8');"
+        + "fs.unlinkSync('" + syncFile + "');"
+        + "});"
+        + (data ? "req.write('" + JSON.stringify(data).slice(1,-1).replace(/'/g, "\\'") + "');":"")
+        + "req.end();";
+      // Start the other Node Process, executing this string
+      var syncProc = spawn(process.argv[0], ["-e", execString]);
+      while(fs.existsSync(syncFile)) {
+        // Wait while the sync file is empty
+      }
+      var resp = JSON.parse(fs.readFileSync(contentFile, 'utf8'));
+      // Kill the child process once the file has data
+      syncProc.stdin.end();
+      // Remove the temporary file
+      fs.unlinkSync(contentFile);
+
+      if (resp.err) {
+        self.handleError(resp.err);
+      } else {
+        response = resp.data;
+        self.status = resp.data.statusCode;
+        self.responseText = resp.data.text;
+        setState(self.DONE);
+      }
+    }
+  };
+
+  /**
+   * Called when an error is encountered to deal with it.
+   */
+  this.handleError = function(error) {
+    this.status = 0;
+    this.statusText = error;
+    this.responseText = error.stack;
+    errorFlag = true;
+    setState(this.DONE);
+    this.dispatchEvent('error');
+  };
+
+  /**
+   * Aborts a request.
+   */
+  this.abort = function() {
+    if (request) {
+      request.abort();
+      request = null;
+    }
+
+    headers = defaultHeaders;
+    this.status = 0;
+    this.responseText = "";
+    this.responseXML = "";
+
+    errorFlag = true;
+
+    if (this.readyState !== this.UNSENT
+        && (this.readyState !== this.OPENED || sendFlag)
+        && this.readyState !== this.DONE) {
+      sendFlag = false;
+      setState(this.DONE);
+    }
+    this.readyState = this.UNSENT;
+    this.dispatchEvent('abort');
+  };
+
+  /**
+   * Adds an event listener. Preferred method of binding to events.
+   */
+  this.addEventListener = function(event, callback) {
+    if (!(event in listeners)) {
+      listeners[event] = [];
+    }
+    // Currently allows duplicate callbacks. Should it?
+    listeners[event].push(callback);
+  };
+
+  /**
+   * Remove an event callback that has already been bound.
+   * Only works on the matching funciton, cannot be a copy.
+   */
+  this.removeEventListener = function(event, callback) {
+    if (event in listeners) {
+      // Filter will return a new array with the callback removed
+      listeners[event] = listeners[event].filter(function(ev) {
+        return ev !== callback;
+      });
+    }
+  };
+
+  /**
+   * Dispatch any events, including both "on" methods and events attached using addEventListener.
+   */
+  this.dispatchEvent = function(event) {
+    if (typeof self["on" + event] === "function") {
+      self["on" + event]();
+    }
+    if (event in listeners) {
+      for (var i = 0, len = listeners[event].length; i < len; i++) {
+        listeners[event][i].call(self);
+      }
+    }
+  };
+
+  /**
+   * Changes readyState and calls onreadystatechange.
+   *
+   * @param int state New state
+   */
+  var setState = function(state) {
+    if (state == self.LOADING || self.readyState !== state) {
+      self.readyState = state;
+
+      if (settings.async || self.readyState < self.OPENED || self.readyState === self.DONE) {
+        self.dispatchEvent("readystatechange");
+      }
+
+      if (self.readyState === self.DONE && !errorFlag) {
+        self.dispatchEvent("load");
+        // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
+        self.dispatchEvent("loadend");
+      }
+    }
+  };
+};
+
+
+/***/ }),
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 (function(nacl) {
@@ -2315,7 +4666,7 @@ function modL(r, x) {
     carry = 0;
     for (j = i - 32, k = i - 12; j < k; ++j) {
       x[j] += carry - 16 * x[i] * L[j - (i - 32)];
-      carry = (x[j] + 128) >> 8;
+      carry = Math.floor((x[j] + 128) / 256);
       x[j] -= carry * 256;
     }
     x[j] += carry;
@@ -2416,12 +4767,11 @@ function unpackneg(r, p) {
 }
 
 function crypto_sign_open(m, sm, n, pk) {
-  var i, mlen;
+  var i;
   var t = new Uint8Array(32), h = new Uint8Array(64);
   var p = [gf(), gf(), gf(), gf()],
       q = [gf(), gf(), gf(), gf()];
 
-  mlen = -1;
   if (n < 64) return -1;
 
   if (unpackneg(q, pk)) return -1;
@@ -2443,8 +4793,7 @@ function crypto_sign_open(m, sm, n, pk) {
   }
 
   for (i = 0; i < n; i++) m[i] = sm[i + 64];
-  mlen = n;
-  return mlen;
+  return n;
 }
 
 var crypto_secretbox_KEYBYTES = 32,
@@ -2505,7 +4854,23 @@ nacl.lowlevel = {
   crypto_sign_PUBLICKEYBYTES: crypto_sign_PUBLICKEYBYTES,
   crypto_sign_SECRETKEYBYTES: crypto_sign_SECRETKEYBYTES,
   crypto_sign_SEEDBYTES: crypto_sign_SEEDBYTES,
-  crypto_hash_BYTES: crypto_hash_BYTES
+  crypto_hash_BYTES: crypto_hash_BYTES,
+
+  gf: gf,
+  D: D,
+  L: L,
+  pack25519: pack25519,
+  unpack25519: unpack25519,
+  M: M,
+  A: A,
+  S: S,
+  Z: Z,
+  pow2523: pow2523,
+  add: add,
+  set25519: set25519,
+  modL: modL,
+  scalarmult: scalarmult,
+  scalarbase: scalarbase,
 };
 
 /* High-level API */
@@ -2738,7 +5103,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (true) {
     // Node.js.
-    crypto = __webpack_require__(5);
+    crypto = __webpack_require__(3);
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -2753,2024 +5118,26 @@ nacl.setPRNG = function(fn) {
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// Written in 2014-2016 by Dmitry Chestnykh and Devi Mandiri.
-// Public domain.
-(function(root, f) {
-  'use strict';
-  if ( true && module.exports) module.exports = f();
-  else if (root.nacl) root.nacl.util = f();
-  else {
-    root.nacl = {};
-    root.nacl.util = f();
-  }
-}(this, function() {
-  'use strict';
-
-  var util = {};
-
-  function validateBase64(s) {
-    if (!(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(s))) {
-      throw new TypeError('invalid encoding');
-    }
-  }
-
-  util.decodeUTF8 = function(s) {
-    if (typeof s !== 'string') throw new TypeError('expected string');
-    var i, d = unescape(encodeURIComponent(s)), b = new Uint8Array(d.length);
-    for (i = 0; i < d.length; i++) b[i] = d.charCodeAt(i);
-    return b;
-  };
-
-  util.encodeUTF8 = function(arr) {
-    var i, s = [];
-    for (i = 0; i < arr.length; i++) s.push(String.fromCharCode(arr[i]));
-    return decodeURIComponent(escape(s.join('')));
-  };
-
-  if (typeof atob === 'undefined') {
-    // Node.js
-
-    if (typeof Buffer.from !== 'undefined') {
-       // Node v6 and later
-      util.encodeBase64 = function (arr) { // v6 and later
-          return Buffer.from(arr).toString('base64');
-      };
-
-      util.decodeBase64 = function (s) {
-        validateBase64(s);
-        return new Uint8Array(Array.prototype.slice.call(Buffer.from(s, 'base64'), 0));
-      };
-
-    } else {
-      // Node earlier than v6
-      util.encodeBase64 = function (arr) { // v6 and later
-        return (new Buffer(arr)).toString('base64');
-      };
-
-      util.decodeBase64 = function(s) {
-        validateBase64(s);
-        return new Uint8Array(Array.prototype.slice.call(new Buffer(s, 'base64'), 0));
-      };
-    }
-
-  } else {
-    // Browsers
-
-    util.encodeBase64 = function(arr) {
-      var i, s = [], len = arr.length;
-      for (i = 0; i < len; i++) s.push(String.fromCharCode(arr[i]));
-      return btoa(s.join(''));
-    };
-
-    util.decodeBase64 = function(s) {
-      validateBase64(s);
-      var i, d = atob(s), b = new Uint8Array(d.length);
-      for (i = 0; i < d.length; i++) b[i] = d.charCodeAt(i);
-      return b;
-    };
-
-  }
-
-  return util;
-
-}));
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-module.exports = require("crypto");
-
-/***/ }),
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// Protocol references:
-//
-// * http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-75
-// * http://tools.ietf.org/html/draft-hixie-thewebsocketprotocol-76
-// * http://tools.ietf.org/html/draft-ietf-hybi-thewebsocketprotocol-17
-
-var Base   = __webpack_require__(2),
-    Client = __webpack_require__(25),
-    Server = __webpack_require__(36);
-
-var Driver = {
-  client: function(url, options) {
-    options = options || {};
-    if (options.masking === undefined) options.masking = true;
-    return new Client(url, options);
-  },
-
-  server: function(options) {
-    options = options || {};
-    if (options.requireMasking === undefined) options.requireMasking = true;
-    return new Server(options);
-  },
-
-  http: function() {
-    return Server.http.apply(Server, arguments);
-  },
-
-  isSecureRequest: function(request) {
-    return Server.isSecureRequest(request);
-  },
-
-  isWebSocket: function(request) {
-    return Base.isWebSocket(request);
-  },
-
-  validateOptions: function(options, validKeys) {
-    Base.validateOptions(options, validKeys);
-  }
-};
-
-module.exports = Driver;
-
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
-module.exports = require("stream");
-
-/***/ }),
-/* 8 */
-/***/ (function(module, exports) {
-
-module.exports = require("url");
-
-/***/ }),
-/* 9 */
-/***/ (function(module, exports) {
-
-var Event = function(eventType, options) {
-  this.type = eventType;
-  for (var key in options)
-    this[key] = options[key];
-};
-
-Event.prototype.initEvent = function(eventType, canBubble, cancelable) {
-  this.type       = eventType;
-  this.bubbles    = canBubble;
-  this.cancelable = cancelable;
-};
-
-Event.prototype.stopPropagation = function() {};
-Event.prototype.preventDefault  = function() {};
-
-Event.CAPTURING_PHASE = 1;
-Event.AT_TARGET       = 2;
-Event.BUBBLING_PHASE  = 3;
-
-module.exports = Event;
-
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Headers = function() {
-  this.clear();
-};
-
-Headers.prototype.ALLOWED_DUPLICATES = ['set-cookie', 'set-cookie2', 'warning', 'www-authenticate'];
-
-Headers.prototype.clear = function() {
-  this._sent  = {};
-  this._lines = [];
-};
-
-Headers.prototype.set = function(name, value) {
-  if (value === undefined) return;
-
-  name = this._strip(name);
-  value = this._strip(value);
-
-  var key = name.toLowerCase();
-  if (!this._sent.hasOwnProperty(key) || this.ALLOWED_DUPLICATES.indexOf(key) >= 0) {
-    this._sent[key] = true;
-    this._lines.push(name + ': ' + value + '\r\n');
-  }
-};
-
-Headers.prototype.toString = function() {
-  return this._lines.join('');
-};
-
-Headers.prototype._strip = function(string) {
-  return string.toString().replace(/^ */, '').replace(/ *$/, '');
-};
-
-module.exports = Headers;
-
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var NodeHTTPParser = __webpack_require__(26).HTTPParser,
-    Buffer         = __webpack_require__(1).Buffer;
-
-var TYPES = {
-  request:  NodeHTTPParser.REQUEST  || 'request',
-  response: NodeHTTPParser.RESPONSE || 'response'
-};
-
-var HttpParser = function(type) {
-  this._type     = type;
-  this._parser   = new NodeHTTPParser(TYPES[type]);
-  this._complete = false;
-  this.headers   = {};
-
-  var current = null,
-      self    = this;
-
-  this._parser.onHeaderField = function(b, start, length) {
-    current = b.toString('utf8', start, start + length).toLowerCase();
-  };
-
-  this._parser.onHeaderValue = function(b, start, length) {
-    var value = b.toString('utf8', start, start + length);
-
-    if (self.headers.hasOwnProperty(current))
-      self.headers[current] += ', ' + value;
-    else
-      self.headers[current] = value;
-  };
-
-  this._parser.onHeadersComplete = this._parser[NodeHTTPParser.kOnHeadersComplete] =
-  function(majorVersion, minorVersion, headers, method, pathname, statusCode) {
-    var info = arguments[0];
-
-    if (typeof info === 'object') {
-      method     = info.method;
-      pathname   = info.url;
-      statusCode = info.statusCode;
-      headers    = info.headers;
-    }
-
-    self.method     = (typeof method === 'number') ? HttpParser.METHODS[method] : method;
-    self.statusCode = statusCode;
-    self.url        = pathname;
-
-    if (!headers) return;
-
-    for (var i = 0, n = headers.length, key, value; i < n; i += 2) {
-      key   = headers[i].toLowerCase();
-      value = headers[i+1];
-      if (self.headers.hasOwnProperty(key))
-        self.headers[key] += ', ' + value;
-      else
-        self.headers[key] = value;
-    }
-
-    self._complete = true;
-  };
-};
-
-HttpParser.METHODS = {
-  0:  'DELETE',
-  1:  'GET',
-  2:  'HEAD',
-  3:  'POST',
-  4:  'PUT',
-  5:  'CONNECT',
-  6:  'OPTIONS',
-  7:  'TRACE',
-  8:  'COPY',
-  9:  'LOCK',
-  10: 'MKCOL',
-  11: 'MOVE',
-  12: 'PROPFIND',
-  13: 'PROPPATCH',
-  14: 'SEARCH',
-  15: 'UNLOCK',
-  16: 'BIND',
-  17: 'REBIND',
-  18: 'UNBIND',
-  19: 'ACL',
-  20: 'REPORT',
-  21: 'MKACTIVITY',
-  22: 'CHECKOUT',
-  23: 'MERGE',
-  24: 'M-SEARCH',
-  25: 'NOTIFY',
-  26: 'SUBSCRIBE',
-  27: 'UNSUBSCRIBE',
-  28: 'PATCH',
-  29: 'PURGE',
-  30: 'MKCALENDAR',
-  31: 'LINK',
-  32: 'UNLINK'
-};
-
-var VERSION = (process.version || '')
-              .match(/[0-9]+/g)
-              .map(function(n) { return parseInt(n, 10) });
-
-if (VERSION[0] === 0 && VERSION[1] === 12) {
-  HttpParser.METHODS[16] = 'REPORT';
-  HttpParser.METHODS[17] = 'MKACTIVITY';
-  HttpParser.METHODS[18] = 'CHECKOUT';
-  HttpParser.METHODS[19] = 'MERGE';
-  HttpParser.METHODS[20] = 'M-SEARCH';
-  HttpParser.METHODS[21] = 'NOTIFY';
-  HttpParser.METHODS[22] = 'SUBSCRIBE';
-  HttpParser.METHODS[23] = 'UNSUBSCRIBE';
-  HttpParser.METHODS[24] = 'PATCH';
-  HttpParser.METHODS[25] = 'PURGE';
-}
-
-HttpParser.prototype.isComplete = function() {
-  return this._complete;
-};
-
-HttpParser.prototype.parse = function(chunk) {
-  var consumed = this._parser.execute(chunk, 0, chunk.length);
-
-  if (typeof consumed !== 'number') {
-    this.error     = consumed;
-    this._complete = true;
-    return;
-  }
-
-  if (this._complete)
-    this.body = (consumed < chunk.length)
-              ? chunk.slice(consumed)
-              : Buffer.alloc(0);
-};
-
-module.exports = HttpParser;
-
-
-/***/ }),
-/* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Stream      = __webpack_require__(7).Stream,
-    util        = __webpack_require__(0),
-    driver      = __webpack_require__(6),
-    EventTarget = __webpack_require__(17),
-    Event       = __webpack_require__(9);
-
-var API = function(options) {
-  options = options || {};
-  driver.validateOptions(options, ['headers', 'extensions', 'maxLength', 'ping', 'proxy', 'tls', 'ca']);
-
-  this.readable = this.writable = true;
-
-  var headers = options.headers;
-  if (headers) {
-    for (var name in headers) this._driver.setHeader(name, headers[name]);
-  }
-
-  var extensions = options.extensions;
-  if (extensions) {
-    [].concat(extensions).forEach(this._driver.addExtension, this._driver);
-  }
-
-  this._ping          = options.ping;
-  this._pingId        = 0;
-  this.readyState     = API.CONNECTING;
-  this.bufferedAmount = 0;
-  this.protocol       = '';
-  this.url            = this._driver.url;
-  this.version        = this._driver.version;
-
-  var self = this;
-
-  this._driver.on('open',    function(e) { self._open() });
-  this._driver.on('message', function(e) { self._receiveMessage(e.data) });
-  this._driver.on('close',   function(e) { self._beginClose(e.reason, e.code) });
-
-  this._driver.on('error', function(error) {
-    self._emitError(error.message);
-  });
-  this.on('error', function() {});
-
-  this._driver.messages.on('drain', function() {
-    self.emit('drain');
-  });
-
-  if (this._ping)
-    this._pingTimer = setInterval(function() {
-      self._pingId += 1;
-      self.ping(self._pingId.toString());
-    }, this._ping * 1000);
-
-  this._configureStream();
-
-  if (!this._proxy) {
-    this._stream.pipe(this._driver.io);
-    this._driver.io.pipe(this._stream);
-  }
-};
-util.inherits(API, Stream);
-
-API.CONNECTING = 0;
-API.OPEN       = 1;
-API.CLOSING    = 2;
-API.CLOSED     = 3;
-
-var instance = {
-  write: function(data) {
-    return this.send(data);
-  },
-
-  end: function(data) {
-    if (data !== undefined) this.send(data);
-    this.close();
-  },
-
-  pause: function() {
-    return this._driver.messages.pause();
-  },
-
-  resume: function() {
-    return this._driver.messages.resume();
-  },
-
-  send: function(data) {
-    if (this.readyState > API.OPEN) return false;
-    if (!(data instanceof Buffer)) data = String(data);
-    return this._driver.messages.write(data);
-  },
-
-  ping: function(message, callback) {
-    if (this.readyState > API.OPEN) return false;
-    return this._driver.ping(message, callback);
-  },
-
-  close: function() {
-    if (this.readyState !== API.CLOSED) this.readyState = API.CLOSING;
-    this._driver.close();
-  },
-
-  _configureStream: function() {
-    var self = this;
-
-    this._stream.setTimeout(0);
-    this._stream.setNoDelay(true);
-
-    ['close', 'end'].forEach(function(event) {
-      this._stream.on(event, function() { self._finalizeClose() });
-    }, this);
-
-    this._stream.on('error', function(error) {
-      self._emitError('Network error: ' + self.url + ': ' + error.message);
-      self._finalizeClose();
-    });
-  },
-
- _open: function() {
-    if (this.readyState !== API.CONNECTING) return;
-
-    this.readyState = API.OPEN;
-    this.protocol = this._driver.protocol || '';
-
-    var event = new Event('open');
-    event.initEvent('open', false, false);
-    this.dispatchEvent(event);
-  },
-
-  _receiveMessage: function(data) {
-    if (this.readyState > API.OPEN) return false;
-
-    if (this.readable) this.emit('data', data);
-
-    var event = new Event('message', {data: data});
-    event.initEvent('message', false, false);
-    this.dispatchEvent(event);
-  },
-
-  _emitError: function(message) {
-    if (this.readyState >= API.CLOSING) return;
-
-    var event = new Event('error', {message: message});
-    event.initEvent('error', false, false);
-    this.dispatchEvent(event);
-  },
-
-  _beginClose: function(reason, code) {
-    if (this.readyState === API.CLOSED) return;
-    this.readyState = API.CLOSING;
-
-    if (this._stream) {
-      this._stream.end();
-      if (!this._stream.readable) this._finalizeClose();
-    }
-    this._closeParams = [reason, code];
-  },
-
-  _finalizeClose: function() {
-    if (this.readyState === API.CLOSED) return;
-    this.readyState = API.CLOSED;
-
-    if (this._pingTimer) clearInterval(this._pingTimer);
-    if (this._stream) this._stream.end();
-
-    if (this.readable) this.emit('end');
-    this.readable = this.writable = false;
-
-    var reason = this._closeParams ? this._closeParams[0] : '',
-        code   = this._closeParams ? this._closeParams[1] : 1006;
-
-    var event = new Event('close', {code: code, reason: reason});
-    event.initEvent('close', false, false);
-    this.dispatchEvent(event);
-  }
-};
-
-for (var method in instance) API.prototype[method] = instance[method];
-for (var key in EventTarget) API.prototype[key] = EventTarget[key];
-
-module.exports = API;
-
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Buffer     = __webpack_require__(1).Buffer,
-    crypto     = __webpack_require__(5),
-    util       = __webpack_require__(0),
-    Extensions = __webpack_require__(28),
-    Base       = __webpack_require__(2),
-    Frame      = __webpack_require__(33),
-    Message    = __webpack_require__(34);
-
-var Hybi = function(request, url, options) {
-  Base.apply(this, arguments);
-
-  this._extensions     = new Extensions();
-  this._stage          = 0;
-  this._masking        = this._options.masking;
-  this._protocols      = this._options.protocols || [];
-  this._requireMasking = this._options.requireMasking;
-  this._pingCallbacks  = {};
-
-  if (typeof this._protocols === 'string')
-    this._protocols = this._protocols.split(/ *, */);
-
-  if (!this._request) return;
-
-  var protos    = this._request.headers['sec-websocket-protocol'],
-      supported = this._protocols;
-
-  if (protos !== undefined) {
-    if (typeof protos === 'string') protos = protos.split(/ *, */);
-    this.protocol = protos.filter(function(p) { return supported.indexOf(p) >= 0 })[0];
-  }
-
-  this.version = 'hybi-' + Hybi.VERSION;
-};
-util.inherits(Hybi, Base);
-
-Hybi.VERSION = '13';
-
-Hybi.mask = function(payload, mask, offset) {
-  if (!mask || mask.length === 0) return payload;
-  offset = offset || 0;
-
-  for (var i = 0, n = payload.length - offset; i < n; i++) {
-    payload[offset + i] = payload[offset + i] ^ mask[i % 4];
-  }
-  return payload;
-};
-
-Hybi.generateAccept = function(key) {
-  var sha1 = crypto.createHash('sha1');
-  sha1.update(key + Hybi.GUID);
-  return sha1.digest('base64');
-};
-
-Hybi.GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
-
-var instance = {
-  FIN:    0x80,
-  MASK:   0x80,
-  RSV1:   0x40,
-  RSV2:   0x20,
-  RSV3:   0x10,
-  OPCODE: 0x0F,
-  LENGTH: 0x7F,
-
-  OPCODES: {
-    continuation: 0,
-    text:         1,
-    binary:       2,
-    close:        8,
-    ping:         9,
-    pong:         10
-  },
-
-  OPCODE_CODES:    [0, 1, 2, 8, 9, 10],
-  MESSAGE_OPCODES: [0, 1, 2],
-  OPENING_OPCODES: [1, 2],
-
-  ERRORS: {
-    normal_closure:       1000,
-    going_away:           1001,
-    protocol_error:       1002,
-    unacceptable:         1003,
-    encoding_error:       1007,
-    policy_violation:     1008,
-    too_large:            1009,
-    extension_error:      1010,
-    unexpected_condition: 1011
-  },
-
-  ERROR_CODES:        [1000, 1001, 1002, 1003, 1007, 1008, 1009, 1010, 1011],
-  DEFAULT_ERROR_CODE: 1000,
-  MIN_RESERVED_ERROR: 3000,
-  MAX_RESERVED_ERROR: 4999,
-
-  // http://www.w3.org/International/questions/qa-forms-utf-8.en.php
-  UTF8_MATCH: /^([\x00-\x7F]|[\xC2-\xDF][\x80-\xBF]|\xE0[\xA0-\xBF][\x80-\xBF]|[\xE1-\xEC\xEE\xEF][\x80-\xBF]{2}|\xED[\x80-\x9F][\x80-\xBF]|\xF0[\x90-\xBF][\x80-\xBF]{2}|[\xF1-\xF3][\x80-\xBF]{3}|\xF4[\x80-\x8F][\x80-\xBF]{2})*$/,
-
-  addExtension: function(extension) {
-    this._extensions.add(extension);
-    return true;
-  },
-
-  parse: function(chunk) {
-    this._reader.put(chunk);
-    var buffer = true;
-    while (buffer) {
-      switch (this._stage) {
-        case 0:
-          buffer = this._reader.read(1);
-          if (buffer) this._parseOpcode(buffer[0]);
-          break;
-
-        case 1:
-          buffer = this._reader.read(1);
-          if (buffer) this._parseLength(buffer[0]);
-          break;
-
-        case 2:
-          buffer = this._reader.read(this._frame.lengthBytes);
-          if (buffer) this._parseExtendedLength(buffer);
-          break;
-
-        case 3:
-          buffer = this._reader.read(4);
-          if (buffer) {
-            this._stage = 4;
-            this._frame.maskingKey = buffer;
-          }
-          break;
-
-        case 4:
-          buffer = this._reader.read(this._frame.length);
-          if (buffer) {
-            this._stage = 0;
-            this._emitFrame(buffer);
-          }
-          break;
-
-        default:
-          buffer = null;
-      }
-    }
-  },
-
-  text: function(message) {
-    if (this.readyState > 1) return false;
-    return this.frame(message, 'text');
-  },
-
-  binary: function(message) {
-    if (this.readyState > 1) return false;
-    return this.frame(message, 'binary');
-  },
-
-  ping: function(message, callback) {
-    if (this.readyState > 1) return false;
-    message = message || '';
-    if (callback) this._pingCallbacks[message] = callback;
-    return this.frame(message, 'ping');
-  },
-
-  pong: function(message) {
-      if (this.readyState > 1) return false;
-      message = message ||'';
-      return this.frame(message, 'pong');
-  },
-
-  close: function(reason, code) {
-    reason = reason || '';
-    code   = code   || this.ERRORS.normal_closure;
-
-    if (this.readyState <= 0) {
-      this.readyState = 3;
-      this.emit('close', new Base.CloseEvent(code, reason));
-      return true;
-    } else if (this.readyState === 1) {
-      this.readyState = 2;
-      this._extensions.close(function() { this.frame(reason, 'close', code) }, this);
-      return true;
-    } else {
-      return false;
-    }
-  },
-
-  frame: function(buffer, type, code) {
-    if (this.readyState <= 0) return this._queue([buffer, type, code]);
-    if (this.readyState > 2) return false;
-
-    if (buffer instanceof Array)    buffer = Buffer.from(buffer);
-    if (typeof buffer === 'number') buffer = buffer.toString();
-
-    var message = new Message(),
-        isText  = (typeof buffer === 'string'),
-        payload, copy;
-
-    message.rsv1   = message.rsv2 = message.rsv3 = false;
-    message.opcode = this.OPCODES[type || (isText ? 'text' : 'binary')];
-
-    payload = isText ? Buffer.from(buffer, 'utf8') : buffer;
-
-    if (code) {
-      copy = payload;
-      payload = Buffer.allocUnsafe(2 + copy.length);
-      payload.writeUInt16BE(code, 0);
-      copy.copy(payload, 2);
-    }
-    message.data = payload;
-
-    var onMessageReady = function(message) {
-      var frame = new Frame();
-
-      frame.final   = true;
-      frame.rsv1    = message.rsv1;
-      frame.rsv2    = message.rsv2;
-      frame.rsv3    = message.rsv3;
-      frame.opcode  = message.opcode;
-      frame.masked  = !!this._masking;
-      frame.length  = message.data.length;
-      frame.payload = message.data;
-
-      if (frame.masked) frame.maskingKey = crypto.randomBytes(4);
-
-      this._sendFrame(frame);
-    };
-
-    if (this.MESSAGE_OPCODES.indexOf(message.opcode) >= 0)
-      this._extensions.processOutgoingMessage(message, function(error, message) {
-        if (error) return this._fail('extension_error', error.message);
-        onMessageReady.call(this, message);
-      }, this);
-    else
-      onMessageReady.call(this, message);
-
-    return true;
-  },
-
-  _sendFrame: function(frame) {
-    var length = frame.length,
-        header = (length <= 125) ? 2 : (length <= 65535 ? 4 : 10),
-        offset = header + (frame.masked ? 4 : 0),
-        buffer = Buffer.allocUnsafe(offset + length),
-        masked = frame.masked ? this.MASK : 0;
-
-    buffer[0] = (frame.final ? this.FIN : 0) |
-                (frame.rsv1 ? this.RSV1 : 0) |
-                (frame.rsv2 ? this.RSV2 : 0) |
-                (frame.rsv3 ? this.RSV3 : 0) |
-                frame.opcode;
-
-    if (length <= 125) {
-      buffer[1] = masked | length;
-    } else if (length <= 65535) {
-      buffer[1] = masked | 126;
-      buffer.writeUInt16BE(length, 2);
-    } else {
-      buffer[1] = masked | 127;
-      buffer.writeUInt32BE(Math.floor(length / 0x100000000), 2);
-      buffer.writeUInt32BE(length % 0x100000000, 6);
-    }
-
-    frame.payload.copy(buffer, offset);
-
-    if (frame.masked) {
-      frame.maskingKey.copy(buffer, header);
-      Hybi.mask(buffer, frame.maskingKey, offset);
-    }
-
-    this._write(buffer);
-  },
-
-  _handshakeResponse: function() {
-    var secKey  = this._request.headers['sec-websocket-key'],
-        version = this._request.headers['sec-websocket-version'];
-
-    if (version !== Hybi.VERSION)
-      throw new Error('Unsupported WebSocket version: ' + version);
-
-    if (typeof secKey !== 'string')
-      throw new Error('Missing handshake request header: Sec-WebSocket-Key');
-
-    this._headers.set('Upgrade', 'websocket');
-    this._headers.set('Connection', 'Upgrade');
-    this._headers.set('Sec-WebSocket-Accept', Hybi.generateAccept(secKey));
-
-    if (this.protocol) this._headers.set('Sec-WebSocket-Protocol', this.protocol);
-
-    var extensions = this._extensions.generateResponse(this._request.headers['sec-websocket-extensions']);
-    if (extensions) this._headers.set('Sec-WebSocket-Extensions', extensions);
-
-    var start   = 'HTTP/1.1 101 Switching Protocols',
-        headers = [start, this._headers.toString(), ''];
-
-    return Buffer.from(headers.join('\r\n'), 'utf8');
-  },
-
-  _shutdown: function(code, reason, error) {
-    delete this._frame;
-    delete this._message;
-    this._stage = 5;
-
-    var sendCloseFrame = (this.readyState === 1);
-    this.readyState = 2;
-
-    this._extensions.close(function() {
-      if (sendCloseFrame) this.frame(reason, 'close', code);
-      this.readyState = 3;
-      if (error) this.emit('error', new Error(reason));
-      this.emit('close', new Base.CloseEvent(code, reason));
-    }, this);
-  },
-
-  _fail: function(type, message) {
-    if (this.readyState > 1) return;
-    this._shutdown(this.ERRORS[type], message, true);
-  },
-
-  _parseOpcode: function(octet) {
-    var rsvs = [this.RSV1, this.RSV2, this.RSV3].map(function(rsv) {
-      return (octet & rsv) === rsv;
-    });
-
-    var frame = this._frame = new Frame();
-
-    frame.final  = (octet & this.FIN) === this.FIN;
-    frame.rsv1   = rsvs[0];
-    frame.rsv2   = rsvs[1];
-    frame.rsv3   = rsvs[2];
-    frame.opcode = (octet & this.OPCODE);
-
-    this._stage = 1;
-
-    if (!this._extensions.validFrameRsv(frame))
-      return this._fail('protocol_error',
-          'One or more reserved bits are on: reserved1 = ' + (frame.rsv1 ? 1 : 0) +
-          ', reserved2 = ' + (frame.rsv2 ? 1 : 0) +
-          ', reserved3 = ' + (frame.rsv3 ? 1 : 0));
-
-    if (this.OPCODE_CODES.indexOf(frame.opcode) < 0)
-      return this._fail('protocol_error', 'Unrecognized frame opcode: ' + frame.opcode);
-
-    if (this.MESSAGE_OPCODES.indexOf(frame.opcode) < 0 && !frame.final)
-      return this._fail('protocol_error', 'Received fragmented control frame: opcode = ' + frame.opcode);
-
-    if (this._message && this.OPENING_OPCODES.indexOf(frame.opcode) >= 0)
-      return this._fail('protocol_error', 'Received new data frame but previous continuous frame is unfinished');
-  },
-
-  _parseLength: function(octet) {
-    var frame = this._frame;
-    frame.masked = (octet & this.MASK) === this.MASK;
-    frame.length = (octet & this.LENGTH);
-
-    if (frame.length >= 0 && frame.length <= 125) {
-      this._stage = frame.masked ? 3 : 4;
-      if (!this._checkFrameLength()) return;
-    } else {
-      this._stage = 2;
-      frame.lengthBytes = (frame.length === 126 ? 2 : 8);
-    }
-
-    if (this._requireMasking && !frame.masked)
-      return this._fail('unacceptable', 'Received unmasked frame but masking is required');
-  },
-
-  _parseExtendedLength: function(buffer) {
-    var frame = this._frame;
-    frame.length = this._readUInt(buffer);
-
-    this._stage = frame.masked ? 3 : 4;
-
-    if (this.MESSAGE_OPCODES.indexOf(frame.opcode) < 0 && frame.length > 125)
-      return this._fail('protocol_error', 'Received control frame having too long payload: ' + frame.length);
-
-    if (!this._checkFrameLength()) return;
-  },
-
-  _checkFrameLength: function() {
-    var length = this._message ? this._message.length : 0;
-
-    if (length + this._frame.length > this._maxLength) {
-      this._fail('too_large', 'WebSocket frame length too large');
-      return false;
-    } else {
-      return true;
-    }
-  },
-
-  _emitFrame: function(buffer) {
-    var frame   = this._frame,
-        payload = frame.payload = Hybi.mask(buffer, frame.maskingKey),
-        opcode  = frame.opcode,
-        message,
-        code, reason,
-        callbacks, callback;
-
-    delete this._frame;
-
-    if (opcode === this.OPCODES.continuation) {
-      if (!this._message) return this._fail('protocol_error', 'Received unexpected continuation frame');
-      this._message.pushFrame(frame);
-    }
-
-    if (opcode === this.OPCODES.text || opcode === this.OPCODES.binary) {
-      this._message = new Message();
-      this._message.pushFrame(frame);
-    }
-
-    if (frame.final && this.MESSAGE_OPCODES.indexOf(opcode) >= 0)
-      return this._emitMessage(this._message);
-
-    if (opcode === this.OPCODES.close) {
-      code   = (payload.length >= 2) ? payload.readUInt16BE(0) : null;
-      reason = (payload.length > 2) ? this._encode(payload.slice(2)) : null;
-
-      if (!(payload.length === 0) &&
-          !(code !== null && code >= this.MIN_RESERVED_ERROR && code <= this.MAX_RESERVED_ERROR) &&
-          this.ERROR_CODES.indexOf(code) < 0)
-        code = this.ERRORS.protocol_error;
-
-      if (payload.length > 125 || (payload.length > 2 && !reason))
-        code = this.ERRORS.protocol_error;
-
-      this._shutdown(code || this.DEFAULT_ERROR_CODE, reason || '');
-    }
-
-    if (opcode === this.OPCODES.ping) {
-      this.frame(payload, 'pong');
-      this.emit('ping', new Base.PingEvent(payload.toString()))
-    }
-
-    if (opcode === this.OPCODES.pong) {
-      callbacks = this._pingCallbacks;
-      message   = this._encode(payload);
-      callback  = callbacks[message];
-
-      delete callbacks[message];
-      if (callback) callback()
-
-      this.emit('pong', new Base.PongEvent(payload.toString()))
-    }
-  },
-
-  _emitMessage: function(message) {
-    var message = this._message;
-    message.read();
-
-    delete this._message;
-
-    this._extensions.processIncomingMessage(message, function(error, message) {
-      if (error) return this._fail('extension_error', error.message);
-
-      var payload = message.data;
-      if (message.opcode === this.OPCODES.text) payload = this._encode(payload);
-
-      if (payload === null)
-        return this._fail('encoding_error', 'Could not decode a text frame as UTF-8');
-      else
-        this.emit('message', new Base.MessageEvent(payload));
-    }, this);
-  },
-
-  _encode: function(buffer) {
-    try {
-      var string = buffer.toString('binary', 0, buffer.length);
-      if (!this.UTF8_MATCH.test(string)) return null;
-    } catch (e) {}
-    return buffer.toString('utf8', 0, buffer.length);
-  },
-
-  _readUInt: function(buffer) {
-    if (buffer.length === 2) return buffer.readUInt16BE(0);
-
-    return buffer.readUInt32BE(0) * 0x100000000 +
-           buffer.readUInt32BE(4);
-  }
-};
-
-for (var key in instance)
-  Hybi.prototype[key] = instance[key];
-
-module.exports = Hybi;
-
-
-/***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var RingBuffer = function(bufferSize) {
-  this._bufferSize = bufferSize;
-  this.clear();
-};
-
-RingBuffer.prototype.clear = function() {
-  this._buffer     = new Array(this._bufferSize);
-  this._ringOffset = 0;
-  this._ringSize   = this._bufferSize;
-  this._head       = 0;
-  this._tail       = 0;
-  this.length      = 0;
-};
-
-RingBuffer.prototype.push = function(value) {
-  var expandBuffer = false,
-      expandRing   = false;
-
-  if (this._ringSize < this._bufferSize) {
-    expandBuffer = (this._tail === 0);
-  } else if (this._ringOffset === this._ringSize) {
-    expandBuffer = true;
-    expandRing   = (this._tail === 0);
-  }
-
-  if (expandBuffer) {
-    this._tail       = this._bufferSize;
-    this._buffer     = this._buffer.concat(new Array(this._bufferSize));
-    this._bufferSize = this._buffer.length;
-
-    if (expandRing)
-      this._ringSize = this._bufferSize;
-  }
-
-  this._buffer[this._tail] = value;
-  this.length += 1;
-  if (this._tail < this._ringSize) this._ringOffset += 1;
-  this._tail = (this._tail + 1) % this._bufferSize;
-};
-
-RingBuffer.prototype.peek = function() {
-  if (this.length === 0) return void 0;
-  return this._buffer[this._head];
-};
-
-RingBuffer.prototype.shift = function() {
-  if (this.length === 0) return void 0;
-
-  var value = this._buffer[this._head];
-  this._buffer[this._head] = void 0;
-  this.length -= 1;
-  this._ringOffset -= 1;
-
-  if (this._ringOffset === 0 && this.length > 0) {
-    this._head       = this._ringSize;
-    this._ringOffset = this.length;
-    this._ringSize   = this._bufferSize;
-  } else {
-    this._head = (this._head + 1) % this._ringSize;
-  }
-  return value;
-};
-
-module.exports = RingBuffer;
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var RingBuffer = __webpack_require__(14);
-
-var Pledge = function() {
-  this._complete  = false;
-  this._callbacks = new RingBuffer(Pledge.QUEUE_SIZE);
-};
-
-Pledge.QUEUE_SIZE = 4;
-
-Pledge.all = function(list) {
-  var pledge  = new Pledge(),
-      pending = list.length,
-      n       = pending;
-
-  if (pending === 0) pledge.done();
-
-  while (n--) list[n].then(function() {
-    pending -= 1;
-    if (pending === 0) pledge.done();
-  });
-  return pledge;
-};
-
-Pledge.prototype.then = function(callback) {
-  if (this._complete) callback();
-  else this._callbacks.push(callback);
-};
-
-Pledge.prototype.done = function() {
-  this._complete = true;
-  var callbacks = this._callbacks, callback;
-  while (callback = callbacks.shift()) callback();
-};
-
-module.exports = Pledge;
-
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Buffer = __webpack_require__(1).Buffer,
-    Base   = __webpack_require__(2),
-    util   = __webpack_require__(0);
-
-var Draft75 = function(request, url, options) {
-  Base.apply(this, arguments);
-  this._stage  = 0;
-  this.version = 'hixie-75';
-
-  this._headers.set('Upgrade', 'WebSocket');
-  this._headers.set('Connection', 'Upgrade');
-  this._headers.set('WebSocket-Origin', this._request.headers.origin);
-  this._headers.set('WebSocket-Location', this.url);
-};
-util.inherits(Draft75, Base);
-
-var instance = {
-  close: function() {
-    if (this.readyState === 3) return false;
-    this.readyState = 3;
-    this.emit('close', new Base.CloseEvent(null, null));
-    return true;
-  },
-
-  parse: function(chunk) {
-    if (this.readyState > 1) return;
-
-    this._reader.put(chunk);
-
-    this._reader.eachByte(function(octet) {
-      var message;
-
-      switch (this._stage) {
-        case -1:
-          this._body.push(octet);
-          this._sendHandshakeBody();
-          break;
-
-        case 0:
-          this._parseLeadingByte(octet);
-          break;
-
-        case 1:
-          this._length = (octet & 0x7F) + 128 * this._length;
-
-          if (this._closing && this._length === 0) {
-            return this.close();
-          }
-          else if ((octet & 0x80) !== 0x80) {
-            if (this._length === 0) {
-              this._stage = 0;
-            }
-            else {
-              this._skipped = 0;
-              this._stage   = 2;
-            }
-          }
-          break;
-
-        case 2:
-          if (octet === 0xFF) {
-            this._stage = 0;
-            message = Buffer.from(this._buffer).toString('utf8', 0, this._buffer.length);
-            this.emit('message', new Base.MessageEvent(message));
-          }
-          else {
-            if (this._length) {
-              this._skipped += 1;
-              if (this._skipped === this._length)
-                this._stage = 0;
-            } else {
-              this._buffer.push(octet);
-              if (this._buffer.length > this._maxLength) return this.close();
-            }
-          }
-          break;
-      }
-    }, this);
-  },
-
-  frame: function(buffer) {
-    if (this.readyState === 0) return this._queue([buffer]);
-    if (this.readyState > 1) return false;
-
-    if (typeof buffer !== 'string') buffer = buffer.toString();
-
-    var length = Buffer.byteLength(buffer),
-        frame  = Buffer.allocUnsafe(length + 2);
-
-    frame[0] = 0x00;
-    frame.write(buffer, 1);
-    frame[frame.length - 1] = 0xFF;
-
-    this._write(frame);
-    return true;
-  },
-
-  _handshakeResponse: function() {
-    var start   = 'HTTP/1.1 101 Web Socket Protocol Handshake',
-        headers = [start, this._headers.toString(), ''];
-
-    return Buffer.from(headers.join('\r\n'), 'utf8');
-  },
-
-  _parseLeadingByte: function(octet) {
-    if ((octet & 0x80) === 0x80) {
-      this._length = 0;
-      this._stage  = 1;
-    } else {
-      delete this._length;
-      delete this._skipped;
-      this._buffer = [];
-      this._stage  = 2;
-    }
-  }
-};
-
-for (var key in instance)
-  Draft75.prototype[key] = instance[key];
-
-module.exports = Draft75;
-
-
-/***/ }),
-/* 17 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var Event = __webpack_require__(9);
-
-var EventTarget = {
-  onopen:     null,
-  onmessage:  null,
-  onerror:    null,
-  onclose:    null,
-
-  addEventListener: function(eventType, listener, useCapture) {
-    this.on(eventType, listener);
-  },
-
-  removeEventListener: function(eventType, listener, useCapture) {
-    this.removeListener(eventType, listener);
-  },
-
-  dispatchEvent: function(event) {
-    event.target = event.currentTarget = this;
-    event.eventPhase = Event.AT_TARGET;
-
-    if (this['on' + event.type])
-      this['on' + event.type](event);
-
-    this.emit(event.type, event);
-  }
-};
-
-module.exports = EventTarget;
-
-
-/***/ }),
-/* 18 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// API references:
-//
-// * http://dev.w3.org/html5/websockets/
-// * http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-eventtarget
-// * http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-event
-
-var util   = __webpack_require__(0),
-    driver = __webpack_require__(6),
-    API    = __webpack_require__(12);
-
-var WebSocket = function(request, socket, body, protocols, options) {
-  options = options || {};
-
-  this._stream = socket;
-  this._driver = driver.http(request, {maxLength: options.maxLength, protocols: protocols});
-
-  var self = this;
-  if (!this._stream || !this._stream.writable) return;
-  if (!this._stream.readable) return this._stream.end();
-
-  var catchup = function() { self._stream.removeListener('data', catchup) };
-  this._stream.on('data', catchup);
-
-  API.call(this, options);
-
-  process.nextTick(function() {
-    self._driver.start();
-    self._driver.io.write(body);
-  });
-};
-util.inherits(WebSocket, API);
-
-WebSocket.isWebSocket = function(request) {
-  return driver.isWebSocket(request);
-};
-
-WebSocket.validateOptions = function(options, validKeys) {
-  driver.validateOptions(options, validKeys);
-};
-
-WebSocket.WebSocket   = WebSocket;
-WebSocket.Client      = __webpack_require__(38);
-WebSocket.EventSource = __webpack_require__(41);
-
-module.exports        = WebSocket;
-
-
-/***/ }),
-/* 19 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * Wrapper for built-in http.js to emulate the browser XMLHttpRequest object.
- *
- * This can be used with JS designed for browsers to improve reuse of code and
- * allow the use of existing libraries.
- *
- * Usage: include("XMLHttpRequest.js") and use XMLHttpRequest per W3C specs.
- *
- * @author Dan DeFelippi <dan@driverdan.com>
- * @contributor David Ellis <d.f.ellis@ieee.org>
- * @license MIT
- */
-
-var Url = __webpack_require__(8);
-var spawn = __webpack_require__(42).spawn;
-var fs = __webpack_require__(43);
-
-exports.XMLHttpRequest = function() {
-  "use strict";
-
-  /**
-   * Private variables
-   */
-  var self = this;
-  var http = __webpack_require__(44);
-  var https = __webpack_require__(45);
-
-  // Holds http.js objects
-  var request;
-  var response;
-
-  // Request settings
-  var settings = {};
-
-  // Disable header blacklist.
-  // Not part of XHR specs.
-  var disableHeaderCheck = false;
-
-  // Set some default headers
-  var defaultHeaders = {
-    "User-Agent": "node-XMLHttpRequest",
-    "Accept": "*/*",
-  };
-
-  var headers = {};
-  var headersCase = {};
-
-  // These headers are not user setable.
-  // The following are allowed but banned in the spec:
-  // * user-agent
-  var forbiddenRequestHeaders = [
-    "accept-charset",
-    "accept-encoding",
-    "access-control-request-headers",
-    "access-control-request-method",
-    "connection",
-    "content-length",
-    "content-transfer-encoding",
-    "cookie",
-    "cookie2",
-    "date",
-    "expect",
-    "host",
-    "keep-alive",
-    "origin",
-    "referer",
-    "te",
-    "trailer",
-    "transfer-encoding",
-    "upgrade",
-    "via"
-  ];
-
-  // These request methods are not allowed
-  var forbiddenRequestMethods = [
-    "TRACE",
-    "TRACK",
-    "CONNECT"
-  ];
-
-  // Send flag
-  var sendFlag = false;
-  // Error flag, used when errors occur or abort is called
-  var errorFlag = false;
-
-  // Event listeners
-  var listeners = {};
-
-  /**
-   * Constants
-   */
-
-  this.UNSENT = 0;
-  this.OPENED = 1;
-  this.HEADERS_RECEIVED = 2;
-  this.LOADING = 3;
-  this.DONE = 4;
-
-  /**
-   * Public vars
-   */
-
-  // Current state
-  this.readyState = this.UNSENT;
-
-  // default ready state change handler in case one is not set or is set late
-  this.onreadystatechange = null;
-
-  // Result & response
-  this.responseText = "";
-  this.responseXML = "";
-  this.status = null;
-  this.statusText = null;
-  
-  // Whether cross-site Access-Control requests should be made using
-  // credentials such as cookies or authorization headers
-  this.withCredentials = false;
-
-  /**
-   * Private methods
-   */
-
-  /**
-   * Check if the specified header is allowed.
-   *
-   * @param string header Header to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  var isAllowedHttpHeader = function(header) {
-    return disableHeaderCheck || (header && forbiddenRequestHeaders.indexOf(header.toLowerCase()) === -1);
-  };
-
-  /**
-   * Check if the specified method is allowed.
-   *
-   * @param string method Request method to validate
-   * @return boolean False if not allowed, otherwise true
-   */
-  var isAllowedHttpMethod = function(method) {
-    return (method && forbiddenRequestMethods.indexOf(method) === -1);
-  };
-
-  /**
-   * Public methods
-   */
-
-  /**
-   * Open the connection. Currently supports local server requests.
-   *
-   * @param string method Connection method (eg GET, POST)
-   * @param string url URL for the connection.
-   * @param boolean async Asynchronous connection. Default is true.
-   * @param string user Username for basic authentication (optional)
-   * @param string password Password for basic authentication (optional)
-   */
-  this.open = function(method, url, async, user, password) {
-    this.abort();
-    errorFlag = false;
-
-    // Check for valid request method
-    if (!isAllowedHttpMethod(method)) {
-      throw new Error("SecurityError: Request method not allowed");
-    }
-
-    settings = {
-      "method": method,
-      "url": url.toString(),
-      "async": (typeof async !== "boolean" ? true : async),
-      "user": user || null,
-      "password": password || null
-    };
-
-    setState(this.OPENED);
-  };
-
-  /**
-   * Disables or enables isAllowedHttpHeader() check the request. Enabled by default.
-   * This does not conform to the W3C spec.
-   *
-   * @param boolean state Enable or disable header checking.
-   */
-  this.setDisableHeaderCheck = function(state) {
-    disableHeaderCheck = state;
-  };
-
-  /**
-   * Sets a header for the request or appends the value if one is already set.
-   *
-   * @param string header Header name
-   * @param string value Header value
-   */
-  this.setRequestHeader = function(header, value) {
-    if (this.readyState !== this.OPENED) {
-      throw new Error("INVALID_STATE_ERR: setRequestHeader can only be called when state is OPEN");
-    }
-    if (!isAllowedHttpHeader(header)) {
-      console.warn("Refused to set unsafe header \"" + header + "\"");
-      return;
-    }
-    if (sendFlag) {
-      throw new Error("INVALID_STATE_ERR: send flag is true");
-    }
-    header = headersCase[header.toLowerCase()] || header;
-    headersCase[header.toLowerCase()] = header;
-    headers[header] = headers[header] ? headers[header] + ', ' + value : value;
-  };
-
-  /**
-   * Gets a header from the server response.
-   *
-   * @param string header Name of header to get.
-   * @return string Text of the header or null if it doesn't exist.
-   */
-  this.getResponseHeader = function(header) {
-    if (typeof header === "string"
-      && this.readyState > this.OPENED
-      && response
-      && response.headers
-      && response.headers[header.toLowerCase()]
-      && !errorFlag
-    ) {
-      return response.headers[header.toLowerCase()];
-    }
-
-    return null;
-  };
-
-  /**
-   * Gets all the response headers.
-   *
-   * @return string A string with all response headers separated by CR+LF
-   */
-  this.getAllResponseHeaders = function() {
-    if (this.readyState < this.HEADERS_RECEIVED || errorFlag) {
-      return "";
-    }
-    var result = "";
-
-    for (var i in response.headers) {
-      // Cookie headers are excluded
-      if (i !== "set-cookie" && i !== "set-cookie2") {
-        result += i + ": " + response.headers[i] + "\r\n";
-      }
-    }
-    return result.substr(0, result.length - 2);
-  };
-
-  /**
-   * Gets a request header
-   *
-   * @param string name Name of header to get
-   * @return string Returns the request header or empty string if not set
-   */
-  this.getRequestHeader = function(name) {
-    if (typeof name === "string" && headersCase[name.toLowerCase()]) {
-      return headers[headersCase[name.toLowerCase()]];
-    }
-
-    return "";
-  };
-
-  /**
-   * Sends the request to the server.
-   *
-   * @param string data Optional data to send as request body.
-   */
-  this.send = function(data) {
-    if (this.readyState !== this.OPENED) {
-      throw new Error("INVALID_STATE_ERR: connection must be opened before send() is called");
-    }
-
-    if (sendFlag) {
-      throw new Error("INVALID_STATE_ERR: send has already been called");
-    }
-
-    var ssl = false, local = false;
-    var url = Url.parse(settings.url);
-    var host;
-    // Determine the server
-    switch (url.protocol) {
-      case "https:":
-        ssl = true;
-        // SSL & non-SSL both need host, no break here.
-      case "http:":
-        host = url.hostname;
-        break;
-
-      case "file:":
-        local = true;
-        break;
-
-      case undefined:
-      case null:
-      case "":
-        host = "localhost";
-        break;
-
-      default:
-        throw new Error("Protocol not supported.");
-    }
-
-    // Load files off the local filesystem (file://)
-    if (local) {
-      if (settings.method !== "GET") {
-        throw new Error("XMLHttpRequest: Only GET method is supported");
-      }
-
-      if (settings.async) {
-        fs.readFile(url.pathname, "utf8", function(error, data) {
-          if (error) {
-            self.handleError(error);
-          } else {
-            self.status = 200;
-            self.responseText = data;
-            setState(self.DONE);
-          }
-        });
-      } else {
-        try {
-          this.responseText = fs.readFileSync(url.pathname, "utf8");
-          this.status = 200;
-          setState(self.DONE);
-        } catch(e) {
-          this.handleError(e);
-        }
-      }
-
-      return;
-    }
-
-    // Default to port 80. If accessing localhost on another port be sure
-    // to use http://localhost:port/path
-    var port = url.port || (ssl ? 443 : 80);
-    // Add query string if one is used
-    var uri = url.pathname + (url.search ? url.search : "");
-
-    // Set the defaults if they haven't been set
-    for (var name in defaultHeaders) {
-      if (!headersCase[name.toLowerCase()]) {
-        headers[name] = defaultHeaders[name];
-      }
-    }
-
-    // Set the Host header or the server may reject the request
-    headers.Host = host;
-    if (!((ssl && port === 443) || port === 80)) {
-      headers.Host += ":" + url.port;
-    }
-
-    // Set Basic Auth if necessary
-    if (settings.user) {
-      if (typeof settings.password === "undefined") {
-        settings.password = "";
-      }
-      var authBuf = new Buffer(settings.user + ":" + settings.password);
-      headers.Authorization = "Basic " + authBuf.toString("base64");
-    }
-
-    // Set content length header
-    if (settings.method === "GET" || settings.method === "HEAD") {
-      data = null;
-    } else if (data) {
-      headers["Content-Length"] = Buffer.isBuffer(data) ? data.length : Buffer.byteLength(data);
-
-      if (!headers["Content-Type"]) {
-        headers["Content-Type"] = "text/plain;charset=UTF-8";
-      }
-    } else if (settings.method === "POST") {
-      // For a post with no data set Content-Length: 0.
-      // This is required by buggy servers that don't meet the specs.
-      headers["Content-Length"] = 0;
-    }
-
-    var options = {
-      host: host,
-      port: port,
-      path: uri,
-      method: settings.method,
-      headers: headers,
-      agent: false,
-      withCredentials: self.withCredentials
-    };
-
-    // Reset error flag
-    errorFlag = false;
-
-    // Handle async requests
-    if (settings.async) {
-      // Use the proper protocol
-      var doRequest = ssl ? https.request : http.request;
-
-      // Request is being sent, set send flag
-      sendFlag = true;
-
-      // As per spec, this is called here for historical reasons.
-      self.dispatchEvent("readystatechange");
-
-      // Handler for the response
-      var responseHandler = function responseHandler(resp) {
-        // Set response var to the response we got back
-        // This is so it remains accessable outside this scope
-        response = resp;
-        // Check for redirect
-        // @TODO Prevent looped redirects
-        if (response.statusCode === 301 || response.statusCode === 302 || response.statusCode === 303 || response.statusCode === 307) {
-          // Change URL to the redirect location
-          settings.url = response.headers.location;
-          var url = Url.parse(settings.url);
-          // Set host var in case it's used later
-          host = url.hostname;
-          // Options for the new request
-          var newOptions = {
-            hostname: url.hostname,
-            port: url.port,
-            path: url.path,
-            method: response.statusCode === 303 ? "GET" : settings.method,
-            headers: headers,
-            withCredentials: self.withCredentials
-          };
-
-          // Issue the new request
-          request = doRequest(newOptions, responseHandler).on("error", errorHandler);
-          request.end();
-          // @TODO Check if an XHR event needs to be fired here
-          return;
-        }
-
-        response.setEncoding("utf8");
-
-        setState(self.HEADERS_RECEIVED);
-        self.status = response.statusCode;
-
-        response.on("data", function(chunk) {
-          // Make sure there's some data
-          if (chunk) {
-            self.responseText += chunk;
-          }
-          // Don't emit state changes if the connection has been aborted.
-          if (sendFlag) {
-            setState(self.LOADING);
-          }
-        });
-
-        response.on("end", function() {
-          if (sendFlag) {
-            // Discard the end event if the connection has been aborted
-            setState(self.DONE);
-            sendFlag = false;
-          }
-        });
-
-        response.on("error", function(error) {
-          self.handleError(error);
-        });
-      };
-
-      // Error handler for the request
-      var errorHandler = function errorHandler(error) {
-        self.handleError(error);
-      };
-
-      // Create the request
-      request = doRequest(options, responseHandler).on("error", errorHandler);
-
-      // Node 0.4 and later won't accept empty data. Make sure it's needed.
-      if (data) {
-        request.write(data);
-      }
-
-      request.end();
-
-      self.dispatchEvent("loadstart");
-    } else { // Synchronous
-      // Create a temporary file for communication with the other Node process
-      var contentFile = ".node-xmlhttprequest-content-" + process.pid;
-      var syncFile = ".node-xmlhttprequest-sync-" + process.pid;
-      fs.writeFileSync(syncFile, "", "utf8");
-      // The async request the other Node process executes
-      var execString = "var http = require('http'), https = require('https'), fs = require('fs');"
-        + "var doRequest = http" + (ssl ? "s" : "") + ".request;"
-        + "var options = " + JSON.stringify(options) + ";"
-        + "var responseText = '';"
-        + "var req = doRequest(options, function(response) {"
-        + "response.setEncoding('utf8');"
-        + "response.on('data', function(chunk) {"
-        + "  responseText += chunk;"
-        + "});"
-        + "response.on('end', function() {"
-        + "fs.writeFileSync('" + contentFile + "', JSON.stringify({err: null, data: {statusCode: response.statusCode, headers: response.headers, text: responseText}}), 'utf8');"
-        + "fs.unlinkSync('" + syncFile + "');"
-        + "});"
-        + "response.on('error', function(error) {"
-        + "fs.writeFileSync('" + contentFile + "', JSON.stringify({err: error}), 'utf8');"
-        + "fs.unlinkSync('" + syncFile + "');"
-        + "});"
-        + "}).on('error', function(error) {"
-        + "fs.writeFileSync('" + contentFile + "', JSON.stringify({err: error}), 'utf8');"
-        + "fs.unlinkSync('" + syncFile + "');"
-        + "});"
-        + (data ? "req.write('" + JSON.stringify(data).slice(1,-1).replace(/'/g, "\\'") + "');":"")
-        + "req.end();";
-      // Start the other Node Process, executing this string
-      var syncProc = spawn(process.argv[0], ["-e", execString]);
-      while(fs.existsSync(syncFile)) {
-        // Wait while the sync file is empty
-      }
-      var resp = JSON.parse(fs.readFileSync(contentFile, 'utf8'));
-      // Kill the child process once the file has data
-      syncProc.stdin.end();
-      // Remove the temporary file
-      fs.unlinkSync(contentFile);
-
-      if (resp.err) {
-        self.handleError(resp.err);
-      } else {
-        response = resp.data;
-        self.status = resp.data.statusCode;
-        self.responseText = resp.data.text;
-        setState(self.DONE);
-      }
-    }
-  };
-
-  /**
-   * Called when an error is encountered to deal with it.
-   */
-  this.handleError = function(error) {
-    this.status = 0;
-    this.statusText = error;
-    this.responseText = error.stack;
-    errorFlag = true;
-    setState(this.DONE);
-    this.dispatchEvent('error');
-  };
-
-  /**
-   * Aborts a request.
-   */
-  this.abort = function() {
-    if (request) {
-      request.abort();
-      request = null;
-    }
-
-    headers = defaultHeaders;
-    this.status = 0;
-    this.responseText = "";
-    this.responseXML = "";
-
-    errorFlag = true;
-
-    if (this.readyState !== this.UNSENT
-        && (this.readyState !== this.OPENED || sendFlag)
-        && this.readyState !== this.DONE) {
-      sendFlag = false;
-      setState(this.DONE);
-    }
-    this.readyState = this.UNSENT;
-    this.dispatchEvent('abort');
-  };
-
-  /**
-   * Adds an event listener. Preferred method of binding to events.
-   */
-  this.addEventListener = function(event, callback) {
-    if (!(event in listeners)) {
-      listeners[event] = [];
-    }
-    // Currently allows duplicate callbacks. Should it?
-    listeners[event].push(callback);
-  };
-
-  /**
-   * Remove an event callback that has already been bound.
-   * Only works on the matching funciton, cannot be a copy.
-   */
-  this.removeEventListener = function(event, callback) {
-    if (event in listeners) {
-      // Filter will return a new array with the callback removed
-      listeners[event] = listeners[event].filter(function(ev) {
-        return ev !== callback;
-      });
-    }
-  };
-
-  /**
-   * Dispatch any events, including both "on" methods and events attached using addEventListener.
-   */
-  this.dispatchEvent = function(event) {
-    if (typeof self["on" + event] === "function") {
-      self["on" + event]();
-    }
-    if (event in listeners) {
-      for (var i = 0, len = listeners[event].length; i < len; i++) {
-        listeners[event][i].call(self);
-      }
-    }
-  };
-
-  /**
-   * Changes readyState and calls onreadystatechange.
-   *
-   * @param int state New state
-   */
-  var setState = function(state) {
-    if (state == self.LOADING || self.readyState !== state) {
-      self.readyState = state;
-
-      if (settings.async || self.readyState < self.OPENED || self.readyState === self.DONE) {
-        self.dispatchEvent("readystatechange");
-      }
-
-      if (self.readyState === self.DONE && !errorFlag) {
-        self.dispatchEvent("load");
-        // @TODO figure out InspectorInstrumentation::didLoadXHR(cookie)
-        self.dispatchEvent("loadend");
-      }
-    }
-  };
-};
-
-
-/***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// required so we don't have to do require('pusher').default etc.
-module.exports = __webpack_require__(46).default;
-
-
-/***/ }),
 /* 21 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = require("buffer");
+module.exports = __webpack_require__(47).default;
+
 
 /***/ }),
 /* 22 */
 /***/ (function(module, exports) {
 
-module.exports = require("events");
+module.exports = require("buffer");
 
 /***/ }),
 /* 23 */
+/***/ (function(module, exports) {
+
+module.exports = require("events");
+
+/***/ }),
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4819,7 +5186,7 @@ driver having these two methods.
 **/
 
 
-var Stream = __webpack_require__(7).Stream,
+var Stream = __webpack_require__(5).Stream,
     util   = __webpack_require__(0);
 
 
@@ -4923,7 +5290,7 @@ exports.Messages = Messages;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4999,20 +5366,20 @@ module.exports = StreamReader;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    crypto     = __webpack_require__(5),
-    url        = __webpack_require__(8),
+    crypto     = __webpack_require__(3),
+    url        = __webpack_require__(6),
     util       = __webpack_require__(0),
-    HttpParser = __webpack_require__(11),
+    HttpParser = __webpack_require__(10),
     Base       = __webpack_require__(2),
     Hybi       = __webpack_require__(13),
-    Proxy      = __webpack_require__(35);
+    Proxy      = __webpack_require__(36);
 
 var Client = function(_url, options) {
   this.version = 'hybi-' + Hybi.VERSION;
@@ -5148,12 +5515,12 @@ module.exports = Client;
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*jshint node:true */
 
-var assert = __webpack_require__(27);
+var assert = __webpack_require__(28);
 
 exports.HTTPParser = HTTPParser;
 function HTTPParser(type) {
@@ -5579,20 +5946,20 @@ function parseErrorCode(code) {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports) {
 
 module.exports = require("assert");
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Parser   = __webpack_require__(29),
-    Pipeline = __webpack_require__(30);
+var Parser   = __webpack_require__(30),
+    Pipeline = __webpack_require__(31);
 
 var Extensions = function() {
   this._rsv1 = this._rsv2 = this._rsv3 = null;
@@ -5754,7 +6121,7 @@ module.exports = Extensions;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5864,13 +6231,13 @@ module.exports = Parser;
 
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cell   = __webpack_require__(31),
+var Cell   = __webpack_require__(32),
     Pledge = __webpack_require__(15);
 
 var Pipeline = function(sessions) {
@@ -5918,13 +6285,13 @@ module.exports = Pipeline;
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Functor = __webpack_require__(32),
+var Functor = __webpack_require__(33),
     Pledge  = __webpack_require__(15);
 
 var Cell = function(tuple) {
@@ -5978,7 +6345,7 @@ module.exports = Cell;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6057,7 +6424,7 @@ module.exports = Functor;
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6085,7 +6452,7 @@ module.exports = Frame;
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6126,19 +6493,19 @@ module.exports = Message;
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    Stream     = __webpack_require__(7).Stream,
-    url        = __webpack_require__(8),
+    Stream     = __webpack_require__(5).Stream,
+    url        = __webpack_require__(6),
     util       = __webpack_require__(0),
     Base       = __webpack_require__(2),
-    Headers    = __webpack_require__(10),
-    HttpParser = __webpack_require__(11);
+    Headers    = __webpack_require__(9),
+    HttpParser = __webpack_require__(10);
 
 var PORTS = { 'ws:': 80, 'wss:': 443 };
 
@@ -6232,17 +6599,17 @@ module.exports = Proxy;
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var util       = __webpack_require__(0),
-    HttpParser = __webpack_require__(11),
+    HttpParser = __webpack_require__(10),
     Base       = __webpack_require__(2),
     Draft75    = __webpack_require__(16),
-    Draft76    = __webpack_require__(37),
+    Draft76    = __webpack_require__(38),
     Hybi       = __webpack_require__(13);
 
 var Server = function(options) {
@@ -6351,7 +6718,7 @@ module.exports = Server;
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -6360,7 +6727,7 @@ module.exports = Server;
 var Buffer  = __webpack_require__(1).Buffer,
     Base    = __webpack_require__(2),
     Draft75 = __webpack_require__(16),
-    crypto  = __webpack_require__(5),
+    crypto  = __webpack_require__(3),
     util    = __webpack_require__(0);
 
 
@@ -6475,17 +6842,17 @@ module.exports = Draft76;
 
 
 /***/ }),
-/* 38 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var util   = __webpack_require__(0),
-    net    = __webpack_require__(39),
-    tls    = __webpack_require__(40),
-    crypto = __webpack_require__(5),
-    url    = __webpack_require__(8),
-    driver = __webpack_require__(6),
-    API    = __webpack_require__(12),
-    Event  = __webpack_require__(9);
+    net    = __webpack_require__(40),
+    tls    = __webpack_require__(41),
+    crypto = __webpack_require__(3),
+    url    = __webpack_require__(6),
+    driver = __webpack_require__(4),
+    API    = __webpack_require__(11),
+    Event  = __webpack_require__(7);
 
 var DEFAULT_PORTS    = {'http:': 80, 'https:': 443, 'ws:':80, 'wss:': 443},
     SECURE_PROTOCOLS = ['https:', 'wss:'];
@@ -6565,28 +6932,28 @@ module.exports = Client;
 
 
 /***/ }),
-/* 39 */
+/* 40 */
 /***/ (function(module, exports) {
 
 module.exports = require("net");
 
 /***/ }),
-/* 40 */
+/* 41 */
 /***/ (function(module, exports) {
 
 module.exports = require("tls");
 
 /***/ }),
-/* 41 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream      = __webpack_require__(7).Stream,
+var Stream      = __webpack_require__(5).Stream,
     util        = __webpack_require__(0),
-    driver      = __webpack_require__(6),
-    Headers     = __webpack_require__(10),
-    API         = __webpack_require__(12),
+    driver      = __webpack_require__(4),
+    Headers     = __webpack_require__(9),
+    API         = __webpack_require__(11),
     EventTarget = __webpack_require__(17),
-    Event       = __webpack_require__(9);
+    Event       = __webpack_require__(7);
 
 var EventSource = function(request, response, options) {
   this.writable = true;
@@ -6714,31 +7081,31 @@ module.exports = EventSource;
 
 
 /***/ }),
-/* 42 */
+/* 43 */
 /***/ (function(module, exports) {
 
 module.exports = require("child_process");
 
 /***/ }),
-/* 43 */
+/* 44 */
 /***/ (function(module, exports) {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 44 */
+/* 45 */
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
-/* 45 */
+/* 46 */
 /***/ (function(module, exports) {
 
 module.exports = require("https");
 
 /***/ }),
-/* 46 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -6891,7 +7258,8 @@ function extend(target) {
     for (var i = 0; i < sources.length; i++) {
         var extensions = sources[i];
         for (var property in extensions) {
-            if (extensions[property] && extensions[property].constructor &&
+            if (extensions[property] &&
+                extensions[property].constructor &&
                 extensions[property].constructor === Object) {
                 target[property] = extend(target[property] || {}, extensions[property]);
             }
@@ -6903,16 +7271,16 @@ function extend(target) {
     return target;
 }
 function stringify() {
-    var m = ["Pusher"];
+    var m = ['Pusher'];
     for (var i = 0; i < arguments.length; i++) {
-        if (typeof arguments[i] === "string") {
+        if (typeof arguments[i] === 'string') {
             m.push(arguments[i]);
         }
         else {
             m.push(safeJSONStringify(arguments[i]));
         }
     }
-    return m.join(" : ");
+    return m.join(' : ');
 }
 function arrayIndexOf(array, item) {
     var nativeIndexOf = Array.prototype.indexOf;
@@ -6970,7 +7338,11 @@ function mapObject(object, f) {
     return result;
 }
 function filter(array, test) {
-    test = test || function (value) { return !!value; };
+    test =
+        test ||
+            function (value) {
+                return !!value;
+            };
     var result = [];
     for (var i = 0; i < array.length; i++) {
         if (test(array[i], i, array, result)) {
@@ -7013,7 +7385,7 @@ function collections_all(array, test) {
 }
 function encodeParamsObject(data) {
     return mapObject(data, function (value) {
-        if (typeof value === "object") {
+        if (typeof value === 'object') {
             value = safeJSONStringify(value);
         }
         return encodeURIComponent(encode(value.toString()));
@@ -7023,7 +7395,7 @@ function buildQueryString(data) {
     var params = filterObject(data, function (value) {
         return value !== undefined;
     });
-    var query = map(flatten(encodeParamsObject(params)), util.method("join", "=")).join("&");
+    var query = map(flatten(encodeParamsObject(params)), util.method('join', '=')).join('&');
     return query;
 }
 function decycleObject(object) {
@@ -7062,7 +7434,7 @@ function decycleObject(object) {
             case 'boolean':
                 return value;
         }
-    }(object, '$'));
+    })(object, '$');
 }
 function safeJSONStringify(source) {
     try {
@@ -7075,22 +7447,22 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "5.0.3",
+    VERSION: "6.0.0",
     PROTOCOL: 7,
-    host: 'ws.pusherapp.com',
-    ws_port: 80,
-    wss_port: 443,
-    ws_path: '',
-    sockjs_host: 'sockjs.pusher.com',
-    sockjs_http_port: 80,
-    sockjs_https_port: 443,
-    sockjs_path: '/pusher',
+    wsPort: 80,
+    wssPort: 443,
+    wsPath: '',
+    httpHost: 'sockjs.pusher.com',
+    httpPort: 80,
+    httpsPort: 443,
+    httpPath: '/pusher',
     stats_host: 'stats.pusher.com',
-    channel_auth_endpoint: '/pusher/auth',
-    channel_auth_transport: 'ajax',
-    activity_timeout: 120000,
-    pong_timeout: 30000,
-    unavailable_timeout: 10000,
+    authEndpoint: '/pusher/auth',
+    authTransport: 'ajax',
+    activityTimeout: 120000,
+    pongTimeout: 30000,
+    unavailableTimeout: 10000,
+    cluster: 'mt1',
     cdn_http: "http://js.pusher.com",
     cdn_https: "https://js.pusher.com",
     dependency_suffix: ""
@@ -7100,33 +7472,35 @@ var Defaults = {
 // CONCATENATED MODULE: ./src/core/transports/url_schemes.ts
 
 function getGenericURL(baseScheme, params, path) {
-    var scheme = baseScheme + (params.useTLS ? "s" : "");
+    var scheme = baseScheme + (params.useTLS ? 's' : '');
     var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
-    return scheme + "://" + host + path;
+    return scheme + '://' + host + path;
 }
 function getGenericPath(key, queryString) {
-    var path = "/app/" + key;
-    var query = "?protocol=" + defaults.PROTOCOL +
-        "&client=js" +
-        "&version=" + defaults.VERSION +
-        (queryString ? ("&" + queryString) : "");
+    var path = '/app/' + key;
+    var query = '?protocol=' +
+        defaults.PROTOCOL +
+        '&client=js' +
+        '&version=' +
+        defaults.VERSION +
+        (queryString ? '&' + queryString : '');
     return path + query;
 }
 var ws = {
     getInitial: function (key, params) {
-        var path = (params.httpPath || "") + getGenericPath(key, "flash=false");
-        return getGenericURL("ws", params, path);
+        var path = (params.httpPath || '') + getGenericPath(key, 'flash=false');
+        return getGenericURL('ws', params, path);
     }
 };
 var http = {
     getInitial: function (key, params) {
-        var path = (params.httpPath || "/pusher") + getGenericPath(key);
-        return getGenericURL("http", params, path);
+        var path = (params.httpPath || '/pusher') + getGenericPath(key);
+        return getGenericURL('http', params, path);
     }
 };
 var sockjs = {
     getInitial: function (key, params) {
-        return getGenericURL("http", params, params.httpPath || "/pusher");
+        return getGenericURL('http', params, params.httpPath || '/pusher');
     },
     getPath: function (key, params) {
         return getGenericPath(key);
@@ -7144,7 +7518,8 @@ var callback_registry_CallbackRegistry = (function () {
     };
     CallbackRegistry.prototype.add = function (name, callback, context) {
         var prefixedEventName = prefix(name);
-        this._callbacks[prefixedEventName] = this._callbacks[prefixedEventName] || [];
+        this._callbacks[prefixedEventName] =
+            this._callbacks[prefixedEventName] || [];
         this._callbacks[prefixedEventName].push({
             fn: callback,
             context: context
@@ -7166,8 +7541,8 @@ var callback_registry_CallbackRegistry = (function () {
     CallbackRegistry.prototype.removeCallback = function (names, callback, context) {
         apply(names, function (name) {
             this._callbacks[name] = filter(this._callbacks[name] || [], function (binding) {
-                return (callback && callback !== binding.fn) ||
-                    (context && context !== binding.context);
+                return ((callback && callback !== binding.fn) ||
+                    (context && context !== binding.context));
             });
             if (this._callbacks[name].length === 0) {
                 delete this._callbacks[name];
@@ -7183,7 +7558,7 @@ var callback_registry_CallbackRegistry = (function () {
 }());
 /* harmony default export */ var callback_registry = (callback_registry_CallbackRegistry);
 function prefix(name) {
-    return "_" + name;
+    return '_' + name;
 }
 
 // CONCATENATED MODULE: ./src/core/events/dispatcher.ts
@@ -7341,7 +7716,7 @@ var transport_connection_TransportConnection = (function (_super) {
         _this.priority = priority;
         _this.key = key;
         _this.options = options;
-        _this.state = "new";
+        _this.state = 'new';
         _this.timeline = options.timeline;
         _this.activityTimeout = options.activityTimeout;
         _this.id = _this.timeline.generateUniqueID();
@@ -7355,7 +7730,7 @@ var transport_connection_TransportConnection = (function (_super) {
     };
     TransportConnection.prototype.connect = function () {
         var _this = this;
-        if (this.socket || this.state !== "initialized") {
+        if (this.socket || this.state !== 'initialized') {
             return false;
         }
         var url = this.hooks.urls.getInitial(this.key, this.options);
@@ -7365,13 +7740,13 @@ var transport_connection_TransportConnection = (function (_super) {
         catch (e) {
             util.defer(function () {
                 _this.onError(e);
-                _this.changeState("closed");
+                _this.changeState('closed');
             });
             return false;
         }
         this.bindListeners();
-        logger.debug("Connecting", { transport: this.name, url: url });
-        this.changeState("connecting");
+        logger.debug('Connecting', { transport: this.name, url: url });
+        this.changeState('connecting');
         return true;
     };
     TransportConnection.prototype.close = function () {
@@ -7385,7 +7760,7 @@ var transport_connection_TransportConnection = (function (_super) {
     };
     TransportConnection.prototype.send = function (data) {
         var _this = this;
-        if (this.state === "open") {
+        if (this.state === 'open') {
             util.defer(function () {
                 if (_this.socket) {
                     _this.socket.send(data);
@@ -7398,7 +7773,7 @@ var transport_connection_TransportConnection = (function (_super) {
         }
     };
     TransportConnection.prototype.ping = function () {
-        if (this.state === "open" && this.supportsPing()) {
+        if (this.state === 'open' && this.supportsPing()) {
             this.socket.ping();
         }
     };
@@ -7406,32 +7781,32 @@ var transport_connection_TransportConnection = (function (_super) {
         if (this.hooks.beforeOpen) {
             this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
         }
-        this.changeState("open");
+        this.changeState('open');
         this.socket.onopen = undefined;
     };
     TransportConnection.prototype.onError = function (error) {
-        this.emit("error", { type: 'WebSocketError', error: error });
+        this.emit('error', { type: 'WebSocketError', error: error });
         this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
     };
     TransportConnection.prototype.onClose = function (closeEvent) {
         if (closeEvent) {
-            this.changeState("closed", {
+            this.changeState('closed', {
                 code: closeEvent.code,
                 reason: closeEvent.reason,
                 wasClean: closeEvent.wasClean
             });
         }
         else {
-            this.changeState("closed");
+            this.changeState('closed');
         }
         this.unbindListeners();
         this.socket = undefined;
     };
     TransportConnection.prototype.onMessage = function (message) {
-        this.emit("message", message);
+        this.emit('message', message);
     };
     TransportConnection.prototype.onActivity = function () {
-        this.emit("activity");
+        this.emit('activity');
     };
     TransportConnection.prototype.bindListeners = function () {
         var _this = this;
@@ -7448,7 +7823,9 @@ var transport_connection_TransportConnection = (function (_super) {
             _this.onMessage(message);
         };
         if (this.supportsPing()) {
-            this.socket.onactivity = function () { _this.onActivity(); };
+            this.socket.onactivity = function () {
+                _this.onActivity();
+            };
         }
     };
     TransportConnection.prototype.unbindListeners = function () {
@@ -7520,11 +7897,13 @@ var httpConfiguration = {
         return true;
     }
 };
-var streamingConfiguration = extend({ getSocket: function (url) {
+var streamingConfiguration = extend({
+    getSocket: function (url) {
         return node_runtime.HTTPFactory.createStreamingSocket(url);
     }
 }, httpConfiguration);
-var pollingConfiguration = extend({ getSocket: function (url) {
+var pollingConfiguration = extend({
+    getSocket: function (url) {
         return node_runtime.HTTPFactory.createPollingSocket(url);
     }
 }, httpConfiguration);
@@ -7533,7 +7912,7 @@ var xhrConfiguration = {
         return node_runtime.isXHRSupported();
     }
 };
-var XHRStreamingTransport = new transports_transport(extend({}, streamingConfiguration, xhrConfiguration));
+var XHRStreamingTransport = new transports_transport((extend({}, streamingConfiguration, xhrConfiguration)));
 var XHRPollingTransport = new transports_transport(extend({}, pollingConfiguration, xhrConfiguration));
 var Transports = {
     ws: WSTransport,
@@ -7561,12 +7940,12 @@ var assistant_to_the_transport_manager_AssistantToTheTransportManager = (functio
         var connection = this.transport.createConnection(name, priority, key, options);
         var openTimestamp = null;
         var onOpen = function () {
-            connection.unbind("open", onOpen);
-            connection.bind("closed", onClosed);
+            connection.unbind('open', onOpen);
+            connection.bind('closed', onClosed);
             openTimestamp = util.now();
         };
         var onClosed = function (closeEvent) {
-            connection.unbind("closed", onClosed);
+            connection.unbind('closed', onClosed);
             if (closeEvent.code === 1002 || closeEvent.code === 1003) {
                 _this.manager.reportDeath();
             }
@@ -7578,7 +7957,7 @@ var assistant_to_the_transport_manager_AssistantToTheTransportManager = (functio
                 }
             }
         };
-        connection.bind("open", onOpen);
+        connection.bind('open', onOpen);
         return connection;
     };
     AssistantToTheTransportManager.prototype.isSupported = function (environment) {
@@ -7603,7 +7982,7 @@ var Protocol = {
             var pusherEvent = {
                 event: messageData.event,
                 channel: messageData.channel,
-                data: pusherEventData,
+                data: pusherEventData
             };
             if (messageData.user_id) {
                 pusherEvent.user_id = messageData.user_id;
@@ -7619,49 +7998,49 @@ var Protocol = {
     },
     processHandshake: function (messageEvent) {
         var message = Protocol.decodeMessage(messageEvent);
-        if (message.event === "pusher:connection_established") {
+        if (message.event === 'pusher:connection_established') {
             if (!message.data.activity_timeout) {
-                throw "No activity timeout specified in handshake";
+                throw 'No activity timeout specified in handshake';
             }
             return {
-                action: "connected",
+                action: 'connected',
                 id: message.data.socket_id,
                 activityTimeout: message.data.activity_timeout * 1000
             };
         }
-        else if (message.event === "pusher:error") {
+        else if (message.event === 'pusher:error') {
             return {
                 action: this.getCloseAction(message.data),
                 error: this.getCloseError(message.data)
             };
         }
         else {
-            throw "Invalid handshake";
+            throw 'Invalid handshake';
         }
     },
     getCloseAction: function (closeEvent) {
         if (closeEvent.code < 4000) {
             if (closeEvent.code >= 1002 && closeEvent.code <= 1004) {
-                return "backoff";
+                return 'backoff';
             }
             else {
                 return null;
             }
         }
         else if (closeEvent.code === 4000) {
-            return "tls_only";
+            return 'tls_only';
         }
         else if (closeEvent.code < 4100) {
-            return "refused";
+            return 'refused';
         }
         else if (closeEvent.code < 4200) {
-            return "backoff";
+            return 'backoff';
         }
         else if (closeEvent.code < 4300) {
-            return "retry";
+            return 'retry';
         }
         else {
-            return "refused";
+            return 'refused';
         }
     },
     getCloseError: function (closeEvent) {
@@ -7753,23 +8132,26 @@ var connection_Connection = (function (_super) {
                     logger.debug('Event recd', pusherEvent);
                     switch (pusherEvent.event) {
                         case 'pusher:error':
-                            _this.emit('error', { type: 'PusherError', data: pusherEvent.data });
+                            _this.emit('error', {
+                                type: 'PusherError',
+                                data: pusherEvent.data
+                            });
                             break;
                         case 'pusher:ping':
-                            _this.emit("ping");
+                            _this.emit('ping');
                             break;
                         case 'pusher:pong':
-                            _this.emit("pong");
+                            _this.emit('pong');
                             break;
                     }
                     _this.emit('message', pusherEvent);
                 }
             },
             activity: function () {
-                _this.emit("activity");
+                _this.emit('activity');
             },
             error: function (error) {
-                _this.emit("error", { type: "WebSocketError", error: error });
+                _this.emit('error', { type: 'WebSocketError', error: error });
             },
             closed: function (closeEvent) {
                 unbindListeners();
@@ -7777,7 +8159,7 @@ var connection_Connection = (function (_super) {
                     _this.handleCloseEvent(closeEvent);
                 }
                 _this.transport = null;
-                _this.emit("closed");
+                _this.emit('closed');
             }
         };
         var unbindListeners = function () {
@@ -7826,12 +8208,12 @@ var handshake_Handshake = (function () {
                 result = protocol.processHandshake(m);
             }
             catch (e) {
-                _this.finish("error", { error: e });
+                _this.finish('error', { error: e });
                 _this.transport.close();
                 return;
             }
-            if (result.action === "connected") {
-                _this.finish("connected", {
+            if (result.action === 'connected') {
+                _this.finish('connected', {
                     connection: new connection_connection(result.id, _this.transport),
                     activityTimeout: result.activityTimeout
                 });
@@ -7843,16 +8225,16 @@ var handshake_Handshake = (function () {
         };
         this.onClosed = function (closeEvent) {
             _this.unbindListeners();
-            var action = protocol.getCloseAction(closeEvent) || "backoff";
+            var action = protocol.getCloseAction(closeEvent) || 'backoff';
             var error = protocol.getCloseError(closeEvent);
             _this.finish(action, { error: error });
         };
-        this.transport.bind("message", this.onMessage);
-        this.transport.bind("closed", this.onClosed);
+        this.transport.bind('message', this.onMessage);
+        this.transport.bind('closed', this.onClosed);
     };
     Handshake.prototype.unbindListeners = function () {
-        this.transport.unbind("message", this.onMessage);
-        this.transport.unbind("closed", this.onClosed);
+        this.transport.unbind('message', this.onMessage);
+        this.transport.unbind('closed', this.onClosed);
     };
     Handshake.prototype.finish = function (action, params) {
         this.callback(extend({ transport: this.transport, action: action }, params));
@@ -7867,24 +8249,31 @@ var pusher_authorizer_PusherAuthorizer = (function () {
     function PusherAuthorizer(channel, options) {
         this.channel = channel;
         var authTransport = options.authTransport;
-        if (typeof node_runtime.getAuthorizers()[authTransport] === "undefined") {
+        if (typeof node_runtime.getAuthorizers()[authTransport] === 'undefined') {
             throw "'" + authTransport + "' is not a recognized auth transport";
         }
         this.type = authTransport;
         this.options = options;
-        this.authOptions = (options || {}).auth || {};
+        this.authOptions = options.auth || {};
     }
     PusherAuthorizer.prototype.composeQuery = function (socketId) {
-        var query = 'socket_id=' + encodeURIComponent(socketId) +
-            '&channel_name=' + encodeURIComponent(this.channel.name);
+        var query = 'socket_id=' +
+            encodeURIComponent(socketId) +
+            '&channel_name=' +
+            encodeURIComponent(this.channel.name);
         for (var i in this.authOptions.params) {
-            query += "&" + encodeURIComponent(i) + "=" + encodeURIComponent(this.authOptions.params[i]);
+            query +=
+                '&' +
+                    encodeURIComponent(i) +
+                    '=' +
+                    encodeURIComponent(this.authOptions.params[i]);
         }
         return query;
     };
     PusherAuthorizer.prototype.authorize = function (socketId, callback) {
-        PusherAuthorizer.authorizers = PusherAuthorizer.authorizers || node_runtime.getAuthorizers();
-        return PusherAuthorizer.authorizers[this.type].call(this, node_runtime, socketId, callback);
+        PusherAuthorizer.authorizers =
+            PusherAuthorizer.authorizers || node_runtime.getAuthorizers();
+        PusherAuthorizer.authorizers[this.type].call(this, node_runtime, socketId, callback);
     };
     return PusherAuthorizer;
 }());
@@ -8001,24 +8390,27 @@ var UnsupportedStrategy = (function (_super) {
 
 // CONCATENATED MODULE: ./src/core/utils/url_store.ts
 var urlStore = {
-    baseUrl: "https://pusher.com",
+    baseUrl: 'https://pusher.com',
     urls: {
         authenticationEndpoint: {
-            path: "/docs/authenticating_users",
+            path: '/docs/authenticating_users'
         },
         javascriptQuickStart: {
-            path: "/docs/javascript_quick_start"
+            path: '/docs/javascript_quick_start'
         },
         triggeringClientEvents: {
-            path: "/docs/client_api_guide/client_events#trigger-events"
+            path: '/docs/client_api_guide/client_events#trigger-events'
+        },
+        encryptedChannelSupport: {
+            fullUrl: 'https://github.com/pusher/pusher-js/tree/cc491015371a4bde5743d1c87a0fbac0feb53195#encrypted-channel-support'
         }
     }
 };
 var buildLogSuffix = function (key) {
-    var urlPrefix = "See:";
+    var urlPrefix = 'See:';
     var urlObj = urlStore.urls[key];
     if (!urlObj)
-        return "";
+        return '';
     var url;
     if (urlObj.fullUrl) {
         url = urlObj.fullUrl;
@@ -8027,7 +8419,7 @@ var buildLogSuffix = function (key) {
         url = urlStore.baseUrl + urlObj.path;
     }
     if (!url)
-        return "";
+        return '';
     return urlPrefix + " " + url;
 };
 /* harmony default export */ var url_store = ({ buildLogSuffix: buildLogSuffix });
@@ -8064,14 +8456,14 @@ var channel_Channel = (function (_super) {
         return _this;
     }
     Channel.prototype.authorize = function (socketId, callback) {
-        return callback(false, {});
+        return callback(false, { auth: '' });
     };
     Channel.prototype.trigger = function (event, data) {
-        if (event.indexOf("client-") !== 0) {
+        if (event.indexOf('client-') !== 0) {
             throw new BadEventName("Event '" + event + "' does not start with 'client-'");
         }
         if (!this.subscribed) {
-            var suffix = url_store.buildLogSuffix("triggeringClientEvents");
+            var suffix = url_store.buildLogSuffix('triggeringClientEvents');
             logger.warn("Client event triggered before channel 'subscription_succeeded' event . " + suffix);
         }
         return this.pusher.send_event(event, data, this.name);
@@ -8083,10 +8475,10 @@ var channel_Channel = (function (_super) {
     Channel.prototype.handleEvent = function (event) {
         var eventName = event.event;
         var data = event.data;
-        if (eventName === "pusher_internal:subscription_succeeded") {
+        if (eventName === 'pusher_internal:subscription_succeeded') {
             this.handleSubscriptionSucceededEvent(event);
         }
-        else if (eventName.indexOf("pusher_internal:") !== 0) {
+        else if (eventName.indexOf('pusher_internal:') !== 0) {
             var metadata = {};
             this.emit(eventName, data, metadata);
         }
@@ -8098,7 +8490,7 @@ var channel_Channel = (function (_super) {
             this.pusher.unsubscribe(this.name);
         }
         else {
-            this.emit("pusher:subscription_succeeded", event.data);
+            this.emit('pusher:subscription_succeeded', event.data);
         }
     };
     Channel.prototype.subscribe = function () {
@@ -8114,6 +8506,7 @@ var channel_Channel = (function (_super) {
                 _this.emit('pusher:subscription_error', data);
             }
             else {
+                data = data;
                 _this.pusher.send_event('pusher:subscribe', {
                     auth: data.auth,
                     channel_data: data.channel_data,
@@ -8252,11 +8645,12 @@ var presence_channel_PresenceChannel = (function (_super) {
         var _this = this;
         _super.prototype.authorize.call(this, socketId, function (error, authData) {
             if (!error) {
+                authData = authData;
                 if (authData.channel_data === undefined) {
-                    var suffix = url_store.buildLogSuffix("authenticationEndpoint");
+                    var suffix = url_store.buildLogSuffix('authenticationEndpoint');
                     logger.error("Invalid auth response for channel '" + _this.name + "'," +
                         ("expected 'channel_data' field. " + suffix));
-                    callback("Invalid auth response");
+                    callback('Invalid auth response');
                     return;
                 }
                 var channelData = JSON.parse(authData.channel_data);
@@ -8267,7 +8661,7 @@ var presence_channel_PresenceChannel = (function (_super) {
     };
     PresenceChannel.prototype.handleEvent = function (event) {
         var eventName = event.event;
-        if (eventName.indexOf("pusher_internal:") === 0) {
+        if (eventName.indexOf('pusher_internal:') === 0) {
             this.handleInternalEvent(event);
         }
         else {
@@ -8283,14 +8677,14 @@ var presence_channel_PresenceChannel = (function (_super) {
         var eventName = event.event;
         var data = event.data;
         switch (eventName) {
-            case "pusher_internal:subscription_succeeded":
+            case 'pusher_internal:subscription_succeeded':
                 this.handleSubscriptionSucceededEvent(event);
                 break;
-            case "pusher_internal:member_added":
+            case 'pusher_internal:member_added':
                 var addedMember = this.members.addMember(data);
                 this.emit('pusher:member_added', addedMember);
                 break;
-            case "pusher_internal:member_removed":
+            case 'pusher_internal:member_removed':
                 var removedMember = this.members.removeMember(data);
                 if (removedMember) {
                     this.emit('pusher:member_removed', removedMember);
@@ -8306,7 +8700,7 @@ var presence_channel_PresenceChannel = (function (_super) {
         }
         else {
             this.members.onSubscription(event.data);
-            this.emit("pusher:subscription_succeeded", this.members);
+            this.emit('pusher:subscription_succeeded', this.members);
         }
     };
     PresenceChannel.prototype.disconnect = function () {
@@ -8317,11 +8711,11 @@ var presence_channel_PresenceChannel = (function (_super) {
 }(private_channel));
 /* harmony default export */ var presence_channel = (presence_channel_PresenceChannel);
 
-// EXTERNAL MODULE: ./node_modules/tweetnacl/nacl-fast.js
-var nacl_fast = __webpack_require__(3);
+// EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
+var utf8 = __webpack_require__(12);
 
-// EXTERNAL MODULE: ./node_modules/tweetnacl-util/nacl-util.js
-var nacl_util = __webpack_require__(4);
+// EXTERNAL MODULE: ./node_modules/@stablelib/base64/lib/base64.js
+var base64 = __webpack_require__(8);
 
 // CONCATENATED MODULE: ./src/core/channels/encrypted_channel.ts
 var encrypted_channel_extends = (undefined && undefined.__extends) || (function () {
@@ -8344,9 +8738,10 @@ var encrypted_channel_extends = (undefined && undefined.__extends) || (function 
 
 var encrypted_channel_EncryptedChannel = (function (_super) {
     encrypted_channel_extends(EncryptedChannel, _super);
-    function EncryptedChannel() {
-        var _this = _super !== null && _super.apply(this, arguments) || this;
+    function EncryptedChannel(name, pusher, nacl) {
+        var _this = _super.call(this, name, pusher) || this;
         _this.key = null;
+        _this.nacl = nacl;
         return _this;
     }
     EncryptedChannel.prototype.authorize = function (socketId, callback) {
@@ -8356,14 +8751,14 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
                 callback(true, authData);
                 return;
             }
-            var sharedSecret = authData["shared_secret"];
+            var sharedSecret = authData['shared_secret'];
             if (!sharedSecret) {
                 var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
                 callback(true, errorMsg);
                 return;
             }
-            _this.key = Object(nacl_util["decodeBase64"])(sharedSecret);
-            delete authData["shared_secret"];
+            _this.key = Object(base64["decode"])(sharedSecret);
+            delete authData['shared_secret'];
             callback(false, authData);
         });
     };
@@ -8373,7 +8768,8 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
     EncryptedChannel.prototype.handleEvent = function (event) {
         var eventName = event.event;
         var data = event.data;
-        if (eventName.indexOf("pusher_internal:") === 0 || eventName.indexOf("pusher:") === 0) {
+        if (eventName.indexOf('pusher_internal:') === 0 ||
+            eventName.indexOf('pusher:') === 0) {
             _super.prototype.handleEvent.call(this, event);
             return;
         }
@@ -8386,20 +8782,21 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
             return;
         }
         if (!data.ciphertext || !data.nonce) {
-            logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' + data);
+            logger.error('Unexpected format for encrypted event, expected object with `ciphertext` and `nonce` fields, got: ' +
+                data);
             return;
         }
-        var cipherText = Object(nacl_util["decodeBase64"])(data.ciphertext);
-        if (cipherText.length < nacl_fast["secretbox"].overheadLength) {
-            logger.error("Expected encrypted event ciphertext length to be " + nacl_fast["secretbox"].overheadLength + ", got: " + cipherText.length);
+        var cipherText = Object(base64["decode"])(data.ciphertext);
+        if (cipherText.length < this.nacl.secretbox.overheadLength) {
+            logger.error("Expected encrypted event ciphertext length to be " + this.nacl.secretbox.overheadLength + ", got: " + cipherText.length);
             return;
         }
-        var nonce = Object(nacl_util["decodeBase64"])(data.nonce);
-        if (nonce.length < nacl_fast["secretbox"].nonceLength) {
-            logger.error("Expected encrypted event nonce length to be " + nacl_fast["secretbox"].nonceLength + ", got: " + nonce.length);
+        var nonce = Object(base64["decode"])(data.nonce);
+        if (nonce.length < this.nacl.secretbox.nonceLength) {
+            logger.error("Expected encrypted event nonce length to be " + this.nacl.secretbox.nonceLength + ", got: " + nonce.length);
             return;
         }
-        var bytes = nacl_fast["secretbox"].open(cipherText, nonce, this.key);
+        var bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
         if (bytes === null) {
             logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
             this.authorize(this.pusher.connection.socket_id, function (error, authData) {
@@ -8407,17 +8804,17 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
                     logger.error("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
                     return;
                 }
-                bytes = nacl_fast["secretbox"].open(cipherText, nonce, _this.key);
+                bytes = _this.nacl.secretbox.open(cipherText, nonce, _this.key);
                 if (bytes === null) {
                     logger.error("Failed to decrypt event with new key. Dropping encrypted event");
                     return;
                 }
-                _this.emitJSON(event, Object(nacl_util["encodeUTF8"])(bytes));
+                _this.emitJSON(event, Object(utf8["decode"])(bytes));
                 return;
             });
             return;
         }
-        this.emitJSON(event, Object(nacl_util["encodeUTF8"])(bytes));
+        this.emitJSON(event, Object(utf8["decode"])(bytes));
     };
     EncryptedChannel.prototype.emitJSON = function (eventName, data) {
         try {
@@ -8455,24 +8852,24 @@ var connection_manager_ConnectionManager = (function (_super) {
     connection_manager_extends(ConnectionManager, _super);
     function ConnectionManager(key, options) {
         var _this = _super.call(this) || this;
-        _this.key = key;
-        _this.options = options || {};
-        _this.state = "initialized";
+        _this.state = 'initialized';
         _this.connection = null;
-        _this.usingTLS = !!options.useTLS;
+        _this.key = key;
+        _this.options = options;
         _this.timeline = _this.options.timeline;
+        _this.usingTLS = _this.options.useTLS;
         _this.errorCallbacks = _this.buildErrorCallbacks();
         _this.connectionCallbacks = _this.buildConnectionCallbacks(_this.errorCallbacks);
         _this.handshakeCallbacks = _this.buildHandshakeCallbacks(_this.errorCallbacks);
         var Network = node_runtime.getNetwork();
-        Network.bind("online", function () {
-            _this.timeline.info({ netinfo: "online" });
-            if (_this.state === "connecting" || _this.state === "unavailable") {
+        Network.bind('online', function () {
+            _this.timeline.info({ netinfo: 'online' });
+            if (_this.state === 'connecting' || _this.state === 'unavailable') {
                 _this.retryIn(0);
             }
         });
-        Network.bind("offline", function () {
-            _this.timeline.info({ netinfo: "offline" });
+        Network.bind('offline', function () {
+            _this.timeline.info({ netinfo: 'offline' });
             if (_this.connection) {
                 _this.sendActivityCheck();
             }
@@ -8485,14 +8882,13 @@ var connection_manager_ConnectionManager = (function (_super) {
             return;
         }
         if (!this.strategy.isSupported()) {
-            this.updateState("failed");
+            this.updateState('failed');
             return;
         }
-        this.updateState("connecting");
+        this.updateState('connecting');
         this.startConnecting();
         this.setUnavailableTimer();
     };
-    ;
     ConnectionManager.prototype.send = function (data) {
         if (this.connection) {
             return this.connection.send(data);
@@ -8501,7 +8897,6 @@ var connection_manager_ConnectionManager = (function (_super) {
             return false;
         }
     };
-    ;
     ConnectionManager.prototype.send_event = function (name, data, channel) {
         if (this.connection) {
             return this.connection.send_event(name, data, channel);
@@ -8510,16 +8905,13 @@ var connection_manager_ConnectionManager = (function (_super) {
             return false;
         }
     };
-    ;
     ConnectionManager.prototype.disconnect = function () {
         this.disconnectInternally();
-        this.updateState("disconnected");
+        this.updateState('disconnected');
     };
-    ;
     ConnectionManager.prototype.isUsingTLS = function () {
         return this.usingTLS;
     };
-    ;
     ConnectionManager.prototype.startConnecting = function () {
         var _this = this;
         var callback = function (error, handshake) {
@@ -8527,8 +8919,11 @@ var connection_manager_ConnectionManager = (function (_super) {
                 _this.runner = _this.strategy.connect(0, callback);
             }
             else {
-                if (handshake.action === "error") {
-                    _this.emit("error", { type: "HandshakeError", error: handshake.error });
+                if (handshake.action === 'error') {
+                    _this.emit('error', {
+                        type: 'HandshakeError',
+                        error: handshake.error
+                    });
                     _this.timeline.error({ handshakeError: handshake.error });
                 }
                 else {
@@ -8539,14 +8934,12 @@ var connection_manager_ConnectionManager = (function (_super) {
         };
         this.runner = this.strategy.connect(0, callback);
     };
-    ;
     ConnectionManager.prototype.abortConnecting = function () {
         if (this.runner) {
             this.runner.abort();
             this.runner = null;
         }
     };
-    ;
     ConnectionManager.prototype.disconnectInternally = function () {
         this.abortConnecting();
         this.clearRetryTimer();
@@ -8556,7 +8949,6 @@ var connection_manager_ConnectionManager = (function (_super) {
             connection.close();
         }
     };
-    ;
     ConnectionManager.prototype.updateStrategy = function () {
         this.strategy = this.options.getStrategy({
             key: this.key,
@@ -8564,39 +8956,34 @@ var connection_manager_ConnectionManager = (function (_super) {
             useTLS: this.usingTLS
         });
     };
-    ;
     ConnectionManager.prototype.retryIn = function (delay) {
         var _this = this;
-        this.timeline.info({ action: "retry", delay: delay });
+        this.timeline.info({ action: 'retry', delay: delay });
         if (delay > 0) {
-            this.emit("connecting_in", Math.round(delay / 1000));
+            this.emit('connecting_in', Math.round(delay / 1000));
         }
         this.retryTimer = new OneOffTimer(delay || 0, function () {
             _this.disconnectInternally();
             _this.connect();
         });
     };
-    ;
     ConnectionManager.prototype.clearRetryTimer = function () {
         if (this.retryTimer) {
             this.retryTimer.ensureAborted();
             this.retryTimer = null;
         }
     };
-    ;
     ConnectionManager.prototype.setUnavailableTimer = function () {
         var _this = this;
         this.unavailableTimer = new OneOffTimer(this.options.unavailableTimeout, function () {
-            _this.updateState("unavailable");
+            _this.updateState('unavailable');
         });
     };
-    ;
     ConnectionManager.prototype.clearUnavailableTimer = function () {
         if (this.unavailableTimer) {
             this.unavailableTimer.ensureAborted();
         }
     };
-    ;
     ConnectionManager.prototype.sendActivityCheck = function () {
         var _this = this;
         this.stopActivityCheck();
@@ -8606,7 +8993,6 @@ var connection_manager_ConnectionManager = (function (_super) {
             _this.retryIn(0);
         });
     };
-    ;
     ConnectionManager.prototype.resetActivityCheck = function () {
         var _this = this;
         this.stopActivityCheck();
@@ -8616,13 +9002,11 @@ var connection_manager_ConnectionManager = (function (_super) {
             });
         }
     };
-    ;
     ConnectionManager.prototype.stopActivityCheck = function () {
         if (this.activityTimer) {
             this.activityTimer.ensureAborted();
         }
     };
-    ;
     ConnectionManager.prototype.buildConnectionCallbacks = function (errorCallbacks) {
         var _this = this;
         return extend({}, errorCallbacks, {
@@ -8637,7 +9021,7 @@ var connection_manager_ConnectionManager = (function (_super) {
                 _this.resetActivityCheck();
             },
             error: function (error) {
-                _this.emit("error", { type: "WebSocketError", error: error });
+                _this.emit('error', { type: 'WebSocketError', error: error });
             },
             closed: function () {
                 _this.abandonConnection();
@@ -8647,7 +9031,6 @@ var connection_manager_ConnectionManager = (function (_super) {
             }
         });
     };
-    ;
     ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
         var _this = this;
         return extend({}, errorCallbacks, {
@@ -8656,17 +9039,16 @@ var connection_manager_ConnectionManager = (function (_super) {
                 _this.clearUnavailableTimer();
                 _this.setConnection(handshake.connection);
                 _this.socket_id = _this.connection.id;
-                _this.updateState("connected", { socket_id: _this.socket_id });
+                _this.updateState('connected', { socket_id: _this.socket_id });
             }
         });
     };
-    ;
     ConnectionManager.prototype.buildErrorCallbacks = function () {
         var _this = this;
         var withErrorEmitted = function (callback) {
             return function (result) {
                 if (result.error) {
-                    _this.emit("error", { type: "WebSocketError", error: result.error });
+                    _this.emit('error', { type: 'WebSocketError', error: result.error });
                 }
                 callback(result);
             };
@@ -8688,7 +9070,6 @@ var connection_manager_ConnectionManager = (function (_super) {
             })
         };
     };
-    ;
     ConnectionManager.prototype.setConnection = function (connection) {
         this.connection = connection;
         for (var event in this.connectionCallbacks) {
@@ -8696,7 +9077,6 @@ var connection_manager_ConnectionManager = (function (_super) {
         }
         this.resetActivityCheck();
     };
-    ;
     ConnectionManager.prototype.abandonConnection = function () {
         if (!this.connection) {
             return;
@@ -8714,8 +9094,8 @@ var connection_manager_ConnectionManager = (function (_super) {
         this.state = newState;
         if (previousState !== newState) {
             var newStateDescription = newState;
-            if (newStateDescription === "connected") {
-                newStateDescription += " with new socket ID " + data.socket_id;
+            if (newStateDescription === 'connected') {
+                newStateDescription += ' with new socket ID ' + data.socket_id;
             }
             logger.debug('State changed', previousState + ' -> ' + newStateDescription);
             this.timeline.info({ state: newState, params: data });
@@ -8724,13 +9104,14 @@ var connection_manager_ConnectionManager = (function (_super) {
         }
     };
     ConnectionManager.prototype.shouldRetry = function () {
-        return this.state === "connecting" || this.state === "connected";
+        return this.state === 'connecting' || this.state === 'connected';
     };
     return ConnectionManager;
 }(dispatcher));
 /* harmony default export */ var connection_manager = (connection_manager_ConnectionManager);
 
 // CONCATENATED MODULE: ./src/core/channels/channels.ts
+
 
 
 
@@ -8765,8 +9146,12 @@ var channels_Channels = (function () {
 /* harmony default export */ var channels = (channels_Channels);
 function createChannel(name, pusher) {
     if (name.indexOf('private-encrypted-') === 0) {
-        if (false) { var errorMsg; }
-        return factory.createEncryptedChannel(name, pusher);
+        if (pusher.config.nacl) {
+            return factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
+        }
+        var errMsg = 'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
+        var suffix = url_store.buildLogSuffix('encryptedChannelSupport');
+        throw new UnsupportedFeature(errMsg + ". " + suffix);
     }
     else if (name.indexOf('private-') === 0) {
         return factory.createPrivateChannel(name, pusher);
@@ -8806,8 +9191,8 @@ var Factory = {
     createPresenceChannel: function (name, pusher) {
         return new presence_channel(name, pusher);
     },
-    createEncryptedChannel: function (name, pusher) {
-        return new encrypted_channel(name, pusher);
+    createEncryptedChannel: function (name, pusher, nacl) {
+        return new encrypted_channel(name, pusher, nacl);
     },
     createTimelineSender: function (timeline, options) {
         return new timeline_sender(timeline, options);
@@ -8863,7 +9248,7 @@ var sequential_strategy_SequentialStrategy = (function () {
         this.timeoutLimit = options.timeoutLimit;
     }
     SequentialStrategy.prototype.isSupported = function () {
-        return any(this.strategies, util.method("isSupported"));
+        return any(this.strategies, util.method('isSupported'));
     };
     SequentialStrategy.prototype.connect = function (minPriority, callback) {
         var _this = this;
@@ -8949,7 +9334,7 @@ var best_connected_ever_strategy_BestConnectedEverStrategy = (function () {
         this.strategies = strategies;
     }
     BestConnectedEverStrategy.prototype.isSupported = function () {
-        return any(this.strategies, util.method("isSupported"));
+        return any(this.strategies, util.method('isSupported'));
     };
     BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {
         return connect(this.strategies, minPriority, function (i, runners) {
@@ -9033,7 +9418,9 @@ var cached_strategy_CachedStrategy = (function () {
             }
         }
         var startTimestamp = util.now();
-        var runner = strategies.pop().connect(minPriority, function cb(error, handshake) {
+        var runner = strategies
+            .pop()
+            .connect(minPriority, function cb(error, handshake) {
             if (error) {
                 flushTransportCache(usingTLS);
                 if (strategies.length > 0) {
@@ -9065,7 +9452,7 @@ var cached_strategy_CachedStrategy = (function () {
 }());
 /* harmony default export */ var cached_strategy = (cached_strategy_CachedStrategy);
 function getTransportCacheKey(usingTLS) {
-    return "pusherTransport" + (usingTLS ? "TLS" : "NonTLS");
+    return 'pusherTransport' + (usingTLS ? 'TLS' : 'NonTLS');
 }
 function fetchTransportCache(usingTLS) {
     var storage = node_runtime.getLocalStorage();
@@ -9197,26 +9584,26 @@ function testSupportsStrategy(strategy) {
         return strategy.isSupported();
     };
 }
-var getDefaultStrategy = function (config, defineTransport) {
+var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     var definedTransports = {};
     function defineTransportStrategy(name, type, priority, options, manager) {
         var transport = defineTransport(config, name, type, priority, options, manager);
         definedTransports[name] = transport;
         return transport;
     }
-    var ws_options = {
-        hostNonTLS: config.wsHost + ":" + config.wsPort,
-        hostTLS: config.wsHost + ":" + config.wssPort,
+    var ws_options = Object.assign({}, baseOptions, {
+        hostNonTLS: config.wsHost + ':' + config.wsPort,
+        hostTLS: config.wsHost + ':' + config.wssPort,
         httpPath: config.wsPath
-    };
+    });
     var wss_options = extend({}, ws_options, {
         useTLS: true
     });
-    var http_options = {
-        hostNonTLS: config.httpHost + ":" + config.httpPort,
-        hostTLS: config.httpHost + ":" + config.httpsPort,
+    var http_options = Object.assign({}, baseOptions, {
+        hostNonTLS: config.httpHost + ':' + config.httpPort,
+        hostTLS: config.httpHost + ':' + config.httpsPort,
         httpPath: config.httpPath
-    };
+    });
     var timeouts = {
         loop: true,
         timeout: 15000,
@@ -9225,25 +9612,33 @@ var getDefaultStrategy = function (config, defineTransport) {
     var ws_manager = new transport_manager({
         lives: 2,
         minPingDelay: 10000,
-        maxPingDelay: config.activity_timeout
+        maxPingDelay: config.activityTimeout
     });
     var streaming_manager = new transport_manager({
         lives: 2,
         minPingDelay: 10000,
-        maxPingDelay: config.activity_timeout
+        maxPingDelay: config.activityTimeout
     });
-    var ws_transport = defineTransportStrategy("ws", "ws", 3, ws_options, ws_manager);
-    var wss_transport = defineTransportStrategy("wss", "ws", 3, wss_options, ws_manager);
-    var xhr_streaming_transport = defineTransportStrategy("xhr_streaming", "xhr_streaming", 1, http_options, streaming_manager);
-    var xhr_polling_transport = defineTransportStrategy("xhr_polling", "xhr_polling", 1, http_options);
+    var ws_transport = defineTransportStrategy('ws', 'ws', 3, ws_options, ws_manager);
+    var wss_transport = defineTransportStrategy('wss', 'ws', 3, wss_options, ws_manager);
+    var xhr_streaming_transport = defineTransportStrategy('xhr_streaming', 'xhr_streaming', 1, http_options, streaming_manager);
+    var xhr_polling_transport = defineTransportStrategy('xhr_polling', 'xhr_polling', 1, http_options);
     var ws_loop = new sequential_strategy([ws_transport], timeouts);
     var wss_loop = new sequential_strategy([wss_transport], timeouts);
     var streaming_loop = new sequential_strategy([xhr_streaming_transport], timeouts);
     var polling_loop = new sequential_strategy([xhr_polling_transport], timeouts);
-    var http_loop = new sequential_strategy([new if_strategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy([streaming_loop, new delayed_strategy(polling_loop, { delay: 4000 })]), polling_loop)], timeouts);
+    var http_loop = new sequential_strategy([
+        new if_strategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy([
+            streaming_loop,
+            new delayed_strategy(polling_loop, { delay: 4000 })
+        ]), polling_loop)
+    ], timeouts);
     var wsStrategy;
-    if (config.useTLS) {
-        wsStrategy = new best_connected_ever_strategy([ws_loop, new delayed_strategy(http_loop, { delay: 2000 })]);
+    if (baseOptions.useTLS) {
+        wsStrategy = new best_connected_ever_strategy([
+            ws_loop,
+            new delayed_strategy(http_loop, { delay: 2000 })
+        ]);
     }
     else {
         wsStrategy = new best_connected_ever_strategy([
@@ -9254,8 +9649,8 @@ var getDefaultStrategy = function (config, defineTransport) {
     }
     return new cached_strategy(new first_connected_strategy(new if_strategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop)), definedTransports, {
         ttl: 1800000,
-        timeline: config.timeline,
-        useTLS: config.useTLS
+        timeline: baseOptions.timeline,
+        useTLS: baseOptions.useTLS
     });
 };
 /* harmony default export */ var default_strategy = (getDefaultStrategy);
@@ -9264,10 +9659,10 @@ var getDefaultStrategy = function (config, defineTransport) {
 /* harmony default export */ var transport_connection_initializer = (function () {
     var self = this;
     self.timeline.info(self.buildTimelineMessage({
-        transport: self.name + (self.options.useTLS ? "s" : "")
+        transport: self.name + (self.options.useTLS ? 's' : '')
     }));
     if (self.hooks.isInitialized()) {
-        self.changeState("initialized");
+        self.changeState('initialized');
     }
     else {
         self.onClose();
@@ -9310,7 +9705,7 @@ var http_request_HTTPRequest = (function (_super) {
         node_runtime.addUnloadListener(this.unloader);
         this.xhr.open(this.method, this.url, true);
         if (this.xhr.setRequestHeader) {
-            this.xhr.setRequestHeader("Content-Type", "application/json");
+            this.xhr.setRequestHeader('Content-Type', 'application/json');
         }
         this.xhr.send(payload);
     };
@@ -9328,19 +9723,19 @@ var http_request_HTTPRequest = (function (_super) {
         while (true) {
             var chunk = this.advanceBuffer(data);
             if (chunk) {
-                this.emit("chunk", { status: status, data: chunk });
+                this.emit('chunk', { status: status, data: chunk });
             }
             else {
                 break;
             }
         }
         if (this.isBufferTooLong(data)) {
-            this.emit("buffer_too_long");
+            this.emit('buffer_too_long');
         }
     };
     HTTPRequest.prototype.advanceBuffer = function (buffer) {
         var unreadData = buffer.slice(this.position);
-        var endOfLinePosition = unreadData.indexOf("\n");
+        var endOfLinePosition = unreadData.indexOf('\n');
         if (endOfLinePosition !== -1) {
             this.position += endOfLinePosition + 1;
             return unreadData.slice(0, endOfLinePosition);
@@ -9373,7 +9768,7 @@ var autoIncrement = 1;
 var http_socket_HTTPSocket = (function () {
     function HTTPSocket(hooks, url) {
         this.hooks = hooks;
-        this.session = randomNumber(1000) + "/" + randomString(8);
+        this.session = randomNumber(1000) + '/' + randomString(8);
         this.location = getLocation(url);
         this.readyState = state.CONNECTING;
         this.openStream();
@@ -9390,7 +9785,7 @@ var http_socket_HTTPSocket = (function () {
     HTTPSocket.prototype.sendRaw = function (payload) {
         if (this.readyState === state.OPEN) {
             try {
-                node_runtime.createSocketRequest("POST", getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+                node_runtime.createSocketRequest('POST', getUniqueURL(getSendURL(this.location, this.session))).start(payload);
                 return true;
             }
             catch (e) {
@@ -9405,7 +9800,6 @@ var http_socket_HTTPSocket = (function () {
         this.closeStream();
         this.openStream();
     };
-    ;
     HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
         this.closeStream();
         this.readyState = state.CLOSED;
@@ -9461,7 +9855,7 @@ var http_socket_HTTPSocket = (function () {
             }
         }
         else {
-            this.onClose(1006, "Server lost session", true);
+            this.onClose(1006, 'Server lost session', true);
         }
     };
     HTTPSocket.prototype.onEvent = function (event) {
@@ -9481,14 +9875,14 @@ var http_socket_HTTPSocket = (function () {
     };
     HTTPSocket.prototype.openStream = function () {
         var _this = this;
-        this.stream = node_runtime.createSocketRequest("POST", getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
-        this.stream.bind("chunk", function (chunk) {
+        this.stream = node_runtime.createSocketRequest('POST', getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
+        this.stream.bind('chunk', function (chunk) {
             _this.onChunk(chunk);
         });
-        this.stream.bind("finished", function (status) {
+        this.stream.bind('finished', function (status) {
             _this.hooks.onFinished(_this, status);
         });
-        this.stream.bind("buffer_too_long", function () {
+        this.stream.bind('buffer_too_long', function () {
             _this.reconnect();
         });
         try {
@@ -9497,7 +9891,7 @@ var http_socket_HTTPSocket = (function () {
         catch (error) {
             util.defer(function () {
                 _this.onError(error);
-                _this.onClose(1006, "Could not start streaming", false);
+                _this.onClose(1006, 'Could not start streaming', false);
             });
         }
     };
@@ -9518,11 +9912,11 @@ function getLocation(url) {
     };
 }
 function getSendURL(url, session) {
-    return url.base + "/" + session + "/xhr_send";
+    return url.base + '/' + session + '/xhr_send';
 }
 function getUniqueURL(url) {
-    var separator = (url.indexOf('?') === -1) ? "?" : "&";
-    return url + separator + "t=" + (+new Date()) + "&n=" + autoIncrement++;
+    var separator = url.indexOf('?') === -1 ? '?' : '&';
+    return url + separator + 't=' + +new Date() + '&n=' + autoIncrement++;
 }
 function replaceHost(url, hostname) {
     var urlParts = /(https?:\/\/)([^\/:]+)((\/|:)?.*)/.exec(url);
@@ -9543,16 +9937,16 @@ function randomString(length) {
 // CONCATENATED MODULE: ./src/core/http/http_streaming_socket.ts
 var http_streaming_socket_hooks = {
     getReceiveURL: function (url, session) {
-        return url.base + "/" + session + "/xhr_streaming" + url.queryString;
+        return url.base + '/' + session + '/xhr_streaming' + url.queryString;
     },
     onHeartbeat: function (socket) {
-        socket.sendRaw("[]");
+        socket.sendRaw('[]');
     },
     sendHeartbeat: function (socket) {
-        socket.sendRaw("[]");
+        socket.sendRaw('[]');
     },
     onFinished: function (socket, status) {
-        socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+        socket.onClose(1006, 'Connection interrupted (' + status + ')', false);
     }
 };
 /* harmony default export */ var http_streaming_socket = (http_streaming_socket_hooks);
@@ -9560,19 +9954,19 @@ var http_streaming_socket_hooks = {
 // CONCATENATED MODULE: ./src/core/http/http_polling_socket.ts
 var http_polling_socket_hooks = {
     getReceiveURL: function (url, session) {
-        return url.base + "/" + session + "/xhr" + url.queryString;
+        return url.base + '/' + session + '/xhr' + url.queryString;
     },
     onHeartbeat: function () {
     },
     sendHeartbeat: function (socket) {
-        socket.sendRaw("[]");
+        socket.sendRaw('[]');
     },
     onFinished: function (socket, status) {
         if (status === 200) {
             socket.reconnect();
         }
         else {
-            socket.onClose(1006, "Connection interrupted (" + status + ")", false);
+            socket.onClose(1006, 'Connection interrupted (' + status + ')', false);
         }
     }
 };
@@ -9595,7 +9989,7 @@ var http_xhr_request_hooks = {
                     if (xhr.responseText && xhr.responseText.length > 0) {
                         socket.onChunk(xhr.status, xhr.responseText);
                     }
-                    socket.emit("finished", xhr.status);
+                    socket.emit('finished', xhr.status);
                     socket.close();
                     break;
             }
@@ -9652,10 +10046,12 @@ var Isomorphic = {
         return undefined;
     },
     getClientFeatures: function () {
-        return keys(filterObject({ "ws": transports.ws }, function (t) { return t.isSupported({}); }));
+        return keys(filterObject({ ws: transports.ws }, function (t) {
+            return t.isSupported({});
+        }));
     },
     getProtocol: function () {
-        return "http:";
+        return 'http:';
     },
     isXHRSupported: function () {
         return true;
@@ -9665,7 +10061,7 @@ var Isomorphic = {
             return this.HTTPFactory.createXHR(method, url);
         }
         else {
-            throw "Cross-origin HTTP requests are not supported";
+            throw 'Cross-origin HTTP requests are not supported';
         }
     },
     createXHR: function () {
@@ -9722,8 +10118,8 @@ var net_info_Network = new NetInfo();
 var ajax = function (context, socketId, callback) {
     var self = this, xhr;
     xhr = node_runtime.createXHR();
-    xhr.open("POST", self.options.authEndpoint, true);
-    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.open('POST', self.options.authEndpoint, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in this.authOptions.headers) {
         xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
     }
@@ -9736,14 +10132,15 @@ var ajax = function (context, socketId, callback) {
                     parsed = true;
                 }
                 catch (e) {
-                    callback(true, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' + xhr.responseText);
+                    callback(true, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+                        xhr.responseText);
                 }
                 if (parsed) {
                     callback(false, data);
                 }
             }
             else {
-                var suffix = url_store.buildLogSuffix("authenticationEndpoint");
+                var suffix = url_store.buildLogSuffix('authenticationEndpoint');
                 logger.error('Unable to retrieve auth string from auth endpoint - ' +
                     ("received status " + xhr.status + " from " + self.options.authEndpoint + ". ") +
                     ("Clients must be authenticated to join private or presence channels. " + suffix));
@@ -9762,12 +10159,12 @@ var ajax = function (context, socketId, callback) {
 
 var getAgent = function (sender, useTLS) {
     return function (data, callback) {
-        var scheme = "http" + (useTLS ? "s" : "") + "://";
+        var scheme = 'http' + (useTLS ? 's' : '') + '://';
         var url = scheme + (sender.host || sender.options.host) + sender.options.path;
         var query = buildQueryString(data);
-        url += ("/" + 2 + "?" + query);
+        url += '/' + 2 + '?' + query;
         var xhr = node_runtime.createXHR();
-        xhr.open("GET", url, true);
+        xhr.open('GET', url, true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
                 var status_1 = xhr.status, responseText = xhr.responseText;
@@ -9881,7 +10278,7 @@ var timeline_Timeline = (function () {
             session: this.session,
             bundle: this.sent + 1,
             key: this.key,
-            lib: "js",
+            lib: 'js',
             version: this.options.version,
             cluster: this.options.cluster,
             features: this.options.features,
@@ -9935,7 +10332,7 @@ var transport_strategy_TransportStrategy = (function () {
         var transport = this.transport.createConnection(this.name, this.priority, this.options.key, this.options);
         var handshake = null;
         var onInitialized = function () {
-            transport.unbind("initialized", onInitialized);
+            transport.unbind('initialized', onInitialized);
             transport.connect();
         };
         var onOpen = function () {
@@ -9956,15 +10353,15 @@ var transport_strategy_TransportStrategy = (function () {
             callback(new TransportClosed(serializedTransport));
         };
         var unbindListeners = function () {
-            transport.unbind("initialized", onInitialized);
-            transport.unbind("open", onOpen);
-            transport.unbind("error", onError);
-            transport.unbind("closed", onClosed);
+            transport.unbind('initialized', onInitialized);
+            transport.unbind('open', onOpen);
+            transport.unbind('error', onError);
+            transport.unbind('closed', onClosed);
         };
-        transport.bind("initialized", onInitialized);
-        transport.bind("open", onOpen);
-        transport.bind("error", onError);
-        transport.bind("closed", onClosed);
+        transport.bind('initialized', onInitialized);
+        transport.bind('open', onOpen);
+        transport.bind('error', onError);
+        transport.bind('closed', onClosed);
         transport.initialize();
         return {
             abort: function () {
@@ -10025,12 +10422,8 @@ var strategy_builder_defineTransport = function (config, name, type, priority, o
             arrayIndexOf(config.disabledTransports, name) === -1);
     var transport;
     if (enabled) {
-        transport = new transport_strategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, extend({
-            key: config.key,
-            useTLS: config.useTLS,
-            timeline: config.timeline,
-            ignoreNullOrigin: config.ignoreNullOrigin
-        }, options));
+        options = Object.assign({ ignoreNullOrigin: config.ignoreNullOrigin }, options);
+        transport = new transport_strategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
     }
     else {
         transport = strategy_builder_UnsupportedStrategy;
@@ -10056,30 +10449,83 @@ var strategy_builder_UnsupportedStrategy = {
 
 // CONCATENATED MODULE: ./src/core/config.ts
 
-var getGlobalConfig = function () {
-    return {
-        wsHost: defaults.host,
-        wsPort: defaults.ws_port,
-        wssPort: defaults.wss_port,
-        wsPath: defaults.ws_path,
-        httpHost: defaults.sockjs_host,
-        httpPort: defaults.sockjs_http_port,
-        httpsPort: defaults.sockjs_https_port,
-        httpPath: defaults.sockjs_path,
-        statsHost: defaults.stats_host,
-        authEndpoint: defaults.channel_auth_endpoint,
-        authTransport: defaults.channel_auth_transport,
-        activity_timeout: defaults.activity_timeout,
-        pong_timeout: defaults.pong_timeout,
-        unavailable_timeout: defaults.unavailable_timeout
+
+function getConfig(opts) {
+    var config = {
+        activityTimeout: opts.activityTimeout || defaults.activityTimeout,
+        authEndpoint: opts.authEndpoint || defaults.authEndpoint,
+        authTransport: opts.authTransport || defaults.authTransport,
+        cluster: opts.cluster || defaults.cluster,
+        httpPath: opts.httpPath || defaults.httpPath,
+        httpPort: opts.httpPort || defaults.httpPort,
+        httpsPort: opts.httpsPort || defaults.httpsPort,
+        pongTimeout: opts.pongTimeout || defaults.pongTimeout,
+        statsHost: opts.statsHost || defaults.stats_host,
+        unavailableTimeout: opts.unavailableTimeout || defaults.unavailableTimeout,
+        wsPath: opts.wsPath || defaults.wsPath,
+        wsPort: opts.wsPort || defaults.wsPort,
+        wssPort: opts.wssPort || defaults.wssPort,
+        enableStats: getEnableStatsConfig(opts),
+        httpHost: getHttpHost(opts),
+        useTLS: shouldUseTLS(opts),
+        wsHost: getWebsocketHost(opts)
     };
-};
-var getClusterConfig = function (clusterName) {
-    return {
-        wsHost: 'ws-' + clusterName + '.pusher.com',
-        httpHost: 'sockjs-' + clusterName + '.pusher.com'
-    };
-};
+    if ('auth' in opts)
+        config.auth = opts.auth;
+    if ('authorizer' in opts)
+        config.authorizer = opts.authorizer;
+    if ('disabledTransports' in opts)
+        config.disabledTransports = opts.disabledTransports;
+    if ('enabledTransports' in opts)
+        config.enabledTransports = opts.enabledTransports;
+    if ('ignoreNullOrigin' in opts)
+        config.ignoreNullOrigin = opts.ignoreNullOrigin;
+    if ('timelineParams' in opts)
+        config.timelineParams = opts.timelineParams;
+    if ('nacl' in opts) {
+        config.nacl = opts.nacl;
+    }
+    return config;
+}
+function getHttpHost(opts) {
+    if (opts.httpHost) {
+        return opts.httpHost;
+    }
+    if (opts.cluster) {
+        return "sockjs-" + opts.cluster + ".pusher.com";
+    }
+    return defaults.httpHost;
+}
+function getWebsocketHost(opts) {
+    if (opts.wsHost) {
+        return opts.wsHost;
+    }
+    if (opts.cluster) {
+        return getWebsocketHostFromCluster(opts.cluster);
+    }
+    return getWebsocketHostFromCluster(defaults.cluster);
+}
+function getWebsocketHostFromCluster(cluster) {
+    return "ws-" + cluster + ".pusher.com";
+}
+function shouldUseTLS(opts) {
+    if (node_runtime.getProtocol() === 'https:') {
+        return true;
+    }
+    else if (opts.forceTLS === false) {
+        return false;
+    }
+    return true;
+}
+function getEnableStatsConfig(opts) {
+    if ('enableStats' in opts) {
+        return opts.enableStats;
+    }
+    if ('disableStats' in opts) {
+        return !opts.disableStats;
+    }
+    return false;
+}
 
 // CONCATENATED MODULE: ./src/core/pusher.ts
 
@@ -10103,8 +10549,11 @@ var pusher_Pusher = (function () {
             var suffix = url_store.buildLogSuffix('javascriptQuickStart');
             logger.warn("You should always specify a cluster when connecting. " + suffix);
         }
+        if ('disableStats' in options) {
+            logger.warn('The disableStats option is deprecated in favor of enableStats');
+        }
         this.key = app_key;
-        this.config = extend(getGlobalConfig(), options.cluster ? getClusterConfig(options.cluster) : {}, options);
+        this.config = getConfig(options);
         this.channels = factory.createChannels();
         this.global_emitter = new dispatcher();
         this.sessionID = Math.floor(Math.random() * 1000000000);
@@ -10116,23 +10565,23 @@ var pusher_Pusher = (function () {
             level: timeline_level.INFO,
             version: defaults.VERSION
         });
-        if (!this.config.disableStats) {
+        if (this.config.enableStats) {
             this.timelineSender = factory.createTimelineSender(this.timeline, {
                 host: this.config.statsHost,
                 path: '/timeline/v2/' + node_runtime.TimelineTransport.name
             });
         }
         var getStrategy = function (options) {
-            var config = extend({}, _this.config, options);
-            return node_runtime.getDefaultStrategy(config, strategy_builder_defineTransport);
+            return node_runtime.getDefaultStrategy(_this.config, options, strategy_builder_defineTransport);
         };
-        this.connection = factory.createConnectionManager(this.key, extend({
+        this.connection = factory.createConnectionManager(this.key, {
             getStrategy: getStrategy,
             timeline: this.timeline,
-            activityTimeout: this.config.activity_timeout,
-            pongTimeout: this.config.pong_timeout,
-            unavailableTimeout: this.config.unavailable_timeout
-        }, this.config, { useTLS: this.shouldUseTLS() }));
+            activityTimeout: this.config.activityTimeout,
+            pongTimeout: this.config.pongTimeout,
+            unavailableTimeout: this.config.unavailableTimeout,
+            useTLS: Boolean(this.config.useTLS)
+        });
         this.connection.bind('connected', function () {
             _this.subscribeAll();
             if (_this.timelineSender) {
@@ -10258,15 +10707,7 @@ var pusher_Pusher = (function () {
         return this.connection.send_event(event_name, data, channel);
     };
     Pusher.prototype.shouldUseTLS = function () {
-        if (node_runtime.getProtocol() === 'https:') {
-            return true;
-        }
-        else if (this.config.forceTLS === true) {
-            return true;
-        }
-        else {
-            return Boolean(this.config.encrypted);
-        }
+        return this.config.useTLS;
     };
     Pusher.instances = [];
     Pusher.isReady = false;
@@ -10277,13 +10718,47 @@ var pusher_Pusher = (function () {
     Pusher.auth_callbacks = node_runtime.auth_callbacks;
     return Pusher;
 }());
-/* harmony default export */ var core_pusher = __webpack_exports__["default"] = (pusher_Pusher);
+/* harmony default export */ var core_pusher = (pusher_Pusher);
 function checkAppKey(key) {
     if (key === null || key === undefined) {
         throw 'You must pass your app key when you instantiate Pusher.';
     }
 }
 node_runtime.setup(pusher_Pusher);
+
+// EXTERNAL MODULE: ./node_modules/tweetnacl/nacl-fast.js
+var nacl_fast = __webpack_require__(20);
+
+// CONCATENATED MODULE: ./src/core/pusher-with-encryption.ts
+var pusher_with_encryption_extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+
+var pusher_with_encryption_PusherWithEncryption = (function (_super) {
+    pusher_with_encryption_extends(PusherWithEncryption, _super);
+    function PusherWithEncryption(app_key, options) {
+        var _this = this;
+        core_pusher.logToConsole = PusherWithEncryption.logToConsole;
+        core_pusher.log = PusherWithEncryption.log;
+        options = options || {};
+        options.nacl = nacl_fast;
+        _this = _super.call(this, app_key, options) || this;
+        return _this;
+    }
+    return PusherWithEncryption;
+}(core_pusher));
+/* harmony default export */ var pusher_with_encryption = __webpack_exports__["default"] = (pusher_with_encryption_PusherWithEncryption);
 
 
 /***/ })

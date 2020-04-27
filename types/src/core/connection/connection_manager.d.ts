@@ -23,7 +23,7 @@ export default class ConnectionManager extends EventsDispatcher {
     errorCallbacks: ErrorCallbacks;
     handshakeCallbacks: HandshakeCallbacks;
     connectionCallbacks: ConnectionCallbacks;
-    constructor(key: string, options: any);
+    constructor(key: string, options: ConnectionManagerOptions);
     connect(): void;
     send(data: any): boolean;
     send_event(name: string, data: any, channel?: string): boolean;

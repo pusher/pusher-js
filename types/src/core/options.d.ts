@@ -1,45 +1,30 @@
 import { AuthOptions, AuthorizerGenerator } from './auth/options';
-export interface PusherOptions {
-    cluster: string;
-    disableStats: boolean;
-    enableStats: boolean;
-    statsHost: string;
-    activity_timeout: number;
-    pong_timeout: number;
-    unavailable_timeout: number;
-    forceTLS: boolean;
-    encrypted: boolean;
-    timelineParams: any;
-    authTransport: 'ajax' | 'jsonp';
-    auth: AuthOptions;
-    authorizer: AuthorizerGenerator;
-}
-declare type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockjs';
-declare type AuthTransport = 'ajax' | 'jsonp';
+import { AuthTransport, Transport } from './config';
+import * as nacl from 'tweetnacl';
 export interface Options {
     activityTimeout?: number;
-    enableStats?: boolean;
-    disableStats?: boolean;
-    authEndpoint?: string;
     auth?: AuthOptions;
+    authEndpoint?: string;
     authTransport?: AuthTransport;
     authorizer?: AuthorizerGenerator;
+    cluster?: string;
+    enableStats?: boolean;
+    disableStats?: boolean;
     disabledTransports?: Transport[];
     enabledTransports?: Transport[];
-    encrypted?: boolean;
     forceTLS?: boolean;
+    httpHost?: string;
+    httpPath?: string;
+    httpPort?: number;
+    httpsPort?: number;
     ignoreNullOrigin?: boolean;
+    nacl?: nacl;
     pongTimeout?: number;
     statsHost?: string;
     timelineParams?: any;
-    unavailable_timeout?: number;
-    cluster?: string;
+    unavailableTimeout?: number;
     wsHost?: string;
-    httpHost?: string;
     wsPath?: string;
     wsPort?: number;
     wssPort?: number;
-    httpPort?: number;
-    httpsPort?: number;
 }
-export {};
