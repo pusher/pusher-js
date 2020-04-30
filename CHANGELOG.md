@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.0.1 (2020-04-30)
+
+[CHANGED] Moved tweetnacl from `devDependencies` to `dependencies`. No
+additional code is included in the bundle, but this gives the typescript
+compiler access to the tweetnacl types
+
+[FIXED] Typescript declarations for react-native. These were supposed to be
+included in 6.0.0 but the commit was missed
+
 ## 6.0.0 (2020-04-27)
 
 [CHANGED] The default builds for web and worker no longer support encrypted
