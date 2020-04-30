@@ -1,1 +1,1 @@
-module.exports = require('./dist/react-native/pusher');
+module.exports = require('../dist/react-native/pusher');
