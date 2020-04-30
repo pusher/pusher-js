@@ -1,5 +1,9 @@
 # Changelog
 
+## 6.0.2 (2020-04-30)
+
+[FIXED] React-native import broken in release 6.0.1
+
 ## 6.0.1 (2020-04-30)
 
 [CHANGED] Moved tweetnacl from `devDependencies` to `dependencies`. No
