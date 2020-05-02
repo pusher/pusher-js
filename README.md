@@ -454,8 +454,6 @@ const channel = pusher.subscribe('private-my-channel');
 
 Like private channels, encrypted channels have their own namespace, 'private-encrypted-'. For more information about encrypted channels, please see the [docs](https://pusher.com/docs/channels/using_channels/encrypted-channels).
 
-Please note: we know for sure this won't work in React Native builds since the React Native runtime does not include the required crypto functionality we depend on. Please let us know if you need this functionality in our web-worker or React Native builds!
-
 ```js
 const channel = pusher.subscribe('private-encrypted-my-channel');
 ```
