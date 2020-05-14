@@ -1,5 +1,14 @@
 # Changelog
 
+## 6.0.3 (2020-05-14)
+
+[FIXED] Added typescript declarations for the pusher-js/with-encryption build
+
+[REMOVED] Unnecessary dummy tweetnacl types for react-native (thanks to
+@dmitrybirin)
+
+[UPDATED] Copyright years (thanks to @annzenkina)
+
 ## 6.0.2 (2020-04-30)
 
 [FIXED] React-native import broken in release 6.0.1
