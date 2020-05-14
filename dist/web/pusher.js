@@ -1,8 +1,8 @@
 /*!
- * Pusher JavaScript Library v6.0.2
+ * Pusher JavaScript Library v6.0.3
  * https://pusher.com/
  *
- * Copyright 2017, Pusher
+ * Copyright 2020, Pusher
  * Released under the MIT licence.
  */
 
@@ -592,7 +592,7 @@ var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.Scrip
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "6.0.2",
+    VERSION: "6.0.3",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
