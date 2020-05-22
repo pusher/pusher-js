@@ -10199,7 +10199,7 @@ var xhr_timeline_xhr = {
 
 
 
-var runtime_getDefaultStrategy = runtime.getDefaultStrategy, runtime_Transports = runtime.Transports, setup = runtime.setup, getProtocol = runtime.getProtocol, isXHRSupported = runtime.isXHRSupported, getLocalStorage = runtime.getLocalStorage, createXHR = runtime.createXHR, createWebSocket = runtime.createWebSocket, addUnloadListener = runtime.addUnloadListener, removeUnloadListener = runtime.removeUnloadListener, transportConnectionInitializer = runtime.transportConnectionInitializer, createSocketRequest = runtime.createSocketRequest, HTTPFactory = runtime.HTTPFactory;
+var runtime_getDefaultStrategy = runtime.getDefaultStrategy, runtime_Transports = runtime.Transports, setup = runtime.setup, getProtocol = runtime.getProtocol, isXHRSupported = runtime.isXHRSupported, getLocalStorage = runtime.getLocalStorage, createXHR = runtime.createXHR, addUnloadListener = runtime.addUnloadListener, removeUnloadListener = runtime.removeUnloadListener, transportConnectionInitializer = runtime.transportConnectionInitializer, createSocketRequest = runtime.createSocketRequest, HTTPFactory = runtime.HTTPFactory;
 var NodeJS = {
     getDefaultStrategy: runtime_getDefaultStrategy,
     Transports: runtime_Transports,
@@ -10209,7 +10209,6 @@ var NodeJS = {
     createSocketRequest: createSocketRequest,
     getLocalStorage: getLocalStorage,
     createXHR: createXHR,
-    createWebSocket: createWebSocket,
     addUnloadListener: addUnloadListener,
     removeUnloadListener: removeUnloadListener,
     transportConnectionInitializer: transportConnectionInitializer,
@@ -10220,6 +10219,14 @@ var NodeJS = {
     },
     getWebSocketAPI: function () {
         return websocket["Client"];
+    },
+    createWebSocket: function (url) {
+        var Constructor = this.getWebSocketAPI();
+        var socketURL = new URL(url);
+        if (socketURL.protocol === 'wss:') {
+            return new Constructor(url, null, { tls: { servername: socketURL.hostname } });
+        }
+        return new Constructor(url);
     },
     getXHRAPI: function () {
         return XMLHttpRequest["XMLHttpRequest"];
