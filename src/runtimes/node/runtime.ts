@@ -18,7 +18,6 @@ const {
   isXHRSupported,
   getLocalStorage,
   createXHR,
-  createWebSocket,
   addUnloadListener,
   removeUnloadListener,
   transportConnectionInitializer,
@@ -35,7 +34,6 @@ const NodeJS: Runtime = {
   createSocketRequest,
   getLocalStorage,
   createXHR,
-  createWebSocket,
   addUnloadListener,
   removeUnloadListener,
   transportConnectionInitializer,
@@ -49,6 +47,16 @@ const NodeJS: Runtime = {
 
   getWebSocketAPI() {
     return WebSocket;
+  },
+
+  createWebSocket(url: string) {
+    var Constructor = this.getWebSocketAPI();
+    var socketURL = new URL(url);
+    // Set servername to enable SNI for wss connections.
+    if (socketURL.protocol === 'wss:') {
+      return new Constructor(url, null, {tls: {servername: socketURL.hostname}});
+    }
+    return new Constructor(url);
   },
 
   getXHRAPI() {
