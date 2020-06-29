@@ -1,6 +1,6 @@
 import Isomorphic from 'isomorphic/runtime';
 import Runtime from '../interface';
-import { Network } from './net_info';
+import { NetInfo } from './net_info';
 import xhrAuth from 'isomorphic/auth/xhr_auth';
 import { AuthTransports } from 'core/auth/auth_transports';
 import xhrTimeline from 'isomorphic/timeline/xhr_timeline';
@@ -54,7 +54,7 @@ const ReactNative: Runtime = {
   },
 
   getNetwork() {
-    return Network;
+    return new NetInfo();
   }
 };
 

@@ -38,5 +38,3 @@ export class NetInfo extends EventsDispatcher implements Reachability {
     return this.online;
   }
 }
-
-export var Network = new NetInfo();

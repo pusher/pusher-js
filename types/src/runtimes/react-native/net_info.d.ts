@@ -5,4 +5,3 @@ export declare class NetInfo extends EventsDispatcher implements Reachability {
     constructor();
     isOnline(): boolean;
 }
-export declare var Network: NetInfo;
