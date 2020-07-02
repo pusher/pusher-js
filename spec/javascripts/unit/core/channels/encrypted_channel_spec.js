@@ -321,4 +321,39 @@ describe("EncryptedChannel", function() {
       });
     });
   });
+
+  describe("nacl", function() {
+    it("should decrypt these messages", function() {
+      var key = "dwXDg1sGnypM44uPh5Rts/JIP2Y7XkHR5lB/o3rBlVs=";
+
+      var nonces = [
+        "p8v9RQR5r6o3G7e2KRgteRi5P90ajKVz",
+        "ZwJVq1LuvUSL5F2EH7RN8P9BcrkxHJS2",
+        "F7ZhEsQLeo/H60T+eghMYdgulNI7iq78",
+        "jU9ShtYe8fz/lOUWnxw7hlb+W5cA6neA",
+        "yGJN1Q03seO6CS8QHRxDLVvetp0hmyCB",
+        "Xi+1aPjEBOTsPATGiEtKnS1YTosvXQQu",
+        "mGi+Rj860MfSGFGbYBwjJfK/kdajUFfg",
+        "YrIvOUf/n6GELtC9GxkccEJsZWdfDXu6",
+        "nRZmojqKgQaPN4KSiIgBfIIk7tU3TuDV"
+      ];
+
+      var ciphers = [
+        "glAlout7BU/REO+kzS+Ixa6uTnV1v0ZdPdRyV4hn",
+        "lbjgrLGKFQJWjaCoTwDV9NxcxSiQ42KdvmPEkN7y",
+        "qFpG2oVtc2hJR99wOZeIjdxaZQUJaSxnS631G521",
+        "Qi8vqaCBoq0iDXhbOFBBSLO6jLsQlfZ1rJP6W8iZ",
+        "QZMiHsoEBGN6GtQQduAMTAdPrspQeLPieCa4+fsH",
+        "BHB7z1oJ51+y790myI6U8Iqtu6BK5CGAw0B6RiNA",
+        "8oh6WxNppFXRQRxE6YHTmipWR6AOlmZe1oIXjQyY",
+        "tfVzEAF0pw7taOmPFWGqfxMHZAYegFr3NHeHQvR3",
+        "+lMeOemGsySbPaBuD2G07gZmofHc1XCfaX/NV4Y6"
+      ];
+
+      for (var i = 0; i < ciphers.length; i++) {
+        var result = nacl.secretbox.open(base64.decode(ciphers[i]), base64.decode(nonces[i]), base64.decode(key));
+        expect(utf8.decode(result)).toEqual("{\"message\":\"\"}");
+      }
+    });
+  });
 });
