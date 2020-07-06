@@ -129,11 +129,13 @@ export default class EncryptedChannel extends PrivateChannel {
   }
 
   emitJSON(eventName: string, data?: any): Dispatcher {
+    let parsedData;
     try {
-      this.emit(eventName, JSON.parse(data));
-    } catch (e) {
-      this.emit(eventName, data);
+      parsedData = JSON.parse(data);
+    } catch {
+      parsedData = data;
     }
+    this.emit(eventName, parsedData);
     return this;
   }
 }
