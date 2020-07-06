@@ -248,6 +248,29 @@ describe("EncryptedChannel", function() {
         });
         expect(boundCallback).toHaveBeenCalledWith(payload, {});
       });
+      it("should not swallow errors thrown by the handler", function() {
+        // previously, if the handler threw an error, when called with the
+        // parsed json, we tried again with a string. This test aims to check
+        // that an error thrown by a handler should not be caught by the lib
+        let payload = { test: "payload" };
+        let encryptedPayload = {
+          nonce: nonceBase64,
+          ciphertext: testEncrypt(payload)
+        };
+        let callCount = 0;
+        channel.bind("something", (data)=> {
+          if (callCount == 0) {
+            callCount++;
+            throw new Error("some error");
+          }
+        })
+        expect(function() {
+          channel.handleEvent({
+            event: "something",
+            data: encryptedPayload
+          });
+        }).toThrow()
+      });
 
       describe("with rotated shared key", function() {
         const newSecretUTF8 = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
