@@ -119,23 +119,22 @@ export default class EncryptedChannel extends PrivateChannel {
           );
           return;
         }
-        this.emitJSON(event, encodeUTF8(bytes));
+        this.emit(event, this.getDataToEmit(bytes));
         return;
       });
       return;
     }
-
-    this.emitJSON(event, encodeUTF8(bytes));
+    this.emit(event, this.getDataToEmit(bytes));
   }
 
-  emitJSON(eventName: string, data?: any): Dispatcher {
-    let parsedData;
+  // Try and parse the decrypted bytes as JSON. If we can't parse it, just
+  // return the utf-8 string
+  getDataToEmit(bytes: Uint8Array): string {
+    let raw = encodeUTF8(bytes);
     try {
-      parsedData = JSON.parse(data);
+      return JSON.parse(raw);
     } catch {
-      parsedData = data;
+      return raw;
     }
-    this.emit(eventName, parsedData);
-    return this;
   }
 }
