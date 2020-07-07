@@ -122,7 +122,7 @@ export default class Connection extends EventsDispatcher implements Socket {
         this.emit('activity');
       },
       error: error => {
-        this.emit('error', { type: 'WebSocketError', error: error });
+        this.emit('error', error);
       },
       closed: closeEvent => {
         unbindListeners();
