@@ -71,10 +71,16 @@ describe("EncryptedChannel", function() {
       authorizer._callback(null, {
         foo: "bar"
       });
-      expect(callback).toHaveBeenCalledWith(
-        new Error("No shared_secret key in auth payload for encrypted channel: private-encrypted-test"),
-        null
+      // For some reason comparing the Error types doesn't work properly in
+      // Safari on Mojave. Manually check the arguments.
+      expect(callback.calls.length).toEqual(1)
+      let args = callback.calls[0].args;
+      expect(args.length).toEqual(2)
+      expect(args[0]).toEqual(jasmine.any(Error))
+      expect(args[0].message).toEqual(
+        "No shared_secret key in auth payload for encrypted channel: private-encrypted-test"
       );
+      expect(args[1]).toEqual(null);
     });
 
     describe("with custom authorizer", function() {

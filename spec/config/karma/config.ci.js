@@ -1,7 +1,7 @@
 var config = {
   browserStack: {
     startTunnel: true,
-    timeout: 1800
+    timeout: 1800,
   },
   browsers: ['ChromeHeadless', 'FirefoxHeadless'],
   customLaunchers: {
