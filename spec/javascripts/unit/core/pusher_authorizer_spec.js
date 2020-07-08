@@ -120,7 +120,7 @@ if (TestEnv !== "worker") {
       xhr.onreadystatechange();
 
       expect(callback.calls.length).toEqual(1);
-      expect(callback).toHaveBeenCalledWith(false, data);
+      expect(callback).toHaveBeenCalledWith(null, data);
     });
 
     it("should call back with an error if JSON in xhr.responseText is invalid", function() {
@@ -145,10 +145,10 @@ if (TestEnv !== "worker") {
 
       expect(callback.calls.length).toEqual(1);
       expect(callback).toHaveBeenCalledWith(
-        true,
-        "JSON returned from auth endpoint was invalid, yet status code was 200. " +
+        new Error("JSON returned from auth endpoint was invalid, yet status code was 200. " +
           "Data was: " +
-          invalidJSON
+          invalidJSON),
+        null,
       );
     });
   });

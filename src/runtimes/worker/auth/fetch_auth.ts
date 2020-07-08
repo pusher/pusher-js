@@ -1,8 +1,13 @@
 import AbstractRuntime from 'runtimes/interface';
 import Logger from 'core/logger';
 import { AuthTransport } from 'core/auth/auth_transports';
+import { AuthorizerCallback, AuthData } from 'core/auth/options';
 
-var fetchAuth: AuthTransport = function(context, socketId, callback) {
+var fetchAuth: AuthTransport = function(
+  context: AbstractRuntime,
+  socketId: string,
+  callback: AuthorizerCallback
+) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
@@ -29,8 +34,9 @@ var fetchAuth: AuthTransport = function(context, socketId, callback) {
       }
     })
     .then(data => {
+      let parsedData: AuthData;
       try {
-        data = JSON.parse(data);
+        parsedData = JSON.parse(data);
       } catch (e) {
         var message =
           'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
@@ -38,10 +44,10 @@ var fetchAuth: AuthTransport = function(context, socketId, callback) {
         Logger.error(message);
         throw message;
       }
-      callback(false, data);
+      callback(null, parsedData);
     })
     .catch(err => {
-      callback(true, err);
+      callback(err, null);
     });
 };
 

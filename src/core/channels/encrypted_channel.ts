@@ -31,18 +31,18 @@ export default class EncryptedChannel extends PrivateChannel {
   authorize(socketId: string, callback: AuthorizerCallback) {
     super.authorize(socketId, (error, authData) => {
       if (error) {
-        callback(true, authData);
+        callback(error, authData);
         return;
       }
       let sharedSecret = authData['shared_secret'];
       if (!sharedSecret) {
         let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
-        callback(true, errorMsg);
+        callback(new Error(errorMsg), null);
         return;
       }
       this.key = decodeBase64(sharedSecret);
       delete authData['shared_secret'];
-      callback(false, authData);
+      callback(null, authData);
     });
   }
 

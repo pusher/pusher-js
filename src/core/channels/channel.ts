@@ -40,7 +40,7 @@ export default class Channel extends EventsDispatcher {
    * @param {Function} callback
    */
   authorize(socketId: string, callback: AuthorizerCallback) {
-    return callback(false, { auth: '' });
+    return callback(null, { auth: '' });
   }
 
   /** Triggers an event */
