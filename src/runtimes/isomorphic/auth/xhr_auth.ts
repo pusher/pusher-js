@@ -6,11 +6,12 @@ import Runtime from 'runtime';
 import { AuthTransport } from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
 import UrlStore from 'core/utils/url_store';
+import { AuthorizerCallback } from 'core/auth/options';
 
 var ajax: AuthTransport = function(
   context: AbstractRuntime,
-  socketId,
-  callback
+  socketId: string,
+  callback: AuthorizerCallback
 ) {
   var self = this,
     xhr;
@@ -34,25 +35,25 @@ var ajax: AuthTransport = function(
           data = JSON.parse(xhr.responseText);
           parsed = true;
         } catch (e) {
-          callback(
-            true,
+          let err = new Error(
             'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
               xhr.responseText
           );
+          callback(err, null);
         }
 
         if (parsed) {
           // prevents double execution.
-          callback(false, data);
+          callback(null, data);
         }
       } else {
         var suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
-        Logger.error(
+        let err =
           'Unable to retrieve auth string from auth endpoint - ' +
-            `received status ${xhr.status} from ${self.options.authEndpoint}. ` +
-            `Clients must be authenticated to join private or presence channels. ${suffix}`
-        );
-        callback(true, xhr.status);
+          `received status: ${xhr.status} from ${self.options.authEndpoint}. ` +
+          `Clients must be authenticated to join private or presence channels. ${suffix}`;
+        Logger.error(err);
+        callback(new Error(err), null);
       }
     }
   };

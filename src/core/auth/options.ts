@@ -8,11 +8,13 @@ export interface AuthOptions {
 export interface AuthData {
   auth: string;
   channel_data?: string;
+  shared_secret?: string;
 }
 
-export type AuthInfo = AuthData | string;
-
-export type AuthorizerCallback = (error: boolean, authInfo: AuthInfo) => void;
+export type AuthorizerCallback = (
+  error: Error | null,
+  authData: AuthData
+) => void;
 
 export interface Authorizer {
   authorize(socketId: string, callback: AuthorizerCallback): void;

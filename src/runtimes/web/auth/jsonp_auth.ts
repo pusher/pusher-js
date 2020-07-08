@@ -23,7 +23,7 @@ var jsonp: AuthTransport = function(
   var script = document.createElement('script');
   // Hacked wrapper.
   context.auth_callbacks[callbackName] = function(data) {
-    callback(false, data);
+    callback(null, data);
   };
 
   var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";

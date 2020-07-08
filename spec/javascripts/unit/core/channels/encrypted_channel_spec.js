@@ -62,18 +62,18 @@ describe("EncryptedChannel", function() {
         shared_secret: secretBase64,
         foo: "bar"
       });
-      expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
+      expect(callback).toHaveBeenCalledWith(null, { foo: "bar" });
     });
 
     it("should callback an error if no shared_secret included in auth data", function() {
       let callback = jasmine.createSpy("callback");
       channel.authorize("1.23", callback);
-      authorizer._callback(false, {
+      authorizer._callback(null, {
         foo: "bar"
       });
       expect(callback).toHaveBeenCalledWith(
-        true,
-        "No shared_secret key in auth payload for encrypted channel: private-encrypted-test"
+        new Error("No shared_secret key in auth payload for encrypted channel: private-encrypted-test"),
+        null
       );
     });
 
@@ -95,7 +95,7 @@ describe("EncryptedChannel", function() {
           shared_secret: secretBase64,
           foo: "bar"
         });
-        expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
+        expect(callback).toHaveBeenCalledWith(null, { foo: "bar" });
       });
     });
   });

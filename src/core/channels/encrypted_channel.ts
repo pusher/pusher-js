@@ -6,7 +6,7 @@ import { decode as encodeUTF8 } from '@stablelib/utf8';
 import { decode as decodeBase64 } from '@stablelib/base64';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
-import { AuthorizerCallback } from '../auth/options';
+import { AuthData, AuthorizerCallback } from '../auth/options';
 import * as nacl from 'tweetnacl';
 
 /** Extends private channels to provide encrypted channel interface.
@@ -29,20 +29,20 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {Function} callback
    */
   authorize(socketId: string, callback: AuthorizerCallback) {
-    super.authorize(socketId, (error, authData) => {
+    super.authorize(socketId, (error: Error | null, authData: AuthData) => {
       if (error) {
-        callback(true, authData);
+        callback(error, authData);
         return;
       }
       let sharedSecret = authData['shared_secret'];
       if (!sharedSecret) {
         let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
-        callback(true, errorMsg);
+        callback(new Error(errorMsg), null);
         return;
       }
       this.key = decodeBase64(sharedSecret);
       delete authData['shared_secret'];
-      callback(false, authData);
+      callback(null, authData);
     });
   }
 

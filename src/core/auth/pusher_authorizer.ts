@@ -53,6 +53,7 @@ export default class PusherAuthorizer implements Authorizer {
   authorize(socketId: string, callback: AuthorizerCallback): void {
     PusherAuthorizer.authorizers =
       PusherAuthorizer.authorizers || Runtime.getAuthorizers();
+
     PusherAuthorizer.authorizers[this.type].call(
       this,
       Runtime,
