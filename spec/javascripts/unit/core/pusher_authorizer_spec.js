@@ -144,12 +144,17 @@ if (TestEnv !== "worker") {
       xhr.onreadystatechange();
 
       expect(callback.calls.length).toEqual(1);
-      expect(callback).toHaveBeenCalledWith(
-        new Error("JSON returned from auth endpoint was invalid, yet status code was 200. " +
-          "Data was: " +
-          invalidJSON),
-        null,
+      // For some reason comparing the Error types doesn't work properly in
+      // Safari on Mojave. Manually check the arguments.
+      let args = callback.calls[0].args;
+      expect(args.length).toEqual(2)
+      expect(args[0]).toEqual(jasmine.any(Error))
+      expect(args[0].message).toEqual(
+        "JSON returned from auth endpoint was invalid, yet status code was 200. " +
+        "Data was: " +
+        invalidJSON
       );
+      expect(args[1]).toEqual(null);
     });
   });
 }
