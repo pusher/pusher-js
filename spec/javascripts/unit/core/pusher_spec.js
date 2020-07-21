@@ -225,6 +225,13 @@ describe("Pusher", function() {
       Pusher.ready();
       expect(pusher.connect).toHaveBeenCalled();
     });
+
+    it("should not connect with keepAlive set to false", function() {
+      Pusher.ready();
+      var pusher = new Pusher("");
+      spyOn(pusher, 'connect');
+      expect(pusher.connect).not.toHaveBeenCalled();
+    })
   });
 
   describe("#connect", function() {
@@ -288,7 +295,15 @@ describe("Pusher", function() {
         pusher.subscribe("xxx");
 
         expect(channel.reinstateSubscription).toHaveBeenCalled();
-      })
+      });
+
+      it("should connect if keepAlive is set to false", function() {
+        var pusher = new Pusher('sa', { keepAlive: false });
+        spyOn(pusher, 'connect');
+        expect(pusher.connect).not.toHaveBeenCalled();
+        pusher.subscribe('ab');
+        expect(pusher.connect).toHaveBeenCalled();
+      });
     });
 
     describe("#unsubscribe", function() {
@@ -316,7 +331,16 @@ describe("Pusher", function() {
         expect(pusher.channel("yyy")).toBe(channel);
         expect(channel.unsubscribe).not.toHaveBeenCalled();
         expect(channel.cancelSubscription).toHaveBeenCalled();
-      })
+      });
+
+      it("should close the connection if keepAlive is set to false", function() {
+        var pusher = new Pusher("foo", { keepAlive: false });
+        pusher.subscribe('bar');
+        spyOn(pusher, 'disconnect');
+        expect(pusher.disconnect).not.toHaveBeenCalled();
+        pusher.unsubscribe('bar');
+        expect(pusher.disconnect).toHaveBeenCalled();
+      });
     });
   });
 
