@@ -145,7 +145,7 @@ export default class Pusher {
     Pusher.instances.push(this);
     this.timeline.info({ instances: Pusher.instances.length });
 
-    if (Pusher.isReady) {
+    if (Pusher.isReady && this.config.keepAlive) {
       this.connect();
     }
   }
@@ -216,6 +216,9 @@ export default class Pusher {
   }
 
   subscribe(channel_name: string) {
+    if (!this.config.keepAlive) {
+      this.connect();
+    }
     var channel = this.channels.add(channel_name, this);
     if (channel.subscriptionPending && channel.subscriptionCancelled) {
       channel.reinstateSubscription();
@@ -237,6 +240,10 @@ export default class Pusher {
       if (channel && this.connection.state === 'connected') {
         channel.unsubscribe();
       }
+    }
+
+    if (this.allChannels().length === 0 && !this.config.keepAlive) {
+      this.disconnect();
     }
   }
 

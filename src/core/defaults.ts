@@ -10,6 +10,7 @@ export interface DefaultConfig {
   httpPort: number;
   httpsPort: number;
   httpPath: string;
+  keepAlive: boolean;
   stats_host: string;
   authEndpoint: string;
   authTransport: AuthTransport;
@@ -44,6 +45,7 @@ var Defaults: DefaultConfig = {
   pongTimeout: 30000,
   unavailableTimeout: 10000,
   cluster: 'mt1',
+  keepAlive: true,
 
   // CDN configuration
   cdn_http: CDN_HTTP,

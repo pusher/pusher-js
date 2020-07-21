@@ -9,6 +9,7 @@ export interface DefaultConfig {
     httpPort: number;
     httpsPort: number;
     httpPath: string;
+    keepAlive: boolean;
     stats_host: string;
     authEndpoint: string;
     authTransport: AuthTransport;

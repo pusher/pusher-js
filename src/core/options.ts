@@ -20,6 +20,7 @@ export interface Options {
   httpPort?: number;
   httpsPort?: number;
   ignoreNullOrigin?: boolean;
+  keepAlive?: boolean;
   nacl?: nacl;
   pongTimeout?: number;
   statsHost?: string;

@@ -303,6 +303,11 @@ Disables stats collection, so that connection metrics are not submitted to Pushe
 
 Enables stats collection, so that connection metrics are submitted to Pusher’s servers. These stats can help pusher engineers debug connection issues.
 
+#### `keepAlive` (Boolean) (default: true)
+
+Specifies if we should keep the pusher connection open
+when there is no active subscriptions
+
 #### `enabledTransports` (Array)
 
 Specifies which transports should be used by pusher-js to establish a connection. Useful for applications running in controlled, well-behaving environments. Available transports for web: `ws`, `wss`, `xhr_streaming`, `xhr_polling`, `sockjs`. If you specify your transports in this way, you may miss out on new transports we add in the future.

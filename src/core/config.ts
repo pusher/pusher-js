@@ -32,6 +32,7 @@ export interface Config {
   wsPath: string;
   wsPort: number;
   wssPort: number;
+  keepAlive: boolean;
 
   // these are all optional parameters or overrrides. The customer can set these
   // but it's not strictly necessary
@@ -61,6 +62,7 @@ export function getConfig(opts: Options): Config {
     wsPath: opts.wsPath || Defaults.wsPath,
     wsPort: opts.wsPort || Defaults.wsPort,
     wssPort: opts.wssPort || Defaults.wssPort,
+    keepAlive: Defaults.keepAlive,
 
     enableStats: getEnableStatsConfig(opts),
     httpHost: getHttpHost(opts),
@@ -79,6 +81,9 @@ export function getConfig(opts: Options): Config {
   if ('timelineParams' in opts) config.timelineParams = opts.timelineParams;
   if ('nacl' in opts) {
     config.nacl = opts.nacl;
+  }
+  if ('keepAlive' in opts) {
+    config.keepAlive = opts.keepAlive;
   }
 
   return config;

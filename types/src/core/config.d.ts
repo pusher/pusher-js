@@ -20,6 +20,7 @@ export interface Config {
     wsPath: string;
     wsPort: number;
     wssPort: number;
+    keepAlive: boolean;
     forceTLS?: boolean;
     auth?: AuthOptions;
     authorizer?: AuthorizerGenerator;
