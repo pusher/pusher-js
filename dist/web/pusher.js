@@ -1137,19 +1137,21 @@ var ajax = function (context, socketId, callback) {
                     parsed = true;
                 }
                 catch (e) {
-                    callback(true, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+                    var err = new Error('JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
                         xhr.responseText);
+                    callback(err, null);
                 }
                 if (parsed) {
-                    callback(false, data);
+                    callback(null, data);
                 }
             }
             else {
                 var suffix = url_store.buildLogSuffix('authenticationEndpoint');
-                logger.error('Unable to retrieve auth string from auth endpoint - ' +
-                    ("received status " + xhr.status + " from " + self.options.authEndpoint + ". ") +
-                    ("Clients must be authenticated to join private or presence channels. " + suffix));
-                callback(true, xhr.status);
+                var err = 'Unable to retrieve auth string from auth endpoint - ' +
+                    ("received status: " + xhr.status + " from " + self.options.authEndpoint + ". ") +
+                    ("Clients must be authenticated to join private or presence channels. " + suffix);
+                logger.error(err);
+                callback(new Error(err), null);
             }
         }
     };
@@ -1169,7 +1171,7 @@ var jsonp = function (context, socketId, callback) {
     var document = context.getDocument();
     var script = document.createElement('script');
     context.auth_callbacks[callbackName] = function (data) {
-        callback(false, data);
+        callback(null, data);
     };
     var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
     script.src =
@@ -2004,7 +2006,7 @@ var connection_Connection = (function (_super) {
                 _this.emit('activity');
             },
             error: function (error) {
-                _this.emit('error', { type: 'WebSocketError', error: error });
+                _this.emit('error', error);
             },
             closed: function (closeEvent) {
                 unbindListeners();
@@ -2273,7 +2275,7 @@ var channel_Channel = (function (_super) {
         return _this;
     }
     Channel.prototype.authorize = function (socketId, callback) {
-        return callback(false, { auth: '' });
+        return callback(null, { auth: '' });
     };
     Channel.prototype.trigger = function (event, data) {
         if (event.indexOf('client-') !== 0) {
@@ -2565,18 +2567,18 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
         var _this = this;
         _super.prototype.authorize.call(this, socketId, function (error, authData) {
             if (error) {
-                callback(true, authData);
+                callback(error, authData);
                 return;
             }
             var sharedSecret = authData['shared_secret'];
             if (!sharedSecret) {
                 var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
-                callback(true, errorMsg);
+                callback(new Error(errorMsg), null);
                 return;
             }
             _this.key = Object(base64["decode"])(sharedSecret);
             delete authData['shared_secret'];
-            callback(false, authData);
+            callback(null, authData);
         });
     };
     EncryptedChannel.prototype.trigger = function (event, data) {
@@ -2626,21 +2628,21 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
                     logger.error("Failed to decrypt event with new key. Dropping encrypted event");
                     return;
                 }
-                _this.emitJSON(event, Object(utf8["decode"])(bytes));
+                _this.emit(event, _this.getDataToEmit(bytes));
                 return;
             });
             return;
         }
-        this.emitJSON(event, Object(utf8["decode"])(bytes));
+        this.emit(event, this.getDataToEmit(bytes));
     };
-    EncryptedChannel.prototype.emitJSON = function (eventName, data) {
+    EncryptedChannel.prototype.getDataToEmit = function (bytes) {
+        var raw = Object(utf8["decode"])(bytes);
         try {
-            this.emit(eventName, JSON.parse(data));
+            return JSON.parse(raw);
         }
-        catch (e) {
-            this.emit(eventName, data);
+        catch (_a) {
+            return raw;
         }
-        return this;
     };
     return EncryptedChannel;
 }(private_channel));
@@ -2838,7 +2840,7 @@ var connection_manager_ConnectionManager = (function (_super) {
                 _this.resetActivityCheck();
             },
             error: function (error) {
-                _this.emit('error', { type: 'WebSocketError', error: error });
+                _this.emit('error', error);
             },
             closed: function () {
                 _this.abandonConnection();

@@ -7,8 +7,7 @@ export interface AuthData {
     auth: string;
     channel_data?: string;
 }
-export declare type AuthInfo = AuthData | string;
-export declare type AuthorizerCallback = (error: boolean, authInfo: AuthInfo) => void;
+export declare type AuthorizerCallback = (error: Error | null, authData: AuthData) => void;
 export interface Authorizer {
     authorize(socketId: string, callback: AuthorizerCallback): void;
 }

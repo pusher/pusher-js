@@ -1,6 +1,5 @@
 import PrivateChannel from './private_channel';
 import Pusher from '../pusher';
-import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
 import { AuthorizerCallback } from '../auth/options';
 import * as nacl from 'tweetnacl';
@@ -12,5 +11,5 @@ export default class EncryptedChannel extends PrivateChannel {
     trigger(event: string, data: any): boolean;
     handleEvent(event: PusherEvent): void;
     private handleEncryptedEvent;
-    emitJSON(eventName: string, data?: any): Dispatcher;
+    getDataToEmit(bytes: Uint8Array): string;
 }
