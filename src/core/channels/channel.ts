@@ -6,6 +6,7 @@ import { PusherEvent } from '../connection/protocol/message-types';
 import Metadata from './metadata';
 import UrlStore from '../utils/url_store';
 import { AuthData, AuthorizerCallback } from '../auth/options';
+import { HTTPAuthError } from '../errors';
 
 /** Provides base public channel interface with an event emitter.
  *
@@ -97,22 +98,34 @@ export default class Channel extends EventsDispatcher {
     }
     this.subscriptionPending = true;
     this.subscriptionCancelled = false;
-    this.authorize(this.pusher.connection.socket_id, (error, data) => {
-      if (error) {
-        // Why not bind to 'pusher:subscription_error' a level up, and log there?
-        // Binding to this event would cause the warning about no callbacks being
-        // bound (see constructor) to be suppressed, that's not what we want.
-        Logger.error(data);
-        this.emit('pusher:subscription_error', data);
-      } else {
-        data = data as AuthData;
-        this.pusher.send_event('pusher:subscribe', {
-          auth: data.auth,
-          channel_data: data.channel_data,
-          channel: this.name
-        });
+    this.authorize(
+      this.pusher.connection.socket_id,
+      (error: Error | null, data: AuthData) => {
+        if (error) {
+          // Why not bind to 'pusher:subscription_error' a level up, and log there?
+          // Binding to this event would cause the warning about no callbacks being
+          // bound (see constructor) to be suppressed, that's not what we want.
+          Logger.error(error.toString());
+          this.emit(
+            'pusher:subscription_error',
+            Object.assign(
+              {},
+              {
+                type: 'AuthError',
+                error: error.message
+              },
+              error instanceof HTTPAuthError ? { status: error.status } : {}
+            )
+          );
+        } else {
+          this.pusher.send_event('pusher:subscribe', {
+            auth: data.auth,
+            channel_data: data.channel_data,
+            channel: this.name
+          });
+        }
       }
-    });
+    );
   }
 
   /** Sends an unsubscription request. For internal use only. */

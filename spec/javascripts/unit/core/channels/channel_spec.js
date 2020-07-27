@@ -247,10 +247,13 @@ describe("Channel", function() {
 
       channel.subscribe();
       var authorizeCallback = channel.authorize.calls[0].args[1];
-      authorizeCallback(true, { error: "test error" });
+      authorizeCallback(new Error("test error"), {auth: ""})
 
       expect(onSubscriptionError).toHaveBeenCalledWith(
-        { error: "test error" }
+       {
+          type: "AuthError",
+          error: "test error"
+        }
       );
       expect(pusher.send_event).not.toHaveBeenCalled();
     });

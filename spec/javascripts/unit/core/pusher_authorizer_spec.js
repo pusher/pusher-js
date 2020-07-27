@@ -154,7 +154,7 @@ if (TestEnv !== "worker") {
         "Data was: " +
         invalidJSON
       );
-      expect(args[1]).toEqual(null);
+      expect(args[1]).toEqual({auth: ""});
     });
   });
 }
