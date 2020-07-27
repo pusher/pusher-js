@@ -1,4 +1,3 @@
-import Logger from 'core/logger';
 import TimelineSender from 'core/timeline/timeline_sender';
 import * as Collections from 'core/utils/collections';
 import Util from 'core/util';
@@ -54,7 +53,6 @@ var ajax: AuthTransport = function(
           'Unable to retrieve auth string from auth endpoint - ' +
           `received status: ${xhr.status} from ${self.options.authEndpoint}. ` +
           `Clients must be authenticated to join private or presence channels. ${suffix}`;
-        Logger.error(err);
         callback(new HTTPAuthError(xhr.status, err), { auth: '' });
       }
     }
