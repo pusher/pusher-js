@@ -272,7 +272,10 @@ describe("Connection", function() {
       var onError = jasmine.createSpy("onError");
       connection.bind("error", onError);
 
-      transport.emit("error", "wut");
+      transport.emit("error", {
+        type: "WebSocketError",
+        error: "wut"
+      });
       expect(onError).toHaveBeenCalledWith({
         type: "WebSocketError",
         error: "wut"

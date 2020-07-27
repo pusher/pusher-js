@@ -425,7 +425,10 @@ describe("ConnectionManager", function() {
         var onError = jasmine.createSpy("onError");
         manager.bind("error", onError);
 
-        connection.emit("error", { boom: "boom" });
+        connection.emit("error", {
+          type: "WebSocketError",
+          error: { boom: "boom" }
+        });
 
         expect(onError).toHaveBeenCalledWith({
           type: "WebSocketError",

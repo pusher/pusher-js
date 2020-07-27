@@ -269,7 +269,7 @@ export default class ConnectionManager extends EventsDispatcher {
       },
       error: error => {
         // just emit error to user - socket will already be closed by browser
-        this.emit('error', { type: 'WebSocketError', error: error });
+        this.emit('error', error);
       },
       closed: () => {
         this.abandonConnection();
