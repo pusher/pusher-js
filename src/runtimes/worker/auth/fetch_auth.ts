@@ -33,7 +33,7 @@ var fetchAuth: AuthTransport = function(
       }
       throw new HTTPAuthError(
         200,
-        `Couldn't get auth info from your auth endpoint, status: ${status}`
+        `Could not get auth info from your auth endpoint, status: ${status}`
       );
     })
     .then(data => {
