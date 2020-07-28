@@ -28,19 +28,21 @@ var ajax: AuthTransport = function(
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
-        var data,
-          parsed = false;
+        let data;
+        let parsed = false;
 
         try {
           data = JSON.parse(xhr.responseText);
           parsed = true;
         } catch (e) {
-          let err = new HTTPAuthError(
-            200,
-            'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-              xhr.responseText
+          callback(
+            new HTTPAuthError(
+              200,
+              'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+                xhr.responseText
+            ),
+            { auth: '' }
           );
-          callback(err, { auth: '' });
         }
 
         if (parsed) {
@@ -49,11 +51,15 @@ var ajax: AuthTransport = function(
         }
       } else {
         var suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
-        let err =
-          'Unable to retrieve auth string from auth endpoint - ' +
-          `received status: ${xhr.status} from ${self.options.authEndpoint}. ` +
-          `Clients must be authenticated to join private or presence channels. ${suffix}`;
-        callback(new HTTPAuthError(xhr.status, err), { auth: '' });
+        callback(
+          new HTTPAuthError(
+            xhr.status,
+            'Unable to retrieve auth string from auth endpoint - ' +
+              `received status: ${xhr.status} from ${self.options.authEndpoint}. ` +
+              `Clients must be authenticated to join private or presence channels. ${suffix}`
+          ),
+          { auth: '' }
+        );
       }
     }
   };

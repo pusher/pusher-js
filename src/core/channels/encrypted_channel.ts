@@ -36,8 +36,12 @@ export default class EncryptedChannel extends PrivateChannel {
       }
       let sharedSecret = authData['shared_secret'];
       if (!sharedSecret) {
-        let errorMsg = `No shared_secret key in auth payload for encrypted channel: ${this.name}`;
-        callback(new Error(errorMsg), null);
+        callback(
+          new Error(
+            `No shared_secret key in auth payload for encrypted channel: ${this.name}`
+          ),
+          null
+        );
         return;
       }
       this.key = decodeBase64(sharedSecret);

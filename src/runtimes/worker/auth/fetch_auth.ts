@@ -27,20 +27,25 @@ var fetchAuth: AuthTransport = function(
     .then(response => {
       let { status } = response;
       if (status === 200) {
+        // manually parse the json so we can provide a more helpful error in
+        // failure case
         return response.text();
       }
-      let message = `Couldn't get auth info from your auth endpoint, status: ${status}`;
-      throw new HTTPAuthError(200, message);
+      throw new HTTPAuthError(
+        200,
+        `Couldn't get auth info from your auth endpoint, status: ${status}`
+      );
     })
     .then(data => {
       let parsedData: AuthData;
       try {
         parsedData = JSON.parse(data);
       } catch (e) {
-        var message =
+        throw new HTTPAuthError(
+          200,
           'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-          data;
-        throw new HTTPAuthError(200, message);
+            data
+        );
       }
       callback(null, parsedData);
     })
