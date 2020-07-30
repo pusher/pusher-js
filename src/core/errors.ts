@@ -49,3 +49,12 @@ export class UnsupportedStrategy extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+export class HTTPAuthError extends Error {
+  status: number;
+  constructor(status: number, msg?: string) {
+    super(msg);
+    this.status = status;
+
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}

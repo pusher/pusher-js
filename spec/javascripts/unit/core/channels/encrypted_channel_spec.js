@@ -62,19 +62,25 @@ describe("EncryptedChannel", function() {
         shared_secret: secretBase64,
         foo: "bar"
       });
-      expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
+      expect(callback).toHaveBeenCalledWith(null, { foo: "bar" });
     });
 
     it("should callback an error if no shared_secret included in auth data", function() {
       let callback = jasmine.createSpy("callback");
       channel.authorize("1.23", callback);
-      authorizer._callback(false, {
+      authorizer._callback(null, {
         foo: "bar"
       });
-      expect(callback).toHaveBeenCalledWith(
-        true,
+      // For some reason comparing the Error types doesn't work properly in
+      // Safari on Mojave. Manually check the arguments.
+      expect(callback.calls.length).toEqual(1)
+      let args = callback.calls[0].args;
+      expect(args.length).toEqual(2)
+      expect(args[0]).toEqual(jasmine.any(Error))
+      expect(args[0].message).toEqual(
         "No shared_secret key in auth payload for encrypted channel: private-encrypted-test"
       );
+      expect(args[1]).toEqual(null);
     });
 
     describe("with custom authorizer", function() {
@@ -95,7 +101,7 @@ describe("EncryptedChannel", function() {
           shared_secret: secretBase64,
           foo: "bar"
         });
-        expect(callback).toHaveBeenCalledWith(false, { foo: "bar" });
+        expect(callback).toHaveBeenCalledWith(null, { foo: "bar" });
       });
     });
   });

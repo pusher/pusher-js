@@ -27,10 +27,10 @@ describe("Channel", function() {
   });
 
   describe("#authorize", function() {
-    it("should call back with false, {} immediately", function() {
+    it("should call back with null, {} immediately", function() {
       var callback = jasmine.createSpy("callback");
       channel.authorize("1.1", callback);
-      expect(callback).toHaveBeenCalledWith(false, {auth: ''});
+      expect(callback).toHaveBeenCalledWith(null, {auth: ''});
     });
   });
 
@@ -247,10 +247,13 @@ describe("Channel", function() {
 
       channel.subscribe();
       var authorizeCallback = channel.authorize.calls[0].args[1];
-      authorizeCallback(true, { error: "test error" });
+      authorizeCallback(new Error("test error"), {auth: ""})
 
       expect(onSubscriptionError).toHaveBeenCalledWith(
-        { error: "test error" }
+       {
+          type: "AuthError",
+          error: "test error"
+        }
       );
       expect(pusher.send_event).not.toHaveBeenCalled();
     });

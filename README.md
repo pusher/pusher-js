@@ -276,11 +276,50 @@ const pusher = new Pusher(APP_KEY, {
   authorizer: function (channel, options) {
     return {
       authorize: function (socketId, callback) {
-        // Do some ajax to get the auth information
-        callback(false, authInformation);
+        // Do some ajax to get the auth string
+        callback(null, {auth: authString});
       }
     };
   }
+})
+```
+
+Example: An authorizer which uses the [`fetch`
+API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) to make a JSON
+request to an auth endpoint
+
+```js
+let authorizer = (channel, options) => {
+  return {
+    authorize: (socketId, callback) => {
+      fetch(authUrl, {
+        method: "POST",
+        headers: new Headers({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          socket_id: socketId,
+          channel_name: channel.name
+        })
+      })
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Received ${res.statusCode} from ${authUrl}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          callback(null, data);
+        })
+        .catch(err => {
+          callback(new Error(`Error calling auth endpoint: ${err}`), {
+            auth: ""
+          });
+        });
+    }
+  };
+};
+const pusher = new Pusher(APP_KEY, {
+  cluster: APP_CLUSTER,
+  authorizer: authorizer,
 })
 ```
 

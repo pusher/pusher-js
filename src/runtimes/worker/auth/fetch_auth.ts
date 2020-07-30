@@ -1,8 +1,13 @@
 import AbstractRuntime from 'runtimes/interface';
-import Logger from 'core/logger';
 import { AuthTransport } from 'core/auth/auth_transports';
+import { AuthorizerCallback, AuthData } from 'core/auth/options';
+import { HTTPAuthError } from 'core/errors';
 
-var fetchAuth: AuthTransport = function(context, socketId, callback) {
+var fetchAuth: AuthTransport = function(
+  context: AbstractRuntime,
+  socketId: string,
+  callback: AuthorizerCallback
+) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
@@ -22,26 +27,30 @@ var fetchAuth: AuthTransport = function(context, socketId, callback) {
     .then(response => {
       let { status } = response;
       if (status === 200) {
+        // manually parse the json so we can provide a more helpful error in
+        // failure case
         return response.text();
-      } else {
-        Logger.error("Couldn't get auth info from your auth endpoint", status);
-        throw status;
       }
+      throw new HTTPAuthError(
+        200,
+        `Could not get auth info from your auth endpoint, status: ${status}`
+      );
     })
     .then(data => {
+      let parsedData: AuthData;
       try {
-        data = JSON.parse(data);
+        parsedData = JSON.parse(data);
       } catch (e) {
-        var message =
+        throw new HTTPAuthError(
+          200,
           'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-          data;
-        Logger.error(message);
-        throw message;
+            data
+        );
       }
-      callback(false, data);
+      callback(null, parsedData);
     })
     .catch(err => {
-      callback(true, err);
+      callback(err, { auth: '' });
     });
 };
 
