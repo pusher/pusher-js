@@ -19,3 +19,7 @@ export declare class UnsupportedTransport extends Error {
 export declare class UnsupportedStrategy extends Error {
     constructor(msg?: string);
 }
+export declare class HTTPAuthError extends Error {
+    status: number;
+    constructor(status: number, msg?: string);
+}
