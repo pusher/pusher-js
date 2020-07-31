@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v6.0.3
+ * Pusher JavaScript Library v7.0.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -940,7 +940,7 @@ module.exports = HttpParser;
 var Stream      = __webpack_require__(5).Stream,
     util        = __webpack_require__(0),
     driver      = __webpack_require__(4),
-    EventTarget = __webpack_require__(17),
+    EventTarget = __webpack_require__(16),
     Event       = __webpack_require__(7);
 
 var API = function(options) {
@@ -1119,161 +1119,6 @@ module.exports = API;
 
 /***/ }),
 /* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-// Copyright (C) 2016 Dmitry Chestnykh
-// MIT License. See LICENSE file for details.
-Object.defineProperty(exports, "__esModule", { value: true });
-/**
- * Package utf8 implements UTF-8 encoding and decoding.
- */
-var INVALID_UTF16 = "utf8: invalid string";
-var INVALID_UTF8 = "utf8: invalid source encoding";
-/**
- * Encodes the given string into UTF-8 byte array.
- * Throws if the source string has invalid UTF-16 encoding.
- */
-function encode(s) {
-    // Calculate result length and allocate output array.
-    // encodedLength() also validates string and throws errors,
-    // so we don't need repeat validation here.
-    var arr = new Uint8Array(encodedLength(s));
-    var pos = 0;
-    for (var i = 0; i < s.length; i++) {
-        var c = s.charCodeAt(i);
-        if (c < 0x80) {
-            arr[pos++] = c;
-        }
-        else if (c < 0x800) {
-            arr[pos++] = 0xc0 | c >> 6;
-            arr[pos++] = 0x80 | c & 0x3f;
-        }
-        else if (c < 0xd800) {
-            arr[pos++] = 0xe0 | c >> 12;
-            arr[pos++] = 0x80 | (c >> 6) & 0x3f;
-            arr[pos++] = 0x80 | c & 0x3f;
-        }
-        else {
-            i++; // get one more character
-            c = (c & 0x3ff) << 10;
-            c |= s.charCodeAt(i) & 0x3ff;
-            c += 0x10000;
-            arr[pos++] = 0xf0 | c >> 18;
-            arr[pos++] = 0x80 | (c >> 12) & 0x3f;
-            arr[pos++] = 0x80 | (c >> 6) & 0x3f;
-            arr[pos++] = 0x80 | c & 0x3f;
-        }
-    }
-    return arr;
-}
-exports.encode = encode;
-/**
- * Returns the number of bytes required to encode the given string into UTF-8.
- * Throws if the source string has invalid UTF-16 encoding.
- */
-function encodedLength(s) {
-    var result = 0;
-    for (var i = 0; i < s.length; i++) {
-        var c = s.charCodeAt(i);
-        if (c < 0x80) {
-            result += 1;
-        }
-        else if (c < 0x800) {
-            result += 2;
-        }
-        else if (c < 0xd800) {
-            result += 3;
-        }
-        else if (c <= 0xdfff) {
-            if (i >= s.length - 1) {
-                throw new Error(INVALID_UTF16);
-            }
-            i++; // "eat" next character
-            result += 4;
-        }
-        else {
-            throw new Error(INVALID_UTF16);
-        }
-    }
-    return result;
-}
-exports.encodedLength = encodedLength;
-/**
- * Decodes the given byte array from UTF-8 into a string.
- * Throws if encoding is invalid.
- */
-function decode(arr) {
-    var chars = [];
-    for (var i = 0; i < arr.length; i++) {
-        var b = arr[i];
-        if (b & 0x80) {
-            var min = void 0;
-            if (b < 0xe0) {
-                // Need 1 more byte.
-                if (i >= arr.length) {
-                    throw new Error(INVALID_UTF8);
-                }
-                var n1 = arr[++i];
-                if ((n1 & 0xc0) !== 0x80) {
-                    throw new Error(INVALID_UTF8);
-                }
-                b = (b & 0x1f) << 6 | (n1 & 0x3f);
-                min = 0x80;
-            }
-            else if (b < 0xf0) {
-                // Need 2 more bytes.
-                if (i >= arr.length - 1) {
-                    throw new Error(INVALID_UTF8);
-                }
-                var n1 = arr[++i];
-                var n2 = arr[++i];
-                if ((n1 & 0xc0) !== 0x80 || (n2 & 0xc0) !== 0x80) {
-                    throw new Error(INVALID_UTF8);
-                }
-                b = (b & 0x0f) << 12 | (n1 & 0x3f) << 6 | (n2 & 0x3f);
-                min = 0x800;
-            }
-            else if (b < 0xf8) {
-                // Need 3 more bytes.
-                if (i >= arr.length - 2) {
-                    throw new Error(INVALID_UTF8);
-                }
-                var n1 = arr[++i];
-                var n2 = arr[++i];
-                var n3 = arr[++i];
-                if ((n1 & 0xc0) !== 0x80 || (n2 & 0xc0) !== 0x80 || (n3 & 0xc0) !== 0x80) {
-                    throw new Error(INVALID_UTF8);
-                }
-                b = (b & 0x0f) << 18 | (n1 & 0x3f) << 12 | (n2 & 0x3f) << 6 | (n3 & 0x3f);
-                min = 0x10000;
-            }
-            else {
-                throw new Error(INVALID_UTF8);
-            }
-            if (b < min || (b >= 0xd800 && b <= 0xdfff)) {
-                throw new Error(INVALID_UTF8);
-            }
-            if (b >= 0x10000) {
-                // Surrogate pair.
-                if (b > 0x10ffff) {
-                    throw new Error(INVALID_UTF8);
-                }
-                b -= 0x10000;
-                chars.push(String.fromCharCode(0xd800 | (b >> 10)));
-                b = 0xdc00 | (b & 0x3ff);
-            }
-        }
-        chars.push(String.fromCharCode(b));
-    }
-    return chars.join("");
-}
-exports.decode = decode;
-//# sourceMappingURL=utf8.js.map
-
-/***/ }),
-/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1763,7 +1608,7 @@ module.exports = Hybi;
 
 
 /***/ }),
-/* 14 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1836,13 +1681,13 @@ module.exports = RingBuffer;
 
 
 /***/ }),
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var RingBuffer = __webpack_require__(14);
+var RingBuffer = __webpack_require__(13);
 
 var Pledge = function() {
   this._complete  = false;
@@ -1880,7 +1725,7 @@ module.exports = Pledge;
 
 
 /***/ }),
-/* 16 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2010,7 +1855,7 @@ module.exports = Draft75;
 
 
 /***/ }),
-/* 17 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Event = __webpack_require__(7);
@@ -2042,6 +1887,161 @@ var EventTarget = {
 
 module.exports = EventTarget;
 
+
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+// Copyright (C) 2016 Dmitry Chestnykh
+// MIT License. See LICENSE file for details.
+Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * Package utf8 implements UTF-8 encoding and decoding.
+ */
+var INVALID_UTF16 = "utf8: invalid string";
+var INVALID_UTF8 = "utf8: invalid source encoding";
+/**
+ * Encodes the given string into UTF-8 byte array.
+ * Throws if the source string has invalid UTF-16 encoding.
+ */
+function encode(s) {
+    // Calculate result length and allocate output array.
+    // encodedLength() also validates string and throws errors,
+    // so we don't need repeat validation here.
+    var arr = new Uint8Array(encodedLength(s));
+    var pos = 0;
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        if (c < 0x80) {
+            arr[pos++] = c;
+        }
+        else if (c < 0x800) {
+            arr[pos++] = 0xc0 | c >> 6;
+            arr[pos++] = 0x80 | c & 0x3f;
+        }
+        else if (c < 0xd800) {
+            arr[pos++] = 0xe0 | c >> 12;
+            arr[pos++] = 0x80 | (c >> 6) & 0x3f;
+            arr[pos++] = 0x80 | c & 0x3f;
+        }
+        else {
+            i++; // get one more character
+            c = (c & 0x3ff) << 10;
+            c |= s.charCodeAt(i) & 0x3ff;
+            c += 0x10000;
+            arr[pos++] = 0xf0 | c >> 18;
+            arr[pos++] = 0x80 | (c >> 12) & 0x3f;
+            arr[pos++] = 0x80 | (c >> 6) & 0x3f;
+            arr[pos++] = 0x80 | c & 0x3f;
+        }
+    }
+    return arr;
+}
+exports.encode = encode;
+/**
+ * Returns the number of bytes required to encode the given string into UTF-8.
+ * Throws if the source string has invalid UTF-16 encoding.
+ */
+function encodedLength(s) {
+    var result = 0;
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        if (c < 0x80) {
+            result += 1;
+        }
+        else if (c < 0x800) {
+            result += 2;
+        }
+        else if (c < 0xd800) {
+            result += 3;
+        }
+        else if (c <= 0xdfff) {
+            if (i >= s.length - 1) {
+                throw new Error(INVALID_UTF16);
+            }
+            i++; // "eat" next character
+            result += 4;
+        }
+        else {
+            throw new Error(INVALID_UTF16);
+        }
+    }
+    return result;
+}
+exports.encodedLength = encodedLength;
+/**
+ * Decodes the given byte array from UTF-8 into a string.
+ * Throws if encoding is invalid.
+ */
+function decode(arr) {
+    var chars = [];
+    for (var i = 0; i < arr.length; i++) {
+        var b = arr[i];
+        if (b & 0x80) {
+            var min = void 0;
+            if (b < 0xe0) {
+                // Need 1 more byte.
+                if (i >= arr.length) {
+                    throw new Error(INVALID_UTF8);
+                }
+                var n1 = arr[++i];
+                if ((n1 & 0xc0) !== 0x80) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b = (b & 0x1f) << 6 | (n1 & 0x3f);
+                min = 0x80;
+            }
+            else if (b < 0xf0) {
+                // Need 2 more bytes.
+                if (i >= arr.length - 1) {
+                    throw new Error(INVALID_UTF8);
+                }
+                var n1 = arr[++i];
+                var n2 = arr[++i];
+                if ((n1 & 0xc0) !== 0x80 || (n2 & 0xc0) !== 0x80) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b = (b & 0x0f) << 12 | (n1 & 0x3f) << 6 | (n2 & 0x3f);
+                min = 0x800;
+            }
+            else if (b < 0xf8) {
+                // Need 3 more bytes.
+                if (i >= arr.length - 2) {
+                    throw new Error(INVALID_UTF8);
+                }
+                var n1 = arr[++i];
+                var n2 = arr[++i];
+                var n3 = arr[++i];
+                if ((n1 & 0xc0) !== 0x80 || (n2 & 0xc0) !== 0x80 || (n3 & 0xc0) !== 0x80) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b = (b & 0x0f) << 18 | (n1 & 0x3f) << 12 | (n2 & 0x3f) << 6 | (n3 & 0x3f);
+                min = 0x10000;
+            }
+            else {
+                throw new Error(INVALID_UTF8);
+            }
+            if (b < min || (b >= 0xd800 && b <= 0xdfff)) {
+                throw new Error(INVALID_UTF8);
+            }
+            if (b >= 0x10000) {
+                // Surrogate pair.
+                if (b > 0x10ffff) {
+                    throw new Error(INVALID_UTF8);
+                }
+                b -= 0x10000;
+                chars.push(String.fromCharCode(0xd800 | (b >> 10)));
+                b = 0xdc00 | (b & 0x3ff);
+            }
+        }
+        chars.push(String.fromCharCode(b));
+    }
+    return chars.join("");
+}
+exports.decode = decode;
+//# sourceMappingURL=utf8.js.map
 
 /***/ }),
 /* 18 */
@@ -5378,7 +5378,7 @@ var Buffer     = __webpack_require__(1).Buffer,
     util       = __webpack_require__(0),
     HttpParser = __webpack_require__(10),
     Base       = __webpack_require__(2),
-    Hybi       = __webpack_require__(13),
+    Hybi       = __webpack_require__(12),
     Proxy      = __webpack_require__(36);
 
 var Client = function(_url, options) {
@@ -6070,7 +6070,7 @@ var instance = {
   },
 
   validFrameRsv: function(frame) {
-    var allowed = {rsv1: false, rsv2: false, rsv3: false},
+    var allowed = { rsv1: false, rsv2: false, rsv3: false },
         ext;
 
     if (Extensions.MESSAGE_OPCODES.indexOf(frame.opcode) >= 0) {
@@ -6129,7 +6129,7 @@ module.exports = Extensions;
 
 var TOKEN    = /([!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z]+)/,
     NOTOKEN  = /([^!#\$%&'\*\+\-\.\^_`\|~0-9A-Za-z])/g,
-    QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"])*)"/,
+    QUOTED   = /"((?:\\[\x00-\x7f]|[^\x00-\x08\x0a-\x1f\x7f"\\])*)"/,
     PARAM    = new RegExp(TOKEN.source + '(?:=(?:' + TOKEN.source + '|' + QUOTED.source + '))?'),
     EXT      = new RegExp(TOKEN.source + '(?: *; *' + PARAM.source + ')*', 'g'),
     EXT_LIST = new RegExp('^' + EXT.source + '(?: *, *' + EXT.source + ')*$'),
@@ -6210,7 +6210,7 @@ Offers.prototype.push = function(name, params) {
     this._byName[name] = [];
 
   this._byName[name].push(params);
-  this._inOrder.push({name: name, params: params});
+  this._inOrder.push({ name: name, params: params });
 };
 
 Offers.prototype.eachOffer = function(callback, context) {
@@ -6238,11 +6238,11 @@ module.exports = Parser;
 
 
 var Cell   = __webpack_require__(32),
-    Pledge = __webpack_require__(15);
+    Pledge = __webpack_require__(14);
 
 var Pipeline = function(sessions) {
   this._cells   = sessions.map(function(session) { return new Cell(session) });
-  this._stopped = {incoming: false, outgoing: false};
+  this._stopped = { incoming: false, outgoing: false };
 };
 
 Pipeline.prototype.processIncomingMessage = function(message, callback, context) {
@@ -6256,7 +6256,7 @@ Pipeline.prototype.processOutgoingMessage = function(message, callback, context)
 };
 
 Pipeline.prototype.close = function(callback, context) {
-  this._stopped = {incoming: true, outgoing: true};
+  this._stopped = { incoming: true, outgoing: true };
 
   var closed = this._cells.map(function(a) { return a.close() });
   if (callback)
@@ -6292,7 +6292,7 @@ module.exports = Pipeline;
 
 
 var Functor = __webpack_require__(33),
-    Pledge  = __webpack_require__(15);
+    Pledge  = __webpack_require__(14);
 
 var Cell = function(tuple) {
   this._ext     = tuple[0];
@@ -6351,7 +6351,7 @@ module.exports = Cell;
 "use strict";
 
 
-var RingBuffer = __webpack_require__(14);
+var RingBuffer = __webpack_require__(13);
 
 var Functor = function(session, method) {
   this._session = session;
@@ -6366,7 +6366,7 @@ Functor.QUEUE_SIZE = 8;
 Functor.prototype.call = function(error, message, callback, context) {
   if (this._stopped) return;
 
-  var record = {error: error, message: message, callback: callback, context: context, done: false},
+  var record = { error: error, message: message, callback: callback, context: context, done: false },
       called = false,
       self   = this;
 
@@ -6608,9 +6608,9 @@ module.exports = Proxy;
 var util       = __webpack_require__(0),
     HttpParser = __webpack_require__(10),
     Base       = __webpack_require__(2),
-    Draft75    = __webpack_require__(16),
+    Draft75    = __webpack_require__(15),
     Draft76    = __webpack_require__(38),
-    Hybi       = __webpack_require__(13);
+    Hybi       = __webpack_require__(12);
 
 var Server = function(options) {
   Base.call(this, null, null, options);
@@ -6726,7 +6726,7 @@ module.exports = Server;
 
 var Buffer  = __webpack_require__(1).Buffer,
     Base    = __webpack_require__(2),
-    Draft75 = __webpack_require__(16),
+    Draft75 = __webpack_require__(15),
     crypto  = __webpack_require__(3),
     util    = __webpack_require__(0);
 
@@ -6952,7 +6952,7 @@ var Stream      = __webpack_require__(5).Stream,
     driver      = __webpack_require__(4),
     Headers     = __webpack_require__(9),
     API         = __webpack_require__(11),
-    EventTarget = __webpack_require__(17),
+    EventTarget = __webpack_require__(16),
     Event       = __webpack_require__(7);
 
 var EventSource = function(request, response, options) {
@@ -7447,7 +7447,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "6.0.3",
+    VERSION: "7.0.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -8151,7 +8151,7 @@ var connection_Connection = (function (_super) {
                 _this.emit('activity');
             },
             error: function (error) {
-                _this.emit('error', { type: 'WebSocketError', error: error });
+                _this.emit('error', error);
             },
             closed: function (closeEvent) {
                 unbindListeners();
@@ -8387,6 +8387,18 @@ var UnsupportedStrategy = (function (_super) {
     return UnsupportedStrategy;
 }(Error));
 
+var HTTPAuthError = (function (_super) {
+    errors_extends(HTTPAuthError, _super);
+    function HTTPAuthError(status, msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        _this.status = status;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return HTTPAuthError;
+}(Error));
+
 
 // CONCATENATED MODULE: ./src/core/utils/url_store.ts
 var urlStore = {
@@ -8442,6 +8454,7 @@ var channel_extends = (undefined && undefined.__extends) || (function () {
 
 
 
+
 var channel_Channel = (function (_super) {
     channel_extends(Channel, _super);
     function Channel(name, pusher) {
@@ -8456,7 +8469,7 @@ var channel_Channel = (function (_super) {
         return _this;
     }
     Channel.prototype.authorize = function (socketId, callback) {
-        return callback(false, { auth: '' });
+        return callback(null, { auth: '' });
     };
     Channel.prototype.trigger = function (event, data) {
         if (event.indexOf('client-') !== 0) {
@@ -8502,11 +8515,13 @@ var channel_Channel = (function (_super) {
         this.subscriptionCancelled = false;
         this.authorize(this.pusher.connection.socket_id, function (error, data) {
             if (error) {
-                logger.error(data);
-                _this.emit('pusher:subscription_error', data);
+                logger.error(error.toString());
+                _this.emit('pusher:subscription_error', Object.assign({}, {
+                    type: 'AuthError',
+                    error: error.message
+                }, error instanceof HTTPAuthError ? { status: error.status } : {}));
             }
             else {
-                data = data;
                 _this.pusher.send_event('pusher:subscribe', {
                     auth: data.auth,
                     channel_data: data.channel_data,
@@ -8712,7 +8727,7 @@ var presence_channel_PresenceChannel = (function (_super) {
 /* harmony default export */ var presence_channel = (presence_channel_PresenceChannel);
 
 // EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
-var utf8 = __webpack_require__(12);
+var utf8 = __webpack_require__(17);
 
 // EXTERNAL MODULE: ./node_modules/@stablelib/base64/lib/base64.js
 var base64 = __webpack_require__(8);
@@ -8748,18 +8763,17 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
         var _this = this;
         _super.prototype.authorize.call(this, socketId, function (error, authData) {
             if (error) {
-                callback(true, authData);
+                callback(error, authData);
                 return;
             }
             var sharedSecret = authData['shared_secret'];
             if (!sharedSecret) {
-                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
-                callback(true, errorMsg);
+                callback(new Error("No shared_secret key in auth payload for encrypted channel: " + _this.name), null);
                 return;
             }
             _this.key = Object(base64["decode"])(sharedSecret);
             delete authData['shared_secret'];
-            callback(false, authData);
+            callback(null, authData);
         });
     };
     EncryptedChannel.prototype.trigger = function (event, data) {
@@ -8809,21 +8823,21 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
                     logger.error("Failed to decrypt event with new key. Dropping encrypted event");
                     return;
                 }
-                _this.emitJSON(event, Object(utf8["decode"])(bytes));
+                _this.emit(event, _this.getDataToEmit(bytes));
                 return;
             });
             return;
         }
-        this.emitJSON(event, Object(utf8["decode"])(bytes));
+        this.emit(event, this.getDataToEmit(bytes));
     };
-    EncryptedChannel.prototype.emitJSON = function (eventName, data) {
+    EncryptedChannel.prototype.getDataToEmit = function (bytes) {
+        var raw = Object(utf8["decode"])(bytes);
         try {
-            this.emit(eventName, JSON.parse(data));
+            return JSON.parse(raw);
         }
-        catch (e) {
-            this.emit(eventName, data);
+        catch (_a) {
+            return raw;
         }
-        return this;
     };
     return EncryptedChannel;
 }(private_channel));
@@ -9021,7 +9035,7 @@ var connection_manager_ConnectionManager = (function (_super) {
                 _this.resetActivityCheck();
             },
             error: function (error) {
-                _this.emit('error', { type: 'WebSocketError', error: error });
+                _this.emit('error', error);
             },
             closed: function () {
                 _this.abandonConnection();
@@ -10126,25 +10140,25 @@ var ajax = function (context, socketId, callback) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-                var data, parsed = false;
+                var data = void 0;
+                var parsed = false;
                 try {
                     data = JSON.parse(xhr.responseText);
                     parsed = true;
                 }
                 catch (e) {
-                    callback(true, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                        xhr.responseText);
+                    callback(new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+                        xhr.responseText), { auth: '' });
                 }
                 if (parsed) {
-                    callback(false, data);
+                    callback(null, data);
                 }
             }
             else {
                 var suffix = url_store.buildLogSuffix('authenticationEndpoint');
-                logger.error('Unable to retrieve auth string from auth endpoint - ' +
-                    ("received status " + xhr.status + " from " + self.options.authEndpoint + ". ") +
-                    ("Clients must be authenticated to join private or presence channels. " + suffix));
-                callback(true, xhr.status);
+                callback(new HTTPAuthError(xhr.status, 'Unable to retrieve auth string from auth endpoint - ' +
+                    ("received status: " + xhr.status + " from " + self.options.authEndpoint + ". ") +
+                    ("Clients must be authenticated to join private or presence channels. " + suffix)), { auth: '' });
             }
         }
     };

@@ -101,13 +101,13 @@ const Pusher = require('pusher-js/with-encryption');
 #### CDN
 
 ```html
-<script src="https://js.pusher.com/6.0/pusher.min.js"></script>
+<script src="https://js.pusher.com/7.0/pusher.min.js"></script>
 ```
 
 If you'd like to use encrypted channels:
 
 ```html
-<script src="https://js.pusher.com/6.0/pusher-with-encryption.min.js"></script>
+<script src="https://js.pusher.com/7.0/pusher-with-encryption.min.js"></script>
 ```
 
 You can also use [cdnjs.com](https://cdnjs.com/libraries/pusher) if you prefer
@@ -172,13 +172,13 @@ Notes:
 You can import the worker script (`pusher.worker.js`, not `pusher.js`) from the CDN:
 
 ```javascript
-importScripts('https://js.pusher.com/6.0/pusher.worker.min.js');
+importScripts('https://js.pusher.com/7.0/pusher.worker.min.js');
 ```
 
 If you'd like to use encrypted channels:
 
 ```javascript
-importScripts('https://js.pusher.com/6.0/pusher-with-encryption.worker.min.js');
+importScripts('https://js.pusher.com/7.0/pusher-with-encryption.worker.min.js');
 ```
 
 ### Node.js
@@ -637,17 +637,17 @@ First, clone this repository and run `npm install && git submodule init && git s
 
 In the `dist/web` folder, you should see the files you need: `pusher.js`, `pusher.min.js`, `json2.js`, `json.min.js`, `sockjs.js` and `sockjs.min.js`. `pusher.js` should be built referencing your URLs as the dependency hosts.
 
-First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 6.0.3 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URL's:
+First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 7.0.0 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URL's:
 
-    http://example.com/pusher-js/6.0.3/pusher.js
-    http://example.com/pusher-js/6.0.3/json2.js
-    http://example.com/pusher-js/6.0.3/sockjs.js
+    http://example.com/pusher-js/7.0.0/pusher.js
+    http://example.com/pusher-js/7.0.0/json2.js
+    http://example.com/pusher-js/7.0.0/sockjs.js
 
 Minified files should have `.min` in their names, as in the `dist/web` directory:
 
-    http://example.com/pusher-js/6.0.3/pusher.min.js
-    http://example.com/pusher-js/6.0.3/json2.min.js
-    http://example.com/pusher-js/6.0.3/sockjs.min.js
+    http://example.com/pusher-js/7.0.0/pusher.min.js
+    http://example.com/pusher-js/7.0.0/json2.min.js
+    http://example.com/pusher-js/7.0.0/sockjs.min.js
 
 ## SockJS compatibility
 

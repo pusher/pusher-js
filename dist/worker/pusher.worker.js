@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v6.0.3
+ * Pusher JavaScript Library v7.0.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -887,7 +887,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "6.0.3",
+    VERSION: "7.0.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -1591,7 +1591,7 @@ var connection_Connection = (function (_super) {
                 _this.emit('activity');
             },
             error: function (error) {
-                _this.emit('error', { type: 'WebSocketError', error: error });
+                _this.emit('error', error);
             },
             closed: function (closeEvent) {
                 unbindListeners();
@@ -1827,6 +1827,18 @@ var UnsupportedStrategy = (function (_super) {
     return UnsupportedStrategy;
 }(Error));
 
+var HTTPAuthError = (function (_super) {
+    errors_extends(HTTPAuthError, _super);
+    function HTTPAuthError(status, msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        _this.status = status;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return HTTPAuthError;
+}(Error));
+
 
 // CONCATENATED MODULE: ./src/core/utils/url_store.ts
 var urlStore = {
@@ -1882,6 +1894,7 @@ var channel_extends = (undefined && undefined.__extends) || (function () {
 
 
 
+
 var channel_Channel = (function (_super) {
     channel_extends(Channel, _super);
     function Channel(name, pusher) {
@@ -1896,7 +1909,7 @@ var channel_Channel = (function (_super) {
         return _this;
     }
     Channel.prototype.authorize = function (socketId, callback) {
-        return callback(false, { auth: '' });
+        return callback(null, { auth: '' });
     };
     Channel.prototype.trigger = function (event, data) {
         if (event.indexOf('client-') !== 0) {
@@ -1942,11 +1955,13 @@ var channel_Channel = (function (_super) {
         this.subscriptionCancelled = false;
         this.authorize(this.pusher.connection.socket_id, function (error, data) {
             if (error) {
-                logger.error(data);
-                _this.emit('pusher:subscription_error', data);
+                logger.error(error.toString());
+                _this.emit('pusher:subscription_error', Object.assign({}, {
+                    type: 'AuthError',
+                    error: error.message
+                }, error instanceof HTTPAuthError ? { status: error.status } : {}));
             }
             else {
-                data = data;
                 _this.pusher.send_event('pusher:subscribe', {
                     auth: data.auth,
                     channel_data: data.channel_data,
@@ -2188,18 +2203,17 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
         var _this = this;
         _super.prototype.authorize.call(this, socketId, function (error, authData) {
             if (error) {
-                callback(true, authData);
+                callback(error, authData);
                 return;
             }
             var sharedSecret = authData['shared_secret'];
             if (!sharedSecret) {
-                var errorMsg = "No shared_secret key in auth payload for encrypted channel: " + _this.name;
-                callback(true, errorMsg);
+                callback(new Error("No shared_secret key in auth payload for encrypted channel: " + _this.name), null);
                 return;
             }
             _this.key = Object(base64["decode"])(sharedSecret);
             delete authData['shared_secret'];
-            callback(false, authData);
+            callback(null, authData);
         });
     };
     EncryptedChannel.prototype.trigger = function (event, data) {
@@ -2249,21 +2263,21 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
                     logger.error("Failed to decrypt event with new key. Dropping encrypted event");
                     return;
                 }
-                _this.emitJSON(event, Object(utf8["decode"])(bytes));
+                _this.emit(event, _this.getDataToEmit(bytes));
                 return;
             });
             return;
         }
-        this.emitJSON(event, Object(utf8["decode"])(bytes));
+        this.emit(event, this.getDataToEmit(bytes));
     };
-    EncryptedChannel.prototype.emitJSON = function (eventName, data) {
+    EncryptedChannel.prototype.getDataToEmit = function (bytes) {
+        var raw = Object(utf8["decode"])(bytes);
         try {
-            this.emit(eventName, JSON.parse(data));
+            return JSON.parse(raw);
         }
-        catch (e) {
-            this.emit(eventName, data);
+        catch (_a) {
+            return raw;
         }
-        return this;
     };
     return EncryptedChannel;
 }(private_channel));
@@ -2461,7 +2475,7 @@ var connection_manager_ConnectionManager = (function (_super) {
                 _this.resetActivityCheck();
             },
             error: function (error) {
-                _this.emit('error', { type: 'WebSocketError', error: error });
+                _this.emit('error', error);
             },
             closed: function () {
                 _this.abandonConnection();
@@ -3566,24 +3580,20 @@ var fetchAuth = function (context, socketId, callback) {
         if (status === 200) {
             return response.text();
         }
-        else {
-            logger.error("Couldn't get auth info from your auth endpoint", status);
-            throw status;
-        }
+        throw new HTTPAuthError(200, "Could not get auth info from your auth endpoint, status: " + status);
     })
         .then(function (data) {
+        var parsedData;
         try {
-            data = JSON.parse(data);
+            parsedData = JSON.parse(data);
         }
         catch (e) {
-            var message = 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                data;
-            logger.error(message);
-            throw message;
+            throw new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+                data);
         }
-        callback(false, data);
+        callback(null, parsedData);
     })["catch"](function (err) {
-        callback(true, err);
+        callback(err, { auth: '' });
     });
 };
 /* harmony default export */ var fetch_auth = (fetchAuth);

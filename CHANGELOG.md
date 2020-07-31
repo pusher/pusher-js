@@ -1,5 +1,29 @@
 # Changelog
 
+## 7.0.0 (2020-07-30)
+
+[UPDATED] Type signatures for authorizer callback. Previously the authorizer
+callback had 2 arguments, the first was a boolean indicating that the second
+was an error. Switched for a more conventional `function(err, data)` signature.
+**This is a breaking change, if you use a custom authorizer**
+
+[UPDATED] Types of errors emitted on `pusher:subscription_error` events.
+Previously this event just contained the status code the auth endpoint
+returned. This was replaced with a (hopefully) more error object with a message
+and a `status` key.
+**This is a breaking change, if you depend on the status in the
+`pusher:subscription_error` event**
+
+[FIXED] Stop wrapping websocket errors multiple times. [Fixes issue
+464](https://github.com/pusher/pusher-js/issues/464)
+**This might be a breaking change, if you depend on the structure of `'error'` events
+emitted by `pusher.connection`**
+
+[FIXED] Stop swallowing errors thrown by handlers on encrypted channels.
+Previously errors thrown by handlers bound to encrypted channels were caught
+and ignored. This was unintentional and undesirable. [Fixes Issue
+437](https://github.com/pusher/pusher-js/issues/437)
+
 ## 6.0.3 (2020-05-14)
 
 [FIXED] Added typescript declarations for the pusher-js/with-encryption build
