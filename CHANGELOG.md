@@ -217,7 +217,7 @@ reconnection. Regression introduced in 3.2.3.
 
 ## 3.2.3 (2016-10-22)
 
-[NEW] Cancelled subscriptions are now re-instated on subsequent `subscribe`
+[NEW] Cancelled subscriptions are now reinstated on subsequent `subscribe`
 calls, allowing arbitrary chains of `subscribe`/`unsubscribe` calls, where the
 final method is always respected regardless of the timings.
 See [PR 201](https://github.com/pusher/pusher-js/pull/201) for details.
@@ -248,7 +248,7 @@ See [PR 201](https://github.com/pusher/pusher-js/pull/201) for details.
 
 [FIXED] Callback removal issues in Safari 9 (#125 #129)
 
-[CHANGED] Monkey-patching the DependencyLoader when self-hosting no longer supported. New steps in README.
+[CHANGED] Monkey-patching the DependencyLoader when self-hosting is no longer supported. New steps in README.
 
 [CHANGED] HTTP fallbacks are now included as part of the main file and are not therefore dynamically loaded.
 
@@ -322,7 +322,7 @@ No changes since 2.2.0-rc3, just changed the version number.
 
 [CHANGED] Improved heartbeat handling for HTTP transports
 
-[CHANGED] Removed wssHost and httpsHost options, reverted to a single domain regardless of encryption
+[CHANGED] Removed wsHost and httpsHost options, reverted to a single domain regardless of encryption
 
 [CHANGED] Added extra 1s to the cached transport timeout
 
@@ -580,7 +580,7 @@ No changes since 2.2.0-rc3, just changed the version number.
 
 ## 1.9.6 (2011-11-16)
 
-[FIXED] Issue in Mozilla Firefox 8, where making a connection to non-ssl websocket endpoint from a secure page results in a security exception.
+[FIXED] Issue in Mozilla Firefox 8, where making a connection to a non-ssl websocket endpoint from a secure page results in a security exception.
 
 ## 1.9.5 (2011-11-15)
 
@@ -665,7 +665,7 @@ For the full list of changes in web-socket-js see <https://github.com/gimite/web
 
 [BUGFIX] Minor fix which could have allowed `member_removed` to be triggered with nil.
 
-[CHANGE] Increased default connection timeout to reduce likelyhood of timeouts on first connection attempt. This is now configurable as `Pusher.connection_timeout`.
+[CHANGE] Increased default connection timeout to reduce likelihood of timeouts on first connection attempt. This is now configurable as `Pusher.connection_timeout`.
 
 ## 1.8.0 (2011-02-10)
 
@@ -693,7 +693,7 @@ Also, the member object passed to `member_added` and `member_removed` now has at
 
 ## 1.7.5 (2011-03-21)
 
-[CHANGE] Increased default connection timeout to reduce likelyhood of timeouts on first connection attempt. This is now configurable as `Pusher.connection_timeout` [backported from 1.8.1].
+[CHANGE] Increased default connection timeout to reduce likelihood of timeouts on first connection attempt. This is now configurable as `Pusher.connection_timeout` [backported from 1.8.1].
 
 ## 1.7.4 (2011-02-09)
 
@@ -733,7 +733,7 @@ Note that the second argument to the Pusher constructor for setting channel name
 
 JSONp support for presence and private channels
 
-Configurable transport for channel auths. JSONp allows for cross-domain channel authorization (ie. embedable widgets)
+Configurable transport for channel auths. JSONp allows for cross-domain channel authorization (ie. embeddable widgets)
 
     Pusher.channel_auth_transport = 'jsonp';
 
