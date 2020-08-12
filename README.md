@@ -637,7 +637,7 @@ First, clone this repository and run `npm install && git submodule init && git s
 
 In the `dist/web` folder, you should see the files you need: `pusher.js`, `pusher.min.js`, `json2.js`, `json.min.js`, `sockjs.js` and `sockjs.min.js`. `pusher.js` should be built referencing your URLs as the dependency hosts.
 
-First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 7.0.0 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URL's:
+First, make sure you expose all files from the `dist` directory. They need to be in a directory with named after the version number. For example, if you're hosting version 7.0.0 under `http://example.com/pusher-js` (and https for SSL), files should be accessible under following URLs:
 
     http://example.com/pusher-js/7.0.0/pusher.js
     http://example.com/pusher-js/7.0.0/json2.js
@@ -690,7 +690,7 @@ We use webpack module resolution to make the library look for different versions
 
 For web it will look for `src/runtimes/web/runtime.ts`. For ReactNative, `src/runtimes/react-native/runtime.ts`. For Node:  `src/runtimes/node/runtime.ts`. For worker: `src/runtimes/worker/runtime.ts`.
 
-Each of these runtime files exports an object (conforming to the interface you can see in `src/runtimes/interface.ts`) that abstracts away everything platform-specific. The core library pulls this object in without any knowledge of how it implements it. This means web build can use the DOM underneath, the ReactNative build can use its native NetInfo API, Workers can use `fetch` and so on.
+Each of these runtime files exports an object (conforming to the interface you can see in `src/runtimes/interface.ts`) that abstracts away everything platform-specific. The core library pulls this object in without any knowledge of how it implements it. This means web builds can use the DOM underneath, the ReactNative build can use its native NetInfo API, Workers can use `fetch` and so on.
 
 ### Building
 
