@@ -294,6 +294,7 @@ describe("Pusher", function() {
     describe("#unsubscribe", function() {
       it("should unsubscribe the channel if subscription is not pending", function() {
         var channel = pusher.subscribe("yyy");
+        channel.subscribed = true;
         expect(channel.unsubscribe).not.toHaveBeenCalled();
 
         pusher.unsubscribe("yyy");

@@ -234,7 +234,7 @@ export default class Pusher {
       channel.cancelSubscription();
     } else {
       channel = this.channels.remove(channel_name);
-      if (channel && this.connection.state === 'connected') {
+      if (channel && channel.subscribed) {
         channel.unsubscribe();
       }
     }
