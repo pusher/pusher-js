@@ -301,6 +301,15 @@ describe("Pusher", function() {
         expect(channel.unsubscribe).toHaveBeenCalled();
       });
 
+      it("should not unsubscribe the channel if the channel is not subscribed", function() {
+        var channel = pusher.subscribe("yyy");
+        channel.subscribed = false;
+        expect(channel.unsubscribe).not.toHaveBeenCalled();
+
+        pusher.unsubscribe("yyy");
+        expect(channel.unsubscribe).not.toHaveBeenCalled();
+      });
+
       it("should remove the channel from .channels if subscription is not pending", function () {
         var channel = pusher.subscribe("yyy");
         expect(pusher.channel("yyy")).toBe(channel);
