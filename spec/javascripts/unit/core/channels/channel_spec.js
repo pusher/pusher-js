@@ -276,6 +276,19 @@ describe("Channel", function() {
       expect(channel.subscriptionPending).toEqual(false);
     });
 
+    it("should keep #subscriptionPending set as true after a successful authorization", function() {
+      expect(channel.subscriptionPending).toEqual(false);
+
+      channel.subscribe();
+      var authorizeCallback = channel.authorize.calls[0].args[1];
+      authorizeCallback(false, {
+        auth: "one",
+        channel_data: "two"
+      });
+
+      expect(channel.subscriptionPending).toEqual(true);
+    });
+
     it("should do nothing if already subscribed", function() {
       channel.subscribed = true;
 
