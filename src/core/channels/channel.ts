@@ -102,6 +102,7 @@ export default class Channel extends EventsDispatcher {
       this.pusher.connection.socket_id,
       (error: Error | null, data: AuthData) => {
         if (error) {
+          this.subscriptionPending = false;
           // Why not bind to 'pusher:subscription_error' a level up, and log there?
           // Binding to this event would cause the warning about no callbacks being
           // bound (see constructor) to be suppressed, that's not what we want.
