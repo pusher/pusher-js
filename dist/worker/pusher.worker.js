@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v7.0.0
+ * Pusher JavaScript Library v7.0.1
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -887,7 +887,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.0.0",
+    VERSION: "7.0.1",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -1955,6 +1955,7 @@ var channel_Channel = (function (_super) {
         this.subscriptionCancelled = false;
         this.authorize(this.pusher.connection.socket_id, function (error, data) {
             if (error) {
+                _this.subscriptionPending = false;
                 logger.error(error.toString());
                 _this.emit('pusher:subscription_error', Object.assign({}, {
                     type: 'AuthError',
@@ -4134,7 +4135,7 @@ var pusher_Pusher = (function () {
         }
         else {
             channel = this.channels.remove(channel_name);
-            if (channel && this.connection.state === 'connected') {
+            if (channel && channel.subscribed) {
                 channel.unsubscribe();
             }
         }

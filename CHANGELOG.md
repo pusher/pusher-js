@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.1 (2020-11-02)
+
+[FIXED] Channels no longer get stuck in the `subscriptionPending` state
+after a failed request to an auth endpoint. [Fixes Issue
+255](https://github.com/pusher/pusher-js/issues/255)
+
 ## 7.0.0 (2020-07-30)
 
 [UPDATED] Type signatures for authorizer callback. Previously the authorizer
