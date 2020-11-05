@@ -18,6 +18,7 @@ var ajax: AuthTransport = function(
 
   xhr = Runtime.createXHR();
   xhr.open('POST', self.options.authEndpoint, true);
+  xhr.withCredentials = this.authOptions.withCredentials;
 
   // add request headers
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');

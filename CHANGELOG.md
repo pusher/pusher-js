@@ -1,5 +1,8 @@
 # Changelog
 
+[ADDED] Support for making auth requests with credentials by setting
+`auth.withCredentials` on the `Pusher` constructor options.
+
 ## 7.0.1 (2020-11-02)
 
 [FIXED] Channels no longer get stuck in the `subscriptionPending` state

@@ -10134,6 +10134,7 @@ var ajax = function (context, socketId, callback) {
     var self = this, xhr;
     xhr = node_runtime.createXHR();
     xhr.open('POST', self.options.authEndpoint, true);
+    xhr.withCredentials = this.authOptions.withCredentials;
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in this.authOptions.headers) {
         xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);

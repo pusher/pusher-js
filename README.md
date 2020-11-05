@@ -238,7 +238,13 @@ For more information see the [Channel authentication transport section of our au
 
 #### `auth` (Hash)
 
-Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
+Allows passing additional data to authorizers. Supported properties are:
+
+- `params`: an object of key value pairs to send as parameters with the authorization request
+- `headers`: an object of key value pairs to send as headers with the authorization request (AJAX only)
+- `withCredentials`: set to `true` to set [`withCredentials`](https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/withCredentials) on the underlying XHR instance (AJAX only)
+
+For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
 
 ```js
 const pusher = new Pusher(APP_KEY, {
@@ -250,7 +256,7 @@ const pusher = new Pusher(APP_KEY, {
 });
 ```
 
-Additional parameters to be sent when the channel authentication endpoint is called. When using [ajax authentication](https://pusher.com/docs/authenticating_users#ajax_authentication) the parameters are passed as additional `POST` parameters. When using [jsonp authentication](http://pusher.com/docs/authenticating_users#jsonp_authentication) the parameters are passed as `GET` parameters. This can be useful with web application frameworks that guard against [CSRF (Cross-site request forgery)](http://en.wikipedia.org/wiki/Cross-site_request_forgery).
+When using [ajax authentication](https://pusher.com/docs/authenticating_users#ajax_authentication) the parameters are passed as additional `POST` parameters. When using [jsonp authentication](http://pusher.com/docs/authenticating_users#jsonp_authentication) the parameters are passed as `GET` parameters. This can be useful with web application frameworks that guard against [CSRF (Cross-site request forgery)](http://en.wikipedia.org/wiki/Cross-site_request_forgery).
 
 ##### CSRF
 

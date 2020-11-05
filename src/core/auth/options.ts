@@ -3,6 +3,7 @@ import Channel from '../channels/channel';
 export interface AuthOptions {
   params?: any;
   headers?: any;
+  withCredentials?: boolean;
 }
 
 export interface AuthData {

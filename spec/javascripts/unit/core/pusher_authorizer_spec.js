@@ -96,6 +96,20 @@ if (TestEnv !== "worker") {
       );
     });
 
+    it("should set withCredentials", function() {
+      var authorizer = new Authorizer(
+        { name: "chan" },
+        { authTransport: "ajax",
+          auth: {
+            withCredentials: true
+          }
+        }
+      );
+      authorizer.authorize("1.23", function() {});
+
+      expect(xhr.withCredentials).toEqual(true);
+    })
+
     it("should call back with auth result on success", function() {
       var authorizer = new Authorizer(
         { name: "chan" },
