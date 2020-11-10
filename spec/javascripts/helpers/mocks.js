@@ -115,7 +115,8 @@ var Mocks = {
   getTransportManager: function(alive) {
     return {
       isAlive: jasmine.createSpy("isAlive").andReturn(alive !== false),
-      reportDeath: jasmine.createSpy("reportDeath")
+      reportDeath: jasmine.createSpy("reportDeath"),
+      reportConnection: jasmine.createSpy("reportConnection")
     };
   },
 

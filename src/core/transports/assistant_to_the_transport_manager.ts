@@ -65,10 +65,11 @@ export default class AssistantToTheTransportManager {
 
     var openTimestamp = null;
 
-    var onOpen = function() {
+    var onOpen = () => {
       connection.unbind('open', onOpen);
       connection.bind('closed', onClosed);
       openTimestamp = Util.now();
+      this.manager.reportConnection();
     };
     var onClosed = closeEvent => {
       connection.unbind('closed', onClosed);

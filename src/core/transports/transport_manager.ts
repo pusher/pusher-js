@@ -2,9 +2,11 @@ import AssistantToTheTransportManager from './assistant_to_the_transport_manager
 import Transport from './transport';
 import PingDelayOptions from './ping_delay_options';
 import Factory from '../utils/factory';
+import { OneOffTimer } from '../utils/timers';
 
 export interface TransportManagerOptions extends PingDelayOptions {
   lives?: number;
+  connectionSucceedsAfter?: number;
 }
 
 /** Keeps track of the number of lives left for a transport.
@@ -19,10 +21,14 @@ export interface TransportManagerOptions extends PingDelayOptions {
 export default class TransportManager {
   options: TransportManagerOptions;
   livesLeft: number;
+  successfulConnectionTimer: OneOffTimer | null;
+  connectionSucceedsAfter: number;
 
   constructor(options: TransportManagerOptions) {
     this.options = options || {};
     this.livesLeft = this.options.lives || Infinity;
+    this.successfulConnectionTimer = null;
+    this.connectionSucceedsAfter = this.options.connectionSucceedsAfter || 5;
   }
 
   /** Creates a assistant for the transport.
@@ -47,6 +53,24 @@ export default class TransportManager {
 
   /** Takes one life from the transport. */
   reportDeath() {
+    if (this.successfulConnectionTimer) {
+      this.successfulConnectionTimer.ensureAborted();
+      this.successfulConnectionTimer = null;
+    }
     this.livesLeft -= 1;
+  }
+
+  reportConnection() {
+    this.successfulConnectionTimer = new OneOffTimer(
+      this.connectionSucceedsAfter,
+      this.reportSuccessfulConnection
+    );
+  }
+
+  /** Adds one life to the transport. */
+  reportSuccessfulConnection() {
+    if (this.livesLeft < this.options.lives) {
+      this.livesLeft += 1;
+    }
   }
 }

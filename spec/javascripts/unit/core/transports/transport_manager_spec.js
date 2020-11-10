@@ -24,7 +24,7 @@ describe("TransportManager", function() {
     var manager;
 
     beforeEach(function() {
-      manager = new TransportManager({ lives: 2 });
+      manager = new TransportManager({ lives: 2, connectionSucceedsAfter: 0 });
     });
 
     it("should be alive in the beginning", function() {
@@ -37,6 +37,22 @@ describe("TransportManager", function() {
     });
 
     it("should be dead after losing both lives", function() {
+      manager.reportDeath();
+      manager.reportDeath();
+      expect(manager.isAlive()).toBe(false);
+    });
+
+    it("should be alive after succeeding between 2 deaths", function() {
+      manager.reportDeath();
+      manager.reportSuccessfulConnection();
+      manager.reportDeath();
+      expect(manager.isAlive()).toBe(true);
+    });
+
+    it("should be dead after losing both lives even after multiple successes", function() {
+      manager.reportSuccessfulConnection();
+      manager.reportSuccessfulConnection();
+      manager.reportSuccessfulConnection();
       manager.reportDeath();
       manager.reportDeath();
       expect(manager.isAlive()).toBe(false);
