@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.2 (2020-11-26)
+
+[FIXED] Removes `AuthInfo` type from react-native and with-encryption builds.
+This type was removed everywhere else in v7.0.0. See [issue
+512](https://github.com/pusher/pusher-js/issues/512)
+
 ## 7.0.1 (2020-11-02)
 
 [FIXED] Channels no longer get stuck in the `subscriptionPending` state
