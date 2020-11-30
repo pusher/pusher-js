@@ -598,6 +598,20 @@ channel.unbind_global();
 
 The `unbind_all` method is equivalent to calling `unbind()` and `unbind_global()` together; it removes all bindings, global and event specific.
 
+## Triggering Client Events
+
+It's possible to trigger [client events](https://pusher.com/docs/channels/using_channels/events#triggering-client-events) using the `trigger` method on an instance of the `Channel` class.
+
+A few gotchas to consider when using client events:
+- Client events can only be triggered on private/presence channels
+- Client events must be enabled in the settings page for your app: `https://dashboard.pusher.com/apps/$YOUR_APP_ID/settings`
+- The event name for client events *must* start with `client-`
+
+```
+channel.trigger('client-my-event', {message: 'Hello, world!'})
+```
+
+
 ## Batching auth requests (aka multi-auth)
 
 Currently, pusher-js itself does not support authenticating multiple channels in one HTTP request. However, thanks to @dirkbonhomme you can use the [pusher-js-auth](https://github.com/dirkbonhomme/pusher-js-auth) plugin that buffers subscription requests and sends auth requests to your endpoint in batches.
