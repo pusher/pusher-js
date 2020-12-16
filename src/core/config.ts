@@ -109,10 +109,10 @@ function getWebsocketHostFromCluster(cluster: string): string {
 }
 
 function shouldUseTLS(opts: Options): boolean {
-  if (Runtime.getProtocol() === 'https:') {
-    return true;
-  } else if (opts.forceTLS === false) {
+  if (opts.forceTLS === false) {
     return false;
+  } else if (Runtime.getProtocol() === 'https:') {
+    return true;
   }
   return true;
 }
