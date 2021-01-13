@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
-    "@react-native-community/netinfo": "^4.1.1",
+    "@react-native-community/netinfo": "^5.9.7",
     "@stablelib/base64": "^1.0.0",
     "@stablelib/utf8": "^1.0.0",
     "buffer": "^5.6.0",
