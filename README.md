@@ -181,6 +181,18 @@ If you'd like to use encrypted channels:
 importScripts('https://js.pusher.com/7.0/pusher-with-encryption.worker.min.js');
 ```
 
+If you're building your worker with a bundler, you can import the worker entrypoint
+
+```
+import Pusher from 'pusher-js/worker'
+```
+
+If you'd like to use encrypted channels:
+
+```
+import Pusher from 'pusher-js/worker/with-encryption'
+```
+
 ### Node.js
 
 Having installed `pusher-js` via an NPM-compatible package manager, run:
