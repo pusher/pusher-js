@@ -1,5 +1,18 @@
 # Changelog
 
+## 7.0.3 (2021-01-25)
+
+[UPDATED] Bumped version of faye-websocket (used only by the node runtime) from
+0.9.4 to 0.11.3. Thanks to @Akhawais for the PR.
+
+[UPDATED] Bumped version of @react-native-community/netinfo (used only by the
+react-native runtime) from 4.1.1 to 5.9.7. Thanks to @Yinabled for the PR.
+
+[ADDED] We were missing a react-native key in `package.json`. Thanks to @giaset
+for the PR
+
+[ADDED] Support for importing the worker builds (solving issue #499)
+
 ## 7.0.2 (2020-11-26)
 
 [FIXED] Removes `AuthInfo` type from react-native and with-encryption builds.
