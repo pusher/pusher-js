@@ -1,5 +1,7 @@
 # Pusher Channels Javascript Client
 
+![test badge](https://github.com/pusher/pusher-js/workflows/test/badge.svg)
+
 This Pusher Channels client library supports web browsers, web workers, Node.js
 and React Native.
 
