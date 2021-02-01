@@ -1,0 +1,38 @@
+name: test
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - master
+jobs:
+  run-web-tests:
+    runs-on: ubuntu-latest
+    env:
+      CI: ${{ github.event_name == 'push' && 'basic' || 'full' }}
+      MINIMAL_INTEGRATION_TESTS: ${{ github.event_name == 'push' && 'true' || '' }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install
+      - run: npm run check-format
+      - run: make web_unit
+      - run: make web_integration
+        env:
+          BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
+          BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
+  run-node-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - run: npm install
+      - run: npm run check-format
+      - run: make node_unit
+      - run: make node_integration
+
