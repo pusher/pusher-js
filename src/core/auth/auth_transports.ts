@@ -8,4 +8,4 @@ interface AuthTransports {
   [index: string]: AuthTransport;
 }
 
-export { AuthTransport, AuthTransports };
+export type { AuthTransport, AuthTransports };
