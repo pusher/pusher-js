@@ -6,6 +6,7 @@
   "browser": "dist/web/pusher.js",
   "react-native": "dist/react-native/pusher.js",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions@0.0.3",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --config .prettierrc --write 'src/**/*.ts' 'webpack/**/*.js'",
     "check-format": "prettier --config .prettierrc --check 'src/**/*.ts' 'webpack/**/*.js'"
@@ -63,5 +64,9 @@
   },
   "dependencies": {
     "tweetnacl": "^1.0.3"
+  },
+  "resolutions": {
+    "kind-of": "6.0.3",
+    "xmlhttprequest-ssl": "1.6.2"
   }
 }
