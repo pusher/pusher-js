@@ -1,7 +1,8 @@
-var TestEnv = require('testenv');
-var Pusher = require('pusher_integration');
-var DependenciesModule = require('dom/dependencies');
-var DependenciesReceiversModule = require('dom/dependency_loader');
+const TestEnv = require('testenv');
+const Pusher = require('pusher_integration');
+const DependenciesModule = require('dom/dependencies');
+const DependenciesReceiversModule = require('dom/dependency_loader');
+const waitsFor = require('../../helpers/waitsFor');
 
 if (TestEnv === "web") {
   window.Pusher = Pusher;
@@ -10,12 +11,11 @@ if (TestEnv === "web") {
   var DependencyLoader = DependenciesReceiversModule.default;
 }
 
-var Integration = require("integration");
-var Collections = require("core/utils/collections");
-var util = require("core/util").default;
-var Runtime = require('runtime').default;
-var Defaults = require('core/defaults').default;
-var TRANSPORTS = Runtime.Transports;
+const Integration = require("integration");
+const Collections = require("core/utils/collections");
+const Runtime = require('runtime').default;
+const Defaults = require('core/defaults').default;
+const TRANSPORTS = Runtime.Transports;
 
 
 module.exports = function(testConfigs) {
@@ -40,14 +40,13 @@ module.exports = function(testConfigs) {
       describe("with " + options.transport + ", forceTLS=" + options.forceTLS, function() {
         beforeEach(function() {
           Collections.objectApply(TRANSPORTS, function(transport, name) {
-            spyOn(transport, "isSupported").andReturn(false);
+            spyOn(transport, "isSupported").and.returnValue(false);
           });
-          TRANSPORTS[options.transport].isSupported.andReturn(true);
-          spyOn(Runtime, "getLocalStorage").andReturn({});
+          TRANSPORTS[options.transport].isSupported.and.returnValue(true);
+          spyOn(Runtime, "getLocalStorage").and.returnValue({});
         });
 
-        it("should open a connection to the 'eu' cluster", function() {
-
+        it("should open a connection to the 'eu' cluster", async function() {
           var authTransport = (TestEnv === "web") ? 'jsonp' : 'ajax';
 
           pusher = new Pusher("4d31fbea7080e3b4bf6d", {
@@ -56,12 +55,15 @@ module.exports = function(testConfigs) {
             cluster: "eu",
             forceTLS: options.forceTLS,
           });
-          waitsFor(function() {
+
+          await waitsFor(function() {
             return pusher.connection.state === "connected";
           }, "connection to be established", 20000);
+
+          expect(pusher.connection.state).toEqual('connected');
         });
 
-        it("should subscribe and receive a message sent via REST API", function() {
+        it("should subscribe and receive a message sent via REST API", async function() {
           var channelName = Integration.getRandomName("private-integration");
 
           var onSubscribed = jasmine.createSpy("onSubscribed");
@@ -71,27 +73,26 @@ module.exports = function(testConfigs) {
           var data = { x: 1, y: "z" };
           var received = null;
 
-          waitsFor(function() {
-            return onSubscribed.calls.length;
+          await waitsFor(function() {
+            return onSubscribed.calls.count();
           }, "subscription to succeed", 10000);
-          runs(function() {
-            channel.bind(eventName, function(message) {
-              received = message;
-            });
-            Integration.sendAPIMessage({
-              url: Integration.API_EU_URL + "/v2/send",
-              channel: channelName,
-              event: eventName,
-              data: data
-            });
+
+          channel.bind(eventName, function(message) {
+            received = message;
           });
-          waitsFor(function() {
+          Integration.sendAPIMessage({
+            url: Integration.API_EU_URL + "/v2/send",
+            channel: channelName,
+            event: eventName,
+            data: data
+          });
+
+          await waitsFor(function() {
             return received !== null;
           }, "message to get delivered", 10000);
-          runs(function() {
-            expect(received).toEqual(data);
-            pusher.unsubscribe(channelName);
-          });
+
+          expect(received).toEqual(data);
+          pusher.unsubscribe(channelName);
         });
 
         it("should disconnect the connection", function() {

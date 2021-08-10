@@ -7,17 +7,23 @@ describe("ConnectionManager", function() {
   var connection, strategy, timeline;
   var managerOptions, manager;
 
-  beforeEach(function() {
-    jasmine.Clock.useMock();
+  beforeAll(() => {
+    jasmine.clock().install();
+  });
 
+  afterAll(() => {
+    jasmine.clock().uninstall();
+  });
+
+  beforeEach(function() {
     connection = Mocks.getConnection();
     strategy = Mocks.getStrategy(true);
     timeline = Mocks.getTimeline();
 
-    spyOn(Network, "isOnline").andReturn(true);
+    spyOn(Network, "isOnline").and.returnValue(true);
 
     managerOptions = {
-      getStrategy: jasmine.createSpy("getStrategy").andReturn(strategy),
+      getStrategy: jasmine.createSpy("getStrategy").and.returnValue(strategy),
       timeline: timeline,
       activityTimeout: 3456,
       pongTimeout: 2345,
@@ -29,15 +35,15 @@ describe("ConnectionManager", function() {
 
   describe("on construction", function() {
     it("should construct a strategy", function() {
-      expect(manager.options.getStrategy.calls.length).toEqual(1);
+      expect(manager.options.getStrategy.calls.count()).toEqual(1);
     });
 
     it("should pass the key to the strategy builder", function() {
-      expect(manager.options.getStrategy.calls[0].args[0].key).toEqual("foo");
+      expect(manager.options.getStrategy.calls.first().args[0].key).toEqual("foo");
     });
 
     it("should pass a timeline to the strategy builder", function() {
-      var getStrategy = jasmine.createSpy("getStrategy").andCallFake(function(options) {
+      var getStrategy = jasmine.createSpy("getStrategy").and.callFake(function(options) {
         expect(options.timeline).toBe(timeline);
         return strategy;
       });
@@ -74,7 +80,7 @@ describe("ConnectionManager", function() {
   describe("#connect", function() {
     it("should not re-build the strategy", function() {
       manager.connect();
-      expect(managerOptions.getStrategy.calls.length).toEqual(1);
+      expect(managerOptions.getStrategy.calls.count()).toEqual(1);
     });
 
     it("should try to connect using the strategy", function() {
@@ -130,7 +136,7 @@ describe("ConnectionManager", function() {
       it("should clear the unavailable timer", function() {
         manager.disconnect();
 
-        jasmine.Clock.tick(10000);
+        jasmine.clock().tick(10000);
         // if unavailable timer had worked, it would have transitioned into 'unavailable'
         expect(manager.state).toEqual("disconnected");
       });
@@ -141,9 +147,9 @@ describe("ConnectionManager", function() {
         var onUnavailable = jasmine.createSpy("onUnavailable");
         manager.bind("unavailable", onUnavailable);
 
-        jasmine.Clock.tick(1233);
+        jasmine.clock().tick(1233);
         expect(manager.state).toEqual("connecting");
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
         expect(manager.state).toEqual("unavailable");
         expect(onUnavailable).toHaveBeenCalled();
       });
@@ -162,14 +168,14 @@ describe("ConnectionManager", function() {
 
       beforeEach(function() {
         tlsStrategy = Mocks.getStrategy(true);
-        managerOptions.getStrategy.andReturn(tlsStrategy);
+        managerOptions.getStrategy.and.returnValue(tlsStrategy);
 
         handshake = { action: "tls_only" };
         strategy._callback(null, handshake);
       });
 
       it("should build a TLS strategy", function() {
-        expect(managerOptions.getStrategy.calls.length).toEqual(2);
+        expect(managerOptions.getStrategy.calls.count()).toEqual(2);
         expect(managerOptions.getStrategy).toHaveBeenCalledWith({
           key: "foo",
           useTLS: true,
@@ -179,7 +185,7 @@ describe("ConnectionManager", function() {
 
       it("should connect using the TLS strategy", function() {
         // connection is retried with a zero delay
-        jasmine.Clock.tick(0);
+        jasmine.clock().tick(0);
         expect(tlsStrategy.connect).toHaveBeenCalled();
         expect(manager.state).toEqual("connecting");
       });
@@ -206,7 +212,7 @@ describe("ConnectionManager", function() {
       });
 
       it("should not reconnect", function() {
-        jasmine.Clock.tick(100000);
+        jasmine.clock().tick(100000);
         expect(manager.state).toEqual("disconnected");
       });
     });
@@ -220,7 +226,7 @@ describe("ConnectionManager", function() {
       });
 
       it("should reconnect immediately", function() {
-        jasmine.Clock.tick(0);
+        jasmine.clock().tick(0);
         expect(manager.state).toEqual("connecting");
       });
     });
@@ -238,14 +244,14 @@ describe("ConnectionManager", function() {
       });
 
       it("should reconnect after 1s", function() {
-        jasmine.Clock.tick(999);
-        expect(strategy.connect.calls.length).toEqual(1);
-        jasmine.Clock.tick(1);
-        expect(strategy.connect.calls.length).toEqual(2);
+        jasmine.clock().tick(999);
+        expect(strategy.connect.calls.count()).toEqual(1);
+        jasmine.clock().tick(1);
+        expect(strategy.connect.calls.count()).toEqual(2);
       });
 
       it("should emit 'connecting_in' event", function() {
-        expect(onConnectingIn.calls.length).toEqual(1);
+        expect(onConnectingIn.calls.count()).toEqual(1);
         expect(onConnectingIn).toHaveBeenCalledWith(1);
       });
     });
@@ -301,15 +307,15 @@ describe("ConnectionManager", function() {
     });
 
     it("should clear the unavailable timer", function() {
-      jasmine.Clock.tick(1500);
+      jasmine.clock().tick(1500);
       // if unavailable timer was not cleared, state should be unavailable
       expect(manager.state).toEqual("connected");
     });
 
     it("should not try to connect again", function() {
-      expect(strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.count()).toEqual(1);
       manager.connect();
-      expect(strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.count()).toEqual(1);
     });
 
     describe("#send", function() {
@@ -338,7 +344,7 @@ describe("ConnectionManager", function() {
       it("should clear the activity check", function() {
         manager.disconnect();
 
-        jasmine.Clock.tick(10000);
+        jasmine.clock().tick(10000);
         // if activity check had worked, it would have sent a ping message
         expect(connection.ping).not.toHaveBeenCalled();
       });
@@ -367,16 +373,16 @@ describe("ConnectionManager", function() {
       });
 
       it("should transition to 'connecting' after 1s", function() {
-        jasmine.Clock.tick(999);
+        jasmine.clock().tick(999);
         expect(onConnecting).not.toHaveBeenCalled();
 
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
         expect(onConnecting).toHaveBeenCalled();
         expect(manager.state).toEqual("connecting");
       });
 
       it("should clean up the activity check", function() {
-        jasmine.Clock.tick(10000);
+        jasmine.clock().tick(10000);
         // if activity check had worked, it would have sent a ping message
         expect(connection.ping).not.toHaveBeenCalled();
       });
@@ -384,38 +390,38 @@ describe("ConnectionManager", function() {
 
     describe("while reconnecting", function() {
       it("should re-use the strategy", function() {
-        expect(managerOptions.getStrategy.calls.length).toEqual(1);
-        expect(strategy.connect.calls.length).toEqual(1);
+        expect(managerOptions.getStrategy.calls.count()).toEqual(1);
+        expect(strategy.connect.calls.count()).toEqual(1);
 
         manager.disconnect();
         manager.connect();
 
-        expect(managerOptions.getStrategy.calls.length).toEqual(1);
-        expect(strategy.connect.calls.length).toEqual(2);
+        expect(managerOptions.getStrategy.calls.count()).toEqual(1);
+        expect(strategy.connect.calls.count()).toEqual(2);
       });
     });
 
     describe("on activity timeout", function() {
       it("should send a ping", function() {
-        jasmine.Clock.tick(499);
+        jasmine.clock().tick(499);
         expect(connection.ping).not.toHaveBeenCalled();
 
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
         expect(connection.ping).toHaveBeenCalled();
 
-        jasmine.Clock.tick(999);
+        jasmine.clock().tick(999);
         expect(connection.close).not.toHaveBeenCalled();
 
         connection.emit("activity");
         // pong received, connection should not get closed
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(connection.close).not.toHaveBeenCalled();
       });
 
       it("should close the connection after pong timeout", function() {
-        jasmine.Clock.tick(500);
+        jasmine.clock().tick(500);
         expect(connection.close).not.toHaveBeenCalled();
-        jasmine.Clock.tick(2345);
+        jasmine.clock().tick(2346);
         expect(connection.close).toHaveBeenCalled();
       });
     });
@@ -451,10 +457,10 @@ describe("ConnectionManager", function() {
         Network.emit("offline");
         expect(connection.ping).toHaveBeenCalled();
 
-        jasmine.Clock.tick(2344);
+        jasmine.clock().tick(2345);
         expect(manager.state).toEqual("connected");
 
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
         expect(manager.state).toEqual("connecting");
       });
     });
@@ -477,7 +483,7 @@ describe("ConnectionManager", function() {
       it("should emit error and reconnect upon receipt of a tls_only event", function() {
         var error = {code: 4000};
         connection.emit("tls_only", {error: error});
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
         expect(manager.state).toEqual("connecting");
         expect(errorHandler).toHaveBeenCalledWith({
           type: 'WebSocketError',
@@ -487,7 +493,7 @@ describe("ConnectionManager", function() {
       it("should emit error and reconnect with backoff upon receipt of a backoff event", function() {
         var error = {code: 4100};
         connection.emit("backoff", {error: error});
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(manager.state).toEqual("connecting");
         expect(errorHandler).toHaveBeenCalledWith({
           type: 'WebSocketError',
@@ -497,7 +503,7 @@ describe("ConnectionManager", function() {
       it("should emit error and reconnect upon receipt of a retry event", function() {
         var error = {code: 4200};
         connection.emit("retry", {error: error});
-        jasmine.Clock.tick(1);
+        jasmine.clock().tick(1);
         expect(manager.state).toEqual("connecting");
         expect(errorHandler).toHaveBeenCalledWith({
           type: 'WebSocketError',
@@ -511,7 +517,7 @@ describe("ConnectionManager", function() {
     beforeEach(function() {
       manager.connect();
       connection.id = "123.456";
-      connection.handlesActivityChecks.andReturn(true);
+      connection.handlesActivityChecks.and.returnValue(true);
       strategy._callback(null, {
         action: "connected",
         connection: connection,
@@ -521,7 +527,7 @@ describe("ConnectionManager", function() {
 
     describe("on activity timeout", function() {
       it("should not send a ping or close a connection", function() {
-        jasmine.Clock.tick(10000);
+        jasmine.clock().tick(10000);
         expect(connection.ping).not.toHaveBeenCalled();
         expect(connection.close).not.toHaveBeenCalled();
       });
@@ -531,37 +537,37 @@ describe("ConnectionManager", function() {
   describe("on online event", function() {
     it("should retry when in 'connecting' state", function() {
       manager.connect();
-      expect(strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.count()).toEqual(1);
 
       Network.emit("online");
-      expect(strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.count()).toEqual(1);
       expect(manager.state).toEqual("connecting");
 
-      jasmine.Clock.tick(1);
-      expect(strategy.connect.calls.length).toEqual(2);
+      jasmine.clock().tick(1);
+      expect(strategy.connect.calls.count()).toEqual(2);
     });
 
     it("should retry when in 'unavailable' state", function() {
       manager.connect();
-      expect(strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.count()).toEqual(1);
 
-      jasmine.Clock.tick(1234);
-      expect(strategy.connect.calls.length).toEqual(1);
+      jasmine.clock().tick(1234);
+      expect(strategy.connect.calls.count()).toEqual(1);
       expect(manager.state).toEqual("unavailable");
       Network.emit("online");
 
-      jasmine.Clock.tick(1);
-      expect(strategy.connect.calls.length).toEqual(2);
+      jasmine.clock().tick(1);
+      expect(strategy.connect.calls.count()).toEqual(2);
     });
   });
 
   describe("on strategy error", function() {
     it("should connect again using the same strategy", function() {
       manager.connect();
-      expect(strategy.connect.calls.length).toEqual(1);
+      expect(strategy.connect.calls.count()).toEqual(1);
 
       strategy._callback(true);
-      expect(strategy.connect.calls.length).toEqual(2);
+      expect(strategy.connect.calls.count()).toEqual(2);
       expect(manager.state).toEqual("connecting");
     });
   });
@@ -569,7 +575,7 @@ describe("ConnectionManager", function() {
   describe("with unsupported strategy", function() {
     it("should transition to failed on connect", function() {
       strategy.isSupported = jasmine.createSpy("isSupported")
-        .andReturn(false);
+        .and.returnValue(false);
 
       var onFailed = jasmine.createSpy("onFailed");
       manager.bind("failed", onFailed);
@@ -597,10 +603,10 @@ describe("ConnectionManager", function() {
       };
       strategy._callback(null, handshake);
 
-      jasmine.Clock.tick(2665);
+      jasmine.clock().tick(2665);
       expect(connection.send_event).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(connection.ping).toHaveBeenCalled();
     });
 
@@ -613,10 +619,10 @@ describe("ConnectionManager", function() {
       };
       strategy._callback(null, handshake);
 
-      jasmine.Clock.tick(3399);
+      jasmine.clock().tick(3399);
       expect(connection.send_event).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(connection.ping).toHaveBeenCalled();
     });
 
@@ -629,10 +635,10 @@ describe("ConnectionManager", function() {
       };
       strategy._callback(null, handshake);
 
-      jasmine.Clock.tick(3455);
+      jasmine.clock().tick(3455);
       expect(connection.send_event).not.toHaveBeenCalled();
 
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(connection.ping).toHaveBeenCalled();
     });
   });

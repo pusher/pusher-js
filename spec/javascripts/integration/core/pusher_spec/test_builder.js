@@ -1,10 +1,11 @@
-var Pusher = require('pusher_integration');
+const Pusher = require('pusher_integration');
 
-var Integration = require("integration");
-var Timer = require("core/utils/timers").OneOffTimer;
-var Collections = require('core/utils/collections');
-var Runtime = require('runtime').default;
-var TRANSPORTS = Runtime.Transports;
+const Integration = require('integration');
+const OneOffTimer = require('core/utils/timers').OneOffTimer;
+const Collections = require('core/utils/collections');
+const Runtime = require('runtime').default;
+const TRANSPORTS = Runtime.Transports;
+const waitsFor = require('../../../helpers/waitsFor');
 
 // this is a slightly horrible function that allows easy placement of arbitrary
 // delays in jasmine async tests. e.g:
@@ -50,13 +51,13 @@ function build(testConfig) {
 
     beforeEach(function() {
       Collections.objectApply(TRANSPORTS, function(t, name) {
-        spyOn(t, "isSupported").andReturn(false);
+        spyOn(t, "isSupported").and.returnValue(false);
       });
-      TRANSPORTS[transport].isSupported.andReturn(true);
+      TRANSPORTS[transport].isSupported.and.returnValue(true);
     });
 
     describe("setup", function() {
-      it("should open connections", function() {
+      it("should open connections", async function() {
         pusher1 = new Pusher("7324d55a5eeb8f554761", {
           forceTLS: forceTLS,
         });
@@ -64,11 +65,11 @@ function build(testConfig) {
           pusher2 = new Pusher("7324d55a5eeb8f554761", {
             forceTLS: forceTLS,
           });
-          waitsFor(function() {
+          await waitsFor(function() {
             return pusher2.connection.state === "connected";
           }, "second connection to be established", 20000);
         }
-        waitsFor(function() {
+        await waitsFor(function() {
           return pusher1.connection.state === "connected";
         }, "first connection to be established", 20000);
       });
@@ -132,7 +133,7 @@ function build(testConfig) {
   });
 }
 function buildPresenceChannelTests(getPusher1, getPusher2) {
-  it("should get connection's member data", function() {
+  it("should get connection's member data", async function() {
     var pusher = getPusher1();
     var channelName = Integration.getRandomName("presence-integration_me");
 
@@ -141,21 +142,20 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
       members = ms;
     });
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return members !== null;
     }, "channel to subscribe", 10000);
-    runs(function() {
-      expect(members.me).toEqual({
-        id: pusher.connection.socket_id,
-        info: {
-          name: "Integration " + pusher.connection.socket_id,
-          email: "integration-" + pusher.connection.socket_id + "@example.com"
-        }
-      });
+
+    expect(members.me).toEqual({
+      id: pusher.connection.socket_id,
+      info: {
+        name: "Integration " + pusher.connection.socket_id,
+        email: "integration-" + pusher.connection.socket_id + "@example.com"
+      }
     });
   });
 
-  it("should receive a member added event", function() {
+  it("should receive a member added event", async function() {
     var pusher1 = getPusher1();
     var pusher2 = getPusher2();
     var channelName = Integration.getRandomName("presence-integration_member_added");
@@ -169,25 +169,24 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
       subscribe(pusher2, channelName, function() {});
     });
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return member !== null;
     }, "the member added event", 10000);
-    runs(function() {
-      expect(member.id).toEqual(pusher2.connection.socket_id);
-      expect(member).toEqual({
-        id: pusher2.connection.socket_id,
-        info: {
-          name: "Integration " + pusher2.connection.socket_id,
-          email: "integration-" + pusher2.connection.socket_id + "@example.com"
-        }
-      });
 
-      pusher1.unsubscribe(channelName);
-      pusher2.unsubscribe(channelName);
+    expect(member.id).toEqual(pusher2.connection.socket_id);
+    expect(member).toEqual({
+      id: pusher2.connection.socket_id,
+      info: {
+        name: "Integration " + pusher2.connection.socket_id,
+        email: "integration-" + pusher2.connection.socket_id + "@example.com"
+      }
     });
+
+    pusher1.unsubscribe(channelName);
+    pusher2.unsubscribe(channelName);
   });
 
-  it("should receive a member removed event", function() {
+  it("should receive a member removed event", async function() {
     var pusher1 = getPusher1();
     var pusher2 = getPusher2();
     var channelName = Integration.getRandomName("presence-integration_member_removed");
@@ -204,24 +203,23 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
       subscribe(pusher1, channelName, function() {});
     });
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return member !== null;
     }, "the member removed event", 10000);
-    runs(function() {
-      expect(member.id).toEqual(pusher1.connection.socket_id);
-      expect(member).toEqual({
-        id: pusher1.connection.socket_id,
-        info: {
-          name: "Integration " + pusher1.connection.socket_id,
-          email: "integration-" + pusher1.connection.socket_id + "@example.com"
-        }
-      });
 
-      pusher2.unsubscribe(channelName);
+    expect(member.id).toEqual(pusher1.connection.socket_id);
+    expect(member).toEqual({
+      id: pusher1.connection.socket_id,
+      info: {
+        name: "Integration " + pusher1.connection.socket_id,
+        email: "integration-" + pusher1.connection.socket_id + "@example.com"
+      }
     });
+
+    pusher2.unsubscribe(channelName);
   });
 
-  it("should maintain correct members count", function() {
+  it("should maintain correct members count", async function() {
     var pusher1 = getPusher1();
     var pusher2 = getPusher2();
     var channelName = Integration.getRandomName("presence-integration_member_count");
@@ -233,41 +231,39 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
     var onMemberAdded = jasmine.createSpy("onMemberAdded");
     var onMemberRemoved = jasmine.createSpy("onMemberRemoved");
 
-    runs(function() {
-      channel1 = subscribe(pusher1, channelName, onSubscribed1);
-      expect(channel1.members.count).toEqual(0);
-    });
-    waitsFor(function() {
-      return onSubscribed1.calls.length > 0;
+    channel1 = subscribe(pusher1, channelName, onSubscribed1);
+    expect(channel1.members.count).toEqual(0);
+
+    await waitsFor(function() {
+      return onSubscribed1.calls.count() > 0;
     }, "first connection to subscribe", 10000);
-    runs(function() {
-      expect(channel1.members.count).toEqual(1);
-      channel1.bind("pusher:member_added", onMemberAdded);
-      channel2 = subscribe(pusher2, channelName, onSubscribed2);
-    });
-    waitsFor(function() {
-      return onSubscribed2.calls.length > 0;
+
+    expect(channel1.members.count).toEqual(1);
+    channel1.bind("pusher:member_added", onMemberAdded);
+    channel2 = subscribe(pusher2, channelName, onSubscribed2);
+
+    await waitsFor(function() {
+      return onSubscribed2.calls.count() > 0;
     }, "second connection to subscribe", 10000);
-    runs(function() {
-      expect(channel2.members.count).toEqual(2);
-    });
-    waitsFor(function() {
-      return onMemberAdded.calls.length > 0;
+
+    expect(channel2.members.count).toEqual(2);
+
+    await waitsFor(function() {
+      return onMemberAdded.calls.count() > 0;
     }, "member added event", 10000);
-    runs(function() {
-      expect(channel1.members.count).toEqual(2);
-      channel2.bind("pusher:member_removed", onMemberRemoved);
-      pusher1.unsubscribe(channelName);
-    });
-    waitsFor(function() {
-      return onMemberRemoved.calls.length > 0;
+
+    expect(channel1.members.count).toEqual(2);
+    channel2.bind("pusher:member_removed", onMemberRemoved);
+    pusher1.unsubscribe(channelName);
+
+    await waitsFor(function() {
+      return onMemberRemoved.calls.count() > 0;
     }, "member removed event", 10000);
-    runs(function() {
-      expect(channel2.members.count).toEqual(1);
-    });
+
+    expect(channel2.members.count).toEqual(1);
   });
 
-  it("should maintain correct members data", function() {
+  it("should maintain correct members data", async function() {
     var pusher1 = getPusher1();
     var pusher2 = getPusher2();
     var channelName = Integration.getRandomName("presence-integration_member_count");
@@ -294,59 +290,57 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
       }
     };
 
-    runs(function() {
-      channel1 = subscribe(pusher1, channelName, onSubscribed1);
-    });
-    waitsFor(function() {
-      return onSubscribed1.calls.length > 0;
+    channel1 = subscribe(pusher1, channelName, onSubscribed1);
+
+    await waitsFor(function() {
+      return onSubscribed1.calls.count() > 0;
     }, "first connection to subscribe", 10000);
-    runs(function() {
-      expect(channel1.members.get(pusher1.connection.socket_id))
-        .toEqual(member1);
-      expect(channel1.members.get(pusher2.connection.socket_id))
-        .toBe(null);
 
-      expect(channel1.members.me).toEqual(member1);
+    expect(channel1.members.get(pusher1.connection.socket_id))
+      .toEqual(member1);
+    expect(channel1.members.get(pusher2.connection.socket_id))
+      .toBe(null);
 
-      channel1.bind("pusher:member_added", onMemberAdded);
-      channel2 = subscribe(pusher2, channelName, onSubscribed2);
-    });
-    waitsFor(function() {
-      return onSubscribed2.calls.length > 0;
+    expect(channel1.members.me).toEqual(member1);
+
+    channel1.bind("pusher:member_added", onMemberAdded);
+    channel2 = subscribe(pusher2, channelName, onSubscribed2);
+
+    await waitsFor(function() {
+      return onSubscribed2.calls.count() > 0;
     }, "second connection to subscribe", 10000);
-    runs(function() {
-      expect(channel2.members.get(pusher1.connection.socket_id))
-        .toEqual(member1);
-      expect(channel2.members.get(pusher2.connection.socket_id))
-        .toEqual(member2);
 
-      expect(channel2.members.me).toEqual(member2);
-    });
-    waitsFor(function() {
-      return onMemberAdded.calls.length > 0;
+    expect(channel2.members.get(pusher1.connection.socket_id))
+      .toEqual(member1);
+    expect(channel2.members.get(pusher2.connection.socket_id))
+      .toEqual(member2);
+
+    expect(channel2.members.me).toEqual(member2);
+
+    await waitsFor(function() {
+      return onMemberAdded.calls.count() > 0;
     }, "member added event", 10000);
-    runs(function() {
-      expect(channel1.members.get(pusher1.connection.socket_id))
-        .toEqual(member1);
-      expect(channel1.members.get(pusher2.connection.socket_id))
-        .toEqual(member2);
 
-      channel2.bind("pusher:member_removed", onMemberRemoved);
-      pusher1.unsubscribe(channelName);
-    });
-    waitsFor(function() {
-      return onMemberRemoved.calls.length > 0;
+    expect(channel1.members.get(pusher1.connection.socket_id))
+      .toEqual(member1);
+    expect(channel1.members.get(pusher2.connection.socket_id))
+      .toEqual(member2);
+
+    channel2.bind("pusher:member_removed", onMemberRemoved);
+    pusher1.unsubscribe(channelName);
+
+    await waitsFor(function() {
+      return onMemberRemoved.calls.count() > 0;
     }, "member removed event", 10000);
-    runs(function() {
-      expect(channel2.members.get(pusher1.connection.socket_id))
-        .toBe(null);
-      expect(channel2.members.get(pusher2.connection.socket_id))
-        .toEqual(member2);
-    });
+
+    expect(channel2.members.get(pusher1.connection.socket_id))
+      .toBe(null);
+    expect(channel2.members.get(pusher2.connection.socket_id))
+      .toEqual(member2);
   });
 }
 function buildClientEventsTests(getPusher1, getPusher2, prefix) {
-  it("should receive a client event sent by another connection", function() {
+  it("should receive a client event sent by another connection", async function() {
     var pusher1 = getPusher1();
     var pusher2 = getPusher2();
 
@@ -361,28 +355,27 @@ function buildClientEventsTests(getPusher1, getPusher2, prefix) {
     var onEvent1 = jasmine.createSpy("onEvent1");
     var onEvent2 = jasmine.createSpy("onEvent2");
 
-    runs(function() {
-      channel1 = subscribe(pusher1, channelName, onSubscribed1);
-      channel2 = subscribe(pusher2, channelName, onSubscribed2);
-    });
-    waitsFor(function() {
-      return onSubscribed1.calls.length > 0 && onSubscribed2.calls.length > 0;
+
+    channel1 = subscribe(pusher1, channelName, onSubscribed1);
+    channel2 = subscribe(pusher2, channelName, onSubscribed2);
+
+    await waitsFor(function() {
+      return onSubscribed1.calls.count() > 0 && onSubscribed2.calls.count() > 0;
     }, "both connections to subscribe", 10000);
-    runs(function() {
-      channel1.bind(eventName, onEvent1);
-      channel2.bind(eventName, onEvent2);
-      pusher1.send_event(eventName, data, channelName);
-    });
-    waitsFor(function() {
-      return onEvent2.calls.length;
+
+    channel1.bind(eventName, onEvent1);
+    channel2.bind(eventName, onEvent2);
+    pusher1.send_event(eventName, data, channelName);
+
+    await waitsFor(function() {
+      return onEvent2.calls.count();
     }, "second connection to receive a message", 10000);
-    runs(function() {
-      pusher1.unsubscribe(channelName);
-      pusher2.unsubscribe(channelName);
-    });
+
+    pusher1.unsubscribe(channelName);
+    pusher2.unsubscribe(channelName);
   });
 
-  it("should not receive a client event sent by itself", function() {
+  it("should not receive a client event sent by itself", async function() {
     var pusher = getPusher1();
 
     var channelName = Integration.getRandomName((prefix || "") + "integration_client_events");
@@ -393,25 +386,24 @@ function buildClientEventsTests(getPusher1, getPusher2, prefix) {
     var timer = null;
 
     var channel = subscribe(pusher, channelName, onSubscribed);
-    waitsFor(function() {
-      return onSubscribed.calls.length > 0;
+    await waitsFor(function() {
+      return onSubscribed.calls.count() > 0;
     }, "connection to subscribe", 10000);
-    runs(function() {
-      channel.bind(eventName, onEvent);
-      pusher.send_event(eventName, {}, channelName);
-      timer = new Timer(3000, function() {});
-    });
-    waitsFor(function() {
+
+    channel.bind(eventName, onEvent);
+    pusher.send_event(eventName, {}, channelName);
+    timer = new OneOffTimer(3000, function() {});
+
+    await waitsFor(function() {
       return !timer.isRunning();
     }, "timer to finish", 3210);
-    runs(function() {
-      expect(onEvent).not.toHaveBeenCalled();
-      pusher.unsubscribe(channelName);
-    });
+
+    expect(onEvent).not.toHaveBeenCalled();
+    pusher.unsubscribe(channelName);
   });
 }
 function buildPublicChannelTests(getPusher, prefix) {
-  it("should subscribe and receive a message sent via REST API", function() {
+  it("should subscribe and receive a message sent via REST API", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -422,30 +414,29 @@ function buildPublicChannelTests(getPusher, prefix) {
     var data = { x: 1, y: "z" };
     var received = null;
 
-    waitsFor(function() {
-      return onSubscribed.calls.length;
+    await waitsFor(function() {
+      return onSubscribed.calls.count();
     }, "subscription to succeed", 10000);
-    runs(function() {
-      channel.bind(eventName, function(message) {
-        received = message;
-      });
-      Integration.sendAPIMessage({
-        url: Integration.API_URL + "/v2/send",
-        channel: channelName,
-        event: eventName,
-        data: data
-      });
+
+    channel.bind(eventName, function(message) {
+      received = message;
     });
-    waitsFor(function() {
+    Integration.sendAPIMessage({
+      url: Integration.API_URL + "/v2/send",
+      channel: channelName,
+      event: eventName,
+      data: data
+    });
+
+    await waitsFor(function() {
       return received !== null;
     }, "message to get delivered", 10000);
-    runs(function() {
-      expect(received).toEqual(data);
-      pusher.unsubscribe(channelName);
-    });
+
+    expect(received).toEqual(data);
+    pusher.unsubscribe(channelName);
   });
 
-  it("should not receive messages after unsubscribing", function() {
+  it("should not receive messages after unsubscribing", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -456,48 +447,46 @@ function buildPublicChannelTests(getPusher, prefix) {
     var received = null;
     var timer = null;
 
-    waitsFor(function() {
-      return onSubscribed.calls.length;
+    await waitsFor(function() {
+      return onSubscribed.calls.count();
     }, "subscription to succeed", 10000);
-    runs(function() {
-      channel.bind(eventName, function(message) {
-        received = message;
-      });
-      pusher.unsubscribe(channelName);
-      Integration.sendAPIMessage({
-        url: Integration.API_URL + "/v2/send",
-        channel: channelName,
-        event: eventName,
-        data: {}
-      });
-      timer = new Timer(3000, function() {});
+
+    channel.bind(eventName, function(message) {
+      received = message;
     });
-    waitsFor(function() {
+    pusher.unsubscribe(channelName);
+    Integration.sendAPIMessage({
+      url: Integration.API_URL + "/v2/send",
+      channel: channelName,
+      event: eventName,
+      data: {}
+    });
+    timer = new OneOffTimer(3000, function() {});
+
+    await waitsFor(function() {
       return !timer.isRunning();
     }, "timer to finish", 3210);
-    runs(function() {
-      expect(received).toBe(null);
-    });
+
+    expect(received).toBe(null);
   });
 
-  it("should handle unsubscribing as an idempotent operation", function() {
+  it("should handle unsubscribing as an idempotent operation", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
     var onSubscribed = jasmine.createSpy("onSubscribed");
     subscribe(pusher, channelName, onSubscribed);
 
-    waitsFor(function() {
-      return onSubscribed.calls.length;
+    await waitsFor(function() {
+      return onSubscribed.calls.count();
     }, "subscription to succeed", 10000);
-    runs(function() {
-      pusher.unsubscribe(channelName);
-      pusher.unsubscribe(channelName);
-      pusher.unsubscribe(channelName);
-    });
+
+    pusher.unsubscribe(channelName);
+    pusher.unsubscribe(channelName);
+    pusher.unsubscribe(channelName);
   });
 
-  it("should handle cancelling pending subscription", function() {
+  it("should handle cancelling pending subscription", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -511,28 +500,27 @@ function buildPublicChannelTests(getPusher, prefix) {
     });
 
     pusher.unsubscribe(channelName);
-    waitsFor(function() {
+    await waitsFor(function() {
       return !channel.subscriptionPending;
     }, "subscription to succeed", 10000);
-    runs(function () {
-      Integration.sendAPIMessage({
-        url: Integration.API_URL + "/v2/send",
-        channel: channelName,
-        event: eventName,
-        data: {}
-      });
-      timer = new Timer(3000, function() {});
+
+    Integration.sendAPIMessage({
+      url: Integration.API_URL + "/v2/send",
+      channel: channelName,
+      event: eventName,
+      data: {}
     });
-    waitsFor(function() {
+    timer = new OneOffTimer(3000, function() {});
+
+    await waitsFor(function() {
       return !timer.isRunning();
     }, "timer to finish", 10000);
-    runs(function() {
-      expect(channel.subscribed).toEqual(false);
-      expect(received).toBe(null);
-    });
+
+    expect(channel.subscribed).toEqual(false);
+    expect(received).toBe(null);
   });
 
-  it("should handle reinstating cancelled pending subscription", function() {
+  it("should handle reinstating cancelled pending subscription", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -547,30 +535,29 @@ function buildPublicChannelTests(getPusher, prefix) {
 
     pusher.unsubscribe(channelName);
     pusher.subscribe(channelName);
-    waitsFor(function() {
+    await waitsFor(function() {
       return !channel.subscriptionPending;
     }, "subscription to succeed", 10000);
-    runs(function () {
-      Integration.sendAPIMessage({
-        url: Integration.API_URL + "/v2/send",
-        channel: channelName,
-        event: eventName,
-        data: {}
-      });
-      timer = new Timer(3000, function() {});
+
+    Integration.sendAPIMessage({
+      url: Integration.API_URL + "/v2/send",
+      channel: channelName,
+      event: eventName,
+      data: {}
     });
-    waitsFor(function() {
+    timer = new OneOffTimer(3000, function() {});
+
+    await waitsFor(function() {
       return !timer.isRunning();
     }, "timer to finish", 10000);
-    runs(function() {
-      expect(channel.subscribed).toEqual(true);
-      expect(received).not.toBe(null);
-    });
+
+    expect(channel.subscribed).toEqual(true);
+    expect(received).not.toBe(null);
   });
 }
 
 function buildSubscriptionStateTests(getPusher, prefix) {
-  it("sub-sub = sub", function() {
+  it("sub-sub = sub", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -583,18 +570,16 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return pusher.channel(channelName).subscribed;
     }, "subscription to finish", 10000);
 
-    runs(function() {
-      expect(pusher.channel(channelName).subscribed).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
-    });
+    expect(pusher.channel(channelName).subscribed).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
   });
 
-  it("sub-wait-sub = sub", function() {
+  it("sub-wait-sub = sub", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -603,23 +588,21 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return pusher.channel(channelName).subscribed;
     }, "subscription to finish", 10000);
 
-    runs(function() {
-      expect(pusher.channel(channelName).subscribed).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+    expect(pusher.channel(channelName).subscribed).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-      pusher.subscribe(channelName)
-      expect(pusher.channel(channelName).subscribed).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
-    });
+    pusher.subscribe(channelName)
+    expect(pusher.channel(channelName).subscribed).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
   });
 
-  it("sub-unsub = NOP", function() {
+  it("sub-unsub = NOP", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -635,14 +618,12 @@ function buildSubscriptionStateTests(getPusher, prefix) {
 
     // there is no easy way to know when an unsubscribe request has been
     // actioned by the server, so we just wait a while
-    waitsFor(sleep(3000), "unsubscription to finish", 3500)
+    await waitsFor(sleep(3000), "unsubscription to finish", 3500)
 
-    runs(function() {
-      expect(pusher.channel(channelName)).toBe(undefined);
-    });
+    expect(pusher.channel(channelName)).toBe(undefined);
   });
 
-  it("sub-wait-unsub = NOP", function() {
+  it("sub-wait-unsub = NOP", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -651,21 +632,19 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return pusher.channel(channelName).subscribed;
     }, "subscription to finish", 10000);
 
-    runs(function() {
-      expect(pusher.channel(channelName).subscribed).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
+    expect(pusher.channel(channelName).subscribed).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-      pusher.unsubscribe(channelName)
-      expect(pusher.channel(channelName)).toBe(undefined);
-    });
+    pusher.unsubscribe(channelName)
+    expect(pusher.channel(channelName)).toBe(undefined);
   });
 
-  it("sub-unsub-sub = sub", function() {
+  it("sub-unsub-sub = sub", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -684,18 +663,16 @@ function buildSubscriptionStateTests(getPusher, prefix) {
     expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
     expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return pusher.channel(channelName).subscribed;
     }, "subscription to finish", 10000);
 
-    runs(function() {
-      expect(pusher.channel(channelName).subscribed).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
-    });
+    expect(pusher.channel(channelName).subscribed).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
   });
 
-  it("sub-unsub-wait-sub = sub", function() {
+  it("sub-unsub-wait-sub = sub", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -711,28 +688,24 @@ function buildSubscriptionStateTests(getPusher, prefix) {
 
     // there is no easy way to know when an unsubscribe request has been
     // actioned by the server, so we just wait a while
-    waitsFor(sleep(3000), "unsubscription to finish", 3500)
-    runs(function() {
-      expect(pusher.channel(channelName)).toBe(undefined);
+    await waitsFor(sleep(3000), "unsubscription to finish", 3500)
+    expect(pusher.channel(channelName)).toBe(undefined);
 
-      pusher.subscribe(channelName)
-      expect(pusher.channel(channelName).subscribed).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
-    });
+    pusher.subscribe(channelName)
+    expect(pusher.channel(channelName).subscribed).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
 
-    waitsFor(function() {
+    await waitsFor(function() {
       return pusher.channel(channelName).subscribed;
     }, "subscription to finish", 10000);
 
-    runs(function() {
-      expect(pusher.channel(channelName).subscribed).toEqual(true);
-      expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
-      expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
-    });
+    expect(pusher.channel(channelName).subscribed).toEqual(true);
+    expect(pusher.channel(channelName).subscriptionPending).toEqual(false);
+    expect(pusher.channel(channelName).subscriptionCancelled).toEqual(false);
   });
 
-  it("sub-unsub-unsub = NOP", function() {
+  it("sub-unsub-unsub = NOP", async function() {
     var pusher = getPusher();
     var channelName = Integration.getRandomName((prefix || "") + "integration");
 
@@ -753,11 +726,9 @@ function buildSubscriptionStateTests(getPusher, prefix) {
 
     // there is no easy way to know when an unsubscribe request has been
     // actioned by the server, so we just wait a while
-    waitsFor(sleep(3000), "unsubscription to finish", 3500)
+    await waitsFor(sleep(3000), "unsubscription to finish", 3500)
 
-    runs(function() {
-      expect(pusher.channel(channelName)).toBe(undefined);
-    });
+    expect(pusher.channel(channelName)).toBe(undefined);
   });
 }
 module.exports = {build}

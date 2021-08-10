@@ -40,6 +40,12 @@ module.exports = {
   singleRun: true,
   client: {
     captureConsole: false,
+    jasmine: {
+      // This new behaviour in jasmine is enabled by default but, some of our
+      // old tests rely on sequential execution.
+      // @todo Enable random order execution (i.e. remove this flag) and fix tests that are broken
+      random: false
+    }
   }
-}
+};
 

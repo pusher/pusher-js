@@ -28,30 +28,30 @@ describe("Connection", function() {
 
   describe("#handlesActivityChecks", function() {
     it("should return true if transport handles activity checks by itself", function() {
-      transport.handlesActivityChecks.andReturn(true);
+      transport.handlesActivityChecks.and.returnValue(true);
       expect(connection.handlesActivityChecks()).toBe(true);
     });
 
     it("should return false if transport does not handle activity checks by itself", function() {
-      transport.handlesActivityChecks.andReturn(false);
+      transport.handlesActivityChecks.and.returnValue(false);
       expect(connection.handlesActivityChecks()).toBe(false);
     });
   });
 
   describe("#send", function() {
     it("should pass the data to the transport", function() {
-      transport.send.andReturn(true);
+      transport.send.and.returnValue(true);
       connection.send("proxy");
       expect(transport.send).toHaveBeenCalledWith("proxy");
     });
 
     it("should return true if the transport sent the data", function() {
-      transport.send.andReturn(true);
+      transport.send.and.returnValue(true);
       expect(connection.send("proxy")).toBe(true);
     });
 
     it("should return false if the transport did not send the data", function() {
-      transport.send.andReturn(false);
+      transport.send.and.returnValue(false);
       expect(connection.send("proxy")).toBe(false);
     });
 
@@ -75,18 +75,18 @@ describe("Connection", function() {
 
   describe("#ping", function() {
     it("should call ping on the transport if it's supported", function() {
-      transport.supportsPing.andReturn(true);
+      transport.supportsPing.and.returnValue(true);
       connection.ping();
       expect(transport.ping).toHaveBeenCalled();
       expect(transport.send).not.toHaveBeenCalled();
     });
 
     it("should send a pusher:ping event if ping is not supported", function() {
-      transport.supportsPing.andReturn(false);
+      transport.supportsPing.and.returnValue(false);
       connection.ping();
 
       expect(transport.ping).not.toHaveBeenCalled();
-      var pingEvent = JSON.parse(transport.send.calls[0].args[0]);
+      var pingEvent = JSON.parse(transport.send.calls.first().args[0]);
       expect(pingEvent).toEqual({
         event: "pusher:ping",
         data: {}
@@ -115,6 +115,7 @@ describe("Connection", function() {
       expect(onMessage).toHaveBeenCalledWith({
         event: "random",
         data: { foo: "bar" },
+        channel: undefined,
       });
     });
 
@@ -164,7 +165,7 @@ describe("Connection", function() {
       var error = {};
 
       var onMessage = jasmine.createSpy("onMessage");
-      var onError = jasmine.createSpy("onError").andCallFake(function(e) {
+      var onError = jasmine.createSpy("onError").and.callFake(function(e) {
         error = e;
       });
       connection.bind("message", onMessage);
@@ -212,8 +213,8 @@ describe("Connection", function() {
     it("should emit the action dispatched by protocol", function() {
       var onMockAction = jasmine.createSpy("onMockAction");
       connection.bind("mock_action", onMockAction);
-      spyOn(Protocol, "getCloseAction").andReturn("mock_action");
-      spyOn(Protocol, "getCloseError").andReturn(null);
+      spyOn(Protocol, "getCloseAction").and.returnValue("mock_action");
+      spyOn(Protocol, "getCloseError").and.returnValue(null);
 
       transport.emit("closed", { code: 1006, reason: "unknown" });
 
@@ -227,8 +228,8 @@ describe("Connection", function() {
     it("should emit the error returned by protocol", function() {
       var onError = jasmine.createSpy("onError");
       connection.bind("error", onError);
-      spyOn(Protocol, "getCloseAction").andReturn("mock_action");
-      spyOn(Protocol, "getCloseError").andReturn({
+      spyOn(Protocol, "getCloseAction").and.returnValue("mock_action");
+      spyOn(Protocol, "getCloseError").and.returnValue({
         type: "MockError",
         data: {
           code: 4123,

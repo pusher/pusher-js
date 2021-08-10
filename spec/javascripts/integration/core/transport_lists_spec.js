@@ -20,18 +20,18 @@ module.exports = function() {
     var _isReady = Pusher.isReady;
 
     beforeEach(function() {
-      spyOn(transports.ws, "isSupported").andReturn(true);
-      spyOn(transports.xhr_streaming, "isSupported").andReturn(true);
-      spyOn(transports[BASE_FALLBACK], "isSupported").andReturn(true);
+      spyOn(transports.ws, "isSupported").and.returnValue(true);
+      spyOn(transports.xhr_streaming, "isSupported").and.returnValue(true);
+      spyOn(transports[BASE_FALLBACK], "isSupported").and.returnValue(true);
 
       spyOn(transports.ws, "createConnection")
-        .andCallFake(Mocks.getTransport);
+        .and.callFake(Mocks.getTransport);
       spyOn(transports.xhr_streaming, "createConnection")
-        .andCallFake(Mocks.getTransport);
+        .and.callFake(Mocks.getTransport);
       spyOn(transports[BASE_FALLBACK], "createConnection")
-        .andCallFake(Mocks.getTransport);
+        .and.callFake(Mocks.getTransport);
 
-      spyOn(Runtime, "getDefaultStrategy").andCallFake(function(config) {
+      spyOn(Runtime, "getDefaultStrategy").and.callFake(function(config) {
         return new BestConnectedEverStrategy([
           defineTransport(config, 'a', 'ws', 1, {}),
           defineTransport(config, 'b', 'xhr_streaming', 2, {}),
@@ -39,7 +39,7 @@ module.exports = function() {
         ]);
       });
 
-      spyOn(Network, "isOnline").andReturn(true);
+      spyOn(Network, "isOnline").and.returnValue(true);
       Pusher.isReady = true;
     });
 

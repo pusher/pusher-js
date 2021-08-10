@@ -12,7 +12,7 @@ describe("HTTPRequest", function() {
 
   beforeEach(function() {
     hooks = {
-      getRequest: jasmine.createSpy().andCallFake(function() {
+      getRequest: jasmine.createSpy().and.callFake(function() {
         lastXHR = Mocks.getXHR();
         return lastXHR;
       }),
@@ -28,7 +28,7 @@ describe("HTTPRequest", function() {
   describe("#start", function() {
     it("should create a request using the getRequest hook", function() {
       request.start("test");
-      expect(hooks.getRequest.calls.length).toEqual(1);
+      expect(hooks.getRequest.calls.count()).toEqual(1);
       expect(hooks.getRequest).toHaveBeenCalledWith(request);
     });
 
@@ -52,23 +52,23 @@ describe("HTTPRequest", function() {
     it("raised by XMLHttpRequest#open", function() {
       hooks.getRequest = function() {
         xhr = Mocks.getXHR();
-        xhr.open.andThrow("open exception");
+        xhr.open.and.throwError("open exception");
         return xhr;
       };
       expect(function() {
         request.start();
-      }).toThrow("open exception");
+      }).toThrow(new Error('open exception'));
     });
 
     it("should re-throw the exception raised by XMLHttpRequest#send", function() {
       hooks.getRequest = function() {
         xhr = Mocks.getXHR();
-        xhr.send.andThrow("send exception");
+        xhr.send.and.throwError("send exception");
         return xhr;
       };
       expect(function() {
         request.start();
-      }).toThrow("send exception");
+      }).toThrow(new Error('send exception'));
     });
   });
 
@@ -79,12 +79,12 @@ describe("HTTPRequest", function() {
 
     it("should abort the request using the abortRequest hook", function() {
       request.close();
-      expect(hooks.abortRequest.calls.length).toEqual(1);
+      expect(hooks.abortRequest.calls.count()).toEqual(1);
       expect(hooks.abortRequest).toHaveBeenCalledWith(lastXHR);
     });
 
     it("should unregister the unloader", function() {
-      var unloader = Runtime.addUnloadListener.calls[0].args[0];
+      var unloader = Runtime.addUnloadListener.calls.first().args[0];
       request.close();
       expect(Runtime.removeUnloadListener).toHaveBeenCalledWith(unloader);
     });
@@ -106,20 +106,23 @@ describe("HTTPRequest", function() {
 
     it("should emit two chunks received one after another", function() {
       request.onChunk(201, "c1\n");
-      expect(onChunk.calls.length).toEqual(1);
+      expect(onChunk.calls.count()).toEqual(1);
       expect(onChunk).toHaveBeenCalledWith({ status: 201, data: "c1" });
 
       request.onChunk(201, "c1\nc2\n");
-      expect(onChunk.calls.length).toEqual(2);
+      expect(onChunk.calls.count()).toEqual(2);
       expect(onChunk).toHaveBeenCalledWith({ status: 201, data: "c2" });
     });
 
     it("should emit all chunks send in one batch", function() {
       request.onChunk(200, "c1\nc2\nc3\n");
-      expect(onChunk.calls.length).toEqual(3);
-      expect(onChunk.calls[0].args[0]).toEqual({ status: 200, data: "c1" });
-      expect(onChunk.calls[1].args[0]).toEqual({ status: 200, data: "c2" });
-      expect(onChunk.calls[2].args[0]).toEqual({ status: 200, data: "c3" });
+      expect(onChunk.calls.count()).toEqual(3);
+      expect(onChunk.calls.first().args[0]).toEqual({ status: 200, data: "c1" });
+      expect(onChunk.calls.argsFor(1)[0]).toEqual({
+        status: 200,
+        data: 'c2'
+      });
+      expect(onChunk.calls.argsFor(2)[0]).toEqual({ status: 200, data: "c3" });
     });
 
     it("should not emit an unfinished chunk", function() {
@@ -156,7 +159,7 @@ describe("HTTPRequest", function() {
         200,
         new Array(256).join(kilobyteChunk + "\n") + kilobyteChunk + "x" + "\n"
       ); // 256KB + 1B
-      expect(onChunk.calls.length).toEqual(256);
+      expect(onChunk.calls.count()).toEqual(256);
     });
   });
 
@@ -171,12 +174,12 @@ describe("HTTPRequest", function() {
 
     beforeEach(function() {
       request.start("test payload");
-      unloader = Runtime.addUnloadListener.calls[0].args[0];
+      unloader = Runtime.addUnloadListener.calls.first().args[0];
     });
 
     it("should abort the request using the abortRequest hook", function() {
       unloader();
-      expect(hooks.abortRequest.calls.length).toEqual(1);
+      expect(hooks.abortRequest.calls.count()).toEqual(1);
       expect(hooks.abortRequest).toHaveBeenCalledWith(lastXHR);
     });
 

@@ -32,23 +32,23 @@ describe("Pusher", function() {
     Pusher.isReady = false;
     Pusher.instances = [];
 
-    spyOn(Runtime, "getDefaultStrategy").andCallFake(function() {
+    spyOn(Runtime, "getDefaultStrategy").and.callFake(function() {
       return Mocks.getStrategy(true);
     });
 
-    spyOn(Factory, "createConnectionManager").andCallFake(function(key, options, config) {
+    spyOn(Factory, "createConnectionManager").and.callFake(function(key, options, config) {
       var manager = Mocks.getConnectionManager();
       manager.key = key;
       manager.options = options;
       manager.config = config;
       return manager;
     });
-    spyOn(Factory, "createChannel").andCallFake(function(name, _) {
+    spyOn(Factory, "createChannel").and.callFake(function(name, _) {
       return Mocks.getChannel(name);
     });
 
     if (TestEnv === "web") {
-      spyOn(Runtime, "getDocument").andReturn({
+      spyOn(Runtime, "getDocument").and.returnValue({
         location: {
           protocol: "http:"
         }
@@ -116,7 +116,7 @@ describe("Pusher", function() {
     });
 
     it("should pass a feature list to the timeline", function() {
-      spyOn(Pusher, "getClientFeatures").andReturn(["foo", "bar"]);
+      spyOn(Pusher, "getClientFeatures").and.returnValue(["foo", "bar"]);
       var pusher = new Pusher("foo");
       expect(pusher.timeline.options.features).toEqual(["foo", "bar"]);
     });
@@ -154,7 +154,7 @@ describe("Pusher", function() {
 
       if (TestEnv === "web") {
         it("should be on when using https", function() {
-          Runtime.getDocument.andReturn({
+          Runtime.getDocument.and.returnValue({
             location: {
               protocol: "https:"
             }
@@ -455,16 +455,20 @@ describe("Pusher", function() {
     var timelineSender;
 
     beforeEach(function() {
-      jasmine.Clock.useMock();
+      jasmine.clock().install();
 
       timelineSender = Mocks.getTimelineSender();
-      spyOn(Factory, "createTimelineSender").andReturn(timelineSender);
+      spyOn(Factory, "createTimelineSender").and.returnValue(timelineSender);
 
+    });
+
+    afterEach(function() {
+      jasmine.clock().uninstall();
     });
 
     it("should be sent to stats.pusher.com", function() {
       var pusher = new Pusher("foo", { enableStats: true });
-      expect(Factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
@@ -484,15 +488,15 @@ describe("Pusher", function() {
       var pusher = new Pusher("foo");
       pusher.connect();
       pusher.connection.options.timeline.info({});
-      jasmine.Clock.tick(1000000);
-      expect(timelineSender.send.calls.length).toEqual(0);
+      jasmine.clock().tick(1000000);
+      expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
     it("should be sent if disableStats set to false", function() {
       var pusher = new Pusher("foo", { disableStats: false });
       pusher.connect();
       pusher.connection.options.timeline.info({});
-      expect(Factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
@@ -502,7 +506,7 @@ describe("Pusher", function() {
       var pusher = new Pusher("foo", { disableStats: true, enableStats: true });
       pusher.connect();
       pusher.connection.options.timeline.info({});
-      expect(Factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
@@ -511,23 +515,23 @@ describe("Pusher", function() {
     it("should not be sent before calling connect", function() {
       var pusher = new Pusher("foo", { enableStats: true });
       pusher.connection.options.timeline.info({});
-      jasmine.Clock.tick(1000000);
-      expect(timelineSender.send.calls.length).toEqual(0);
+      jasmine.clock().tick(1000000);
+      expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
     it("should be sent every 60 seconds after calling connect", function() {
       var pusher = new Pusher("foo", { enableStats: true });
       pusher.connect();
-      expect(Factory.createTimelineSender.calls.length).toEqual(1);
+      expect(Factory.createTimelineSender.calls.count()).toEqual(1);
 
       pusher.connection.options.timeline.info({});
 
-      jasmine.Clock.tick(59999);
-      expect(timelineSender.send.calls.length).toEqual(0);
-      jasmine.Clock.tick(1);
-      expect(timelineSender.send.calls.length).toEqual(1);
-      jasmine.Clock.tick(60000);
-      expect(timelineSender.send.calls.length).toEqual(2);
+      jasmine.clock().tick(59999);
+      expect(timelineSender.send.calls.count()).toEqual(0);
+      jasmine.clock().tick(1);
+      expect(timelineSender.send.calls.count()).toEqual(1);
+      jasmine.clock().tick(60000);
+      expect(timelineSender.send.calls.count()).toEqual(2);
     });
 
     it("should be sent after connecting", function() {
@@ -538,7 +542,7 @@ describe("Pusher", function() {
       pusher.connection.state = "connected";
       pusher.connection.emit("connected");
 
-      expect(timelineSender.send.calls.length).toEqual(1);
+      expect(timelineSender.send.calls.count()).toEqual(1);
     });
 
     it("should not be sent after disconnecting", function() {
@@ -548,13 +552,13 @@ describe("Pusher", function() {
 
       pusher.connection.options.timeline.info({});
 
-      jasmine.Clock.tick(1000000);
-      expect(timelineSender.send.calls.length).toEqual(0);
+      jasmine.clock().tick(1000000);
+      expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
     it("should be sent without TLS if connection is not using TLS", function() {
       var pusher = new Pusher("foo", { enableStats: true });
-      pusher.connection.isUsingTLS.andReturn(false);
+      pusher.connection.isUsingTLS.and.returnValue(false);
 
       pusher.connect();
       pusher.connection.options.timeline.info({});
@@ -567,7 +571,7 @@ describe("Pusher", function() {
 
     it("should be sent with TLS if connection is over TLS", function() {
       var pusher = new Pusher("foo", { enableStats: true });
-      pusher.connection.isUsingTLS.andReturn(true);
+      pusher.connection.isUsingTLS.and.returnValue(true);
 
       pusher.connect();
       pusher.connection.options.timeline.info({});

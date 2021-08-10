@@ -7,7 +7,11 @@ describe("DelayedStrategy", function() {
     this.strategy = new DelayedStrategy(this.substrategy, { delay: 0 });
     this.callback = jasmine.createSpy();
 
-    jasmine.Clock.useMock();
+    jasmine.clock().install();
+  });
+
+  afterEach(function() {
+    jasmine.clock().uninstall();
   });
 
   describe("after calling isSupported", function() {
@@ -33,9 +37,9 @@ describe("DelayedStrategy", function() {
       strategy.connect(0, this.callback);
 
       expect(this.substrategy.connect).not.toHaveBeenCalled();
-      jasmine.Clock.tick(99);
+      jasmine.clock().tick(99);
       expect(this.substrategy.connect).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(this.substrategy.connect).toHaveBeenCalled();
 
       var handshake = {};
@@ -46,7 +50,7 @@ describe("DelayedStrategy", function() {
 
     it("should pass an error when substrategy fails", function() {
       this.strategy.connect(0, this.callback);
-      jasmine.Clock.tick(0);
+      jasmine.clock().tick(0);
       this.substrategy._callback(true);
 
       expect(this.callback).toHaveBeenCalledWith(true);
@@ -56,7 +60,7 @@ describe("DelayedStrategy", function() {
   describe("on abort", function() {
     it("should abort substrategy when connecting", function() {
       var runner = this.strategy.connect(0);
-      jasmine.Clock.tick(0);
+      jasmine.clock().tick(0);
       runner.abort();
       expect(this.substrategy._abort).toHaveBeenCalled();
     });
@@ -65,7 +69,7 @@ describe("DelayedStrategy", function() {
       var run = this.strategy.connect(0);
       expect(this.substrategy.connect).not.toHaveBeenCalled();
       run.abort();
-      jasmine.Clock.tick(10000);
+      jasmine.clock().tick(10000);
       expect(this.substrategy._abort).not.toHaveBeenCalled();
       expect(this.substrategy.connect).not.toHaveBeenCalled();
     });
@@ -75,14 +79,14 @@ describe("DelayedStrategy", function() {
     it("should force the priority while waiting", function() {
       var runner = this.strategy.connect(0, this.callback);
       runner.forceMinPriority(5);
-      jasmine.Clock.tick(0);
+      jasmine.clock().tick(0);
       expect(this.substrategy.connect)
         .toHaveBeenCalledWith(5, jasmine.any(Function));
     });
 
     it("should force the priority while connecting", function() {
       var runner = this.strategy.connect(0, this.callback);
-      jasmine.Clock.tick(0);
+      jasmine.clock().tick(0);
       runner.forceMinPriority(5);
       expect(this.substrategy._forceMinPriority).toHaveBeenCalledWith(5);
     });

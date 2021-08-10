@@ -33,12 +33,12 @@ describe("PrivateChannel", function() {
 
     beforeEach(function() {
       authorizer = Mocks.getAuthorizer();
-      factorySpy = spyOn(Factory, "createAuthorizer").andReturn(authorizer);
+      factorySpy = spyOn(Factory, "createAuthorizer").and.returnValue(authorizer);
     });
 
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(Factory.createAuthorizer.calls.length).toEqual(1);
+      expect(Factory.createAuthorizer.calls.count()).toEqual(1);
       expect(Factory.createAuthorizer).toHaveBeenCalledWith(
         channel,
         { foo: "bar" }
@@ -57,13 +57,13 @@ describe("PrivateChannel", function() {
 
     describe('with custom authorizer', function() {
       beforeEach(function() {
-        pusher = Mocks.getPusher({ 
+        pusher = Mocks.getPusher({
           authorizer: function(channel, options) {
             return authorizer;
           }
         });
         channel = new PrivateChannel("private-test-custom-auth", pusher);
-        factorySpy.andCallThrough();
+        factorySpy.and.callThrough();
       });
 
       it("should call the authorizer", function() {
@@ -78,20 +78,10 @@ describe("PrivateChannel", function() {
   describe("#trigger", function() {
     beforeEach(function() {
       channel.subscribed = true;
-    })
+    });
+
     it("should raise an exception if the event name does not start with client-", function() {
-      // we can't use toThrow with jasmine.any because it compares
-      // (exception.message || exception) with (expected.message || expected)
-      // the thrown exception has a message so it's passed to the matcher. The
-      // message is a string, and *not* an instanceof the expected class
-      // https://github.com/jasmine/jasmine/blob/v1.3.1/src/core/Matchers.js#L331-L333
-      var exception;
-      try {
-        channel.trigger("whatever", {});
-      } catch(e) {
-        exception = e;
-      }
-      expect(exception).toMatch(jasmine.any(Errors.BadEventName));
+      expect(() => channel.trigger('whatever', {})).toThrow(jasmine.any(Errors.BadEventName));
     });
 
     it("should call send_event on connection", function() {
@@ -101,12 +91,12 @@ describe("PrivateChannel", function() {
     });
 
     it("should return true if connection sent the event", function() {
-      pusher.send_event.andReturn(true);
+      pusher.send_event.and.returnValue(true);
       expect(channel.trigger("client-test", {})).toBe(true);
     });
 
     it("should return false if connection didn't send the event", function() {
-      pusher.send_event.andReturn(false);
+      pusher.send_event.and.returnValue(false);
       expect(channel.trigger("client-test", {})).toBe(false);
     });
   });

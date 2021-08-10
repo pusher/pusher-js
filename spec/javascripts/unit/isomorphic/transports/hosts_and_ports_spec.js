@@ -13,13 +13,13 @@ describe("Host/Port Configuration", function() {
   var Transports;
 
   beforeEach(function() {
-    spyOn(Runtime, 'getNetwork').andCallFake(function(){
+    spyOn(Runtime, 'getNetwork').and.callFake(function(){
       var network = new NetInfo();
       network.isOnline = jasmine.createSpy("isOnline")
-        .andReturn(true);
+        .and.returnValue(true);
       return network;
     });
-    spyOn(Runtime, "getLocalStorage").andReturn({});
+    spyOn(Runtime, "getLocalStorage").and.returnValue({});
   });
 
   afterEach(function() {
@@ -30,13 +30,13 @@ describe("Host/Port Configuration", function() {
     var _WebSocket;
 
     beforeEach(function() {
-      spyOn(Runtime, 'createWebSocket').andReturn(Mocks.getTransport());
+      spyOn(Runtime, 'createWebSocket').and.returnValue(Mocks.getTransport());
 
       var Transports = Runtime.Transports;
 
-      spyOn(Transports.ws, "isSupported").andReturn(true);
-      spyOn(Transports.xhr_streaming, "isSupported").andReturn(false);
-      spyOn(Transports.xhr_polling, "isSupported").andReturn(false);
+      spyOn(Transports.ws, "isSupported").and.returnValue(true);
+      spyOn(Transports.xhr_streaming, "isSupported").and.returnValue(false);
+      spyOn(Transports.xhr_polling, "isSupported").and.returnValue(false);
     });
 
     it("should connect to wss://ws-mt1.pusher.com:443 by default", function() {

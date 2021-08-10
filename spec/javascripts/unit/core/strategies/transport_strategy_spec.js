@@ -13,7 +13,7 @@ describe("TransportStrategy", function() {
     transport = Mocks.getTransport(true);
     transportClass = Mocks.getTransportClass(true, transport);
 
-    spyOn(Factory, 'createHandshake').andCallFake(function(transport, callback) {
+    spyOn(Factory, 'createHandshake').and.callFake(function(transport, callback) {
       handshake = Mocks.getHandshake(transport, callback);
       return handshake;
     });
@@ -42,6 +42,14 @@ describe("TransportStrategy", function() {
   });
 
   describe("#connect", function() {
+    beforeEach(() => {
+      jasmine.clock().install();
+    });
+
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
     it("should pass key and options to the transport", function() {
       var options = {
         key: "asdf",
@@ -129,32 +137,22 @@ describe("TransportStrategy", function() {
     });
 
     it("should call back with an error if transport's priority is too low", function() {
-      runs(function() {
-        strategy.connect(2, callback);
-      });
-      waitsFor(function() {
-        return callback.calls.length > 0;
-      }, "callback to be called");
-      runs(function() {
-        expect(callback).toHaveBeenCalledWith(
-          jasmine.any(Errors.TransportPriorityTooLow)
-        );
-      });
+      strategy.connect(2, callback);
+
+      jasmine.clock().tick(100);
+
+      expect(callback).toHaveBeenCalledWith(jasmine.any(Errors.TransportPriorityTooLow));
     });
 
     it("should call back with an error if transport is not supported", function() {
-      transportClass.isSupported.andReturn(false);
-      runs(function() {
-        strategy.connect(0, callback);
-      });
-      waitsFor(function() {
-        return callback.calls.length > 0;
-      }, "callback to be called", 100);
-      runs(function() {
-        expect(callback).toHaveBeenCalledWith(
-          jasmine.any(Errors.UnsupportedStrategy)
-        );
-      });
+      transportClass.isSupported.and.returnValue(false);
+
+      strategy.connect(0, callback);
+
+      jasmine.clock().tick(100);
+
+      expect(callback.calls.count()).toBeGreaterThan(0);
+      expect(callback).toHaveBeenCalledWith(jasmine.any(Errors.UnsupportedStrategy));
     });
   });
 

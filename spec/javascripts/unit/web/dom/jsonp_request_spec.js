@@ -9,7 +9,7 @@ describe("JSONPRequest", function() {
   var scriptRequest;
 
   beforeEach(function() {
-    spyOn(Runtime, "createScriptRequest").andCallFake(function() {
+    spyOn(Runtime, "createScriptRequest").and.callFake(function() {
       scriptRequest = Mocks.getScriptRequest();
       return scriptRequest;
     });
@@ -21,7 +21,7 @@ describe("JSONPRequest", function() {
     it("should send the script request to a correct URL", function() {
       var request = new JSONPRequest("http://example.com", {});
       request.send(receiver);
-      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.count()).toEqual(1);
       expect(Runtime.createScriptRequest).toHaveBeenCalledWith(
         "http://example.com/" + receiver.number + "?"
       );
@@ -32,7 +32,7 @@ describe("JSONPRequest", function() {
       var request = new JSONPRequest("http://example.org", {});
       request.send(receiver);
       expect(callback).not.toHaveBeenCalled();
-      scriptRequest.send.calls[0].args[0].callback("first", "second");
+      scriptRequest.send.calls.first().args[0].callback("first", "second");
       expect(callback).toHaveBeenCalledWith("first", "second");
     });
 
@@ -44,7 +44,7 @@ describe("JSONPRequest", function() {
       });
 
       request.send(receiver);
-      var url = Runtime.createScriptRequest.calls[0].args[0];
+      var url = Runtime.createScriptRequest.calls.first().args[0];
       var queryString = url.match(/http:\/\/example.org\/[0-9]+\?(.*)$/)[1];
       var queryStringPairs = queryString.split("&");
       expect(queryStringPairs.length).toEqual(3);
@@ -111,9 +111,9 @@ describe("JSONPRequest", function() {
     it("should be idempotent", function() {
       var request = new JSONPRequest("http://example.org", {});
       request.send(receiver);
-      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.count()).toEqual(1);
       request.send(receiver);
-      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.count()).toEqual(1);
     });
   });
 
@@ -121,7 +121,7 @@ describe("JSONPRequest", function() {
     it("should call cleanup on the script request", function() {
       var request = new JSONPRequest("http://example.com", {});
       request.send(receiver);
-      expect(Runtime.createScriptRequest.calls.length).toEqual(1);
+      expect(Runtime.createScriptRequest.calls.count()).toEqual(1);
       expect(scriptRequest.cleanup).not.toHaveBeenCalled();
       request.cleanup();
       expect(scriptRequest.cleanup).toHaveBeenCalled();

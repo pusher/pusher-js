@@ -38,19 +38,9 @@ describe("Channel", function() {
     beforeEach(function() {
       channel.subscribed = true;
     });
+
     it("should raise an exception if the event name does not start with client-", function() {
-    // we can't use toThrow with jasmine.any because it compares
-    // (exception.message || exception) with (expected.message || expected)
-    // the thrown exception has a message so it's passed to the matcher. The
-    // message is a string, and *not* an instanceof the expected class
-    // https://github.com/jasmine/jasmine/blob/v1.3.1/src/core/Matchers.js#L331-L333
-      var exception;
-      try {
-        channel.trigger("whatever", {});
-      } catch(e) {
-        exception = e;
-      }
-      expect(exception).toMatch(jasmine.any(Errors.BadEventName))
+      expect(() => channel.trigger('whatever', {})).toThrow(jasmine.any(Errors.BadEventName));
     });
 
     it("should call send_event on connection", function() {
@@ -60,12 +50,12 @@ describe("Channel", function() {
     });
 
     it("should return true if connection sent the event", function() {
-      pusher.send_event.andReturn(true);
+      pusher.send_event.and.returnValue(true);
       expect(channel.trigger("client-test", {})).toBe(true);
     });
 
     it("should return false if connection didn't send the event", function() {
-      pusher.send_event.andReturn(false);
+      pusher.send_event.and.returnValue(false);
       expect(channel.trigger("client-test", {})).toBe(false);
     });
   });
@@ -81,7 +71,7 @@ describe("Channel", function() {
 
     it("should set subscriptionPending to false", function() {
       channel.subscriptionPending = true;
-      
+
       channel.disconnect();
 
       expect(channel.subscriptionPending).toEqual(false);
@@ -216,10 +206,10 @@ describe("Channel", function() {
     });
 
     it("should authorize the connection first", function() {
-      expect(channel.authorize.calls.length).toEqual(0);
+      expect(channel.authorize.calls.count()).toEqual(0);
       channel.subscribe();
 
-      expect(channel.authorize.calls.length).toEqual(1);
+      expect(channel.authorize.calls.count()).toEqual(1);
       expect(channel.authorize).toHaveBeenCalledWith(
         "9.37", jasmine.any(Function)
       );
@@ -229,7 +219,7 @@ describe("Channel", function() {
       expect(pusher.send_event).not.toHaveBeenCalled();
 
       channel.subscribe();
-      var authorizeCallback = channel.authorize.calls[0].args[1];
+      var authorizeCallback = channel.authorize.calls.first().args[1];
       authorizeCallback(false, {
         auth: "one",
         channel_data: "two"
@@ -246,7 +236,7 @@ describe("Channel", function() {
       channel.bind("pusher:subscription_error", onSubscriptionError);
 
       channel.subscribe();
-      var authorizeCallback = channel.authorize.calls[0].args[1];
+      var authorizeCallback = channel.authorize.calls.first().args[1];
       authorizeCallback(new Error("test error"), {auth: ""})
 
       expect(onSubscriptionError).toHaveBeenCalledWith(
@@ -270,7 +260,7 @@ describe("Channel", function() {
       expect(channel.subscriptionPending).toEqual(false);
 
       channel.subscribe();
-      var authorizeCallback = channel.authorize.calls[0].args[1];
+      var authorizeCallback = channel.authorize.calls.first().args[1];
       authorizeCallback(new Error("test error"), {auth: ""})
 
       expect(channel.subscriptionPending).toEqual(false);
@@ -280,7 +270,7 @@ describe("Channel", function() {
       expect(channel.subscriptionPending).toEqual(false);
 
       channel.subscribe();
-      var authorizeCallback = channel.authorize.calls[0].args[1];
+      var authorizeCallback = channel.authorize.calls.first().args[1];
       authorizeCallback(false, {
         auth: "one",
         channel_data: "two"
