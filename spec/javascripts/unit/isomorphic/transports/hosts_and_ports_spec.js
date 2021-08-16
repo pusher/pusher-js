@@ -23,7 +23,11 @@ describe("Host/Port Configuration", function() {
   });
 
   afterEach(function() {
-    pusher.disconnect();
+    try {
+      pusher.disconnect();
+    } catch (e) {
+      console.log(`Received an error when tried to disconnect. Error message: ${e}`);
+    }
   });
 
   describe("WebSockets", function() {
