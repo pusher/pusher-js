@@ -51,14 +51,14 @@
     "karma-spec-reporter": "0.0.32",
     "karma-verbose-reporter": "0.0.6",
     "karma-webpack": "^4.0.2",
-    "object-assign-deep": "0.0.4",
     "prettier": "^1.19.1",
     "ts-loader": "^6.0.4",
     "typescript": "^3.4.5",
     "uglify-js": "^2.6.2",
-    "webpack": "^4.41.5",
-    "webpack-cli": "^3.3.5",
-    "webpack-dev-server": "^3.11.0",
+    "webpack": "^4.46.0",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.2",
+    "webpack-merge": "^5.8.0",
     "xmlhttprequest": "^1.8.0"
   },
   "dependencies": {

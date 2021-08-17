@@ -1,9 +1,9 @@
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
 var config = require('./config.integration');
 
 if (process.env.CI) {
   var ci = require('./config.ci');
-  config = objectAssign(config, ci);
+  config = merge(config, ci);
   config.browsers = ci.browsers;
 }
 
@@ -12,7 +12,7 @@ if (process.env.WORKER === 'true') {
   config.webpack.resolve.alias = {
     pusher_integration: 'core/pusher',
     integration: 'node/integration'
-  }
+  };
   if (process.env.CI) config.browsers = ['bs_chrome_74'];
 }
 

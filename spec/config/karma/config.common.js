@@ -1,5 +1,5 @@
-var webpackConfig = require('../../../webpack/config.shared');
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
+const webpackConfig = require('../../../webpack/config.shared');
 
 var browserList;
 if (process.env.MINIMAL_INTEGRATION_TESTS) {
@@ -14,7 +14,7 @@ module.exports = {
 
   reporters: ['verbose'],
 
-  webpack: objectAssign({}, webpackConfig, {
+  webpack: merge({}, webpackConfig, {
     mode: 'development',
     resolve: {
       modules: [

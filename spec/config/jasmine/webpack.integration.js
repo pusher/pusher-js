@@ -1,8 +1,8 @@
-var objectAssign = require('object-assign-deep');
-var baseConfig = require('../../../webpack/config.node');
-var path = require('path');
+const { merge } = require('webpack-merge');
+const path = require('path');
+const baseConfig = require('../../../webpack/config.node');
 
-module.exports = objectAssign({}, baseConfig, {
+module.exports = merge({}, baseConfig, {
   entry: {
     pusher: path.join(
       __dirname,
