@@ -38,6 +38,16 @@ module.exports = function(testConfigs) {
       }
 
       describe("with " + options.transport + ", forceTLS=" + options.forceTLS, function() {
+        var jasmineDefaultTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+
+        beforeAll(() => {
+          jasmine.DEFAULT_TIMEOUT_INTERVAL = 21000;
+        });
+
+        afterAll(() => {
+          jasmine.DEFAULT_TIMEOUT_INTERVAL = jasmineDefaultTimeout;
+        });
+
         beforeEach(function() {
           Collections.objectApply(TRANSPORTS, function(transport, name) {
             spyOn(transport, "isSupported").and.returnValue(false);

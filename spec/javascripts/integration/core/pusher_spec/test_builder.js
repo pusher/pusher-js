@@ -48,6 +48,15 @@ function build(testConfig) {
 
   describe("with " + (transport ? transport + ", " : "") + "forceTLS=" + forceTLS, function() {
     var pusher1, pusher2;
+    var jasmineDefaultTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+
+    beforeAll(() => {
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = 41000;
+    });
+
+    afterAll(() => {
+      jasmine.DEFAULT_TIMEOUT_INTERVAL = jasmineDefaultTimeout;
+    });
 
     beforeEach(function() {
       Collections.objectApply(TRANSPORTS, function(t, name) {
