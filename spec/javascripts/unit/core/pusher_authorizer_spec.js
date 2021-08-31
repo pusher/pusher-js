@@ -52,9 +52,9 @@ if (TestEnv !== "worker") {
       xhr = new Mocks.getXHR();
 
       if (TestEnv === "web" && !window.XMLHttpRequest) {
-        spyOn(Runtime, "createMicrosoftXHR").andReturn(xhr);
+        spyOn(Runtime, "createMicrosoftXHR").and.returnValue(xhr);
       } else {
-        spyOn(Runtime, "createXHR").andReturn(xhr);
+        spyOn(Runtime, "createXHR").and.returnValue(xhr);
       }
     });
 
@@ -70,7 +70,7 @@ if (TestEnv !== "worker") {
       );
       authorizer.authorize("1.23", function() {});
 
-      expect(xhr.setRequestHeader.calls.length).toEqual(3);
+      expect(xhr.setRequestHeader.calls.count()).toEqual(3);
       expect(xhr.setRequestHeader).toHaveBeenCalledWith(
         "Content-Type", "application/x-www-form-urlencoded"
       );
@@ -90,7 +90,7 @@ if (TestEnv !== "worker") {
       );
       authorizer.authorize("1.23", function() {});
 
-      expect(xhr.send.calls.length).toEqual(1);
+      expect(xhr.send.calls.count()).toEqual(1);
       expect(xhr.send).toHaveBeenCalledWith(
         "socket_id=1.23&channel_name=chan&a=1&b=2"
       );
@@ -109,9 +109,9 @@ if (TestEnv !== "worker") {
       authorizer.authorize("1.23", callback);
 
       if (TestEnv === "web" && !window.XMLHttpRequest) {
-        expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
+        expect(Runtime.createMicrosoftXHR.calls.count()).toEqual(1);
       } else {
-        expect(Runtime.createXHR.calls.length).toEqual(1);
+        expect(Runtime.createXHR.calls.count()).toEqual(1);
       }
 
       xhr.readyState = 4;
@@ -119,7 +119,7 @@ if (TestEnv !== "worker") {
       xhr.responseText = dataJSON;
       xhr.onreadystatechange();
 
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
       expect(callback).toHaveBeenCalledWith(null, data);
     });
 
@@ -133,9 +133,9 @@ if (TestEnv !== "worker") {
       authorizer.authorize("1.23", callback);
 
       if (TestEnv === "web" && !window.XMLHttpRequest) {
-        expect(Runtime.createMicrosoftXHR.calls.length).toEqual(1);
+        expect(Runtime.createMicrosoftXHR.calls.count()).toEqual(1);
       } else {
-        expect(Runtime.createXHR.calls.length).toEqual(1);
+        expect(Runtime.createXHR.calls.count()).toEqual(1);
       }
 
       xhr.readyState = 4;
@@ -143,10 +143,10 @@ if (TestEnv !== "worker") {
       xhr.responseText = invalidJSON;
       xhr.onreadystatechange();
 
-      expect(callback.calls.length).toEqual(1);
+      expect(callback.calls.count()).toEqual(1);
       // For some reason comparing the Error types doesn't work properly in
       // Safari on Mojave. Manually check the arguments.
-      let args = callback.calls[0].args;
+      let args = callback.calls.first().args;
       expect(args.length).toEqual(2)
       expect(args[0]).toEqual(jasmine.any(Error))
       expect(args[0].message).toEqual(

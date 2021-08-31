@@ -13,11 +13,11 @@ describe("HTTP.getXDR", function() {
     HTTPFactory = require('runtime').default.HTTPFactory;
 
 
-    window.XDomainRequest = jasmine.createSpy().andCallFake(
+    window.XDomainRequest = jasmine.createSpy().and.callFake(
       Mocks.getXHR
     );;
 
-    spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
+    spyOn(HTTPFactory, "createRequest").and.callFake(function(h, m, u) {
       hooks = h;
       method = m;
       url = u;
@@ -52,15 +52,15 @@ describe("HTTP.getXDR", function() {
       describe("on XDR timeout", function() {
         it("should close the socket", function() {
           xdr.ontimeout();
-          expect(socket.close.calls.length).toEqual(1);
+          expect(socket.close.calls.count()).toEqual(1);
         });
 
         it("should emit an RequestTimedOut error before closing the socket", function() {
           var onError = jasmine.createSpy();
           socket.bind("error", onError);
 
-          socket.close.andCallFake(function() {
-            expect(onError.calls.length).toEqual(1);
+          socket.close.and.callFake(function() {
+            expect(onError.calls.count()).toEqual(1);
             expect(onError).toHaveBeenCalledWith(
               jasmine.any(Errors.RequestTimedOut)
             );
@@ -73,15 +73,15 @@ describe("HTTP.getXDR", function() {
       describe("on XDR error", function() {
         it("should close the socket", function() {
           xdr.onerror("test error");
-          expect(socket.close.calls.length).toEqual(1);
+          expect(socket.close.calls.count()).toEqual(1);
         });
 
         it("should emit the error before closing the socket", function() {
           var onError = jasmine.createSpy();
           socket.bind("error", onError);
 
-          socket.close.andCallFake(function() {
-            expect(onError.calls.length).toEqual(1);
+          socket.close.and.callFake(function() {
+            expect(onError.calls.count()).toEqual(1);
             expect(onError).toHaveBeenCalledWith("test error");
           });
 
@@ -108,7 +108,7 @@ describe("HTTP.getXDR", function() {
           xdr.responseText = "asdf";
 
           xdr.onprogress();
-          expect(socket.onChunk.calls.length).toEqual(1);
+          expect(socket.onChunk.calls.count()).toEqual(1);
           expect(socket.onChunk).toHaveBeenCalledWith(200, "asdf");
         });
 
@@ -116,12 +116,12 @@ describe("HTTP.getXDR", function() {
           xdr.responseText = "asdf";
 
           xdr.onprogress();
-          expect(socket.onChunk.calls.length).toEqual(1);
+          expect(socket.onChunk.calls.count()).toEqual(1);
           expect(socket.onChunk).toHaveBeenCalledWith(200, "asdf");
 
           xdr.responseText = "asdfghjkl";
           xdr.onprogress();
-          expect(socket.onChunk.calls.length).toEqual(2);
+          expect(socket.onChunk.calls.count()).toEqual(2);
           expect(socket.onChunk).toHaveBeenCalledWith(200, "asdfghjkl");
         });
       });
@@ -131,7 +131,7 @@ describe("HTTP.getXDR", function() {
           xdr.responseText = "";
 
           xdr.onload();
-          expect(socket.close.calls.length).toEqual(1);
+          expect(socket.close.calls.count()).toEqual(1);
         });
 
         it("should not call socket.onChunk if there is no responseText", function() {
@@ -151,8 +151,8 @@ describe("HTTP.getXDR", function() {
         it("should call socket.onChunk before closing if responseText is not empty", function() {
           xdr.responseText = "12356890";
 
-          socket.close.andCallFake(function() {
-            expect(socket.onChunk.calls.length).toEqual(1);
+          socket.close.and.callFake(function() {
+            expect(socket.onChunk.calls.count()).toEqual(1);
             expect(socket.onChunk).toHaveBeenCalledWith(200, "12356890");
           });
 
@@ -165,8 +165,8 @@ describe("HTTP.getXDR", function() {
           var onFinished = jasmine.createSpy();
           socket.bind("finished", onFinished);
 
-          socket.close.andCallFake(function() {
-            expect(onFinished.calls.length).toEqual(1);
+          socket.close.and.callFake(function() {
+            expect(onFinished.calls.count()).toEqual(1);
             expect(onFinished).toHaveBeenCalledWith(200);
           });
 
@@ -177,14 +177,14 @@ describe("HTTP.getXDR", function() {
 
     describe("#abortRequest", function() {
       it("should abort the passed request", function() {
-        expect(xdr.abort.calls.length).toEqual(0);
+        expect(xdr.abort.calls.count()).toEqual(0);
         hooks.abortRequest(xdr);
-        expect(xdr.abort.calls.length).toEqual(1);
+        expect(xdr.abort.calls.count()).toEqual(1);
       });
 
       it("should set the ontimeout listener to null before calling abort", function() {
         xdr.ontimeout = function() {};
-        xdr.abort.andCallFake(function() {
+        xdr.abort.and.callFake(function() {
           expect(xdr.ontimeout).toBe(null);
         });
 
@@ -193,7 +193,7 @@ describe("HTTP.getXDR", function() {
 
       it("should set the onerror listener to null before calling abort", function() {
         xdr.onerror = function() {};
-        xdr.abort.andCallFake(function() {
+        xdr.abort.and.callFake(function() {
           expect(xdr.onerror).toBe(null);
         });
 
@@ -202,7 +202,7 @@ describe("HTTP.getXDR", function() {
 
       it("should set the onprogress listener to null before calling abort", function() {
         xdr.onprogress = function() {};
-        xdr.abort.andCallFake(function() {
+        xdr.abort.and.callFake(function() {
           expect(xdr.onprogress).toBe(null);
         });
 
@@ -211,7 +211,7 @@ describe("HTTP.getXDR", function() {
 
       it("should set the onload listener to null before calling abort", function() {
         xdr.onload = function() {};
-        xdr.abort.andCallFake(function() {
+        xdr.abort.and.callFake(function() {
           expect(xdr.onload).toBe(null);
         });
 

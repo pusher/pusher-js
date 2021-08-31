@@ -1,9 +1,9 @@
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
 var config = require('./config.unit');
 
 if (process.env.CI) {
   var ci = require('./config.ci');
-  config = objectAssign(config, ci);
+  config = merge(config, ci);
   config.browsers = ci.browsers;
 }
 

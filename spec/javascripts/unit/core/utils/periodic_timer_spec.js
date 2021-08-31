@@ -6,7 +6,7 @@ describe("PeriodicTimer", function() {
   var timer;
 
   beforeEach(function() {
-    jasmine.Clock.useMock();
+    jasmine.clock().install();
 
     callback = jasmine.createSpy("callback");
     timer = new PeriodicTimer(123, callback);
@@ -14,30 +14,31 @@ describe("PeriodicTimer", function() {
 
   afterEach(function() {
     timer.ensureAborted();
+    jasmine.clock().uninstall();
   });
 
   it("should keep executing the callback with the specified interval", function() {
-    expect(callback.calls.length).toEqual(0);
-    jasmine.Clock.tick(122);
-    expect(callback.calls.length).toEqual(0);
-    jasmine.Clock.tick(1);
-    expect(callback.calls.length).toEqual(1);
+    expect(callback.calls.count()).toEqual(0);
+    jasmine.clock().tick(122);
+    expect(callback.calls.count()).toEqual(0);
+    jasmine.clock().tick(1);
+    expect(callback.calls.count()).toEqual(1);
 
-    expect(callback.calls.length).toEqual(1);
-    jasmine.Clock.tick(122);
-    expect(callback.calls.length).toEqual(1);
-    jasmine.Clock.tick(1);
-    expect(callback.calls.length).toEqual(2);
+    expect(callback.calls.count()).toEqual(1);
+    jasmine.clock().tick(122);
+    expect(callback.calls.count()).toEqual(1);
+    jasmine.clock().tick(1);
+    expect(callback.calls.count()).toEqual(2);
   });
 
   describe("#isRunning", function() {
     it("should return true before first execution", function() {
-      jasmine.Clock.tick(122);
+      jasmine.clock().tick(122);
       expect(timer.isRunning()).toBe(true);
     });
 
     it("should return true after execution", function() {
-      jasmine.Clock.tick(123);
+      jasmine.clock().tick(123);
       expect(timer.isRunning()).toBe(true);
     });
 
@@ -50,12 +51,12 @@ describe("PeriodicTimer", function() {
   describe("#ensureAborted", function() {
     it("should abort the timer before execution", function() {
       timer.ensureAborted();
-      jasmine.Clock.tick(1000000);
+      jasmine.clock().tick(1000000);
       expect(callback).not.toHaveBeenCalled();
     });
 
     it("should play nice after first execution", function() {
-      jasmine.Clock.tick(1000);
+      jasmine.clock().tick(1000);
       timer.ensureAborted();
     });
 
@@ -63,7 +64,7 @@ describe("PeriodicTimer", function() {
       // IE has some edge-case with clearInterval not working, let's simulate it
       spyOn(global, "clearInterval");
       timer.ensureAborted();
-      jasmine.Clock.tick(1000);
+      jasmine.clock().tick(1000);
       expect(callback).not.toHaveBeenCalled();
     });
   });

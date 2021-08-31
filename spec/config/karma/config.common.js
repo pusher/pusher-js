@@ -1,5 +1,5 @@
-var webpackConfig = require('../../../webpack/config.shared');
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
+const webpackConfig = require('../../../webpack/config.shared');
 
 var browserList;
 if (process.env.MINIMAL_INTEGRATION_TESTS) {
@@ -14,7 +14,7 @@ module.exports = {
 
   reporters: ['verbose'],
 
-  webpack: objectAssign({}, webpackConfig, {
+  webpack: merge({}, webpackConfig, {
     mode: 'development',
     resolve: {
       modules: [
@@ -40,6 +40,12 @@ module.exports = {
   singleRun: true,
   client: {
     captureConsole: false,
+    jasmine: {
+      // This new behaviour in jasmine is enabled by default but, some of our
+      // old tests rely on sequential execution.
+      // @todo Enable random order execution (i.e. remove this flag) and fix tests that are broken
+      random: false
+    }
   }
-}
+};
 

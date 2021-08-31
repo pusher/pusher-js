@@ -1,8 +1,8 @@
-var objectAssign = require('object-assign-deep');
-var webpack = require('webpack');
-var commonConfig = require('./config.common');
+const { merge } = require('webpack-merge');
+const webpack = require('webpack');
+const commonConfig = require('./config.common');
 
-module.exports = objectAssign({}, commonConfig, {
+module.exports = merge({}, commonConfig, {
   files: [
     '**/spec/javascripts/integration/index.web.js'
   ],

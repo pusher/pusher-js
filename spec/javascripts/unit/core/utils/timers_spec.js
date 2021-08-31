@@ -1,12 +1,17 @@
 var timers = require('core/utils/timers');
 
 describe("timers", function() {
+  afterEach(() => {
+    jasmine.clock().uninstall();
+  });
+
   describe("Timer", function() {
     var callback;
     var timer;
 
     beforeEach(function() {
-      jasmine.Clock.useMock();
+      jasmine.clock().uninstall();
+      jasmine.clock().install();
 
       callback = jasmine.createSpy("callback");
       timer = new timers.OneOffTimer(123, callback);
@@ -18,25 +23,25 @@ describe("timers", function() {
 
     it("should execute the callback with the specified delay", function() {
       expect(callback).not.toHaveBeenCalled();
-      jasmine.Clock.tick(122);
+      jasmine.clock().tick(122);
       expect(callback).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(callback).toHaveBeenCalled();
     });
 
     it("should execute the callback exactly once", function() {
-      jasmine.Clock.tick(1000);
-      expect(callback.calls.length).toEqual(1);
+      jasmine.clock().tick(1000);
+      expect(callback.calls.count()).toEqual(1);
     });
 
     describe("#isRunning", function() {
       it("should return true before execution", function() {
-        jasmine.Clock.tick(122);
+        jasmine.clock().tick(122);
         expect(timer.isRunning()).toBe(true);
       });
 
       it("should return false after execution", function() {
-        jasmine.Clock.tick(123);
+        jasmine.clock().tick(123);
         expect(timer.isRunning()).toBe(false);
       });
 
@@ -49,12 +54,12 @@ describe("timers", function() {
     describe("#ensureAborted", function() {
       it("should abort the timer before execution", function() {
         timer.ensureAborted();
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(callback).not.toHaveBeenCalled();
       });
 
       it("should play nice after execution", function() {
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         timer.ensureAborted();
       });
 
@@ -62,7 +67,7 @@ describe("timers", function() {
         // IE has some edge-case with clearTimeout not working, let's simulate it
         spyOn(global, "clearTimeout");
         timer.ensureAborted();
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(callback).not.toHaveBeenCalled();
       });
     });
@@ -73,7 +78,8 @@ describe("timers", function() {
     var timer;
 
     beforeEach(function() {
-      jasmine.Clock.useMock();
+      jasmine.clock().uninstall();
+      jasmine.clock().install();
 
       callback = jasmine.createSpy("callback");
       timer = new timers.PeriodicTimer(123, callback);
@@ -85,27 +91,27 @@ describe("timers", function() {
 
     it("should execute the callback with the specified delay", function() {
       expect(callback).not.toHaveBeenCalled();
-      jasmine.Clock.tick(122);
+      jasmine.clock().tick(122);
       expect(callback).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(callback).toHaveBeenCalled();
     });
 
     it("should execute the callback periodically", function() {
-      jasmine.Clock.tick(123);
-      expect(callback.calls.length).toEqual(1);
-      jasmine.Clock.tick(123);
-      expect(callback.calls.length).toEqual(2);
+      jasmine.clock().tick(123);
+      expect(callback.calls.count()).toEqual(1);
+      jasmine.clock().tick(123);
+      expect(callback.calls.count()).toEqual(2);
     });
 
     describe("#isRunning", function() {
       it("should return true before execution", function() {
-        jasmine.Clock.tick(122);
+        jasmine.clock().tick(122);
         expect(timer.isRunning()).toBe(true);
       });
 
       it("should return true after execution", function() {
-        jasmine.Clock.tick(123);
+        jasmine.clock().tick(123);
         expect(timer.isRunning()).toBe(true);
       });
 
@@ -118,22 +124,22 @@ describe("timers", function() {
     describe("#ensureAborted", function() {
       it("should abort the timer before execution", function() {
         timer.ensureAborted();
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(callback).not.toHaveBeenCalled();
       });
 
       it("should abort the timer after first execution", function() {
-        jasmine.Clock.tick(123);
-        expect(callback.calls.length).toEqual(1);
+        jasmine.clock().tick(123);
+        expect(callback.calls.count()).toEqual(1);
         timer.ensureAborted();
-        jasmine.Clock.tick(1000);
-        expect(callback.calls.length).toEqual(1);
+        jasmine.clock().tick(1000);
+        expect(callback.calls.count()).toEqual(1);
       });
 
       it("should be idempotent", function() {
         timer.ensureAborted();
         timer.ensureAborted();
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(callback).not.toHaveBeenCalled();
       });
 
@@ -141,7 +147,7 @@ describe("timers", function() {
         // IE has some edge-case with clearTimeout not working, let's simulate it
         spyOn(global, "clearTimeout");
         timer.ensureAborted();
-        jasmine.Clock.tick(1000);
+        jasmine.clock().tick(1000);
         expect(callback).not.toHaveBeenCalled();
       });
     });

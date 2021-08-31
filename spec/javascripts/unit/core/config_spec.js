@@ -7,7 +7,7 @@ var nacl = require('tweetnacl')
 describe('Config', function() {
   beforeEach(function() {
     if (TestEnv === 'web') {
-      spyOn(Runtime, 'getDocument').andReturn({
+      spyOn(Runtime, 'getDocument').and.returnValue({
         location: {
           protocol: 'http:'
         }
@@ -80,7 +80,7 @@ describe('Config', function() {
     });
     if (TestEnv === 'web') {
       it('should use TLS when using https', function() {
-        Runtime.getDocument.andReturn({
+        Runtime.getDocument.and.returnValue({
           location: {
             protocol: 'https:'
           }

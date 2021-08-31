@@ -18,7 +18,7 @@ describe("Handshake", function() {
 
   describe("after a successful handshake", function() {
     beforeEach(function() {
-      Protocol.processHandshake.andReturn({
+      Protocol.processHandshake.and.returnValue({
         action: "connected",
         id: "9.9"
       });
@@ -29,9 +29,10 @@ describe("Handshake", function() {
       expect(callback).toHaveBeenCalledWith({
         action: "connected",
         transport: transport,
+        activityTimeout: undefined,
         connection: jasmine.any(Connection)
       });
-      expect(callback.calls[0].args[0].connection.id).toEqual("9.9");
+      expect(callback.calls.first().args[0].connection.id).toEqual("9.9");
     });
 
     it("should not call close on the transport", function() {
@@ -41,7 +42,7 @@ describe("Handshake", function() {
 
   describe("after a handshake with other action", function() {
     beforeEach(function() {
-      Protocol.processHandshake.andReturn({
+      Protocol.processHandshake.and.returnValue({
         action: "boom",
         error: "BOOM"
       });
@@ -63,7 +64,7 @@ describe("Handshake", function() {
 
   describe("after a handshake raising an exception", function() {
     beforeEach(function() {
-      Protocol.processHandshake.andThrow("Invalid handshake");
+      Protocol.processHandshake.and.throwError("Invalid handshake");
       transport.emit("message", { data: "dummy "});
     });
 
@@ -71,7 +72,7 @@ describe("Handshake", function() {
       expect(callback).toHaveBeenCalledWith({
         action: "error",
         transport: transport,
-        error: "Invalid handshake"
+        error: new Error("Invalid handshake")
       });
     });
 
@@ -85,15 +86,15 @@ describe("Handshake", function() {
       var finishSpy = spyOn(handshake, 'finish');
       var error = new Error("some exception");
 
-      finishSpy.andCallFake(function(action, params){
+      finishSpy.and.callFake(function(action, params){
         if (action === "connected") {
           throw error
         } else {
-          finishSpy.andCallThrough();
+          finishSpy.and.callThrough();
         }
       });
 
-      Protocol.processHandshake.andReturn({
+      Protocol.processHandshake.and.returnValue({
         action: "connected",
         id: "9.9"
       });
@@ -107,7 +108,7 @@ describe("Handshake", function() {
   describe("after receiving a 'closed' event from transport", function() {
     describe("with defined action", function() {
       beforeEach(function() {
-        spyOn(Protocol, "getCloseAction").andReturn("boo");
+        spyOn(Protocol, "getCloseAction").and.returnValue("boo");
         spyOn(Protocol, "getCloseError");
 
         transport.emit("closed", {
@@ -119,7 +120,8 @@ describe("Handshake", function() {
       it("should call back with correct action and error", function() {
         expect(callback).toHaveBeenCalledWith({
           action: "boo",
-          transport: transport
+          transport: transport,
+          error: undefined,
         });
       });
 
@@ -137,8 +139,8 @@ describe("Handshake", function() {
 
     describe("with null action", function() {
       beforeEach(function() {
-        spyOn(Protocol, "getCloseAction").andReturn(null);
-        spyOn(Protocol, "getCloseError").andReturn("???");
+        spyOn(Protocol, "getCloseAction").and.returnValue(null);
+        spyOn(Protocol, "getCloseError").and.returnValue("???");
 
         transport.emit("closed", {
           code: 4321,

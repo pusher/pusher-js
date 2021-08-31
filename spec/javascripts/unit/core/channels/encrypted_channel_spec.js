@@ -28,7 +28,7 @@ describe("EncryptedChannel", function() {
     pusher = Mocks.getPusher({ foo: "bar" });
     channel = new EncryptedChannel("private-encrypted-test", pusher, nacl);
     authorizer = Mocks.getAuthorizer();
-    factorySpy = spyOn(Factory, "createAuthorizer").andReturn(authorizer);
+    factorySpy = spyOn(Factory, "createAuthorizer").and.returnValue(authorizer);
   });
 
   describe("after construction", function() {
@@ -48,7 +48,7 @@ describe("EncryptedChannel", function() {
   describe("#authorize", function() {
     it("should create and call an authorizer", function() {
       channel.authorize("1.23", function() {});
-      expect(Factory.createAuthorizer.calls.length).toEqual(1);
+      expect(Factory.createAuthorizer.calls.count()).toEqual(1);
       expect(Factory.createAuthorizer).toHaveBeenCalledWith(channel, {
         foo: "bar"
       });
@@ -73,8 +73,9 @@ describe("EncryptedChannel", function() {
       });
       // For some reason comparing the Error types doesn't work properly in
       // Safari on Mojave. Manually check the arguments.
-      expect(callback.calls.length).toEqual(1)
-      let args = callback.calls[0].args;
+      expect(callback.calls.count()).toEqual(1)
+      let args = callback.calls.first().args;
+
       expect(args.length).toEqual(2)
       expect(args[0]).toEqual(jasmine.any(Error))
       expect(args[0].message).toEqual(
@@ -91,7 +92,7 @@ describe("EncryptedChannel", function() {
           }
         });
         channel = new EncryptedChannel("private-test-custom-auth", pusher, nacl);
-        factorySpy.andCallThrough();
+        factorySpy.and.callThrough();
       });
 
       it("should call the authorizer", function() {
@@ -112,18 +113,9 @@ describe("EncryptedChannel", function() {
       channel.authorize("1.23", callback);
     });
     it("should raise an exception if called", function() {
-      // we can't use toThrow with jasmine.any because it compares
-      // (exception.message || exception) with (expected.message || expected)
-      // the thrown exception has a message so it's passed to the matcher. The
-      // message is a string, and *not* an instanceof the expected class
-      // https://github.com/jasmine/jasmine/blob/v1.3.1/src/core/Matchers.js#L331-L333
-      var exception;
-      try {
-        channel.trigger("whatever", {});
-      } catch(e) {
-        exception = e;
-      }
-      expect(exception).toMatch(jasmine.any(Errors.UnsupportedFeature));
+      expect(() => channel.trigger('whatever', {})).toThrow(
+        jasmine.any(Errors.UnsupportedFeature)
+      );
     });
   });
 

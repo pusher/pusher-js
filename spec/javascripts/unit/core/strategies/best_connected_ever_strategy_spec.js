@@ -32,7 +32,7 @@ describe("BestConnectedEverStrategy", function() {
         expect(this.callback).toHaveBeenCalledWith(null, {
           transport: transport1
         });
-        expect(this.callback.calls.length).toEqual(1);
+        expect(this.callback.calls.count()).toEqual(1);
       });
 
       it("should force min priorities on all substrategies", function() {
@@ -50,7 +50,7 @@ describe("BestConnectedEverStrategy", function() {
         expect(this.callback).toHaveBeenCalledWith(null, {
           transport: transport2
         });
-        expect(this.callback.calls.length).toEqual(2);
+        expect(this.callback.calls.count()).toEqual(2);
       });
     });
 
@@ -67,12 +67,12 @@ describe("BestConnectedEverStrategy", function() {
       it("should not pass errors after one substrategy succeeded", function() {
         var transport = Mocks.getTransport();
         this.substrategies[0]._callback(null, { transport: transport });
-        expect(this.callback.calls.length).toEqual(1);
+        expect(this.callback.calls.count()).toEqual(1);
 
         this.substrategies[1]._callback(true);
-        expect(this.callback.calls.length).toEqual(1);
+        expect(this.callback.calls.count()).toEqual(1);
         this.substrategies[2]._callback(true);
-        expect(this.callback.calls.length).toEqual(1);
+        expect(this.callback.calls.count()).toEqual(1);
       });
     });
   });

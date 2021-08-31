@@ -22,10 +22,10 @@ describe("JSONP Authorizer", function() {
     var script = Mocks.getDocumentElement();
     var documentElement = Mocks.getDocumentElement();
 
-    document.createElement.andReturn(script);
-    document.getElementsByTagName.andReturn([]);
+    document.createElement.and.returnValue(script);
+    document.getElementsByTagName.and.returnValue([]);
     document.documentElement = documentElement;
-    spyOn(Runtime, "getDocument").andReturn(document);
+    spyOn(Runtime, "getDocument").and.returnValue(document);
 
     spyOn(Logger, "warn");
     authorizer.authorize("1.23", function() {});

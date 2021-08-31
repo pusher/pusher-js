@@ -10,9 +10,9 @@ describe("HTTP.getXHR", function() {
   beforeEach(function() {
     HTTPFactory = require('runtime').default.HTTPFactory;
 
-    spyOn(Runtime, 'getXHRAPI').andReturn(Mocks.getXHR);
+    spyOn(Runtime, 'getXHRAPI').and.returnValue(Mocks.getXHR);
 
-    spyOn(HTTPFactory, "createRequest").andCallFake(function(h, m, u) {
+    spyOn(HTTPFactory, "createRequest").and.callFake(function(h, m, u) {
       hooks = h;
       return Mocks.getHTTPRequest(m, u);
     });
@@ -64,7 +64,7 @@ describe("HTTP.getXHR", function() {
           xhr.responseText = "asdf";
 
           xhr.onreadystatechange();
-          expect(socket.onChunk.calls.length).toEqual(1);
+          expect(socket.onChunk.calls.count()).toEqual(1);
           expect(socket.onChunk).toHaveBeenCalledWith(201, "asdf");
         });
 
@@ -73,12 +73,12 @@ describe("HTTP.getXHR", function() {
           xhr.responseText = "asdf";
 
           xhr.onreadystatechange();
-          expect(socket.onChunk.calls.length).toEqual(1);
+          expect(socket.onChunk.calls.count()).toEqual(1);
           expect(socket.onChunk).toHaveBeenCalledWith(201, "asdf");
 
           xhr.responseText = "asdfghjkl";
           xhr.onreadystatechange();
-          expect(socket.onChunk.calls.length).toEqual(2);
+          expect(socket.onChunk.calls.count()).toEqual(2);
           expect(socket.onChunk).toHaveBeenCalledWith(201, "asdfghjkl");
         });
       });
@@ -93,7 +93,7 @@ describe("HTTP.getXHR", function() {
           xhr.responseText = "";
 
           xhr.onreadystatechange();
-          expect(socket.close.calls.length).toEqual(1);
+          expect(socket.close.calls.count()).toEqual(1);
         });
 
         it("should not call socket.onChunk if there is no responseText", function() {
@@ -116,8 +116,8 @@ describe("HTTP.getXHR", function() {
           xhr.status = 234;
           xhr.responseText = "12356890";
 
-          socket.close.andCallFake(function() {
-            expect(socket.onChunk.calls.length).toEqual(1);
+          socket.close.and.callFake(function() {
+            expect(socket.onChunk.calls.count()).toEqual(1);
             expect(socket.onChunk).toHaveBeenCalledWith(234, "12356890");
           });
 
@@ -131,8 +131,8 @@ describe("HTTP.getXHR", function() {
           var onFinished = jasmine.createSpy();
           socket.bind("finished", onFinished);
 
-          socket.close.andCallFake(function() {
-            expect(onFinished.calls.length).toEqual(1);
+          socket.close.and.callFake(function() {
+            expect(onFinished.calls.count()).toEqual(1);
             expect(onFinished).toHaveBeenCalledWith(404);
           });
 
@@ -145,15 +145,15 @@ describe("HTTP.getXHR", function() {
       it("should abort the passed request", function() {
         var xhr = Mocks.getXHR();
 
-        expect(xhr.abort.calls.length).toEqual(0);
+        expect(xhr.abort.calls.count()).toEqual(0);
         hooks.abortRequest(xhr);
-        expect(xhr.abort.calls.length).toEqual(1);
+        expect(xhr.abort.calls.count()).toEqual(1);
       });
 
       it("should set the onreadystatechange listener to null before calling abort", function() {
         var xhr = Mocks.getXHR();
         xhr.onreadystatechange = function() {};
-        xhr.abort.andCallFake(function() {
+        xhr.abort.and.callFake(function() {
           expect(xhr.onreadystatechange).toBe(null);
         });
 

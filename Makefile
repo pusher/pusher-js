@@ -59,12 +59,12 @@ worker_integration:
 	WORKER=true node_modules/karma/bin/karma start spec/config/karma/integration.js
 
 node_unit:
-	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.unit.js && \
-	node spec/config/jasmine-node/config.js ./tmp/node_unit
+	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine/webpack.unit.js && \
+	node_modules/.bin/jasmine --config=spec/config/jasmine/unit.json
 
 node_integration:
-	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine-node/webpack.integration.js && \
-	node spec/config/jasmine-node/config.js ./tmp/node_integration
+	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine/webpack.integration.js && \
+	node_modules/.bin/jasmine --config=spec/config/jasmine/integration.json
 
 serve:
 	node webpack/dev.server.js

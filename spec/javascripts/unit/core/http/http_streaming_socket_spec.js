@@ -7,7 +7,7 @@ describe("HTTP.getStreamingSocket", function() {
   var socket;
 
   beforeEach(function() {
-    spyOn(HTTPFactory, "createSocket").andCallFake(function(h, u) {
+    spyOn(HTTPFactory, "createSocket").and.callFake(function(h, u) {
       socket = Mocks.getHTTPSocket();
       hooks = h;
       url = u;
@@ -36,13 +36,13 @@ describe("HTTP.getStreamingSocket", function() {
     it("#onHeartbeat should send an '[]' frame", function() {
       hooks.onHeartbeat(socket);
       expect(socket.sendRaw).toHaveBeenCalledWith("[]");
-      expect(socket.sendRaw.calls.length).toEqual(1);
+      expect(socket.sendRaw.calls.count()).toEqual(1);
     });
 
     it("#sendHeartbeat should send an '[]' frame", function() {
       hooks.sendHeartbeat(socket);
       expect(socket.sendRaw).toHaveBeenCalledWith("[]");
-      expect(socket.sendRaw.calls.length).toEqual(1);
+      expect(socket.sendRaw.calls.count()).toEqual(1);
     });
 
     it("#onFinished should close the socket", function() {
@@ -50,7 +50,7 @@ describe("HTTP.getStreamingSocket", function() {
       expect(socket.onClose).toHaveBeenCalledWith(
         1006, "Connection interrupted (200)", false
       );
-      expect(socket.onClose.calls.length).toEqual(1);
+      expect(socket.onClose.calls.count()).toEqual(1);
     });
   });
 });

@@ -23,23 +23,25 @@ module.exports = function() {
     var pusher;
 
     beforeEach(function() {
-      spyOn(Network, "isOnline").andReturn(true);
+      jasmine.clock().install();
 
-      spyOn(transports.ws, "isSupported").andReturn(true);
-      spyOn(transports[BASE_FALLBACK], "isSupported").andReturn(false);
+      spyOn(Network, "isOnline").and.returnValue(true);
 
-      spyOn(Runtime, "getLocalStorage").andReturn({});
+      spyOn(transports.ws, "isSupported").and.returnValue(true);
+      spyOn(transports[BASE_FALLBACK], "isSupported").and.returnValue(false);
 
-      spyOn(transports.ws, "createConnection").andCallFake(function() {
+      spyOn(Runtime, "getLocalStorage").and.returnValue({});
+
+      spyOn(transports.ws, "createConnection").and.callFake(function() {
         transport = Mocks.getTransport(true);
-        transport.supportsPing.andReturn(false);
+        transport.supportsPing.and.returnValue(false);
         return transport;
       });
-      jasmine.Clock.useMock();
     });
 
     afterEach(function() {
       pusher.disconnect();
+      jasmine.clock().uninstall();
     });
 
     it("should transition to unavailable after default timeout", function() {
@@ -49,9 +51,9 @@ module.exports = function() {
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
-      jasmine.Clock.tick(Defaults.unavailableTimeout - 1);
+      jasmine.clock().tick(Defaults.unavailableTimeout - 1);
       expect(onUnavailable).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(onUnavailable).toHaveBeenCalled();
     });
 
@@ -62,9 +64,9 @@ module.exports = function() {
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
-      jasmine.Clock.tick(2344);
+      jasmine.clock().tick(2344);
       expect(onUnavailable).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(onUnavailable).toHaveBeenCalled();
     });
 
@@ -89,14 +91,14 @@ module.exports = function() {
       });
 
       expect(pusher.connection.state).toEqual("connected");
-      jasmine.Clock.tick(12000 - 1);
+      jasmine.clock().tick(12000 - 1);
       expect(firstTransport.send).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(firstTransport.send).toHaveBeenCalled();
 
-      jasmine.Clock.tick(Defaults.pongTimeout - 1);
+      jasmine.clock().tick(Defaults.pongTimeout - 1);
       expect(firstTransport.close).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(2);
       expect(firstTransport.close).toHaveBeenCalled();
     });
 
@@ -124,9 +126,9 @@ module.exports = function() {
       });
 
       expect(pusher.connection.state).toEqual("connected");
-      jasmine.Clock.tick(15000 - 1);
+      jasmine.clock().tick(15000 - 1);
       expect(firstTransport.send).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(firstTransport.send).toHaveBeenCalled();
     });
 
@@ -154,9 +156,9 @@ module.exports = function() {
       });
 
       expect(pusher.connection.state).toEqual("connected");
-      jasmine.Clock.tick(15555 - 1);
+      jasmine.clock().tick(15555 - 1);
       expect(firstTransport.send).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(1);
       expect(firstTransport.send).toHaveBeenCalled();
     });
 
@@ -183,11 +185,11 @@ module.exports = function() {
       });
 
       // first, send the ping
-      jasmine.Clock.tick(120000);
+      jasmine.clock().tick(120000);
       // wait for the pong timeout
-      jasmine.Clock.tick(2221);
+      jasmine.clock().tick(2221);
       expect(firstTransport.close).not.toHaveBeenCalled();
-      jasmine.Clock.tick(1);
+      jasmine.clock().tick(2);
       expect(firstTransport.close).toHaveBeenCalled();
     });
   });

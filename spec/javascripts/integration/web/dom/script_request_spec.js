@@ -1,9 +1,9 @@
-var Pusher = require('pusher_integration');
+const Pusher = require('pusher_integration');
 window.Pusher = Pusher;
 
-var Integration = require('integration');
-var ScriptRequest = require('dom/script_request').default;
-
+const Integration = require('integration');
+const ScriptRequest = require('dom/script_request').default;
+const waitsFor = require('../../../helpers/waitsFor');
 
 Integration.describe("ScriptRequest", function() {
   var callback, receiver;
@@ -23,20 +23,18 @@ Integration.describe("ScriptRequest", function() {
     request.cleanup();
   });
 
-  it("should send a request and receive a correct response", function() {
-    runs(function() {
-      request.send(receiver);
-    });
-    waitsFor(function() {
-      return callback.calls.length > 0;
+  it("should send a request and receive a correct response", async function() {
+    request.send(receiver);
+
+    await waitsFor(function() {
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
-    runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback).toHaveBeenCalledWith(null, { param: "test" });
-    });
+
+    expect(callback.calls.count()).toEqual(1);
+    expect(callback).toHaveBeenCalledWith(null, { param: "test" });
   });
 
-  it("should allow cleaning up", function() {
+  it("should allow cleaning up", async function() {
     var callback = jasmine.createSpy();
     var receiver = Pusher.Integration.ScriptReceivers.create(callback);
     var query = "receiver=" + receiver.name;
@@ -44,55 +42,49 @@ Integration.describe("ScriptRequest", function() {
 
     var request = new ScriptRequest(url);
 
-    runs(function() {
-      expect(document.getElementById(receiver.id)).toBe(null);
-      expect(document.getElementById(receiver.id + "_error")).toBe(null);
-      request.send(receiver);
-      // we don't test for the _error tag, because it's Opera-specific
-      expect(document.getElementById(receiver.id)).not.toBe(null);
-    });
-    waitsFor(function() {
-      return callback.calls.length > 0;
+    expect(document.getElementById(receiver.id)).toBe(null);
+    expect(document.getElementById(receiver.id + "_error")).toBe(null);
+    request.send(receiver);
+    // we don't test for the _error tag, because it's Opera-specific
+    expect(document.getElementById(receiver.id)).not.toBe(null);
+
+    await waitsFor(function() {
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
-    runs(function() {
-      expect(document.getElementById(receiver.id)).not.toBe(null);
-      request.cleanup();
-      expect(document.getElementById(receiver.id)).toBe(null);
-      expect(document.getElementById(receiver.id + "_error")).toBe(null);
-    });
+
+    expect(document.getElementById(receiver.id)).not.toBe(null);
+    request.cleanup();
+    expect(document.getElementById(receiver.id)).toBe(null);
+    expect(document.getElementById(receiver.id + "_error")).toBe(null);
   });
 
-  it("should call back without result on a 404 response", function() {
+  it("should call back without result on a 404 response", async function() {
     var url = Integration.API_URL + "/jsonp/404/" + receiver.number;
     var request = new ScriptRequest(url);
 
-    runs(function() {
-      request.send(receiver);
-    });
-    waitsFor(function() {
-      return callback.calls.length > 0;
+    request.send(receiver);
+
+    await waitsFor(function() {
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
-    runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback.calls[0].args[1]).toBe(undefined);
-      request.cleanup();
-    });
+
+    expect(callback.calls.count()).toEqual(1);
+    expect(callback.calls.first().args[1]).toBe(undefined);
+    request.cleanup();
   });
 
-  it("should call back without result on a 500 response", function() {
+  it("should call back without result on a 500 response", async function() {
     var url = Integration.API_URL + "/jsonp/500/" + receiver.number;
     var request = new ScriptRequest(url);
 
-    runs(function() {
-      request.send(receiver);
-    });
-    waitsFor(function() {
-      return callback.calls.length > 0;
+    request.send(receiver);
+
+    await waitsFor(function() {
+      return callback.calls.count() > 0;
     }, "endpoint to respond", 5000);
-    runs(function() {
-      expect(callback.calls.length).toEqual(1);
-      expect(callback.calls[0].args[1]).toBe(undefined);
-      request.cleanup();
-    });
+
+    expect(callback.calls.count()).toEqual(1);
+    expect(callback.calls.first().args[1]).toBe(undefined);
+    request.cleanup();
   });
 });

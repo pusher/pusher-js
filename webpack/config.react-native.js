@@ -2,12 +2,12 @@ var path = require('path');
 var NormalModuleReplacementPlugin = require('webpack')
   .NormalModuleReplacementPlugin;
 var version = require('../package').version;
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
 var configShared = require('./config.shared');
 var webpack = require('webpack');
 var buffer = require('buffer');
 
-module.exports = objectAssign({}, configShared, {
+module.exports = merge({}, configShared, {
   entry: {
     pusher: './src/core/pusher-with-encryption.js'
   },

@@ -1,9 +1,10 @@
-var TestEnv = require('testenv');
-var Mocks = require("mocks");
-var TransportConnection = require('core/transports/transport_connection').default;
-var Collections = require('core/utils/collections');
-var Timer = require('core/utils/timers').OneOffTimer;
-var Dependencies = require('dom/dependencies').Dependencies;
+const TestEnv = require('testenv');
+const Mocks = require('mocks');
+const TransportConnection = require('core/transports/transport_connection').default;
+const Collections = require('core/utils/collections');
+const OneOffTimer = require('core/utils/timers').OneOffTimer;
+const Dependencies = require('dom/dependencies').Dependencies;
+const waitsFor = require('../../../helpers/waitsFor');
 
 describe("TransportConnection", function() {
   function getTransport(hooks, key, options) {
@@ -36,7 +37,7 @@ describe("TransportConnection", function() {
     }
 
     timeline = Mocks.getTimeline();
-    timeline.generateUniqueID.andReturn(667);
+    timeline.generateUniqueID.and.returnValue(667);
 
     urls = {
       getInitial: function(key, params) {
@@ -47,8 +48,8 @@ describe("TransportConnection", function() {
     hooks = {
       urls: urls,
       supportsPing: false,
-      isInitialized: jasmine.createSpy().andReturn(true),
-      getSocket: jasmine.createSpy().andReturn(socket)
+      isInitialized: jasmine.createSpy().and.returnValue(true),
+      getSocket: jasmine.createSpy().and.returnValue(socket)
     };
 
     transport = getTransport(hooks, "foo", {
@@ -110,7 +111,7 @@ describe("TransportConnection", function() {
       beforeEach(function() {
         hooks = {
           supportsPing: false,
-          isInitialized: jasmine.createSpy().andReturn(true)
+          isInitialized: jasmine.createSpy().and.returnValue(true)
         };
         transport = getTransport(hooks, "foo", {
           timeline: timeline
@@ -134,8 +135,8 @@ describe("TransportConnection", function() {
       beforeEach(function() {
         hooks = {
           file: "test",
-          isInitialized: jasmine.createSpy().andReturn(false),
-          getSocket: jasmine.createSpy().andReturn(socket)
+          isInitialized: jasmine.createSpy().and.returnValue(false),
+          getSocket: jasmine.createSpy().and.returnValue(socket)
         };
         transport = getTransport(hooks, "foo", {
           timeline: timeline
@@ -154,7 +155,7 @@ describe("TransportConnection", function() {
 
         it("should load the resource file (useTLS=false)", function() {
           transport.initialize();
-          expect(Dependencies.load.calls.length).toEqual(1);
+          expect(Dependencies.load.calls.count()).toEqual(1);
           expect(Dependencies.load).toHaveBeenCalledWith(
             "test", { useTLS: false }, jasmine.any(Function)
           );
@@ -167,7 +168,7 @@ describe("TransportConnection", function() {
           });
 
           transport.initialize();
-          expect(Dependencies.load.calls.length).toEqual(1);
+          expect(Dependencies.load.calls.count()).toEqual(1);
           expect(Dependencies.load).toHaveBeenCalledWith(
             "test", { useTLS: true }, jasmine.any(Function)
           );
@@ -184,9 +185,9 @@ describe("TransportConnection", function() {
 
             transport.initialize();
             // after loading the resource, isInitialized will return true
-            hooks.isInitialized.andReturn(true);
+            hooks.isInitialized.and.returnValue(true);
             // fire the callback for the resource file load
-            Dependencies.load.calls[0].args[2](null, loadCallback);
+            Dependencies.load.calls.first().args[2](null, loadCallback);
           });
 
           it("should transition to 'initialized'", function() {
@@ -210,9 +211,9 @@ describe("TransportConnection", function() {
 
             transport.initialize();
             // after loading the resource, isInitialized will return true
-            hooks.isInitialized.andReturn(false);
+            hooks.isInitialized.and.returnValue(false);
             // fire the callback for the resource file load
-            Dependencies.load.calls[0].args[2](null, loadCallback);
+            Dependencies.load.calls.first().args[2](null, loadCallback);
           });
 
           it("should transition to 'closed'", function() {
@@ -271,7 +272,7 @@ describe("TransportConnection", function() {
       transport.initialize();
       transport.connect();
       expect(transport.state).toEqual("connecting");
-      expect(onConnecting.calls.length).toEqual(1);
+      expect(onConnecting.calls.count()).toEqual(1);
     });
 
     it("should transition to 'open' after connection is established", function() {
@@ -283,55 +284,53 @@ describe("TransportConnection", function() {
       socket.onopen();
 
       expect(transport.state).toEqual("open");
-      expect(onOpen.calls.length).toEqual(1);
+      expect(onOpen.calls.count()).toEqual(1);
     });
 
-    it("should emit the error raised by getSocket", function() {
-      hooks.getSocket.andThrow("test exception");
+    it("should emit the error raised by getSocket", async function() {
+      hooks.getSocket.and.throwError("test exception");
 
       var onError = jasmine.createSpy("onError");
       transport.bind("error", onError);
 
-      runs(function() {
-        transport.initialize();
-        transport.connect();
-      });
-      waitsFor(function () {
-        return onError.calls.length > 0;
+      transport.initialize();
+      transport.connect();
+
+      await waitsFor(function() {
+        return onError.calls.count();
       }, "error to be emitted", 50);
-      runs(function() {
-        expect(onError.calls.length).toEqual(1);
-        expect(onError).toHaveBeenCalledWith({
-          type: "WebSocketError",
-          error: "test exception"
-        });
+
+      expect(onError.calls.count()).toBeGreaterThan(0);
+      expect(onError.calls.count()).toEqual(1);
+      expect(onError).toHaveBeenCalledWith({
+        type: "WebSocketError",
+        error: new Error ("test exception")
       });
     });
 
-    it("should transition to 'closed' when getSocket raises an error", function() {
-      hooks.getSocket.andThrow("test exception");
+    it("should transition to 'closed' when getSocket raises an error", async function() {
+      hooks.getSocket.and.throwError("test exception");
 
       var onClosed = jasmine.createSpy("onClosed");
       transport.bind("closed", onClosed);
 
-      runs(function() {
-        transport.initialize();
-        transport.connect();
-      });
-      waitsFor(function () {
-        return onClosed.calls.length > 0;
+      transport.initialize();
+      transport.connect();
+
+      await waitsFor(function () {
+        return onClosed.calls.count();
       }, "transitioning to 'closed'", 50);
-      runs(function() {
-        expect(onClosed.calls.length).toEqual(1);
-        expect(transport.state).toEqual("closed");
-      });
+
+      expect(onClosed.calls.count()).toBeGreaterThan(0);
+      expect(onClosed.calls.count()).toEqual(1);
+      expect(transport.state).toEqual("closed");
     });
 
     it("should be idempotent", function() {
       transport.initialize();
 
       transport.connect();
-      expect(hooks.getSocket.calls.length).toEqual(1);
+      expect(hooks.getSocket.calls.count()).toEqual(1);
       expect(transport.state).toEqual("connecting");
 
       var onConnecting = jasmine.createSpy("onConnecting");
@@ -339,7 +338,7 @@ describe("TransportConnection", function() {
 
       transport.connect();
       expect(transport.state).toEqual("connecting");
-      expect(hooks.getSocket.calls.length).toEqual(1);
+      expect(hooks.getSocket.calls.count()).toEqual(1);
       expect(onConnecting).not.toHaveBeenCalled();
     });
   });
@@ -351,35 +350,29 @@ describe("TransportConnection", function() {
       socket.onopen();
     });
 
-    it("should defer sending data to the socket", function() {
-      var sendCalled = false;
-      socket.send = jasmine.createSpy("send").andCallFake(function() {
-        sendCalled = true;
-      });
+    it("should defer sending data to the socket", async function() {
+      socket.send.calls.reset();
 
-      runs(function() {
-        expect(transport.send("foobar")).toBe(true);
-        expect(socket.send).not.toHaveBeenCalled();
-      });
-      waitsFor(function () {
-        return sendCalled;
+      expect(socket.send).not.toHaveBeenCalled();
+
+      let sendCall = transport.send('foobar');
+
+      await waitsFor(function () {
+        return socket.send.calls.count();
       }, "socket.send to be called", 50);
-      runs(function() {
-        expect(socket.send).toHaveBeenCalledWith("foobar");
-      });
+
+      expect(sendCall).toBe(true);
+      expect(socket.send.calls.count()).toEqual(1);
+      expect(socket.send).toHaveBeenCalledWith("foobar");
     });
 
-    it("should not crash when socket is closed before next tick (will log to console only)", function() {
-      var timer;
-      runs(function() {
-        transport.send("foobar");
+    it("should not crash when socket is closed before next tick (will log to console only)", async function() {
+      transport.send("foobar");
+      transport.close();
+      socket.onclose({ wasClean: true });
+      var timer = new OneOffTimer(100, function() {});
 
-        transport.close();
-        socket.onclose({ wasClean: true });
-
-        timer = new Timer(100, function() {});
-      });
-      waitsFor(function () {
+      await waitsFor(function () {
         return !timer.isRunning();
       }, "timer to run", 500);
     });
@@ -393,8 +386,8 @@ describe("TransportConnection", function() {
       var hooks = {
         urls: urls,
         supportsPing: true,
-        isInitialized: jasmine.createSpy().andReturn(true),
-        getSocket: jasmine.createSpy().andReturn(socket)
+        isInitialized: jasmine.createSpy().and.returnValue(true),
+        getSocket: jasmine.createSpy().and.returnValue(socket)
       };
       var transport = getTransport(hooks, "foo", {
         timeline: timeline
@@ -414,8 +407,8 @@ describe("TransportConnection", function() {
       var hooks = {
         urls: urls,
         supportsPing: false,
-        isInitialized: jasmine.createSpy().andReturn(true),
-        getSocket: jasmine.createSpy().andReturn(socket)
+        isInitialized: jasmine.createSpy().and.returnValue(true),
+        getSocket: jasmine.createSpy().and.returnValue(socket)
       };
       var transport = getTransport(hooks, "foo", {
         timeline: timeline
@@ -443,7 +436,7 @@ describe("TransportConnection", function() {
       expect(onClosed).not.toHaveBeenCalled();
 
       socket.onclose({ wasClean: true });
-      expect(onClosed).toHaveBeenCalledWith({ wasClean: true });
+      expect(onClosed).toHaveBeenCalledWith({ wasClean: true, code: undefined, reason: undefined });
     });
 
     it("should not fail if not open", function() {
@@ -477,8 +470,8 @@ describe("TransportConnection", function() {
       hooks = {
         urls: urls,
         supportsPing: true,
-        isInitialized: jasmine.createSpy().andReturn(true),
-        getSocket: jasmine.createSpy().andReturn(socket)
+        isInitialized: jasmine.createSpy().and.returnValue(true),
+        getSocket: jasmine.createSpy().and.returnValue(socket)
       };
       transport = getTransport(hooks, "foo", {
         timeline: timeline
@@ -517,7 +510,7 @@ describe("TransportConnection", function() {
           test: "We're doomed"
         }
       });
-      expect(onError.calls.length).toEqual(1);
+      expect(onError.calls.count()).toEqual(1);
     });
 
     it("should emit a closed event with correct params", function() {
@@ -536,7 +529,7 @@ describe("TransportConnection", function() {
         reason: "testing",
         wasClean: true
       });
-      expect(onClosed.calls.length).toEqual(1);
+      expect(onClosed.calls.count()).toEqual(1);
       expect(transport.state).toEqual("closed");
     });
 
@@ -547,7 +540,7 @@ describe("TransportConnection", function() {
       socket.onclose();
 
       expect(onClosed).toHaveBeenCalled();
-      expect(onClosed.calls.length).toEqual(1);
+      expect(onClosed.calls.count()).toEqual(1);
     });
 
     it("should log an error as a string to timeline", function() {
@@ -563,22 +556,24 @@ describe("TransportConnection", function() {
     it("should log the new state to timeline", function() {
       transport.initialize();
 
-      expect(timeline.info.calls.length).toEqual(2);
+      expect(timeline.info.calls.count()).toEqual(2);
       expect(timeline.info).toHaveBeenCalledWith({
         cid: 667,
         transport: "test"
       });
       expect(timeline.info).toHaveBeenCalledWith({
         cid: 667,
-        state: "initialized"
+        state: "initialized",
+        params: undefined,
       });
 
       transport.connect();
 
-      expect(timeline.info.calls.length).toEqual(3);
+      expect(timeline.info.calls.count()).toEqual(3);
       expect(timeline.info).toHaveBeenCalledWith({
         cid: 667,
-        state: "connecting"
+        state: "connecting",
+        params: undefined,
       });
     });
   });

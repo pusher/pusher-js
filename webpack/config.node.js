@@ -1,9 +1,9 @@
 var path = require('path');
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
 var configShared = require('./config.shared');
 var webpack = require('webpack');
 
-module.exports = objectAssign({}, configShared, {
+module.exports = merge({}, configShared, {
   entry: {
     pusher: './src/core/pusher-with-encryption.js'
   },

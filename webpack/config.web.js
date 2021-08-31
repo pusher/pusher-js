@@ -1,7 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var NormalModuleReplacementPlugin = webpack.NormalModuleReplacementPlugin;
-var objectAssign = require('object-assign-deep');
+const { merge } = require('webpack-merge');
 var configShared = require('./config.shared');
 
 var filename = configShared.optimization.minimize
@@ -14,7 +14,7 @@ if (process.env.INCLUDE_TWEETNACL === 'true') {
   filename = filename.replace('pusher', 'pusher-with-encryption');
 }
 
-module.exports = objectAssign({}, configShared, {
+module.exports = merge({}, configShared, {
   entry: {
     pusher: entry
   },

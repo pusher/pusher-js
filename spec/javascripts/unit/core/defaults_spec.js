@@ -8,7 +8,7 @@ describe("Default", function() {
     function buildTest(ws) {
       it("should be supported when ws=" + ws, function() {
         if (ws) {
-          spyOn(WSTransport, "isSupported").andReturn(true);
+          spyOn(WSTransport, "isSupported").and.returnValue(true);
         }
         var strategy = Runtime.getDefaultStrategy(
           Config.getConfig({}),
