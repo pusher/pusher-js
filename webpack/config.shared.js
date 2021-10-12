@@ -24,12 +24,6 @@ module.exports = {
   module: {
     rules: [{ test: /\.ts$/, loader: 'ts-loader' }]
   },
-  node: {
-    // nacl uses Buffer on node.js but has a different code path for the browser.
-    // We don't need webpack to include a Buffer polyfill when seeing the usage,
-    // as it won't be used.
-    Buffer: false
-  },
   plugins: [
     new webpack.BannerPlugin({ banner: banner, raw: true }),
     new webpack.DefinePlugin({
