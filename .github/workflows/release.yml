@@ -1,0 +1,112 @@
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  check-release-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Prepare tag
+        id: prepare_tag
+        continue-on-error: true
+        run: |
+          export TAG=v$(jq -r '.version' package.json)
+          echo "TAG=$TAG" >> $GITHUB_ENV
+
+          export CHECK_TAG=$(git tag | grep $TAG)
+          if [[ $CHECK_TAG ]]; then
+            echo "Skipping because release tag already exists"
+            exit 1
+          fi
+      - name: Output
+        id: release_output
+        if: ${{ steps.prepare_tag.outcome == 'success' }}
+        run: |
+          echo "::set-output name=tag::${{ env.TAG }}"
+    outputs:
+      tag: ${{ steps.release_output.outputs.tag }}
+
+  create-github-release:
+    runs-on: ubuntu-latest
+    needs: check-release-tag
+    if: ${{ needs.check-release-tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Prepare tag
+        run: |
+          export TAG=v$(jq -r '.version' package.json)
+          echo "TAG=$TAG" >> $GITHUB_ENV
+      - name: Setup git
+        run: |
+          git config user.email "pusher-ci@pusher.com"
+          git config user.name "Pusher CI"
+      - name: Prepare description
+        run: |
+          csplit -s CHANGELOG.md "/##/" {1}
+          cat xx01 > CHANGELOG.tmp
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.TAG }}
+          release_name: ${{ env.TAG }}
+          body_path: CHANGELOG.tmp
+          draft: false
+          prerelease: false
+
+  publish-to-npm:
+    runs-on: ubuntu-latest
+    needs: create-github-release
+    steps:
+      - uses: actions/checkout@v2
+      - uses: flood-io/is-published-on-npm@8478347e2650eb228d303975415458183d0a37e4
+        id: is-published
+      - run: echo "This version is already published on NPM"
+        if: ${{ steps.is-published.outputs.published == 'true' }}
+      - uses: actions/setup-node@v2
+        if: ${{ steps.is-published.outputs.published == 'false' }}
+        with:
+          node-version: '14'
+          registry-url: https://registry.npmjs.org/
+      - run: npm install
+        if: ${{ steps.is-published.outputs.published == 'false' }}
+      - run: npm publish --access public
+        if: ${{ steps.is-published.outputs.published == 'false' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  upload-to-s3:
+    runs-on: ubuntu-latest
+    needs: create-github-release
+    steps:
+      - uses: actions/checkout@v2
+      - name: Upload to S3
+        run: |
+          VERSION=$(jq -r '.version' package.json | cut -d'.' -f1,2,3)
+          VERSION_MIN=$(jq -r '.version' package.json | cut -d'.' -f1,2)
+
+          egrep -o '^[0-9]+\.[0-9]+\.[0-9]+' <<< $VERSION
+
+          aws s3 sync dist/web/ s3://${BUCKET_NAME}/latest/ --acl public-read --cache-control max-age=$MAX_AGE
+          aws s3 sync dist/worker/ s3://${BUCKET_NAME}/latest/ --acl public-read --cache-control max-age=$MAX_AGE
+
+          aws s3 sync dist/web/ s3://${BUCKET_NAME}/${VERSION}/ --acl public-read --cache-control max-age=$MAX_AGE
+          aws s3 sync dist/worker/ s3://${BUCKET_NAME}/${VERSION}/ --acl public-read --cache-control max-age=$MAX_AGE
+
+          aws s3 sync dist/web/ s3://${BUCKET_NAME}/${VERSION_MIN}/ --acl public-read --cache-control max-age=$MAX_AGE
+          aws s3 sync dist/worker/ s3://${BUCKET_NAME}/${VERSION_MIN}/ --acl public-read --cache-control max-age=$MAX_AGE
+
+          aws cloudfront create-invalidation --distribution-id ${CLOUDFRONT_DISTRIBUTION_ID} --paths "/latest/*" "/${VERSION}/*" "/${VERSION_MIN}/*"
+        env:
+          MAX_AGE: 2592000
+          BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PUSHERINOS_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PUSHERINOS_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-west-2
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
