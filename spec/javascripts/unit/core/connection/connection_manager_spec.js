@@ -341,6 +341,12 @@ describe("ConnectionManager", function() {
         expect(connection.close).toHaveBeenCalled();
       });
 
+      it("should pass intentional", function() {
+        manager.disconnect(true);
+
+        expect(connection.close).toHaveBeenCalledWith(true);
+      });
+
       it("should clear the activity check", function() {
         manager.disconnect();
 

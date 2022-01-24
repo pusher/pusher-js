@@ -88,6 +88,23 @@ describe("AssistantToTheTransportManager", function() {
     });
   });
 
+  describe("after an opened connection closed intentionally", function() {
+    var connection;
+
+    beforeEach(function() {
+      connection = assistant.createConnection("x", 1, "a", {});
+      Util.now.and.returnValue(1);
+      connection.emit("open");
+      Util.now.and.returnValue(100001);
+      connection.closedIntentionally = true
+      connection.emit("closed", { wasClean: true, code: 1002 });
+    });
+
+    it("should not report its death to the manager", function() {
+      expect(transportManager.reportDeath).not.toHaveBeenCalled();
+    });
+  });
+
   describe("after an opened connection closed with a unsupported error (code 1003)", function() {
     var connection;
 
