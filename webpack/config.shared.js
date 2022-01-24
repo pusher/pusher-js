@@ -16,13 +16,21 @@ module.exports = {
   entry: {
     pusher: './src/core/pusher.js'
   },
+  devtool: 'source-map',
   resolve: {
     extensions: ['.webpack.js', '.web.js', '.ts', '.js'],
     // add runtimes for easier importing of isomorphic runtime modules
     modules: ['src', 'src/runtimes', 'node_modules']
   },
   module: {
-    rules: [{ test: /\.ts$/, loader: 'ts-loader' }]
+    rules: [
+      { test: /\.ts$/, loader: 'ts-loader' },
+      {
+        test: /\.js$/,
+        enforce: 'pre',
+        use: ["source-map-loader"],
+      }
+    ]
   },
   node: {
     // nacl uses Buffer on node.js but has a different code path for the browser.
