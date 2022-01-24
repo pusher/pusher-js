@@ -120,7 +120,7 @@ export default class TransportConnection extends EventsDispatcher {
    * @return {Boolean} true if there was a connection to close
    */
   close(intentional = false): boolean {
-    this.closedIntentionally = intentional
+    this.closedIntentionally = intentional;
     if (this.socket) {
       this.socket.close();
       return true;
