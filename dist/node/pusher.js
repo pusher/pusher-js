@@ -369,12 +369,6 @@ module.exports = Base;
 
 /***/ }),
 /* 3 */
-/***/ (function(module, exports) {
-
-module.exports = require("crypto");
-
-/***/ }),
-/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -424,10 +418,16 @@ module.exports = Driver;
 
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = require("stream");
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+module.exports = require("crypto");
 
 /***/ }),
 /* 6 */
@@ -437,7 +437,10 @@ module.exports = require("url");
 
 /***/ }),
 /* 7 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
 
 var Event = function(eventType, options) {
   this.type = eventType;
@@ -747,7 +750,7 @@ exports.maxDecodedLength = function (length) {
 exports.decodedLength = function (s) {
     return stdCoder.decodedLength(s);
 };
-//# sourceMappingURL=base64.js.map
+
 
 /***/ }),
 /* 9 */
@@ -937,9 +940,12 @@ module.exports = HttpParser;
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream      = __webpack_require__(5).Stream,
+"use strict";
+
+
+var Stream      = __webpack_require__(4).Stream,
     util        = __webpack_require__(0),
-    driver      = __webpack_require__(4),
+    driver      = __webpack_require__(3),
     EventTarget = __webpack_require__(16),
     Event       = __webpack_require__(7);
 
@@ -1002,6 +1008,8 @@ API.OPEN       = 1;
 API.CLOSING    = 2;
 API.CLOSED     = 3;
 
+API.CLOSE_TIMEOUT = 30000;
+
 var instance = {
   write: function(data) {
     return this.send(data);
@@ -1031,9 +1039,23 @@ var instance = {
     return this._driver.ping(message, callback);
   },
 
-  close: function() {
+  close: function(code, reason) {
+    if (code === undefined) code = 1000;
+    if (reason === undefined) reason = '';
+
+    if (code !== 1000 && (code < 3000 || code > 4999))
+      throw new Error("Failed to execute 'close' on WebSocket: " +
+                      "The code must be either 1000, or between 3000 and 4999. " +
+                      code + " is neither.");
+
     if (this.readyState !== API.CLOSED) this.readyState = API.CLOSING;
-    this._driver.close();
+    var self = this;
+
+    this._closeTimer = setTimeout(function() {
+      self._beginClose('', 1006);
+    }, API.CLOSE_TIMEOUT);
+
+    this._driver.close(reason, code);
   },
 
   _configureStream: function() {
@@ -1052,7 +1074,7 @@ var instance = {
     });
   },
 
- _open: function() {
+  _open: function() {
     if (this.readyState !== API.CONNECTING) return;
 
     this.readyState = API.OPEN;
@@ -1084,18 +1106,19 @@ var instance = {
   _beginClose: function(reason, code) {
     if (this.readyState === API.CLOSED) return;
     this.readyState = API.CLOSING;
+    this._closeParams = [reason, code];
 
     if (this._stream) {
-      this._stream.end();
+      this._stream.destroy();
       if (!this._stream.readable) this._finalizeClose();
     }
-    this._closeParams = [reason, code];
   },
 
   _finalizeClose: function() {
     if (this.readyState === API.CLOSED) return;
     this.readyState = API.CLOSED;
 
+    if (this._closeTimer) clearTimeout(this._closeTimer);
     if (this._pingTimer) clearInterval(this._pingTimer);
     if (this._stream) this._stream.end();
 
@@ -1125,7 +1148,7 @@ module.exports = API;
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    crypto     = __webpack_require__(3),
+    crypto     = __webpack_require__(5),
     util       = __webpack_require__(0),
     Extensions = __webpack_require__(29),
     Base       = __webpack_require__(2),
@@ -1858,6 +1881,9 @@ module.exports = Draft75;
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var Event = __webpack_require__(7);
 
 var EventTarget = {
@@ -2041,20 +2067,23 @@ function decode(arr) {
     return chars.join("");
 }
 exports.decode = decode;
-//# sourceMappingURL=utf8.js.map
+
 
 /***/ }),
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
 // API references:
 //
-// * http://dev.w3.org/html5/websockets/
-// * http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-eventtarget
-// * http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#interface-event
+// * https://html.spec.whatwg.org/multipage/comms.html#network
+// * https://dom.spec.whatwg.org/#interface-eventtarget
+// * https://dom.spec.whatwg.org/#interface-event
+
+
 
 var util   = __webpack_require__(0),
-    driver = __webpack_require__(4),
+    driver = __webpack_require__(3),
     API    = __webpack_require__(11);
 
 var WebSocket = function(request, socket, body, protocols, options) {
@@ -5103,7 +5132,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (true) {
     // Node.js.
-    crypto = __webpack_require__(3);
+    crypto = __webpack_require__(5);
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -5186,7 +5215,7 @@ driver having these two methods.
 **/
 
 
-var Stream = __webpack_require__(5).Stream,
+var Stream = __webpack_require__(4).Stream,
     util   = __webpack_require__(0);
 
 
@@ -5373,7 +5402,7 @@ module.exports = StreamReader;
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    crypto     = __webpack_require__(3),
+    crypto     = __webpack_require__(5),
     url        = __webpack_require__(6),
     util       = __webpack_require__(0),
     HttpParser = __webpack_require__(10),
@@ -6500,7 +6529,7 @@ module.exports = Message;
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    Stream     = __webpack_require__(5).Stream,
+    Stream     = __webpack_require__(4).Stream,
     url        = __webpack_require__(6),
     util       = __webpack_require__(0),
     Base       = __webpack_require__(2),
@@ -6727,7 +6756,7 @@ module.exports = Server;
 var Buffer  = __webpack_require__(1).Buffer,
     Base    = __webpack_require__(2),
     Draft75 = __webpack_require__(15),
-    crypto  = __webpack_require__(3),
+    crypto  = __webpack_require__(5),
     util    = __webpack_require__(0);
 
 
@@ -6845,12 +6874,14 @@ module.exports = Draft76;
 /* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+
 var util   = __webpack_require__(0),
     net    = __webpack_require__(40),
     tls    = __webpack_require__(41),
-    crypto = __webpack_require__(3),
     url    = __webpack_require__(6),
-    driver = __webpack_require__(4),
+    driver = __webpack_require__(3),
     API    = __webpack_require__(11),
     Event  = __webpack_require__(7);
 
@@ -6870,20 +6901,25 @@ var Client = function(_url, protocols, options) {
     });
   }, this);
 
-  var proxy     = options.proxy || {},
-      endpoint  = url.parse(proxy.origin || this.url),
-      port      = endpoint.port || DEFAULT_PORTS[endpoint.protocol],
-      secure    = SECURE_PROTOCOLS.indexOf(endpoint.protocol) >= 0,
-      onConnect = function() { self._onConnect() },
-      originTLS = options.tls || {},
-      socketTLS = proxy.origin ? (proxy.tls || {}) : originTLS,
-      self      = this;
+  var proxy      = options.proxy || {},
+      endpoint   = url.parse(proxy.origin || this.url),
+      port       = endpoint.port || DEFAULT_PORTS[endpoint.protocol],
+      secure     = SECURE_PROTOCOLS.indexOf(endpoint.protocol) >= 0,
+      onConnect  = function() { self._onConnect() },
+      netOptions = options.net || {},
+      originTLS  = options.tls || {},
+      socketTLS  = proxy.origin ? (proxy.tls || {}) : originTLS,
+      self       = this;
+
+  netOptions.host = socketTLS.host = endpoint.hostname;
+  netOptions.port = socketTLS.port = port;
 
   originTLS.ca = originTLS.ca || options.ca;
+  socketTLS.servername = socketTLS.servername || endpoint.hostname;
 
   this._stream = secure
-               ? tls.connect(port, endpoint.hostname, socketTLS, onConnect)
-               : net.connect(port, endpoint.hostname, onConnect);
+               ? tls.connect(socketTLS, onConnect)
+               : net.connect(netOptions, onConnect);
 
   if (proxy.origin) this._configureProxy(proxy, originTLS);
 
@@ -6947,9 +6983,12 @@ module.exports = require("tls");
 /* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stream      = __webpack_require__(5).Stream,
+"use strict";
+
+
+var Stream      = __webpack_require__(4).Stream,
     util        = __webpack_require__(0),
-    driver      = __webpack_require__(4),
+    driver      = __webpack_require__(3),
     Headers     = __webpack_require__(9),
     API         = __webpack_require__(11),
     EventTarget = __webpack_require__(16),
@@ -7109,6 +7148,7 @@ module.exports = require("https");
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
 // CONCATENATED MODULE: ./src/core/base64.ts
@@ -10778,3 +10818,4 @@ var pusher_with_encryption_PusherWithEncryption = (function (_super) {
 
 /***/ })
 /******/ ]);
+//# sourceMappingURL=pusher.js.map
