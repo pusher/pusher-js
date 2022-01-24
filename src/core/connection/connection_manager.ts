@@ -143,7 +143,7 @@ export default class ConnectionManager extends EventsDispatcher {
 
   /** Closes the connection. */
   disconnect() {
-    this.disconnectInternally();
+    this.disconnectInternally(true);
     this.updateState('disconnected');
   }
 
@@ -178,13 +178,13 @@ export default class ConnectionManager extends EventsDispatcher {
     }
   }
 
-  private disconnectInternally() {
+  private disconnectInternally(intentional = false) {
     this.abortConnecting();
     this.clearRetryTimer();
     this.clearUnavailableTimer();
     if (this.connection) {
       var connection = this.abandonConnection();
-      connection.close();
+      connection.close(intentional);
     }
   }
 

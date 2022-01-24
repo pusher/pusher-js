@@ -73,15 +73,18 @@ export default class AssistantToTheTransportManager {
     var onClosed = closeEvent => {
       connection.unbind('closed', onClosed);
 
-      if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-        // we don't want to use transports not obeying the protocol
-        this.manager.reportDeath();
-      } else if (!closeEvent.wasClean && openTimestamp) {
-        // report deaths only for short-living transport
-        var lifespan = Util.now() - openTimestamp;
-        if (lifespan < 2 * this.maxPingDelay) {
+      // Don't report death if the transport was close intentionally 
+      if (!connection.closedIntentionally) {
+        if (closeEvent.code === 1002 || closeEvent.code === 1003) {
+          // we don't want to use transports not obeying the protocol
           this.manager.reportDeath();
-          this.pingDelay = Math.max(lifespan / 2, this.minPingDelay);
+        } else if (!closeEvent.wasClean && openTimestamp) {
+          // report deaths only for short-living transport
+          var lifespan = Util.now() - openTimestamp;
+          if (lifespan < 2 * this.maxPingDelay) {
+            this.manager.reportDeath();
+            this.pingDelay = Math.max(lifespan / 2, this.minPingDelay);
+          }
         }
       }
     };

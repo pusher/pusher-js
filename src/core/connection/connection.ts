@@ -80,8 +80,8 @@ export default class Connection extends EventsDispatcher implements Socket {
   }
 
   /** Closes the connection. */
-  close() {
-    this.transport.close();
+  close(intentional = false) {
+    this.transport.close(intentional);
   }
 
   private bindListeners() {

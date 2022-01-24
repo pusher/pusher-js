@@ -49,6 +49,7 @@ export default class TransportConnection extends EventsDispatcher {
   socket: Socket;
   beforeOpen: Function;
   initialize: Function;
+  closedIntentionally: boolean;
 
   constructor(
     hooks: TransportHooks,
@@ -118,7 +119,8 @@ export default class TransportConnection extends EventsDispatcher {
    *
    * @return {Boolean} true if there was a connection to close
    */
-  close(): boolean {
+  close(intentional = false): boolean {
+    this.closedIntentionally = intentional
     if (this.socket) {
       this.socket.close();
       return true;

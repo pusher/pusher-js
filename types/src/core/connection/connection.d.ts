@@ -10,7 +10,7 @@ export default class Connection extends EventsDispatcher implements Socket {
     send(data: any): boolean;
     send_event(name: string, data: any, channel?: string): boolean;
     ping(): void;
-    close(): void;
+    close(intentional?: boolean): void;
     private bindListeners;
     private handleCloseEvent;
 }

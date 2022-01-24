@@ -16,11 +16,12 @@ export default class TransportConnection extends EventsDispatcher {
     socket: Socket;
     beforeOpen: Function;
     initialize: Function;
+    closedIntentionally: boolean;
     constructor(hooks: TransportHooks, name: string, priority: number, key: string, options: TransportConnectionOptions);
     handlesActivityChecks(): boolean;
     supportsPing(): boolean;
     connect(): boolean;
-    close(): boolean;
+    close(intentional?: boolean): boolean;
     send(data: any): boolean;
     ping(): void;
     private onOpen;

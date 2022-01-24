@@ -2960,6 +2960,7 @@ module.exports = __webpack_require__(5).default;
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
 // CONCATENATED MODULE: ./src/runtimes/web/dom/script_receiver_factory.ts
@@ -4020,7 +4021,9 @@ var transport_connection_TransportConnection = (function (_super) {
         this.changeState('connecting');
         return true;
     };
-    TransportConnection.prototype.close = function () {
+    TransportConnection.prototype.close = function (intentional) {
+        if (intentional === void 0) { intentional = false; }
+        this.closedIntentionally = intentional;
         if (this.socket) {
             this.socket.close();
             return true;
@@ -4305,14 +4308,16 @@ var assistant_to_the_transport_manager_AssistantToTheTransportManager = (functio
         };
         var onClosed = function (closeEvent) {
             connection.unbind('closed', onClosed);
-            if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-                _this.manager.reportDeath();
-            }
-            else if (!closeEvent.wasClean && openTimestamp) {
-                var lifespan = util.now() - openTimestamp;
-                if (lifespan < 2 * _this.maxPingDelay) {
+            if (!connection.closedIntentionally) {
+                if (closeEvent.code === 1002 || closeEvent.code === 1003) {
                     _this.manager.reportDeath();
-                    _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);
+                }
+                else if (!closeEvent.wasClean && openTimestamp) {
+                    var lifespan = util.now() - openTimestamp;
+                    if (lifespan < 2 * _this.maxPingDelay) {
+                        _this.manager.reportDeath();
+                        _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);
+                    }
                 }
             }
         };
@@ -4469,8 +4474,9 @@ var connection_Connection = (function (_super) {
             this.send_event('pusher:ping', {});
         }
     };
-    Connection.prototype.close = function () {
-        this.transport.close();
+    Connection.prototype.close = function (intentional) {
+        if (intentional === void 0) { intentional = false; }
+        this.transport.close(intentional);
     };
     Connection.prototype.bindListeners = function () {
         var _this = this;
@@ -5140,7 +5146,7 @@ var connection_manager_ConnectionManager = (function (_super) {
         }
     };
     ConnectionManager.prototype.disconnect = function () {
-        this.disconnectInternally();
+        this.disconnectInternally(true);
         this.updateState('disconnected');
     };
     ConnectionManager.prototype.isUsingTLS = function () {
@@ -5174,13 +5180,14 @@ var connection_manager_ConnectionManager = (function (_super) {
             this.runner = null;
         }
     };
-    ConnectionManager.prototype.disconnectInternally = function () {
+    ConnectionManager.prototype.disconnectInternally = function (intentional) {
+        if (intentional === void 0) { intentional = false; }
         this.abortConnecting();
         this.clearRetryTimer();
         this.clearUnavailableTimer();
         if (this.connection) {
             var connection = this.abandonConnection();
-            connection.close();
+            connection.close(intentional);
         }
     };
     ConnectionManager.prototype.updateStrategy = function () {
