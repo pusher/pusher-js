@@ -3,12 +3,6 @@ SHELL := /bin/bash
 .PHONY: build_all
 build_all: web react-native node worker
 
-# sockjs:
-# 	pushd src/runtimes/web/dom/sockjs && \
-# 	npm install &&  \
-# 	make build &&  \
-# 	popd
-
 .PHONY: json2
 json2:
 	cp src/runtimes/web/dom/json2.js dist/web
