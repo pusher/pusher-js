@@ -1,6 +1,6 @@
 on:
   push:
-    branches: [ master ]
+    branches: [ master, test-release ]
 
 jobs:
   check-release-tag:
@@ -20,7 +20,6 @@ jobs:
           export CHECK_TAG=$(git tag | grep $TAG)
           if [[ $CHECK_TAG ]]; then
             echo "Skipping because release tag already exists"
-            exit 1
           fi
       - name: Output
         id: release_output
@@ -61,7 +60,7 @@ jobs:
 
   publish-to-npm:
     runs-on: ubuntu-latest
-    needs: create-github-release
+    needs: check-release-tag
     steps:
       - uses: actions/checkout@v2
       - uses: flood-io/is-published-on-npm@8478347e2650eb228d303975415458183d0a37e4
@@ -69,14 +68,14 @@ jobs:
       - run: echo "This version is already published on NPM"
         if: ${{ steps.is-published.outputs.published == 'true' }}
       - uses: actions/setup-node@v2
-        if: ${{ steps.is-published.outputs.published == 'false' }}
+        if: ${{ steps.is-published.outputs.published == 'true' }}
         with:
           node-version: '14'
           registry-url: https://registry.npmjs.org/
       - run: npm install
-        if: ${{ steps.is-published.outputs.published == 'false' }}
+        if: ${{ steps.is-published.outputs.published == 'true' }}
       - run: npm publish --access public
-        if: ${{ steps.is-published.outputs.published == 'false' }}
+        if: ${{ steps.is-published.outputs.published == 'true' }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
