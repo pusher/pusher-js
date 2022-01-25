@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.4
+
+* [FIXED] References to nonexistent source map #570 
+
 ## 7.0.3 (2021-01-25)
 
 [UPDATED] Bumped version of faye-websocket (used only by the node runtime) from
