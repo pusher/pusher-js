@@ -23,7 +23,8 @@ var config = merge(configShared, {
   output: {
     library: 'Pusher',
     path: path.join(__dirname, '../dist/worker'),
-    filename: filename
+    filename: filename,
+    libraryTarget: 'umd'
   },
   resolve: {
     // in order to import the appropriate runtime.ts
