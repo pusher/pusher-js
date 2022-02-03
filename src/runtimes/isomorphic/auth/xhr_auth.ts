@@ -5,24 +5,24 @@ import Runtime from 'runtime';
 import { AuthTransport } from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
 import UrlStore from 'core/utils/url_store';
-import { AuthorizerCallback } from 'core/auth/options';
+import { AuthorizerCallback, InternalAuthOptions } from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
 var ajax: AuthTransport = function(
   context: AbstractRuntime,
-  socketId: string,
+  query: string,
+  options: InternalAuthOptions,
   callback: AuthorizerCallback
 ) {
-  var self = this,
-    xhr;
+  var xhr;
 
   xhr = Runtime.createXHR();
-  xhr.open('POST', self.options.authEndpoint, true);
+  xhr.open('POST', options.endpoint, true);
 
   // add request headers
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  for (var headerName in this.authOptions.headers) {
-    xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
+  for (var headerName in options.headers) {
+    xhr.setRequestHeader(headerName, options.headers[headerName]);
   }
 
   xhr.onreadystatechange = function() {
@@ -55,7 +55,7 @@ var ajax: AuthTransport = function(
           new HTTPAuthError(
             xhr.status,
             'Unable to retrieve auth string from auth endpoint - ' +
-              `received status: ${xhr.status} from ${self.options.authEndpoint}. ` +
+              `received status: ${xhr.status} from ${options.endpoint}. ` +
               `Clients must be authenticated to join private or presence channels. ${suffix}`
           ),
           { auth: '' }
@@ -64,7 +64,7 @@ var ajax: AuthTransport = function(
     }
   };
 
-  xhr.send(this.composeQuery(socketId));
+  xhr.send(query);
   return xhr;
 };
 

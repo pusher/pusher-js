@@ -1,6 +1,9 @@
 import { Options } from './options';
 import Defaults from './defaults';
-import { AuthOptions, AuthorizerGenerator } from './auth/options';
+import { AuthHandler, NewAuthOptions } from './auth/options';
+import { UserAuthorizer } from './auth/user_authorizer';
+import { ChannelAuthorizer } from './auth/channel_authorizer';
+import { ChannelAuthorizerProxy } from './auth/deprecated_channel_authorizer';
 import Runtime from 'runtime';
 import * as nacl from 'tweetnacl';
 import Logger from './logger';
@@ -17,8 +20,6 @@ export interface Config {
   // these are all 'required' config parameters, it's not necessary for the user
   // to set them, but they have configured defaults.
   activityTimeout: number;
-  authEndpoint: string;
-  authTransport: AuthTransport;
   enableStats: boolean;
   httpHost: string;
   httpPath: string;
@@ -32,12 +33,12 @@ export interface Config {
   wsPath: string;
   wsPort: number;
   wssPort: number;
+  userAuthorizer: AuthHandler;
+  channelAuthorizer: AuthHandler;
 
   // these are all optional parameters or overrrides. The customer can set these
   // but it's not strictly necessary
   forceTLS?: boolean;
-  auth?: AuthOptions;
-  authorizer?: AuthorizerGenerator;
   cluster?: string;
   disabledTransports?: Transport[];
   enabledTransports?: Transport[];
@@ -46,11 +47,11 @@ export interface Config {
   timelineParams?: any;
 }
 
-export function getConfig(opts: Options): Config {
+
+// getConfig mainly sets the defaults for the options that are not provided
+export function getConfig(opts: Options, pusher): Config {
   let config: Config = {
     activityTimeout: opts.activityTimeout || Defaults.activityTimeout,
-    authEndpoint: opts.authEndpoint || Defaults.authEndpoint,
-    authTransport: opts.authTransport || Defaults.authTransport,
     cluster: opts.cluster || Defaults.cluster,
     httpPath: opts.httpPath || Defaults.httpPath,
     httpPort: opts.httpPort || Defaults.httpPort,
@@ -65,11 +66,12 @@ export function getConfig(opts: Options): Config {
     enableStats: getEnableStatsConfig(opts),
     httpHost: getHttpHost(opts),
     useTLS: shouldUseTLS(opts),
-    wsHost: getWebsocketHost(opts)
+    wsHost: getWebsocketHost(opts),
+
+    userAuthorizer: buildUserAuthorizer(opts),
+    channelAuthorizer: buildChannelAuthorizer(opts, pusher),
   };
 
-  if ('auth' in opts) config.auth = opts.auth;
-  if ('authorizer' in opts) config.authorizer = opts.authorizer;
   if ('disabledTransports' in opts)
     config.disabledTransports = opts.disabledTransports;
   if ('enabledTransports' in opts)
@@ -128,4 +130,40 @@ function getEnableStatsConfig(opts: Options): boolean {
     return !opts.disableStats;
   }
   return false;
+}
+
+function buildUserAuthorizer(opts: Options) : AuthHandler {
+  const userAuth = opts.userAuth || Defaults.userAuth;
+  if ('customHandler' in userAuth) {
+    return userAuth['customHandler'];
+  }
+
+  return UserAuthorizer(userAuth);
+}
+
+function buildChannelAuth(opts: Options, pusher) {
+  var channelAuth : NewAuthOptions;
+  if ('channelAuth' in opts){
+    channelAuth = opts.channelAuth;
+  } else {
+    channelAuth = {
+      transport: opts.authTransport || Defaults.authTransport,
+      endpoint: opts.authEndpoint || Defaults.authEndpoint,
+    };
+    if ('auth' in opts) {
+      if ('params' in opts.auth) channelAuth.params = opts.auth.params;
+      if ('headers' in opts.auth) channelAuth.headers = opts.auth.headers;
+    }
+    if ('authorizer' in opts) channelAuth.customHandler = ChannelAuthorizerProxy(pusher, channelAuth, opts.authorizer);
+  }
+  return channelAuth;
+}
+
+function buildChannelAuthorizer(opts: Options, pusher) : AuthHandler {
+  const channelAuth = buildChannelAuth(opts, pusher);
+  if ('customHandler' in channelAuth) {
+    return channelAuth['customHandler'];
+  }
+
+  return ChannelAuthorizer(channelAuth);
 }

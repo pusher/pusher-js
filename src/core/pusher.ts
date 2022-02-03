@@ -20,6 +20,9 @@ import UrlStore from 'core/utils/url_store';
 import { Options } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
+// import hmacsha1 from 'hmacsha1';
+import CryptoJS from 'crypto-js';
+import { AuthorizerCallback, AuthData } from './auth/options';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -77,8 +80,8 @@ export default class Pusher {
     }
 
     this.key = app_key;
-    this.config = getConfig(options);
-
+    this.config = getConfig(options, this);
+  
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
@@ -246,6 +249,45 @@ export default class Pusher {
 
   shouldUseTLS(): boolean {
     return this.config.useTLS;
+  }
+
+
+  dummyAuthCall(callback : AuthorizerCallback) {
+    const secret = "835b99135d36e956982e"
+    const user_json = JSON.stringify({
+      id: "123",
+      name: "test",
+    });
+    const payload = `${this.connection.socket_id}::user::${user_json}`;
+    const signature = CryptoJS.HmacSHA256(payload, secret);
+    console.log('payload', payload);
+    console.log('signature', signature);
+    console.log('signature as string', `${signature}`);
+
+    const key = this.key;
+    const authstring = `${key}:${signature}`;
+    console.log('authstring', authstring);
+    return [authstring, user_json];
+  }
+
+  signin() {
+    const onAuthorize : AuthorizerCallback = (err, authData : AuthData) => {
+      if (err) {
+        console.error('Error during signin', err);
+        return;
+      }
+
+      // Send pusher:signin event
+      this.send_event('pusher:signin', { auth: authData.auth, user: authData.user_data });
+
+      // Later when we get pusher:singin-success event, the user will be marked as signed in
+    }
+
+    // Call the user auth endpoint
+    this.dummyAuthCall(onAuthorize);
+    this.config.userAuthorizer({
+      socketId: this.connection.socket_id,
+    }, onAuthorize)
   }
 }
 

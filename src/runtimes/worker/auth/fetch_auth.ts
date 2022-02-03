@@ -1,22 +1,23 @@
 import AbstractRuntime from 'runtimes/interface';
 import { AuthTransport } from 'core/auth/auth_transports';
-import { AuthorizerCallback, AuthData } from 'core/auth/options';
+import { AuthorizerCallback, AuthData, InternalAuthOptions } from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
 var fetchAuth: AuthTransport = function(
   context: AbstractRuntime,
-  socketId: string,
+  query: string,
+  options: InternalAuthOptions,
   callback: AuthorizerCallback
 ) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
-  for (var headerName in this.authOptions.headers) {
-    headers.set(headerName, this.authOptions.headers[headerName]);
+  for (var headerName in options.headers) {
+    headers.set(headerName, options.headers[headerName]);
   }
 
-  var body = this.composeQuery(socketId);
-  var request = new Request(this.options.authEndpoint, {
+  var body = query;
+  var request = new Request(options.endpoint, {
     headers,
     body,
     credentials: 'same-origin',

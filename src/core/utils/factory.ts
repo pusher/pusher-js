@@ -6,8 +6,7 @@ import Handshake from '../connection/handshake';
 import TransportConnection from '../transports/transport_connection';
 import SocketHooks from '../http/socket_hooks';
 import HTTPSocket from '../http/http_socket';
-import { AuthorizerOptions, Authorizer } from '../auth/options';
-import PusherAuthorizer from '../auth/pusher_authorizer';
+
 import Timeline from '../timeline/timeline';
 import {
   default as TimelineSender,
@@ -24,6 +23,7 @@ import Channels from '../channels/channels';
 import Pusher from '../pusher';
 import { Config } from '../config';
 import * as nacl from 'tweetnacl';
+
 
 var Factory = {
   createChannels(): Channels {
@@ -59,14 +59,6 @@ var Factory = {
 
   createTimelineSender(timeline: Timeline, options: TimelineSenderOptions) {
     return new TimelineSender(timeline, options);
-  },
-
-  createAuthorizer(channel: Channel, options: AuthorizerOptions): Authorizer {
-    if (options.authorizer) {
-      return options.authorizer(channel, options);
-    }
-
-    return new PusherAuthorizer(channel, options);
   },
 
   createHandshake(

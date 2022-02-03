@@ -1,3 +1,4 @@
+import { NewAuthOptions } from './auth/options';
 import { AuthTransport } from './config';
 
 export interface DefaultConfig {
@@ -17,6 +18,7 @@ export interface DefaultConfig {
   pongTimeout: number;
   unavailableTimeout: number;
   cluster: string;
+  userAuth: NewAuthOptions,
 
   cdn_http?: string;
   cdn_https?: string;
@@ -44,6 +46,10 @@ var Defaults: DefaultConfig = {
   pongTimeout: 30000,
   unavailableTimeout: 10000,
   cluster: 'mt1',
+  userAuth: {
+    endpoint: '/pusher/user-auth',
+    transport: 'ajax',
+  },
 
   // CDN configuration
   cdn_http: CDN_HTTP,

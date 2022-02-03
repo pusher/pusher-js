@@ -3,14 +3,15 @@ import Logger from 'core/logger';
 import JSONPRequest from '../dom/jsonp_request';
 import { ScriptReceivers } from '../dom/script_receiver_factory';
 import { AuthTransport } from 'core/auth/auth_transports';
-import { AuthorizerCallback } from 'core/auth/options';
+import { AuthorizerCallback, InternalAuthOptions} from 'core/auth/options';
 
 var jsonp: AuthTransport = function(
   context: Browser,
-  socketId: string,
+  query: string,
+  options: InternalAuthOptions,
   callback: AuthorizerCallback
 ) {
-  if (this.authOptions.headers !== undefined) {
+  if (options.headers !== undefined) {
     Logger.warn(
       'To send headers with the auth request, you must use AJAX, rather than JSONP.'
     );
@@ -28,11 +29,11 @@ var jsonp: AuthTransport = function(
 
   var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
   script.src =
-    this.options.authEndpoint +
+    options.endpoint +
     '?callback=' +
     encodeURIComponent(callback_name) +
     '&' +
-    this.composeQuery(socketId);
+    query;
 
   var head =
     document.getElementsByTagName('head')[0] || document.documentElement;
