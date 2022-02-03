@@ -18,7 +18,7 @@ export interface DefaultConfig {
   pongTimeout: number;
   unavailableTimeout: number;
   cluster: string;
-  userAuth: NewAuthOptions,
+  userAuth: NewAuthOptions;
 
   cdn_http?: string;
   cdn_https?: string;
@@ -48,7 +48,7 @@ var Defaults: DefaultConfig = {
   cluster: 'mt1',
   userAuth: {
     endpoint: '/pusher/user-auth',
-    transport: 'ajax',
+    transport: 'ajax'
   },
 
   // CDN configuration

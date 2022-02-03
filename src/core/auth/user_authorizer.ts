@@ -1,12 +1,17 @@
-import { AuthorizerCallback, NewAuthOptions, AuthHandler, AuthRequestParams } from './options';
+import {
+  AuthorizerCallback,
+  NewAuthOptions,
+  AuthHandler,
+  AuthRequestParams
+} from './options';
 
 import Runtime from 'runtime';
 
-
-const composeChannelQuery = (params: AuthRequestParams, userAuth : NewAuthOptions) => {
-  var query =
-  'socket_id=' +
-  encodeURIComponent(params.socketId);
+const composeChannelQuery = (
+  params: AuthRequestParams,
+  userAuth: NewAuthOptions
+) => {
+  var query = 'socket_id=' + encodeURIComponent(params.socketId);
 
   for (var i in userAuth.params) {
     query +=
@@ -17,9 +22,9 @@ const composeChannelQuery = (params: AuthRequestParams, userAuth : NewAuthOption
   }
 
   return query;
-}
+};
 
-export const UserAuthorizer = (userAuth : NewAuthOptions) : AuthHandler => {
+export const UserAuthorizer = (userAuth: NewAuthOptions): AuthHandler => {
   if (typeof Runtime.getAuthorizers()[userAuth.transport] === 'undefined') {
     throw `'${userAuth.transport}' is not a recognized auth transport`;
   }
@@ -33,5 +38,5 @@ export const UserAuthorizer = (userAuth : NewAuthOptions) : AuthHandler => {
       userAuth,
       callback
     );
-  }
-}
+  };
+};

@@ -1,16 +1,19 @@
-import { AuthorizerCallback, NewAuthOptions, AuthHandler, AuthRequestParams } from './options';
+import {
+  AuthorizerCallback,
+  NewAuthOptions,
+  AuthHandler,
+  AuthRequestParams
+} from './options';
 
 import Runtime from 'runtime';
 
+const composeChannelQuery = (
+  params: AuthRequestParams,
+  channelAuth: NewAuthOptions
+) => {
+  var query = 'socket_id=' + encodeURIComponent(params.socketId);
 
-const composeChannelQuery = (params: AuthRequestParams, channelAuth : NewAuthOptions) => {
-  var query =
-  'socket_id=' +
-  encodeURIComponent(params.socketId);
-
-  query += '&channel_name=' + 
-    encodeURIComponent(params.channelName);
-
+  query += '&channel_name=' + encodeURIComponent(params.channelName);
 
   for (var i in channelAuth.params) {
     query +=
@@ -21,9 +24,9 @@ const composeChannelQuery = (params: AuthRequestParams, channelAuth : NewAuthOpt
   }
 
   return query;
-}
+};
 
-export const ChannelAuthorizer = (channelAuth : NewAuthOptions) : AuthHandler => {
+export const ChannelAuthorizer = (channelAuth: NewAuthOptions): AuthHandler => {
   if (typeof Runtime.getAuthorizers()[channelAuth.transport] === 'undefined') {
     throw `'${channelAuth.transport}' is not a recognized auth transport`;
   }
@@ -37,5 +40,5 @@ export const ChannelAuthorizer = (channelAuth : NewAuthOptions) : AuthHandler =>
       channelAuth,
       callback
     );
-  }
-}
+  };
+};

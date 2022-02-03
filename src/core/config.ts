@@ -47,7 +47,6 @@ export interface Config {
   timelineParams?: any;
 }
 
-
 // getConfig mainly sets the defaults for the options that are not provided
 export function getConfig(opts: Options, pusher): Config {
   let config: Config = {
@@ -69,7 +68,7 @@ export function getConfig(opts: Options, pusher): Config {
     wsHost: getWebsocketHost(opts),
 
     userAuthorizer: buildUserAuthorizer(opts),
-    channelAuthorizer: buildChannelAuthorizer(opts, pusher),
+    channelAuthorizer: buildChannelAuthorizer(opts, pusher)
   };
 
   if ('disabledTransports' in opts)
@@ -132,7 +131,7 @@ function getEnableStatsConfig(opts: Options): boolean {
   return false;
 }
 
-function buildUserAuthorizer(opts: Options) : AuthHandler {
+function buildUserAuthorizer(opts: Options): AuthHandler {
   const userAuth = opts.userAuth || Defaults.userAuth;
   if ('customHandler' in userAuth) {
     return userAuth['customHandler'];
@@ -142,24 +141,29 @@ function buildUserAuthorizer(opts: Options) : AuthHandler {
 }
 
 function buildChannelAuth(opts: Options, pusher) {
-  var channelAuth : NewAuthOptions;
-  if ('channelAuth' in opts){
+  var channelAuth: NewAuthOptions;
+  if ('channelAuth' in opts) {
     channelAuth = opts.channelAuth;
   } else {
     channelAuth = {
       transport: opts.authTransport || Defaults.authTransport,
-      endpoint: opts.authEndpoint || Defaults.authEndpoint,
+      endpoint: opts.authEndpoint || Defaults.authEndpoint
     };
     if ('auth' in opts) {
       if ('params' in opts.auth) channelAuth.params = opts.auth.params;
       if ('headers' in opts.auth) channelAuth.headers = opts.auth.headers;
     }
-    if ('authorizer' in opts) channelAuth.customHandler = ChannelAuthorizerProxy(pusher, channelAuth, opts.authorizer);
+    if ('authorizer' in opts)
+      channelAuth.customHandler = ChannelAuthorizerProxy(
+        pusher,
+        channelAuth,
+        opts.authorizer
+      );
   }
   return channelAuth;
 }
 
-function buildChannelAuthorizer(opts: Options, pusher) : AuthHandler {
+function buildChannelAuthorizer(opts: Options, pusher): AuthHandler {
   const channelAuth = buildChannelAuth(opts, pusher);
   if ('customHandler' in channelAuth) {
     return channelAuth['customHandler'];

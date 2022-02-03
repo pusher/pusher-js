@@ -1,4 +1,3 @@
-
 export interface AuthData {
   auth: string;
   channel_data?: string;
@@ -10,7 +9,6 @@ export type AuthorizerCallback = (
   error: Error | null,
   authData: AuthData
 ) => void;
-
 
 export interface AuthRequestParams {
   socketId: string;

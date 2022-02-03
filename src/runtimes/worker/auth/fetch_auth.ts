@@ -1,6 +1,10 @@
 import AbstractRuntime from 'runtimes/interface';
 import { AuthTransport } from 'core/auth/auth_transports';
-import { AuthorizerCallback, AuthData, InternalAuthOptions } from 'core/auth/options';
+import {
+  AuthorizerCallback,
+  AuthData,
+  InternalAuthOptions
+} from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
 var fetchAuth: AuthTransport = function(

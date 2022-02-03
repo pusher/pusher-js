@@ -79,7 +79,7 @@ export default class Pusher {
 
     this.key = app_key;
     this.config = getConfig(options, this);
-  
+
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
     this.sessionID = Math.floor(Math.random() * 1000000000);
@@ -250,22 +250,28 @@ export default class Pusher {
   }
 
   signin() {
-    const onAuthorize : AuthorizerCallback = (err, authData : AuthData) => {
+    const onAuthorize: AuthorizerCallback = (err, authData: AuthData) => {
       if (err) {
         console.error('Error during signin', err);
         return;
       }
 
       // Send pusher:signin event
-      this.send_event('pusher:signin', { auth: authData.auth, user: authData.user_data });
+      this.send_event('pusher:signin', {
+        auth: authData.auth,
+        user: authData.user_data
+      });
 
       // Later when we get pusher:singin-success event, the user will be marked as signed in
-    }
+    };
 
     // Call the user auth endpoint
-    this.config.userAuthorizer({
-      socketId: this.connection.socket_id,
-    }, onAuthorize)
+    this.config.userAuthorizer(
+      {
+        socketId: this.connection.socket_id
+      },
+      onAuthorize
+    );
   }
 }
 

@@ -3,7 +3,7 @@ import Logger from 'core/logger';
 import JSONPRequest from '../dom/jsonp_request';
 import { ScriptReceivers } from '../dom/script_receiver_factory';
 import { AuthTransport } from 'core/auth/auth_transports';
-import { AuthorizerCallback, InternalAuthOptions} from 'core/auth/options';
+import { AuthorizerCallback, InternalAuthOptions } from 'core/auth/options';
 
 var jsonp: AuthTransport = function(
   context: Browser,

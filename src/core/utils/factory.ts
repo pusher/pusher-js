@@ -24,7 +24,6 @@ import Pusher from '../pusher';
 import { Config } from '../config';
 import * as nacl from 'tweetnacl';
 
-
 var Factory = {
   createChannels(): Channels {
     return new Channels();
