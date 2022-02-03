@@ -20,8 +20,6 @@ import UrlStore from 'core/utils/url_store';
 import { Options } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
-// import hmacsha1 from 'hmacsha1';
-import CryptoJS from 'crypto-js';
 import { AuthorizerCallback, AuthData } from './auth/options';
 
 export default class Pusher {
@@ -251,25 +249,6 @@ export default class Pusher {
     return this.config.useTLS;
   }
 
-
-  dummyAuthCall(callback : AuthorizerCallback) {
-    const secret = "835b99135d36e956982e"
-    const user_json = JSON.stringify({
-      id: "123",
-      name: "test",
-    });
-    const payload = `${this.connection.socket_id}::user::${user_json}`;
-    const signature = CryptoJS.HmacSHA256(payload, secret);
-    console.log('payload', payload);
-    console.log('signature', signature);
-    console.log('signature as string', `${signature}`);
-
-    const key = this.key;
-    const authstring = `${key}:${signature}`;
-    console.log('authstring', authstring);
-    return [authstring, user_json];
-  }
-
   signin() {
     const onAuthorize : AuthorizerCallback = (err, authData : AuthData) => {
       if (err) {
@@ -284,7 +263,6 @@ export default class Pusher {
     }
 
     // Call the user auth endpoint
-    this.dummyAuthCall(onAuthorize);
     this.config.userAuthorizer({
       socketId: this.connection.socket_id,
     }, onAuthorize)

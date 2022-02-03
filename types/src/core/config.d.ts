@@ -1,12 +1,10 @@
 import { Options } from './options';
-import { AuthOptions, AuthorizerGenerator } from './auth/options';
+import { AuthHandler } from './auth/options';
 import * as nacl from 'tweetnacl';
 export declare type AuthTransport = 'ajax' | 'jsonp';
 export declare type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockjs';
 export interface Config {
     activityTimeout: number;
-    authEndpoint: string;
-    authTransport: AuthTransport;
     enableStats: boolean;
     httpHost: string;
     httpPath: string;
@@ -20,9 +18,9 @@ export interface Config {
     wsPath: string;
     wsPort: number;
     wssPort: number;
+    userAuthorizer: AuthHandler;
+    channelAuthorizer: AuthHandler;
     forceTLS?: boolean;
-    auth?: AuthOptions;
-    authorizer?: AuthorizerGenerator;
     cluster?: string;
     disabledTransports?: Transport[];
     enabledTransports?: Transport[];
@@ -30,4 +28,4 @@ export interface Config {
     nacl?: nacl;
     timelineParams?: any;
 }
-export declare function getConfig(opts: Options): Config;
+export declare function getConfig(opts: Options, pusher: any): Config;

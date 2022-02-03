@@ -1,23 +1,27 @@
-import Channel from '../channels/channel';
-export interface AuthOptions {
-    params?: any;
-    headers?: any;
-}
 export interface AuthData {
     auth: string;
     channel_data?: string;
     shared_secret?: string;
+    user_data?: string;
 }
 export declare type AuthorizerCallback = (error: Error | null, authData: AuthData) => void;
-export interface Authorizer {
-    authorize(socketId: string, callback: AuthorizerCallback): void;
+export interface AuthRequestParams {
+    socketId: string;
+    channelName?: string;
 }
-export interface AuthorizerGenerator {
-    (channel: Channel, options: AuthorizerOptions): Authorizer;
+export interface AuthHandler {
+    (params: AuthRequestParams, callback: AuthorizerCallback): void;
 }
-export interface AuthorizerOptions {
-    authTransport: 'ajax' | 'jsonp';
-    authEndpoint: string;
-    auth?: AuthOptions;
-    authorizer?: AuthorizerGenerator;
+export interface NewAuthOptions {
+    transport: 'ajax' | 'jsonp';
+    endpoint: string;
+    params?: any;
+    headers?: any;
+    customHandler?: AuthHandler;
+}
+export interface InternalAuthOptions {
+    transport: 'ajax' | 'jsonp';
+    endpoint: string;
+    params?: any;
+    headers?: any;
 }

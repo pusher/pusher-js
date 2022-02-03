@@ -43,4 +43,5 @@ export default class Pusher {
     unsubscribe(channel_name: string): void;
     send_event(event_name: string, data: any, channel?: string): boolean;
     shouldUseTLS(): boolean;
+    signin(): void;
 }
