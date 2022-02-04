@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.0.6
+
+* [FIXED] pusher-js/worker can now be bundled and used in a web worker context
+
 ## 7.0.5
 
 * [FIXED] pusher-js/worker is now built by webpack with umd libraryTarget, which
