@@ -24,7 +24,8 @@ var config = merge(configShared, {
     library: 'Pusher',
     path: path.join(__dirname, '../dist/worker'),
     filename: filename,
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
+    globalObject: 'this'
   },
   resolve: {
     // in order to import the appropriate runtime.ts
