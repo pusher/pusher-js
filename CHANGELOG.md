@@ -1,8 +1,13 @@
 # Changelog
 
+## 7.0.5
+
+* [FIXED] pusher-js/worker is now built by webpack with umd libraryTarget, which
+allows it to be bundled as described in the README
+
 ## 7.0.4
 
-* [FIXED] References to nonexistent source map #570 
+* [FIXED] References to nonexistent source map #570
 
 ## 7.0.3 (2021-01-25)
 

@@ -1,13 +1,22 @@
 /*!
- * Pusher JavaScript Library v7.0.4
+ * Pusher JavaScript Library v7.0.5
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
  * Released under the MIT licence.
  */
 
-var Pusher =
-/******/ (function(modules) { // webpackBootstrap
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["Pusher"] = factory();
+	else
+		root["Pusher"] = factory();
+})(window, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -3290,7 +3299,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.0.4",
+    VERSION: "7.0.5",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -6603,4 +6612,5 @@ var pusher_with_encryption_PusherWithEncryption = (function (_super) {
 
 /***/ })
 /******/ ]);
+});
 //# sourceMappingURL=pusher-with-encryption.worker.js.map

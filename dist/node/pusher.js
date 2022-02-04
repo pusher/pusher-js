@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v7.0.4
+ * Pusher JavaScript Library v7.0.5
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -7487,7 +7487,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.0.4",
+    VERSION: "7.0.5",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
