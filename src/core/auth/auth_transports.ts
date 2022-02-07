@@ -5,7 +5,7 @@ interface AuthTransport {
   (
     context: AbstractRuntime,
     query: string,
-    options: InternalAuthOptions,
+    authOptions: InternalAuthOptions,
     callback: Function
   ): void;
 }

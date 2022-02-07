@@ -8,10 +8,10 @@ import { AuthorizerCallback, InternalAuthOptions } from 'core/auth/options';
 var jsonp: AuthTransport = function(
   context: Browser,
   query: string,
-  options: InternalAuthOptions,
+  authOptions: InternalAuthOptions,
   callback: AuthorizerCallback
 ) {
-  if (options.headers !== undefined) {
+  if (authOptions.headers !== undefined) {
     Logger.warn(
       'To send headers with the auth request, you must use AJAX, rather than JSONP.'
     );
@@ -29,7 +29,7 @@ var jsonp: AuthTransport = function(
 
   var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
   script.src =
-    options.endpoint +
+    authOptions.endpoint +
     '?callback=' +
     encodeURIComponent(callback_name) +
     '&' +

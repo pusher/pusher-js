@@ -1,6 +1,6 @@
 import {
   AuthorizerCallback,
-  NewAuthOptions,
+  InternalAuthOptions,
   AuthHandler,
   AuthRequestParams
 } from './options';
@@ -9,36 +9,38 @@ import Runtime from 'runtime';
 
 const composeChannelQuery = (
   params: AuthRequestParams,
-  channelAuth: NewAuthOptions
+  authOptions: InternalAuthOptions
 ) => {
   var query = 'socket_id=' + encodeURIComponent(params.socketId);
 
   query += '&channel_name=' + encodeURIComponent(params.channelName);
 
-  for (var i in channelAuth.params) {
+  for (var i in authOptions.params) {
     query +=
       '&' +
       encodeURIComponent(i) +
       '=' +
-      encodeURIComponent(channelAuth.params[i]);
+      encodeURIComponent(authOptions.params[i]);
   }
 
   return query;
 };
 
-export const ChannelAuthorizer = (channelAuth: NewAuthOptions): AuthHandler => {
-  if (typeof Runtime.getAuthorizers()[channelAuth.transport] === 'undefined') {
-    throw `'${channelAuth.transport}' is not a recognized auth transport`;
+const ChannelAuthorizer = (authOptions: InternalAuthOptions): AuthHandler => {
+  if (typeof Runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+    throw `'${authOptions.transport}' is not a recognized auth transport`;
   }
 
   return (params: AuthRequestParams, callback: AuthorizerCallback) => {
-    const query = composeChannelQuery(params, channelAuth);
+    const query = composeChannelQuery(params, authOptions);
 
-    Runtime.getAuthorizers()[channelAuth.transport](
+    Runtime.getAuthorizers()[authOptions.transport](
       Runtime,
       query,
-      channelAuth,
+      authOptions,
       callback
     );
   };
 };
+
+export default ChannelAuthorizer;

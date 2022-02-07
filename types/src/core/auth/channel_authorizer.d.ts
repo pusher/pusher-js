@@ -1,2 +1,3 @@
-import { NewAuthOptions, AuthHandler } from './options';
-export declare const ChannelAuthorizer: (channelAuth: NewAuthOptions) => AuthHandler;
+import { InternalAuthOptions, AuthHandler } from './options';
+declare const ChannelAuthorizer: (authOptions: InternalAuthOptions) => AuthHandler;
+export default ChannelAuthorizer;

@@ -1,6 +1,6 @@
 import {
   AuthorizerCallback,
-  NewAuthOptions,
+  InternalAuthOptions,
   AuthHandler,
   AuthRequestParams
 } from './options';
@@ -9,34 +9,36 @@ import Runtime from 'runtime';
 
 const composeChannelQuery = (
   params: AuthRequestParams,
-  userAuth: NewAuthOptions
+  authOptions: InternalAuthOptions
 ) => {
   var query = 'socket_id=' + encodeURIComponent(params.socketId);
 
-  for (var i in userAuth.params) {
+  for (var i in authOptions.params) {
     query +=
       '&' +
       encodeURIComponent(i) +
       '=' +
-      encodeURIComponent(userAuth.params[i]);
+      encodeURIComponent(authOptions.params[i]);
   }
 
   return query;
 };
 
-export const UserAuthorizer = (userAuth: NewAuthOptions): AuthHandler => {
-  if (typeof Runtime.getAuthorizers()[userAuth.transport] === 'undefined') {
-    throw `'${userAuth.transport}' is not a recognized auth transport`;
+const UserAuthorizer = (authOptions: InternalAuthOptions): AuthHandler => {
+  if (typeof Runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+    throw `'${authOptions.transport}' is not a recognized auth transport`;
   }
 
   return (params: AuthRequestParams, callback: AuthorizerCallback) => {
-    const query = composeChannelQuery(params, userAuth);
+    const query = composeChannelQuery(params, authOptions);
 
-    Runtime.getAuthorizers()[userAuth.transport](
+    Runtime.getAuthorizers()[authOptions.transport](
       Runtime,
       query,
-      userAuth,
+      authOptions,
       callback
     );
   };
 };
+
+export default UserAuthorizer;

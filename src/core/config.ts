@@ -1,8 +1,8 @@
 import { Options } from './options';
 import Defaults from './defaults';
 import { AuthHandler, NewAuthOptions } from './auth/options';
-import { UserAuthorizer } from './auth/user_authorizer';
-import { ChannelAuthorizer } from './auth/channel_authorizer';
+import UserAuthorizer from './auth/user_authorizer';
+import ChannelAuthorizer from './auth/channel_authorizer';
 import { ChannelAuthorizerProxy } from './auth/deprecated_channel_authorizer';
 import Runtime from 'runtime';
 import * as nacl from 'tweetnacl';

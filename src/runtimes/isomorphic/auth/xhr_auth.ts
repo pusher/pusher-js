@@ -11,18 +11,18 @@ import { HTTPAuthError } from 'core/errors';
 var ajax: AuthTransport = function(
   context: AbstractRuntime,
   query: string,
-  options: InternalAuthOptions,
+  authOptions: InternalAuthOptions,
   callback: AuthorizerCallback
 ) {
   var xhr;
 
   xhr = Runtime.createXHR();
-  xhr.open('POST', options.endpoint, true);
+  xhr.open('POST', authOptions.endpoint, true);
 
   // add request headers
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  for (var headerName in options.headers) {
-    xhr.setRequestHeader(headerName, options.headers[headerName]);
+  for (var headerName in authOptions.headers) {
+    xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
   }
 
   xhr.onreadystatechange = function() {
@@ -55,7 +55,7 @@ var ajax: AuthTransport = function(
           new HTTPAuthError(
             xhr.status,
             'Unable to retrieve auth string from auth endpoint - ' +
-              `received status: ${xhr.status} from ${options.endpoint}. ` +
+              `received status: ${xhr.status} from ${authOptions.endpoint}. ` +
               `Clients must be authenticated to join private or presence channels. ${suffix}`
           ),
           { auth: '' }

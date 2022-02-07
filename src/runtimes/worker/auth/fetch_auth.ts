@@ -10,18 +10,18 @@ import { HTTPAuthError } from 'core/errors';
 var fetchAuth: AuthTransport = function(
   context: AbstractRuntime,
   query: string,
-  options: InternalAuthOptions,
+  authOptions: InternalAuthOptions,
   callback: AuthorizerCallback
 ) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
-  for (var headerName in options.headers) {
-    headers.set(headerName, options.headers[headerName]);
+  for (var headerName in authOptions.headers) {
+    headers.set(headerName, authOptions.headers[headerName]);
   }
 
   var body = query;
-  var request = new Request(options.endpoint, {
+  var request = new Request(authOptions.endpoint, {
     headers,
     body,
     credentials: 'same-origin',

@@ -7,3 +7,6 @@ sharedTestsContext.keys().forEach(sharedTestsContext);
 
 var nodeTestsContext = require.context("./web", true, /_spec$/);
 nodeTestsContext.keys().forEach(nodeTestsContext);
+
+var coreWithRuntimeTestsContext = require.context("./core_with_runtime", true, /_spec$/);
+coreWithRuntimeTestsContext.keys().forEach(coreWithRuntimeTestsContext)

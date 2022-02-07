@@ -1,7 +1,7 @@
 var PresenceChannel = require('core/channels/presence_channel').default;
 var Channel = require('core/channels/channel').default;
 var Members = require('core/channels/members').default;
-var Authorizer = require('core/auth/pusher_authorizer').default;
+// var Authorizer = require('core/auth/pusher_authorizer').default;
 var Errors = require('core/errors');
 var Factory = require('core/utils/factory').default;
 var Mocks = require("mocks");
@@ -9,9 +9,11 @@ var Mocks = require("mocks");
 describe("PresenceChannel", function() {
   var pusher;
   var channel;
+  var channelAuthorizer;
 
   beforeEach(function() {
-    pusher = Mocks.getPusher({ foo: "bar" });
+    channelAuthorizer = jasmine.createSpy("channelAuthorizer")
+    pusher = Mocks.getPusher({ channelAuthorizer: channelAuthorizer });
     channel = new PresenceChannel("presence-test", pusher);
   });
 
@@ -47,45 +49,56 @@ describe("PresenceChannel", function() {
 
   describe("#authorize", function() {
     var authorizer;
-
-    beforeEach(function() {
-      authorizer = Mocks.getAuthorizer();
-      spyOn(Factory, "createAuthorizer").and.returnValue(authorizer);
-    });
-
-    it("should create and call an authorizer", function() {
-      channel.authorize("1.23", function() {});
-      expect(Factory.createAuthorizer.calls.count()).toEqual(1);
-      expect(Factory.createAuthorizer).toHaveBeenCalledWith(
-        channel,
-        { foo: "bar" }
-      );
-    });
-
-    it("should call back on success with authorization data", function() {
-      var callback = jasmine.createSpy("callback");
+    it("should call channelAuthorizer", function() {
+      const callback = function(){}
       channel.authorize("1.23", callback);
-
-      expect(callback).not.toHaveBeenCalled();
-      authorizer._callback(false, {
-        foo: "bar",
-        channel_data: JSON.stringify({ user_id: "U" })
-      });
-
-      expect(callback).toHaveBeenCalledWith(false, {
-        foo: "bar",
-        channel_data: JSON.stringify({ user_id: "U" })
-      });
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
     });
 
-    it("should call back on failure", function() {
-      var callback = jasmine.createSpy("callback");
+    it("should call the callback if an authorizaiton error is encountered", function() {
+      const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);
-
-      authorizer._callback("error!");
-
-      expect(callback).toHaveBeenCalledWith("error!", undefined);
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
+      const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      
+      presenceChannelCallback("error", {})
+      expect(callback).toHaveBeenCalledWith("error", {})
     });
+
+    it("should call the callback with error if auth data doesn't have channel_data", function() {
+      const callback = jasmine.createSpy("callback")
+      channel.authorize("1.23", callback);
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
+      const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      
+      presenceChannelCallback(null, {
+        foo: 'bar'
+      })
+      expect(callback).toHaveBeenCalledWith("Invalid auth response")
+    });
+
+    it("should call the callback with auth data", function() {
+      const callback = jasmine.createSpy("callback")
+      channel.authorize("1.23", callback);
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
+      const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      
+      const authdata = {
+        channel_data: "{\"user_id\":\"123\"}",
+        foo: 'bar'
+      };
+      presenceChannelCallback(null, authdata)
+      expect(callback).toHaveBeenCalledWith(null, authdata)
+    });
+
   });
 
   describe("#trigger", function() {
@@ -114,16 +127,14 @@ describe("PresenceChannel", function() {
   });
 
   describe("after authorizing", function() {
-    var authorizer;
-
     beforeEach(function() {
-      authorizer = Mocks.getAuthorizer();
-      spyOn(Factory, "createAuthorizer").and.returnValue(authorizer);
-      channel.authorize("1.23", function() {});
-      authorizer._callback(false, {
-        foo: "bar",
-        channel_data: JSON.stringify({ user_id: "U" })
+      channelAuthorizer.and.callFake(function(params, callback) {
+        callback(null, {
+          foo: "bar",
+          channel_data: JSON.stringify({ user_id: "U" })
+        });
       });
+      channel.authorize("1.23", function() {});
     });
 
     describe("#handleEvent", function() {

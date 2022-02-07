@@ -1,10 +1,10 @@
 import Channel from '../channels/channel';
-import { AuthorizerCallback, AuthHandler, NewAuthOptions } from './options';
-export interface ChannelAuthorizer {
+import { AuthorizerCallback, AuthHandler, InternalAuthOptions } from './options';
+export interface OldChannelAuthorizer {
     authorize(socketId: string, callback: AuthorizerCallback): void;
 }
 export interface ChannelAuthorizerGenerator {
-    (channel: Channel, options: OldAuthorizerOptions): ChannelAuthorizer;
+    (channel: Channel, options: OldAuthorizerOptions): OldChannelAuthorizer;
 }
 export interface OldAuthOptions {
     params?: any;
@@ -15,4 +15,4 @@ export interface OldAuthorizerOptions {
     authEndpoint: string;
     auth?: OldAuthOptions;
 }
-export declare const ChannelAuthorizerProxy: (pusher: any, channelAuth: NewAuthOptions, channelAuthorizerGenerator: ChannelAuthorizerGenerator) => AuthHandler;
+export declare const ChannelAuthorizerProxy: (pusher: any, authOptions: InternalAuthOptions, channelAuthorizerGenerator: ChannelAuthorizerGenerator) => AuthHandler;
