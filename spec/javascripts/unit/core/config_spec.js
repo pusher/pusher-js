@@ -46,13 +46,6 @@ describe('Config', function() {
       pongTimeout: 123,
       activityTimeout: 345,
       ignoreNullOrigin: true,
-      authorizer: () => {},
-      authTransport: 'some-auth-transport',
-      authEndpoint: '/pusher/spec/auth',
-      auth: {
-        params: { spec: 'param' },
-        headers: { spec: 'header' }
-      },
       wsHost: 'ws-spec.pusher.com',
       wsPort: 2020,
       wssPort: 2021,
@@ -66,6 +59,46 @@ describe('Config', function() {
     for (let opt in opts) {
       expect(config[opt]).toEqual(opts[opt]);
     }
+  });
+
+  describe('auth', function(){
+    it('should create ChannelAuthorizerProxy if authorizer is set', function() {
+      const authorizer = { authorize: jasmine.createSpy('authorize') };
+      const authorizerGenerator = jasmine.createSpy('authorizerGenerator').and.returnValue(authorizer);
+      let opts = {
+        authorizer: authorizerGenerator,
+        authTransport: 'some-auth-transport',
+        authEndpoint: '/pusher/spec/auth',
+        auth: {
+          params: { spec: 'param' },
+          headers: { spec: 'header' }
+        },
+      };
+      const channel = {name: 'private-test'};
+      const pusher = { channel: jasmine.createSpy('channel').and.returnValue(channel) };
+      let config = Config.getConfig(opts, pusher);
+      
+      const callback = function(){};
+      config.channelAuthorizer({
+        socketId: '1.23',
+        channelName: 'private-test', 
+      }, callback);
+      expect(authorizerGenerator).toHaveBeenCalledWith(channel, {
+        authTransport: 'some-auth-transport',
+        authEndpoint: '/pusher/spec/auth',
+        auth: {
+          params: { spec: 'param' },
+          headers: { spec: 'header' }
+        },
+      })
+      expect(authorizer.authorize).toHaveBeenCalledWith('1.23', callback);
+    });
+
+    // We should have tests for:
+    // - Not setting authorizer
+    // - channelAuth and for the cases where it overrides deprecated fields
+    // - userAuth.
+    // These are challenging because we can't spy on the imported functions inside config.ts
   });
 
   describe('TLS', function() {
