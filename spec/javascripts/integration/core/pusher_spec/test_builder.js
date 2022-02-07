@@ -38,6 +38,14 @@ function subscribe(pusher, channelName, callback) {
   return channel;
 }
 
+async function subscribep(pusher, channelName) {
+  return new Promise(function (resolve, reject) {
+    subscribe(pusher, channelName, function(channel, members) {
+      resolve({channel, members});
+    });
+  });
+}
+
 function build(testConfig) {
   var forceTLS = testConfig.forceTLS;
   var transport = testConfig.transport;
@@ -146,14 +154,7 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
     var pusher = getPusher1();
     var channelName = Integration.getRandomName("presence-integration_me");
 
-    var members = null;
-    subscribe(pusher, channelName, function(channel, ms) {
-      members = ms;
-    });
-
-    await waitsFor(function() {
-      return members !== null;
-    }, "channel to subscribe", 10000);
+    const {members} = await subscribep(pusher, channelName);
 
     expect(members.me).toEqual({
       id: pusher.connection.socket_id,
@@ -169,18 +170,14 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
     var pusher2 = getPusher2();
     var channelName = Integration.getRandomName("presence-integration_member_added");
 
-    var member = null;
-    subscribe(pusher1, channelName, function(channel) {
+    const {channel} = await subscribep(pusher1, channelName);
+    const member_promise = new Promise((resolve) => {
       channel.bind("pusher:member_added", function(m) {
-        member = m;
+        resolve(m);
       });
-
-      subscribe(pusher2, channelName, function() {});
     });
-
-    await waitsFor(function() {
-      return member !== null;
-    }, "the member added event", 10000);
+    await subscribep(pusher2, channelName);
+    const member = await member_promise;
 
     expect(member.id).toEqual(pusher2.connection.socket_id);
     expect(member).toEqual({
@@ -200,21 +197,17 @@ function buildPresenceChannelTests(getPusher1, getPusher2) {
     var pusher2 = getPusher2();
     var channelName = Integration.getRandomName("presence-integration_member_removed");
 
-    var member = null;
-    subscribe(pusher2, channelName, function(channel) {
+    const {channel} = await subscribep(pusher2, channelName);
+    const member_promise = new Promise((resolve) => {
       channel.bind("pusher:member_added", function(_) {
         channel.bind("pusher:member_removed", function(m) {
-          member = m;
+          resolve(m);
         });
         pusher1.unsubscribe(channelName);
-      });
-
-      subscribe(pusher1, channelName, function() {});
+      })
     });
-
-    await waitsFor(function() {
-      return member !== null;
-    }, "the member removed event", 10000);
+    await subscribep(pusher1, channelName);
+    const member = await member_promise;
 
     expect(member.id).toEqual(pusher1.connection.socket_id);
     expect(member).toEqual({
