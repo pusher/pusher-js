@@ -12,7 +12,7 @@ export interface AuthRequestParams {
 export interface AuthHandler {
     (params: AuthRequestParams, callback: AuthorizerCallback): void;
 }
-export interface NewAuthOptions {
+export interface AuthOptions {
     transport: 'ajax' | 'jsonp';
     endpoint: string;
     params?: any;

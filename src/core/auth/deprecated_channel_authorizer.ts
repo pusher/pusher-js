@@ -6,23 +6,23 @@ import {
   InternalAuthOptions
 } from './options';
 
-export interface OldChannelAuthorizer {
+export interface DeprecatedChannelAuthorizer {
   authorize(socketId: string, callback: AuthorizerCallback): void;
 }
 
 export interface ChannelAuthorizerGenerator {
-  (channel: Channel, options: OldAuthorizerOptions): OldChannelAuthorizer;
+  (channel: Channel, options: DeprecatedAuthorizerOptions): DeprecatedChannelAuthorizer;
 }
 
-export interface OldAuthOptions {
+export interface DeprecatedAuthOptions {
   params?: any;
   headers?: any;
 }
 
-export interface OldAuthorizerOptions {
+export interface DeprecatedAuthorizerOptions {
   authTransport: 'ajax' | 'jsonp';
   authEndpoint: string;
-  auth?: OldAuthOptions;
+  auth?: DeprecatedAuthOptions;
 }
 
 export const ChannelAuthorizerProxy = (
@@ -30,7 +30,7 @@ export const ChannelAuthorizerProxy = (
   authOptions: InternalAuthOptions,
   channelAuthorizerGenerator: ChannelAuthorizerGenerator
 ): AuthHandler => {
-  const oldAuthOptions: OldAuthorizerOptions = {
+  const deprecatedAuthorizerOptions: DeprecatedAuthorizerOptions = {
     authTransport: authOptions.transport,
     authEndpoint: authOptions.endpoint,
     auth: {
@@ -43,9 +43,9 @@ export const ChannelAuthorizerProxy = (
     // This line creates a new channel authorizer every time.
     // In the past, this was only done once per channel and reused.
     // We can do that again if we want to keep this behavior intact.
-    const channelAuthorizer: OldChannelAuthorizer = channelAuthorizerGenerator(
+    const channelAuthorizer: DeprecatedChannelAuthorizer = channelAuthorizerGenerator(
       channel,
-      oldAuthOptions
+      deprecatedAuthorizerOptions
     );
     channelAuthorizer.authorize(params.socketId, callback);
   };

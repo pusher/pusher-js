@@ -3,7 +3,7 @@ var ChannelAuthorizerProxy = require('core/auth/deprecated_channel_authorizer').
 describe("ChannelAuthorizerProxy", function() {
 
   describe("initialization", function(){
-    it("should call the old authorizer properly", function(){
+    it("should call the deprecated authorizer properly", function(){
       const channel = {};
       const pusher = {
         channel: jasmine.createSpy('channel').and.returnValue(channel)
@@ -15,7 +15,7 @@ describe("ChannelAuthorizerProxy", function() {
         params: { foo: "bar" },
         headers: { "X-Foo": "my-bar" }
       };
-      const oldAuthParams = {
+      const deprecatedAuthorizerParams = {
         authTransport: "bad-transport",
         authEndpoint: "http://example.com/auth",
         auth: {
@@ -23,12 +23,12 @@ describe("ChannelAuthorizerProxy", function() {
           headers: { "X-Foo": "my-bar" }
         }
       }
-      const oldAuthorizer = {
-        authorize:jasmine.createSpy('oldAuthorizer')
+      const deprecatedAuthorizer = {
+        authorize:jasmine.createSpy('deprecatedAuthorizer')
       };
-      const oldAuthorizerGenerator = jasmine.createSpy("oldAuthorizerGenerator").and.returnValue(oldAuthorizer);
+      const deprecatedAuthorizerGenerator = jasmine.createSpy("deprecatedAuthorizerGenerator").and.returnValue(deprecatedAuthorizer);
 
-      channelAuthorizer = ChannelAuthorizerProxy(pusher, authOptions, oldAuthorizerGenerator)
+      channelAuthorizer = ChannelAuthorizerProxy(pusher, authOptions, deprecatedAuthorizerGenerator)
       
       const params = { socketId: "1.23", channelName: "private-test-channel"};
       const callback = function() {};
@@ -37,11 +37,11 @@ describe("ChannelAuthorizerProxy", function() {
       expect(pusher.channel.calls.count()).toEqual(1);
       expect(pusher.channel).toHaveBeenCalledWith('private-test-channel');
 
-      expect(oldAuthorizerGenerator.calls.count()).toEqual(1);
-      expect(oldAuthorizerGenerator).toHaveBeenCalledWith(channel, oldAuthParams);
+      expect(deprecatedAuthorizerGenerator.calls.count()).toEqual(1);
+      expect(deprecatedAuthorizerGenerator).toHaveBeenCalledWith(channel, deprecatedAuthorizerParams);
 
-      expect(oldAuthorizer.authorize.calls.count()).toEqual(1);
-      expect(oldAuthorizer.authorize).toHaveBeenCalledWith("1.23", callback);
+      expect(deprecatedAuthorizer.authorize.calls.count()).toEqual(1);
+      expect(deprecatedAuthorizer.authorize).toHaveBeenCalledWith("1.23", callback);
     });
   });
 

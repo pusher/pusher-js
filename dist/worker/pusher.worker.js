@@ -3907,7 +3907,7 @@ var ChannelAuthorizer = function (authOptions) {
 
 // CONCATENATED MODULE: ./src/core/auth/deprecated_channel_authorizer.ts
 var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGenerator) {
-    var oldAuthOptions = {
+    var deprecatedAuthorizerOptions = {
         authTransport: authOptions.transport,
         authEndpoint: authOptions.endpoint,
         auth: {
@@ -3917,7 +3917,7 @@ var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGen
     };
     return function (params, callback) {
         var channel = pusher.channel(params.channelName);
-        var channelAuthorizer = channelAuthorizerGenerator(channel, oldAuthOptions);
+        var channelAuthorizer = channelAuthorizerGenerator(channel, deprecatedAuthorizerOptions);
         channelAuthorizer.authorize(params.socketId, callback);
     };
 };
