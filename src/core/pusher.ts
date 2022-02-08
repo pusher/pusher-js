@@ -271,7 +271,7 @@ export default class Pusher {
       // Later when we get pusher:singin-success event, the user will be marked as signed in
     };
 
-    this.config.userAuthorizer(
+    this.config.userAuthenticator(
       {
         socketId: this.connection.socket_id
       },

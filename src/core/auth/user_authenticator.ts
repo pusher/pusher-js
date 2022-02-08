@@ -24,7 +24,7 @@ const composeChannelQuery = (
   return query;
 };
 
-const UserAuthorizer = (authOptions: InternalAuthOptions): AuthHandler => {
+const UserAuthenticator = (authOptions: InternalAuthOptions): AuthHandler => {
   if (typeof Runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
     throw `'${authOptions.transport}' is not a recognized auth transport`;
   }
@@ -41,4 +41,4 @@ const UserAuthorizer = (authOptions: InternalAuthOptions): AuthHandler => {
   };
 };
 
-export default UserAuthorizer;
+export default UserAuthenticator;

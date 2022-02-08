@@ -422,7 +422,7 @@ describe("Pusher", function() {
     var pusher;
     beforeEach(function() {
       pusher = new Pusher("foo");
-      spyOn(pusher.config, "userAuthorizer");
+      spyOn(pusher.config, "userAuthenticator");
       spyOn(pusher, "send_event");
       pusher.connection.state = "connected";
       pusher.connection.socket_id = "1.23";
@@ -432,23 +432,23 @@ describe("Pusher", function() {
       pusher.connection.state = "connecting";
       spyOn(Logger, "warn");
       pusher.signin();
-      expect(pusher.config.userAuthorizer).not.toHaveBeenCalled();
+      expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
       expect(Logger.warn).toHaveBeenCalledWith("Error during signin: Pusher connection not in connected state");
     });
 
-    it("should fail if userAuthorizer fails", function() {
-      pusher.config.userAuthorizer.and.callFake(function(params, callback) {
+    it("should fail if userAuthenticator fails", function() {
+      pusher.config.userAuthenticator.and.callFake(function(params, callback) {
         callback("this error", {});
       });
       spyOn(Logger, "warn");
       pusher.signin();
-      expect(pusher.config.userAuthorizer).toHaveBeenCalledWith({socketId: "1.23"}, jasmine.any(Function));
+      expect(pusher.config.userAuthenticator).toHaveBeenCalledWith({socketId: "1.23"}, jasmine.any(Function));
       expect(Logger.warn).toHaveBeenCalledWith("Error during signin: this error");
     });
 
     // TODO more signin tests
     it("should send piusher:signin event", function() {
-      pusher.config.userAuthorizer.and.callFake(function(params, callback) {
+      pusher.config.userAuthenticator.and.callFake(function(params, callback) {
         callback(null, {
           auth: "auth",
           user_data: JSON.stringify({ id:"1" }),
@@ -457,7 +457,7 @@ describe("Pusher", function() {
       });
       spyOn(Logger, "warn");
       pusher.signin();
-      expect(pusher.config.userAuthorizer).toHaveBeenCalledWith({socketId: "1.23"}, jasmine.any(Function));
+      expect(pusher.config.userAuthenticator).toHaveBeenCalledWith({socketId: "1.23"}, jasmine.any(Function));
       expect(pusher.send_event).toHaveBeenCalledWith('pusher:signin', {
         auth: "auth",
         user_data: JSON.stringify({ id:"1" }),

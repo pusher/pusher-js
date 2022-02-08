@@ -3856,7 +3856,7 @@ var strategy_builder_UnsupportedStrategy = {
     }
 };
 
-// CONCATENATED MODULE: ./src/core/auth/user_authorizer.ts
+// CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
 
 var composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
@@ -3869,7 +3869,7 @@ var composeChannelQuery = function (params, authOptions) {
     }
     return query;
 };
-var UserAuthorizer = function (authOptions) {
+var UserAuthenticator = function (authOptions) {
     if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
         throw "'" + authOptions.transport + "' is not a recognized auth transport";
     }
@@ -3878,7 +3878,7 @@ var UserAuthorizer = function (authOptions) {
         worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, callback);
     };
 };
-/* harmony default export */ var user_authorizer = (UserAuthorizer);
+/* harmony default export */ var user_authenticator = (UserAuthenticator);
 
 // CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
 
@@ -3945,7 +3945,7 @@ function getConfig(opts, pusher) {
         httpHost: getHttpHost(opts),
         useTLS: shouldUseTLS(opts),
         wsHost: getWebsocketHost(opts),
-        userAuthorizer: buildUserAuthorizer(opts),
+        userAuthenticator: buildUserAuthenticator(opts),
         channelAuthorizer: buildChannelAuthorizer(opts, pusher)
     };
     if ('disabledTransports' in opts)
@@ -4000,12 +4000,12 @@ function getEnableStatsConfig(opts) {
     }
     return false;
 }
-function buildUserAuthorizer(opts) {
+function buildUserAuthenticator(opts) {
     var userAuth = opts.userAuth || defaults.userAuth;
     if ('customHandler' in userAuth) {
         return userAuth['customHandler'];
     }
-    return user_authorizer(userAuth);
+    return user_authenticator(userAuth);
 }
 function buildChannelAuth(opts, pusher) {
     var channelAuth;
@@ -4234,7 +4234,7 @@ var pusher_Pusher = (function () {
                 user_data: authData.user_data
             });
         };
-        this.config.userAuthorizer({
+        this.config.userAuthenticator({
             socketId: this.connection.socket_id
         }, onAuthorize);
     };

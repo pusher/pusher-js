@@ -11,7 +11,10 @@ export interface DeprecatedChannelAuthorizer {
 }
 
 export interface ChannelAuthorizerGenerator {
-  (channel: Channel, options: DeprecatedAuthorizerOptions): DeprecatedChannelAuthorizer;
+  (
+    channel: Channel,
+    options: DeprecatedAuthorizerOptions
+  ): DeprecatedChannelAuthorizer;
 }
 
 export interface DeprecatedAuthOptions {

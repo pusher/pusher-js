@@ -1,7 +1,7 @@
 import { Options } from './options';
 import Defaults from './defaults';
 import { AuthHandler, AuthOptions } from './auth/options';
-import UserAuthorizer from './auth/user_authorizer';
+import UserAuthenticator from './auth/user_authenticator';
 import ChannelAuthorizer from './auth/channel_authorizer';
 import { ChannelAuthorizerProxy } from './auth/deprecated_channel_authorizer';
 import Runtime from 'runtime';
@@ -33,7 +33,7 @@ export interface Config {
   wsPath: string;
   wsPort: number;
   wssPort: number;
-  userAuthorizer: AuthHandler;
+  userAuthenticator: AuthHandler;
   channelAuthorizer: AuthHandler;
 
   // these are all optional parameters or overrrides. The customer can set these
@@ -67,7 +67,7 @@ export function getConfig(opts: Options, pusher): Config {
     useTLS: shouldUseTLS(opts),
     wsHost: getWebsocketHost(opts),
 
-    userAuthorizer: buildUserAuthorizer(opts),
+    userAuthenticator: buildUserAuthenticator(opts),
     channelAuthorizer: buildChannelAuthorizer(opts, pusher)
   };
 
@@ -131,13 +131,13 @@ function getEnableStatsConfig(opts: Options): boolean {
   return false;
 }
 
-function buildUserAuthorizer(opts: Options): AuthHandler {
+function buildUserAuthenticator(opts: Options): AuthHandler {
   const userAuth = opts.userAuth || Defaults.userAuth;
   if ('customHandler' in userAuth) {
     return userAuth['customHandler'];
   }
 
-  return UserAuthorizer(userAuth);
+  return UserAuthenticator(userAuth);
 }
 
 function buildChannelAuth(opts: Options, pusher) {

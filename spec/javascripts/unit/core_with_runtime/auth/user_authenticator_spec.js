@@ -1,7 +1,7 @@
 var Runtime = require('runtime').default;
-var UserAuthorizer = require('core/auth/user_authorizer').default;
+var UserAuthenticator = require('core/auth/user_authenticator').default;
 
-describe("UserAuthorizer", function() {
+describe("UserAuthenticator", function() {
 
   describe("initialization", function(){
     it("should throw an error if the specified transport is unrecognized", function(){
@@ -9,7 +9,7 @@ describe("UserAuthorizer", function() {
         transport: "bad-transport",
       };
       expect(function(){
-        UserAuthorizer(channelAuth)
+        UserAuthenticator(channelAuth)
       }).toThrow("'bad-transport' is not a recognized auth transport");
     });
   });
@@ -19,7 +19,7 @@ describe("UserAuthorizer", function() {
       const userAuth = {
         transport: "ajax",
       };
-      userAuthorizer = UserAuthorizer(userAuth);
+      userAuthenticator = UserAuthenticator(userAuth);
       
       transportAuthorizer = jasmine.createSpy("ajax")
       Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
@@ -29,7 +29,7 @@ describe("UserAuthorizer", function() {
       const params = { socketId: '1.23' };
       const callback = function(){};
       const query = 'socket_id=1.23';
-      userAuthorizer(params, callback);
+      userAuthenticator(params, callback);
       expect(Runtime.getAuthorizers.calls.count()).toEqual(1);
       expect(transportAuthorizer).toHaveBeenCalledWith(
         Runtime,
