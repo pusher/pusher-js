@@ -611,7 +611,7 @@ var Defaults = {
     cluster: 'mt1',
     userAuth: {
         endpoint: '/pusher/user-auth',
-        transport: 'ajax',
+        transport: 'ajax'
     },
     cdn_http: "http://js.pusher.com",
     cdn_https: "https://js.pusher.com",
@@ -829,13 +829,13 @@ var HTTPAuthError = (function (_super) {
 
 
 
-var ajax = function (context, query, options, callback) {
+var ajax = function (context, query, authOptions, callback) {
     var xhr;
     xhr = runtime.createXHR();
-    xhr.open('POST', options.endpoint, true);
+    xhr.open('POST', authOptions.endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    for (var headerName in options.headers) {
-        xhr.setRequestHeader(headerName, options.headers[headerName]);
+    for (var headerName in authOptions.headers) {
+        xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
     }
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -857,7 +857,7 @@ var ajax = function (context, query, options, callback) {
             else {
                 var suffix = url_store.buildLogSuffix('authenticationEndpoint');
                 callback(new HTTPAuthError(xhr.status, 'Unable to retrieve auth string from auth endpoint - ' +
-                    ("received status: " + xhr.status + " from " + options.endpoint + ". ") +
+                    ("received status: " + xhr.status + " from " + authOptions.endpoint + ". ") +
                     ("Clients must be authenticated to join private or presence channels. " + suffix)), { auth: '' });
             }
         }
@@ -1269,8 +1269,8 @@ var logger_Logger = (function () {
 
 // CONCATENATED MODULE: ./src/runtimes/web/auth/jsonp_auth.ts
 
-var jsonp = function (context, query, options, callback) {
-    if (options.headers !== undefined) {
+var jsonp = function (context, query, authOptions, callback) {
+    if (authOptions.headers !== undefined) {
         logger.warn('To send headers with the auth request, you must use AJAX, rather than JSONP.');
     }
     var callbackName = context.nextAuthCallbackID.toString();
@@ -1282,7 +1282,7 @@ var jsonp = function (context, query, options, callback) {
     };
     var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
     script.src =
-        options.endpoint +
+        authOptions.endpoint +
             '?callback=' +
             encodeURIComponent(callback_name) +
             '&' +
@@ -2356,7 +2356,7 @@ var PrivateChannel = (function (_super) {
     PrivateChannel.prototype.authorize = function (socketId, callback) {
         return this.pusher.config.channelAuthorizer({
             channelName: this.name,
-            socketId: socketId,
+            socketId: socketId
         }, callback);
     };
     return PrivateChannel;
@@ -4246,62 +4246,61 @@ var strategy_builder_UnsupportedStrategy = {
 
 // CONCATENATED MODULE: ./src/core/auth/user_authorizer.ts
 
-var composeChannelQuery = function (params, userAuth) {
-    var query = 'socket_id=' +
-        encodeURIComponent(params.socketId);
-    for (var i in userAuth.params) {
+var composeChannelQuery = function (params, authOptions) {
+    var query = 'socket_id=' + encodeURIComponent(params.socketId);
+    for (var i in authOptions.params) {
         query +=
             '&' +
                 encodeURIComponent(i) +
                 '=' +
-                encodeURIComponent(userAuth.params[i]);
+                encodeURIComponent(authOptions.params[i]);
     }
     return query;
 };
-var UserAuthorizer = function (userAuth) {
-    if (typeof runtime.getAuthorizers()[userAuth.transport] === 'undefined') {
-        throw "'" + userAuth.transport + "' is not a recognized auth transport";
+var UserAuthorizer = function (authOptions) {
+    if (typeof runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+        throw "'" + authOptions.transport + "' is not a recognized auth transport";
     }
     return function (params, callback) {
-        var query = composeChannelQuery(params, userAuth);
-        runtime.getAuthorizers()[userAuth.transport](runtime, query, userAuth, callback);
+        var query = composeChannelQuery(params, authOptions);
+        runtime.getAuthorizers()[authOptions.transport](runtime, query, authOptions, callback);
     };
 };
+/* harmony default export */ var user_authorizer = (UserAuthorizer);
 
 // CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
 
-var channel_authorizer_composeChannelQuery = function (params, channelAuth) {
-    var query = 'socket_id=' +
-        encodeURIComponent(params.socketId);
-    query += '&channel_name=' +
-        encodeURIComponent(params.channelName);
-    for (var i in channelAuth.params) {
+var channel_authorizer_composeChannelQuery = function (params, authOptions) {
+    var query = 'socket_id=' + encodeURIComponent(params.socketId);
+    query += '&channel_name=' + encodeURIComponent(params.channelName);
+    for (var i in authOptions.params) {
         query +=
             '&' +
                 encodeURIComponent(i) +
                 '=' +
-                encodeURIComponent(channelAuth.params[i]);
+                encodeURIComponent(authOptions.params[i]);
     }
     return query;
 };
-var ChannelAuthorizer = function (channelAuth) {
-    if (typeof runtime.getAuthorizers()[channelAuth.transport] === 'undefined') {
-        throw "'" + channelAuth.transport + "' is not a recognized auth transport";
+var ChannelAuthorizer = function (authOptions) {
+    if (typeof runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+        throw "'" + authOptions.transport + "' is not a recognized auth transport";
     }
     return function (params, callback) {
-        var query = channel_authorizer_composeChannelQuery(params, channelAuth);
-        runtime.getAuthorizers()[channelAuth.transport](runtime, query, channelAuth, callback);
+        var query = channel_authorizer_composeChannelQuery(params, authOptions);
+        runtime.getAuthorizers()[authOptions.transport](runtime, query, authOptions, callback);
     };
 };
+/* harmony default export */ var channel_authorizer = (ChannelAuthorizer);
 
 // CONCATENATED MODULE: ./src/core/auth/deprecated_channel_authorizer.ts
-var ChannelAuthorizerProxy = function (pusher, channelAuth, channelAuthorizerGenerator) {
+var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGenerator) {
     var oldAuthOptions = {
-        authTransport: channelAuth.transport,
-        authEndpoint: channelAuth.endpoint,
+        authTransport: authOptions.transport,
+        authEndpoint: authOptions.endpoint,
         auth: {
-            params: channelAuth.params,
-            headers: channelAuth.headers
+            params: authOptions.params,
+            headers: authOptions.headers
         }
     };
     return function (params, callback) {
@@ -4335,7 +4334,7 @@ function getConfig(opts, pusher) {
         useTLS: shouldUseTLS(opts),
         wsHost: getWebsocketHost(opts),
         userAuthorizer: buildUserAuthorizer(opts),
-        channelAuthorizer: buildChannelAuthorizer(opts, pusher),
+        channelAuthorizer: buildChannelAuthorizer(opts, pusher)
     };
     if ('disabledTransports' in opts)
         config.disabledTransports = opts.disabledTransports;
@@ -4394,7 +4393,7 @@ function buildUserAuthorizer(opts) {
     if ('customHandler' in userAuth) {
         return userAuth['customHandler'];
     }
-    return UserAuthorizer(userAuth);
+    return user_authorizer(userAuth);
 }
 function buildChannelAuth(opts, pusher) {
     var channelAuth;
@@ -4404,7 +4403,7 @@ function buildChannelAuth(opts, pusher) {
     else {
         channelAuth = {
             transport: opts.authTransport || defaults.authTransport,
-            endpoint: opts.authEndpoint || defaults.authEndpoint,
+            endpoint: opts.authEndpoint || defaults.authEndpoint
         };
         if ('auth' in opts) {
             if ('params' in opts.auth)
@@ -4422,7 +4421,7 @@ function buildChannelAuthorizer(opts, pusher) {
     if ('customHandler' in channelAuth) {
         return channelAuth['customHandler'];
     }
-    return ChannelAuthorizer(channelAuth);
+    return channel_authorizer(channelAuth);
 }
 
 // CONCATENATED MODULE: ./src/core/pusher.ts
@@ -4609,15 +4608,22 @@ var pusher_Pusher = (function () {
     };
     Pusher.prototype.signin = function () {
         var _this = this;
+        if (this.connection.state !== 'connected') {
+            logger.warn("Error during signin: Pusher connection not in connected state");
+            return;
+        }
         var onAuthorize = function (err, authData) {
             if (err) {
-                console.error('Error during signin', err);
+                logger.warn("Error during signin: " + err);
                 return;
             }
-            _this.send_event('pusher:signin', { auth: authData.auth, user: authData.user_data });
+            _this.send_event('pusher:signin', {
+                auth: authData.auth,
+                user_data: authData.user_data
+            });
         };
         this.config.userAuthorizer({
-            socketId: this.connection.socket_id,
+            socketId: this.connection.socket_id
         }, onAuthorize);
     };
     Pusher.instances = [];

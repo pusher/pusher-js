@@ -418,6 +418,53 @@ describe("Pusher", function() {
     });
   });
 
+  describe("#signin", function(){
+    var pusher;
+    beforeEach(function() {
+      pusher = new Pusher("foo");
+      spyOn(pusher.config, "userAuthorizer");
+      spyOn(pusher, "send_event");
+      pusher.connection.state = "connected";
+      pusher.connection.socket_id = "1.23";
+    });
+
+    it("should fail if the connection is not connected", function() {
+      pusher.connection.state = "connecting";
+      spyOn(Logger, "warn");
+      pusher.signin();
+      expect(pusher.config.userAuthorizer).not.toHaveBeenCalled();
+      expect(Logger.warn).toHaveBeenCalledWith("Error during signin: Pusher connection not in connected state");
+    });
+
+    it("should fail if userAuthorizer fails", function() {
+      pusher.config.userAuthorizer.and.callFake(function(params, callback) {
+        callback("this error", {});
+      });
+      spyOn(Logger, "warn");
+      pusher.signin();
+      expect(pusher.config.userAuthorizer).toHaveBeenCalledWith({socketId: "1.23"}, jasmine.any(Function));
+      expect(Logger.warn).toHaveBeenCalledWith("Error during signin: this error");
+    });
+
+    // TODO more signin tests
+    it("should send piusher:signin event", function() {
+      pusher.config.userAuthorizer.and.callFake(function(params, callback) {
+        callback(null, {
+          auth: "auth",
+          user_data: JSON.stringify({ id:"1" }),
+          foo: 'bar',
+        });
+      });
+      spyOn(Logger, "warn");
+      pusher.signin();
+      expect(pusher.config.userAuthorizer).toHaveBeenCalledWith({socketId: "1.23"}, jasmine.any(Function));
+      expect(pusher.send_event).toHaveBeenCalledWith('pusher:signin', {
+        auth: "auth",
+        user_data: JSON.stringify({ id:"1" }),
+      });
+    });
+  });
+
   describe("#disconnect", function() {
     it("should call disconnect on connection manager", function() {
       var pusher = new Pusher("foo");

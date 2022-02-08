@@ -3317,7 +3317,7 @@ var Defaults = {
     cluster: 'mt1',
     userAuth: {
         endpoint: '/pusher/user-auth',
-        transport: 'ajax',
+        transport: 'ajax'
     },
     cdn_http: "http://js.pusher.com",
     cdn_https: "https://js.pusher.com",
@@ -4390,7 +4390,7 @@ var PrivateChannel = (function (_super) {
     PrivateChannel.prototype.authorize = function (socketId, callback) {
         return this.pusher.config.channelAuthorizer({
             channelName: this.name,
-            socketId: socketId,
+            socketId: socketId
         }, callback);
     };
     return PrivateChannel;
@@ -5936,14 +5936,14 @@ var net_info_Network = new NetInfo();
 
 // CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
 
-var fetchAuth = function (context, query, options, callback) {
+var fetchAuth = function (context, query, authOptions, callback) {
     var headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
-    for (var headerName in options.headers) {
-        headers.set(headerName, options.headers[headerName]);
+    for (var headerName in authOptions.headers) {
+        headers.set(headerName, authOptions.headers[headerName]);
     }
     var body = query;
-    var request = new Request(options.endpoint, {
+    var request = new Request(authOptions.endpoint, {
         headers: headers,
         body: body,
         credentials: 'same-origin',
@@ -6260,62 +6260,61 @@ var strategy_builder_UnsupportedStrategy = {
 
 // CONCATENATED MODULE: ./src/core/auth/user_authorizer.ts
 
-var composeChannelQuery = function (params, userAuth) {
-    var query = 'socket_id=' +
-        encodeURIComponent(params.socketId);
-    for (var i in userAuth.params) {
+var composeChannelQuery = function (params, authOptions) {
+    var query = 'socket_id=' + encodeURIComponent(params.socketId);
+    for (var i in authOptions.params) {
         query +=
             '&' +
                 encodeURIComponent(i) +
                 '=' +
-                encodeURIComponent(userAuth.params[i]);
+                encodeURIComponent(authOptions.params[i]);
     }
     return query;
 };
-var UserAuthorizer = function (userAuth) {
-    if (typeof worker_runtime.getAuthorizers()[userAuth.transport] === 'undefined') {
-        throw "'" + userAuth.transport + "' is not a recognized auth transport";
+var UserAuthorizer = function (authOptions) {
+    if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+        throw "'" + authOptions.transport + "' is not a recognized auth transport";
     }
     return function (params, callback) {
-        var query = composeChannelQuery(params, userAuth);
-        worker_runtime.getAuthorizers()[userAuth.transport](worker_runtime, query, userAuth, callback);
+        var query = composeChannelQuery(params, authOptions);
+        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, callback);
     };
 };
+/* harmony default export */ var user_authorizer = (UserAuthorizer);
 
 // CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
 
-var channel_authorizer_composeChannelQuery = function (params, channelAuth) {
-    var query = 'socket_id=' +
-        encodeURIComponent(params.socketId);
-    query += '&channel_name=' +
-        encodeURIComponent(params.channelName);
-    for (var i in channelAuth.params) {
+var channel_authorizer_composeChannelQuery = function (params, authOptions) {
+    var query = 'socket_id=' + encodeURIComponent(params.socketId);
+    query += '&channel_name=' + encodeURIComponent(params.channelName);
+    for (var i in authOptions.params) {
         query +=
             '&' +
                 encodeURIComponent(i) +
                 '=' +
-                encodeURIComponent(channelAuth.params[i]);
+                encodeURIComponent(authOptions.params[i]);
     }
     return query;
 };
-var ChannelAuthorizer = function (channelAuth) {
-    if (typeof worker_runtime.getAuthorizers()[channelAuth.transport] === 'undefined') {
-        throw "'" + channelAuth.transport + "' is not a recognized auth transport";
+var ChannelAuthorizer = function (authOptions) {
+    if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+        throw "'" + authOptions.transport + "' is not a recognized auth transport";
     }
     return function (params, callback) {
-        var query = channel_authorizer_composeChannelQuery(params, channelAuth);
-        worker_runtime.getAuthorizers()[channelAuth.transport](worker_runtime, query, channelAuth, callback);
+        var query = channel_authorizer_composeChannelQuery(params, authOptions);
+        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, callback);
     };
 };
+/* harmony default export */ var channel_authorizer = (ChannelAuthorizer);
 
 // CONCATENATED MODULE: ./src/core/auth/deprecated_channel_authorizer.ts
-var ChannelAuthorizerProxy = function (pusher, channelAuth, channelAuthorizerGenerator) {
+var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGenerator) {
     var oldAuthOptions = {
-        authTransport: channelAuth.transport,
-        authEndpoint: channelAuth.endpoint,
+        authTransport: authOptions.transport,
+        authEndpoint: authOptions.endpoint,
         auth: {
-            params: channelAuth.params,
-            headers: channelAuth.headers
+            params: authOptions.params,
+            headers: authOptions.headers
         }
     };
     return function (params, callback) {
@@ -6349,7 +6348,7 @@ function getConfig(opts, pusher) {
         useTLS: shouldUseTLS(opts),
         wsHost: getWebsocketHost(opts),
         userAuthorizer: buildUserAuthorizer(opts),
-        channelAuthorizer: buildChannelAuthorizer(opts, pusher),
+        channelAuthorizer: buildChannelAuthorizer(opts, pusher)
     };
     if ('disabledTransports' in opts)
         config.disabledTransports = opts.disabledTransports;
@@ -6408,7 +6407,7 @@ function buildUserAuthorizer(opts) {
     if ('customHandler' in userAuth) {
         return userAuth['customHandler'];
     }
-    return UserAuthorizer(userAuth);
+    return user_authorizer(userAuth);
 }
 function buildChannelAuth(opts, pusher) {
     var channelAuth;
@@ -6418,7 +6417,7 @@ function buildChannelAuth(opts, pusher) {
     else {
         channelAuth = {
             transport: opts.authTransport || defaults.authTransport,
-            endpoint: opts.authEndpoint || defaults.authEndpoint,
+            endpoint: opts.authEndpoint || defaults.authEndpoint
         };
         if ('auth' in opts) {
             if ('params' in opts.auth)
@@ -6436,7 +6435,7 @@ function buildChannelAuthorizer(opts, pusher) {
     if ('customHandler' in channelAuth) {
         return channelAuth['customHandler'];
     }
-    return ChannelAuthorizer(channelAuth);
+    return channel_authorizer(channelAuth);
 }
 
 // CONCATENATED MODULE: ./src/core/pusher.ts
@@ -6623,15 +6622,22 @@ var pusher_Pusher = (function () {
     };
     Pusher.prototype.signin = function () {
         var _this = this;
+        if (this.connection.state !== 'connected') {
+            logger.warn("Error during signin: Pusher connection not in connected state");
+            return;
+        }
         var onAuthorize = function (err, authData) {
             if (err) {
-                console.error('Error during signin', err);
+                logger.warn("Error during signin: " + err);
                 return;
             }
-            _this.send_event('pusher:signin', { auth: authData.auth, user: authData.user_data });
+            _this.send_event('pusher:signin', {
+                auth: authData.auth,
+                user_data: authData.user_data
+            });
         };
         this.config.userAuthorizer({
-            socketId: this.connection.socket_id,
+            socketId: this.connection.socket_id
         }, onAuthorize);
     };
     Pusher.instances = [];

@@ -250,22 +250,27 @@ export default class Pusher {
   }
 
   signin() {
+    if (this.connection.state !== 'connected') {
+      Logger.warn(
+        `Error during signin: Pusher connection not in connected state`
+      );
+      return;
+    }
+
     const onAuthorize: AuthorizerCallback = (err, authData: AuthData) => {
       if (err) {
-        console.error('Error during signin', err);
+        Logger.warn(`Error during signin: ${err}`);
         return;
       }
 
-      // Send pusher:signin event
       this.send_event('pusher:signin', {
         auth: authData.auth,
-        user: authData.user_data
+        user_data: authData.user_data
       });
 
       // Later when we get pusher:singin-success event, the user will be marked as signed in
     };
 
-    // Call the user auth endpoint
     this.config.userAuthorizer(
       {
         socketId: this.connection.socket_id
