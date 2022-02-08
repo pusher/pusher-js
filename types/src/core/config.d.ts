@@ -1,5 +1,5 @@
 import { Options } from './options';
-import { AuthHandler } from './auth/options';
+import { ChannelAuthHandler, UserAuthHandler } from './auth/options';
 import * as nacl from 'tweetnacl';
 export declare type AuthTransport = 'ajax' | 'jsonp';
 export declare type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockjs';
@@ -18,8 +18,8 @@ export interface Config {
     wsPath: string;
     wsPort: number;
     wssPort: number;
-    userAuthenticator: AuthHandler;
-    channelAuthorizer: AuthHandler;
+    userAuthenticator: UserAuthHandler;
+    channelAuthorizer: ChannelAuthHandler;
     forceTLS?: boolean;
     cluster?: string;
     disabledTransports?: Transport[];

@@ -6,7 +6,7 @@ import { decode as encodeUTF8 } from '@stablelib/utf8';
 import { decode as decodeBase64 } from '@stablelib/base64';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
-import { AuthData, AuthorizerCallback } from '../auth/options';
+import { ChannelAuthData, ChannelAuthCallback } from '../auth/options';
 import * as nacl from 'tweetnacl';
 
 /** Extends private channels to provide encrypted channel interface.
@@ -28,8 +28,8 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {String} socketId
    * @param  {Function} callback
    */
-  authorize(socketId: string, callback: AuthorizerCallback) {
-    super.authorize(socketId, (error: Error | null, authData: AuthData) => {
+  authorize(socketId: string, callback: ChannelAuthCallback) {
+    super.authorize(socketId, (error: Error | null, authData: ChannelAuthData) => {
       if (error) {
         callback(error, authData);
         return;

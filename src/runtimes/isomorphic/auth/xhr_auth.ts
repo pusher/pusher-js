@@ -5,14 +5,14 @@ import Runtime from 'runtime';
 import { AuthTransport } from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
 import UrlStore from 'core/utils/url_store';
-import { AuthorizerCallback, InternalAuthOptions } from 'core/auth/options';
+import { AuthTransportCallback, InternalAuthOptions } from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
 var ajax: AuthTransport = function(
   context: AbstractRuntime,
   query: string,
   authOptions: InternalAuthOptions,
-  callback: AuthorizerCallback
+  callback: AuthTransportCallback
 ) {
   var xhr;
 
@@ -41,7 +41,7 @@ var ajax: AuthTransport = function(
               'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
                 xhr.responseText
             ),
-            { auth: '' }
+            null,
           );
         }
 
@@ -58,7 +58,7 @@ var ajax: AuthTransport = function(
               `received status: ${xhr.status} from ${authOptions.endpoint}. ` +
               `Clients must be authenticated to join private or presence channels. ${suffix}`
           ),
-          { auth: '' }
+          null,
         );
       }
     }

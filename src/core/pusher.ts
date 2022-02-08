@@ -20,7 +20,7 @@ import UrlStore from 'core/utils/url_store';
 import { Options } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
-import { AuthorizerCallback, AuthData } from './auth/options';
+import { UserAuthData, UserAuthCallback } from './auth/options';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -257,7 +257,7 @@ export default class Pusher {
       return;
     }
 
-    const onAuthorize: AuthorizerCallback = (err, authData: AuthData) => {
+    const onAuthorize: UserAuthCallback = (err, authData: UserAuthData) => {
       if (err) {
         Logger.warn(`Error during signin: ${err}`);
         return;

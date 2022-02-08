@@ -1,13 +1,13 @@
 import Channel from '../channels/channel';
 import {
-  AuthorizerCallback,
-  AuthHandler,
-  AuthRequestParams,
+  ChannelAuthCallback,
+  ChannelAuthHandler,
+  ChannelAuthRequestParams,
   InternalAuthOptions
 } from './options';
 
 export interface DeprecatedChannelAuthorizer {
-  authorize(socketId: string, callback: AuthorizerCallback): void;
+  authorize(socketId: string, callback: ChannelAuthCallback): void;
 }
 
 export interface ChannelAuthorizerGenerator {
@@ -32,7 +32,7 @@ export const ChannelAuthorizerProxy = (
   pusher,
   authOptions: InternalAuthOptions,
   channelAuthorizerGenerator: ChannelAuthorizerGenerator
-): AuthHandler => {
+): ChannelAuthHandler => {
   const deprecatedAuthorizerOptions: DeprecatedAuthorizerOptions = {
     authTransport: authOptions.transport,
     authEndpoint: authOptions.endpoint,
@@ -41,7 +41,7 @@ export const ChannelAuthorizerProxy = (
       headers: authOptions.headers
     }
   };
-  return (params: AuthRequestParams, callback: AuthorizerCallback) => {
+  return (params: ChannelAuthRequestParams, callback: ChannelAuthCallback) => {
     const channel = pusher.channel(params.channelName);
     // This line creates a new channel authorizer every time.
     // In the past, this was only done once per channel and reused.

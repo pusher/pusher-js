@@ -1,8 +1,7 @@
 import AbstractRuntime from 'runtimes/interface';
 import { AuthTransport } from 'core/auth/auth_transports';
 import {
-  AuthorizerCallback,
-  AuthData,
+  AuthTransportCallback,
   InternalAuthOptions
 } from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
@@ -11,7 +10,7 @@ var fetchAuth: AuthTransport = function(
   context: AbstractRuntime,
   query: string,
   authOptions: InternalAuthOptions,
-  callback: AuthorizerCallback
+  callback: AuthTransportCallback
 ) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -42,7 +41,7 @@ var fetchAuth: AuthTransport = function(
       );
     })
     .then(data => {
-      let parsedData: AuthData;
+      let parsedData;
       try {
         parsedData = JSON.parse(data);
       } catch (e) {
@@ -55,7 +54,7 @@ var fetchAuth: AuthTransport = function(
       callback(null, parsedData);
     })
     .catch(err => {
-      callback(err, { auth: '' });
+      callback(err, null);
     });
 };
 

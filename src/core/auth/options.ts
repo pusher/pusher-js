@@ -1,25 +1,46 @@
-export interface AuthData {
+export interface ChannelAuthData {
   auth: string;
   channel_data?: string;
   shared_secret?: string;
-  user_data?: string;
 }
 
-export type AuthorizerCallback = (
+export type ChannelAuthCallback = (
   error: Error | null,
-  authData: AuthData
+  authData: ChannelAuthData | null,
 ) => void;
 
-export interface AuthRequestParams {
+export interface ChannelAuthRequestParams {
   socketId: string;
-  channelName?: string;
+  channelName: string;
 }
 
-export interface AuthHandler {
-  (params: AuthRequestParams, callback: AuthorizerCallback): void;
+export interface ChannelAuthHandler {
+  (params: ChannelAuthRequestParams, callback: ChannelAuthCallback): void;
 }
 
-export interface AuthOptions {
+export interface UserAuthData {
+  auth: string;
+  user_data: string;
+}
+
+
+export type UserAuthCallback = (
+  error: Error | null,
+  authData: UserAuthData | null,
+) => void;
+
+export interface UserAuthRequestParams {
+  socketId: string;
+}
+
+export interface UserAuthHandler {
+  (params: UserAuthRequestParams, callback: UserAuthCallback): void;
+}
+
+
+export type AuthTransportCallback = ChannelAuthCallback | UserAuthCallback;
+
+export interface AuthOptions<AuthHandler> {
   transport: 'ajax' | 'jsonp';
   endpoint: string;
   params?: any;

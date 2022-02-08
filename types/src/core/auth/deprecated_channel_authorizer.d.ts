@@ -1,7 +1,7 @@
 import Channel from '../channels/channel';
-import { AuthorizerCallback, AuthHandler, InternalAuthOptions } from './options';
+import { ChannelAuthCallback, ChannelAuthHandler, InternalAuthOptions } from './options';
 export interface DeprecatedChannelAuthorizer {
-    authorize(socketId: string, callback: AuthorizerCallback): void;
+    authorize(socketId: string, callback: ChannelAuthCallback): void;
 }
 export interface ChannelAuthorizerGenerator {
     (channel: Channel, options: DeprecatedAuthorizerOptions): DeprecatedChannelAuthorizer;
@@ -15,4 +15,4 @@ export interface DeprecatedAuthorizerOptions {
     authEndpoint: string;
     auth?: DeprecatedAuthOptions;
 }
-export declare const ChannelAuthorizerProxy: (pusher: any, authOptions: InternalAuthOptions, channelAuthorizerGenerator: ChannelAuthorizerGenerator) => AuthHandler;
+export declare const ChannelAuthorizerProxy: (pusher: any, authOptions: InternalAuthOptions, channelAuthorizerGenerator: ChannelAuthorizerGenerator) => ChannelAuthHandler;

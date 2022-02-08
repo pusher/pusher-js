@@ -1,4 +1,4 @@
-import { AuthOptions } from './auth/options';
+import { AuthOptions, UserAuthHandler } from './auth/options';
 import { AuthTransport } from './config';
 
 export interface DefaultConfig {
@@ -18,7 +18,7 @@ export interface DefaultConfig {
   pongTimeout: number;
   unavailableTimeout: number;
   cluster: string;
-  userAuth: AuthOptions;
+  userAuth: AuthOptions<UserAuthHandler>;
 
   cdn_http?: string;
   cdn_https?: string;

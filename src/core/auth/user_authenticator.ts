@@ -1,14 +1,14 @@
 import {
-  AuthorizerCallback,
+  UserAuthCallback,
   InternalAuthOptions,
-  AuthHandler,
-  AuthRequestParams
+  UserAuthHandler,
+  UserAuthRequestParams
 } from './options';
 
 import Runtime from 'runtime';
 
 const composeChannelQuery = (
-  params: AuthRequestParams,
+  params: UserAuthRequestParams,
   authOptions: InternalAuthOptions
 ) => {
   var query = 'socket_id=' + encodeURIComponent(params.socketId);
@@ -24,12 +24,12 @@ const composeChannelQuery = (
   return query;
 };
 
-const UserAuthenticator = (authOptions: InternalAuthOptions): AuthHandler => {
+const UserAuthenticator = (authOptions: InternalAuthOptions): UserAuthHandler => {
   if (typeof Runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
     throw `'${authOptions.transport}' is not a recognized auth transport`;
   }
 
-  return (params: AuthRequestParams, callback: AuthorizerCallback) => {
+  return (params: UserAuthRequestParams, callback: UserAuthCallback) => {
     const query = composeChannelQuery(params, authOptions);
 
     Runtime.getAuthorizers()[authOptions.transport](
