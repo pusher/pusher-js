@@ -6,7 +6,7 @@ export interface ChannelAuthData {
 
 export type ChannelAuthCallback = (
   error: Error | null,
-  authData: ChannelAuthData | null,
+  authData: ChannelAuthData | null
 ) => void;
 
 export interface ChannelAuthRequestParams {
@@ -23,10 +23,9 @@ export interface UserAuthData {
   user_data: string;
 }
 
-
 export type UserAuthCallback = (
   error: Error | null,
-  authData: UserAuthData | null,
+  authData: UserAuthData | null
 ) => void;
 
 export interface UserAuthRequestParams {
@@ -36,7 +35,6 @@ export interface UserAuthRequestParams {
 export interface UserAuthHandler {
   (params: UserAuthRequestParams, callback: UserAuthCallback): void;
 }
-
 
 export type AuthTransportCallback = ChannelAuthCallback | UserAuthCallback;
 

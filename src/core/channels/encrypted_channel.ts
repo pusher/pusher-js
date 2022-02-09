@@ -29,25 +29,28 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {Function} callback
    */
   authorize(socketId: string, callback: ChannelAuthCallback) {
-    super.authorize(socketId, (error: Error | null, authData: ChannelAuthData) => {
-      if (error) {
-        callback(error, authData);
-        return;
+    super.authorize(
+      socketId,
+      (error: Error | null, authData: ChannelAuthData) => {
+        if (error) {
+          callback(error, authData);
+          return;
+        }
+        let sharedSecret = authData['shared_secret'];
+        if (!sharedSecret) {
+          callback(
+            new Error(
+              `No shared_secret key in auth payload for encrypted channel: ${this.name}`
+            ),
+            null
+          );
+          return;
+        }
+        this.key = decodeBase64(sharedSecret);
+        delete authData['shared_secret'];
+        callback(null, authData);
       }
-      let sharedSecret = authData['shared_secret'];
-      if (!sharedSecret) {
-        callback(
-          new Error(
-            `No shared_secret key in auth payload for encrypted channel: ${this.name}`
-          ),
-          null
-        );
-        return;
-      }
-      this.key = decodeBase64(sharedSecret);
-      delete authData['shared_secret'];
-      callback(null, authData);
-    });
+    );
   }
 
   trigger(event: string, data: any): boolean {

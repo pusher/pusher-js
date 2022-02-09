@@ -1,5 +1,9 @@
 import ConnectionManager from './connection/connection_manager';
-import { AuthOptions, ChannelAuthHandler, UserAuthHandler } from './auth/options';
+import {
+  AuthOptions,
+  ChannelAuthHandler,
+  UserAuthHandler
+} from './auth/options';
 import {
   ChannelAuthorizerGenerator,
   DeprecatedAuthOptions

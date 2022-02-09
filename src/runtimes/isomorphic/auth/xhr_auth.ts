@@ -41,7 +41,7 @@ var ajax: AuthTransport = function(
               'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
                 xhr.responseText
             ),
-            null,
+            null
           );
         }
 
@@ -58,7 +58,7 @@ var ajax: AuthTransport = function(
               `received status: ${xhr.status} from ${authOptions.endpoint}. ` +
               `Clients must be authenticated to join private or presence channels. ${suffix}`
           ),
-          null,
+          null
         );
       }
     }

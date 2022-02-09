@@ -1,6 +1,10 @@
 import { Options } from './options';
 import Defaults from './defaults';
-import { ChannelAuthHandler, UserAuthHandler, AuthOptions } from './auth/options';
+import {
+  ChannelAuthHandler,
+  UserAuthHandler,
+  AuthOptions
+} from './auth/options';
 import UserAuthenticator from './auth/user_authenticator';
 import ChannelAuthorizer from './auth/channel_authorizer';
 import { ChannelAuthorizerProxy } from './auth/deprecated_channel_authorizer';
@@ -140,7 +144,10 @@ function buildUserAuthenticator(opts: Options): UserAuthHandler {
   return UserAuthenticator(userAuth);
 }
 
-function buildChannelAuth(opts: Options, pusher) : AuthOptions<ChannelAuthHandler> {
+function buildChannelAuth(
+  opts: Options,
+  pusher
+): AuthOptions<ChannelAuthHandler> {
   var channelAuth: AuthOptions<ChannelAuthHandler>;
   if ('channelAuth' in opts) {
     channelAuth = opts.channelAuth;
