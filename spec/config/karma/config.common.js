@@ -10,6 +10,7 @@ if (process.env.MINIMAL_INTEGRATION_TESTS) {
 
 module.exports = {
   basePath: '../../../',
+  frameworks: ["jasmine"],
 
   reporters: ['verbose'],
 
@@ -17,9 +18,13 @@ module.exports = {
     mode: 'development',
     resolve: {
       modules: [
+        'src/runtimes/web',
         'spec/javascripts/helpers'
       ]
     },
+    externals: {
+      testenv: "'web'"
+    }
   }),
   port: 9876,
   runnerPort: 9100,

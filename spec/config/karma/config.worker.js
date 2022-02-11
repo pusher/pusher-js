@@ -4,26 +4,31 @@ i.e. 'unit' or 'integration'.
 Sorts out the module resolution for this build and changes
 the testenv.
 */
+module.exports = function(config, suite) {
+  config.frameworks = ["jasmine-web-worker"];
+  config.files = [
+    '**/spec/javascripts/'+suite+'/index.worker.js'
+  ];
 
-module.exports = {
-  // frameworks: ['jasmine'],
-  frameworks: ['jasmine-web-worker'],
-  files: ['**/spec/javascripts/unit/index.worker.js'],
-  preprocessors: {
-    '**/spec/javascripts/unit/index.worker.js': ['webpack']
-  },
-  webpack: { 
-    resolve: {
-      modules: [
-        'src/runtimes/worker',
-        'node_modules'
-      ],
-      alias:{
-        'dom/dependencies': 'worker/mock-dom-dependencies'
-      }
-    },
-    externals: {
-      testenv: "'worker'"
-    }
+  config.preprocessors = {
+    '**/spec/javascripts/node_modules/**/*.ts': ['webpack'],
+    '**/spec/javascripts/helpers/**/*.js': ['webpack']
+  };
+
+  var index = '**/spec/javascripts/'+suite+'/index.worker.js';
+  config.preprocessors[index] = ['webpack'];
+
+  config.webpack.resolve.modules = [
+    'node_modules',
+    'web_modules',
+    'src',
+    'src/runtimes/worker',
+    'src/runtimes',
+    'spec/javascripts/helpers'
+  ]
+  config.webpack.resolve.alias = {
+    'dom/dependencies': 'worker/mock-dom-dependencies',
   }
+  config.webpack.externals.testenv = "'worker'";
+  return config;
 }
