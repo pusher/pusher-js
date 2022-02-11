@@ -6,10 +6,6 @@ var ChannelAuthorizer = require('core/auth/channel_authorizer').default;
 var endpoint = 'http://example.org/pusher/auth';
 
 describe('Fetch Authorizer', function() {
-  beforeEach(function() {
-    print(Runtime.getAuthorizers())
-    // Authorizer.authorizers = { ajax: fetchAuth };
-  });
 
   afterEach(function() {
     fetchMock.restore();
@@ -26,7 +22,7 @@ describe('Fetch Authorizer', function() {
     });
 
     channelAuthorizer({
-      sockerId: '1.23',
+      socketId: '1.23',
       channelName: 'chan'
     }, function() {});
 
@@ -39,7 +35,7 @@ describe('Fetch Authorizer', function() {
     expect(sentHeaders.get('n')).toEqual('42');
   });
 
-  it('should pass params in the query string', function() {
+  it('should pass params in the query string', async function() {
     fetchMock.mock(endpoint, { body: { hello: 'world' } });
 
     var params = { a: 1, b: 2 };
@@ -50,18 +46,17 @@ describe('Fetch Authorizer', function() {
     });
 
     channelAuthorizer({
-      sockerId: '1.23',
+      socketId: '1.23',
       channelName: 'chan'
     }, function() {});
 
-    var lastCall = fetchMock.lastCall(endpoint)[0];
-    console.log(lastCall);
-    expect(lastCall.body).toEqual(
-      'socket_id=1.23&channel_name=chan&a=1&b=2'
-    );
+    await new Promise(resolve => setTimeout(resolve, 100));
+    var lastRequest = fetchMock.lastCall(endpoint)[0];
+    const body = await lastRequest.text()
+    expect(body).toEqual("socket_id=1.23&channel_name=chan&a=1&b=2");
   });
 
-  it('should call back with the auth result on success', function() {
+  it('should call back with the auth result on success', async function() {
     var data = { foo: 'bar', number: 1 };
     var dataJSON = JSON.stringify(data);
 
@@ -74,40 +69,42 @@ describe('Fetch Authorizer', function() {
       endpoint: endpoint,
     });
 
-    var callback = jasmine.createSpy('callback');
+    var callback = jasmine.createSpy('callback123');
     channelAuthorizer({
-      sockerId: '1.23',
+      socketId: '1.23',
       channelName: 'chan'
     }, callback);
     
+    await new Promise(resolve => setTimeout(resolve, 100));
     expect(callback.calls.count()).toEqual(1);
-    expect(callback).toHaveBeenCalledWith(false, data);
+    expect(callback).toHaveBeenCalledWith(null, data);
   });
 
-  it('should call back with an error if JSON is invalid', function() {
+  it('should call back with an error if JSON is invalid', async function() {
     var channelAuthorizer = ChannelAuthorizer({
       transport: 'ajax',
       endpoint: endpoint,
     });
-
 
     var invalidJSON = 'INVALID { "something": "something"}';
     fetchMock.mock(endpoint, {
       body: invalidJSON
     });
 
-    var callback = jasmine.createSpy('callback');
+    var callback = jasmine.createSpy('callback456');
     channelAuthorizer({
-      sockerId: '1.23',
+      socketId: '1.23',
       channelName: 'chan'
     }, callback);
-    
+
+    await new Promise(resolve => setTimeout(resolve, 200));
     expect(callback.calls.count()).toEqual(1);
     expect(callback).toHaveBeenCalledWith(
-      true,
-      'JSON returned from auth endpoint was invalid, yet status code was 200. ' +
+      new Error('JSON returned from auth endpoint was invalid, yet status code was 200. ' +
         'Data was: ' +
-        invalidJSON
+        invalidJSON), 
+        null
     );
+
   });
 });

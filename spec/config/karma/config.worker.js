@@ -4,28 +4,29 @@ i.e. 'unit' or 'integration'.
 Sorts out the module resolution for this build and changes
 the testenv.
 */
-module.exports = function(config, suite) {
-  config.frameworks = ["jasmine-web-worker"];
-  config.files = [
-    '**/spec/javascripts/'+suite+'/index.worker.js'
-  ];
 
-  config.preprocessors = {
-    '**/spec/javascripts/node_modules/**/*.ts': ['webpack'],
-    '**/spec/javascripts/helpers/**/*.js': ['webpack']
-  };
+module.exports = function(suite) {
+  var index = '**/spec/javascripts/'+suite+'/index.worker.js'
+  config = {
+    frameworks: ['jasmine-web-worker'],
+    files: [index],
+    preprocessors: {
+      [index]: ['webpack']
+    },
+    webpack: { 
+      resolve: {
+        modules: [
+          'src/runtimes/worker',
+        ],
+        alias:{
+          'dom/dependencies': 'worker/mock-dom-dependencies'
+        }
+      },
+      externals: {
+        testenv: "'worker'"
+      }
+    }
+  }
 
-  var index = '**/spec/javascripts/'+suite+'/index.worker.js';
-  config.preprocessors[index] = ['webpack'];
-
-  config.webpack.resolve.modules = [
-    'node_modules',
-    'web_modules',
-    'src',
-    'src/runtimes/worker',
-    'src/runtimes',
-    'spec/javascripts/helpers'
-  ]
-  config.webpack.externals.testenv = "'worker'";
   return config;
 }
