@@ -5,28 +5,25 @@ Sorts out the module resolution for this build and changes
 the testenv.
 */
 
-module.exports = function(suite) {
-  var index = '**/spec/javascripts/'+suite+'/index.worker.js'
-  config = {
-    frameworks: ['jasmine-web-worker'],
-    files: [index],
-    preprocessors: {
-      [index]: ['webpack']
-    },
-    webpack: { 
-      resolve: {
-        modules: [
-          'src/runtimes/worker',
-        ],
-        alias:{
-          'dom/dependencies': 'worker/mock-dom-dependencies'
-        }
-      },
-      externals: {
-        testenv: "'worker'"
+module.exports = {
+  // frameworks: ['jasmine'],
+  frameworks: ['jasmine-web-worker'],
+  files: ['**/spec/javascripts/unit/index.worker.js'],
+  preprocessors: {
+    '**/spec/javascripts/unit/index.worker.js': ['webpack']
+  },
+  webpack: { 
+    resolve: {
+      modules: [
+        'src/runtimes/worker',
+        'node_modules'
+      ],
+      alias:{
+        'dom/dependencies': 'worker/mock-dom-dependencies'
       }
+    },
+    externals: {
+      testenv: "'worker'"
     }
   }
-
-  return config;
 }

@@ -4,7 +4,7 @@ var webConfig = require('./config.web');
 var config = merge(commonConfig, webConfig);
 
 if (process.env.WORKER === 'true') {
-  var workerConfig = require('./config.worker')('unit');
+  var workerConfig = require('./config.worker');
   config = merge(commonConfig, workerConfig);
 }
 
