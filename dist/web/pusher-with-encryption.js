@@ -3250,7 +3250,7 @@ var ajax = function (context, query, authOptions, callback) {
                 }
                 catch (e) {
                     callback(new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                        xhr.responseText), { auth: '' });
+                        xhr.responseText), null);
                 }
                 if (parsed) {
                     callback(null, data);
@@ -3260,7 +3260,7 @@ var ajax = function (context, query, authOptions, callback) {
                 var suffix = url_store.buildLogSuffix('authenticationEndpoint');
                 callback(new HTTPAuthError(xhr.status, 'Unable to retrieve auth string from auth endpoint - ' +
                     ("received status: " + xhr.status + " from " + authOptions.endpoint + ". ") +
-                    ("Clients must be authenticated to join private or presence channels. " + suffix)), { auth: '' });
+                    ("Clients must be authenticated to join private or presence channels. " + suffix)), null);
             }
         }
     };
@@ -6889,6 +6889,14 @@ var pusher_Pusher = (function () {
         });
         this.connection.bind('message', function (event) {
             var eventName = event.event;
+            if (eventName === 'pusher:signin_success') {
+                try {
+                    _this.user = JSON.parse(event.data.user_data);
+                }
+                catch (e) {
+                    logger.warn("Failed parsing user data after signin: " + event.data.user_data);
+                }
+            }
             var internal = eventName.indexOf('pusher_internal:') === 0;
             if (event.channel) {
                 var channel = _this.channel(event.channel);

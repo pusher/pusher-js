@@ -3535,6 +3535,7 @@ var net_info_Network = new NetInfo();
 // CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
 
 var fetchAuth = function (context, query, authOptions, callback) {
+    console.log('using fetchAuth');
     var headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in authOptions.headers) {
@@ -3566,7 +3567,7 @@ var fetchAuth = function (context, query, authOptions, callback) {
         }
         callback(null, parsedData);
     })["catch"](function (err) {
-        callback(err, { auth: '' });
+        callback(err, null);
     });
 };
 /* harmony default export */ var fetch_auth = (fetchAuth);
@@ -4099,6 +4100,14 @@ var pusher_Pusher = (function () {
         });
         this.connection.bind('message', function (event) {
             var eventName = event.event;
+            if (eventName === 'pusher:signin_success') {
+                try {
+                    _this.user = JSON.parse(event.data.user_data);
+                }
+                catch (e) {
+                    logger.warn("Failed parsing user data after signin: " + event.data.user_data);
+                }
+            }
             var internal = eventName.indexOf('pusher_internal:') === 0;
             if (event.channel) {
                 var channel = _this.channel(event.channel);

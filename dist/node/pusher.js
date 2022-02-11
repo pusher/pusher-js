@@ -103,6 +103,7 @@ module.exports = require("util");
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
+/*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* eslint-disable node/no-deprecated-api */
 var buffer = __webpack_require__(22)
 var Buffer = buffer.Buffer
@@ -124,6 +125,8 @@ if (Buffer.from && Buffer.alloc && Buffer.allocUnsafe && Buffer.allocUnsafeSlow)
 function SafeBuffer (arg, encodingOrOffset, length) {
   return Buffer(arg, encodingOrOffset, length)
 }
+
+SafeBuffer.prototype = Object.create(Buffer.prototype)
 
 // Copy static methods from Buffer
 copyProps(Buffer, SafeBuffer)
@@ -897,9 +900,9 @@ HttpParser.METHODS = {
   32: 'UNLINK'
 };
 
-var VERSION = (process.version || '')
-              .match(/[0-9]+/g)
-              .map(function(n) { return parseInt(n, 10) });
+var VERSION = process.version
+  ? process.version.match(/[0-9]+/g).map(function(n) { return parseInt(n, 10) })
+  : [];
 
 if (VERSION[0] === 0 && VERSION[1] === 12) {
   HttpParser.METHODS[16] = 'REPORT';
@@ -1048,12 +1051,14 @@ var instance = {
                       "The code must be either 1000, or between 3000 and 4999. " +
                       code + " is neither.");
 
-    if (this.readyState !== API.CLOSED) this.readyState = API.CLOSING;
-    var self = this;
+    if (this.readyState < API.CLOSING) {
+      var self = this;
+      this._closeTimer = setTimeout(function() {
+        self._beginClose('', 1006);
+      }, API.CLOSE_TIMEOUT);
+    }
 
-    this._closeTimer = setTimeout(function() {
-      self._beginClose('', 1006);
-    }, API.CLOSE_TIMEOUT);
+    if (this.readyState !== API.CLOSED) this.readyState = API.CLOSING;
 
     this._driver.close(reason, code);
   },
@@ -1090,7 +1095,7 @@ var instance = {
 
     if (this.readable) this.emit('data', data);
 
-    var event = new Event('message', {data: data});
+    var event = new Event('message', { data: data });
     event.initEvent('message', false, false);
     this.dispatchEvent(event);
   },
@@ -1098,7 +1103,7 @@ var instance = {
   _emitError: function(message) {
     if (this.readyState >= API.CLOSING) return;
 
-    var event = new Event('error', {message: message});
+    var event = new Event('error', { message: message });
     event.initEvent('error', false, false);
     this.dispatchEvent(event);
   },
@@ -1128,7 +1133,7 @@ var instance = {
     var reason = this._closeParams ? this._closeParams[0] : '',
         code   = this._closeParams ? this._closeParams[1] : 1006;
 
-    var event = new Event('close', {code: code, reason: reason});
+    var event = new Event('close', { code: code, reason: reason });
     event.initEvent('close', false, false);
     this.dispatchEvent(event);
   }
@@ -2090,7 +2095,7 @@ var WebSocket = function(request, socket, body, protocols, options) {
   options = options || {};
 
   this._stream = socket;
-  this._driver = driver.http(request, {maxLength: options.maxLength, protocols: protocols});
+  this._driver = driver.http(request, { maxLength: options.maxLength, protocols: protocols });
 
   var self = this;
   if (!this._stream || !this._stream.writable) return;
@@ -5553,6 +5558,14 @@ var assert = __webpack_require__(28);
 
 exports.HTTPParser = HTTPParser;
 function HTTPParser(type) {
+  assert.ok(type === HTTPParser.REQUEST || type === HTTPParser.RESPONSE || type === undefined);
+  if (type === undefined) {
+    // Node v12+
+  } else {
+    this.initialize(type);
+  }
+}
+HTTPParser.prototype.initialize = function (type, async_resource) {
   assert.ok(type === HTTPParser.REQUEST || type === HTTPParser.RESPONSE);
   this.type = type;
   this.state = type + '_LINE';
@@ -5568,14 +5581,19 @@ function HTTPParser(type) {
   this.body_bytes = null;
   this.isUserCall = false;
   this.hadError = false;
-}
+};
+
+HTTPParser.encoding = 'ascii';
 HTTPParser.maxHeaderSize = 80 * 1024; // maxHeaderSize (in bytes) is configurable, but 80kb by default;
 HTTPParser.REQUEST = 'REQUEST';
 HTTPParser.RESPONSE = 'RESPONSE';
-var kOnHeaders = HTTPParser.kOnHeaders = 0;
-var kOnHeadersComplete = HTTPParser.kOnHeadersComplete = 1;
-var kOnBody = HTTPParser.kOnBody = 2;
-var kOnMessageComplete = HTTPParser.kOnMessageComplete = 3;
+
+// Note: *not* starting with kOnHeaders=0 line the Node parser, because any
+//   newly added constants (kOnTimeout in Node v12.19.0) will overwrite 0!
+var kOnHeaders = HTTPParser.kOnHeaders = 1;
+var kOnHeadersComplete = HTTPParser.kOnHeadersComplete = 2;
+var kOnBody = HTTPParser.kOnBody = 3;
+var kOnMessageComplete = HTTPParser.kOnMessageComplete = 4;
 
 // Some handler stubs, needed for compatibility
 HTTPParser.prototype[kOnHeaders] =
@@ -5588,7 +5606,7 @@ Object.defineProperty(HTTPParser, 'kOnExecute', {
     get: function () {
       // hack for backward compatibility
       compatMode0_12 = false;
-      return 4;
+      return 99;
     }
   });
 
@@ -5627,6 +5645,7 @@ var methods = exports.methods = HTTPParser.methods = [
   'LINK',
   'UNLINK'
 ];
+var method_connect = methods.indexOf('CONNECT');
 HTTPParser.prototype.reinitialize = HTTPParser;
 HTTPParser.prototype.close =
 HTTPParser.prototype.pause =
@@ -5722,7 +5741,7 @@ HTTPParser.prototype.consumeLine = function () {
       chunk = this.chunk;
   for (var i = this.offset; i < end; i++) {
     if (chunk[i] === 0x0a) { // \n
-      var line = this.line + chunk.toString('ascii', this.offset, i);
+      var line = this.line + chunk.toString(HTTPParser.encoding, this.offset, i);
       if (line.charAt(line.length - 1) === '\r') {
         line = line.substr(0, line.length - 1);
       }
@@ -5732,7 +5751,7 @@ HTTPParser.prototype.consumeLine = function () {
     }
   }
   //line split over multiple chunks
-  this.line += chunk.toString('ascii', this.offset, this.end);
+  this.line += chunk.toString(HTTPParser.encoding, this.offset, this.end);
   this.offset = this.end;
 };
 
@@ -5772,9 +5791,6 @@ HTTPParser.prototype.REQUEST_LINE = function () {
   this.info.method = this._compatMode0_11 ? match[1] : methods.indexOf(match[1]);
   if (this.info.method === -1) {
     throw new Error('invalid request method');
-  }
-  if (match[1] === 'CONNECT') {
-    this.info.upgrade = true;
   }
   this.info.url = match[2];
   this.info.versionMajor = +match[3];
@@ -5830,6 +5846,7 @@ HTTPParser.prototype.HEADER = function () {
     var headers = info.headers;
     var hasContentLength = false;
     var currentContentLengthValue;
+    var hasUpgradeHeader = false;
     for (var i = 0; i < headers.length; i += 2) {
       switch (headers[i].toLowerCase()) {
         case 'transfer-encoding':
@@ -5855,13 +5872,33 @@ HTTPParser.prototype.HEADER = function () {
           this.connection += headers[i + 1].toLowerCase();
           break;
         case 'upgrade':
-          info.upgrade = true;
+          hasUpgradeHeader = true;
           break;
       }
     }
 
+    // if both isChunked and hasContentLength, isChunked wins
+    // This is required so the body is parsed using the chunked method, and matches
+    // Chrome's behavior.  We could, maybe, ignore them both (would get chunked
+    // encoding into the body), and/or disable shouldKeepAlive to be more
+    // resilient.
     if (this.isChunked && hasContentLength) {
-      throw parseErrorCode('HPE_UNEXPECTED_CONTENT_LENGTH');
+      hasContentLength = false;
+      this.body_bytes = null;
+    }
+
+    // Logic from https://github.com/nodejs/http-parser/blob/921d5585515a153fa00e411cf144280c59b41f90/http_parser.c#L1727-L1737
+    // "For responses, "Upgrade: foo" and "Connection: upgrade" are
+    //   mandatory only when it is a 101 Switching Protocols response,
+    //   otherwise it is purely informational, to announce support.
+    if (hasUpgradeHeader && this.connection.indexOf('upgrade') != -1) {
+      info.upgrade = this.type === HTTPParser.REQUEST || info.statusCode === 101;
+    } else {
+      info.upgrade = info.method === method_connect;
+    }
+
+    if (this.isChunked && info.upgrade) {
+      this.isChunked = false;
     }
 
     info.shouldKeepAlive = this.shouldKeepAlive();
@@ -5874,13 +5911,16 @@ HTTPParser.prototype.HEADER = function () {
           info.versionMinor, info.headers, info.method, info.url, info.statusCode,
           info.statusMessage, info.upgrade, info.shouldKeepAlive));
     }
-    if (info.upgrade || skipBody === 2) {
+    if (skipBody === 2) {
       this.nextRequest();
       return true;
     } else if (this.isChunked && !skipBody) {
       this.state = 'BODY_CHUNKHEAD';
     } else if (skipBody || this.body_bytes === 0) {
       this.nextRequest();
+      // For older versions of node (v6.x and older?), that return skipBody=1 or skipBody=true,
+      //   need this "return true;" if it's an upgrade request.
+      return info.upgrade;
     } else if (this.body_bytes === null) {
       this.state = 'BODY_RAW';
     } else {
@@ -5962,6 +6002,7 @@ HTTPParser.prototype.BODY_SIZED = function () {
     set: function (to) {
       // hack for backward compatibility
       this._compatMode0_11 = true;
+      method_connect = 'CONNECT';
       return (this[k] = to);
     }
   });
@@ -6648,7 +6689,7 @@ var Server = function(options) {
 util.inherits(Server, Base);
 
 var instance = {
-  EVENTS: ['open', 'message', 'error', 'close'],
+  EVENTS: ['open', 'message', 'error', 'close', 'ping', 'pong'],
 
   _bindEventListeners: function() {
     this.messages.on('error', function() {});
@@ -6885,14 +6926,14 @@ var util   = __webpack_require__(0),
     API    = __webpack_require__(11),
     Event  = __webpack_require__(7);
 
-var DEFAULT_PORTS    = {'http:': 80, 'https:': 443, 'ws:':80, 'wss:': 443},
+var DEFAULT_PORTS    = { 'http:': 80, 'https:': 443, 'ws:':80, 'wss:': 443 },
     SECURE_PROTOCOLS = ['https:', 'wss:'];
 
 var Client = function(_url, protocols, options) {
   options = options || {};
 
   this.url     = _url;
-  this._driver = driver.client(this.url, {maxLength: options.maxLength, protocols: protocols});
+  this._driver = driver.client(this.url, { maxLength: options.maxLength, protocols: protocols });
 
   ['open', 'error'].forEach(function(event) {
     this._driver.on(event, function() {
@@ -6944,12 +6985,12 @@ Client.prototype._configureProxy = function(proxy, originTLS) {
     for (name in proxy.headers) this._proxy.setHeader(name, proxy.headers[name]);
   }
 
-  this._proxy.pipe(this._stream, {end: false});
+  this._proxy.pipe(this._stream, { end: false });
   this._stream.pipe(this._proxy);
 
   this._proxy.on('connect', function() {
     if (secure) {
-      var options = {socket: self._stream, servername: uri.hostname};
+      var options = { socket: self._stream, servername: uri.hostname };
       for (name in originTLS) options[name] = originTLS[name];
       self._stream = tls.connect(options);
       self._configureStream();
@@ -10151,7 +10192,7 @@ var ajax = function (context, query, authOptions, callback) {
                 }
                 catch (e) {
                     callback(new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                        xhr.responseText), { auth: '' });
+                        xhr.responseText), null);
                 }
                 if (parsed) {
                     callback(null, data);
@@ -10161,7 +10202,7 @@ var ajax = function (context, query, authOptions, callback) {
                 var suffix = url_store.buildLogSuffix('authenticationEndpoint');
                 callback(new HTTPAuthError(xhr.status, 'Unable to retrieve auth string from auth endpoint - ' +
                     ("received status: " + xhr.status + " from " + authOptions.endpoint + ". ") +
-                    ("Clients must be authenticated to join private or presence channels. " + suffix)), { auth: '' });
+                    ("Clients must be authenticated to join private or presence channels. " + suffix)), null);
             }
         }
     };
@@ -10707,6 +10748,14 @@ var pusher_Pusher = (function () {
         });
         this.connection.bind('message', function (event) {
             var eventName = event.event;
+            if (eventName === 'pusher:signin_success') {
+                try {
+                    _this.user = JSON.parse(event.data.user_data);
+                }
+                catch (e) {
+                    logger.warn("Failed parsing user data after signin: " + event.data.user_data);
+                }
+            }
             var internal = eventName.indexOf('pusher_internal:') === 0;
             if (event.channel) {
                 var channel = _this.channel(event.channel);
