@@ -1,32 +1,32 @@
-var TestEnv = require('testenv');
-var Util = require('core/util').default;
-var Collections = require('core/utils/collections');
-var Logger = require('core/logger').default;
-var Defaults = require('core/defaults').default;
-var DefaultConfig = require('core/config');
-var TimelineSender = require('core/timeline/timeline_sender').default;
-var Pusher = require('core/pusher').default;
-var Mocks = require('../../helpers/mocks');
-var Factory = require('core/utils/factory').default;
-var Runtime = require('runtime').default;
+var TestEnv = require("testenv");
+var Util = require("core/util").default;
+var Collections = require("core/utils/collections");
+var Logger = require("core/logger").default;
+var Defaults = require("core/defaults").default;
+var DefaultConfig = require("core/config");
+var TimelineSender = require("core/timeline/timeline_sender").default;
+var Pusher = require("core/pusher").default;
+var Mocks = require("../../helpers/mocks");
+var Factory = require("core/utils/factory").default;
+var Runtime = require("runtime").default;
 const transports = Runtime.Transports;
-const Network = require('net_info').Network;
-const waitsFor = require('../../helpers/waitsFor');
-var NetInfo = require('net_info').NetInfo;
+const Network = require("net_info").Network;
+const waitsFor = require("../../helpers/waitsFor");
+var NetInfo = require("net_info").NetInfo;
 
-describe('Pusher', function() {
+describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
 
   switch (TestEnv) {
-    case 'worker':
-    case 'node':
-      var timelineTransport = 'xhr';
+    case "worker":
+    case "node":
+      var timelineTransport = "xhr";
       break;
-    case 'web':
-      var timelineTransport = 'jsonp';
+    case "web":
+      var timelineTransport = "jsonp";
       break;
     default:
-      throw 'Please specify the test environment as an external.';
+      throw "Please specify the test environment as an external.";
   }
 
   beforeEach(function() {
@@ -36,11 +36,11 @@ describe('Pusher', function() {
     Pusher.isReady = false;
     Pusher.instances = [];
 
-    spyOn(Runtime, 'getDefaultStrategy').and.callFake(function() {
+    spyOn(Runtime, "getDefaultStrategy").and.callFake(function() {
       return Mocks.getStrategy(true);
     });
 
-    spyOn(Factory, 'createConnectionManager').and.callFake(function(
+    spyOn(Factory, "createConnectionManager").and.callFake(function(
       key,
       options,
       config
@@ -51,14 +51,14 @@ describe('Pusher', function() {
       manager.config = config;
       return manager;
     });
-    spyOn(Factory, 'createChannel').and.callFake(function(name, _) {
+    spyOn(Factory, "createChannel").and.callFake(function(name, _) {
       return Mocks.getChannel(name);
     });
 
-    if (TestEnv === 'web') {
-      spyOn(Runtime, 'getDocument').and.returnValue({
+    if (TestEnv === "web") {
+      spyOn(Runtime, "getDocument").and.returnValue({
         location: {
-          protocol: 'http:'
+          protocol: "http:"
         }
       });
     }
@@ -70,123 +70,123 @@ describe('Pusher', function() {
     Pusher.logToConsole = _logToConsole;
   });
 
-  describe('app key validation', function() {
-    it('should throw on a null key', function() {
+  describe("app key validation", function() {
+    it("should throw on a null key", function() {
       expect(function() {
         new Pusher(null);
-      }).toThrow('You must pass your app key when you instantiate Pusher.');
+      }).toThrow("You must pass your app key when you instantiate Pusher.");
     });
 
-    it('should throw on an undefined key', function() {
+    it("should throw on an undefined key", function() {
       expect(function() {
         new Pusher();
-      }).toThrow('You must pass your app key when you instantiate Pusher.');
+      }).toThrow("You must pass your app key when you instantiate Pusher.");
     });
 
-    it('should allow a hex key', function() {
-      spyOn(Logger, 'warn');
-      var pusher = new Pusher('1234567890abcdef', { cluster: 'mt1' });
+    it("should allow a hex key", function() {
+      spyOn(Logger, "warn");
+      var pusher = new Pusher("1234567890abcdef", { cluster: "mt1" });
       expect(Logger.warn).not.toHaveBeenCalled();
     });
 
-    it('should warn if no cluster is supplied', function() {
-      spyOn(Logger, 'warn');
-      var pusher = new Pusher('1234567890abcdef');
+    it("should warn if no cluster is supplied", function() {
+      spyOn(Logger, "warn");
+      var pusher = new Pusher("1234567890abcdef");
       expect(Logger.warn).toHaveBeenCalled();
     });
 
-    it('should not warn if no cluster is supplied if wsHost or httpHost are supplied', function() {
-      spyOn(Logger, 'warn');
-      var wsPusher = new Pusher('1234567890abcdef', { wsHost: 'example.com' });
-      var httpPusher = new Pusher('1234567890abcdef', {
-        httpHost: 'example.com'
+    it("should not warn if no cluster is supplied if wsHost or httpHost are supplied", function() {
+      spyOn(Logger, "warn");
+      var wsPusher = new Pusher("1234567890abcdef", { wsHost: "example.com" });
+      var httpPusher = new Pusher("1234567890abcdef", {
+        httpHost: "example.com"
       });
       expect(Logger.warn).not.toHaveBeenCalled();
       expect(Logger.warn).not.toHaveBeenCalled();
     });
   });
 
-  describe('after construction', function() {
+  describe("after construction", function() {
     var pusher;
 
     beforeEach(function() {
-      pusher = new Pusher('foo');
+      pusher = new Pusher("foo");
     });
 
-    it('should create a timeline with the correct key', function() {
-      expect(pusher.timeline.key).toEqual('foo');
+    it("should create a timeline with the correct key", function() {
+      expect(pusher.timeline.key).toEqual("foo");
     });
 
-    it('should create a timeline with a session id', function() {
+    it("should create a timeline with a session id", function() {
       expect(pusher.timeline.session).toEqual(pusher.sessionID);
     });
 
-    it('should pass the cluster name to the timeline', function() {
-      var pusher = new Pusher('foo');
+    it("should pass the cluster name to the timeline", function() {
+      var pusher = new Pusher("foo");
       expect(pusher.timeline.options.cluster).toBe(Defaults.cluster);
 
-      pusher = new Pusher('foo', { cluster: 'spec' });
-      expect(pusher.timeline.options.cluster).toEqual('spec');
+      pusher = new Pusher("foo", { cluster: "spec" });
+      expect(pusher.timeline.options.cluster).toEqual("spec");
     });
 
-    it('should pass a feature list to the timeline', function() {
-      spyOn(Pusher, 'getClientFeatures').and.returnValue(['foo', 'bar']);
-      var pusher = new Pusher('foo');
-      expect(pusher.timeline.options.features).toEqual(['foo', 'bar']);
+    it("should pass a feature list to the timeline", function() {
+      spyOn(Pusher, "getClientFeatures").and.returnValue(["foo", "bar"]);
+      var pusher = new Pusher("foo");
+      expect(pusher.timeline.options.features).toEqual(["foo", "bar"]);
     });
 
-    it('should pass the version number to the timeline', function() {
+    it("should pass the version number to the timeline", function() {
       expect(pusher.timeline.options.version).toEqual(Defaults.VERSION);
     });
 
-    it('should pass per-connection timeline params', function() {
-      pusher = new Pusher('foo', { timelineParams: { horse: true } });
+    it("should pass per-connection timeline params", function() {
+      pusher = new Pusher("foo", { timelineParams: { horse: true } });
       expect(pusher.timeline.options.params).toEqual({ horse: true });
     });
 
-    it('should find subscribed channels', function() {
-      var channel = pusher.subscribe('chan');
-      expect(pusher.channel('chan')).toBe(channel);
+    it("should find subscribed channels", function() {
+      var channel = pusher.subscribe("chan");
+      expect(pusher.channel("chan")).toBe(channel);
     });
 
-    it('should not find unsubscribed channels', function() {
-      expect(pusher.channel('chan')).toBe(undefined);
-      pusher.subscribe('chan');
-      pusher.unsubscribe('chan');
-      expect(pusher.channel('chan')).toBe(undefined);
+    it("should not find unsubscribed channels", function() {
+      expect(pusher.channel("chan")).toBe(undefined);
+      pusher.subscribe("chan");
+      pusher.unsubscribe("chan");
+      expect(pusher.channel("chan")).toBe(undefined);
     });
 
-    describe('TLS', function() {
-      it('should be off by default', function() {
+    describe("TLS", function() {
+      it("should be off by default", function() {
         expect(pusher.shouldUseTLS()).toBe(true);
       });
 
-      it("should be off when 'forceTLS' parameter is passed", function() {
-        var pusher = new Pusher('foo', { forceTLS: false });
+      it("should be off when forceTLS parameter is passed", function() {
+        var pusher = new Pusher("foo", { forceTLS: false });
         expect(pusher.shouldUseTLS()).toBe(false);
       });
 
-      if (TestEnv === 'web') {
-        it('should be on when using https', function() {
+      if (TestEnv === "web") {
+        it("should be on when using https", function() {
           Runtime.getDocument.and.returnValue({
             location: {
-              protocol: 'https:'
+              protocol: "https:"
             }
           });
-          var pusher = new Pusher('foo', { forceTLS: false });
+          var pusher = new Pusher("foo", { forceTLS: false });
           expect(pusher.shouldUseTLS()).toBe(true);
         });
       }
     });
 
-    describe('with getStrategy function', function() {
-      it('should construct a strategy instance', function() {
+    describe("with getStrategy function", function() {
+      it("should construct a strategy instance", function() {
         var strategy = pusher.connection.options.getStrategy();
         expect(strategy.isSupported).toEqual(jasmine.any(Function));
         expect(strategy.connect).toEqual(jasmine.any(Function));
       });
 
-      it('should pass config and options to the strategy builder', function() {
+      it("should pass config and options to the strategy builder", function() {
         var config = DefaultConfig.getConfig({});
         var options = { useTLS: true };
 
@@ -200,14 +200,14 @@ describe('Pusher', function() {
       });
     });
 
-    describe('connection manager', function() {
-      it('should have the right key', function() {
-        var pusher = new Pusher('beef');
-        expect(pusher.connection.key).toEqual('beef');
+    describe("connection manager", function() {
+      it("should have the right key", function() {
+        var pusher = new Pusher("beef");
+        expect(pusher.connection.key).toEqual("beef");
       });
 
-      it('should have default timeouts', function() {
-        var pusher = new Pusher('foo');
+      it("should have default timeouts", function() {
+        var pusher = new Pusher("foo");
         var options = pusher.connection.options;
 
         expect(options.activityTimeout).toEqual(Defaults.activityTimeout);
@@ -215,8 +215,8 @@ describe('Pusher', function() {
         expect(options.unavailableTimeout).toEqual(Defaults.unavailableTimeout);
       });
 
-      it('should use user-specified timeouts', function() {
-        var pusher = new Pusher('foo', {
+      it("should use user-specified timeouts", function() {
+        var pusher = new Pusher("foo", {
           activityTimeout: 123,
           pongTimeout: 456,
           unavailableTimeout: 789
@@ -230,10 +230,10 @@ describe('Pusher', function() {
     });
   });
 
-  describe('.ready', function() {
-    it('should start connection attempts for instances', function() {
-      var pusher = new Pusher('01234567890abcdef');
-      spyOn(pusher, 'connect');
+  describe(".ready", function() {
+    it("should start connection attempts for instances", function() {
+      var pusher = new Pusher("01234567890abcdef");
+      spyOn(pusher, "connect");
 
       expect(pusher.connect).not.toHaveBeenCalled();
       Pusher.ready();
@@ -241,361 +241,361 @@ describe('Pusher', function() {
     });
   });
 
-  describe('#connect', function() {
-    it('should call connect on connection manager', function() {
-      var pusher = new Pusher('foo');
+  describe("#connect", function() {
+    it("should call connect on connection manager", function() {
+      var pusher = new Pusher("foo");
       pusher.connect();
       expect(pusher.connection.connect).toHaveBeenCalledWith();
     });
   });
 
-  describe('after connecting', function() {
+  describe("after connecting", function() {
     beforeEach(function() {
-      pusher = new Pusher('foo');
+      pusher = new Pusher("foo");
       pusher.connect();
-      pusher.connection.state = 'connected';
-      pusher.connection.emit('connected');
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
     });
 
-    it('should subscribe to all channels', function() {
-      var pusher = new Pusher('foo');
+    it("should subscribe to all channels", function() {
+      var pusher = new Pusher("foo");
 
       var subscribedChannels = {
-        channel1: pusher.subscribe('channel1'),
-        channel2: pusher.subscribe('channel2')
+        channel1: pusher.subscribe("channel1"),
+        channel2: pusher.subscribe("channel2")
       };
 
       expect(subscribedChannels.channel1.subscribe).not.toHaveBeenCalled();
       expect(subscribedChannels.channel2.subscribe).not.toHaveBeenCalled();
 
       pusher.connect();
-      pusher.connection.state = 'connected';
-      pusher.connection.emit('connected');
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
 
       expect(subscribedChannels.channel1.subscribe).toHaveBeenCalled();
       expect(subscribedChannels.channel2.subscribe).toHaveBeenCalled();
     });
 
-    it('should send events via the connection manager', function() {
-      pusher.send_event('event', { key: 'value' }, 'channel');
+    it("should send events via the connection manager", function() {
+      pusher.send_event("event", { key: "value" }, "channel");
       expect(pusher.connection.send_event).toHaveBeenCalledWith(
-        'event',
-        { key: 'value' },
-        'channel'
+        "event",
+        { key: "value" },
+        "channel"
       );
     });
 
-    describe('#subscribe', function() {
-      it('should return the same channel object for subsequent calls', function() {
-        var channel = pusher.subscribe('xxx');
-        expect(channel.name).toEqual('xxx');
-        expect(pusher.subscribe('xxx')).toBe(channel);
+    describe("#subscribe", function() {
+      it("should return the same channel object for subsequent calls", function() {
+        var channel = pusher.subscribe("xxx");
+        expect(channel.name).toEqual("xxx");
+        expect(pusher.subscribe("xxx")).toBe(channel);
       });
 
-      it('should subscribe the channel', function() {
-        var channel = pusher.subscribe('xxx');
+      it("should subscribe the channel", function() {
+        var channel = pusher.subscribe("xxx");
         expect(channel.subscribe).toHaveBeenCalled();
       });
 
-      it('should reinstate cancelled pending subscription', function() {
-        var channel = pusher.subscribe('xxx');
+      it("should reinstate cancelled pending subscription", function() {
+        var channel = pusher.subscribe("xxx");
         channel.subscriptionPending = true;
         channel.subscriptionCancelled = true;
-        pusher.subscribe('xxx');
+        pusher.subscribe("xxx");
 
         expect(channel.reinstateSubscription).toHaveBeenCalled();
       });
     });
 
-    describe('#unsubscribe', function() {
-      it('should unsubscribe the channel if subscription is not pending', function() {
-        var channel = pusher.subscribe('yyy');
+    describe("#unsubscribe", function() {
+      it("should unsubscribe the channel if subscription is not pending", function() {
+        var channel = pusher.subscribe("yyy");
         channel.subscribed = true;
         expect(channel.unsubscribe).not.toHaveBeenCalled();
 
-        pusher.unsubscribe('yyy');
+        pusher.unsubscribe("yyy");
         expect(channel.unsubscribe).toHaveBeenCalled();
       });
 
-      it('should not unsubscribe the channel if the channel is not subscribed', function() {
-        var channel = pusher.subscribe('yyy');
+      it("should not unsubscribe the channel if the channel is not subscribed", function() {
+        var channel = pusher.subscribe("yyy");
         channel.subscribed = false;
         expect(channel.unsubscribe).not.toHaveBeenCalled();
 
-        pusher.unsubscribe('yyy');
+        pusher.unsubscribe("yyy");
         expect(channel.unsubscribe).not.toHaveBeenCalled();
       });
 
-      it('should remove the channel from .channels if subscription is not pending', function() {
-        var channel = pusher.subscribe('yyy');
-        expect(pusher.channel('yyy')).toBe(channel);
+      it("should remove the channel from .channels if subscription is not pending", function() {
+        var channel = pusher.subscribe("yyy");
+        expect(pusher.channel("yyy")).toBe(channel);
 
-        pusher.unsubscribe('yyy');
-        expect(pusher.channel('yyy')).toBe(undefined);
+        pusher.unsubscribe("yyy");
+        expect(pusher.channel("yyy")).toBe(undefined);
       });
 
-      it('should delay unsubscription if the subscription is pending', function() {
-        var channel = pusher.subscribe('yyy');
+      it("should delay unsubscription if the subscription is pending", function() {
+        var channel = pusher.subscribe("yyy");
         channel.subscriptionPending = true;
 
-        pusher.unsubscribe('yyy');
-        expect(pusher.channel('yyy')).toBe(channel);
+        pusher.unsubscribe("yyy");
+        expect(pusher.channel("yyy")).toBe(channel);
         expect(channel.unsubscribe).not.toHaveBeenCalled();
         expect(channel.cancelSubscription).toHaveBeenCalled();
       });
     });
   });
 
-  describe('on message', function() {
+  describe("on message", function() {
     var pusher;
 
     beforeEach(function() {
-      pusher = new Pusher('foo');
+      pusher = new Pusher("foo");
     });
 
-    it('should pass events to their channels', function() {
-      var channel = pusher.subscribe('chan');
+    it("should pass events to their channels", function() {
+      var channel = pusher.subscribe("chan");
 
-      pusher.connection.emit('message', {
-        channel: 'chan',
-        event: 'event',
-        data: { key: 'value' }
+      pusher.connection.emit("message", {
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
       });
       expect(channel.handleEvent).toHaveBeenCalledWith({
-        channel: 'chan',
-        event: 'event',
-        data: { key: 'value' }
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
       });
     });
 
-    it('should not publish events to other channels', function() {
-      var channel = pusher.subscribe('chan');
-      var onEvent = jasmine.createSpy('onEvent');
-      channel.bind('event', onEvent);
+    it("should not publish events to other channels", function() {
+      var channel = pusher.subscribe("chan");
+      var onEvent = jasmine.createSpy("onEvent");
+      channel.bind("event", onEvent);
 
-      pusher.connection.emit('message', {
-        channel: 'different',
-        event: 'event',
+      pusher.connection.emit("message", {
+        channel: "different",
+        event: "event",
         data: {}
       });
       expect(onEvent).not.toHaveBeenCalled();
     });
 
-    it('should publish per-channel events globally (deprecated)', function() {
-      var onEvent = jasmine.createSpy('onEvent');
-      pusher.bind('event', onEvent);
+    it("should publish per-channel events globally (deprecated)", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      pusher.bind("event", onEvent);
 
-      pusher.connection.emit('message', {
-        channel: 'chan',
-        event: 'event',
-        data: { key: 'value' }
+      pusher.connection.emit("message", {
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
       });
-      expect(onEvent).toHaveBeenCalledWith({ key: 'value' });
+      expect(onEvent).toHaveBeenCalledWith({ key: "value" });
     });
 
-    it('should publish global events (deprecated)', function() {
-      var onEvent = jasmine.createSpy('onEvent');
-      var onAllEvents = jasmine.createSpy('onAllEvents');
-      pusher.bind('global', onEvent);
+    it("should publish global events (deprecated)", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      var onAllEvents = jasmine.createSpy("onAllEvents");
+      pusher.bind("global", onEvent);
       pusher.bind_global(onAllEvents);
 
-      pusher.connection.emit('message', {
-        event: 'global',
-        data: 'data'
+      pusher.connection.emit("message", {
+        event: "global",
+        data: "data"
       });
-      expect(onEvent).toHaveBeenCalledWith('data');
-      expect(onAllEvents).toHaveBeenCalledWith('global', 'data');
+      expect(onEvent).toHaveBeenCalledWith("data");
+      expect(onAllEvents).toHaveBeenCalledWith("global", "data");
     });
 
-    it('should not publish internal events', function() {
-      var onEvent = jasmine.createSpy('onEvent');
-      pusher.bind('pusher_internal:test', onEvent);
+    it("should not publish internal events", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      pusher.bind("pusher_internal:test", onEvent);
 
-      pusher.connection.emit('message', {
-        event: 'pusher_internal:test',
-        data: 'data'
-      });
-      expect(onEvent).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('#unbind', function() {
-    it('should allow a globally bound callback to be removed', function() {
-      var onEvent = jasmine.createSpy('onEvent');
-      pusher.bind('event', onEvent);
-      pusher.unbind('event', onEvent);
-
-      pusher.connection.emit('message', {
-        channel: 'chan',
-        event: 'event',
-        data: { key: 'value' }
+      pusher.connection.emit("message", {
+        event: "pusher_internal:test",
+        data: "data"
       });
       expect(onEvent).not.toHaveBeenCalled();
     });
   });
 
-  describe('#signin', function() {
+  describe("#unbind", function() {
+    it("should allow a globally bound callback to be removed", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      pusher.bind("event", onEvent);
+      pusher.unbind("event", onEvent);
+
+      pusher.connection.emit("message", {
+        channel: "chan",
+        event: "event",
+        data: { key: "value" }
+      });
+      expect(onEvent).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("#signin", function() {
     var pusher;
     beforeEach(function() {
-      pusher = new Pusher('foo');
-      spyOn(pusher.config, 'userAuthenticator');
-      spyOn(pusher, 'send_event');
-      pusher.connection.state = 'connected';
-      pusher.connection.socket_id = '1.23';
+      pusher = new Pusher("foo");
+      spyOn(pusher.config, "userAuthenticator");
+      spyOn(pusher, "send_event");
+      pusher.connection.state = "connected";
+      pusher.connection.socket_id = "1.23";
     });
 
-    it('should fail if the connection is not connected', function() {
-      pusher.connection.state = 'connecting';
-      spyOn(Logger, 'warn');
+    it("should fail if the connection is not connected", function() {
+      pusher.connection.state = "connecting";
+      spyOn(Logger, "warn");
       pusher.signin();
       expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
       expect(Logger.warn).toHaveBeenCalledWith(
-        'Error during signin: Pusher connection not in connected state'
+        "Error during signin: Pusher connection not in connected state"
       );
     });
 
-    it('should fail if userAuthenticator fails', function() {
+    it("should fail if userAuthenticator fails", function() {
       pusher.config.userAuthenticator.and.callFake(function(params, callback) {
-        callback('this error', {});
+        callback("this error", {});
       });
-      spyOn(Logger, 'warn');
+      spyOn(Logger, "warn");
       pusher.signin();
       expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
-        { socketId: '1.23' },
+        { socketId: "1.23" },
         jasmine.any(Function)
       );
       expect(Logger.warn).toHaveBeenCalledWith(
-        'Error during signin: this error'
+        "Error during signin: this error"
       );
     });
 
-    it('should send piusher:signin event', function() {
+    it("should send piusher:signin event", function() {
       pusher.config.userAuthenticator.and.callFake(function(params, callback) {
         callback(null, {
-          auth: 'auth',
-          user_data: JSON.stringify({ id: '1' }),
-          foo: 'bar'
+          auth: "auth",
+          user_data: JSON.stringify({ id: "1" }),
+          foo: "bar"
         });
       });
-      spyOn(Logger, 'warn');
+      spyOn(Logger, "warn");
       pusher.signin();
       expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
-        { socketId: '1.23' },
+        { socketId: "1.23" },
         jasmine.any(Function)
       );
-      expect(pusher.send_event).toHaveBeenCalledWith('pusher:signin', {
-        auth: 'auth',
-        user_data: JSON.stringify({ id: '1' })
+      expect(pusher.send_event).toHaveBeenCalledWith("pusher:signin", {
+        auth: "auth",
+        user_data: JSON.stringify({ id: "1" })
       });
     });
   });
 
-  describe('#disconnect', function() {
-    it('should call disconnect on connection manager', function() {
-      var pusher = new Pusher('foo');
+  describe("#disconnect", function() {
+    it("should call disconnect on connection manager", function() {
+      var pusher = new Pusher("foo");
 
       pusher.disconnect();
       expect(pusher.connection.disconnect).toHaveBeenCalledWith();
     });
   });
 
-  describe('after disconnecting', function() {
-    it('should disconnect channels', function() {
-      var pusher = new Pusher('foo');
-      var channel1 = pusher.subscribe('channel1');
-      var channel2 = pusher.subscribe('channel2');
+  describe("after disconnecting", function() {
+    it("should disconnect channels", function() {
+      var pusher = new Pusher("foo");
+      var channel1 = pusher.subscribe("channel1");
+      var channel2 = pusher.subscribe("channel2");
 
-      pusher.connection.state = 'disconnected';
-      pusher.connection.emit('disconnected');
+      pusher.connection.state = "disconnected";
+      pusher.connection.emit("disconnected");
 
       expect(channel1.disconnect).toHaveBeenCalledWith();
       expect(channel2.disconnect).toHaveBeenCalledWith();
     });
   });
 
-  describe('on error', function() {
-    it('should log a warning to console', function() {
-      var pusher = new Pusher('foo');
+  describe("on error", function() {
+    it("should log a warning to console", function() {
+      var pusher = new Pusher("foo");
 
-      spyOn(Logger, 'warn');
-      pusher.connection.emit('error', 'something');
-      expect(Logger.warn).toHaveBeenCalledWith('something');
+      spyOn(Logger, "warn");
+      pusher.connection.emit("error", "something");
+      expect(Logger.warn).toHaveBeenCalledWith("something");
     });
   });
 
-  describe('metrics', function() {
+  describe("metrics", function() {
     var timelineSender;
 
     beforeEach(function() {
       jasmine.clock().install();
 
       timelineSender = Mocks.getTimelineSender();
-      spyOn(Factory, 'createTimelineSender').and.returnValue(timelineSender);
+      spyOn(Factory, "createTimelineSender").and.returnValue(timelineSender);
     });
 
     afterEach(function() {
       jasmine.clock().uninstall();
     });
 
-    it('should be sent to stats.pusher.com', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should be sent to stats.pusher.com", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline,
-        { host: 'stats.pusher.com', path: '/timeline/v2/' + timelineTransport }
+        { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
-    it('should be sent to a hostname specified in constructor options', function() {
-      var pusher = new Pusher('foo', {
-        statsHost: 'example.com',
+    it("should be sent to a hostname specified in constructor options", function() {
+      var pusher = new Pusher("foo", {
+        statsHost: "example.com",
         enableStats: true
       });
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline,
-        { host: 'example.com', path: '/timeline/v2/' + timelineTransport }
+        { host: "example.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
-    it('should not be sent by default', function() {
-      var pusher = new Pusher('foo');
+    it("should not be sent by default", function() {
+      var pusher = new Pusher("foo");
       pusher.connect();
       pusher.connection.options.timeline.info({});
       jasmine.clock().tick(1000000);
       expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
-    it('should be sent if disableStats set to false', function() {
-      var pusher = new Pusher('foo', { disableStats: false });
+    it("should be sent if disableStats set to false", function() {
+      var pusher = new Pusher("foo", { disableStats: false });
       pusher.connect();
       pusher.connection.options.timeline.info({});
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline,
-        { host: 'stats.pusher.com', path: '/timeline/v2/' + timelineTransport }
+        { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
-    it('should honour enableStats setting if enableStats and disableStats set', function() {
-      var pusher = new Pusher('foo', { disableStats: true, enableStats: true });
+    it("should honour enableStats setting if enableStats and disableStats set", function() {
+      var pusher = new Pusher("foo", { disableStats: true, enableStats: true });
       pusher.connect();
       pusher.connection.options.timeline.info({});
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline,
-        { host: 'stats.pusher.com', path: '/timeline/v2/' + timelineTransport }
+        { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
-    it('should not be sent before calling connect', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should not be sent before calling connect", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       pusher.connection.options.timeline.info({});
       jasmine.clock().tick(1000000);
       expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
-    it('should be sent every 60 seconds after calling connect', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should be sent every 60 seconds after calling connect", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       pusher.connect();
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
 
@@ -609,19 +609,19 @@ describe('Pusher', function() {
       expect(timelineSender.send.calls.count()).toEqual(2);
     });
 
-    it('should be sent after connecting', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should be sent after connecting", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       pusher.connect();
       pusher.connection.options.timeline.info({});
 
-      pusher.connection.state = 'connected';
-      pusher.connection.emit('connected');
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
 
       expect(timelineSender.send.calls.count()).toEqual(1);
     });
 
-    it('should not be sent after disconnecting', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should not be sent after disconnecting", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       pusher.connect();
       pusher.disconnect();
 
@@ -631,28 +631,28 @@ describe('Pusher', function() {
       expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
-    it('should be sent without TLS if connection is not using TLS', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should be sent without TLS if connection is not using TLS", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       pusher.connection.isUsingTLS.and.returnValue(false);
 
       pusher.connect();
       pusher.connection.options.timeline.info({});
 
-      pusher.connection.state = 'connected';
-      pusher.connection.emit('connected');
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
 
       expect(timelineSender.send).toHaveBeenCalledWith(false);
     });
 
-    it('should be sent with TLS if connection is over TLS', function() {
-      var pusher = new Pusher('foo', { enableStats: true });
+    it("should be sent with TLS if connection is over TLS", function() {
+      var pusher = new Pusher("foo", { enableStats: true });
       pusher.connection.isUsingTLS.and.returnValue(true);
 
       pusher.connect();
       pusher.connection.options.timeline.info({});
 
-      pusher.connection.state = 'connected';
-      pusher.connection.emit('connected');
+      pusher.connection.state = "connected";
+      pusher.connection.emit("connected");
 
       expect(timelineSender.send).toHaveBeenCalledWith(true);
     });

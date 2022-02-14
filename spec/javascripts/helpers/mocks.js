@@ -269,14 +269,6 @@ var Mocks = {
     return channel;
   },
 
-  getAuthorizer: function() {
-    var authorizer = {};
-    authorizer._callback = null;
-    authorizer.authorize = jasmine.createSpy("authorize").and.callFake(function(_, callback) {
-      authorizer._callback = callback;
-    });
-    return authorizer;
-  }
 };
 
 module.exports = Mocks;

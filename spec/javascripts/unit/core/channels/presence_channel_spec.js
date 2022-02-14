@@ -1,7 +1,6 @@
 var PresenceChannel = require('core/channels/presence_channel').default;
 var Channel = require('core/channels/channel').default;
 var Members = require('core/channels/members').default;
-// var Authorizer = require('core/auth/pusher_authorizer').default;
 var Errors = require('core/errors');
 var Factory = require('core/utils/factory').default;
 var Mocks = require("mocks");
@@ -48,7 +47,7 @@ describe("PresenceChannel", function() {
   });
 
   describe("#authorize", function() {
-    var authorizer;
+    
     it("should call channelAuthorizer", function() {
       const callback = function(){}
       channel.authorize("1.23", callback);
