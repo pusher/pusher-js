@@ -62,6 +62,67 @@ describe('Config', function() {
   });
 
   describe('auth', function(){
+    let _getAuthorizers;
+    let transportAuthorizer;
+    let transportAuthorizer2;
+    let transportAuthorizerAjax;
+
+    beforeAll(function() {
+      _getAuthorizers = Runtime.getAuthorizers;
+    });
+
+    afterAll(function() {
+      Runtime.getAuthorizers = _getAuthorizers;
+    });
+
+    beforeEach(function() {
+      transportAuthorizer = jasmine.createSpy("some-auth-transport")
+      transportAuthorizer2 = jasmine.createSpy("some-auth-transport2")
+      transportAuthorizerAjax = jasmine.createSpy("ajax")
+      Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
+        'some-auth-transport': transportAuthorizer,
+        'some-auth-transport2': transportAuthorizer2,
+
+        // When we test channelAuthorizer, the userAuthenticator will be using
+        // the default ajax transport and vice versa.
+        'ajax': transportAuthorizerAjax, 
+      });
+    });
+
+    it('should use deprecated auth options', function() {
+      let opts = {
+        authTransport: 'some-auth-transport',
+        authEndpoint: '/pusher/spec/auth',
+        auth: {
+          params: { foo: 'bar' },
+          headers: { spec: 'header' }
+        },
+      };
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+
+      let callback = function(){};
+      config.channelAuthorizer({
+        socketId: '1.23',
+        channelName: 'private-test', 
+      }, callback);
+
+      authOptions = {
+        transport: 'some-auth-transport',
+        endpoint: '/pusher/spec/auth',
+        params: { foo: 'bar' },
+        headers: { spec: 'header' }
+      }
+      const query = 'socket_id=1.23&channel_name=private-test&foo=bar';
+      expect(transportAuthorizer.calls.count()).toEqual(1);
+      expect(transportAuthorizer).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        callback
+      );
+    })
+
     it('should create ChannelAuthorizerProxy if authorizer is set', function() {
       const authorizer = { authorize: jasmine.createSpy('authorize') };
       const authorizerGenerator = jasmine.createSpy('authorizerGenerator').and.returnValue(authorizer);
@@ -94,11 +155,136 @@ describe('Config', function() {
       expect(authorizer.authorize).toHaveBeenCalledWith('1.23', callback);
     });
 
-    // We should have tests for:
-    // - Not setting authorizer
-    // - channelAuth and for the cases where it overrides deprecated fields
-    // - userAuth.
-    // These are challenging because we can't spy on the imported functions inside config.ts
+    it('should use channelAuth and override deprecated auth options', function() {
+      let opts = {
+        authTransport: 'some-auth-transport',
+        authEndpoint: '/pusher/spec/auth',
+        auth: {
+          params: { foo: 'bar' },
+          headers: { spec: 'header' }
+        },
+        channelAuth: {
+          transport: 'some-auth-transport2',
+          endpoint: '/pusher/spec/auth2',
+          params: { spec2: 'param2' },
+          headers: { spec2: 'header2' }
+        }
+      };
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.channelAuthorizer({
+        socketId: '1.23',
+        channelName: 'private-test', 
+      }, callback);
+
+      authOptions = {
+        transport: 'some-auth-transport2',
+        endpoint: '/pusher/spec/auth2',
+        params: { spec2: 'param2' },
+        headers: { spec2: 'header2' }
+      }
+      const query = 'socket_id=1.23&channel_name=private-test&spec2=param2';
+      expect(transportAuthorizer.calls.count()).toEqual(0);
+      expect(transportAuthorizer2.calls.count()).toEqual(1);
+      expect(transportAuthorizer2).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        callback
+      );
+    });
+
+    it('should use customerHandler inside channelAuth', function() {
+      const customHandler = jasmine.createSpy('customHandler');
+      let opts = {
+        channelAuth: {
+          transport: 'some-auth-transport',
+          endpoint: '/pusher/spec/auth',
+          params: { spec: 'param' },
+          headers: { spec: 'header' },
+          customHandler: customHandler
+        }
+      };
+
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      expect(config.channelAuthorizer).toEqual(customHandler);
+    });
+
+    it('should have default options for user authentication', function() {
+      let opts = {};
+
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.userAuthenticator({
+        socketId: '1.23',
+      }, callback);
+
+      authOptions = {
+        transport: 'ajax',
+        endpoint: '/pusher/user-auth',
+      }
+      const query = 'socket_id=1.23';
+      expect(transportAuthorizerAjax.calls.count()).toEqual(1);
+      expect(transportAuthorizerAjax).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        callback
+      );
+    });
+
+    it('should use userAuth options for user authentication', function() {
+      let opts = {
+        userAuth: {
+          transport: 'some-auth-transport',
+          endpoint: '/pusher/spec/auth',
+          params: { foo: 'bar' },
+          headers: { spec: 'header' }
+        }
+      };
+
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.userAuthenticator({
+        socketId: '1.23',
+      }, callback);
+
+      authOptions = {
+        transport: 'some-auth-transport',
+        endpoint: '/pusher/spec/auth',
+        params: { foo: 'bar' },
+        headers: { spec: 'header' }
+      }
+      const query = 'socket_id=1.23&foo=bar';
+      expect(transportAuthorizer.calls.count()).toEqual(1);
+      expect(transportAuthorizer).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        callback
+      );
+    });
+    
+    it('should use customHandler inside userAuth', function() {
+      const customHandler = jasmine.createSpy('customHandler');
+      let opts = {
+        userAuth: {
+          transport: 'some-auth-transport',
+          endpoint: '/pusher/spec/auth',
+          params: { spec: 'param' },
+          headers: { spec: 'header' },
+          customHandler: customHandler
+        }
+      };
+
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      expect(config.userAuthenticator).toEqual(customHandler);
+    });
   });
 
   describe('TLS', function() {

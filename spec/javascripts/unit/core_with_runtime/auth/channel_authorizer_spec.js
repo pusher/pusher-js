@@ -15,6 +15,16 @@ describe("ChannelAuthorizer", function() {
   });
 
   describe("channel AuthHandler", function(){
+    let _getAuthorizers;
+
+    beforeAll(function() {
+      _getAuthorizers = Runtime.getAuthorizers;
+    });
+
+    afterAll(function() {
+      Runtime.getAuthorizers = _getAuthorizers;
+    });
+
     it("should call the specified transport authorizer", function(){
       const authOptions = {
         transport: "ajax",
