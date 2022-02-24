@@ -23,6 +23,7 @@ module.exports = function() {
     var pusher;
 
     beforeEach(function() {
+      jasmine.clock().uninstall();
       jasmine.clock().install();
 
       spyOn(Network, "isOnline").and.returnValue(true);

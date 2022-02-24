@@ -6,6 +6,7 @@ describe("PeriodicTimer", function() {
   var timer;
 
   beforeEach(function() {
+    jasmine.clock().uninstall();
     jasmine.clock().install();
 
     callback = jasmine.createSpy("callback");
@@ -62,10 +63,12 @@ describe("PeriodicTimer", function() {
 
     it("should stop callback from being called even if clearInterval is broken", function() {
       // IE has some edge-case with clearInterval not working, let's simulate it
-      spyOn(global, "clearInterval");
+      let _clearInterval = global.clearInterval;
+      spyOn(global, "clearInterval").and.callThrough();
       timer.ensureAborted();
       jasmine.clock().tick(1000);
       expect(callback).not.toHaveBeenCalled();
+      global.clearInterval = _clearInterval;
     });
   });
 });

@@ -43,6 +43,7 @@ describe("TransportStrategy", function() {
 
   describe("#connect", function() {
     beforeEach(() => {
+      jasmine.clock().uninstall();
       jasmine.clock().install();
     });
 

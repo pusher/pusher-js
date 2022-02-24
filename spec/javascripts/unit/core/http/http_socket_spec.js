@@ -15,6 +15,7 @@ describe("HTTP.Socket", function() {
 
   beforeEach(function() {
     HTTPFactory = require('runtime').default.HTTPFactory;
+    jasmine.clock().uninstall();
     jasmine.clock().install();
 
     spyOn(HTTPFactory, "createXHR").and.callFake(function(method, url) {

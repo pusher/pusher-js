@@ -250,6 +250,8 @@ describe("Pusher", function() {
   });
 
   describe("after connecting", function() {
+    var pusher;
+
     beforeEach(function() {
       pusher = new Pusher("foo");
       pusher.connect();
@@ -258,8 +260,7 @@ describe("Pusher", function() {
     });
 
     it("should subscribe to all channels", function() {
-      var pusher = new Pusher("foo");
-
+      pusher = new Pusher("foo");
       var subscribedChannels = {
         channel1: pusher.subscribe("channel1"),
         channel2: pusher.subscribe("channel2")
@@ -420,6 +421,12 @@ describe("Pusher", function() {
   });
 
   describe("#unbind", function() {
+    var pusher;
+
+    beforeEach(function() {
+      pusher = new Pusher("foo");
+    });
+
     it("should allow a globally bound callback to be removed", function() {
       var onEvent = jasmine.createSpy("onEvent");
       pusher.bind("event", onEvent);
@@ -527,6 +534,7 @@ describe("Pusher", function() {
     var timelineSender;
 
     beforeEach(function() {
+      jasmine.clock().uninstall();
       jasmine.clock().install();
 
       timelineSender = Mocks.getTimelineSender();

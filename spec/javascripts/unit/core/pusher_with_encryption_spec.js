@@ -8,9 +8,11 @@ describe('PusherWithEncryption', function() {
     expect(Pusher.logToConsole).toEqual(true);
   });
   it('should pass log function to parent class', function() {
+    let _prevLog = PusherWithEncryption.log
     let logFn =  jasmine.createSpy('logFn');
     PusherWithEncryption.log = logFn
     let pusher = new PusherWithEncryption('key');
     expect(logFn).toHaveBeenCalled();
+    PusherWithEncryption.log = _prevLog
   });
 });

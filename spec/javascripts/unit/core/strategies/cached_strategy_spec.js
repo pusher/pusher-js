@@ -5,6 +5,7 @@ var Util = require('core/util').default;
 
 describe("CachedStrategy", function() {
   beforeEach(function() {
+    jasmine.clock().uninstall();
     jasmine.clock().install();
   });
 
