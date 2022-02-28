@@ -29,6 +29,7 @@ export default class Pusher {
     connection: ConnectionManager;
     timelineSenderTimer: PeriodicTimer;
     user?: any;
+    signin_requested: boolean;
     constructor(app_key: string, options?: Options);
     channel(name: string): Channel;
     allChannels(): Channel[];
@@ -45,4 +46,5 @@ export default class Pusher {
     send_event(event_name: string, data: any, channel?: string): boolean;
     shouldUseTLS(): boolean;
     signin(): void;
+    _signin(): void;
 }

@@ -451,15 +451,12 @@ describe("Pusher", function() {
       pusher.connection.socket_id = "1.23";
     });
 
-    it("should fail if the connection is not connected", function() {
+    it("should not call userAuthenticator if the connection is not connected", function() {
       pusher.connection.state = "connecting";
-      spyOn(Logger, "warn");
       pusher.signin();
       expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
-      expect(Logger.warn).toHaveBeenCalledWith(
-        "Error during signin: Pusher connection not in connected state"
-      );
     });
+
 
     it("should fail if userAuthenticator fails", function() {
       pusher.config.userAuthenticator.and.callFake(function(params, callback) {
@@ -476,7 +473,7 @@ describe("Pusher", function() {
       );
     });
 
-    it("should send piusher:signin event", function() {
+    it("should send pusher:signin event", function() {
       pusher.config.userAuthenticator.and.callFake(function(params, callback) {
         callback(null, {
           auth: "auth",
@@ -495,6 +492,76 @@ describe("Pusher", function() {
         user_data: JSON.stringify({ id: "1" })
       });
     });
+
+    it("should signin when the connection becomes connected", function() {
+      pusher.connection.state = "connecting";
+      pusher.signin();
+      expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
+
+      pusher.config.userAuthenticator.and.callFake(function(params, callback) {
+        callback(null, {
+          auth: "auth",
+          user_data: JSON.stringify({ id: "1" }),
+          foo: "bar"
+        });
+      });
+      
+      pusher.connection.state = "connected";
+      pusher.connection.emit('connected');
+
+      expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
+        { socketId: "1.23" },
+        jasmine.any(Function)
+      );
+      expect(pusher.send_event).toHaveBeenCalledWith("pusher:signin", {
+        auth: "auth",
+        user_data: JSON.stringify({ id: "1" })
+      });
+    });
+
+    it("should re-signin when the connection reconnects!", function() {
+      pusher.config.userAuthenticator.and.callFake(function(params, callback) {
+        callback(null, {
+          auth: "auth",
+          user_data: JSON.stringify({ id: "1" }),
+          foo: "bar"
+        });
+      });
+      
+      pusher.signin();
+      expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
+        { socketId: "1.23" },
+        jasmine.any(Function)
+      );
+      expect(pusher.send_event).toHaveBeenCalledWith("pusher:signin", {
+        auth: "auth",
+        user_data: JSON.stringify({ id: "1" })
+      });
+      pusher.send_event.calls.reset()
+      pusher.config.userAuthenticator.calls.reset()
+
+      pusher.connection.state == "disconnected";
+      pusher.connection.emit("disconnected");
+      pusher.connection.state == "connecting";
+      pusher.connection.emit("connecting");
+      pusher.connection.state == "connected";
+      pusher.connection.emit("connected");
+
+      expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
+        { socketId: "1.23" },
+        jasmine.any(Function)
+      );
+      expect(pusher.send_event).toHaveBeenCalledWith("pusher:signin", {
+        auth: "auth",
+        user_data: JSON.stringify({ id: "1" })
+      });
+    });
+
+    it("should not signin when the connection is connected if signin() was never called", function() {
+      pusher.connection.state = "connected";
+      pusher.connection.emit('connected');
+      expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
+    })
   });
 
   describe("#disconnect", function() {

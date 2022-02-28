@@ -5937,7 +5937,6 @@ var net_info_Network = new NetInfo();
 // CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
 
 var fetchAuth = function (context, query, authOptions, callback) {
-    console.log('using fetchAuth');
     var headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in authOptions.headers) {
@@ -6455,6 +6454,7 @@ function buildChannelAuthorizer(opts, pusher) {
 var pusher_Pusher = (function () {
     function Pusher(app_key, options) {
         var _this = this;
+        this.signin_requested = false;
         checkAppKey(app_key);
         options = options || {};
         if (!options.cluster && !(options.wsHost || options.httpHost)) {
@@ -6496,6 +6496,7 @@ var pusher_Pusher = (function () {
         });
         this.connection.bind('connected', function () {
             _this.subscribeAll();
+            _this._signin();
             if (_this.timelineSender) {
                 _this.timelineSender.send(_this.connection.isUsingTLS());
             }
@@ -6630,9 +6631,15 @@ var pusher_Pusher = (function () {
         return this.config.useTLS;
     };
     Pusher.prototype.signin = function () {
+        this.signin_requested = true;
+        this._signin();
+    };
+    Pusher.prototype._signin = function () {
         var _this = this;
+        if (!this.signin_requested) {
+            return;
+        }
         if (this.connection.state !== 'connected') {
-            logger.warn("Error during signin: Pusher connection not in connected state");
             return;
         }
         var onAuthorize = function (err, authData) {

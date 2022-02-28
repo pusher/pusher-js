@@ -62,6 +62,7 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
   user?;
+  signin_requested: boolean = false;
 
   constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
@@ -115,6 +116,7 @@ export default class Pusher {
 
     this.connection.bind('connected', () => {
       this.subscribeAll();
+      this._signin();
       if (this.timelineSender) {
         this.timelineSender.send(this.connection.isUsingTLS());
       }
@@ -261,10 +263,16 @@ export default class Pusher {
   }
 
   signin() {
+    this.signin_requested = true;
+    this._signin();
+  }
+
+  _signin() {
+    if (!this.signin_requested) {
+      return;
+    }
+
     if (this.connection.state !== 'connected') {
-      Logger.warn(
-        `Error during signin: Pusher connection not in connected state`
-      );
       return;
     }
 
