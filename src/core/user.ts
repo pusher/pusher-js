@@ -5,14 +5,18 @@ import {
   UserAuthenticationCallback
 } from './auth/options';
 import Channel from './channels/channel';
+import EventsDispatcher from './events/dispatcher';
 
-export default class UserFacade {
+export default class UserFacade extends EventsDispatcher {
   pusher: Pusher;
   signin_requested: boolean = false;
   user_data: any = null;
   serverToUserChannel: Channel = null;
 
   public constructor(pusher: Pusher) {
+    super(function(eventName, data) {
+      Logger.debug('No callbacks on user for ' + eventName);
+    });
     this.pusher = pusher;
     this.pusher.connection.bind('connected', () => {
       this._signin();
@@ -27,6 +31,12 @@ export default class UserFacade {
       var eventName = event.event;
       if (eventName === 'pusher:signin_success') {
         this._onSigninSuccess(event.data);
+      }
+      if (
+        this.serverToUserChannel &&
+        this.serverToUserChannel.name === event.channel
+      ) {
+        this.serverToUserChannel.handleEvent(event);
       }
     });
   }
@@ -109,6 +119,16 @@ export default class UserFacade {
       `#server-to-user-${this.user_data.id}`,
       this.pusher
     );
+    this.serverToUserChannel.bind_global((eventName, data) => {
+      if (
+        eventName.indexOf('pusher_internal:') === 0 ||
+        eventName.indexOf('pusher:') === 0
+      ) {
+        // ignore internal events
+        return;
+      }
+      this.emit(eventName, data);
+    });
     ensure_subscribed(this.serverToUserChannel);
   }
 

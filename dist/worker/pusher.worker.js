@@ -4051,30 +4051,52 @@ function buildChannelAuthorizer(opts, pusher) {
 }
 
 // CONCATENATED MODULE: ./src/core/user.ts
+var user_extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 
 
-var user_UserFacade = (function () {
+
+var user_UserFacade = (function (_super) {
+    user_extends(UserFacade, _super);
     function UserFacade(pusher) {
-        var _this = this;
-        this.signin_requested = false;
-        this.user_data = null;
-        this.serverToUserChannel = null;
-        this.pusher = pusher;
-        this.pusher.connection.bind('connected', function () {
+        var _this = _super.call(this, function (eventName, data) {
+            logger.debug('No callbacks on user for ' + eventName);
+        }) || this;
+        _this.signin_requested = false;
+        _this.user_data = null;
+        _this.serverToUserChannel = null;
+        _this.pusher = pusher;
+        _this.pusher.connection.bind('connected', function () {
             _this._signin();
         });
-        this.pusher.connection.bind('connecting', function () {
+        _this.pusher.connection.bind('connecting', function () {
             _this._disconnect();
         });
-        this.pusher.connection.bind('disconnected', function () {
+        _this.pusher.connection.bind('disconnected', function () {
             _this._disconnect();
         });
-        this.pusher.connection.bind('message', function (event) {
+        _this.pusher.connection.bind('message', function (event) {
             var eventName = event.event;
             if (eventName === 'pusher:signin_success') {
                 _this._onSigninSuccess(event.data);
             }
+            if (_this.serverToUserChannel &&
+                _this.serverToUserChannel.name === event.channel) {
+                _this.serverToUserChannel.handleEvent(event);
+            }
         });
+        return _this;
     }
     UserFacade.prototype.signin = function () {
         if (this.signin_requested) {
@@ -4131,6 +4153,13 @@ var user_UserFacade = (function () {
             }
         };
         this.serverToUserChannel = new channels_channel("#server-to-user-" + this.user_data.id, this.pusher);
+        this.serverToUserChannel.bind_global(function (eventName, data) {
+            if (eventName.indexOf('pusher_internal:') === 0 ||
+                eventName.indexOf('pusher:') === 0) {
+                return;
+            }
+            _this.emit(eventName, data);
+        });
         ensure_subscribed(this.serverToUserChannel);
     };
     UserFacade.prototype._disconnect = function () {
@@ -4142,7 +4171,7 @@ var user_UserFacade = (function () {
         }
     };
     return UserFacade;
-}());
+}(dispatcher));
 /* harmony default export */ var user = (user_UserFacade);
 
 // CONCATENATED MODULE: ./src/core/pusher.ts

@@ -1,6 +1,7 @@
 import Pusher from './pusher';
 import Channel from './channels/channel';
-export default class UserFacade {
+import EventsDispatcher from './events/dispatcher';
+export default class UserFacade extends EventsDispatcher {
     pusher: Pusher;
     signin_requested: boolean;
     user_data: any;
