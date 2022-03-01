@@ -5,11 +5,11 @@ describe("UserAuthenticator", function() {
 
   describe("initialization", function(){
     it("should throw an error if the specified transport is unrecognized", function(){
-      const channelAuth = {
+      const userAuthentication = {
         transport: "bad-transport",
       };
       expect(function(){
-        UserAuthenticator(channelAuth)
+        UserAuthenticator(userAuthentication)
       }).toThrow("'bad-transport' is not a recognized auth transport");
     });
   });
@@ -26,10 +26,10 @@ describe("UserAuthenticator", function() {
     });
 
     it("should call the specified transport authorizer", function(){
-      const userAuth = {
+      const userAuthentication = {
         transport: "ajax",
       };
-      userAuthenticator = UserAuthenticator(userAuth);
+      userAuthenticator = UserAuthenticator(userAuthentication);
       
       transportAuthorizer = jasmine.createSpy("ajax")
       Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
@@ -44,7 +44,7 @@ describe("UserAuthenticator", function() {
       expect(transportAuthorizer).toHaveBeenCalledWith(
         Runtime,
         query,
-        userAuth,
+        userAuthentication,
         callback);
     });
   });

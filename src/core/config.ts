@@ -1,8 +1,8 @@
 import { Options } from './options';
 import Defaults from './defaults';
 import {
-  ChannelAuthHandler,
-  UserAuthHandler,
+  ChannelAuthorizationHandler,
+  UserAuthenticationHandler,
   AuthOptions
 } from './auth/options';
 import UserAuthenticator from './auth/user_authenticator';
@@ -37,8 +37,8 @@ export interface Config {
   wsPath: string;
   wsPort: number;
   wssPort: number;
-  userAuthenticator: UserAuthHandler;
-  channelAuthorizer: ChannelAuthHandler;
+  userAuthenticator: UserAuthenticationHandler;
+  channelAuthorizer: ChannelAuthorizationHandler;
 
   // these are all optional parameters or overrrides. The customer can set these
   // but it's not strictly necessary
@@ -135,46 +135,46 @@ function getEnableStatsConfig(opts: Options): boolean {
   return false;
 }
 
-function buildUserAuthenticator(opts: Options): UserAuthHandler {
-  const userAuth = opts.userAuth || Defaults.userAuth;
-  if ('customHandler' in userAuth) {
-    return userAuth['customHandler'];
+function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
+  const userAuthentication = opts.userAuthentication || Defaults.userAuthentication;
+  if ('customHandler' in userAuthentication) {
+    return userAuthentication['customHandler'];
   }
 
-  return UserAuthenticator(userAuth);
+  return UserAuthenticator(userAuthentication);
 }
 
 function buildChannelAuth(
   opts: Options,
   pusher
-): AuthOptions<ChannelAuthHandler> {
-  var channelAuth: AuthOptions<ChannelAuthHandler>;
-  if ('channelAuth' in opts) {
-    channelAuth = opts.channelAuth;
+): AuthOptions<ChannelAuthorizationHandler> {
+  var channelAuthorization: AuthOptions<ChannelAuthorizationHandler>;
+  if ('channelAuthorization' in opts) {
+    channelAuthorization = opts.channelAuthorization;
   } else {
-    channelAuth = {
+    channelAuthorization = {
       transport: opts.authTransport || Defaults.authTransport,
       endpoint: opts.authEndpoint || Defaults.authEndpoint
     };
     if ('auth' in opts) {
-      if ('params' in opts.auth) channelAuth.params = opts.auth.params;
-      if ('headers' in opts.auth) channelAuth.headers = opts.auth.headers;
+      if ('params' in opts.auth) channelAuthorization.params = opts.auth.params;
+      if ('headers' in opts.auth) channelAuthorization.headers = opts.auth.headers;
     }
     if ('authorizer' in opts)
-      channelAuth.customHandler = ChannelAuthorizerProxy(
+      channelAuthorization.customHandler = ChannelAuthorizerProxy(
         pusher,
-        channelAuth,
+        channelAuthorization,
         opts.authorizer
       );
   }
-  return channelAuth;
+  return channelAuthorization;
 }
 
-function buildChannelAuthorizer(opts: Options, pusher): ChannelAuthHandler {
-  const channelAuth = buildChannelAuth(opts, pusher);
-  if ('customHandler' in channelAuth) {
-    return channelAuth['customHandler'];
+function buildChannelAuthorizer(opts: Options, pusher): ChannelAuthorizationHandler {
+  const channelAuthorization = buildChannelAuth(opts, pusher);
+  if ('customHandler' in channelAuthorization) {
+    return channelAuthorization['customHandler'];
   }
 
-  return ChannelAuthorizer(channelAuth);
+  return ChannelAuthorizer(channelAuthorization);
 }

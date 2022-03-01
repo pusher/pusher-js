@@ -155,7 +155,7 @@ describe('Config', function() {
       expect(authorizer.authorize).toHaveBeenCalledWith('1.23', callback);
     });
 
-    it('should use channelAuth and override deprecated auth options', function() {
+    it('should use channelAuthorization and override deprecated auth options', function() {
       let opts = {
         authTransport: 'some-auth-transport',
         authEndpoint: '/pusher/spec/auth',
@@ -163,7 +163,7 @@ describe('Config', function() {
           params: { foo: 'bar' },
           headers: { spec: 'header' }
         },
-        channelAuth: {
+        channelAuthorization: {
           transport: 'some-auth-transport2',
           endpoint: '/pusher/spec/auth2',
           params: { spec2: 'param2' },
@@ -195,10 +195,10 @@ describe('Config', function() {
       );
     });
 
-    it('should use customerHandler inside channelAuth', function() {
+    it('should use customerHandler inside channelAuthorization', function() {
       const customHandler = jasmine.createSpy('customHandler');
       let opts = {
-        channelAuth: {
+        channelAuthorization: {
           transport: 'some-auth-transport',
           endpoint: '/pusher/spec/auth',
           params: { spec: 'param' },
@@ -236,9 +236,9 @@ describe('Config', function() {
       );
     });
 
-    it('should use userAuth options for user authentication', function() {
+    it('should use userAuthentication options for user authentication', function() {
       let opts = {
-        userAuth: {
+        userAuthentication: {
           transport: 'some-auth-transport',
           endpoint: '/pusher/spec/auth',
           params: { foo: 'bar' },
@@ -269,10 +269,10 @@ describe('Config', function() {
       );
     });
     
-    it('should use customHandler inside userAuth', function() {
+    it('should use customHandler inside userAuthentication', function() {
       const customHandler = jasmine.createSpy('customHandler');
       let opts = {
-        userAuth: {
+        userAuthentication: {
           transport: 'some-auth-transport',
           endpoint: '/pusher/spec/auth',
           params: { spec: 'param' },

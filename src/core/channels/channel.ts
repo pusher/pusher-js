@@ -5,7 +5,7 @@ import Pusher from '../pusher';
 import { PusherEvent } from '../connection/protocol/message-types';
 import Metadata from './metadata';
 import UrlStore from '../utils/url_store';
-import { ChannelAuthData, ChannelAuthCallback } from '../auth/options';
+import { ChannelAuthorizationData, ChannelAuthorizationCallback } from '../auth/options';
 import { HTTPAuthError } from '../errors';
 
 /** Provides base public channel interface with an event emitter.
@@ -40,7 +40,7 @@ export default class Channel extends EventsDispatcher {
    *
    * @param {Function} callback
    */
-  authorize(socketId: string, callback: ChannelAuthCallback) {
+  authorize(socketId: string, callback: ChannelAuthorizationCallback) {
     return callback(null, { auth: '' });
   }
 
@@ -100,7 +100,7 @@ export default class Channel extends EventsDispatcher {
     this.subscriptionCancelled = false;
     this.authorize(
       this.pusher.connection.socket_id,
-      (error: Error | null, data: ChannelAuthData) => {
+      (error: Error | null, data: ChannelAuthorizationData) => {
         if (error) {
           this.subscriptionPending = false;
           // Why not bind to 'pusher:subscription_error' a level up, and log there?

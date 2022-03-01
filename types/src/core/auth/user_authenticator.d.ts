@@ -1,3 +1,3 @@
-import { InternalAuthOptions, UserAuthHandler } from './options';
-declare const UserAuthenticator: (authOptions: InternalAuthOptions) => UserAuthHandler;
+import { InternalAuthOptions, UserAuthenticationHandler } from './options';
+declare const UserAuthenticator: (authOptions: InternalAuthOptions) => UserAuthenticationHandler;
 export default UserAuthenticator;

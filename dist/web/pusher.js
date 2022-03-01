@@ -609,7 +609,7 @@ var Defaults = {
     pongTimeout: 30000,
     unavailableTimeout: 10000,
     cluster: 'mt1',
-    userAuth: {
+    userAuthentication: {
         endpoint: '/pusher/user-auth',
         transport: 'ajax'
     },
@@ -4389,39 +4389,39 @@ function getEnableStatsConfig(opts) {
     return false;
 }
 function buildUserAuthenticator(opts) {
-    var userAuth = opts.userAuth || defaults.userAuth;
-    if ('customHandler' in userAuth) {
-        return userAuth['customHandler'];
+    var userAuthentication = opts.userAuthentication || defaults.userAuthentication;
+    if ('customHandler' in userAuthentication) {
+        return userAuthentication['customHandler'];
     }
-    return user_authenticator(userAuth);
+    return user_authenticator(userAuthentication);
 }
 function buildChannelAuth(opts, pusher) {
-    var channelAuth;
-    if ('channelAuth' in opts) {
-        channelAuth = opts.channelAuth;
+    var channelAuthorization;
+    if ('channelAuthorization' in opts) {
+        channelAuthorization = opts.channelAuthorization;
     }
     else {
-        channelAuth = {
+        channelAuthorization = {
             transport: opts.authTransport || defaults.authTransport,
             endpoint: opts.authEndpoint || defaults.authEndpoint
         };
         if ('auth' in opts) {
             if ('params' in opts.auth)
-                channelAuth.params = opts.auth.params;
+                channelAuthorization.params = opts.auth.params;
             if ('headers' in opts.auth)
-                channelAuth.headers = opts.auth.headers;
+                channelAuthorization.headers = opts.auth.headers;
         }
         if ('authorizer' in opts)
-            channelAuth.customHandler = ChannelAuthorizerProxy(pusher, channelAuth, opts.authorizer);
+            channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
     }
-    return channelAuth;
+    return channelAuthorization;
 }
 function buildChannelAuthorizer(opts, pusher) {
-    var channelAuth = buildChannelAuth(opts, pusher);
-    if ('customHandler' in channelAuth) {
-        return channelAuth['customHandler'];
+    var channelAuthorization = buildChannelAuth(opts, pusher);
+    if ('customHandler' in channelAuthorization) {
+        return channelAuthorization['customHandler'];
     }
-    return channel_authorizer(channelAuth);
+    return channel_authorizer(channelAuthorization);
 }
 
 // CONCATENATED MODULE: ./src/core/pusher.ts
