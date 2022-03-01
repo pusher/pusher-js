@@ -6,7 +6,10 @@ import { decode as encodeUTF8 } from '@stablelib/utf8';
 import { decode as decodeBase64 } from '@stablelib/base64';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
-import { ChannelAuthorizationData, ChannelAuthorizationCallback } from '../auth/options';
+import {
+  ChannelAuthorizationData,
+  ChannelAuthorizationCallback
+} from '../auth/options';
 import * as nacl from 'tweetnacl';
 
 /** Extends private channels to provide encrypted channel interface.

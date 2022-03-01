@@ -31,7 +31,10 @@ const UserAuthenticator = (
     throw `'${authOptions.transport}' is not a recognized auth transport`;
   }
 
-  return (params: UserAuthenticationRequestParams, callback: UserAuthenticationCallback) => {
+  return (
+    params: UserAuthenticationRequestParams,
+    callback: UserAuthenticationCallback
+  ) => {
     const query = composeChannelQuery(params, authOptions);
 
     Runtime.getAuthorizers()[authOptions.transport](

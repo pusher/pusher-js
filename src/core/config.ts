@@ -136,7 +136,8 @@ function getEnableStatsConfig(opts: Options): boolean {
 }
 
 function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
-  const userAuthentication = opts.userAuthentication || Defaults.userAuthentication;
+  const userAuthentication =
+    opts.userAuthentication || Defaults.userAuthentication;
   if ('customHandler' in userAuthentication) {
     return userAuthentication['customHandler'];
   }
@@ -158,7 +159,8 @@ function buildChannelAuth(
     };
     if ('auth' in opts) {
       if ('params' in opts.auth) channelAuthorization.params = opts.auth.params;
-      if ('headers' in opts.auth) channelAuthorization.headers = opts.auth.headers;
+      if ('headers' in opts.auth)
+        channelAuthorization.headers = opts.auth.headers;
     }
     if ('authorizer' in opts)
       channelAuthorization.customHandler = ChannelAuthorizerProxy(
@@ -170,7 +172,10 @@ function buildChannelAuth(
   return channelAuthorization;
 }
 
-function buildChannelAuthorizer(opts: Options, pusher): ChannelAuthorizationHandler {
+function buildChannelAuthorizer(
+  opts: Options,
+  pusher
+): ChannelAuthorizationHandler {
   const channelAuthorization = buildChannelAuth(opts, pusher);
   if ('customHandler' in channelAuthorization) {
     return channelAuthorization['customHandler'];

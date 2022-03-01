@@ -41,7 +41,10 @@ export const ChannelAuthorizerProxy = (
       headers: authOptions.headers
     }
   };
-  return (params: ChannelAuthorizationRequestParams, callback: ChannelAuthorizationCallback) => {
+  return (
+    params: ChannelAuthorizationRequestParams,
+    callback: ChannelAuthorizationCallback
+  ) => {
     const channel = pusher.channel(params.channelName);
     // This line creates a new channel authorizer every time.
     // In the past, this was only done once per channel and reused.

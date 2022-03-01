@@ -33,7 +33,10 @@ const ChannelAuthorizer = (
     throw `'${authOptions.transport}' is not a recognized auth transport`;
   }
 
-  return (params: ChannelAuthorizationRequestParams, callback: ChannelAuthorizationCallback) => {
+  return (
+    params: ChannelAuthorizationRequestParams,
+    callback: ChannelAuthorizationCallback
+  ) => {
     const query = composeChannelQuery(params, authOptions);
 
     Runtime.getAuthorizers()[authOptions.transport](

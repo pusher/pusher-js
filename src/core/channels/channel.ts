@@ -5,7 +5,10 @@ import Pusher from '../pusher';
 import { PusherEvent } from '../connection/protocol/message-types';
 import Metadata from './metadata';
 import UrlStore from '../utils/url_store';
-import { ChannelAuthorizationData, ChannelAuthorizationCallback } from '../auth/options';
+import {
+  ChannelAuthorizationData,
+  ChannelAuthorizationCallback
+} from '../auth/options';
 import { HTTPAuthError } from '../errors';
 
 /** Provides base public channel interface with an event emitter.
