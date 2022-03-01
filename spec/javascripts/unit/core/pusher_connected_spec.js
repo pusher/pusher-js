@@ -47,11 +47,11 @@ describe('Pusher connected', function() {
           })
         });
 
-        expect(pusher.user).toEqual({ id: '1', name: 'test' });
+        expect(pusher.user.user_data).toEqual({ id: '1', name: 'test' });
       });
 
       it('should log warning if user_data is not JSON', async function() {
-        spyOn(Logger, 'warn');
+        spyOn(Logger, 'error');
         transport.emit('message', {
           data: JSON.stringify({
             event: 'pusher:signin_success',
@@ -60,10 +60,10 @@ describe('Pusher connected', function() {
             }
           })
         });
-        expect(Logger.warn).toHaveBeenCalledWith(
+        expect(Logger.error).toHaveBeenCalledWith(
           "Failed parsing user data after signin: I'm not JSON"
         );
-        expect(pusher.user).toEqual(undefined);
+        expect(pusher.user.user_data).toEqual(null);
       });
     });
   });

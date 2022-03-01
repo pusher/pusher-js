@@ -1,6 +1,9 @@
 export declare class BadEventName extends Error {
     constructor(msg?: string);
 }
+export declare class BadChannelName extends Error {
+    constructor(msg?: string);
+}
 export declare class RequestTimedOut extends Error {
     constructor(msg?: string);
 }

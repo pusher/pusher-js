@@ -20,10 +20,7 @@ import UrlStore from 'core/utils/url_store';
 import { Options } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
-import {
-  UserAuthenticationData,
-  UserAuthenticationCallback
-} from './auth/options';
+import UserFacade from './user';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -64,8 +61,7 @@ export default class Pusher {
   timelineSender: TimelineSender;
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
-  user?;
-  signin_requested: boolean = false;
+  user: UserFacade;
 
   constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
@@ -119,7 +115,6 @@ export default class Pusher {
 
     this.connection.bind('connected', () => {
       this.subscribeAll();
-      this._signin();
       if (this.timelineSender) {
         this.timelineSender.send(this.connection.isUsingTLS());
       }
@@ -127,16 +122,6 @@ export default class Pusher {
 
     this.connection.bind('message', event => {
       var eventName = event.event;
-      if (eventName === 'pusher:signin_success') {
-        try {
-          this.user = JSON.parse(event.data.user_data);
-        } catch (e) {
-          Logger.warn(
-            `Failed parsing user data after signin: ${event.data.user_data}`
-          );
-        }
-      }
-
       var internal = eventName.indexOf('pusher_internal:') === 0;
       if (event.channel) {
         var channel = this.channel(event.channel);
@@ -161,6 +146,8 @@ export default class Pusher {
 
     Pusher.instances.push(this);
     this.timeline.info({ instances: Pusher.instances.length });
+
+    this.user = new UserFacade(this);
 
     if (Pusher.isReady) {
       this.connect();
@@ -266,42 +253,7 @@ export default class Pusher {
   }
 
   signin() {
-    this.signin_requested = true;
-    this._signin();
-  }
-
-  _signin() {
-    if (!this.signin_requested) {
-      return;
-    }
-
-    if (this.connection.state !== 'connected') {
-      return;
-    }
-
-    const onAuthorize: UserAuthenticationCallback = (
-      err,
-      authData: UserAuthenticationData
-    ) => {
-      if (err) {
-        Logger.warn(`Error during signin: ${err}`);
-        return;
-      }
-
-      this.send_event('pusher:signin', {
-        auth: authData.auth,
-        user_data: authData.user_data
-      });
-
-      // Later when we get pusher:singin_success event, the user will be marked as signed in
-    };
-
-    this.config.userAuthenticator(
-      {
-        socketId: this.connection.socket_id
-      },
-      onAuthorize
-    );
+    this.user.signin();
   }
 }
 

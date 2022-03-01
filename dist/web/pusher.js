@@ -746,6 +746,17 @@ var BadEventName = (function (_super) {
     return BadEventName;
 }(Error));
 
+var BadChannelName = (function (_super) {
+    __extends(BadChannelName, _super);
+    function BadChannelName(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return BadChannelName;
+}(Error));
+
 var RequestTimedOut = (function (_super) {
     __extends(RequestTimedOut, _super);
     function RequestTimedOut(msg) {
@@ -2961,6 +2972,9 @@ function createChannel(name, pusher) {
     else if (name.indexOf('presence-') === 0) {
         return factory.createPresenceChannel(name, pusher);
     }
+    else if (name.indexOf('#') === 0) {
+        throw new BadChannelName('Cannot create a channel with name "' + name + '".');
+    }
     else {
         return factory.createChannel(name, pusher);
     }
@@ -4424,7 +4438,103 @@ function buildChannelAuthorizer(opts, pusher) {
     return channel_authorizer(channelAuthorization);
 }
 
+// CONCATENATED MODULE: ./src/core/user.ts
+
+
+var user_UserFacade = (function () {
+    function UserFacade(pusher) {
+        var _this = this;
+        this.signin_requested = false;
+        this.user_data = null;
+        this.serverToUserChannel = null;
+        this.pusher = pusher;
+        this.pusher.connection.bind('connected', function () {
+            _this._signin();
+        });
+        this.pusher.connection.bind('connecting', function () {
+            _this._disconnect();
+        });
+        this.pusher.connection.bind('disconnected', function () {
+            _this._disconnect();
+        });
+        this.pusher.connection.bind('message', function (event) {
+            var eventName = event.event;
+            if (eventName === 'pusher:signin_success') {
+                _this._onSigninSuccess(event.data);
+            }
+        });
+    }
+    UserFacade.prototype.signin = function () {
+        if (this.signin_requested) {
+            return;
+        }
+        this.signin_requested = true;
+        this._signin();
+    };
+    UserFacade.prototype._signin = function () {
+        var _this = this;
+        if (!this.signin_requested) {
+            return;
+        }
+        if (this.pusher.connection.state !== 'connected') {
+            return;
+        }
+        var onAuthorize = function (err, authData) {
+            if (err) {
+                logger.warn("Error during signin: " + err);
+                return;
+            }
+            _this.pusher.send_event('pusher:signin', {
+                auth: authData.auth,
+                user_data: authData.user_data
+            });
+        };
+        this.pusher.config.userAuthenticator({
+            socketId: this.pusher.connection.socket_id
+        }, onAuthorize);
+    };
+    UserFacade.prototype._onSigninSuccess = function (data) {
+        try {
+            this.user_data = JSON.parse(data.user_data);
+        }
+        catch (e) {
+            logger.error("Failed parsing user data after signin: " + data.user_data);
+            return;
+        }
+        if (typeof this.user_data.id !== 'string' || this.user_data.id === '') {
+            logger.error("user_data doesn't contain an id. user_data: " + this.user_data);
+            return;
+        }
+        this._subscribeChannels();
+    };
+    UserFacade.prototype._subscribeChannels = function () {
+        var _this = this;
+        var ensure_subscribed = function (channel) {
+            if (channel.subscriptionPending && channel.subscriptionCancelled) {
+                channel.reinstateSubscription();
+            }
+            else if (!channel.subscriptionPending &&
+                _this.pusher.connection.state === 'connected') {
+                channel.subscribe();
+            }
+        };
+        this.serverToUserChannel = new channels_channel("#server-to-user-" + this.user_data.id, this.pusher);
+        ensure_subscribed(this.serverToUserChannel);
+    };
+    UserFacade.prototype._disconnect = function () {
+        this.user_data = null;
+        if (this.serverToUserChannel) {
+            this.serverToUserChannel.unbind_all();
+            this.serverToUserChannel.disconnect();
+            this.serverToUserChannel = null;
+        }
+    };
+    return UserFacade;
+}());
+/* harmony default export */ var user = (user_UserFacade);
+
 // CONCATENATED MODULE: ./src/core/pusher.ts
+
 
 
 
@@ -4440,7 +4550,6 @@ function buildChannelAuthorizer(opts, pusher) {
 var pusher_Pusher = (function () {
     function Pusher(app_key, options) {
         var _this = this;
-        this.signin_requested = false;
         checkAppKey(app_key);
         options = options || {};
         if (!options.cluster && !(options.wsHost || options.httpHost)) {
@@ -4482,21 +4591,12 @@ var pusher_Pusher = (function () {
         });
         this.connection.bind('connected', function () {
             _this.subscribeAll();
-            _this._signin();
             if (_this.timelineSender) {
                 _this.timelineSender.send(_this.connection.isUsingTLS());
             }
         });
         this.connection.bind('message', function (event) {
             var eventName = event.event;
-            if (eventName === 'pusher:signin_success') {
-                try {
-                    _this.user = JSON.parse(event.data.user_data);
-                }
-                catch (e) {
-                    logger.warn("Failed parsing user data after signin: " + event.data.user_data);
-                }
-            }
             var internal = eventName.indexOf('pusher_internal:') === 0;
             if (event.channel) {
                 var channel = _this.channel(event.channel);
@@ -4519,6 +4619,7 @@ var pusher_Pusher = (function () {
         });
         Pusher.instances.push(this);
         this.timeline.info({ instances: Pusher.instances.length });
+        this.user = new user(this);
         if (Pusher.isReady) {
             this.connect();
         }
@@ -4617,30 +4718,7 @@ var pusher_Pusher = (function () {
         return this.config.useTLS;
     };
     Pusher.prototype.signin = function () {
-        this.signin_requested = true;
-        this._signin();
-    };
-    Pusher.prototype._signin = function () {
-        var _this = this;
-        if (!this.signin_requested) {
-            return;
-        }
-        if (this.connection.state !== 'connected') {
-            return;
-        }
-        var onAuthorize = function (err, authData) {
-            if (err) {
-                logger.warn("Error during signin: " + err);
-                return;
-            }
-            _this.send_event('pusher:signin', {
-                auth: authData.auth,
-                user_data: authData.user_data
-            });
-        };
-        this.config.userAuthenticator({
-            socketId: this.connection.socket_id
-        }, onAuthorize);
+        this.user.signin();
     };
     Pusher.instances = [];
     Pusher.isReady = false;

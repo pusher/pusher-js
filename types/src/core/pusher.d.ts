@@ -8,6 +8,7 @@ import ConnectionManager from './connection/connection_manager';
 import { PeriodicTimer } from './utils/timers';
 import { Options } from './options';
 import { Config } from './config';
+import UserFacade from './user';
 export default class Pusher {
     static instances: Pusher[];
     static isReady: boolean;
@@ -28,8 +29,7 @@ export default class Pusher {
     timelineSender: TimelineSender;
     connection: ConnectionManager;
     timelineSenderTimer: PeriodicTimer;
-    user?: any;
-    signin_requested: boolean;
+    user: UserFacade;
     constructor(app_key: string, options?: Options);
     channel(name: string): Channel;
     allChannels(): Channel[];
@@ -46,5 +46,4 @@ export default class Pusher {
     send_event(event_name: string, data: any, channel?: string): boolean;
     shouldUseTLS(): boolean;
     signin(): void;
-    _signin(): void;
 }
