@@ -33,6 +33,7 @@ interface Runtime {
     HTTPFactory: HTTPFactory;
     isXHRSupported(): boolean;
     createSocketRequest(method: string, url: string): HTTPRequest;
+    randomInt(max: number): number;
     getDocument?(): Document;
     createScriptRequest?(url: string): any;
     createJSONPRequest?(url: string, data: any): JSONPRequest;

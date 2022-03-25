@@ -81,7 +81,7 @@ export default class Pusher {
 
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
-    this.sessionID = Math.floor(Math.random() * 1000000000);
+    this.sessionID = Runtime.randomInt(1000000000);
 
     this.timeline = new Timeline(this.key, this.sessionID, {
       cluster: this.config.cluster,

@@ -204,14 +204,16 @@ function replaceHost(url: string, hostname: string): string {
 }
 
 function randomNumber(max: number): number {
-  return Math.floor(Math.random() * max);
+  return Runtime.randomInt(max);
 }
 
 function randomString(length: number): string {
   var result = [];
+
   for (var i = 0; i < length; i++) {
     result.push(randomNumber(32).toString(32));
   }
+
   return result.join('');
 }
 
