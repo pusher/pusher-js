@@ -1,4 +1,8 @@
-import { AuthOptions, UserAuthenticationHandler } from './auth/options';
+import {
+  AuthOptions,
+  ChannelAuthorizationHandler,
+  UserAuthenticationHandler
+} from './auth/options';
 import { AuthTransport } from './config';
 
 export interface DefaultConfig {
@@ -19,6 +23,7 @@ export interface DefaultConfig {
   unavailableTimeout: number;
   cluster: string;
   userAuthentication: AuthOptions<UserAuthenticationHandler>;
+  channelAuthorization: AuthOptions<ChannelAuthorizationHandler>;
 
   cdn_http?: string;
   cdn_https?: string;
@@ -48,6 +53,10 @@ var Defaults: DefaultConfig = {
   cluster: 'mt1',
   userAuthentication: {
     endpoint: '/pusher/user-auth',
+    transport: 'ajax'
+  },
+  channelAuthorization: {
+    endpoint: '/pusher/auth',
     transport: 'ajax'
   },
 

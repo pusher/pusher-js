@@ -136,8 +136,10 @@ function getEnableStatsConfig(opts: Options): boolean {
 }
 
 function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
-  const userAuthentication =
-    opts.userAuthentication || Defaults.userAuthentication;
+  const userAuthentication = {
+    ...Defaults.userAuthentication,
+    ...opts.userAuthentication
+  };
   if ('customHandler' in userAuthentication) {
     return userAuthentication['customHandler'];
   }
@@ -149,9 +151,12 @@ function buildChannelAuth(
   opts: Options,
   pusher
 ): AuthOptions<ChannelAuthorizationHandler> {
-  var channelAuthorization: AuthOptions<ChannelAuthorizationHandler>;
+  let channelAuthorization: AuthOptions<ChannelAuthorizationHandler>;
   if ('channelAuthorization' in opts) {
-    channelAuthorization = opts.channelAuthorization;
+    channelAuthorization = {
+      ...Defaults.channelAuthorization,
+      ...opts.channelAuthorization
+    };
   } else {
     channelAuthorization = {
       transport: opts.authTransport || Defaults.authTransport,

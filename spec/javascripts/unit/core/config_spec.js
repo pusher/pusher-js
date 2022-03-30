@@ -85,7 +85,7 @@ describe('Config', function() {
 
         // When we test channelAuthorizer, the userAuthenticator will be using
         // the default ajax transport and vice versa.
-        'ajax': transportAuthorizerAjax, 
+        'ajax': transportAuthorizerAjax,
       });
     });
 
@@ -178,6 +178,7 @@ describe('Config', function() {
         channelName: 'private-test', 
       }, callback);
 
+      console.log(config);
       authOptions = {
         transport: 'some-auth-transport2',
         endpoint: '/pusher/spec/auth2',
@@ -194,6 +195,46 @@ describe('Config', function() {
         callback
       );
     });
+
+    it('should use default transport when not provided in channelAuthorization', function() {
+      let opts = {
+        authEndpoint: '/pusher/spec/auth',
+        auth: {
+          params: { foo: 'bar' },
+          headers: { spec: 'header' }
+        },
+        channelAuthorization: {
+          endpoint: '/pusher/spec/auth2',
+          params: { spec2: 'param2' },
+          headers: { spec2: 'header2' }
+        }
+      };
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.channelAuthorizer({
+        socketId: '1.23',
+        channelName: 'private-test', 
+      }, callback);
+
+      authOptions = {
+        transport: 'ajax',
+        endpoint: '/pusher/spec/auth2',
+        params: { spec2: 'param2' },
+        headers: { spec2: 'header2' }
+      }
+      const query = 'socket_id=1.23&channel_name=private-test&spec2=param2';
+      expect(transportAuthorizer.calls.count()).toEqual(0);
+      expect(transportAuthorizer2.calls.count()).toEqual(0);
+      expect(transportAuthorizerAjax.calls.count()).toEqual(1);
+      expect(transportAuthorizerAjax).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        callback
+      );
+    });
+
 
     it('should use customerHandler inside channelAuthorization', function() {
       const customHandler = jasmine.createSpy('customHandler');
@@ -268,7 +309,41 @@ describe('Config', function() {
         callback
       );
     });
-    
+
+    it('should use default transport when not provided in userAuthentication', function() {
+      let opts = {
+        userAuthentication: {
+          endpoint: '/pusher/spec/auth',
+          params: { foo: 'bar' },
+          headers: { spec: 'header' }
+        }
+      };
+
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.userAuthenticator({
+        socketId: '1.23',
+      }, callback);
+
+      authOptions = {
+        transport: 'ajax',
+        endpoint: '/pusher/spec/auth',
+        params: { foo: 'bar' },
+        headers: { spec: 'header' }
+      }
+      const query = 'socket_id=1.23&foo=bar';
+      expect(transportAuthorizer.calls.count()).toEqual(0);
+      expect(transportAuthorizer2.calls.count()).toEqual(0);
+      expect(transportAuthorizerAjax.calls.count()).toEqual(1);
+      expect(transportAuthorizerAjax).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        callback
+      );
+    });
+
     it('should use customHandler inside userAuthentication', function() {
       const customHandler = jasmine.createSpy('customHandler');
       let opts = {

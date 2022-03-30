@@ -7548,6 +7548,10 @@ var Defaults = {
         endpoint: '/pusher/user-auth',
         transport: 'ajax'
     },
+    channelAuthorization: {
+        endpoint: '/pusher/auth',
+        transport: 'ajax'
+    },
     cdn_http: "http://js.pusher.com",
     cdn_https: "https://js.pusher.com",
     dependency_suffix: ""
@@ -10586,6 +10590,17 @@ var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGen
 };
 
 // CONCATENATED MODULE: ./src/core/config.ts
+var __assign = (undefined && undefined.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 
 
 
@@ -10664,7 +10679,7 @@ function getEnableStatsConfig(opts) {
     return false;
 }
 function buildUserAuthenticator(opts) {
-    var userAuthentication = opts.userAuthentication || defaults.userAuthentication;
+    var userAuthentication = __assign(__assign({}, defaults.userAuthentication), opts.userAuthentication);
     if ('customHandler' in userAuthentication) {
         return userAuthentication['customHandler'];
     }
@@ -10673,7 +10688,7 @@ function buildUserAuthenticator(opts) {
 function buildChannelAuth(opts, pusher) {
     var channelAuthorization;
     if ('channelAuthorization' in opts) {
-        channelAuthorization = opts.channelAuthorization;
+        channelAuthorization = __assign(__assign({}, defaults.channelAuthorization), opts.channelAuthorization);
     }
     else {
         channelAuthorization = {
