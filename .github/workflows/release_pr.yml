@@ -28,7 +28,7 @@ jobs:
           current_version: ${{ env.CURRENT_VERSION }}
       - uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
       - run: npm install
       - name: Push
         shell: bash

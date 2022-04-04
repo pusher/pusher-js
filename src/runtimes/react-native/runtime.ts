@@ -4,7 +4,7 @@ import { Network } from './net_info';
 import xhrAuth from 'isomorphic/auth/xhr_auth';
 import { AuthTransports } from 'core/auth/auth_transports';
 import xhrTimeline from 'isomorphic/timeline/xhr_timeline';
-import { getRandomValues } from 'crypto';
+import { randomInt } from 'crypto';
 
 // Very verbose but until unavoidable until
 // TypeScript 2.1, when spread attributes will be
@@ -59,16 +59,7 @@ const ReactNative: Runtime = {
   },
 
   randomInt(max: number): number {
-    /**
-     * Return values in the range of [0, 1[
-     */
-     const random = function() {
-      const random = getRandomValues(new Uint32Array(1))[0];
-
-      return random / 2 ** 32;
-    };
-
-    return Math.floor(random() * max);
+    return randomInt(max);
   }
 };
 
