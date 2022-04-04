@@ -8469,7 +8469,10 @@ var urlStore = {
     baseUrl: 'https://pusher.com',
     urls: {
         authenticationEndpoint: {
-            path: '/docs/authenticating_users'
+            path: '/docs/channels/server_api/authenticating_users'
+        },
+        authorizationEndpoint: {
+            path: '/docs/channels/server_api/authorizing-users/'
         },
         javascriptQuickStart: {
             path: '/docs/javascript_quick_start'
@@ -10187,13 +10190,20 @@ var NetInfo = (function (_super) {
 
 var net_info_Network = new NetInfo();
 
+// CONCATENATED MODULE: ./src/core/auth/options.ts
+var AuthRequestType;
+(function (AuthRequestType) {
+    AuthRequestType["UserAuthentication"] = "user-authentication";
+    AuthRequestType["ChannelAuthorization"] = "channel-authorization";
+})(AuthRequestType || (AuthRequestType = {}));
+
 // CONCATENATED MODULE: ./src/runtimes/isomorphic/auth/xhr_auth.ts
 
 
 
-var ajax = function (context, query, authOptions, callback) {
-    var xhr;
-    xhr = node_runtime.createXHR();
+
+var ajax = function (context, query, authOptions, authRequestType, callback) {
+    var xhr = node_runtime.createXHR();
     xhr.open('POST', authOptions.endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in authOptions.headers) {
@@ -10209,18 +10219,24 @@ var ajax = function (context, query, authOptions, callback) {
                     parsed = true;
                 }
                 catch (e) {
-                    callback(new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                        xhr.responseText), null);
+                    callback(new HTTPAuthError(200, "JSON returned from " + authRequestType.toString() + " endpoint was invalid, yet status code was 200. Data was: " + xhr.responseText), null);
                 }
                 if (parsed) {
                     callback(null, data);
                 }
             }
             else {
-                var suffix = url_store.buildLogSuffix('authenticationEndpoint');
-                callback(new HTTPAuthError(xhr.status, 'Unable to retrieve auth string from auth endpoint - ' +
-                    ("received status: " + xhr.status + " from " + authOptions.endpoint + ". ") +
-                    ("Clients must be authenticated to join private or presence channels. " + suffix)), null);
+                var suffix = "";
+                switch (authRequestType) {
+                    case AuthRequestType.UserAuthentication:
+                        suffix = url_store.buildLogSuffix('authenticationEndpoint');
+                        break;
+                    case AuthRequestType.ChannelAuthorization:
+                        suffix = "Clients must be authenticated to join private or presence channels. " + url_store.buildLogSuffix('authorizationEndpoint');
+                        break;
+                }
+                callback(new HTTPAuthError(xhr.status, "Unable to retrieve auth string from " + authRequestType.toString() + " endpoint - " +
+                    ("received status: " + xhr.status + " from " + authOptions.endpoint + ". " + suffix)), null);
             }
         }
     };
@@ -10525,6 +10541,7 @@ var strategy_builder_UnsupportedStrategy = {
 
 // CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
 
+
 var composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
     for (var i in authOptions.params) {
@@ -10542,12 +10559,13 @@ var UserAuthenticator = function (authOptions) {
     }
     return function (params, callback) {
         var query = composeChannelQuery(params, authOptions);
-        node_runtime.getAuthorizers()[authOptions.transport](node_runtime, query, authOptions, callback);
+        node_runtime.getAuthorizers()[authOptions.transport](node_runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
     };
 };
 /* harmony default export */ var user_authenticator = (UserAuthenticator);
 
 // CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
+
 
 var channel_authorizer_composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
@@ -10567,7 +10585,7 @@ var ChannelAuthorizer = function (authOptions) {
     }
     return function (params, callback) {
         var query = channel_authorizer_composeChannelQuery(params, authOptions);
-        node_runtime.getAuthorizers()[authOptions.transport](node_runtime, query, authOptions, callback);
+        node_runtime.getAuthorizers()[authOptions.transport](node_runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
     };
 };
 /* harmony default export */ var channel_authorizer = (ChannelAuthorizer);

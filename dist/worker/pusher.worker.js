@@ -1838,7 +1838,10 @@ var urlStore = {
     baseUrl: 'https://pusher.com',
     urls: {
         authenticationEndpoint: {
-            path: '/docs/authenticating_users'
+            path: '/docs/channels/server_api/authenticating_users'
+        },
+        authorizationEndpoint: {
+            path: '/docs/channels/server_api/authorizing-users/'
         },
         javascriptQuickStart: {
             path: '/docs/javascript_quick_start'
@@ -3552,7 +3555,7 @@ var net_info_Network = new NetInfo();
 
 // CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
 
-var fetchAuth = function (context, query, authOptions, callback) {
+var fetchAuth = function (context, query, authOptions, authRequestType, callback) {
     var headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in authOptions.headers) {
@@ -3571,7 +3574,7 @@ var fetchAuth = function (context, query, authOptions, callback) {
         if (status === 200) {
             return response.text();
         }
-        throw new HTTPAuthError(200, "Could not get auth info from your auth endpoint, status: " + status);
+        throw new HTTPAuthError(200, "Could not get " + authRequestType.toString() + " info from your auth endpoint, status: " + status);
     })
         .then(function (data) {
         var parsedData;
@@ -3579,8 +3582,7 @@ var fetchAuth = function (context, query, authOptions, callback) {
             parsedData = JSON.parse(data);
         }
         catch (e) {
-            throw new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                data);
+            throw new HTTPAuthError(200, "JSON returned from " + authRequestType.toString() + " endpoint was invalid, yet status code was 200. Data was: " + data);
         }
         callback(null, parsedData);
     })["catch"](function (err) {
@@ -3874,7 +3876,15 @@ var strategy_builder_UnsupportedStrategy = {
     }
 };
 
+// CONCATENATED MODULE: ./src/core/auth/options.ts
+var AuthRequestType;
+(function (AuthRequestType) {
+    AuthRequestType["UserAuthentication"] = "user-authentication";
+    AuthRequestType["ChannelAuthorization"] = "channel-authorization";
+})(AuthRequestType || (AuthRequestType = {}));
+
 // CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
+
 
 var composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
@@ -3893,12 +3903,13 @@ var UserAuthenticator = function (authOptions) {
     }
     return function (params, callback) {
         var query = composeChannelQuery(params, authOptions);
-        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, callback);
+        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
     };
 };
 /* harmony default export */ var user_authenticator = (UserAuthenticator);
 
 // CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
+
 
 var channel_authorizer_composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
@@ -3918,7 +3929,7 @@ var ChannelAuthorizer = function (authOptions) {
     }
     return function (params, callback) {
         var query = channel_authorizer_composeChannelQuery(params, authOptions);
-        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, callback);
+        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
     };
 };
 /* harmony default export */ var channel_authorizer = (ChannelAuthorizer);

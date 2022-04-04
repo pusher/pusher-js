@@ -1,4 +1,5 @@
 import {
+  AuthRequestType,
   InternalAuthOptions,
   ChannelAuthorizationHandler,
   ChannelAuthorizationRequestParams,
@@ -43,6 +44,7 @@ const ChannelAuthorizer = (
       Runtime,
       query,
       authOptions,
+      AuthRequestType.ChannelAuthorization,
       callback
     );
   };

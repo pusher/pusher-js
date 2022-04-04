@@ -104,7 +104,7 @@ describe('Config', function() {
       let callback = function(){};
       config.channelAuthorizer({
         socketId: '1.23',
-        channelName: 'private-test', 
+        channelName: 'private-test',
       }, callback);
 
       authOptions = {
@@ -119,6 +119,7 @@ describe('Config', function() {
         Runtime,
         query,
         authOptions,
+        "channel-authorization",
         callback
       );
     })
@@ -138,11 +139,11 @@ describe('Config', function() {
       const channel = {name: 'private-test'};
       const pusher = { channel: jasmine.createSpy('channel').and.returnValue(channel) };
       let config = Config.getConfig(opts, pusher);
-      
+
       const callback = function(){};
       config.channelAuthorizer({
         socketId: '1.23',
-        channelName: 'private-test', 
+        channelName: 'private-test',
       }, callback);
       expect(authorizerGenerator).toHaveBeenCalledWith(channel, {
         authTransport: 'some-auth-transport',
@@ -175,7 +176,7 @@ describe('Config', function() {
       let callback = function(){};
       config.channelAuthorizer({
         socketId: '1.23',
-        channelName: 'private-test', 
+        channelName: 'private-test',
       }, callback);
 
       console.log(config);
@@ -192,6 +193,7 @@ describe('Config', function() {
         Runtime,
         query,
         authOptions,
+        "channel-authorization",
         callback
       );
     });
@@ -214,7 +216,7 @@ describe('Config', function() {
       let callback = function(){};
       config.channelAuthorizer({
         socketId: '1.23',
-        channelName: 'private-test', 
+        channelName: 'private-test',
       }, callback);
 
       authOptions = {
@@ -231,6 +233,7 @@ describe('Config', function() {
         Runtime,
         query,
         authOptions,
+        "channel-authorization",
         callback
       );
     });
@@ -273,6 +276,7 @@ describe('Config', function() {
         Runtime,
         query,
         authOptions,
+        "user-authentication",
         callback
       );
     });
@@ -306,6 +310,7 @@ describe('Config', function() {
         Runtime,
         query,
         authOptions,
+        "user-authentication",
         callback
       );
     });
@@ -340,6 +345,7 @@ describe('Config', function() {
         Runtime,
         query,
         authOptions,
+        "user-authentication",
         callback
       );
     });

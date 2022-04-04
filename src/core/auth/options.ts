@@ -1,3 +1,8 @@
+export enum AuthRequestType {
+  UserAuthentication = 'user-authentication',
+  ChannelAuthorization = 'channel-authorization'
+}
+
 export interface ChannelAuthorizationData {
   auth: string;
   channel_data?: string;

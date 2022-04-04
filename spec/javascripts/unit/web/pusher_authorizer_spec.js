@@ -30,7 +30,7 @@ describe('JSONP Authorizer', function() {
     }, function() {})
 
     expect(Logger.warn).toHaveBeenCalledWith(
-      'To send headers with the auth request, you must use AJAX, rather than JSONP.'
+      'To send headers with the channel-authorization request, you must use AJAX, rather than JSONP.'
     );
   });
 });

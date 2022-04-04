@@ -5,18 +5,21 @@ import Runtime from 'runtime';
 import { AuthTransport } from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
 import UrlStore from 'core/utils/url_store';
-import { AuthTransportCallback, InternalAuthOptions } from 'core/auth/options';
+import {
+  AuthRequestType,
+  AuthTransportCallback,
+  InternalAuthOptions
+} from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
-var ajax: AuthTransport = function(
+const ajax: AuthTransport = function(
   context: AbstractRuntime,
   query: string,
   authOptions: InternalAuthOptions,
+  authRequestType: AuthRequestType,
   callback: AuthTransportCallback
 ) {
-  var xhr;
-
-  xhr = Runtime.createXHR();
+  const xhr = Runtime.createXHR();
   xhr.open('POST', authOptions.endpoint, true);
 
   // add request headers
@@ -38,8 +41,9 @@ var ajax: AuthTransport = function(
           callback(
             new HTTPAuthError(
               200,
-              'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+              `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${
                 xhr.responseText
+              }`
             ),
             null
           );
@@ -50,13 +54,22 @@ var ajax: AuthTransport = function(
           callback(null, data);
         }
       } else {
-        var suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+        let suffix = '';
+        switch (authRequestType) {
+          case AuthRequestType.UserAuthentication:
+            suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+            break;
+          case AuthRequestType.ChannelAuthorization:
+            suffix = `Clients must be authenticated to join private or presence channels. ${UrlStore.buildLogSuffix(
+              'authorizationEndpoint'
+            )}`;
+            break;
+        }
         callback(
           new HTTPAuthError(
             xhr.status,
-            'Unable to retrieve auth string from auth endpoint - ' +
-              `received status: ${xhr.status} from ${authOptions.endpoint}. ` +
-              `Clients must be authenticated to join private or presence channels. ${suffix}`
+            `Unable to retrieve auth string from ${authRequestType.toString()} endpoint - ` +
+              `received status: ${xhr.status} from ${authOptions.endpoint}. ${suffix}`
           ),
           null
         );

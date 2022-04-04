@@ -33,7 +33,7 @@ describe("ChannelAuthorizer", function() {
         headers: { "X-Foo": "my-bar" }
       };
       channelAuthorizer = ChannelAuthorizer(authOptions);
-      
+
       transportAuthorizer = jasmine.createSpy("ajax")
       Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
         ajax: transportAuthorizer
@@ -48,6 +48,7 @@ describe("ChannelAuthorizer", function() {
         Runtime,
         query,
         authOptions,
+        'channel-authorization',
         callback);
     });
   });

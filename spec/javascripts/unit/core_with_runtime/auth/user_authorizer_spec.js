@@ -14,7 +14,7 @@ describe("UserAuthenticator", function() {
     });
   });
 
-  describe("user AuthHandler", function(){    
+  describe("user AuthHandler", function(){
     let _getAuthorizers;
 
     beforeAll(function() {
@@ -30,7 +30,7 @@ describe("UserAuthenticator", function() {
         transport: "ajax",
       };
       userAuthenticator = UserAuthenticator(userAuthentication);
-      
+
       transportAuthorizer = jasmine.createSpy("ajax")
       Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
         ajax: transportAuthorizer
@@ -45,6 +45,7 @@ describe("UserAuthenticator", function() {
         Runtime,
         query,
         userAuthentication,
+        'user-authentication',
         callback);
     });
   });

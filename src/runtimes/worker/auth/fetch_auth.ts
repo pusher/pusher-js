@@ -1,12 +1,17 @@
 import AbstractRuntime from 'runtimes/interface';
 import { AuthTransport } from 'core/auth/auth_transports';
-import { AuthTransportCallback, InternalAuthOptions } from 'core/auth/options';
+import {
+  AuthRequestType,
+  AuthTransportCallback,
+  InternalAuthOptions
+} from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
 var fetchAuth: AuthTransport = function(
   context: AbstractRuntime,
   query: string,
   authOptions: InternalAuthOptions,
+  authRequestType: AuthRequestType,
   callback: AuthTransportCallback
 ) {
   var headers = new Headers();
@@ -34,7 +39,7 @@ var fetchAuth: AuthTransport = function(
       }
       throw new HTTPAuthError(
         200,
-        `Could not get auth info from your auth endpoint, status: ${status}`
+        `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`
       );
     })
     .then(data => {
@@ -44,8 +49,7 @@ var fetchAuth: AuthTransport = function(
       } catch (e) {
         throw new HTTPAuthError(
           200,
-          'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-            data
+          `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${data}`
         );
       }
       callback(null, parsedData);

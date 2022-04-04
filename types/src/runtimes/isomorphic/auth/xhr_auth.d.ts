@@ -1,3 +1,3 @@
 import { AuthTransport } from 'core/auth/auth_transports';
-declare var ajax: AuthTransport;
+declare const ajax: AuthTransport;
 export default ajax;

@@ -2,7 +2,8 @@ import {
   UserAuthenticationCallback,
   InternalAuthOptions,
   UserAuthenticationHandler,
-  UserAuthenticationRequestParams
+  UserAuthenticationRequestParams,
+  AuthRequestType
 } from './options';
 
 import Runtime from 'runtime';
@@ -41,6 +42,7 @@ const UserAuthenticator = (
       Runtime,
       query,
       authOptions,
+      AuthRequestType.UserAuthentication,
       callback
     );
   };

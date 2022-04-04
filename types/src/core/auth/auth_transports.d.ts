@@ -1,7 +1,7 @@
 import AbstractRuntime from '../../runtimes/interface';
-import { InternalAuthOptions } from './options';
+import { AuthRequestType, InternalAuthOptions } from './options';
 interface AuthTransport {
-    (context: AbstractRuntime, query: string, authOptions: InternalAuthOptions, callback: Function): void;
+    (context: AbstractRuntime, query: string, authOptions: InternalAuthOptions, authRequestType: AuthRequestType, callback: Function): void;
 }
 interface AuthTransports {
     [index: string]: AuthTransport;
