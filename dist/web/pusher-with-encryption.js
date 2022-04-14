@@ -3281,7 +3281,7 @@ var ajax = function (context, query, authOptions, authRequestType, callback) {
                 }
             }
             else {
-                var suffix = "";
+                var suffix = '';
                 switch (authRequestType) {
                     case AuthRequestType.UserAuthentication:
                         suffix = url_store.buildLogSuffix('authenticationEndpoint');
@@ -6839,7 +6839,8 @@ function getEnableStatsConfig(opts) {
 }
 function buildUserAuthenticator(opts) {
     var userAuthentication = __assign(__assign({}, defaults.userAuthentication), opts.userAuthentication);
-    if ('customHandler' in userAuthentication) {
+    if ('customHandler' in userAuthentication &&
+        userAuthentication['customHandler'] != null) {
         return userAuthentication['customHandler'];
     }
     return user_authenticator(userAuthentication);
@@ -6867,7 +6868,8 @@ function buildChannelAuth(opts, pusher) {
 }
 function buildChannelAuthorizer(opts, pusher) {
     var channelAuthorization = buildChannelAuth(opts, pusher);
-    if ('customHandler' in channelAuthorization) {
+    if ('customHandler' in channelAuthorization &&
+        channelAuthorization['customHandler'] != null) {
         return channelAuthorization['customHandler'];
     }
     return channel_authorizer(channelAuthorization);

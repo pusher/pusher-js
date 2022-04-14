@@ -140,7 +140,10 @@ function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
     ...Defaults.userAuthentication,
     ...opts.userAuthentication
   };
-  if ('customHandler' in userAuthentication) {
+  if (
+    'customHandler' in userAuthentication &&
+    userAuthentication['customHandler'] != null
+  ) {
     return userAuthentication['customHandler'];
   }
 
@@ -182,7 +185,10 @@ function buildChannelAuthorizer(
   pusher
 ): ChannelAuthorizationHandler {
   const channelAuthorization = buildChannelAuth(opts, pusher);
-  if ('customHandler' in channelAuthorization) {
+  if (
+    'customHandler' in channelAuthorization &&
+    channelAuthorization['customHandler'] != null
+  ) {
     return channelAuthorization['customHandler'];
   }
 
