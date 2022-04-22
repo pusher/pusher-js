@@ -913,6 +913,14 @@ var Defaults = {
     pongTimeout: 30000,
     unavailableTimeout: 10000,
     cluster: 'mt1',
+    userAuthentication: {
+        endpoint: '/pusher/user-auth',
+        transport: 'ajax'
+    },
+    channelAuthorization: {
+        endpoint: '/pusher/auth',
+        transport: 'ajax'
+    },
     cdn_http: "http://js.pusher.com",
     cdn_https: "https://js.pusher.com",
     dependency_suffix: ""
@@ -1693,42 +1701,6 @@ var handshake_Handshake = (function () {
 }());
 /* harmony default export */ var connection_handshake = (handshake_Handshake);
 
-// CONCATENATED MODULE: ./src/core/auth/pusher_authorizer.ts
-
-var pusher_authorizer_PusherAuthorizer = (function () {
-    function PusherAuthorizer(channel, options) {
-        this.channel = channel;
-        var authTransport = options.authTransport;
-        if (typeof worker_runtime.getAuthorizers()[authTransport] === 'undefined') {
-            throw "'" + authTransport + "' is not a recognized auth transport";
-        }
-        this.type = authTransport;
-        this.options = options;
-        this.authOptions = options.auth || {};
-    }
-    PusherAuthorizer.prototype.composeQuery = function (socketId) {
-        var query = 'socket_id=' +
-            encodeURIComponent(socketId) +
-            '&channel_name=' +
-            encodeURIComponent(this.channel.name);
-        for (var i in this.authOptions.params) {
-            query +=
-                '&' +
-                    encodeURIComponent(i) +
-                    '=' +
-                    encodeURIComponent(this.authOptions.params[i]);
-        }
-        return query;
-    };
-    PusherAuthorizer.prototype.authorize = function (socketId, callback) {
-        PusherAuthorizer.authorizers =
-            PusherAuthorizer.authorizers || worker_runtime.getAuthorizers();
-        PusherAuthorizer.authorizers[this.type].call(this, worker_runtime, socketId, callback);
-    };
-    return PusherAuthorizer;
-}());
-/* harmony default export */ var pusher_authorizer = (pusher_authorizer_PusherAuthorizer);
-
 // CONCATENATED MODULE: ./src/core/timeline/timeline_sender.ts
 
 var timeline_sender_TimelineSender = (function () {
@@ -1769,6 +1741,17 @@ var BadEventName = (function (_super) {
         return _this;
     }
     return BadEventName;
+}(Error));
+
+var BadChannelName = (function (_super) {
+    errors_extends(BadChannelName, _super);
+    function BadChannelName(msg) {
+        var _newTarget = this.constructor;
+        var _this = _super.call(this, msg) || this;
+        Object.setPrototypeOf(_this, _newTarget.prototype);
+        return _this;
+    }
+    return BadChannelName;
 }(Error));
 
 var RequestTimedOut = (function (_super) {
@@ -1855,7 +1838,10 @@ var urlStore = {
     baseUrl: 'https://pusher.com',
     urls: {
         authenticationEndpoint: {
-            path: '/docs/authenticating_users'
+            path: '/docs/channels/server_api/authenticating_users'
+        },
+        authorizationEndpoint: {
+            path: '/docs/channels/server_api/authorizing-users/'
         },
         javascriptQuickStart: {
             path: '/docs/javascript_quick_start'
@@ -2012,19 +1998,20 @@ var private_channel_extends = (undefined && undefined.__extends) || (function ()
     };
 })();
 
-
-var private_channel_PrivateChannel = (function (_super) {
+var PrivateChannel = (function (_super) {
     private_channel_extends(PrivateChannel, _super);
     function PrivateChannel() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
     PrivateChannel.prototype.authorize = function (socketId, callback) {
-        var authorizer = factory.createAuthorizer(this, this.pusher.config);
-        return authorizer.authorize(socketId, callback);
+        return this.pusher.config.channelAuthorizer({
+            channelName: this.name,
+            socketId: socketId
+        }, callback);
     };
     return PrivateChannel;
 }(channels_channel));
-/* harmony default export */ var private_channel = (private_channel_PrivateChannel);
+/* harmony default export */ var private_channel = (PrivateChannel);
 
 // CONCATENATED MODULE: ./src/core/channels/members.ts
 
@@ -2624,13 +2611,15 @@ function createChannel(name, pusher) {
     else if (name.indexOf('presence-') === 0) {
         return factory.createPresenceChannel(name, pusher);
     }
+    else if (name.indexOf('#') === 0) {
+        throw new BadChannelName('Cannot create a channel with name "' + name + '".');
+    }
     else {
         return factory.createChannel(name, pusher);
     }
 }
 
 // CONCATENATED MODULE: ./src/core/utils/factory.ts
-
 
 
 
@@ -2661,12 +2650,6 @@ var Factory = {
     },
     createTimelineSender: function (timeline, options) {
         return new timeline_sender(timeline, options);
-    },
-    createAuthorizer: function (channel, options) {
-        if (options.authorizer) {
-            return options.authorizer(channel, options);
-        }
-        return new pusher_authorizer(channel, options);
     },
     createHandshake: function (transport, callback) {
         return new connection_handshake(transport, callback);
@@ -3572,14 +3555,14 @@ var net_info_Network = new NetInfo();
 
 // CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
 
-var fetchAuth = function (context, socketId, callback) {
+var fetchAuth = function (context, query, authOptions, authRequestType, callback) {
     var headers = new Headers();
     headers.set('Content-Type', 'application/x-www-form-urlencoded');
-    for (var headerName in this.authOptions.headers) {
-        headers.set(headerName, this.authOptions.headers[headerName]);
+    for (var headerName in authOptions.headers) {
+        headers.set(headerName, authOptions.headers[headerName]);
     }
-    var body = this.composeQuery(socketId);
-    var request = new Request(this.options.authEndpoint, {
+    var body = query;
+    var request = new Request(authOptions.endpoint, {
         headers: headers,
         body: body,
         credentials: 'same-origin',
@@ -3591,7 +3574,7 @@ var fetchAuth = function (context, socketId, callback) {
         if (status === 200) {
             return response.text();
         }
-        throw new HTTPAuthError(200, "Could not get auth info from your auth endpoint, status: " + status);
+        throw new HTTPAuthError(200, "Could not get " + authRequestType.toString() + " info from your auth endpoint, status: " + status);
     })
         .then(function (data) {
         var parsedData;
@@ -3599,12 +3582,11 @@ var fetchAuth = function (context, socketId, callback) {
             parsedData = JSON.parse(data);
         }
         catch (e) {
-            throw new HTTPAuthError(200, 'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-                data);
+            throw new HTTPAuthError(200, "JSON returned from " + authRequestType.toString() + " endpoint was invalid, yet status code was 200. Data was: " + data);
         }
         callback(null, parsedData);
     })["catch"](function (err) {
-        callback(err, { auth: '' });
+        callback(err, null);
     });
 };
 /* harmony default export */ var fetch_auth = (fetchAuth);
@@ -3894,14 +3876,101 @@ var strategy_builder_UnsupportedStrategy = {
     }
 };
 
+// CONCATENATED MODULE: ./src/core/auth/options.ts
+var AuthRequestType;
+(function (AuthRequestType) {
+    AuthRequestType["UserAuthentication"] = "user-authentication";
+    AuthRequestType["ChannelAuthorization"] = "channel-authorization";
+})(AuthRequestType || (AuthRequestType = {}));
+
+// CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
+
+
+var composeChannelQuery = function (params, authOptions) {
+    var query = 'socket_id=' + encodeURIComponent(params.socketId);
+    for (var i in authOptions.params) {
+        query +=
+            '&' +
+                encodeURIComponent(i) +
+                '=' +
+                encodeURIComponent(authOptions.params[i]);
+    }
+    return query;
+};
+var UserAuthenticator = function (authOptions) {
+    if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+        throw "'" + authOptions.transport + "' is not a recognized auth transport";
+    }
+    return function (params, callback) {
+        var query = composeChannelQuery(params, authOptions);
+        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
+    };
+};
+/* harmony default export */ var user_authenticator = (UserAuthenticator);
+
+// CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
+
+
+var channel_authorizer_composeChannelQuery = function (params, authOptions) {
+    var query = 'socket_id=' + encodeURIComponent(params.socketId);
+    query += '&channel_name=' + encodeURIComponent(params.channelName);
+    for (var i in authOptions.params) {
+        query +=
+            '&' +
+                encodeURIComponent(i) +
+                '=' +
+                encodeURIComponent(authOptions.params[i]);
+    }
+    return query;
+};
+var ChannelAuthorizer = function (authOptions) {
+    if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+        throw "'" + authOptions.transport + "' is not a recognized auth transport";
+    }
+    return function (params, callback) {
+        var query = channel_authorizer_composeChannelQuery(params, authOptions);
+        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
+    };
+};
+/* harmony default export */ var channel_authorizer = (ChannelAuthorizer);
+
+// CONCATENATED MODULE: ./src/core/auth/deprecated_channel_authorizer.ts
+var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGenerator) {
+    var deprecatedAuthorizerOptions = {
+        authTransport: authOptions.transport,
+        authEndpoint: authOptions.endpoint,
+        auth: {
+            params: authOptions.params,
+            headers: authOptions.headers
+        }
+    };
+    return function (params, callback) {
+        var channel = pusher.channel(params.channelName);
+        var channelAuthorizer = channelAuthorizerGenerator(channel, deprecatedAuthorizerOptions);
+        channelAuthorizer.authorize(params.socketId, callback);
+    };
+};
+
 // CONCATENATED MODULE: ./src/core/config.ts
+var __assign = (undefined && undefined.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 
 
-function getConfig(opts) {
+
+
+
+function getConfig(opts, pusher) {
     var config = {
         activityTimeout: opts.activityTimeout || defaults.activityTimeout,
-        authEndpoint: opts.authEndpoint || defaults.authEndpoint,
-        authTransport: opts.authTransport || defaults.authTransport,
         cluster: opts.cluster || defaults.cluster,
         httpPath: opts.httpPath || defaults.httpPath,
         httpPort: opts.httpPort || defaults.httpPort,
@@ -3915,12 +3984,10 @@ function getConfig(opts) {
         enableStats: getEnableStatsConfig(opts),
         httpHost: getHttpHost(opts),
         useTLS: shouldUseTLS(opts),
-        wsHost: getWebsocketHost(opts)
+        wsHost: getWebsocketHost(opts),
+        userAuthenticator: buildUserAuthenticator(opts),
+        channelAuthorizer: buildChannelAuthorizer(opts, pusher)
     };
-    if ('auth' in opts)
-        config.auth = opts.auth;
-    if ('authorizer' in opts)
-        config.authorizer = opts.authorizer;
     if ('disabledTransports' in opts)
         config.disabledTransports = opts.disabledTransports;
     if ('enabledTransports' in opts)
@@ -3973,8 +4040,170 @@ function getEnableStatsConfig(opts) {
     }
     return false;
 }
+function buildUserAuthenticator(opts) {
+    var userAuthentication = __assign({}, defaults.userAuthentication, opts.userAuthentication);
+    if ('customHandler' in userAuthentication &&
+        userAuthentication['customHandler'] != null) {
+        return userAuthentication['customHandler'];
+    }
+    return user_authenticator(userAuthentication);
+}
+function buildChannelAuth(opts, pusher) {
+    var channelAuthorization;
+    if ('channelAuthorization' in opts) {
+        channelAuthorization = __assign({}, defaults.channelAuthorization, opts.channelAuthorization);
+    }
+    else {
+        channelAuthorization = {
+            transport: opts.authTransport || defaults.authTransport,
+            endpoint: opts.authEndpoint || defaults.authEndpoint
+        };
+        if ('auth' in opts) {
+            if ('params' in opts.auth)
+                channelAuthorization.params = opts.auth.params;
+            if ('headers' in opts.auth)
+                channelAuthorization.headers = opts.auth.headers;
+        }
+        if ('authorizer' in opts)
+            channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
+    }
+    return channelAuthorization;
+}
+function buildChannelAuthorizer(opts, pusher) {
+    var channelAuthorization = buildChannelAuth(opts, pusher);
+    if ('customHandler' in channelAuthorization &&
+        channelAuthorization['customHandler'] != null) {
+        return channelAuthorization['customHandler'];
+    }
+    return channel_authorizer(channelAuthorization);
+}
+
+// CONCATENATED MODULE: ./src/core/user.ts
+var user_extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+
+
+var user_UserFacade = (function (_super) {
+    user_extends(UserFacade, _super);
+    function UserFacade(pusher) {
+        var _this = _super.call(this, function (eventName, data) {
+            logger.debug('No callbacks on user for ' + eventName);
+        }) || this;
+        _this.signin_requested = false;
+        _this.user_data = null;
+        _this.serverToUserChannel = null;
+        _this.pusher = pusher;
+        _this.pusher.connection.bind('connected', function () {
+            _this._signin();
+        });
+        _this.pusher.connection.bind('connecting', function () {
+            _this._disconnect();
+        });
+        _this.pusher.connection.bind('disconnected', function () {
+            _this._disconnect();
+        });
+        _this.pusher.connection.bind('message', function (event) {
+            var eventName = event.event;
+            if (eventName === 'pusher:signin_success') {
+                _this._onSigninSuccess(event.data);
+            }
+            if (_this.serverToUserChannel &&
+                _this.serverToUserChannel.name === event.channel) {
+                _this.serverToUserChannel.handleEvent(event);
+            }
+        });
+        return _this;
+    }
+    UserFacade.prototype.signin = function () {
+        if (this.signin_requested) {
+            return;
+        }
+        this.signin_requested = true;
+        this._signin();
+    };
+    UserFacade.prototype._signin = function () {
+        var _this = this;
+        if (!this.signin_requested) {
+            return;
+        }
+        if (this.pusher.connection.state !== 'connected') {
+            return;
+        }
+        var onAuthorize = function (err, authData) {
+            if (err) {
+                logger.warn("Error during signin: " + err);
+                return;
+            }
+            _this.pusher.send_event('pusher:signin', {
+                auth: authData.auth,
+                user_data: authData.user_data
+            });
+        };
+        this.pusher.config.userAuthenticator({
+            socketId: this.pusher.connection.socket_id
+        }, onAuthorize);
+    };
+    UserFacade.prototype._onSigninSuccess = function (data) {
+        try {
+            this.user_data = JSON.parse(data.user_data);
+        }
+        catch (e) {
+            logger.error("Failed parsing user data after signin: " + data.user_data);
+            return;
+        }
+        if (typeof this.user_data.id !== 'string' || this.user_data.id === '') {
+            logger.error("user_data doesn't contain an id. user_data: " + this.user_data);
+            return;
+        }
+        this._subscribeChannels();
+    };
+    UserFacade.prototype._subscribeChannels = function () {
+        var _this = this;
+        var ensure_subscribed = function (channel) {
+            if (channel.subscriptionPending && channel.subscriptionCancelled) {
+                channel.reinstateSubscription();
+            }
+            else if (!channel.subscriptionPending &&
+                _this.pusher.connection.state === 'connected') {
+                channel.subscribe();
+            }
+        };
+        this.serverToUserChannel = new channels_channel("#server-to-user-" + this.user_data.id, this.pusher);
+        this.serverToUserChannel.bind_global(function (eventName, data) {
+            if (eventName.indexOf('pusher_internal:') === 0 ||
+                eventName.indexOf('pusher:') === 0) {
+                return;
+            }
+            _this.emit(eventName, data);
+        });
+        ensure_subscribed(this.serverToUserChannel);
+    };
+    UserFacade.prototype._disconnect = function () {
+        this.user_data = null;
+        if (this.serverToUserChannel) {
+            this.serverToUserChannel.unbind_all();
+            this.serverToUserChannel.disconnect();
+            this.serverToUserChannel = null;
+        }
+    };
+    return UserFacade;
+}(dispatcher));
+/* harmony default export */ var user = (user_UserFacade);
 
 // CONCATENATED MODULE: ./src/core/pusher.ts
+
 
 
 
@@ -4000,7 +4229,7 @@ var pusher_Pusher = (function () {
             logger.warn('The disableStats option is deprecated in favor of enableStats');
         }
         this.key = app_key;
-        this.config = getConfig(options);
+        this.config = getConfig(options, this);
         this.channels = factory.createChannels();
         this.global_emitter = new dispatcher();
         this.sessionID = Math.floor(Math.random() * 1000000000);
@@ -4059,6 +4288,7 @@ var pusher_Pusher = (function () {
         });
         Pusher.instances.push(this);
         this.timeline.info({ instances: Pusher.instances.length });
+        this.user = new user(this);
         if (Pusher.isReady) {
             this.connect();
         }
@@ -4155,6 +4385,9 @@ var pusher_Pusher = (function () {
     };
     Pusher.prototype.shouldUseTLS = function () {
         return this.config.useTLS;
+    };
+    Pusher.prototype.signin = function () {
+        this.user.signin();
     };
     Pusher.instances = [];
     Pusher.isReady = false;

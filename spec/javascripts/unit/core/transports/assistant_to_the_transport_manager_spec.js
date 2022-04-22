@@ -7,6 +7,7 @@ describe("AssistantToTheTransportManager", function() {
   var manager;
 
   beforeEach(function() {
+    jasmine.clock().uninstall();
     jasmine.clock().install();
     spyOn(Util, "now").and.returnValue(1);
 

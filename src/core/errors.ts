@@ -7,6 +7,15 @@ export class BadEventName extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+
+export class BadChannelName extends Error {
+  constructor(msg?: string) {
+    super(msg);
+
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
 export class RequestTimedOut extends Error {
   constructor(msg?: string) {
     super(msg);

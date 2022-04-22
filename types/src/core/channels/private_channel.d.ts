@@ -1,5 +1,5 @@
 import Channel from './channel';
-import { AuthorizerCallback } from '../auth/options';
+import { ChannelAuthorizationCallback } from '../auth/options';
 export default class PrivateChannel extends Channel {
-    authorize(socketId: string, callback: AuthorizerCallback): void;
+    authorize(socketId: string, callback: ChannelAuthorizationCallback): void;
 }

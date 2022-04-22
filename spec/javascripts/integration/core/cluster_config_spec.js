@@ -141,5 +141,13 @@ module.exports = function(testConfigs) {
     for (testConfig of testConfigs) {
       describeClusterTest(testConfig)
     }
+
+
+    it("should restore the global config", function() {
+      Dependencies = _Dependencies;
+      Defaults.authEndpoint = _authEndpoint;
+      Defaults.authTransport = _authTransport;
+      Defaults.VERSION = _VERSION;
+    });
   });
 }

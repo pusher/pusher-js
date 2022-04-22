@@ -1,14 +1,18 @@
-var TestEnv = require('testenv');
-var Util = require('core/util').default;
-var Collections = require('core/utils/collections');
-var Logger = require('core/logger').default;
-var Defaults = require('core/defaults').default;
-var DefaultConfig = require('core/config');
-var TimelineSender = require('core/timeline/timeline_sender').default;
-var Pusher = require('core/pusher').default;
-var Mocks = require('../../helpers/mocks');
-var Factory = require('core/utils/factory').default;
-var Runtime = require('runtime').default;
+var TestEnv = require("testenv");
+var Util = require("core/util").default;
+var Collections = require("core/utils/collections");
+var Logger = require("core/logger").default;
+var Defaults = require("core/defaults").default;
+var DefaultConfig = require("core/config");
+var TimelineSender = require("core/timeline/timeline_sender").default;
+var Pusher = require("core/pusher").default;
+var Mocks = require("../../helpers/mocks");
+var Factory = require("core/utils/factory").default;
+var Runtime = require("runtime").default;
+const transports = Runtime.Transports;
+const Network = require("net_info").Network;
+const waitsFor = require("../../helpers/waitsFor");
+var NetInfo = require("net_info").NetInfo;
 
 describe("Pusher", function() {
   var _isReady, _instances, _logToConsole;
@@ -20,9 +24,9 @@ describe("Pusher", function() {
       break;
     case "web":
       var timelineTransport = "jsonp";
-      break
+      break;
     default:
-      throw("Please specify the test environment as an external.")
+      throw "Please specify the test environment as an external.";
   }
 
   beforeEach(function() {
@@ -36,7 +40,11 @@ describe("Pusher", function() {
       return Mocks.getStrategy(true);
     });
 
-    spyOn(Factory, "createConnectionManager").and.callFake(function(key, options, config) {
+    spyOn(Factory, "createConnectionManager").and.callFake(function(
+      key,
+      options,
+      config
+    ) {
       var manager = Mocks.getConnectionManager();
       manager.key = key;
       manager.options = options;
@@ -64,11 +72,15 @@ describe("Pusher", function() {
 
   describe("app key validation", function() {
     it("should throw on a null key", function() {
-      expect(function() { new Pusher(null) }).toThrow("You must pass your app key when you instantiate Pusher.");
+      expect(function() {
+        new Pusher(null);
+      }).toThrow("You must pass your app key when you instantiate Pusher.");
     });
 
     it("should throw on an undefined key", function() {
-      expect(function() { new Pusher() }).toThrow("You must pass your app key when you instantiate Pusher.");
+      expect(function() {
+        new Pusher();
+      }).toThrow("You must pass your app key when you instantiate Pusher.");
     });
 
     it("should allow a hex key", function() {
@@ -85,8 +97,10 @@ describe("Pusher", function() {
 
     it("should not warn if no cluster is supplied if wsHost or httpHost are supplied", function() {
       spyOn(Logger, "warn");
-      var wsPusher = new Pusher("1234567890abcdef", { wsHost: 'example.com' });
-      var httpPusher = new Pusher("1234567890abcdef", { httpHost: 'example.com' });
+      var wsPusher = new Pusher("1234567890abcdef", { wsHost: "example.com" });
+      var httpPusher = new Pusher("1234567890abcdef", {
+        httpHost: "example.com"
+      });
       expect(Logger.warn).not.toHaveBeenCalled();
       expect(Logger.warn).not.toHaveBeenCalled();
     });
@@ -147,7 +161,7 @@ describe("Pusher", function() {
         expect(pusher.shouldUseTLS()).toBe(true);
       });
 
-      it("should be off when 'forceTLS' parameter is passed", function() {
+      it("should be off when forceTLS parameter is passed", function() {
         var pusher = new Pusher("foo", { forceTLS: false });
         expect(pusher.shouldUseTLS()).toBe(false);
       });
@@ -174,15 +188,15 @@ describe("Pusher", function() {
 
       it("should pass config and options to the strategy builder", function() {
         var config = DefaultConfig.getConfig({});
-        var options = { useTLS: true }
+        var options = { useTLS: true };
 
         var getStrategy = pusher.connection.options.getStrategy;
-        getStrategy(options)
+        getStrategy(options);
         expect(Runtime.getDefaultStrategy).toHaveBeenCalledWith(
           pusher.config,
           options,
-          jasmine.any(Function),
-        )
+          jasmine.any(Function)
+        );
       });
     });
 
@@ -236,6 +250,8 @@ describe("Pusher", function() {
   });
 
   describe("after connecting", function() {
+    var pusher;
+
     beforeEach(function() {
       pusher = new Pusher("foo");
       pusher.connect();
@@ -244,11 +260,10 @@ describe("Pusher", function() {
     });
 
     it("should subscribe to all channels", function() {
-      var pusher = new Pusher("foo");
-
+      pusher = new Pusher("foo");
       var subscribedChannels = {
-        "channel1": pusher.subscribe("channel1"),
-        "channel2": pusher.subscribe("channel2")
+        channel1: pusher.subscribe("channel1"),
+        channel2: pusher.subscribe("channel2")
       };
 
       expect(subscribedChannels.channel1.subscribe).not.toHaveBeenCalled();
@@ -265,7 +280,9 @@ describe("Pusher", function() {
     it("should send events via the connection manager", function() {
       pusher.send_event("event", { key: "value" }, "channel");
       expect(pusher.connection.send_event).toHaveBeenCalledWith(
-        "event", { key: "value" }, "channel"
+        "event",
+        { key: "value" },
+        "channel"
       );
     });
 
@@ -288,7 +305,7 @@ describe("Pusher", function() {
         pusher.subscribe("xxx");
 
         expect(channel.reinstateSubscription).toHaveBeenCalled();
-      })
+      });
     });
 
     describe("#unsubscribe", function() {
@@ -310,7 +327,7 @@ describe("Pusher", function() {
         expect(channel.unsubscribe).not.toHaveBeenCalled();
       });
 
-      it("should remove the channel from .channels if subscription is not pending", function () {
+      it("should remove the channel from .channels if subscription is not pending", function() {
         var channel = pusher.subscribe("yyy");
         expect(pusher.channel("yyy")).toBe(channel);
 
@@ -318,7 +335,7 @@ describe("Pusher", function() {
         expect(pusher.channel("yyy")).toBe(undefined);
       });
 
-      it("should delay unsubscription if the subscription is pending", function () {
+      it("should delay unsubscription if the subscription is pending", function() {
         var channel = pusher.subscribe("yyy");
         channel.subscriptionPending = true;
 
@@ -326,7 +343,7 @@ describe("Pusher", function() {
         expect(pusher.channel("yyy")).toBe(channel);
         expect(channel.unsubscribe).not.toHaveBeenCalled();
         expect(channel.cancelSubscription).toHaveBeenCalled();
-      })
+      });
     });
   });
 
@@ -348,7 +365,7 @@ describe("Pusher", function() {
       expect(channel.handleEvent).toHaveBeenCalledWith({
         channel: "chan",
         event: "event",
-        data: { key: "value" },
+        data: { key: "value" }
       });
     });
 
@@ -404,6 +421,12 @@ describe("Pusher", function() {
   });
 
   describe("#unbind", function() {
+    var pusher;
+
+    beforeEach(function() {
+      pusher = new Pusher("foo");
+    });
+
     it("should allow a globally bound callback to be removed", function() {
       var onEvent = jasmine.createSpy("onEvent");
       pusher.bind("event", onEvent);
@@ -417,6 +440,7 @@ describe("Pusher", function() {
       expect(onEvent).not.toHaveBeenCalled();
     });
   });
+
 
   describe("#disconnect", function() {
     it("should call disconnect on connection manager", function() {
@@ -455,11 +479,11 @@ describe("Pusher", function() {
     var timelineSender;
 
     beforeEach(function() {
+      jasmine.clock().uninstall();
       jasmine.clock().install();
 
       timelineSender = Mocks.getTimelineSender();
       spyOn(Factory, "createTimelineSender").and.returnValue(timelineSender);
-
     });
 
     afterEach(function() {
@@ -470,17 +494,19 @@ describe("Pusher", function() {
       var pusher = new Pusher("foo", { enableStats: true });
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
+        pusher.timeline,
+        { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
     it("should be sent to a hostname specified in constructor options", function() {
       var pusher = new Pusher("foo", {
         statsHost: "example.com",
-        enableStats: true,
+        enableStats: true
       });
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "example.com", path: "/timeline/v2/" + timelineTransport }
+        pusher.timeline,
+        { host: "example.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
@@ -498,7 +524,8 @@ describe("Pusher", function() {
       pusher.connection.options.timeline.info({});
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
+        pusher.timeline,
+        { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 
@@ -508,7 +535,8 @@ describe("Pusher", function() {
       pusher.connection.options.timeline.info({});
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
-        pusher.timeline, { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
+        pusher.timeline,
+        { host: "stats.pusher.com", path: "/timeline/v2/" + timelineTransport }
       );
     });
 

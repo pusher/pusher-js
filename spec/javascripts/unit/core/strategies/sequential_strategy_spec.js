@@ -7,6 +7,7 @@ describe("SequentialStrategy", function() {
     this.substrategies = Mocks.getStrategies([true, true]);
     this.strategy = new SequentialStrategy(this.substrategies, {});
 
+    jasmine.clock().uninstall();
     jasmine.clock().install();
   });
 

@@ -1,12 +1,15 @@
-import { AuthOptions, AuthorizerGenerator } from './auth/options';
+import { AuthOptions, ChannelAuthorizationHandler, UserAuthenticationHandler } from './auth/options';
+import { ChannelAuthorizerGenerator, DeprecatedAuthOptions } from './auth/deprecated_channel_authorizer';
 import { AuthTransport, Transport } from './config';
 import * as nacl from 'tweetnacl';
 export interface Options {
     activityTimeout?: number;
-    auth?: AuthOptions;
+    auth?: DeprecatedAuthOptions;
     authEndpoint?: string;
     authTransport?: AuthTransport;
-    authorizer?: AuthorizerGenerator;
+    authorizer?: ChannelAuthorizerGenerator;
+    channelAuthorization?: AuthOptions<ChannelAuthorizationHandler>;
+    userAuthentication?: AuthOptions<UserAuthenticationHandler>;
     cluster?: string;
     enableStats?: boolean;
     disableStats?: boolean;

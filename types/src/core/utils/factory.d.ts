@@ -4,7 +4,6 @@ import Transport from '../transports/transport';
 import TransportManager from '../transports/transport_manager';
 import Handshake from '../connection/handshake';
 import TransportConnection from '../transports/transport_connection';
-import { AuthorizerOptions, Authorizer } from '../auth/options';
 import Timeline from '../timeline/timeline';
 import { default as TimelineSender, TimelineSenderOptions } from '../timeline/timeline_sender';
 import PresenceChannel from '../channels/presence_channel';
@@ -24,7 +23,6 @@ declare var Factory: {
     createPresenceChannel(name: string, pusher: Pusher): PresenceChannel;
     createEncryptedChannel(name: string, pusher: Pusher, nacl: nacl): EncryptedChannel;
     createTimelineSender(timeline: Timeline, options: TimelineSenderOptions): TimelineSender;
-    createAuthorizer(channel: Channel, options: AuthorizerOptions): Authorizer;
     createHandshake(transport: TransportConnection, callback: (HandshakePayload: any) => void): Handshake;
     createAssistantToTheTransportManager(manager: TransportManager, transport: Transport, options: PingDelayOptions): AssistantToTheTransportManager;
 };

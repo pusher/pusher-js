@@ -6,7 +6,10 @@ import { decode as encodeUTF8 } from '@stablelib/utf8';
 import { decode as decodeBase64 } from '@stablelib/base64';
 import Dispatcher from '../events/dispatcher';
 import { PusherEvent } from '../connection/protocol/message-types';
-import { AuthData, AuthorizerCallback } from '../auth/options';
+import {
+  ChannelAuthorizationData,
+  ChannelAuthorizationCallback
+} from '../auth/options';
 import * as nacl from 'tweetnacl';
 
 /** Extends private channels to provide encrypted channel interface.
@@ -28,26 +31,29 @@ export default class EncryptedChannel extends PrivateChannel {
    * @param  {String} socketId
    * @param  {Function} callback
    */
-  authorize(socketId: string, callback: AuthorizerCallback) {
-    super.authorize(socketId, (error: Error | null, authData: AuthData) => {
-      if (error) {
-        callback(error, authData);
-        return;
+  authorize(socketId: string, callback: ChannelAuthorizationCallback) {
+    super.authorize(
+      socketId,
+      (error: Error | null, authData: ChannelAuthorizationData) => {
+        if (error) {
+          callback(error, authData);
+          return;
+        }
+        let sharedSecret = authData['shared_secret'];
+        if (!sharedSecret) {
+          callback(
+            new Error(
+              `No shared_secret key in auth payload for encrypted channel: ${this.name}`
+            ),
+            null
+          );
+          return;
+        }
+        this.key = decodeBase64(sharedSecret);
+        delete authData['shared_secret'];
+        callback(null, authData);
       }
-      let sharedSecret = authData['shared_secret'];
-      if (!sharedSecret) {
-        callback(
-          new Error(
-            `No shared_secret key in auth payload for encrypted channel: ${this.name}`
-          ),
-          null
-        );
-        return;
-      }
-      this.key = decodeBase64(sharedSecret);
-      delete authData['shared_secret'];
-      callback(null, authData);
-    });
+    );
   }
 
   trigger(event: string, data: any): boolean {

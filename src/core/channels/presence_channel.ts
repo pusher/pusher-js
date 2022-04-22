@@ -5,7 +5,7 @@ import Pusher from '../pusher';
 import UrlStore from 'core/utils/url_store';
 import { PusherEvent } from '../connection/protocol/message-types';
 import Metadata from './metadata';
-import { AuthData } from '../auth/options';
+import { ChannelAuthorizationData } from '../auth/options';
 
 export default class PresenceChannel extends PrivateChannel {
   members: Members;
@@ -28,7 +28,7 @@ export default class PresenceChannel extends PrivateChannel {
   authorize(socketId: string, callback: Function) {
     super.authorize(socketId, (error, authData) => {
       if (!error) {
-        authData = authData as AuthData;
+        authData = authData as ChannelAuthorizationData;
         if (authData.channel_data === undefined) {
           let suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
           Logger.error(
