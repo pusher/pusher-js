@@ -6443,7 +6443,7 @@ function getEnableStatsConfig(opts) {
     return false;
 }
 function buildUserAuthenticator(opts) {
-    var userAuthentication = __assign(__assign({}, defaults.userAuthentication), opts.userAuthentication);
+    var userAuthentication = __assign({}, defaults.userAuthentication, opts.userAuthentication);
     if ('customHandler' in userAuthentication &&
         userAuthentication['customHandler'] != null) {
         return userAuthentication['customHandler'];
@@ -6453,7 +6453,7 @@ function buildUserAuthenticator(opts) {
 function buildChannelAuth(opts, pusher) {
     var channelAuthorization;
     if ('channelAuthorization' in opts) {
-        channelAuthorization = __assign(__assign({}, defaults.channelAuthorization), opts.channelAuthorization);
+        channelAuthorization = __assign({}, defaults.channelAuthorization, opts.channelAuthorization);
     }
     else {
         channelAuthorization = {

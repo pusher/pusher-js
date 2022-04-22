@@ -10,9 +10,6 @@ export default class TransportStrategy implements Strategy {
     isSupported(): boolean;
     connect(minPriority: number, callback: Function): {
         abort: () => void;
-        forceMinPriority: () => void;
-    } | {
-        abort: () => void;
         forceMinPriority: (p: any) => void;
     };
 }
