@@ -1,5 +1,15 @@
 # Changelog
 
+## 7.1.0-beta
+
+[ADDED] Support for authenticating users with the `signin` method
+
+[ADDED] Support for binding to events sent to a specific authenticated user
+
+[UPDATED] The initialization of the `Pusher` object has been changed. Two new parameters were introduced: `userAuthentication` and `channelAuthorization`.
+
+[DEPRECATED] The Pusher object parameters `auth`, `authEndpoint`, and `authTransport` are still supported, but deprecated. They have been replaced with the `channelAuthorization` parameter.
+
 ## 7.0.6
 
 * [FIXED] pusher-js/worker can now be bundled and used in a web worker context
