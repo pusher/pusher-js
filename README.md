@@ -235,107 +235,45 @@ For most users, there is little need to change these. See [client API guide](htt
 
 Forces the connection to use TLS. When set to `false` the library will attempt non-TLS connections first. Defaults to `true`.
 
-#### `authEndpoint` (String)
+### `userAuthentication` (Object)
 
-Endpoint on your server that will return the authentication signature needed for private and presence channels. Defaults to `'/pusher/auth'`.
+Object containing the configuration for user authentication. Valid keys are:
 
-For more information see [authenticating users](https://pusher.com/docs/authenticating_users).
+* `endpoint` (String) - Endpoint on your server that will return the authentication signature needed for signing the user in. Defaults to `/pusher/user-auth`.
 
-#### `authTransport` (String)
+* `transport` (String) - Defines how the authentication endpoint will be called. There are two options available:
+  * `ajax` - the **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+  * `jsonp` - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `userAuthentication.endpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
 
-Defines how the authentication endpoint, defined using authEndpoint, will be called. There are two options available: `ajax` and `jsonp`.
+* `params` (Object) - Additional parameters to be sent when the user authentication endpoint is called. When using ajax authentication the parameters are passed as additional POST parameters. When using jsonp authentication the parameters are passed as GET parameters. This can be useful with web application frameworks that guard against CSRF (Cross-site request forgery).
 
-* `ajax` - The **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
-* `jsonp` - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `authEndpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
+* `headers` (Object) - Only applied when using `ajax` as authentication transport. Provides the ability to pass additional HTTP Headers to the user authentication endpoint. This can be useful with some web application frameworks that guard against CSRF CSRF (Cross-site request forgery).
 
-For more information see the [Channel authentication transport section of our authenticating users docs](http://pusher.com/docs/authenticating_users#authTransport).
+* `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `userAuthentication.endpoint`.
 
-#### `auth` (Hash)
 
-Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
+For  more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
 
-```js
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  auth: {
-    params: { foo: 'bar' },
-    headers: { baz: 'boo' }
-  }
-});
-```
 
-Additional parameters to be sent when the channel authentication endpoint is called. When using [ajax authentication](https://pusher.com/docs/authenticating_users#ajax_authentication) the parameters are passed as additional `POST` parameters. When using [jsonp authentication](http://pusher.com/docs/authenticating_users#jsonp_authentication) the parameters are passed as `GET` parameters. This can be useful with web application frameworks that guard against [CSRF (Cross-site request forgery)](http://en.wikipedia.org/wiki/Cross-site_request_forgery).
+### `channelAuthorization` (Object)
 
-##### CSRF
+Object containing the configuration for user authorization. Valid keys are:
 
-If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
+* `endpoint` (String) - Endpoint on your server that will return the authorization signature needed for private and presence channels. Defaults to `/pusher/user-auth`.
 
-```js
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  auth: {
-    params: { foo: 'bar' },
-    headers: { 'X-CSRF-Token': 'SOME_CSRF_TOKEN' }
-  }
-});
-```
+* `transport` (String) - Defines how the authorization endpoint will be called. There are two options available:
+  * `ajax` - the **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+  * `jsonp` - The authorization endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `channelAuthorization.endpoint`. This can be used when the authorization endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
 
-#### `authorizer` (Function)
+* `params` (Object) - Additional parameters to be sent when the channel authorization endpoint is called. When using ajax authorization the parameters are passed as additional POST parameters. When using jsonp authorization the parameters are passed as GET parameters. This can be useful with web application frameworks that guard against CSRF (Cross-site request forgery).
 
-If you need custom authorization behavior you can provide your own `authorizer` function as follows:
+* `headers` (Object) - Only applied when using `ajax` as authorizing transport. Provides the ability to pass additional HTTP Headers to the user authorization endpoint. This can be useful with some web application frameworks that guard against CSRF CSRF (Cross-site request forgery).
 
-```js
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  authorizer: function (channel, options) {
-    return {
-      authorize: function (socketId, callback) {
-        // Do some ajax to get the auth string
-        callback(null, {auth: authString});
-      }
-    };
-  }
-})
-```
+* `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `channelAuthorization.endpoint`.
 
-Example: An authorizer which uses the [`fetch`
-API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) to make a JSON
-request to an auth endpoint
 
-```js
-let authorizer = (channel, options) => {
-  return {
-    authorize: (socketId, callback) => {
-      fetch(authUrl, {
-        method: "POST",
-        headers: new Headers({ "Content-Type": "application/json" }),
-        body: JSON.stringify({
-          socket_id: socketId,
-          channel_name: channel.name
-        })
-      })
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`Received ${res.statusCode} from ${authUrl}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          callback(null, data);
-        })
-        .catch(err => {
-          callback(new Error(`Error calling auth endpoint: ${err}`), {
-            auth: ""
-          });
-        });
-    }
-  };
-};
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  authorizer: authorizer,
-})
-```
+For  more information see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users).
+
 
 #### `cluster` (String)
 
