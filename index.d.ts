@@ -1,8 +1,13 @@
 export {
-  Authorizer,
+  DeprecatedAuthOptions,
+  ChannelAuthorizerGenerator,
+} from './types/src/core/auth/deprecated_channel_authorizer';
+export {
   AuthOptions,
-  AuthorizerGenerator,
-  AuthorizerCallback,
+  ChannelAuthorizationHandler,
+  UserAuthenticationHandler,
+  ChannelAuthorizationCallback,
+  UserAuthenticationCallback,
 } from './types/src/core/auth/options';
 export { Options } from './types/src/core/options'
 

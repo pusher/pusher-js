@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.1.1-beta
+
+[FIXED] Exported Typescript types in index.d.ts
+
 ## 7.1.0-beta
 
 [ADDED] Support for authenticating users with the `signin` method
