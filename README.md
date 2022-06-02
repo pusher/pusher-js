@@ -225,7 +225,9 @@ There are a number of configuration parameters which can be set for the client, 
 ```js
 const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
-  authEndpoint: 'http://example.com/pusher/auth'
+  channelAuthorization: {
+    endpoint: 'http://example.com/pusher/auth'
+  },
 });
 ```
 
@@ -463,7 +465,7 @@ It is possible to access all subscribed channels through the `allChannels` funct
 pusher.allChannels().forEach(channel => console.log(channel.name));
 ```
 
-Private, presence and encrypted channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
+Private, presence and encrypted channels will make a request to your `channelAuthorization.endpoint` (`/pusher/auth`) by default, where you will have to [authorize the subscription](https://pusher.com/docs/authorizing_users). You will have to send back the correct authorization response and a 200 status code.
 
 ## Unsubscribing from channels
 
@@ -564,9 +566,9 @@ channel.trigger('client-my-event', {message: 'Hello, world!'})
 ```
 
 
-## Batching auth requests (aka multi-auth)
+## Batching authorization requests (aka multi-authorization)
 
-Currently, pusher-js itself does not support authenticating multiple channels in one HTTP request. However, thanks to @dirkbonhomme you can use the [pusher-js-auth](https://github.com/dirkbonhomme/pusher-js-auth) plugin that buffers subscription requests and sends auth requests to your endpoint in batches.
+Currently, pusher-js itself does not support authorizing multiple channels in one HTTP request. However, thanks to @dirkbonhomme you can use the [pusher-js-auth](https://github.com/dirkbonhomme/pusher-js-auth) plugin that buffers subscription requests and sends authorization requests to your endpoint in batches.
 
 ## Default events
 
