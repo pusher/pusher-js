@@ -26,6 +26,7 @@ export default class Channel extends EventsDispatcher {
   subscribed: boolean;
   subscriptionPending: boolean;
   subscriptionCancelled: boolean;
+  subscriptionCount: null;
 
   constructor(name: string, pusher: Pusher) {
     super(function(event, data) {
@@ -78,6 +79,8 @@ export default class Channel extends EventsDispatcher {
     var data = event.data;
     if (eventName === 'pusher_internal:subscription_succeeded') {
       this.handleSubscriptionSucceededEvent(event);
+    } else if (eventName === 'pusher_internal:subscription_count') {
+      this.handleSubscriptionCountEvent(event);
     } else if (eventName.indexOf('pusher_internal:') !== 0) {
       var metadata: Metadata = {};
       this.emit(eventName, data, metadata);
@@ -92,6 +95,14 @@ export default class Channel extends EventsDispatcher {
     } else {
       this.emit('pusher:subscription_succeeded', event.data);
     }
+  }
+
+  handleSubscriptionCountEvent(event: PusherEvent) {
+    if (event.data.subscription_count) {
+      this.subscriptionCount = event.data.subscription_count;
+    }
+
+    this.emit('pusher:subscription_count', event.data);
   }
 
   /** Sends a subscription request. For internal use only. */

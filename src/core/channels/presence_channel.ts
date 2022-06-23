@@ -69,6 +69,9 @@ export default class PresenceChannel extends PrivateChannel {
       case 'pusher_internal:subscription_succeeded':
         this.handleSubscriptionSucceededEvent(event);
         break;
+      case 'pusher_internal:subscription_count':
+        this.handleSubscriptionCountEvent(event);
+        break;
       case 'pusher_internal:member_added':
         var addedMember = this.members.addMember(data);
         this.emit('pusher:member_added', addedMember);
