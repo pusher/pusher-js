@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.2.0
+
+* [ADDED] Add support for subscription_count event
+
 ## 7.1.1-beta
 
 [FIXED] Exported Typescript types in index.d.ts
