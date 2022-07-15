@@ -170,6 +170,31 @@ describe("Channel", function() {
       });
     });
 
+    describe('on pusher_internal:subscription_count', function() {
+      it('should emit pusher:subscription_count', function() {
+        const testEvent = {
+          event: 'pusher_internal:subscription_count',
+          data: { subscription_count: 101 }
+        };
+
+        var callback = jasmine.createSpy('callback');
+        channel.bind('pusher:subscription_count', callback);
+
+        channel.handleEvent(testEvent);
+
+        expect(callback).toHaveBeenCalledWith(testEvent.data);
+      });
+
+      it('should set #subscriptionCount', function() {
+        channel.handleEvent({
+          event: 'pusher_internal:subscription_count',
+          data: { subscription_count: 101 }
+        });
+
+        expect(channel.subscriptionCount).toEqual(101);
+      });
+    });
+
     describe("on other events", function() {
       it("should emit the event", function() {
         var callback = jasmine.createSpy("callback");
