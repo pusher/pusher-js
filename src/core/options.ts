@@ -1,8 +1,7 @@
 import ConnectionManager from './connection/connection_manager';
 import {
-  AuthOptions,
-  ChannelAuthorizationHandler,
-  UserAuthenticationHandler
+  ChannelAuthorizationOptions,
+  UserAuthenticationOptions
 } from './auth/options';
 import {
   ChannelAuthorizerGenerator,
@@ -19,8 +18,8 @@ export interface Options {
   authTransport?: AuthTransport; // DEPRECATED use channelAuthorization instead
   authorizer?: ChannelAuthorizerGenerator; // DEPRECATED use channelAuthorization instead
 
-  channelAuthorization?: AuthOptions<ChannelAuthorizationHandler>;
-  userAuthentication?: AuthOptions<UserAuthenticationHandler>;
+  channelAuthorization?: ChannelAuthorizationOptions;
+  userAuthentication?: UserAuthenticationOptions;
 
   cluster?: string;
   enableStats?: boolean;
