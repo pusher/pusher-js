@@ -1,6 +1,6 @@
 {
   "name": "pusher-js",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "description": "Pusher Channels JavaScript library for browsers, React Native, NodeJS and web workers",
   "main": "dist/node/pusher.js",
   "browser": "dist/web/pusher.js",

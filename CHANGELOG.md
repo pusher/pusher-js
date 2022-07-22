@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.3.0
+
+* [FIXED] Restore previously exported types
+
 ## 7.2.0
 
 * [ADDED] Add support for subscription_count event

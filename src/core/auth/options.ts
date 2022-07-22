@@ -51,13 +51,20 @@ export type AuthTransportCallback =
   | ChannelAuthorizationCallback
   | UserAuthenticationCallback;
 
-export interface AuthOptions<AuthHandler> {
+export interface AuthOptionsT<AuthHandler> {
   transport: 'ajax' | 'jsonp';
   endpoint: string;
   params?: any;
   headers?: any;
   customHandler?: AuthHandler;
 }
+
+export declare type UserAuthenticationOptions = AuthOptionsT<
+  UserAuthenticationHandler
+>;
+export declare type ChannelAuthorizationOptions = AuthOptionsT<
+  ChannelAuthorizationHandler
+>;
 
 export interface InternalAuthOptions {
   transport: 'ajax' | 'jsonp';
