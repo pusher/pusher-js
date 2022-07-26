@@ -146,7 +146,7 @@ var presenceChannel: PusherTypes.PresenceChannel;
 
 > **⚠️ Important notice** 
 >
-> React Native support on `pusher-js` has been **deprecated** and soon will be removed from this repository. 
+> React Native support has been **deprecated** and soon will be removed from this repository. 
 > 
 > Please, use our official [React Native SDK](https://github.com/pusher/pusher-websocket-react-native) instead.
 
