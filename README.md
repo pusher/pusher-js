@@ -2,8 +2,7 @@
 
 ![test badge](https://github.com/pusher/pusher-js/workflows/test/badge.svg)
 
-This Pusher Channels client library supports web browsers, web workers, Node.js
-and React Native.
+This Pusher Channels client library supports web browsers, web workers and Node.js
 
 If you're looking for the Pusher Channels server library for Node.js, use
 [pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
@@ -145,29 +144,11 @@ var presenceChannel: PusherTypes.PresenceChannel;
 
 ### React Native
 
-**Warning it's now necessary to install
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-in order to use pusher-js with react-native.** pusher-js depends on NetInfo.
-NetInfo. NetInfo was included within react-native core until v0.60, when it was
-moved to the
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-library. Please follow the [install
-instructions](https://github.com/react-native-community/react-native-netinfo#getting-started)
-for the
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-library before trying to use pusher-js in your react-native project.
-
-Use a package manager like Yarn or NPM to install `pusher-js` and then import
-it as follows:
-
-```javascript
-import Pusher from 'pusher-js/react-native';
-```
-
-Notes:
-
-* The fallbacks available for this runtime are HTTP streaming and polling.
-* This build uses React Native's NetInfo API to detect changes on connectivity state. It will use this to automatically reconnect.
+> **⚠️ Important notice** 
+>
+> React Native support has been **deprecated** and soon will be removed from this repository. 
+> 
+> Please, use our official [React Native SDK](https://github.com/pusher/pusher-websocket-react-native) instead.
 
 ### Web Workers
 (`pusher-js`'s Web Workers implementation is currently not compatible with Internet Explorer)
@@ -254,7 +235,7 @@ Object containing the configuration for user authentication. Valid keys are:
 * `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `userAuthentication.endpoint`.
 
 
-For  more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
+For more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
 
 
 ### `channelAuthorization` (Object)
@@ -274,7 +255,7 @@ Object containing the configuration for user authorization. Valid keys are:
 * `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `channelAuthorization.endpoint`.
 
 
-For  more information see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users).
+For more information see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users).
 
 
 #### `cluster` (String)
@@ -643,7 +624,7 @@ This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respecti
 
 ### Core Vs. Platform-Specific Code
 
-New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
+New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, NodeJS and
 Web Workers.
 
 In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
@@ -682,7 +663,6 @@ In order to specify the library version, you can either update `package.json` or
 Other build commands include:
 
 ```bash
-make react-native # for the React Native build
 make node         # for the NodeJS build
 make worker       # for the worker build
 ```
@@ -696,7 +676,7 @@ Each test environment contains two types of tests:
 
 Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
 
-There are 3 different testing environments: one for web, one for NodeJS and one for workers. We may consider adding another one for React Native in the future.
+There are 3 different testing environments: one for web, one for NodeJS and one for workers.
 
 The web and worker tests use [Karma](https://github.com/karma-runner/karma) to execute specs in real browsers. The NodeJS tests use [jasmine-node](https://github.com/mhevery/jasmine-node).
 
