@@ -144,8 +144,11 @@ var presenceChannel: PusherTypes.PresenceChannel;
 
 ### React Native
 
-> **Important notice** 
-> React Native support on `pusher-js` has been deprecated. Please, use our official React Native SDK instead.
+> **⚠️ Important notice** 
+>
+> React Native support on `pusher-js` has been **deprecated** and soon will be removed from this repository. 
+> 
+> Please, use our official [React Native SDK](https://github.com/pusher/pusher-websocket-react-native) instead.
 
 ### Web Workers
 (`pusher-js`'s Web Workers implementation is currently not compatible with Internet Explorer)
@@ -673,7 +676,7 @@ Each test environment contains two types of tests:
 
 Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
 
-There are 3 different testing environments: one for web, one for NodeJS and one for workers. 
+There are 3 different testing environments: one for web, one for NodeJS and one for workers.
 
 The web and worker tests use [Karma](https://github.com/karma-runner/karma) to execute specs in real browsers. The NodeJS tests use [jasmine-node](https://github.com/mhevery/jasmine-node).
 
