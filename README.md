@@ -2,8 +2,7 @@
 
 ![test badge](https://github.com/pusher/pusher-js/workflows/test/badge.svg)
 
-This Pusher Channels client library supports web browsers, web workers, Node.js
-and React Native.
+This Pusher Channels client library supports web browsers, web workers and Node.js.
 
 If you're looking for the Pusher Channels server library for Node.js, use
 [pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
@@ -17,7 +16,6 @@ The following topics are covered:
 
 * [Installation](https://github.com/pusher/pusher-js#installation)
   * [Web](https://github.com/pusher/pusher-js#web)
-  * [React Native](https://github.com/pusher/pusher-js#react-native)
   * [Web Workers](https://github.com/pusher/pusher-js#web-workers)
   * [Node.js](https://github.com/pusher/pusher-js#nodejs)
 * [Initialization](https://github.com/pusher/pusher-js#initialization)
@@ -48,7 +46,6 @@ The following topics are covered:
     * React ([See React tutorial](https://pusher.com/tutorials/react-websockets))
     * Vue.js ([see Vue.js tutorial](https://pusher.com/tutorials/realtime-app-vuejs))
 
-* [React Native](https://github.com/pusher/pusher-js#react-native)
 * [Node.js](https://github.com/pusher/pusher-js#nodejs)
 
 ## Installation
@@ -142,32 +139,6 @@ import * as PusherTypes from 'pusher-js';
 var presenceChannel: PusherTypes.PresenceChannel;
 ...
 ```
-
-### React Native
-
-**Warning it's now necessary to install
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-in order to use pusher-js with react-native.** pusher-js depends on NetInfo.
-NetInfo. NetInfo was included within react-native core until v0.60, when it was
-moved to the
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-library. Please follow the [install
-instructions](https://github.com/react-native-community/react-native-netinfo#getting-started)
-for the
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-library before trying to use pusher-js in your react-native project.
-
-Use a package manager like Yarn or NPM to install `pusher-js` and then import
-it as follows:
-
-```javascript
-import Pusher from 'pusher-js/react-native';
-```
-
-Notes:
-
-* The fallbacks available for this runtime are HTTP streaming and polling.
-* This build uses React Native's NetInfo API to detect changes on connectivity state. It will use this to automatically reconnect.
 
 ### Web Workers
 (`pusher-js`'s Web Workers implementation is currently not compatible with Internet Explorer)
@@ -643,7 +614,7 @@ This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respecti
 
 ### Core Vs. Platform-Specific Code
 
-New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
+New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, NodeJS and
 Web Workers.
 
 In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
@@ -656,7 +627,7 @@ import Runtime from "runtime";
 
 We use webpack module resolution to make the library look for different versions of this module depending on the build.
 
-For web it will look for `src/runtimes/web/runtime.ts`. For ReactNative, `src/runtimes/react-native/runtime.ts`. For Node:  `src/runtimes/node/runtime.ts`. For worker: `src/runtimes/worker/runtime.ts`.
+For web it will look for `src/runtimes/web/runtime.ts`. For Node:  `src/runtimes/node/runtime.ts`. For worker: `src/runtimes/worker/runtime.ts`.
 
 Each of these runtime files exports an object (conforming to the interface you can see in `src/runtimes/interface.ts`) that abstracts away everything platform-specific. The core library pulls this object in without any knowledge of how it implements it. This means web build can use the DOM underneath, the ReactNative build can use its native NetInfo API, Workers can use `fetch` and so on.
 
@@ -682,7 +653,6 @@ In order to specify the library version, you can either update `package.json` or
 Other build commands include:
 
 ```bash
-make react-native # for the React Native build
 make node         # for the NodeJS build
 make worker       # for the worker build
 ```
@@ -696,7 +666,7 @@ Each test environment contains two types of tests:
 
 Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
 
-There are 3 different testing environments: one for web, one for NodeJS and one for workers. We may consider adding another one for React Native in the future.
+There are 3 different testing environments: one for web, one for NodeJS and one for workers.
 
 The web and worker tests use [Karma](https://github.com/karma-runner/karma) to execute specs in real browsers. The NodeJS tests use [jasmine-node](https://github.com/mhevery/jasmine-node).
 
