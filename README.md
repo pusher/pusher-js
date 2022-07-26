@@ -235,7 +235,7 @@ Object containing the configuration for user authentication. Valid keys are:
 * `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `userAuthentication.endpoint`.
 
 
-For  more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
+For more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
 
 
 ### `channelAuthorization` (Object)
@@ -255,7 +255,7 @@ Object containing the configuration for user authorization. Valid keys are:
 * `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `channelAuthorization.endpoint`.
 
 
-For  more information see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users).
+For more information see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users).
 
 
 #### `cluster` (String)
@@ -624,7 +624,7 @@ This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respecti
 
 ### Core Vs. Platform-Specific Code
 
-New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web,  NodeJS and
+New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, NodeJS and
 Web Workers.
 
 In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
