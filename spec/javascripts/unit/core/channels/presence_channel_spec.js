@@ -47,7 +47,7 @@ describe("PresenceChannel", function() {
   });
 
   describe("#authorize", function() {
-
+    
     it("should call channelAuthorizer", function() {
       const callback = function(){}
       channel.authorize("1.23", callback);
@@ -56,29 +56,30 @@ describe("PresenceChannel", function() {
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
     });
 
-    it("should call the callback if an authorization error is encountered", function() {
+    it("should call the callback if an authorizaiton error is encountered", function() {
       const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);
       expect(channelAuthorizer.calls.count()).toEqual(1);
       expect(channelAuthorizer).toHaveBeenCalledWith(
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
       const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
-
+      
       presenceChannelCallback("error", {})
       expect(callback).toHaveBeenCalledWith("error", {})
     });
 
-    it("should call the callback when chanel_data isn't present", function() {
+    it("should call the callback with error if auth data doesn't have channel_data", function() {
       const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);
       expect(channelAuthorizer.calls.count()).toEqual(1);
       expect(channelAuthorizer).toHaveBeenCalledWith(
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
       const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
-
-      const authdata = {foo: 'bar'}
-      presenceChannelCallback(null, authdata)
-      expect(callback).toHaveBeenCalledWith(null, authdata)
+      
+      presenceChannelCallback(null, {
+        foo: 'bar'
+      })
+      expect(callback).toHaveBeenCalledWith("Invalid auth response")
     });
 
     it("should call the callback with auth data", function() {
@@ -88,7 +89,7 @@ describe("PresenceChannel", function() {
       expect(channelAuthorizer).toHaveBeenCalledWith(
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
       const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
-
+      
       const authdata = {
         channel_data: "{\"user_id\":\"123\"}",
         foo: 'bar'

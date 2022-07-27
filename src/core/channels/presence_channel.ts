@@ -20,7 +20,7 @@ export default class PresenceChannel extends PrivateChannel {
     this.members = new Members();
   }
 
-  /** Authorizes the connection as a member of the channel.
+  /** Authenticates the connection as a member of the channel.
    *
    * @param  {String} socketId
    * @param  {Function} callback
@@ -29,10 +29,17 @@ export default class PresenceChannel extends PrivateChannel {
     super.authorize(socketId, (error, authData) => {
       if (!error) {
         authData = authData as ChannelAuthorizationData;
-        if (authData.channel_data != null) {
-          var channelData = JSON.parse(authData.channel_data);
-          this.members.setMyID(channelData.user_id);
+        if (authData.channel_data === undefined) {
+          let suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+          Logger.error(
+            `Invalid auth response for channel '${this.name}',` +
+              `expected 'channel_data' field. ${suffix}`
+          );
+          callback('Invalid auth response');
+          return;
         }
+        var channelData = JSON.parse(authData.channel_data);
+        this.members.setMyID(channelData.user_id);
       }
       callback(error, authData);
     });

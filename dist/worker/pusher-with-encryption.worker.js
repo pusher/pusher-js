@@ -4496,6 +4496,8 @@ var presence_channel_extends = (undefined && undefined.__extends) || (function (
 })();
 
 
+
+
 var presence_channel_PresenceChannel = (function (_super) {
     presence_channel_extends(PresenceChannel, _super);
     function PresenceChannel(name, pusher) {
@@ -4508,10 +4510,15 @@ var presence_channel_PresenceChannel = (function (_super) {
         _super.prototype.authorize.call(this, socketId, function (error, authData) {
             if (!error) {
                 authData = authData;
-                if (authData.channel_data != null) {
-                    var channelData = JSON.parse(authData.channel_data);
-                    _this.members.setMyID(channelData.user_id);
+                if (authData.channel_data === undefined) {
+                    var suffix = url_store.buildLogSuffix('authenticationEndpoint');
+                    logger.error("Invalid auth response for channel '" + _this.name + "'," +
+                        ("expected 'channel_data' field. " + suffix));
+                    callback('Invalid auth response');
+                    return;
                 }
+                var channelData = JSON.parse(authData.channel_data);
+                _this.members.setMyID(channelData.user_id);
             }
             callback(error, authData);
         });
