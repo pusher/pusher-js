@@ -32,6 +32,19 @@ export default class PresenceChannel extends PrivateChannel {
         if (authData.channel_data != null) {
           var channelData = JSON.parse(authData.channel_data);
           this.members.setMyID(channelData.user_id);
+        } else if (this.pusher.user.user_data != null) {
+          // If the user is already signed in, get the id of the authenticated user
+          // and allow the presence authorization to continue.
+          this.members.setMyID(this.pusher.user.user_data.id);
+        } else {
+          let suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+          Logger.error(
+            `Invalid auth response for channel '${this.name}', ` +
+              `expected 'channel_data' field. ${suffix}, ` +
+              `or the user should be signed in.`
+          );
+          callback('Invalid auth response');
+          return;
         }
       }
       callback(error, authData);
