@@ -38,7 +38,7 @@
     "faye-websocket": "^0.11.3",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^3.0.0",
-    "jasmine": "^3.8.0",
+    "jasmine": "^3.99.0",
     "jasmine-spec-reporter": "^7.0.0",
     "karma": "^6.4.0",
     "karma-browserstack-launcher": "^1.6.0",
