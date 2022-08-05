@@ -31,6 +31,7 @@ describe("Host/Port Configuration", function() {
 
   afterEach(function() {
     pusher.disconnect();
+    jasmine.clock().uninstall();
   });
 
   describe("SockJS", function() {

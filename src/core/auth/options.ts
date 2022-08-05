@@ -1,32 +1,74 @@
-import Channel from '../channels/channel';
-
-export interface AuthOptions {
-  params?: any;
-  headers?: any;
+export enum AuthRequestType {
+  UserAuthentication = 'user-authentication',
+  ChannelAuthorization = 'channel-authorization'
 }
 
-export interface AuthData {
+export interface ChannelAuthorizationData {
   auth: string;
   channel_data?: string;
   shared_secret?: string;
 }
 
-export type AuthorizerCallback = (
+export type ChannelAuthorizationCallback = (
   error: Error | null,
-  authData: AuthData
+  authData: ChannelAuthorizationData | null
 ) => void;
 
-export interface Authorizer {
-  authorize(socketId: string, callback: AuthorizerCallback): void;
+export interface ChannelAuthorizationRequestParams {
+  socketId: string;
+  channelName: string;
 }
 
-export interface AuthorizerGenerator {
-  (channel: Channel, options: AuthorizerOptions): Authorizer;
+export interface ChannelAuthorizationHandler {
+  (
+    params: ChannelAuthorizationRequestParams,
+    callback: ChannelAuthorizationCallback
+  ): void;
 }
 
-export interface AuthorizerOptions {
-  authTransport: 'ajax' | 'jsonp';
-  authEndpoint: string;
-  auth?: AuthOptions;
-  authorizer?: AuthorizerGenerator;
+export interface UserAuthenticationData {
+  auth: string;
+  user_data: string;
+}
+
+export type UserAuthenticationCallback = (
+  error: Error | null,
+  authData: UserAuthenticationData | null
+) => void;
+
+export interface UserAuthenticationRequestParams {
+  socketId: string;
+}
+
+export interface UserAuthenticationHandler {
+  (
+    params: UserAuthenticationRequestParams,
+    callback: UserAuthenticationCallback
+  ): void;
+}
+
+export type AuthTransportCallback =
+  | ChannelAuthorizationCallback
+  | UserAuthenticationCallback;
+
+export interface AuthOptionsT<AuthHandler> {
+  transport: 'ajax' | 'jsonp';
+  endpoint: string;
+  params?: any;
+  headers?: any;
+  customHandler?: AuthHandler;
+}
+
+export declare type UserAuthenticationOptions = AuthOptionsT<
+  UserAuthenticationHandler
+>;
+export declare type ChannelAuthorizationOptions = AuthOptionsT<
+  ChannelAuthorizationHandler
+>;
+
+export interface InternalAuthOptions {
+  transport: 'ajax' | 'jsonp';
+  endpoint: string;
+  params?: any;
+  headers?: any;
 }

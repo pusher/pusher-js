@@ -20,6 +20,7 @@ import UrlStore from 'core/utils/url_store';
 import { Options } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
+import UserFacade from './user';
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -60,6 +61,7 @@ export default class Pusher {
   timelineSender: TimelineSender;
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
+  user: UserFacade;
 
   constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
@@ -77,7 +79,7 @@ export default class Pusher {
     }
 
     this.key = app_key;
-    this.config = getConfig(options);
+    this.config = getConfig(options, this);
 
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
@@ -144,6 +146,8 @@ export default class Pusher {
 
     Pusher.instances.push(this);
     this.timeline.info({ instances: Pusher.instances.length });
+
+    this.user = new UserFacade(this);
 
     if (Pusher.isReady) {
       this.connect();
@@ -246,6 +250,10 @@ export default class Pusher {
 
   shouldUseTLS(): boolean {
     return this.config.useTLS;
+  }
+
+  signin() {
+    this.user.signin();
   }
 }
 

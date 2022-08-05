@@ -3,38 +3,34 @@ var Logger = require('core/logger').default;
 var global = Function("return this")();
 
 describe("Logger", function() {
-
-  var _nativeConsoleLog;
-  var _nativeConsoleWarn;
-  var _nativeConsoleError;
   var _consoleLogCalls;
   var _consoleWarnCalls;
   var _consoleErrorCalls;
+
+  var _nativeConsole;
 
   beforeEach(function() {
     _consoleLogCalls = [];
     _consoleWarnCalls = [];
     _consoleErrorCalls = [];
 
-    _nativeConsoleLog = global.console.log;
-    _nativeConsoleWarn = global.console.warn;
-    _nativeConsoleError = global.console.error;
+    _nativeConsole = global.console
+    global.console = {
+      log: function() {
+        _consoleLogCalls.push(arguments);
+      },
+      warn: function() {
+        _consoleWarnCalls.push(arguments);
+      },
+      error: function() {
+        _consoleErrorCalls.push(arguments);
+      },
+    }
 
-    global.console.log = function() {
-      _consoleLogCalls.push(arguments);
-    };
-    global.console.warn = function() {
-      _consoleWarnCalls.push(arguments);
-    };
-    global.console.error = function() {
-      _consoleErrorCalls.push(arguments);
-    };
   });
 
   afterEach(function() {
-    global.console.log = _nativeConsoleLog;
-    global.console.warn = _nativeConsoleWarn;
-    global.console.error = _nativeConsoleError;
+    global.console = _nativeConsole;
   });
 
   // logToConsole should be disabled by default
@@ -65,8 +61,13 @@ describe("Logger", function() {
   });
 
   describe("with logToConsole == true", function() {
+    var _defaultLogToConsole
     beforeEach(function() {
+      _defaultLogToConsole = Pusher.logToConsole;
       Pusher.logToConsole = true;
+    })
+    afterEach(function() {
+      Pusher.logToConsole = _defaultLogToConsole;
     })
 
     it("should log to the console", function() {

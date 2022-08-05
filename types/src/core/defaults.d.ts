@@ -1,3 +1,4 @@
+import { ChannelAuthorizationOptions, UserAuthenticationOptions } from './auth/options';
 import { AuthTransport } from './config';
 export interface DefaultConfig {
     VERSION: string;
@@ -16,6 +17,8 @@ export interface DefaultConfig {
     pongTimeout: number;
     unavailableTimeout: number;
     cluster: string;
+    userAuthentication: UserAuthenticationOptions;
+    channelAuthorization: ChannelAuthorizationOptions;
     cdn_http?: string;
     cdn_https?: string;
     dependency_suffix?: string;

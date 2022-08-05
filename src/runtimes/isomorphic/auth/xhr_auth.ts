@@ -5,24 +5,27 @@ import Runtime from 'runtime';
 import { AuthTransport } from 'core/auth/auth_transports';
 import AbstractRuntime from 'runtimes/interface';
 import UrlStore from 'core/utils/url_store';
-import { AuthorizerCallback } from 'core/auth/options';
+import {
+  AuthRequestType,
+  AuthTransportCallback,
+  InternalAuthOptions
+} from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
-var ajax: AuthTransport = function(
+const ajax: AuthTransport = function(
   context: AbstractRuntime,
-  socketId: string,
-  callback: AuthorizerCallback
+  query: string,
+  authOptions: InternalAuthOptions,
+  authRequestType: AuthRequestType,
+  callback: AuthTransportCallback
 ) {
-  var self = this,
-    xhr;
-
-  xhr = Runtime.createXHR();
-  xhr.open('POST', self.options.authEndpoint, true);
+  const xhr = Runtime.createXHR();
+  xhr.open('POST', authOptions.endpoint, true);
 
   // add request headers
   xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-  for (var headerName in this.authOptions.headers) {
-    xhr.setRequestHeader(headerName, this.authOptions.headers[headerName]);
+  for (var headerName in authOptions.headers) {
+    xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
   }
 
   xhr.onreadystatechange = function() {
@@ -38,10 +41,11 @@ var ajax: AuthTransport = function(
           callback(
             new HTTPAuthError(
               200,
-              'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
+              `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${
                 xhr.responseText
+              }`
             ),
-            { auth: '' }
+            null
           );
         }
 
@@ -50,21 +54,30 @@ var ajax: AuthTransport = function(
           callback(null, data);
         }
       } else {
-        var suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+        let suffix = '';
+        switch (authRequestType) {
+          case AuthRequestType.UserAuthentication:
+            suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+            break;
+          case AuthRequestType.ChannelAuthorization:
+            suffix = `Clients must be authenticated to join private or presence channels. ${UrlStore.buildLogSuffix(
+              'authorizationEndpoint'
+            )}`;
+            break;
+        }
         callback(
           new HTTPAuthError(
             xhr.status,
-            'Unable to retrieve auth string from auth endpoint - ' +
-              `received status: ${xhr.status} from ${self.options.authEndpoint}. ` +
-              `Clients must be authenticated to join private or presence channels. ${suffix}`
+            `Unable to retrieve auth string from ${authRequestType.toString()} endpoint - ` +
+              `received status: ${xhr.status} from ${authOptions.endpoint}. ${suffix}`
           ),
-          { auth: '' }
+          null
         );
       }
     }
   };
 
-  xhr.send(this.composeQuery(socketId));
+  xhr.send(query);
   return xhr;
 };
 

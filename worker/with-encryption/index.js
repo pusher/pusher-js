@@ -1,1 +1,1 @@
-module.exports = require('../dist/worker/pusher-with-encryption.worker.js');
+module.exports = require('../../dist/worker/pusher-with-encryption.worker.js');

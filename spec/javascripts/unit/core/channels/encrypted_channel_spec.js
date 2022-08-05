@@ -1,7 +1,6 @@
 const Errors = require("core/errors");
 const Logger = require('core/logger').default;
 const EncryptedChannel = require("core/channels/encrypted_channel").default;
-const Factory = require("core/utils/factory").default;
 const Mocks = require("mocks");
 const nacl = require("tweetnacl");
 const utf8 = require("@stablelib/utf8");
@@ -10,8 +9,7 @@ const base64 = require("@stablelib/base64");
 describe("EncryptedChannel", function() {
   var pusher;
   var channel;
-  var authorizer;
-  var factorySpy;
+  var channelAuthorizer;
   const secretUTF8 = "It Must Be Thirty Two Characters";
   const secretBytes = utf8.encode(secretUTF8);
   const secretBase64 = base64.encode(secretBytes);
@@ -25,10 +23,9 @@ describe("EncryptedChannel", function() {
   };
 
   beforeEach(function() {
-    pusher = Mocks.getPusher({ foo: "bar" });
+    channelAuthorizer = jasmine.createSpy("channelAuthorizer").and.callFake(function(params, callback) {})
+    pusher = Mocks.getPusher({ channelAuthorizer: channelAuthorizer });
     channel = new EncryptedChannel("private-encrypted-test", pusher, nacl);
-    authorizer = Mocks.getAuthorizer();
-    factorySpy = spyOn(Factory, "createAuthorizer").and.returnValue(authorizer);
   });
 
   describe("after construction", function() {
@@ -46,36 +43,38 @@ describe("EncryptedChannel", function() {
   });
 
   describe("#authorize", function() {
-    it("should create and call an authorizer", function() {
-      channel.authorize("1.23", function() {});
-      expect(Factory.createAuthorizer.calls.count()).toEqual(1);
-      expect(Factory.createAuthorizer).toHaveBeenCalledWith(channel, {
-        foo: "bar"
-      });
+    it("should call channelAuthorizer", function() {
+      const callback = function(){}
+      channel.authorize("1.23", callback);
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "private-encrypted-test" }, jasmine.any(Function));
     });
 
-    it("should call back with only authorization data", function() {
-      let callback = jasmine.createSpy("callback");
+    it("should call the callback if an authorizaiton error is encountered", function() {
+      const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);
-      expect(callback).not.toHaveBeenCalled();
-      authorizer._callback(false, {
-        shared_secret: secretBase64,
-        foo: "bar"
-      });
-      expect(callback).toHaveBeenCalledWith(null, { foo: "bar" });
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "private-encrypted-test" }, jasmine.any(Function));
+      const encryptedChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      
+      encryptedChannelCallback("error", {})
+      expect(callback).toHaveBeenCalledWith("error", {})
     });
 
-    it("should callback an error if no shared_secret included in auth data", function() {
-      let callback = jasmine.createSpy("callback");
+    it("should fail if AuthData doens't have a shared_secret", function() {
+      const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);
-      authorizer._callback(null, {
-        foo: "bar"
-      });
-      // For some reason comparing the Error types doesn't work properly in
-      // Safari on Mojave. Manually check the arguments.
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "private-encrypted-test" }, jasmine.any(Function));
+      const encryptedChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      
+      encryptedChannelCallback(null, {})
+      
       expect(callback.calls.count()).toEqual(1)
       let args = callback.calls.first().args;
-
       expect(args.length).toEqual(2)
       expect(args[0]).toEqual(jasmine.any(Error))
       expect(args[0].message).toEqual(
@@ -83,27 +82,22 @@ describe("EncryptedChannel", function() {
       );
       expect(args[1]).toEqual(null);
     });
-
-    describe("with custom authorizer", function() {
-      beforeEach(function() {
-        pusher = Mocks.getPusher({
-          authorizer: function(channel, options) {
-            return authorizer;
-          }
-        });
-        channel = new EncryptedChannel("private-test-custom-auth", pusher, nacl);
-        factorySpy.and.callThrough();
-      });
-
-      it("should call the authorizer", function() {
-        let callback = jasmine.createSpy("callback");
-        channel.authorize("1.23", callback);
-        authorizer._callback(false, {
-          shared_secret: secretBase64,
-          foo: "bar"
-        });
-        expect(callback).toHaveBeenCalledWith(null, { foo: "bar" });
-      });
+    
+    it("should succeed if AuthData has a shared_secret", function() {
+      const callback = jasmine.createSpy("callback")
+      channel.authorize("1.23", callback);
+      expect(channelAuthorizer.calls.count()).toEqual(1);
+      expect(channelAuthorizer).toHaveBeenCalledWith(
+        { socketId: "1.23", channelName: "private-encrypted-test" }, jasmine.any(Function));
+      const encryptedChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      
+      encryptedChannelCallback(null, {
+        shared_secret: secretBase64,
+        foo: 'bar',
+      })
+      expect(callback).toHaveBeenCalledWith(null, {
+        foo: 'bar',
+      })
     });
   });
 
@@ -213,14 +207,14 @@ describe("EncryptedChannel", function() {
 
     describe("on other events", function() {
       beforeEach(function() {
-        // in order to decrypt encrypted events, we need to get a shared secret
-        // from the authorizer.
-        let callback = function() {};
-        channel.authorize("1.23", callback);
-        authorizer._callback(false, {
-          shared_secret: secretBase64,
-          foo: "bar"
+        channelAuthorizer.and.callFake(function(params, callback) {
+          callback(null, {
+            shared_secret: secretBase64,
+            foo: 'bar',
+          });
         });
+        
+        channel.authorize("1.23", function (){});
       });
       it("should decrypt the event payload and emit the event", function() {
         let payload = { test: "payload" };
@@ -281,10 +275,20 @@ describe("EncryptedChannel", function() {
         };
 
         beforeEach(function() {
+          // Channel has already been authorized with the old secret
+          channel.authorize("1.23", function (){});
+
           pusher.connection = {
             socket_id: "9.37"
           };
-          authorizer._callback = null
+
+          // Next call to authorize will use the new secret
+          channelAuthorizer.and.callFake(function(params, callback) {
+            callback(null, {
+              shared_secret: newSecretBase64,
+              foo: 'bar',
+            });
+          });
         });
 
         it("should request new key from authorizer and decrypt event", function() {
@@ -299,10 +303,6 @@ describe("EncryptedChannel", function() {
             event: "something",
             data: encryptedPayload
           });
-          authorizer._callback(false, {
-            shared_secret: newSecretBase64,
-            foo: "bar"
-          });
           expect(boundCallback).toHaveBeenCalledWith(payload);
         });
         it("should log a warning if it fails to decrypt event after requesting a new key from the auth endpoint", function() {
@@ -315,10 +315,6 @@ describe("EncryptedChannel", function() {
             event: "something",
             data: encryptedPayload
           });
-          authorizer._callback(false, {
-            shared_secret: newSecretBase64,
-            foo: "bar"
-          });
           expect(Logger.error).toHaveBeenCalledWith(
             "Failed to decrypt event with new key. Dropping encrypted event"
           );
@@ -330,11 +326,13 @@ describe("EncryptedChannel", function() {
             ciphertext: newTestEncrypt(payload)
           };
           spyOn(Logger, "error");
+          channelAuthorizer.and.callFake(function(params, callback) {
+            callback(true, "ERROR");
+          });
           channel.handleEvent({
             event: "something",
             data: encryptedPayload
           });
-          authorizer._callback(true, "ERROR");
           expect(Logger.error).toHaveBeenCalledWith(
             "Failed to make a request to the authEndpoint: ERROR. Unable to fetch new key, so dropping encrypted event"
           );

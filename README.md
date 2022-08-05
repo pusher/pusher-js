@@ -2,8 +2,7 @@
 
 ![test badge](https://github.com/pusher/pusher-js/workflows/test/badge.svg)
 
-This Pusher Channels client library supports web browsers, web workers, Node.js
-and React Native.
+This Pusher Channels client library supports web browsers, web workers and Node.js
 
 If you're looking for the Pusher Channels server library for Node.js, use
 [pusher-http-node](https://github.com/pusher/pusher-http-node) instead.
@@ -145,29 +144,11 @@ var presenceChannel: PusherTypes.PresenceChannel;
 
 ### React Native
 
-**Warning it's now necessary to install
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-in order to use pusher-js with react-native.** pusher-js depends on NetInfo.
-NetInfo. NetInfo was included within react-native core until v0.60, when it was
-moved to the
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-library. Please follow the [install
-instructions](https://github.com/react-native-community/react-native-netinfo#getting-started)
-for the
-[@react-native-community/netinfo](https://github.com/react-native-community/react-native-netinfo)
-library before trying to use pusher-js in your react-native project.
-
-Use a package manager like Yarn or NPM to install `pusher-js` and then import
-it as follows:
-
-```javascript
-import Pusher from 'pusher-js/react-native';
-```
-
-Notes:
-
-* The fallbacks available for this runtime are HTTP streaming and polling.
-* This build uses React Native's NetInfo API to detect changes on connectivity state. It will use this to automatically reconnect.
+> **⚠️ Important notice** 
+>
+> React Native support has been **deprecated** and soon will be removed from this repository. 
+> 
+> Please, use our official [React Native SDK](https://github.com/pusher/pusher-websocket-react-native) instead.
 
 ### Web Workers
 (`pusher-js`'s Web Workers implementation is currently not compatible with Internet Explorer)
@@ -225,7 +206,9 @@ There are a number of configuration parameters which can be set for the client, 
 ```js
 const pusher = new Pusher(APP_KEY, {
   cluster: APP_CLUSTER,
-  authEndpoint: 'http://example.com/pusher/auth'
+  channelAuthorization: {
+    endpoint: 'http://example.com/pusher/auth'
+  },
 });
 ```
 
@@ -235,107 +218,45 @@ For most users, there is little need to change these. See [client API guide](htt
 
 Forces the connection to use TLS. When set to `false` the library will attempt non-TLS connections first. Defaults to `true`.
 
-#### `authEndpoint` (String)
+### `userAuthentication` (Object)
 
-Endpoint on your server that will return the authentication signature needed for private and presence channels. Defaults to `'/pusher/auth'`.
+Object containing the configuration for user authentication. Valid keys are:
 
-For more information see [authenticating users](https://pusher.com/docs/authenticating_users).
+* `endpoint` (String) - Endpoint on your server that will return the authentication signature needed for signing the user in. Defaults to `/pusher/user-auth`.
 
-#### `authTransport` (String)
+* `transport` (String) - Defines how the authentication endpoint will be called. There are two options available:
+  * `ajax` - the **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+  * `jsonp` - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `userAuthentication.endpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
 
-Defines how the authentication endpoint, defined using authEndpoint, will be called. There are two options available: `ajax` and `jsonp`.
+* `params` (Object) - Additional parameters to be sent when the user authentication endpoint is called. When using ajax authentication the parameters are passed as additional POST parameters. When using jsonp authentication the parameters are passed as GET parameters. This can be useful with web application frameworks that guard against CSRF (Cross-site request forgery).
 
-* `ajax` - The **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
-* `jsonp` - The authentication endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `authEndpoint`. This can be used when the authentication endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
+* `headers` (Object) - Only applied when using `ajax` as authentication transport. Provides the ability to pass additional HTTP Headers to the user authentication endpoint. This can be useful with some web application frameworks that guard against CSRF CSRF (Cross-site request forgery).
 
-For more information see the [Channel authentication transport section of our authenticating users docs](http://pusher.com/docs/authenticating_users#authTransport).
+* `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `userAuthentication.endpoint`.
 
-#### `auth` (Hash)
 
-Allows passing additional data to authorizers. Supports query string params and headers (AJAX only). For example, following will pass `foo=bar` via the query string and `baz: boo` via headers:
+For more information see [authenticating users](https://pusher.com/docs/channels/server_api/authenticating-users/).
 
-```js
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  auth: {
-    params: { foo: 'bar' },
-    headers: { baz: 'boo' }
-  }
-});
-```
 
-Additional parameters to be sent when the channel authentication endpoint is called. When using [ajax authentication](https://pusher.com/docs/authenticating_users#ajax_authentication) the parameters are passed as additional `POST` parameters. When using [jsonp authentication](http://pusher.com/docs/authenticating_users#jsonp_authentication) the parameters are passed as `GET` parameters. This can be useful with web application frameworks that guard against [CSRF (Cross-site request forgery)](http://en.wikipedia.org/wiki/Cross-site_request_forgery).
+### `channelAuthorization` (Object)
 
-##### CSRF
+Object containing the configuration for user authorization. Valid keys are:
 
-If you require a CSRF header for incoming requests to the private channel authentication endpoint on your server, you should add a CSRF token to the `auth` hash under `headers`. This is applicable to frameworks which apply CSRF protection by default.
+* `endpoint` (String) - Endpoint on your server that will return the authorization signature needed for private and presence channels. Defaults to `/pusher/user-auth`.
 
-```js
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  auth: {
-    params: { foo: 'bar' },
-    headers: { 'X-CSRF-Token': 'SOME_CSRF_TOKEN' }
-  }
-});
-```
+* `transport` (String) - Defines how the authorization endpoint will be called. There are two options available:
+  * `ajax` - the **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
+  * `jsonp` - The authorization endpoint will be called by a `<script>` tag being dynamically created pointing to the endpoint defined by `channelAuthorization.endpoint`. This can be used when the authorization endpoint is on a different domain to the web application. The endpoint will therefore be requested as a `GET` and parameters passed in the query string.
 
-#### `authorizer` (Function)
+* `params` (Object) - Additional parameters to be sent when the channel authorization endpoint is called. When using ajax authorization the parameters are passed as additional POST parameters. When using jsonp authorization the parameters are passed as GET parameters. This can be useful with web application frameworks that guard against CSRF (Cross-site request forgery).
 
-If you need custom authorization behavior you can provide your own `authorizer` function as follows:
+* `headers` (Object) - Only applied when using `ajax` as authorizing transport. Provides the ability to pass additional HTTP Headers to the user authorization endpoint. This can be useful with some web application frameworks that guard against CSRF CSRF (Cross-site request forgery).
 
-```js
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  authorizer: function (channel, options) {
-    return {
-      authorize: function (socketId, callback) {
-        // Do some ajax to get the auth string
-        callback(null, {auth: authString});
-      }
-    };
-  }
-})
-```
+* `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `channelAuthorization.endpoint`.
 
-Example: An authorizer which uses the [`fetch`
-API](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) to make a JSON
-request to an auth endpoint
 
-```js
-let authorizer = (channel, options) => {
-  return {
-    authorize: (socketId, callback) => {
-      fetch(authUrl, {
-        method: "POST",
-        headers: new Headers({ "Content-Type": "application/json" }),
-        body: JSON.stringify({
-          socket_id: socketId,
-          channel_name: channel.name
-        })
-      })
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`Received ${res.statusCode} from ${authUrl}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          callback(null, data);
-        })
-        .catch(err => {
-          callback(new Error(`Error calling auth endpoint: ${err}`), {
-            auth: ""
-          });
-        });
-    }
-  };
-};
-const pusher = new Pusher(APP_KEY, {
-  cluster: APP_CLUSTER,
-  authorizer: authorizer,
-})
-```
+For more information see [authorizing users](https://pusher.com/docs/channels/server_api/authorizing-users).
+
 
 #### `cluster` (String)
 
@@ -525,7 +446,7 @@ It is possible to access all subscribed channels through the `allChannels` funct
 pusher.allChannels().forEach(channel => console.log(channel.name));
 ```
 
-Private, presence and encrypted channels will make a request to your `authEndpoint` (`/pusher/auth`) by default, where you will have to [authenticate the subscription](https://pusher.com/docs/authenticating_users). You will have to send back the correct auth response and a 200 status code.
+Private, presence and encrypted channels will make a request to your `channelAuthorization.endpoint` (`/pusher/auth`) by default, where you will have to [authorize the subscription](https://pusher.com/docs/authorizing_users). You will have to send back the correct authorization response and a 200 status code.
 
 ## Unsubscribing from channels
 
@@ -626,9 +547,9 @@ channel.trigger('client-my-event', {message: 'Hello, world!'})
 ```
 
 
-## Batching auth requests (aka multi-auth)
+## Batching authorization requests (aka multi-authorization)
 
-Currently, pusher-js itself does not support authenticating multiple channels in one HTTP request. However, thanks to @dirkbonhomme you can use the [pusher-js-auth](https://github.com/dirkbonhomme/pusher-js-auth) plugin that buffers subscription requests and sends auth requests to your endpoint in batches.
+Currently, pusher-js itself does not support authorizing multiple channels in one HTTP request. However, thanks to @dirkbonhomme you can use the [pusher-js-auth](https://github.com/dirkbonhomme/pusher-js-auth) plugin that buffers subscription requests and sends authorization requests to your endpoint in batches.
 
 ## Default events
 
@@ -703,7 +624,7 @@ This command will serve `pusher.js`, `sockjs.js`, `json2.js`, and their respecti
 
 ### Core Vs. Platform-Specific Code
 
-New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, React Native, NodeJS and
+New to pusher-js 3.1 is the ability for the library to produce builds for different runtimes: classic web, NodeJS and
 Web Workers.
 
 In order for this to happen, we have split the library into two directories: `core/` and `runtimes/`. In `core` we keep anything that is platform-independent. In `runtimes` we keep code that depends on certain runtimes.
@@ -742,7 +663,6 @@ In order to specify the library version, you can either update `package.json` or
 Other build commands include:
 
 ```bash
-make react-native # for the React Native build
 make node         # for the NodeJS build
 make worker       # for the worker build
 ```
@@ -756,7 +676,7 @@ Each test environment contains two types of tests:
 
 Unit tests are simple, fast and don't need any external dependencies. Integration tests usually connect to production and js-integration-api servers and can use a local server for loading JS files, so they need an Internet connection to work.
 
-There are 3 different testing environments: one for web, one for NodeJS and one for workers. We may consider adding another one for React Native in the future.
+There are 3 different testing environments: one for web, one for NodeJS and one for workers.
 
 The web and worker tests use [Karma](https://github.com/karma-runner/karma) to execute specs in real browsers. The NodeJS tests use [jasmine-node](https://github.com/mhevery/jasmine-node).
 

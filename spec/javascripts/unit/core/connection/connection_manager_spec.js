@@ -8,6 +8,7 @@ describe("ConnectionManager", function() {
   var managerOptions, manager;
 
   beforeAll(() => {
+    jasmine.clock().uninstall();
     jasmine.clock().install();
   });
 

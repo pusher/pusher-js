@@ -26,6 +26,9 @@ module.exports = function(config, suite) {
     'src/runtimes',
     'spec/javascripts/helpers'
   ]
+  config.webpack.resolve.alias = {
+    'dom/dependencies': 'worker/mock-dom-dependencies',
+  }
   config.webpack.externals.testenv = "'worker'";
   return config;
 }

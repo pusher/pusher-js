@@ -1,22 +1,28 @@
 import AbstractRuntime from 'runtimes/interface';
 import { AuthTransport } from 'core/auth/auth_transports';
-import { AuthorizerCallback, AuthData } from 'core/auth/options';
+import {
+  AuthRequestType,
+  AuthTransportCallback,
+  InternalAuthOptions
+} from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
 var fetchAuth: AuthTransport = function(
   context: AbstractRuntime,
-  socketId: string,
-  callback: AuthorizerCallback
+  query: string,
+  authOptions: InternalAuthOptions,
+  authRequestType: AuthRequestType,
+  callback: AuthTransportCallback
 ) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
 
-  for (var headerName in this.authOptions.headers) {
-    headers.set(headerName, this.authOptions.headers[headerName]);
+  for (var headerName in authOptions.headers) {
+    headers.set(headerName, authOptions.headers[headerName]);
   }
 
-  var body = this.composeQuery(socketId);
-  var request = new Request(this.options.authEndpoint, {
+  var body = query;
+  var request = new Request(authOptions.endpoint, {
     headers,
     body,
     credentials: 'same-origin',
@@ -33,24 +39,23 @@ var fetchAuth: AuthTransport = function(
       }
       throw new HTTPAuthError(
         200,
-        `Could not get auth info from your auth endpoint, status: ${status}`
+        `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`
       );
     })
     .then(data => {
-      let parsedData: AuthData;
+      let parsedData;
       try {
         parsedData = JSON.parse(data);
       } catch (e) {
         throw new HTTPAuthError(
           200,
-          'JSON returned from auth endpoint was invalid, yet status code was 200. Data was: ' +
-            data
+          `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${data}`
         );
       }
       callback(null, parsedData);
     })
     .catch(err => {
-      callback(err, { auth: '' });
+      callback(err, null);
     });
 };
 

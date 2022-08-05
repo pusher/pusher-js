@@ -7,6 +7,7 @@ describe("DelayedStrategy", function() {
     this.strategy = new DelayedStrategy(this.substrategy, { delay: 0 });
     this.callback = jasmine.createSpy();
 
+    jasmine.clock().uninstall();
     jasmine.clock().install();
   });
 
