@@ -4,6 +4,8 @@ var Members = require('core/channels/members').default;
 var Errors = require('core/errors');
 var Factory = require('core/utils/factory').default;
 var Mocks = require("mocks");
+var flatPromise = require("core/utils/flat_promise").default;
+var { setTimeout } = require("timers/promises").default;
 
 describe("PresenceChannel", function() {
   var pusher;
@@ -47,7 +49,7 @@ describe("PresenceChannel", function() {
   });
 
   describe("#authorize", function() {
-    
+
     it("should call channelAuthorizer", function() {
       const callback = function(){}
       channel.authorize("1.23", callback);
@@ -56,30 +58,97 @@ describe("PresenceChannel", function() {
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
     });
 
-    it("should call the callback if an authorizaiton error is encountered", function() {
+    it("should call the callback if an authorization error is encountered", function() {
       const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);
       expect(channelAuthorizer.calls.count()).toEqual(1);
       expect(channelAuthorizer).toHaveBeenCalledWith(
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
       const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
-      
+
       presenceChannelCallback("error", {})
       expect(callback).toHaveBeenCalledWith("error", {})
     });
 
-    it("should call the callback with error if auth data doesn't have channel_data", function() {
-      const callback = jasmine.createSpy("callback")
-      channel.authorize("1.23", callback);
-      expect(channelAuthorizer.calls.count()).toEqual(1);
-      expect(channelAuthorizer).toHaveBeenCalledWith(
-        { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
-      const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
-      
-      presenceChannelCallback(null, {
-        foo: 'bar'
-      })
-      expect(callback).toHaveBeenCalledWith("Invalid auth response")
+    describe("when channel_data isn't present", function() {
+      let callback;
+      let presenceChannelCallback;
+      const authWithoutChannelData = {foo: 'bar'}
+
+      beforeEach(function() {
+        pusher.user = jasmine.createSpy("user");
+
+        callback = jasmine.createSpy("callback")
+        channel.authorize("1.23", callback);
+        expect(channelAuthorizer.calls.count()).toEqual(1);
+        expect(channelAuthorizer).toHaveBeenCalledWith(
+          { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
+        presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+      });
+
+      it("should call the callback with an error if no signin is in progress", async function() {
+        pusher.user.signinDonePromise = null;
+
+        presenceChannelCallback(null, authWithoutChannelData);
+        await setTimeout(10);
+        expect(callback).toHaveBeenCalledWith("Invalid auth response");
+      });
+
+      it("should wait for the in-progress sign in and call the callback with an error if signin failed", async function() {
+        const {promise, resolve} = flatPromise();
+        pusher.user.signinDonePromise = promise
+
+        // signin is in progress
+        presenceChannelCallback(null, authWithoutChannelData)
+        await setTimeout(10);
+        expect(callback).not.toHaveBeenCalled()
+
+        // Signin failed
+        pusher.user.user_data = null
+        resolve()
+        await setTimeout(10);
+        expect(callback).toHaveBeenCalledWith("Invalid auth response")
+      });
+
+      it("should wait for the in-progress sign in and call the callback if signin succeeded", async function() {
+        const {promise, resolve} = flatPromise();
+        pusher.user.signinDonePromise = promise
+
+        // signin is in progress
+        presenceChannelCallback(null, authWithoutChannelData)
+        await setTimeout(10);
+        expect(callback).not.toHaveBeenCalled()
+
+        // Signin succeeded
+        pusher.user.user_data = {id: '123'}
+        resolve()
+        await setTimeout(10);
+        expect(callback).toHaveBeenCalledWith(null, authWithoutChannelData)
+      });
+
+      it("should call the callback if the user is already signed in", async function() {
+        const {promise, resolve} = flatPromise();
+        pusher.user.signinDonePromise = promise
+        resolve()
+        pusher.user.user_data = {id: '123'}
+
+        // signin is in progress
+        presenceChannelCallback(null, authWithoutChannelData)
+        await setTimeout(10);
+        expect(callback).toHaveBeenCalledWith(null, authWithoutChannelData)
+      });
+
+      it("should call the callback with an error if the user signin already failed", async function() {
+        const {promise, resolve} = flatPromise();
+        pusher.user.signinDonePromise = promise
+        resolve()
+        pusher.user.user_data = null
+
+        // signin is in progress
+        presenceChannelCallback(null, authWithoutChannelData)
+        await setTimeout(10);
+        expect(callback).toHaveBeenCalledWith("Invalid auth response")
+      });
     });
 
     it("should call the callback with auth data", function() {
@@ -89,7 +158,7 @@ describe("PresenceChannel", function() {
       expect(channelAuthorizer).toHaveBeenCalledWith(
         { socketId: "1.23", channelName: "presence-test" }, jasmine.any(Function));
       const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
-      
+
       const authdata = {
         channel_data: "{\"user_id\":\"123\"}",
         foo: 'bar'
