@@ -39,7 +39,7 @@ export default class PresenceChannel extends PrivateChannel {
             // and allow the presence authorization to continue.
             this.members.setMyID(this.pusher.user.user_data.id);
           } else {
-            let suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
+            let suffix = UrlStore.buildLogSuffix('authorizationEndpoint');
             Logger.error(
               `Invalid auth response for channel '${this.name}', ` +
                 `expected 'channel_data' field. ${suffix}, ` +
