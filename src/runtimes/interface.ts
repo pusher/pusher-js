@@ -46,6 +46,7 @@ interface Runtime {
   HTTPFactory: HTTPFactory;
   isXHRSupported(): boolean;
   createSocketRequest(method: string, url: string): HTTPRequest;
+  randomInt(max: number): number;
 
   // these methods/types are only implemented in the web Runtime, so they're
   // optional but must be included in the interface

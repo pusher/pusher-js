@@ -55,6 +55,20 @@ const Worker: Runtime = {
 
   getNetwork() {
     return Network;
+  },
+
+  randomInt(max: number): number {
+    /**
+     * Return values in the range of [0, 1[
+     */
+    const random = function() {
+      const crypto = window.crypto || window['msCrypto'];
+      const random = crypto.getRandomValues(new Uint32Array(1))[0];
+
+      return random / 2 ** 32;
+    };
+
+    return Math.floor(random() * max);
   }
 };
 
