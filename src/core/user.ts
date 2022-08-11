@@ -170,7 +170,8 @@ export default class UserFacade extends EventsDispatcher {
     const setDone = () => {
       (promise as any).done = true;
     };
-    this.signinDonePromise = promise.then(setDone).catch(setDone);
+    promise.then(setDone).catch(setDone);
+    this.signinDonePromise = promise;
     this._signinDoneResolve = resolve;
   }
 }
