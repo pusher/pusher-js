@@ -82,7 +82,7 @@ describe("Pusher (User)", function () {
       });
 
       pusher.connection.state = "connected";
-      pusher.connection.emit('connected');
+      pusher.connection.emit('state_change', {previous:'connecting', current:'connected'});
 
       expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
         { socketId: "1.23" },
@@ -116,11 +116,11 @@ describe("Pusher (User)", function () {
       pusher.config.userAuthenticator.calls.reset()
 
       pusher.connection.state == "disconnected";
-      pusher.connection.emit("disconnected");
+      pusher.connection.emit('state_change', {previous:'connected', current:'disconnected'});
       pusher.connection.state == "connecting";
-      pusher.connection.emit("connecting");
+      pusher.connection.emit('state_change', {previous:'disconnected', current:'connecting'});
       pusher.connection.state == "connected";
-      pusher.connection.emit("connected");
+      pusher.connection.emit('state_change', {previous:'connecting', current:'connected'});
 
       expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
         { socketId: "1.23" },
@@ -134,7 +134,7 @@ describe("Pusher (User)", function () {
 
     it("should not signin when the connection is connected if signin() was never called", function () {
       pusher.connection.state = "connected";
-      pusher.connection.emit('connected');
+      pusher.connection.emit('state_change', {previous:'connecting', current:'connected'});
       expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
     })
 
@@ -292,7 +292,7 @@ describe("Pusher (User)", function () {
       expect(pusher.user.serverToUserChannel.subscribed).toBe(true);
 
       // Disconnect
-      pusher.connection.emit('disconnected');
+      pusher.connection.emit('state_change', {previous:'connected', current:'disconnected'});
 
       expect(pusher.user.user_data).toEqual(null);
       expect(pusher.user.serverToUserChannel).toEqual(null);
