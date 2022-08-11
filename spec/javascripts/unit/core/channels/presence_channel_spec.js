@@ -5,7 +5,7 @@ var Errors = require('core/errors');
 var Factory = require('core/utils/factory').default;
 var Mocks = require("mocks");
 var flatPromise = require("core/utils/flat_promise").default;
-var { setTimeout } = require("timers/promises").default;
+var { setTimeout } = require("../../../helpers/timers/promises").default;
 
 describe("PresenceChannel", function() {
   var pusher;
