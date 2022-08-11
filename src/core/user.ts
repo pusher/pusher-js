@@ -27,6 +27,7 @@ export default class UserFacade extends EventsDispatcher {
       }
       if (previous ==='connected' && current !== 'connected') {
         this._cleanup();
+        this._newSigninPromiseIfNeeded();
       }
     });
     this.pusher.connection.bind('message', event => {
