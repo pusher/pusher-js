@@ -21,14 +21,13 @@ export default class UserFacade extends EventsDispatcher {
       Logger.debug('No callbacks on user for ' + eventName);
     });
     this.pusher = pusher;
-    this.pusher.connection.bind('connected', () => {
-      this._signin();
-    });
-    this.pusher.connection.bind('connecting', () => {
-      this._cleanup();
-    });
-    this.pusher.connection.bind('disconnected', () => {
-      this._cleanup();
+    this.pusher.connection.bind('state_change', ({previous, current}) => {
+      if (previous !=='connected' && current === 'connected') {
+        this._signin();
+      }
+      if (previous ==='connected' && current !== 'connected') {
+        this._cleanup();
+      }
     });
     this.pusher.connection.bind('message', event => {
       var eventName = event.event;
