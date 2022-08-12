@@ -158,6 +158,10 @@ export default class UserFacade extends EventsDispatcher {
   }
 
   private _newSigninPromiseIfNeeded() {
+    if (!this.signin_requested) {
+      return;
+    }
+
     // If there is a promise and it is not resolved, return without creating a new one.
     if (this.signinDonePromise && !(this.signinDonePromise as any).done) {
       return;
