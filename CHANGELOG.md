@@ -2,6 +2,8 @@
 
 ## 7.4.0
 
+* [CHANGED] Use secure random generator instead of pseudo-random generator
+* [CHANGED] Replace git protocol with HTTPS in gitsubmodules file
 * [ADDED] Allow presence channel authorization to depend on user authentication
 
 ## 7.3.0
