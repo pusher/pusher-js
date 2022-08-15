@@ -2,7 +2,7 @@
 
 ## 7.4.0
 
-* [FIXED] Allow presence channel authorization to depend on user authentication
+* [ADDED] Allow presence channel authorization to depend on user authentication
 
 ## 7.3.0
 
