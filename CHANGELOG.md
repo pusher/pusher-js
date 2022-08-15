@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.4.0
+
+* [FIXED] Allow presence channel authorization to depend on user authentication
+
 ## 7.3.0
 
 * [FIXED] Restore previously exported types

@@ -6,10 +6,14 @@ export default class UserFacade extends EventsDispatcher {
     signin_requested: boolean;
     user_data: any;
     serverToUserChannel: Channel;
+    signinDonePromise: Promise<any>;
+    private _signinDoneResolve;
     constructor(pusher: Pusher);
     signin(): void;
     private _signin;
+    private _onAuthorize;
     private _onSigninSuccess;
     private _subscribeChannels;
-    private _disconnect;
+    private _cleanup;
+    private _newSigninPromiseIfNeeded;
 }

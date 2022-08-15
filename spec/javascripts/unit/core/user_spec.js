@@ -82,7 +82,7 @@ describe("Pusher (User)", function () {
       });
 
       pusher.connection.state = "connected";
-      pusher.connection.emit('connected');
+      pusher.connection.emit('state_change', {previous:'connecting', current:'connected'});
 
       expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
         { socketId: "1.23" },
@@ -116,11 +116,11 @@ describe("Pusher (User)", function () {
       pusher.config.userAuthenticator.calls.reset()
 
       pusher.connection.state == "disconnected";
-      pusher.connection.emit("disconnected");
+      pusher.connection.emit('state_change', {previous:'connected', current:'disconnected'});
       pusher.connection.state == "connecting";
-      pusher.connection.emit("connecting");
+      pusher.connection.emit('state_change', {previous:'disconnected', current:'connecting'});
       pusher.connection.state == "connected";
-      pusher.connection.emit("connected");
+      pusher.connection.emit('state_change', {previous:'connecting', current:'connected'});
 
       expect(pusher.config.userAuthenticator).toHaveBeenCalledWith(
         { socketId: "1.23" },
@@ -134,7 +134,7 @@ describe("Pusher (User)", function () {
 
     it("should not signin when the connection is connected if signin() was never called", function () {
       pusher.connection.state = "connected";
-      pusher.connection.emit('connected');
+      pusher.connection.emit('state_change', {previous:'connecting', current:'connected'});
       expect(pusher.config.userAuthenticator).not.toHaveBeenCalled();
     })
 
@@ -172,6 +172,7 @@ describe("Pusher (User)", function () {
     });
 
     it('should process pusher:signin_success', async function () {
+      pusher.user._signinDoneResolve = jasmine.createSpy('signinDoneResolve');
       transport.emit('message', {
         data: JSON.stringify({
           event: 'pusher:signin_success',
@@ -183,6 +184,7 @@ describe("Pusher (User)", function () {
 
       expect(pusher.user.user_data).toEqual({ id: '1', name: 'test' });
       expect(pusher.user.serverToUserChannel.subscriptionPending).toBe(true);
+      expect(pusher.user._signinDoneResolve).toHaveBeenCalled();
     });
 
     it('should log warning if user_data is not JSON', async function () {
@@ -220,6 +222,7 @@ describe("Pusher (User)", function () {
       expect(barCallback).not.toHaveBeenCalled();
 
       // Sign in successfully
+      pusher.user._signinDoneResolve = jasmine.createSpy('signinDoneResolve');
       transport.emit('message', {
         data: JSON.stringify({
           event: 'pusher:signin_success',
@@ -242,6 +245,7 @@ describe("Pusher (User)", function () {
         'pusher.user.serverToUserChannel.subscribed to be true',
         500
       );
+      expect(pusher.user._signinDoneResolve).toHaveBeenCalled();
 
       // Send events on channel
       transport.emit('message', {
@@ -259,6 +263,7 @@ describe("Pusher (User)", function () {
 
     it('should cleanup the signed in state when disconnected', async function () {
       // Sign in successfully
+      pusher.user._signinDoneResolve = jasmine.createSpy('signinDoneResolve');
       transport.emit('message', {
         data: JSON.stringify({
           event: 'pusher:signin_success',
@@ -281,11 +286,13 @@ describe("Pusher (User)", function () {
         'pusher.user.serverToUserChannel.subscribed to be true',
         500
       );
+      expect(pusher.user._signinDoneResolve).toHaveBeenCalled();
+
       expect(pusher.user.user_data).toEqual({ id: '1', name: 'test' });
       expect(pusher.user.serverToUserChannel.subscribed).toBe(true);
 
       // Disconnect
-      pusher.connection.emit('disconnected');
+      pusher.connection.emit('state_change', {previous:'connected', current:'disconnected'});
 
       expect(pusher.user.user_data).toEqual(null);
       expect(pusher.user.serverToUserChannel).toEqual(null);
