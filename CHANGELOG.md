@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.5.0
+
+- [CHANGED] Describe your change here. Look at CHANGELOG.md to see the format.
+
 ## 7.4.0
 
 * [CHANGED] Use secure random generator instead of pseudo-random generator
