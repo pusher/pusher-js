@@ -29,7 +29,7 @@ export default class UserPresenceFacade extends EventsDispatcher {
       if (syntaxSugarEvents !== undefined) {
         userPresenceEvents = syntaxSugarEvents;
       } else {
-        Logger.debug(`Unknown events = ${events}`);
+        userPresenceEvents = [events]
       }
     } else {
       userPresenceEvents = events;
