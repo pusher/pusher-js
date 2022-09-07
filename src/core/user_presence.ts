@@ -1,8 +1,14 @@
+import { type } from 'os';
+import Logger from './logger';
 import Pusher from './pusher';
 
 export default class UserPresenceFacade {
   _pusher: Pusher
   _eventHandlers: Map<string, Function>
+  _syntaxSugar: Map<string, Array<string>> = new Map<string, Array<string>>([
+    ['online-status', ['online', 'offline']],
+    ['channel-subscription', ['subscribed', 'unsubscribed']]
+  ]);
 
   public constructor(pusher: Pusher) {
     this._pusher = pusher;
@@ -10,9 +16,26 @@ export default class UserPresenceFacade {
     this.bindUserPresenceEvents();
   }
 
-  bind(events: Array<string>, callback: Function) {
-    events.forEach(eventName => this._eventHandlers[eventName] = callback)
+  bind(events: string | Array<string>, callback: Function): this {
+    let userPresenceEvents = [];
+    
+    if (typeof(events) === 'string') {
+      const syntaxSugarEvents: Array<string> = this._syntaxSugar[events]
+      if (syntaxSugarEvents) {
+        userPresenceEvents = syntaxSugarEvents;
+      } else {
+        Logger.debug(`Ignoring event: ${events}`);
+      }
+    } else {
+      userPresenceEvents = events;
+    }
+
+    userPresenceEvents.forEach(eventName => this._eventHandlers[eventName] = callback)
     return this;
+  }
+
+  clear(): void {
+    this._eventHandlers.clear();
   }
 
   private bindUserPresenceEvents() {
