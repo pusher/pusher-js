@@ -54,12 +54,12 @@ export default class UserPresenceFacade extends EventsDispatcher {
     this.pusher.connection.bind('message', event => {
       var eventName = event.event;
       if (eventName === 'pusher_internal:user_presence') {
-        this.handleUserPresenceEvent(event);
+        this.handleEvent(event);
       }
     });
   }
 
-  private handleUserPresenceEvent(event) {
+  private handleEvent(event) {
     event.data.events.forEach(userPresenceEvent => {
       userPresenceEvent.users
         .map(userId => this.buildUserPresenceEvent(userId, userPresenceEvent))
