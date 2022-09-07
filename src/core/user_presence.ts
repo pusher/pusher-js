@@ -1,45 +1,48 @@
-import { type } from 'os';
 import Logger from './logger';
 import Pusher from './pusher';
+import EventsDispatcher from './events/dispatcher';
 
-export default class UserPresenceFacade {
-  _pusher: Pusher
-  _eventHandlers: Map<string, Function>
-  _syntaxSugar: Map<string, Array<string>> = new Map<string, Array<string>>([
-    ['online-status', ['online', 'offline']],
-    ['channel-subscription', ['subscribed', 'unsubscribed']]
-  ]);
+export default class UserPresenceFacade extends EventsDispatcher {
+  private pusher: Pusher
+  private syntaxSugars: Map<string, Array<string>> 
 
   public constructor(pusher: Pusher) {
-    this._pusher = pusher;
-    this._eventHandlers = new Map<string, Function>();
+    super(function(eventName, data) {
+      Logger.debug(`No callbacks on user presence for ${eventName}`);
+    });
+    
+    this.pusher = pusher;
+    
+    this.initializeSyntaxSugars();
     this.bindUserPresenceEvents();
   }
 
-  bind(events: string | Array<string>, callback: Function): this {
+  bind(events: string | Array<string>, callback: Function, context?: any): this {
     let userPresenceEvents = [];
     
     if (typeof(events) === 'string') {
-      const syntaxSugarEvents: Array<string> = this._syntaxSugar[events]
-      if (syntaxSugarEvents) {
+      const syntaxSugarEvents = this.syntaxSugars.get(events);
+      if (syntaxSugarEvents !== undefined) {
         userPresenceEvents = syntaxSugarEvents;
       } else {
-        Logger.debug(`Ignoring event: ${events}`);
+        Logger.debug(`Unknown events = ${events}`);
       }
     } else {
       userPresenceEvents = events;
     }
 
-    userPresenceEvents.forEach(eventName => this._eventHandlers[eventName] = callback)
+    userPresenceEvents.forEach(eventName => super.bind(eventName, callback, context))
     return this;
   }
 
-  clear(): void {
-    this._eventHandlers.clear();
+  private initializeSyntaxSugars() {
+    this.syntaxSugars = new Map();
+    this.syntaxSugars.set('online-status', ['online', 'offline']);
+    this.syntaxSugars.set('channel-subscription', ['subscribed', 'unsubscribed']);
   }
 
   private bindUserPresenceEvents() {
-    this._pusher.connection.bind('message', event => {
+    this.pusher.connection.bind('message', event => {
       var eventName = event.event;
       if (eventName === 'pusher_internal:user_presence') {
         this.handleUserPresenceEvent(event);
@@ -49,12 +52,9 @@ export default class UserPresenceFacade {
 
   private handleUserPresenceEvent(event) {
     event.data.events.forEach(userPresenceEvent => {
-      const eventHandler: Function = this._eventHandlers[userPresenceEvent.action];
-      if (eventHandler) {
-        userPresenceEvent.users
-          .map(userId => this.buildUserPresenceEvent(userId, userPresenceEvent))
-          .forEach(finalEvent => eventHandler.call(global, finalEvent));
-      }
+      userPresenceEvent.users
+        .map(userId => this.buildUserPresenceEvent(userId, userPresenceEvent))
+        .forEach(finalEvent => this.emit(userPresenceEvent.action, finalEvent));
     });
   }
 
