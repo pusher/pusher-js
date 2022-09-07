@@ -18,6 +18,7 @@ export interface ChannelAuthorizerGenerator {
 }
 
 export interface DeprecatedAuthOptions {
+  withCredentials: boolean;
   params?: any;
   headers?: any;
 }
@@ -38,7 +39,8 @@ export const ChannelAuthorizerProxy = (
     authEndpoint: authOptions.endpoint,
     auth: {
       params: authOptions.params,
-      headers: authOptions.headers
+      headers: authOptions.headers,
+      withCredentials: authOptions.withCredentials
     }
   };
   return (

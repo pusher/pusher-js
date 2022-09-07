@@ -7,6 +7,7 @@ export interface ChannelAuthorizerGenerator {
     (channel: Channel, options: DeprecatedAuthorizerOptions): DeprecatedChannelAuthorizer;
 }
 export interface DeprecatedAuthOptions {
+    withCredentials: boolean;
     params?: any;
     headers?: any;
 }

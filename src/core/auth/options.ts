@@ -57,6 +57,7 @@ export interface AuthOptions<AuthHandler> {
   params?: any;
   headers?: any;
   customHandler?: AuthHandler;
+  withCredentials?: boolean;
 }
 
 export interface InternalAuthOptions {
@@ -64,4 +65,5 @@ export interface InternalAuthOptions {
   endpoint: string;
   params?: any;
   headers?: any;
+  withCredentials?: boolean;
 }

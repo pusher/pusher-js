@@ -76,7 +76,7 @@ const ajax: AuthTransport = function(
       }
     }
   };
-
+  if (authOptions.withCredentials) xhr.withCredentials = true;
   xhr.send(query);
   return xhr;
 };

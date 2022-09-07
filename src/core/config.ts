@@ -169,6 +169,7 @@ function buildChannelAuth(
       if ('params' in opts.auth) channelAuthorization.params = opts.auth.params;
       if ('headers' in opts.auth)
         channelAuthorization.headers = opts.auth.headers;
+      if ('withCredentials' in opts.auth) channelAuthorization.withCredentials = opts.auth.withCredentials;
     }
     if ('authorizer' in opts)
       channelAuthorization.customHandler = ChannelAuthorizerProxy(

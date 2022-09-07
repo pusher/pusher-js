@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v7.0.6
+ * Pusher JavaScript Library v7.1.0-beta
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -2995,7 +2995,7 @@ var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.Scrip
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.0.6",
+    VERSION: "7.1.0-beta",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -3295,6 +3295,8 @@ var ajax = function (context, query, authOptions, authRequestType, callback) {
             }
         }
     };
+    if (authOptions.withCredentials)
+        xhr.withCredentials = true;
     xhr.send(query);
     return xhr;
 };
@@ -6738,7 +6740,8 @@ var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGen
         authEndpoint: authOptions.endpoint,
         auth: {
             params: authOptions.params,
-            headers: authOptions.headers
+            headers: authOptions.headers,
+            withCredentials: authOptions.withCredentials
         }
     };
     return function (params, callback) {
@@ -6860,6 +6863,8 @@ function buildChannelAuth(opts, pusher) {
                 channelAuthorization.params = opts.auth.params;
             if ('headers' in opts.auth)
                 channelAuthorization.headers = opts.auth.headers;
+            if ('withCredentials' in opts.auth)
+                channelAuthorization.withCredentials = opts.auth.withCredentials;
         }
         if ('authorizer' in opts)
             channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
