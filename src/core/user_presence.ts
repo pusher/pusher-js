@@ -26,11 +26,7 @@ export default class UserPresenceFacade extends EventsDispatcher {
 
     if (typeof events === 'string') {
       const syntaxSugarEvents = this.syntaxSugars.get(events);
-      if (syntaxSugarEvents !== undefined) {
-        userPresenceEvents = syntaxSugarEvents;
-      } else {
-        userPresenceEvents = [events]
-      }
+      userPresenceEvents = syntaxSugarEvents || [events];
     } else {
       userPresenceEvents = events;
     }
