@@ -1,6 +1,6 @@
 var UserPresenceFacade = require("core/user_presence").default;
 
-fdescribe("UserPresenceFacade", function () {
+describe("UserPresenceFacade", function () {
   var connection;
   var pusher;
 
