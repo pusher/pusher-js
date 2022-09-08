@@ -9,13 +9,39 @@ fdescribe("UserPresenceFacade", function () {
     pusher = jasmine.createSpy('pusher');
     pusher.connection = connection;
 
-    spyOn(pusher.connection, 'bind');
+    spyOn(pusher.connection, 'bind')
   });
 
   it('should bind to pusher_internal:user_presence events', function() {
     new UserPresenceFacade(pusher);
-    expect(connection.bind).toHaveBeenCalledWith('message', jasmine.any(Function))
+    expect(connection.bind).toHaveBeenCalledWith('message', jasmine.any(Function));
   });
+
+  describe('#handleEvent', function() {
+    var userPresenceFacade;
+
+    beforeEach(function() {
+      userPresenceFacade = new UserPresenceFacade(pusher);
+    });
+
+    const userPresenceEvents = [
+      { action: 'online', users: ['1'] },
+      { action: 'offline', users: ['2', '3', '4'] },
+      { action: 'subscribed', users: ['5', '6'], channel_name: 'presence-chat' }
+    ];
+
+    it(`should emit ${userPresenceEvents.length} events`, function() {
+      const pusherEvent = {
+        event: 'pusher_internal:user_presence',
+        data: { events: userPresenceEvents }
+      };
+
+      spyOn(userPresenceFacade, 'emit').and.callThrough();
+      userPresenceFacade.handleEvent(pusherEvent);
+      
+      expect(userPresenceFacade.emit).toHaveBeenCalledTimes(userPresenceEvents.length)
+    });
+  })
 
   describe('#bind', function() {
     var userPresenceFacade;
@@ -26,7 +52,7 @@ fdescribe("UserPresenceFacade", function () {
 
     it('should add the listener to a specific event', function() {
       const eventName = 'online'
-      const eventData = { action: eventName, users: ['1'] }
+      const eventData = { action: eventName, users: ['1'] };
 
       var onEvent = jasmine.createSpy('onEvent');
       userPresenceFacade.bind(eventName, onEvent);
@@ -72,7 +98,7 @@ fdescribe("UserPresenceFacade", function () {
       ['subscribed', 'unsubscribed', 'online'].forEach(function(eventName, index) {
         const eventData = { action: eventName, users: [index] }
         userPresenceFacade.emit(eventName, eventData);
-      })
+      });
 
       expect(onEvent).toHaveBeenCalledTimes(2);
     });

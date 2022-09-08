@@ -34,7 +34,14 @@ export default class UserPresenceFacade extends EventsDispatcher {
     userPresenceEvents.forEach(eventName =>
       super.bind(eventName, callback, context)
     );
+
     return this;
+  }
+
+  handleEvent(pusherEvent) {
+    pusherEvent.data.events.forEach(userPresenceEvent => {
+      this.emit(userPresenceEvent.action, userPresenceEvent);
+    });
   }
 
   private initializeSyntaxSugars() {
@@ -52,12 +59,6 @@ export default class UserPresenceFacade extends EventsDispatcher {
       if (eventName === 'pusher_internal:user_presence') {
         this.handleEvent(pusherEvent);
       }
-    });
-  }
-
-  private handleEvent(pusherEvent) {
-    pusherEvent.data.events.forEach(userPresenceEvent => {
-      this.emit(userPresenceEvent.action, userPresenceEvent)
     });
   }
 }
