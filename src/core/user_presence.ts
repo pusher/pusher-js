@@ -14,7 +14,7 @@ export default class UserPresenceFacade extends EventsDispatcher {
     this.pusher = pusher;
 
     this.initializeSyntaxSugars();
-    this.bindUserPresenceEvents();
+    this.bindUserPresenceInternalEvent();
   }
 
   bind(
@@ -46,11 +46,11 @@ export default class UserPresenceFacade extends EventsDispatcher {
     ]);
   }
 
-  private bindUserPresenceEvents() {
-    this.pusher.connection.bind('message', event => {
-      var eventName = event.event;
+  private bindUserPresenceInternalEvent() {
+    this.pusher.connection.bind('message', pusherEvent => {
+      var eventName = pusherEvent.event;
       if (eventName === 'pusher_internal:user_presence') {
-        this.handleEvent(event);
+        this.handleEvent(pusherEvent);
       }
     });
   }
