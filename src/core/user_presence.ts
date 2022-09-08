@@ -57,17 +57,7 @@ export default class UserPresenceFacade extends EventsDispatcher {
 
   private handleEvent(pusherEvent) {
     pusherEvent.data.events.forEach(userPresenceEvent => {
-      userPresenceEvent.users
-        .map(userId => this.buildUserPresenceEvent(userId, userPresenceEvent))
-        .forEach(finalEvent => this.emit(userPresenceEvent.action, finalEvent));
+      this.emit(userPresenceEvent.action, userPresenceEvent)
     });
-  }
-
-  private buildUserPresenceEvent(userId: string, event: any): object {
-    return {
-      action: event.action,
-      user_id: userId,
-      channel_name: event.channel_name
-    };
   }
 }
