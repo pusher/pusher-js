@@ -1,6 +1,6 @@
 var UserPresenceFacade = require("core/user_presence").default;
 
-describe("UserPresenceFacade", function () {
+fdescribe("UserPresenceFacade", function () {
   var connection;
   var pusher;
 
@@ -25,9 +25,9 @@ describe("UserPresenceFacade", function () {
     });
 
     const userPresenceEvents = [
-      { action: 'online', users: ['1'] },
-      { action: 'offline', users: ['2', '3', '4'] },
-      { action: 'subscribed', users: ['5', '6'], channel_name: 'presence-chat' }
+      { action: 'online', user_ids: ['1'] },
+      { action: 'offline', user_ids: ['2', '3', '4'] },
+      { action: 'subscribe', user_ids: ['5', '6'], channel_name: 'presence-chat' }
     ];
 
     it(`should emit ${userPresenceEvents.length} events`, function() {
@@ -40,6 +40,9 @@ describe("UserPresenceFacade", function () {
       userPresenceFacade.handleEvent(pusherEvent);
       
       expect(userPresenceFacade.emit).toHaveBeenCalledTimes(userPresenceEvents.length)
+      userPresenceEvents.forEach(function(event) {
+        expect(userPresenceFacade.emit).toHaveBeenCalledWith(event.action, event);
+      });
     });
   })
 
@@ -52,7 +55,7 @@ describe("UserPresenceFacade", function () {
 
     it('should add the listener to a specific event', function() {
       const eventName = 'online'
-      const eventData = { action: eventName, users: ['1'] };
+      const eventData = { action: eventName, user_ids: ['1'] };
 
       var onEvent = jasmine.createSpy('onEvent');
       userPresenceFacade.bind(eventName, onEvent);
@@ -61,32 +64,20 @@ describe("UserPresenceFacade", function () {
       expect(onEvent).toHaveBeenCalledWith(eventData);
     });
 
-    it('should add the listener to a list of events', function() {
-      const events = ['online', 'offline'];
-      var onEvent = jasmine.createSpy('onEvent');
-
-      userPresenceFacade.bind(events, onEvent);
-
-      events.forEach(function(eventName, index) {
-        const eventData = { action: eventName, users: [index] }
-        userPresenceFacade.emit(eventName, eventData);
-      })
-
-      expect(onEvent).toHaveBeenCalledTimes(2);
-    });
-
     it('should add the listener to online-status events', function() {
       const eventName = 'online-status'
 
       var onEvent = jasmine.createSpy('onEvent');
       userPresenceFacade.bind(eventName, onEvent);
 
-      ['online', 'offline', 'subscribed'].forEach(function(eventName, index) {
-        const eventData = { action: eventName, users: [index] }
+      ['online', 'offline', 'subscribe'].forEach(function(eventName, index) {
+        const eventData = { action: eventName, user_ids: [`${index}`] }
         userPresenceFacade.emit(eventName, eventData);
       })
 
       expect(onEvent).toHaveBeenCalledTimes(2);
+      expect(onEvent).toHaveBeenCalledWith({ action: 'online', user_ids: ['0'] });
+      expect(onEvent).toHaveBeenCalledWith({ action: 'offline', user_ids: ['1'] });
     });
 
     it('should add the listener to channel-subscription events', function() {
@@ -95,12 +86,14 @@ describe("UserPresenceFacade", function () {
       var onEvent = jasmine.createSpy('onEvent');
       userPresenceFacade.bind(eventName, onEvent);
 
-      ['subscribed', 'unsubscribed', 'online'].forEach(function(eventName, index) {
-        const eventData = { action: eventName, users: [index] }
+      ['subscribe', 'unsubscribe', 'online'].forEach(function(eventName, index) {
+        const eventData = { action: eventName, user_ids: [`${index}`] }
         userPresenceFacade.emit(eventName, eventData);
       });
 
       expect(onEvent).toHaveBeenCalledTimes(2);
+      expect(onEvent).toHaveBeenCalledWith({ action: 'subscribe', user_ids: ['0'] });
+      expect(onEvent).toHaveBeenCalledWith({ action: 'unsubscribe', user_ids: ['1'] });
     });
   });
 });

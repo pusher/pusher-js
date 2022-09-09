@@ -18,18 +18,12 @@ export default class UserPresenceFacade extends EventsDispatcher {
   }
 
   bind(
-    events: string | Array<string>,
+    eventName: string,
     callback: Function,
     context?: any
   ): this {
-    let userPresenceEvents = [];
-
-    if (typeof events === 'string') {
-      const syntaxSugarEvents = this.syntaxSugars.get(events);
-      userPresenceEvents = syntaxSugarEvents || [events];
-    } else {
-      userPresenceEvents = events;
-    }
+    const syntaxSugarEvents = this.syntaxSugars.get(eventName);
+    const userPresenceEvents = syntaxSugarEvents || [eventName];
 
     userPresenceEvents.forEach(eventName =>
       super.bind(eventName, callback, context)
@@ -48,8 +42,8 @@ export default class UserPresenceFacade extends EventsDispatcher {
     this.syntaxSugars = new Map();
     this.syntaxSugars.set('online-status', ['online', 'offline']);
     this.syntaxSugars.set('channel-subscription', [
-      'subscribed',
-      'unsubscribed'
+      'subscribe',
+      'unsubscribe'
     ]);
   }
 
