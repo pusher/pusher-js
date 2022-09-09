@@ -17,11 +17,7 @@ export default class UserPresenceFacade extends EventsDispatcher {
     this.bindUserPresenceInternalEvent();
   }
 
-  bind(
-    eventName: string,
-    callback: Function,
-    context?: any
-  ): this {
+  bind(eventName: string, callback: Function, context?: any): this {
     const syntaxSugarEvents = this.syntaxSugars.get(eventName);
     const userPresenceEvents = syntaxSugarEvents || [eventName];
 
@@ -41,10 +37,7 @@ export default class UserPresenceFacade extends EventsDispatcher {
   private initializeSyntaxSugars() {
     this.syntaxSugars = new Map();
     this.syntaxSugars.set('online-status', ['online', 'offline']);
-    this.syntaxSugars.set('channel-subscription', [
-      'subscribe',
-      'unsubscribe'
-    ]);
+    this.syntaxSugars.set('channel-subscription', ['subscribe', 'unsubscribe']);
   }
 
   private bindUserPresenceInternalEvent() {
