@@ -242,7 +242,7 @@ For more information see [authenticating users](https://pusher.com/docs/channels
 
 Object containing the configuration for user authorization. Valid keys are:
 
-* `endpoint` (String) - Endpoint on your server that will return the authorization signature needed for private and presence channels. Defaults to `/pusher/user-auth`.
+* `endpoint` (String) - Endpoint on your server that will return the authorization signature needed for private and presence channels. Defaults to `/pusher/auth`.
 
 * `transport` (String) - Defines how the authorization endpoint will be called. There are two options available:
   * `ajax` - the **default** option where an `XMLHttpRequest` object will be used to make a request. The parameters will be passed as `POST` parameters.
