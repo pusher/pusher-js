@@ -22,7 +22,6 @@ import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
 import UserFacade from './user';
 
-
 export default class Pusher {
   /*  STATIC PROPERTIES */
   static instances: Pusher[] = [];
