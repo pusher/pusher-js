@@ -2,7 +2,7 @@ import Logger from './logger';
 import Pusher from './pusher';
 import EventsDispatcher from './events/dispatcher';
 
-export default class Watchlist extends EventsDispatcher {
+export default class WatchlistFacade extends EventsDispatcher {
   private pusher: Pusher;
 
   public constructor(pusher: Pusher) {
