@@ -21,7 +21,7 @@ import { Options } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
 import UserFacade from './user';
-import WatchlistFacade from './watchlist';
+
 
 export default class Pusher {
   /*  STATIC PROPERTIES */
@@ -63,8 +63,7 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
   user: UserFacade;
-  watchlist: WatchlistFacade;
-
+  
   constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
     options = options || {};
@@ -150,7 +149,6 @@ export default class Pusher {
     this.timeline.info({ instances: Pusher.instances.length });
 
     this.user = new UserFacade(this);
-    this.watchlist = new WatchlistFacade(this);
 
     if (Pusher.isReady) {
       this.connect();
