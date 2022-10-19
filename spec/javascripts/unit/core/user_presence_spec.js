@@ -1,6 +1,6 @@
-var UserPresenceFacade = require("core/user_presence").default;
+var WatchlistFacade = require("core/watchlist").default;
 
-describe("UserPresenceFacade", function () {
+describe("WatchlistFacade", function () {
   var connection;
   var pusher;
 
@@ -13,35 +13,35 @@ describe("UserPresenceFacade", function () {
   });
 
   it('should bind to pusher_internal:user_presence events', function() {
-    new UserPresenceFacade(pusher);
+    new WatchlistFacade(pusher);
     expect(connection.bind).toHaveBeenCalledWith('message', jasmine.any(Function));
   });
 
   describe('#handleEvent', function() {
-    var userPresenceFacade;
+    var watchlistFacade;
 
     beforeEach(function() {
-      userPresenceFacade = new UserPresenceFacade(pusher);
+      watchlistFacade = new WatchlistFacade(pusher);
     });
 
-    const userPresenceEvents = [
-      { action: 'online', user_ids: ['1'] },
-      { action: 'offline', user_ids: ['2', '3', '4'] },
-      { action: 'subscribe', user_ids: ['5', '6'], channel_name: 'presence-chat' }
+    const watchlistEvents = [
+      { name: 'online', user_ids: ['1'] },
+      { name: 'offline', user_ids: ['2', '3', '4'] },
+      { name: 'subscribe', user_ids: ['5', '6'], channel_name: 'presence-chat' }
     ];
 
-    it(`should emit ${userPresenceEvents.length} events`, function() {
+    it(`should emit ${watchlistEvents.length} events`, function() {
       const pusherEvent = {
-        event: 'pusher_internal:user_presence',
-        data: { events: userPresenceEvents }
+        event: 'pusher_internal:watchlist_events',
+        data: { events: watchlistEvents }
       };
 
-      spyOn(userPresenceFacade, 'emit').and.callThrough();
-      userPresenceFacade.handleEvent(pusherEvent);
+      spyOn(watchlistFacade, 'emit').and.callThrough();
+      watchlistFacade.handleEvent(pusherEvent);
       
-      expect(userPresenceFacade.emit).toHaveBeenCalledTimes(userPresenceEvents.length)
-      userPresenceEvents.forEach(function(event) {
-        expect(userPresenceFacade.emit).toHaveBeenCalledWith(event.action, event);
+      expect(watchlistFacade.emit).toHaveBeenCalledTimes(watchlistEvents.length)
+      watchlistEvents.forEach(function(event) {
+        expect(watchlistFacade.emit).toHaveBeenCalledWith(event.name, event);
       });
     });
   })

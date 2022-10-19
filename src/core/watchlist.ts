@@ -2,28 +2,28 @@ import Logger from './logger';
 import Pusher from './pusher';
 import EventsDispatcher from './events/dispatcher';
 
-export default class UserPresenceFacade extends EventsDispatcher {
+export default class Watchlist extends EventsDispatcher {
   private pusher: Pusher;
 
   public constructor(pusher: Pusher) {
     super(function(eventName, data) {
-      Logger.debug(`No callbacks on user presence for ${eventName}`);
+      Logger.debug(`No callbacks on watchlist events for ${eventName}`);
     });
 
     this.pusher = pusher;
-    this.bindUserPresenceInternalEvent();
+    this.bindWatchlistInternalEvent();
   }
 
   handleEvent(pusherEvent) {
-    pusherEvent.data.events.forEach(userPresenceEvent => {
-      this.emit(userPresenceEvent.action, userPresenceEvent);
+    pusherEvent.data.events.forEach(watchlistEvent => {
+      this.emit(watchlistEvent.name, watchlistEvent);
     });
   }
 
-  private bindUserPresenceInternalEvent() {
+  private bindWatchlistInternalEvent() {
     this.pusher.connection.bind('message', pusherEvent => {
       var eventName = pusherEvent.event;
-      if (eventName === 'pusher_internal:user_presence') {
+      if (eventName === 'pusher_internal:watchlist_events') {
         this.handleEvent(pusherEvent);
       }
     });
