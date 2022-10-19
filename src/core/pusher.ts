@@ -62,7 +62,6 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
   user: UserFacade;
-  
   constructor(app_key: string, options?: Options) {
     checkAppKey(app_key);
     options = options || {};
