@@ -3626,6 +3626,12 @@ var fetchAuth = function (context, query, authOptions, authRequestType, callback
     for (var headerName in authOptions.headers) {
         headers.set(headerName, authOptions.headers[headerName]);
     }
+    if (authOptions.headersProvider != null) {
+        var dynamicHeaders = authOptions.headersProvider();
+        for (var headerName in dynamicHeaders) {
+            headers.set(headerName, dynamicHeaders[headerName]);
+        }
+    }
     var body = query;
     var request = new Request(authOptions.endpoint, {
         headers: headers,
@@ -3961,12 +3967,22 @@ var AuthRequestType;
 
 var composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
-    for (var i in authOptions.params) {
+    for (var key in authOptions.params) {
         query +=
             '&' +
-                encodeURIComponent(i) +
+                encodeURIComponent(key) +
                 '=' +
-                encodeURIComponent(authOptions.params[i]);
+                encodeURIComponent(authOptions.params[key]);
+    }
+    if (authOptions.paramsProvider != null) {
+        var dynamicParams = authOptions.paramsProvider();
+        for (var key in dynamicParams) {
+            query +=
+                '&' +
+                    encodeURIComponent(key) +
+                    '=' +
+                    encodeURIComponent(dynamicParams[key]);
+        }
     }
     return query;
 };
@@ -3987,12 +4003,22 @@ var UserAuthenticator = function (authOptions) {
 var channel_authorizer_composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
     query += '&channel_name=' + encodeURIComponent(params.channelName);
-    for (var i in authOptions.params) {
+    for (var key in authOptions.params) {
         query +=
             '&' +
-                encodeURIComponent(i) +
+                encodeURIComponent(key) +
                 '=' +
-                encodeURIComponent(authOptions.params[i]);
+                encodeURIComponent(authOptions.params[key]);
+    }
+    if (authOptions.paramsProvider != null) {
+        var dynamicParams = authOptions.paramsProvider();
+        for (var key in dynamicParams) {
+            query +=
+                '&' +
+                    encodeURIComponent(key) +
+                    '=' +
+                    encodeURIComponent(dynamicParams[key]);
+        }
     }
     return query;
 };

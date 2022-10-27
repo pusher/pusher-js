@@ -3264,6 +3264,12 @@ var ajax = function (context, query, authOptions, authRequestType, callback) {
     for (var headerName in authOptions.headers) {
         xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
     }
+    if (authOptions.headersProvider != null) {
+        var dynamicHeaders = authOptions.headersProvider();
+        for (var headerName in dynamicHeaders) {
+            xhr.setRequestHeader(headerName, dynamicHeaders[headerName]);
+        }
+    }
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
@@ -3703,7 +3709,7 @@ var logger_Logger = (function () {
 // CONCATENATED MODULE: ./src/runtimes/web/auth/jsonp_auth.ts
 
 var jsonp = function (context, query, authOptions, authRequestType, callback) {
-    if (authOptions.headers !== undefined) {
+    if (authOptions.headers !== undefined || authOptions.headersProvider != null) {
         logger.warn("To send headers with the " + authRequestType.toString() + " request, you must use AJAX, rather than JSONP.");
     }
     var callbackName = context.nextAuthCallbackID.toString();
@@ -6758,12 +6764,22 @@ var strategy_builder_UnsupportedStrategy = {
 
 var composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
-    for (var i in authOptions.params) {
+    for (var key in authOptions.params) {
         query +=
             '&' +
-                encodeURIComponent(i) +
+                encodeURIComponent(key) +
                 '=' +
-                encodeURIComponent(authOptions.params[i]);
+                encodeURIComponent(authOptions.params[key]);
+    }
+    if (authOptions.paramsProvider != null) {
+        var dynamicParams = authOptions.paramsProvider();
+        for (var key in dynamicParams) {
+            query +=
+                '&' +
+                    encodeURIComponent(key) +
+                    '=' +
+                    encodeURIComponent(dynamicParams[key]);
+        }
     }
     return query;
 };
@@ -6784,12 +6800,22 @@ var UserAuthenticator = function (authOptions) {
 var channel_authorizer_composeChannelQuery = function (params, authOptions) {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
     query += '&channel_name=' + encodeURIComponent(params.channelName);
-    for (var i in authOptions.params) {
+    for (var key in authOptions.params) {
         query +=
             '&' +
-                encodeURIComponent(i) +
+                encodeURIComponent(key) +
                 '=' +
-                encodeURIComponent(authOptions.params[i]);
+                encodeURIComponent(authOptions.params[key]);
+    }
+    if (authOptions.paramsProvider != null) {
+        var dynamicParams = authOptions.paramsProvider();
+        for (var key in dynamicParams) {
+            query +=
+                '&' +
+                    encodeURIComponent(key) +
+                    '=' +
+                    encodeURIComponent(dynamicParams[key]);
+        }
     }
     return query;
 };
