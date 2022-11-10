@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v7.4.0
+ * Pusher JavaScript Library v7.4.1
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -369,6 +369,12 @@ module.exports = Base;
 
 /***/ }),
 /* 3 */
+/***/ (function(module, exports) {
+
+module.exports = require("crypto");
+
+/***/ }),
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -418,16 +424,10 @@ module.exports = Driver;
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-module.exports = require("stream");
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports) {
 
-module.exports = require("crypto");
+module.exports = require("stream");
 
 /***/ }),
 /* 6 */
@@ -943,9 +943,9 @@ module.exports = HttpParser;
 "use strict";
 
 
-var Stream      = __webpack_require__(4).Stream,
+var Stream      = __webpack_require__(5).Stream,
     util        = __webpack_require__(0),
-    driver      = __webpack_require__(3),
+    driver      = __webpack_require__(4),
     EventTarget = __webpack_require__(16),
     Event       = __webpack_require__(7);
 
@@ -1148,7 +1148,7 @@ module.exports = API;
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    crypto     = __webpack_require__(5),
+    crypto     = __webpack_require__(3),
     util       = __webpack_require__(0),
     Extensions = __webpack_require__(29),
     Base       = __webpack_require__(2),
@@ -2083,7 +2083,7 @@ exports.decode = decode;
 
 
 var util   = __webpack_require__(0),
-    driver = __webpack_require__(3),
+    driver = __webpack_require__(4),
     API    = __webpack_require__(11);
 
 var WebSocket = function(request, socket, body, protocols, options) {
@@ -5132,7 +5132,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (true) {
     // Node.js.
-    crypto = __webpack_require__(5);
+    crypto = __webpack_require__(3);
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -5215,7 +5215,7 @@ driver having these two methods.
 **/
 
 
-var Stream = __webpack_require__(4).Stream,
+var Stream = __webpack_require__(5).Stream,
     util   = __webpack_require__(0);
 
 
@@ -5402,7 +5402,7 @@ module.exports = StreamReader;
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    crypto     = __webpack_require__(5),
+    crypto     = __webpack_require__(3),
     url        = __webpack_require__(6),
     util       = __webpack_require__(0),
     HttpParser = __webpack_require__(10),
@@ -6529,7 +6529,7 @@ module.exports = Message;
 
 
 var Buffer     = __webpack_require__(1).Buffer,
-    Stream     = __webpack_require__(4).Stream,
+    Stream     = __webpack_require__(5).Stream,
     url        = __webpack_require__(6),
     util       = __webpack_require__(0),
     Base       = __webpack_require__(2),
@@ -6756,7 +6756,7 @@ module.exports = Server;
 var Buffer  = __webpack_require__(1).Buffer,
     Base    = __webpack_require__(2),
     Draft75 = __webpack_require__(15),
-    crypto  = __webpack_require__(5),
+    crypto  = __webpack_require__(3),
     util    = __webpack_require__(0);
 
 
@@ -6881,7 +6881,7 @@ var util   = __webpack_require__(0),
     net    = __webpack_require__(40),
     tls    = __webpack_require__(41),
     url    = __webpack_require__(6),
-    driver = __webpack_require__(3),
+    driver = __webpack_require__(4),
     API    = __webpack_require__(11),
     Event  = __webpack_require__(7);
 
@@ -6986,9 +6986,9 @@ module.exports = require("tls");
 "use strict";
 
 
-var Stream      = __webpack_require__(4).Stream,
+var Stream      = __webpack_require__(5).Stream,
     util        = __webpack_require__(0),
-    driver      = __webpack_require__(3),
+    driver      = __webpack_require__(4),
     Headers     = __webpack_require__(9),
     API         = __webpack_require__(11),
     EventTarget = __webpack_require__(16),
@@ -7487,7 +7487,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.4.0",
+    VERSION: "7.4.1",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -8683,10 +8683,11 @@ var presence_channel_extends = (undefined && undefined.__extends) || (function (
     };
 })();
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -10025,7 +10026,7 @@ function replaceHost(url, hostname) {
     return urlParts[1] + hostname + urlParts[3];
 }
 function randomNumber(max) {
-    return Math.floor(Math.random() * max);
+    return node_runtime.randomInt(max);
 }
 function randomString(length) {
     var result = [];
@@ -10307,7 +10308,11 @@ var xhr_timeline_xhr = {
 };
 /* harmony default export */ var xhr_timeline = (xhr_timeline_xhr);
 
+// EXTERNAL MODULE: external "crypto"
+var external_crypto_ = __webpack_require__(3);
+
 // CONCATENATED MODULE: ./src/runtimes/node/runtime.ts
+
 
 
 
@@ -10341,6 +10346,9 @@ var NodeJS = {
     },
     getNetwork: function () {
         return net_info_Network;
+    },
+    randomInt: function (max) {
+        return Object(external_crypto_["randomInt"])(max);
     }
 };
 /* harmony default export */ var node_runtime = (NodeJS);
@@ -10720,7 +10728,7 @@ function getEnableStatsConfig(opts) {
     return false;
 }
 function buildUserAuthenticator(opts) {
-    var userAuthentication = __assign({}, defaults.userAuthentication, opts.userAuthentication);
+    var userAuthentication = __assign(__assign({}, defaults.userAuthentication), opts.userAuthentication);
     if ('customHandler' in userAuthentication &&
         userAuthentication['customHandler'] != null) {
         return userAuthentication['customHandler'];
@@ -10730,7 +10738,7 @@ function buildUserAuthenticator(opts) {
 function buildChannelAuth(opts, pusher) {
     var channelAuthorization;
     if ('channelAuthorization' in opts) {
-        channelAuthorization = __assign({}, defaults.channelAuthorization, opts.channelAuthorization);
+        channelAuthorization = __assign(__assign({}, defaults.channelAuthorization), opts.channelAuthorization);
     }
     else {
         channelAuthorization = {
@@ -10949,7 +10957,7 @@ var pusher_Pusher = (function () {
         this.config = getConfig(options, this);
         this.channels = factory.createChannels();
         this.global_emitter = new dispatcher();
-        this.sessionID = Math.floor(Math.random() * 1000000000);
+        this.sessionID = node_runtime.randomInt(1000000000);
         this.timeline = new timeline_timeline(this.key, this.sessionID, {
             cluster: this.config.cluster,
             features: Pusher.getClientFeatures(),

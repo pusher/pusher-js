@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.4.1
+
+- [CHANGED] Authorization error message.
+
 ## 7.4.0
 
 * [CHANGED] Use secure random generator instead of pseudo-random generator
