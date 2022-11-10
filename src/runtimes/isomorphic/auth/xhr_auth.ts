@@ -60,7 +60,7 @@ const ajax: AuthTransport = function(
             suffix = UrlStore.buildLogSuffix('authenticationEndpoint');
             break;
           case AuthRequestType.ChannelAuthorization:
-            suffix = `Clients must be authenticated to join private or presence channels. ${UrlStore.buildLogSuffix(
+            suffix = `Clients must be authorized to join private or presence channels. ${UrlStore.buildLogSuffix(
               'authorizationEndpoint'
             )}`;
             break;
