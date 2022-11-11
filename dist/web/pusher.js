@@ -1307,7 +1307,8 @@ var logger_Logger = (function () {
 // CONCATENATED MODULE: ./src/runtimes/web/auth/jsonp_auth.ts
 
 var jsonp = function (context, query, authOptions, authRequestType, callback) {
-    if (authOptions.headers !== undefined || authOptions.headersProvider != null) {
+    if (authOptions.headers !== undefined ||
+        authOptions.headersProvider != null) {
         logger.warn("To send headers with the " + authRequestType.toString() + " request, you must use AJAX, rather than JSONP.");
     }
     var callbackName = context.nextAuthCallbackID.toString();
