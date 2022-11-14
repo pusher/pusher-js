@@ -5,6 +5,7 @@ import {
   UserAuthenticationCallback
 } from './auth/options';
 import Channel from './channels/channel';
+import WatchlistFacade from './watchlist';
 import EventsDispatcher from './events/dispatcher';
 import flatPromise from './utils/flat_promise';
 
@@ -14,6 +15,7 @@ export default class UserFacade extends EventsDispatcher {
   user_data: any = null;
   serverToUserChannel: Channel = null;
   signinDonePromise: Promise<any> = null;
+  watchlist: WatchlistFacade;
   private _signinDoneResolve: Function = null;
 
   public constructor(pusher: Pusher) {
@@ -30,6 +32,9 @@ export default class UserFacade extends EventsDispatcher {
         this._newSigninPromiseIfNeeded();
       }
     });
+
+    this.watchlist = new WatchlistFacade(pusher);
+
     this.pusher.connection.bind('message', event => {
       var eventName = event.event;
       if (eventName === 'pusher:signin_success') {

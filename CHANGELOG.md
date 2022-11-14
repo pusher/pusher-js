@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.5.0
+
+- [ADDED] Watchlist Online Status
+
 ## 7.4.1
 
 - [CHANGED] Authorization error message.
