@@ -36,6 +36,8 @@ jobs:
 
           make build_all
 
-          git add package.json CHANGELOG.md dist/
+          git status
+
+          git add package.json package-lock.json CHANGELOG.md dist/ types/
           git commit -m "Bump to version ${{ steps.bump.outputs.new_version }}"
           git push
