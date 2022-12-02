@@ -380,7 +380,7 @@ This returns a pusher object which can then be used to subscribe to channels.
 One reason this connection might fail is your account being over its' limits. You can detect this in the client by binding to the `error` event on the `pusher.connection` object. For example:
 
 ```js
-const pusher = new Pusher('app_key');
+const pusher = new Pusher('app_key', { cluster: APP_CLUSTER });
 pusher.connection.bind( 'error', function( err ) {
   if( err.error.data.code === 4004 ) {
     log('Over limit!');

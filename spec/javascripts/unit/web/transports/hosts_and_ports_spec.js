@@ -59,12 +59,12 @@ describe("Host/Port Configuration", function() {
       window.SockJS = _SockJS;
     });
 
-    it("should connect to https://sockjs.pusher.com:443 by default", function() {
-      pusher = new Pusher("foobar");
+    it("should connect to https://sockjs-<cluster>.pusher.com:443 by default", function() {
+      pusher = new Pusher("foobar", {cluster: "mt1"});
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "https://sockjs.pusher.com:443/pusher",
+        "https://sockjs-mt1.pusher.com:443/pusher",
         null,
         { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
@@ -72,12 +72,12 @@ describe("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to http://sockjs.pusher.com:80 by default when forceTLS disabled", function() {
-      pusher = new Pusher("foobar", { forceTLS: false });
+    it("should connect to http://sockjs-<cluster>.pusher.com:80 by default when forceTLS disabled", function() {
+      pusher = new Pusher("foobar", { cluster: "mt1", forceTLS: false });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "http://sockjs.pusher.com:80/pusher",
+        "http://sockjs-mt1.pusher.com:80/pusher",
         null,
         { js_path: cdn_http+'/'+version +'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
@@ -86,7 +86,7 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect using httpHost and httpsPort when specified in options", function() {
-      pusher = new Pusher("foobar", { httpHost: "example.com", httpsPort: 1999 });
+      pusher = new Pusher("foobar", { cluster: "mt1", httpHost: "example.com", httpsPort: 1999 });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
@@ -99,7 +99,7 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect using httpHost and httpPort when specified in options and forceTLS disabled", function() {
-      pusher = new Pusher("foobar", { httpHost: "example.org", httpPort: 4444, forceTLS: false });
+      pusher = new Pusher("foobar", { cluster: "mt1", httpHost: "example.org", httpPort: 4444, forceTLS: false });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
@@ -112,11 +112,11 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect using httpPath when specified in options", function() {
-      pusher = new Pusher("foobar", { httpPath: "/test" });
+      pusher = new Pusher("foobar", { cluster: "mt1", httpPath: "/test" });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "https://sockjs.pusher.com:443/test",
+        "https://sockjs-mt1.pusher.com:443/test",
         null,
         { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined

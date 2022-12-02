@@ -56,10 +56,12 @@ function build(testConfig) {
       it("should open connections", async function() {
         pusher1 = new Pusher("c49a449b916bb4246729", {
           forceTLS: forceTLS,
+          cluster: "mt1"
         });
         if (canRunTwoConnections(transport)) {
           pusher2 = new Pusher("c49a449b916bb4246729", {
             forceTLS: forceTLS,
+            cluster: "mt1"
           });
           await waitsFor(function() {
             return pusher2.connection.state === "connected";

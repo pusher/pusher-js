@@ -88,21 +88,19 @@ describe("Pusher", function() {
       var pusher = new Pusher("1234567890abcdef", { cluster: "mt1" });
       expect(Logger.warn).not.toHaveBeenCalled();
     });
+  });
 
-    it("should warn if no cluster is supplied", function() {
-      spyOn(Logger, "warn");
-      var pusher = new Pusher("1234567890abcdef");
-      expect(Logger.warn).toHaveBeenCalled();
+  describe("options validation", function() {
+    it("should throw if options are not supplied", function() {
+      expect(function() {
+        var pusher = new Pusher("1234567890abcdef");
+      }).toThrow("You must pass an options object");
     });
 
-    it("should not warn if no cluster is supplied if wsHost or httpHost are supplied", function() {
-      spyOn(Logger, "warn");
-      var wsPusher = new Pusher("1234567890abcdef", { wsHost: "example.com" });
-      var httpPusher = new Pusher("1234567890abcdef", {
-        httpHost: "example.com"
-      });
-      expect(Logger.warn).not.toHaveBeenCalled();
-      expect(Logger.warn).not.toHaveBeenCalled();
+    it("should throw if no cluster is supplied", function() {
+      expect(function() {
+        var pusher = new Pusher("1234567890abcdef", {});
+      }).toThrow("Options object must provide a cluster");
     });
   });
 
@@ -110,7 +108,7 @@ describe("Pusher", function() {
     var pusher;
 
     beforeEach(function() {
-      pusher = new Pusher("foo");
+      pusher = new Pusher("foo", {cluster: "mt1"});
     });
 
     it("should create a timeline with the correct key", function() {
@@ -122,8 +120,8 @@ describe("Pusher", function() {
     });
 
     it("should pass the cluster name to the timeline", function() {
-      var pusher = new Pusher("foo");
-      expect(pusher.timeline.options.cluster).toBe(Defaults.cluster);
+      var pusher = new Pusher("foo", {cluster: "mt1"});
+      expect(pusher.timeline.options.cluster).toBe("mt1");
 
       pusher = new Pusher("foo", { cluster: "spec" });
       expect(pusher.timeline.options.cluster).toEqual("spec");
@@ -131,7 +129,7 @@ describe("Pusher", function() {
 
     it("should pass a feature list to the timeline", function() {
       spyOn(Pusher, "getClientFeatures").and.returnValue(["foo", "bar"]);
-      var pusher = new Pusher("foo");
+      var pusher = new Pusher("foo", {cluster: "mt1"});
       expect(pusher.timeline.options.features).toEqual(["foo", "bar"]);
     });
 
@@ -140,7 +138,7 @@ describe("Pusher", function() {
     });
 
     it("should pass per-connection timeline params", function() {
-      pusher = new Pusher("foo", { timelineParams: { horse: true } });
+      pusher = new Pusher("foo", { cluster: "mt1", timelineParams: { horse: true } });
       expect(pusher.timeline.options.params).toEqual({ horse: true });
     });
 
@@ -162,7 +160,7 @@ describe("Pusher", function() {
       });
 
       it("should be off when forceTLS parameter is passed", function() {
-        var pusher = new Pusher("foo", { forceTLS: false });
+        var pusher = new Pusher("foo", { cluster: "mt1", forceTLS: false });
         expect(pusher.shouldUseTLS()).toBe(false);
       });
 
@@ -173,7 +171,7 @@ describe("Pusher", function() {
               protocol: "https:"
             }
           });
-          var pusher = new Pusher("foo", { forceTLS: false });
+          var pusher = new Pusher("foo", { cluster: "mt1", forceTLS: false });
           expect(pusher.shouldUseTLS()).toBe(true);
         });
       }
@@ -202,12 +200,12 @@ describe("Pusher", function() {
 
     describe("connection manager", function() {
       it("should have the right key", function() {
-        var pusher = new Pusher("beef");
+        var pusher = new Pusher("beef", {cluster: "mt1"});
         expect(pusher.connection.key).toEqual("beef");
       });
 
       it("should have default timeouts", function() {
-        var pusher = new Pusher("foo");
+        var pusher = new Pusher("foo", {cluster: "mt1"});
         var options = pusher.connection.options;
 
         expect(options.activityTimeout).toEqual(Defaults.activityTimeout);
@@ -217,6 +215,7 @@ describe("Pusher", function() {
 
       it("should use user-specified timeouts", function() {
         var pusher = new Pusher("foo", {
+          cluster: "mt1",
           activityTimeout: 123,
           pongTimeout: 456,
           unavailableTimeout: 789
@@ -232,7 +231,7 @@ describe("Pusher", function() {
 
   describe(".ready", function() {
     it("should start connection attempts for instances", function() {
-      var pusher = new Pusher("01234567890abcdef");
+      var pusher = new Pusher("01234567890abcdef", {cluster: "mt1"});
       spyOn(pusher, "connect");
 
       expect(pusher.connect).not.toHaveBeenCalled();
@@ -243,7 +242,7 @@ describe("Pusher", function() {
 
   describe("#connect", function() {
     it("should call connect on connection manager", function() {
-      var pusher = new Pusher("foo");
+      var pusher = new Pusher("foo", {cluster: "mt1"});
       pusher.connect();
       expect(pusher.connection.connect).toHaveBeenCalledWith();
     });
@@ -253,14 +252,14 @@ describe("Pusher", function() {
     var pusher;
 
     beforeEach(function() {
-      pusher = new Pusher("foo");
+      pusher = new Pusher("foo", {cluster: "mt1"});
       pusher.connect();
       pusher.connection.state = "connected";
       pusher.connection.emit("connected");
     });
 
     it("should subscribe to all channels", function() {
-      pusher = new Pusher("foo");
+      pusher = new Pusher("foo", {cluster: "mt1"});
       var subscribedChannels = {
         channel1: pusher.subscribe("channel1"),
         channel2: pusher.subscribe("channel2")
@@ -351,7 +350,7 @@ describe("Pusher", function() {
     var pusher;
 
     beforeEach(function() {
-      pusher = new Pusher("foo");
+      pusher = new Pusher("foo", {cluster: "mt1"});
     });
 
     it("should pass events to their channels", function() {
@@ -424,7 +423,7 @@ describe("Pusher", function() {
     var pusher;
 
     beforeEach(function() {
-      pusher = new Pusher("foo");
+      pusher = new Pusher("foo", {cluster: "mt1"});
     });
 
     it("should allow a globally bound callback to be removed", function() {
@@ -444,7 +443,7 @@ describe("Pusher", function() {
 
   describe("#disconnect", function() {
     it("should call disconnect on connection manager", function() {
-      var pusher = new Pusher("foo");
+      var pusher = new Pusher("foo", {cluster: "mt1"});
 
       pusher.disconnect();
       expect(pusher.connection.disconnect).toHaveBeenCalledWith();
@@ -453,7 +452,7 @@ describe("Pusher", function() {
 
   describe("after disconnecting", function() {
     it("should disconnect channels", function() {
-      var pusher = new Pusher("foo");
+      var pusher = new Pusher("foo", {cluster: "mt1"});
       var channel1 = pusher.subscribe("channel1");
       var channel2 = pusher.subscribe("channel2");
 
@@ -467,7 +466,7 @@ describe("Pusher", function() {
 
   describe("on error", function() {
     it("should log a warning to console", function() {
-      var pusher = new Pusher("foo");
+      var pusher = new Pusher("foo", {cluster: "mt1"});
 
       spyOn(Logger, "warn");
       pusher.connection.emit("error", "something");
@@ -491,7 +490,7 @@ describe("Pusher", function() {
     });
 
     it("should be sent to stats.pusher.com", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
       expect(Factory.createTimelineSender).toHaveBeenCalledWith(
         pusher.timeline,
@@ -501,6 +500,7 @@ describe("Pusher", function() {
 
     it("should be sent to a hostname specified in constructor options", function() {
       var pusher = new Pusher("foo", {
+        cluster: "mt1",
         statsHost: "example.com",
         enableStats: true
       });
@@ -511,7 +511,7 @@ describe("Pusher", function() {
     });
 
     it("should not be sent by default", function() {
-      var pusher = new Pusher("foo");
+      var pusher = new Pusher("foo", {cluster: "mt1"});
       pusher.connect();
       pusher.connection.options.timeline.info({});
       jasmine.clock().tick(1000000);
@@ -519,7 +519,7 @@ describe("Pusher", function() {
     });
 
     it("should be sent if disableStats set to false", function() {
-      var pusher = new Pusher("foo", { disableStats: false });
+      var pusher = new Pusher("foo", { cluster: "mt1", disableStats: false });
       pusher.connect();
       pusher.connection.options.timeline.info({});
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
@@ -530,7 +530,7 @@ describe("Pusher", function() {
     });
 
     it("should honour enableStats setting if enableStats and disableStats set", function() {
-      var pusher = new Pusher("foo", { disableStats: true, enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", disableStats: true, enableStats: true });
       pusher.connect();
       pusher.connection.options.timeline.info({});
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
@@ -541,14 +541,14 @@ describe("Pusher", function() {
     });
 
     it("should not be sent before calling connect", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       pusher.connection.options.timeline.info({});
       jasmine.clock().tick(1000000);
       expect(timelineSender.send.calls.count()).toEqual(0);
     });
 
     it("should be sent every 60 seconds after calling connect", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       pusher.connect();
       expect(Factory.createTimelineSender.calls.count()).toEqual(1);
 
@@ -563,7 +563,7 @@ describe("Pusher", function() {
     });
 
     it("should be sent after connecting", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       pusher.connect();
       pusher.connection.options.timeline.info({});
 
@@ -574,7 +574,7 @@ describe("Pusher", function() {
     });
 
     it("should not be sent after disconnecting", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       pusher.connect();
       pusher.disconnect();
 
@@ -585,7 +585,7 @@ describe("Pusher", function() {
     });
 
     it("should be sent without TLS if connection is not using TLS", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       pusher.connection.isUsingTLS.and.returnValue(false);
 
       pusher.connect();
@@ -598,7 +598,7 @@ describe("Pusher", function() {
     });
 
     it("should be sent with TLS if connection is over TLS", function() {
-      var pusher = new Pusher("foo", { enableStats: true });
+      var pusher = new Pusher("foo", { cluster: "mt1", enableStats: true });
       pusher.connection.isUsingTLS.and.returnValue(true);
 
       pusher.connect();

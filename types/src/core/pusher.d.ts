@@ -30,7 +30,7 @@ export default class Pusher {
     connection: ConnectionManager;
     timelineSenderTimer: PeriodicTimer;
     user: UserFacade;
-    constructor(app_key: string, options?: Options);
+    constructor(app_key: string, options: Options);
     channel(name: string): Channel;
     allChannels(): Channel[];
     connect(): void;

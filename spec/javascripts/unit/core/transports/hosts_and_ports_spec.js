@@ -47,7 +47,7 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect to wss://ws-mt1.pusher.com:443 by default", function() {
-      pusher = new Pusher("foobar");
+      pusher = new Pusher("foobar", {cluster: "mt1"});
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(
@@ -56,7 +56,7 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect to ws://ws-mt1.pusher.com:80 by default when forceTLS disabled", function() {
-      pusher = new Pusher("foobar", { forceTLS: false });
+      pusher = new Pusher("foobar", { cluster: "mt1", forceTLS: false });
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(
@@ -65,7 +65,7 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect using wsHost and wssPort when specified in options", function() {
-      pusher = new Pusher("foobar", { wsHost: "example.com", wssPort: 1999 });
+      pusher = new Pusher("foobar", { cluster: "mt1", wsHost: "example.com", wssPort: 1999 });
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(
@@ -74,7 +74,7 @@ describe("Host/Port Configuration", function() {
     });
 
     it("should connect using wsHost and wsPort when specified in options and forceTLS disabled", function() {
-      pusher = new Pusher("foobar", { wsHost: "example.org", wsPort: 4444, forceTLS: false });
+      pusher = new Pusher("foobar", { cluster: "mt1", wsHost: "example.org", wsPort: 4444, forceTLS: false });
       pusher.connect();
 
       expect(Runtime.createWebSocket).toHaveBeenCalledWith(

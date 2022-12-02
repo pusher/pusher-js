@@ -17,7 +17,7 @@ import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
 import UrlStore from 'core/utils/url_store';
-import { Options } from './options';
+import { Options, validateOptions } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
 import UserFacade from './user';
@@ -62,21 +62,9 @@ export default class Pusher {
   connection: ConnectionManager;
   timelineSenderTimer: PeriodicTimer;
   user: UserFacade;
-  constructor(app_key: string, options?: Options) {
+  constructor(app_key: string, options: Options) {
     checkAppKey(app_key);
-    options = options || {};
-    if (!options.cluster && !(options.wsHost || options.httpHost)) {
-      let suffix = UrlStore.buildLogSuffix('javascriptQuickStart');
-      Logger.warn(
-        `You should always specify a cluster when connecting. ${suffix}`
-      );
-    }
-    if ('disableStats' in options) {
-      Logger.warn(
-        'The disableStats option is deprecated in favor of enableStats'
-      );
-    }
-
+    validateOptions(options);
     this.key = app_key;
     this.config = getConfig(options, this);
 
