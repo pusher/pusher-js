@@ -48,7 +48,7 @@ module.exports = function() {
 
       var timer;
 
-      pusher = new Pusher("foobar");
+      pusher = new Pusher("foobar", {cluster: "mt1"});
       pusher.connect();
 
       await waitsFor(function() {
@@ -130,7 +130,7 @@ module.exports = function() {
 
 
         // use TLS connection, to force sockjs to be the primary fallback
-        pusher = new Pusher("foobar", { forceTLS: true });
+        pusher = new Pusher("foobar", { cluster: "mt1", forceTLS: true });
         pusher.connect();
 
         await waitsFor(function() {

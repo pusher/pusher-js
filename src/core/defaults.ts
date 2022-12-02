@@ -20,7 +20,6 @@ export interface DefaultConfig {
   activityTimeout: number;
   pongTimeout: number;
   unavailableTimeout: number;
-  cluster: string;
   userAuthentication: UserAuthenticationOptions;
   channelAuthorization: ChannelAuthorizationOptions;
 
@@ -49,7 +48,6 @@ var Defaults: DefaultConfig = {
   activityTimeout: 120000,
   pongTimeout: 30000,
   unavailableTimeout: 10000,
-  cluster: 'mt1',
   userAuthentication: {
     endpoint: '/pusher/user-auth',
     transport: 'ajax'

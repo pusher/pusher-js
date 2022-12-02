@@ -48,7 +48,7 @@ module.exports = function() {
     });
 
     it("should use all transports if the whitelist is not specified", function() {
-      var pusher = new Pusher("asdf");
+      var pusher = new Pusher("asdf", {cluster: "mt1"});
       expect(transports.ws.createConnection).toHaveBeenCalled();
       expect(transports.xhr_streaming.createConnection).toHaveBeenCalled();
       expect(transports[BASE_FALLBACK].createConnection).toHaveBeenCalled();
@@ -57,6 +57,7 @@ module.exports = function() {
 
     it("should not use any transports if the whitelist is empty", function() {
       var pusher = new Pusher("asdf", {
+        cluster: "mt1",
         enabledTransports: []
       });
       expect(transports.ws.createConnection).not.toHaveBeenCalled();
@@ -67,6 +68,7 @@ module.exports = function() {
 
     it("should use only transports from the whitelist", function() {
       var pusher = new Pusher("asdf", {
+        cluster: "mt1",
         enabledTransports: ["a", "c"]
       });
       expect(transports.ws.createConnection).toHaveBeenCalled();
@@ -77,6 +79,7 @@ module.exports = function() {
 
     it("should not use transports from the blacklist", function() {
       var pusher = new Pusher("asdf", {
+        cluster: "mt1",
         disabledTransports: ["a", "b"]
       });
       expect(transports.ws.createConnection).not.toHaveBeenCalled();
@@ -87,6 +90,7 @@ module.exports = function() {
 
     it("should not use transports from the blacklist, even if they are on the whitelist", function() {
       var pusher = new Pusher("asdf", {
+        cluster: "mt1",
         enabledTransports: ["b", "c"],
         disabledTransports: ["b"]
       });

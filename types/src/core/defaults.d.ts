@@ -16,7 +16,6 @@ export interface DefaultConfig {
     activityTimeout: number;
     pongTimeout: number;
     unavailableTimeout: number;
-    cluster: string;
     userAuthentication: UserAuthenticationOptions;
     channelAuthorization: ChannelAuthorizationOptions;
     cdn_http?: string;

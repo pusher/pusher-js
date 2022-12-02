@@ -9,6 +9,7 @@ import {
 } from './auth/deprecated_channel_authorizer';
 import { AuthTransport, Transport } from './config';
 import * as nacl from 'tweetnacl';
+import Logger from './logger';
 
 export interface Options {
   activityTimeout?: number;
@@ -21,7 +22,7 @@ export interface Options {
   channelAuthorization?: ChannelAuthorizationOptions;
   userAuthentication?: UserAuthenticationOptions;
 
-  cluster?: string;
+  cluster: string;
   enableStats?: boolean;
   disableStats?: boolean;
   disabledTransports?: Transport[];
@@ -41,4 +42,18 @@ export interface Options {
   wsPath?: string;
   wsPort?: number;
   wssPort?: number;
+}
+
+export function validateOptions(options) {
+  if (options == null) {
+    throw 'You must pass an options object';
+  }
+  if (options.cluster == null) {
+    throw 'Options object must provide a cluster';
+  }
+  if ('disableStats' in options) {
+    Logger.warn(
+      'The disableStats option is deprecated in favor of enableStats'
+    );
+  }
 }

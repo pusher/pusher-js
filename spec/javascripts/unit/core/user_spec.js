@@ -19,7 +19,7 @@ describe("Pusher (User)", function () {
   describe("#signin", function () {
     var pusher;
     beforeEach(function () {
-      pusher = new Pusher("foo");
+      pusher = new Pusher("foo", {cluster: "mt1"});
       spyOn(pusher.config, "userAuthenticator");
       spyOn(pusher, "send_event");
       pusher.connection.state = "connected";
@@ -159,6 +159,7 @@ describe("Pusher (User)", function () {
       );
       spyOn(Transports.xhr_polling, 'isSupported').and.returnValue(true);
       pusher = new Pusher('foobar', {
+        cluster: "mt1",
         enabledTransports: ['xhr_polling']
       });
       pusher.connect();

@@ -48,7 +48,7 @@ module.exports = function() {
     it("should transition to unavailable after default timeout", function() {
       var onUnavailable = jasmine.createSpy("onUnavailable");
 
-      pusher = new Pusher("foobar");
+      pusher = new Pusher("foobar", {cluster: "mt1"});
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
@@ -61,7 +61,7 @@ module.exports = function() {
     it("should transition to unavailable after timeout passed as an option", function() {
       var onUnavailable = jasmine.createSpy("onUnavailable");
 
-      pusher = new Pusher("foobar", { unavailableTimeout: 2345 });
+      pusher = new Pusher("foobar", { cluster: "mt1", unavailableTimeout: 2345 });
       pusher.connect();
       pusher.connection.bind("unavailable", onUnavailable);
 
@@ -72,7 +72,7 @@ module.exports = function() {
     });
 
     it("should obey the server's activity timeout and the default pong timeout", function() {
-      pusher = new Pusher("foobar");
+      pusher = new Pusher("foobar", { cluster: "mt1" });
       pusher.connect();
 
       var firstTransport = transport;
@@ -105,6 +105,7 @@ module.exports = function() {
 
     it("should obey the activity timeout from the handshake if it's lower than one specified in options", function() {
       pusher = new Pusher("foobar", {
+        cluster: "mt1",
         activityTimeout: 16000,
         pongTimeout: 2222
       });
@@ -135,6 +136,7 @@ module.exports = function() {
 
     it("should obey the activity timeout specified in options if it's lower than one from the handshake", function() {
       pusher = new Pusher("foobar", {
+        cluster: "mt1",
         activityTimeout: 15555,
         pongTimeout: 2222
       });
@@ -165,6 +167,7 @@ module.exports = function() {
 
     it("should obey the pong timeout passed in options", function() {
       pusher = new Pusher("foobar", {
+        cluster: "mt1",
         pongTimeout: 2222
       });
       pusher.connect();

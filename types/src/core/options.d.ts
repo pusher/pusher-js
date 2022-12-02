@@ -10,7 +10,7 @@ export interface Options {
     authorizer?: ChannelAuthorizerGenerator;
     channelAuthorization?: ChannelAuthorizationOptions;
     userAuthentication?: UserAuthenticationOptions;
-    cluster?: string;
+    cluster: string;
     enableStats?: boolean;
     disableStats?: boolean;
     disabledTransports?: Transport[];
@@ -31,3 +31,4 @@ export interface Options {
     wsPort?: number;
     wssPort?: number;
 }
+export declare function validateOptions(options: any): void;

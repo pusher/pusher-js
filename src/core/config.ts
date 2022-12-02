@@ -10,7 +10,6 @@ import ChannelAuthorizer from './auth/channel_authorizer';
 import { ChannelAuthorizerProxy } from './auth/deprecated_channel_authorizer';
 import Runtime from 'runtime';
 import * as nacl from 'tweetnacl';
-import Logger from './logger';
 
 export type AuthTransport = 'ajax' | 'jsonp';
 export type Transport =
@@ -55,7 +54,7 @@ export interface Config {
 export function getConfig(opts: Options, pusher): Config {
   let config: Config = {
     activityTimeout: opts.activityTimeout || Defaults.activityTimeout,
-    cluster: opts.cluster || Defaults.cluster,
+    cluster: opts.cluster,
     httpPath: opts.httpPath || Defaults.httpPath,
     httpPort: opts.httpPort || Defaults.httpPort,
     httpsPort: opts.httpsPort || Defaults.httpsPort,
@@ -103,10 +102,7 @@ function getWebsocketHost(opts: Options): string {
   if (opts.wsHost) {
     return opts.wsHost;
   }
-  if (opts.cluster) {
-    return getWebsocketHostFromCluster(opts.cluster);
-  }
-  return getWebsocketHostFromCluster(Defaults.cluster);
+  return getWebsocketHostFromCluster(opts.cluster);
 }
 
 function getWebsocketHostFromCluster(cluster: string): string {
