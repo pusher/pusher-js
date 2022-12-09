@@ -89,7 +89,7 @@ function start_app(port, pusher_config) {
   app.get('/jsonp/echo/:id', (req, res) => {
     const decoded_params =
           Object.keys(req.query)
-          .filter(key => !["id", "receiver", "splat", "captures"].include(key))
+          .filter(key => !["id", "receiver", "splat", "captures"].includes(key))
           .reduce((obj, key) => {
             obj[key] = decode_base64(req.query[key]);
           }, {});
@@ -108,7 +108,7 @@ function start_app(port, pusher_config) {
   app.get('/v2/jsonp/echo/:id', (req, res) => {
     const decoded_params =
           Object.keys(req.query)
-          .filter(key => !["id", "splat", "captures"].include(key))
+          .filter(key => !["id", "splat", "captures"].includes(key))
           .reduce((obj, key) => {
             obj[key] = decode_base64(req.query[key]);
           }, {});
@@ -124,7 +124,7 @@ function start_app(port, pusher_config) {
   app.get('/v2/script_request/echo', (req, res) => {
     const decoded_params =
           Object.keys(req.query)
-          .filter(key => !["id", "receiver", "splat", "captures"].include(key))
+          .filter(key => !["id", "receiver", "splat", "captures"].includes(key))
           .reduce((obj, key) => {
             obj[key] = req.query[key];
           }, {});
