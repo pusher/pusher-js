@@ -22,6 +22,12 @@ jobs:
       - run: make web_unit
       - run: make web_integration
         env:
+          INTEGRATION_TESTS_APP_MT1_APP_ID: ${{ secrets.INTEGRATION_TESTS_APP_MT1_APP_ID }}
+          INTEGRATION_TESTS_APP_MT1_KEY: ${{ secrets.INTEGRATION_TESTS_APP_MT1_KEY }}
+          INTEGRATION_TESTS_APP_MT1_SECRET: ${{ secrets.INTEGRATION_TESTS_APP_MT1_SECRET }}
+          INTEGRATION_TESTS_APP_EU_APP_ID: ${{ secrets.INTEGRATION_TESTS_APP_EU_APP_ID }}
+          INTEGRATION_TESTS_APP_EU_KEY: ${{ secrets.INTEGRATION_TESTS_APP_EU_KEY }}
+          INTEGRATION_TESTS_APP_EU_SECRET: ${{ secrets.INTEGRATION_TESTS_APP_EU_SECRET }}
           BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
           BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
   run-node-tests:
@@ -35,4 +41,10 @@ jobs:
       - run: npm run check-format
       - run: make node_unit
       - run: make node_integration
-
+        env:
+          INTEGRATION_TESTS_APP_MT1_APP_ID: ${{ secrets.INTEGRATION_TESTS_APP_MT1_APP_ID }}
+          INTEGRATION_TESTS_APP_MT1_KEY: ${{ secrets.INTEGRATION_TESTS_APP_MT1_KEY }}
+          INTEGRATION_TESTS_APP_MT1_SECRET: ${{ secrets.INTEGRATION_TESTS_APP_MT1_SECRET }}
+          INTEGRATION_TESTS_APP_EU_APP_ID: ${{ secrets.INTEGRATION_TESTS_APP_EU_APP_ID }}
+          INTEGRATION_TESTS_APP_EU_KEY: ${{ secrets.INTEGRATION_TESTS_APP_EU_KEY }}
+          INTEGRATION_TESTS_APP_EU_SECRET: ${{ secrets.INTEGRATION_TESTS_APP_EU_SECRET }}

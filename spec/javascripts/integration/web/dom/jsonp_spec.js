@@ -37,10 +37,10 @@ Integration.describe("JSONP", function() {
 
     expect(callback.calls.count()).toEqual(1);
     expect(callback).toHaveBeenCalledWith(null, {
-      "session": "2289545",
+      "session": 2289545,
       "features": ["ws", "sockjs"],
       "version": "1.13.0",
-      "t0": "1355850357911",
+      "t0": 1355850357911,
       "timeline": [
         { t:    0, e: 2 },
         { t:    2, e: 2, type: "ws" },

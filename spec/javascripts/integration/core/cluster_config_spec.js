@@ -59,7 +59,7 @@ module.exports = function(testConfigs) {
         it("should open a connection to the 'eu' cluster", async function() {
           var authTransport = (TestEnv === "web") ? 'jsonp' : 'ajax';
 
-          pusher = new Pusher("4d31fbea7080e3b4bf6d", {
+          pusher = new Pusher("cb7d5e50f5669e5c9ae6", {
             authTransport: authTransport,
             authEndpoint: Integration.API_EU_URL + "/auth",
             cluster: "eu",

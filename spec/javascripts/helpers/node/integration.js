@@ -3,8 +3,8 @@ var Runtime = require('runtime').default
 var Collections = require('core/utils/collections');
 var util = require('core/util').default;
 
-exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";
-exports.API_EU_URL = "http://pusher-js-integration-api-eu.herokuapp.com";
+exports.API_URL = "http://localhost:3000";
+exports.API_EU_URL = "http://localhost:3001";
 
 exports.describe = function(name, body) {
   describe(name + " (integration)", body);
