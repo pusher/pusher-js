@@ -163,14 +163,14 @@ function start_app(port, pusher_config) {
 
 start_app(3000, {
   appId: process.env.INTEGRATION_TESTS_APP_MT1_APP_ID,
-  key: "c49a449b916bb4246729",
+  key: process.env.INTEGRATION_TESTS_APP_MT1_KEY,
   secret: process.env.INTEGRATION_TESTS_APP_MT1_SECRET,
   cluster: "mt1",
 });
 
 start_app(3001, {
   appId: process.env.INTEGRATION_TESTS_APP_EU_APP_ID,
-  key: "cb7d5e50f5669e5c9ae6",
+  key: process.env.INTEGRATION_TESTS_APP_EU_KEY,
   secret: process.env.INTEGRATION_TESTS_APP_EU_SECRET,
   cluster: "eu"
 });
