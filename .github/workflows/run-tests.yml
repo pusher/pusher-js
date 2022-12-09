@@ -20,7 +20,12 @@ jobs:
       - run: npm install
       - run: npm run check-format
       - run: make web_unit
-      - run: make web_integration
+      - run: |
+          cd integration_tests_server
+          npm install
+          node index.js &
+          cd ..
+          make web_integration
         env:
           BROWSER_STACK_ACCESS_KEY: ${{ secrets.BROWSER_STACK_ACCESS_KEY }}
           BROWSER_STACK_USERNAME: ${{ secrets.BROWSER_STACK_USERNAME }}
@@ -34,5 +39,9 @@ jobs:
       - run: npm install
       - run: npm run check-format
       - run: make node_unit
-      - run: make node_integration
-
+      - run: |
+          cd integration_tests_server
+          npm install
+          node index.js &
+          cd ..
+          make node_integration

@@ -67,11 +67,11 @@ function build(testConfig) {
 
     describe("setup", function() {
       it("should open connections", async function() {
-        pusher1 = new Pusher("7324d55a5eeb8f554761", {
+        pusher1 = new Pusher("c49a449b916bb4246729", {
           forceTLS: forceTLS,
         });
         if (canRunTwoConnections(transport)) {
-          pusher2 = new Pusher("7324d55a5eeb8f554761", {
+          pusher2 = new Pusher("c49a449b916bb4246729", {
             forceTLS: forceTLS,
           });
           await waitsFor(function() {

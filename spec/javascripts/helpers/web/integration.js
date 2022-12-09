@@ -5,8 +5,8 @@ var Collections = require('core/utils/collections');
 var JSONPRequest = require('dom/jsonp_request').default;
 var ScriptReceivers = require('dom/script_receiver_factory').ScriptReceivers;
 
-exports.API_URL = "http://pusher-js-integration-api.herokuapp.com";
-exports.API_EU_URL = "http://pusher-js-integration-api-eu.herokuapp.com";
+exports.API_URL = "http://localhost:3000";
+exports.API_EU_URL = "http://localhost:3001";
 
 exports.describe = function(name, body) {
   if (navigator.userAgent.match(/phantomjs/i)) {
