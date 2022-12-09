@@ -5,6 +5,15 @@ function decode_base64(data) {
   return Buffer.from(data, 'base64').toString('ascii');
 }
 
+function decode(data) {
+  const str = decode_base64(data);
+  try {
+    return JSON.parse(str);
+  } catch(e) {
+    return str;
+  };
+}
+
 function auth(pusher, channel_name, socket_id) {
   const channel_data = {
     user_id: socket_id,
@@ -51,7 +60,7 @@ function start_app(port, pusher_config) {
     const socket_id = req.query.socket_id;
     const callback = req.query.callback;
     const auth_response = auth(pusher, channel_name, socket_id);
-    res.set('Content-Type','application/json');
+    res.set('Content-Type','text/javascript');
     res.send(callback + "(" + JSON.stringify(auth_response) + ")");
   });
 
@@ -59,7 +68,7 @@ function start_app(port, pusher_config) {
   app.get('/send/:jsonp_id', (req, res) => {
     const channel = decode_base64(req.query.channel);
     const event = decode_base64(req.query.event);
-    const data = JSON.parse(req.query.data);
+    const data = JSON.parse(base_decode64(req.query.data));
     const socket_id = decode_base64(req.query.socket_id || "");
 
     pusher.trigger(channel, event, data);
@@ -91,13 +100,14 @@ function start_app(port, pusher_config) {
           Object.keys(req.query)
           .filter(key => !["id", "receiver", "splat", "captures"].includes(key))
           .reduce((obj, key) => {
-            obj[key] = decode_base64(req.query[key]);
+            obj[key] = decode(req.query[key]);
+            return obj;
           }, {});
 
-    const receiver = params.hasOwnProperty("receiver") ? decode_base64(params["receiver"]) : "Pusher.JSONP.receive";
+    const receiver = params.hasOwnProperty("receiver") ? decode(params["receiver"]) : "Pusher.JSONP.receive";
 
     res.set({
-      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Type': 'text/javascript; charset=utf-8',
       'Cache-Control': 'private, max-age=0, must-revalidate'
     });
     res.send(`${receiver}(${req.params.id}, null, ${JSON.stringify(decoded_params)});`)
@@ -110,14 +120,15 @@ function start_app(port, pusher_config) {
           Object.keys(req.query)
           .filter(key => !["id", "splat", "captures"].includes(key))
           .reduce((obj, key) => {
-            obj[key] = decode_base64(req.query[key]);
+            obj[key] = decode(req.query[key]);
+            return obj;
           }, {});
 
     res.set({
-      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Type': 'text/javascript; charset=utf-8',
       'Cache-Control': 'private, max-age=0, must-revalidate'
     });
-    res.send(`Pusher.ScriptReceivers[${req.params.id}](null, #{JSON.stringify(decoded_params)});`)
+    res.send(`Pusher.ScriptReceivers[${req.params.id}](null, ${JSON.stringify(decoded_params)});`)
   });
 
   // ScriptRequest echo
@@ -127,13 +138,14 @@ function start_app(port, pusher_config) {
           .filter(key => !["id", "receiver", "splat", "captures"].includes(key))
           .reduce((obj, key) => {
             obj[key] = req.query[key];
+            return obj;
           }, {});
 
     res.set({
-      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Type': 'text/javascript; charset=utf-8',
       'Cache-Control': 'private, max-age=0, must-revalidate'
     });
-    res.send(`${req.params.receiver}(null, ${JSON.stringify(decoded_params)});`);
+    res.send(`${req.query.receiver}(null, ${JSON.stringify(decoded_params)});`);
   });
 
   app.get( '/jsonp/500/:id', (req, res) => {
