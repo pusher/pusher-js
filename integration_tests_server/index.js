@@ -52,7 +52,7 @@ function start_app(port, pusher_config) {
     const callback = req.query.callback;
     const auth_response = auth(pusher, channel_name, socket_id);
     res.set('Content-Type','application/json');
-    res.send(callback + "(" + auth_response + ")");
+    res.send(callback + "(" + JSON.stringify(auth_response) + ")");
   });
 
   // triggering messages
@@ -133,7 +133,7 @@ function start_app(port, pusher_config) {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'private, max-age=0, must-revalidate'
     });
-    res.send(`${params["receiver"]}(null, ${JSON.stringify(decoded_params)});`);
+    res.send(`${req.params.receiver}(null, ${JSON.stringify(decoded_params)});`);
   });
 
   app.get( '/jsonp/500/:id', (req, res) => {
