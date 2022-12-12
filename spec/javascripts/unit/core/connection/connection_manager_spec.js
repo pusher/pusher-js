@@ -13,7 +13,17 @@ describe("ConnectionManager", function() {
   });
 
   afterAll(() => {
-    jasmine.clock().uninstall();
+    try {
+      jasmine.clock().uninstall();
+    } catch (e) {
+      if (e instanceof TypeError) {
+        // Ignore
+        // It's a bug in jasmine AFAIK and all other attempts of working
+        // around it led to other issues
+      } else {
+        throw e;
+      }
+    }
   });
 
   beforeEach(function() {
