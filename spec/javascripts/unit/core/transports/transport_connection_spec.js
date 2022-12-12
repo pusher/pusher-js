@@ -226,6 +226,7 @@ describe("TransportConnection", function() {
           });
         });
       } else {
+        // Needed so that the describe block isn't empty
         it("dummy test", function() {
           expect(true).toBe(true);
         })
