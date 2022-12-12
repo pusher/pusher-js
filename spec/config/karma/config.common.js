@@ -32,7 +32,7 @@ module.exports = {
   autoWatch: true,
 
   browsers: browserList,
-  captureTimeout: 5e3,
+  captureTimeout: 10e3,
   browserNoActivityTimeout: 3e4,
   browserDisconnectTimeout: 3e4,
   browserDisconnectTolerance: 3,
@@ -48,4 +48,3 @@ module.exports = {
     }
   }
 };
-
