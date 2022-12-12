@@ -163,12 +163,6 @@ describe("HTTPRequest", function() {
     });
   });
 
-  describe("on request end", function() {
-    beforeEach(function() {
-      request.start();
-    });
-  });
-
   describe("on page unload", function() {
     var unloader;
 

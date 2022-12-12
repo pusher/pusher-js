@@ -225,6 +225,10 @@ describe("TransportConnection", function() {
             expect(loadCallback).toHaveBeenCalledWith(false);
           });
         });
+      } else {
+        it("dummy test", function() {
+          expect(true).toBe(true);
+        })
       }
     });
   });
