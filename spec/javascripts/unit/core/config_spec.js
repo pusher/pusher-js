@@ -198,6 +198,54 @@ describe('Config', function() {
       );
     });
 
+    it('should use channelAuthorization with providers and override deprecated auth options', function() {
+      let headersProvider = () => { return { abc: '123'} };
+      let paramsProvider = () => { return { def: '456'} };
+      let opts = {
+        authTransport: 'some-auth-transport',
+        authEndpoint: '/pusher/spec/auth',
+        auth: {
+          params: { foo: 'bar' },
+          headers: { spec: 'header' }
+        },
+        channelAuthorization: {
+          transport: 'some-auth-transport2',
+          endpoint: '/pusher/spec/auth2',
+          params: { spec2: 'param2' },
+          headers: { spec2: 'header2' },
+          headersProvider,
+          paramsProvider
+        }
+      };
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.channelAuthorizer({
+        socketId: '1.23',
+        channelName: 'private-test',
+      }, callback);
+
+      console.log(config);
+      authOptions = {
+        transport: 'some-auth-transport2',
+        endpoint: '/pusher/spec/auth2',
+        params: { spec2: 'param2' },
+        headers: { spec2: 'header2' },
+        headersProvider,
+        paramsProvider
+      }
+      const query = 'socket_id=1.23&channel_name=private-test&spec2=param2&def=456';
+      expect(transportAuthorizer.calls.count()).toEqual(0);
+      expect(transportAuthorizer2.calls.count()).toEqual(1);
+      expect(transportAuthorizer2).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        "channel-authorization",
+        callback
+      );
+    });
+
     it('should use default transport when not provided in channelAuthorization', function() {
       let opts = {
         authEndpoint: '/pusher/spec/auth',
@@ -239,7 +287,7 @@ describe('Config', function() {
     });
 
 
-    it('should use customerHandler inside channelAuthorization', function() {
+    it('should use customHandler inside channelAuthorization', function() {
       const customHandler = jasmine.createSpy('customHandler');
       let opts = {
         channelAuthorization: {
@@ -287,7 +335,7 @@ describe('Config', function() {
           transport: 'some-auth-transport',
           endpoint: '/pusher/spec/auth',
           params: { foo: 'bar' },
-          headers: { spec: 'header' }
+          headers: { spec: 'header' },
         }
       };
 
@@ -302,9 +350,49 @@ describe('Config', function() {
         transport: 'some-auth-transport',
         endpoint: '/pusher/spec/auth',
         params: { foo: 'bar' },
-        headers: { spec: 'header' }
+        headers: { spec: 'header' },
       }
       const query = 'socket_id=1.23&foo=bar';
+      expect(transportAuthorizer.calls.count()).toEqual(1);
+      expect(transportAuthorizer).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        "user-authentication",
+        callback
+      );
+    });
+
+    it('should use userAuthentication options with providers for user authentication', function() {
+      let headersProvider = () => { return { abc: '123'} };
+      let paramsProvider = () => { return { def: '456'} };
+      let opts = {
+        userAuthentication: {
+          transport: 'some-auth-transport',
+          endpoint: '/pusher/spec/auth',
+          params: { foo: 'bar' },
+          headers: { spec: 'header' },
+          headersProvider,
+          paramsProvider
+        }
+      };
+
+      const pusher = {};
+      let config = Config.getConfig(opts, pusher);
+      let callback = function(){};
+      config.userAuthenticator({
+        socketId: '1.23',
+      }, callback);
+
+      authOptions = {
+        transport: 'some-auth-transport',
+        endpoint: '/pusher/spec/auth',
+        params: { foo: 'bar' },
+        headers: { spec: 'header' },
+        headersProvider,
+        paramsProvider
+      }
+      const query = 'socket_id=1.23&foo=bar&def=456';
       expect(transportAuthorizer.calls.count()).toEqual(1);
       expect(transportAuthorizer).toHaveBeenCalledWith(
         Runtime,

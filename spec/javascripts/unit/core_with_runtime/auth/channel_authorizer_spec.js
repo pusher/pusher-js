@@ -29,6 +29,32 @@ describe("ChannelAuthorizer", function() {
       const authOptions = {
         transport: "ajax",
         endpoint: "http://example.com/auth",
+        headers: { "X-Foo": "my-bar" }
+      };
+      channelAuthorizer = ChannelAuthorizer(authOptions);
+
+      transportAuthorizer = jasmine.createSpy("ajax")
+      Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
+        ajax: transportAuthorizer
+      });
+
+      const params = { socketId: '1.23', channelName: 'private-test' };
+      const callback = function(){};
+      const query = 'socket_id=1.23&channel_name=private-test';
+      channelAuthorizer(params, callback);
+      expect(Runtime.getAuthorizers.calls.count()).toEqual(1);
+      expect(transportAuthorizer).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        'channel-authorization',
+        callback);
+    });
+
+    it("should call the specified transport authorizer with params", function(){
+      const authOptions = {
+        transport: "ajax",
+        endpoint: "http://example.com/auth",
         params: { foo: "bar" },
         headers: { "X-Foo": "my-bar" }
       };
@@ -42,6 +68,62 @@ describe("ChannelAuthorizer", function() {
       const params = { socketId: '1.23', channelName: 'private-test' };
       const callback = function(){};
       const query = 'socket_id=1.23&channel_name=private-test&foo=bar';
+      channelAuthorizer(params, callback);
+      expect(Runtime.getAuthorizers.calls.count()).toEqual(1);
+      expect(transportAuthorizer).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        'channel-authorization',
+        callback);
+    });
+
+    it("should call the specified transport authorizer with paramsProvider", function(){
+      const authOptions = {
+        transport: "ajax",
+        endpoint: "http://example.com/auth",
+        paramsProvider: () => { return { abc: '123' }; },
+        headers: { "X-Foo": "my-bar" }
+      };
+      channelAuthorizer = ChannelAuthorizer(authOptions);
+
+      transportAuthorizer = jasmine.createSpy("ajax")
+      Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
+        ajax: transportAuthorizer
+      });
+
+      const params = { socketId: '1.23', channelName: 'private-test' };
+      const callback = function(){};
+      const query = 'socket_id=1.23&channel_name=private-test&abc=123';
+      channelAuthorizer(params, callback);
+      expect(Runtime.getAuthorizers.calls.count()).toEqual(1);
+      expect(transportAuthorizer).toHaveBeenCalledWith(
+        Runtime,
+        query,
+        authOptions,
+        'channel-authorization',
+        callback);
+    });
+
+
+    it("should call the specified transport authorizer with params and paramsProvider", function(){
+      const authOptions = {
+        transport: "ajax",
+        endpoint: "http://example.com/auth",
+        params: { foo: "bar" },
+        paramsProvider: () => { return { abc: '123' }; },
+        headers: { "X-Foo": "my-bar" }
+      };
+      channelAuthorizer = ChannelAuthorizer(authOptions);
+
+      transportAuthorizer = jasmine.createSpy("ajax")
+      Runtime.getAuthorizers = jasmine.createSpy("getAuthorizers").and.returnValue({
+        ajax: transportAuthorizer
+      });
+
+      const params = { socketId: '1.23', channelName: 'private-test' };
+      const callback = function(){};
+      const query = 'socket_id=1.23&channel_name=private-test&foo=bar&abc=123';
       channelAuthorizer(params, callback);
       expect(Runtime.getAuthorizers.calls.count()).toEqual(1);
       expect(transportAuthorizer).toHaveBeenCalledWith(
