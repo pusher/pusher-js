@@ -20,7 +20,13 @@ jobs:
       - run: npm install
       - run: npm run check-format
       - run: make web_unit
-      - run: make web_integration
+      - name: make web_integration
+        run: |
+          cd integration_tests_server
+          npm install
+          node index.js&
+          cd ..
+          make web_integration
         env:
           INTEGRATION_TESTS_APP_MT1_APP_ID: ${{ secrets.INTEGRATION_TESTS_APP_MT1_APP_ID }}
           INTEGRATION_TESTS_APP_MT1_KEY: ${{ secrets.INTEGRATION_TESTS_APP_MT1_KEY }}
@@ -40,7 +46,13 @@ jobs:
       - run: npm install
       - run: npm run check-format
       - run: make node_unit
-      - run: make node_integration
+      - name: make node_integration
+        run: |
+          cd integration_tests_server
+          npm install
+          node index.js&
+          cd ..
+          make node_integration
         env:
           INTEGRATION_TESTS_APP_MT1_APP_ID: ${{ secrets.INTEGRATION_TESTS_APP_MT1_APP_ID }}
           INTEGRATION_TESTS_APP_MT1_KEY: ${{ secrets.INTEGRATION_TESTS_APP_MT1_KEY }}

@@ -51,7 +51,7 @@ web_unit:
 	node_modules/karma/bin/karma start spec/config/karma/unit.js
 
 .PHONY: web_integration
-web_integration: start_integration_test_server
+web_integration:
 	node_modules/karma/bin/karma start spec/config/karma/integration.js
 
 .PHONY: worker_unit
@@ -68,13 +68,10 @@ node_unit:
 	node_modules/.bin/jasmine --config=spec/config/jasmine/unit.json
 
 .PHONY: node_integration
-node_integration: start_integration_test_server
+node_integration:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine/webpack.integration.js && \
 	node_modules/.bin/jasmine --config=spec/config/jasmine/integration.json
 
-.PHONY: start_integration_test_server
-start_integration_test_server:
-	cd integration_tests_server; npm install; node index.js&
 
 .PHONY: serve
 serve:

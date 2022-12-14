@@ -1,27 +1,10 @@
 const Pusher = require('pusher_integration');
 
 const Integration = require('integration');
-const OneOffTimer = require('core/utils/timers').OneOffTimer;
 const Collections = require('core/utils/collections');
 const Runtime = require('runtime').default;
 const TRANSPORTS = Runtime.Transports;
 const waitsFor = require('../../../helpers/waitsFor');
-
-// this is a slightly horrible function that allows easy placement of arbitrary
-// delays in jasmine async tests. e.g:
-// waitsFor(sleep(3000), "thing to happen", 3500)
-function sleep(time) {
-  var fn = function() {
-    var val = false;
-    setTimeout(function(){
-      val = true;
-    }, time)
-    return function() {
-      return val;
-    }
-  }
-  return fn();
-}
 
 function canRunTwoConnections(transport) {
   if (transport !== "sockjs") {
@@ -36,6 +19,10 @@ function subscribe(pusher, channelName, callback) {
     callback(channel, param);
   });
   return channel;
+}
+
+function delay(timeMs) {
+  return new Promise(resolve => setTimeout(resolve, timeMs));
 }
 
 function build(testConfig) {
@@ -401,11 +388,7 @@ function buildClientEventsTests(getPusher1, getPusher2, prefix) {
 
     channel.bind(eventName, onEvent);
     pusher.send_event(eventName, {}, channelName);
-    timer = new OneOffTimer(3000, function() {});
-
-    await waitsFor(function() {
-      return !timer.isRunning();
-    }, "timer to finish", 3210);
+    await delay(5000);
 
     expect(onEvent).not.toHaveBeenCalled();
     pusher.unsubscribe(channelName);
@@ -470,12 +453,7 @@ function buildPublicChannelTests(getPusher, prefix) {
       event: eventName,
       data: {}
     });
-    timer = new OneOffTimer(3000, function() {});
-
-    await waitsFor(function() {
-      return !timer.isRunning();
-    }, "timer to finish", 3210);
-
+    await delay(5000);
     expect(received).toBe(null);
   });
 
@@ -519,11 +497,7 @@ function buildPublicChannelTests(getPusher, prefix) {
       event: eventName,
       data: {}
     });
-    timer = new OneOffTimer(3000, function() {});
-
-    await waitsFor(function() {
-      return !timer.isRunning();
-    }, "timer to finish", 10000);
+    await delay(5000);
 
     expect(channel.subscribed).toEqual(false);
     expect(received).toBe(null);
@@ -554,11 +528,7 @@ function buildPublicChannelTests(getPusher, prefix) {
       event: eventName,
       data: {}
     });
-    timer = new OneOffTimer(3000, function() {});
-
-    await waitsFor(function() {
-      return !timer.isRunning();
-    }, "timer to finish", 10000);
+    await delay(10000);
 
     expect(channel.subscribed).toEqual(true);
     expect(received).not.toBe(null);
@@ -627,7 +597,7 @@ function buildSubscriptionStateTests(getPusher, prefix) {
 
     // there is no easy way to know when an unsubscribe request has been
     // actioned by the server, so we just wait a while
-    await waitsFor(sleep(3000), "unsubscription to finish", 3500)
+    await delay(5000);
 
     expect(pusher.channel(channelName)).toBe(undefined);
   });
@@ -697,7 +667,7 @@ function buildSubscriptionStateTests(getPusher, prefix) {
 
     // there is no easy way to know when an unsubscribe request has been
     // actioned by the server, so we just wait a while
-    await waitsFor(sleep(3000), "unsubscription to finish", 3500)
+    await delay(5000);
     expect(pusher.channel(channelName)).toBe(undefined);
 
     pusher.subscribe(channelName)
@@ -735,7 +705,7 @@ function buildSubscriptionStateTests(getPusher, prefix) {
 
     // there is no easy way to know when an unsubscribe request has been
     // actioned by the server, so we just wait a while
-    await waitsFor(sleep(3000), "unsubscription to finish", 3500)
+    await delay(5000);
 
     expect(pusher.channel(channelName)).toBe(undefined);
   });
