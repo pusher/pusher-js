@@ -1,10 +1,6 @@
 var timers = require('core/utils/timers');
 
 describe("timers", function() {
-  afterEach(() => {
-    jasmine.clock().uninstall();
-  });
-
   describe("Timer", function() {
     var callback;
     var timer;
