@@ -1,5 +1,9 @@
 # Changelog
 
+## 7.6.0
+
+- [ADDED] Introduce  and  to channel authorization and user authentication in order to allow for changing header and param values after the Pusher object is initialized.
+
 ## 7.5.0
 
 - [ADDED] Watchlist Online Status
