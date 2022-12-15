@@ -21,6 +21,13 @@ var fetchAuth: AuthTransport = function(
     headers.set(headerName, authOptions.headers[headerName]);
   }
 
+  if (authOptions.headersProvider != null) {
+    const dynamicHeaders = authOptions.headersProvider();
+    for (var headerName in dynamicHeaders) {
+      headers.set(headerName, dynamicHeaders[headerName]);
+    }
+  }
+
   var body = query;
   var request = new Request(authOptions.endpoint, {
     headers,

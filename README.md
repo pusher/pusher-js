@@ -144,10 +144,10 @@ var presenceChannel: PusherTypes.PresenceChannel;
 
 ### React Native
 
-> **⚠️ Important notice** 
+> **⚠️ Important notice**
 >
-> React Native support has been **deprecated** and soon will be removed from this repository. 
-> 
+> React Native support has been **deprecated** and soon will be removed from this repository.
+>
 > Please, use our official [React Native SDK](https://github.com/pusher/pusher-websocket-react-native) instead.
 
 ### Web Workers
@@ -232,6 +232,10 @@ Object containing the configuration for user authentication. Valid keys are:
 
 * `headers` (Object) - Only applied when using `ajax` as authentication transport. Provides the ability to pass additional HTTP Headers to the user authentication endpoint. This can be useful with some web application frameworks that guard against CSRF CSRF (Cross-site request forgery).
 
+* `paramsProvider` (Function) - When present, this function is called to get additional parameters to be sent when the user authentication endpoint is called. This is equivalent to passing them on the params key, but allows for the parameters to be retrieved dynamically at the time of the request.
+
+* `headersProvider` (Function) - When present, this function is called to get additional headers to be sent when the user authentication endpoint is called. This is equivalent to passing them on the headers key, but allows for the headers to be retrieved dynamically at the time of the request.
+
 * `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `userAuthentication.endpoint`.
 
 
@@ -251,6 +255,10 @@ Object containing the configuration for user authorization. Valid keys are:
 * `params` (Object) - Additional parameters to be sent when the channel authorization endpoint is called. When using ajax authorization the parameters are passed as additional POST parameters. When using jsonp authorization the parameters are passed as GET parameters. This can be useful with web application frameworks that guard against CSRF (Cross-site request forgery).
 
 * `headers` (Object) - Only applied when using `ajax` as authorizing transport. Provides the ability to pass additional HTTP Headers to the user authorization endpoint. This can be useful with some web application frameworks that guard against CSRF CSRF (Cross-site request forgery).
+
+* `paramsProvider` (Function) - When present, this function is called to get additional parameters to be sent when the user authentication endpoint is called. This is equivalent to passing them on the params key, but allows for the parameters to be retrieved dynamically at the time of the request.
+
+* `headersProvider` (Function) - When present, this function is called to get additional headers to be sent when the user authentication endpoint is called. This is equivalent to passing them on the headers key, but allows for the headers to be retrieved dynamically at the time of the request.
 
 * `customHandler` (Function) - When present, this function is called instead of a request being made to the endpoint specified by `channelAuthorization.endpoint`.
 

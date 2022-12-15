@@ -27,6 +27,12 @@ const ajax: AuthTransport = function(
   for (var headerName in authOptions.headers) {
     xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
   }
+  if (authOptions.headersProvider != null) {
+    let dynamicHeaders = authOptions.headersProvider();
+    for (var headerName in dynamicHeaders) {
+      xhr.setRequestHeader(headerName, dynamicHeaders[headerName]);
+    }
+  }
 
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {

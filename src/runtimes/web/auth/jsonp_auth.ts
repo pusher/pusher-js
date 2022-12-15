@@ -16,7 +16,10 @@ var jsonp: AuthTransport = function(
   authRequestType: AuthRequestType,
   callback: AuthTransportCallback
 ) {
-  if (authOptions.headers !== undefined) {
+  if (
+    authOptions.headers !== undefined ||
+    authOptions.headersProvider != null
+  ) {
     Logger.warn(
       `To send headers with the ${authRequestType.toString()} request, you must use AJAX, rather than JSONP.`
     );

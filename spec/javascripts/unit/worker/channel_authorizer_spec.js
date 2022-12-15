@@ -35,6 +35,30 @@ describe('Fetch Authorizer', function() {
     expect(sentHeaders.get('n')).toEqual('42');
   });
 
+  it('should pass headers from headersProvider in the request', function() {
+    fetchMock.mock(endpoint, { body: { hello: 'world' } });
+
+    var headers = { foo: 'bar', n: 42 };
+    var channelAuthorizer = ChannelAuthorizer({
+      transport: 'ajax',
+      endpoint: endpoint,
+      headersProvider: () => headers
+    });
+
+    channelAuthorizer({
+      socketId: '1.23',
+      channelName: 'chan'
+    }, function() {});
+
+    var lastCall = fetchMock.lastCall(endpoint)[0];
+    var sentHeaders = lastCall.headers;
+    expect(sentHeaders.get('Content-Type')).toEqual(
+      'application/x-www-form-urlencoded'
+    );
+    expect(sentHeaders.get('foo')).toEqual('bar');
+    expect(sentHeaders.get('n')).toEqual('42');
+  });
+
   it('should pass params in the query string', async function() {
     fetchMock.mock(endpoint, { body: { hello: 'world' } });
 
@@ -55,6 +79,28 @@ describe('Fetch Authorizer', function() {
     const body = await lastRequest.text()
     expect(body).toEqual("socket_id=1.23&channel_name=chan&a=1&b=2");
   });
+
+  it('should pass params from paramsProvider in the query string', async function() {
+    fetchMock.mock(endpoint, { body: { hello: 'world' } });
+
+    var params = { a: 1, b: 2 };
+    var channelAuthorizer = ChannelAuthorizer({
+      transport: 'ajax',
+      endpoint: endpoint,
+      paramsProvider: () => params
+    });
+
+    channelAuthorizer({
+      socketId: '1.23',
+      channelName: 'chan'
+    }, function() {});
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+    var lastRequest = fetchMock.lastCall(endpoint)[0];
+    const body = await lastRequest.text()
+    expect(body).toEqual("socket_id=1.23&channel_name=chan&a=1&b=2");
+  });
+
 
   it('should call back with the auth result on success', async function() {
     var data = { foo: 'bar', number: 1 };

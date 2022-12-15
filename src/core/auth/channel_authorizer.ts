@@ -16,12 +16,23 @@ const composeChannelQuery = (
 
   query += '&channel_name=' + encodeURIComponent(params.channelName);
 
-  for (var i in authOptions.params) {
+  for (var key in authOptions.params) {
     query +=
       '&' +
-      encodeURIComponent(i) +
+      encodeURIComponent(key) +
       '=' +
-      encodeURIComponent(authOptions.params[i]);
+      encodeURIComponent(authOptions.params[key]);
+  }
+
+  if (authOptions.paramsProvider != null) {
+    let dynamicParams = authOptions.paramsProvider();
+    for (var key in dynamicParams) {
+      query +=
+        '&' +
+        encodeURIComponent(key) +
+        '=' +
+        encodeURIComponent(dynamicParams[key]);
+    }
   }
 
   return query;
