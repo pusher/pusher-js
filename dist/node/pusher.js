@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v7.6.0
+ * Pusher JavaScript Library v8.0.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -7525,7 +7525,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "7.6.0",
+    VERSION: "8.0.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -7540,7 +7540,6 @@ var Defaults = {
     activityTimeout: 120000,
     pongTimeout: 30000,
     unavailableTimeout: 10000,
-    cluster: 'mt1',
     userAuthentication: {
         endpoint: '/pusher/user-auth',
         transport: 'ajax'
@@ -10614,6 +10613,20 @@ var strategy_builder_UnsupportedStrategy = {
     }
 };
 
+// CONCATENATED MODULE: ./src/core/options.ts
+
+function validateOptions(options) {
+    if (options == null) {
+        throw 'You must pass an options object';
+    }
+    if (options.cluster == null) {
+        throw 'Options object must provide a cluster';
+    }
+    if ('disableStats' in options) {
+        logger.warn('The disableStats option is deprecated in favor of enableStats');
+    }
+}
+
 // CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
 
 
@@ -10722,7 +10735,7 @@ var __assign = (undefined && undefined.__assign) || function () {
 function getConfig(opts, pusher) {
     var config = {
         activityTimeout: opts.activityTimeout || defaults.activityTimeout,
-        cluster: opts.cluster || defaults.cluster,
+        cluster: opts.cluster,
         httpPath: opts.httpPath || defaults.httpPath,
         httpPort: opts.httpPort || defaults.httpPort,
         httpsPort: opts.httpsPort || defaults.httpsPort,
@@ -10765,10 +10778,7 @@ function getWebsocketHost(opts) {
     if (opts.wsHost) {
         return opts.wsHost;
     }
-    if (opts.cluster) {
-        return getWebsocketHostFromCluster(opts.cluster);
-    }
-    return getWebsocketHostFromCluster(defaults.cluster);
+    return getWebsocketHostFromCluster(opts.cluster);
 }
 function getWebsocketHostFromCluster(cluster) {
     return "ws-" + cluster + ".pusher.com";
@@ -11056,14 +11066,7 @@ var pusher_Pusher = (function () {
     function Pusher(app_key, options) {
         var _this = this;
         checkAppKey(app_key);
-        options = options || {};
-        if (!options.cluster && !(options.wsHost || options.httpHost)) {
-            var suffix = url_store.buildLogSuffix('javascriptQuickStart');
-            logger.warn("You should always specify a cluster when connecting. " + suffix);
-        }
-        if ('disableStats' in options) {
-            logger.warn('The disableStats option is deprecated in favor of enableStats');
-        }
+        validateOptions(options);
         this.key = app_key;
         this.config = getConfig(options, this);
         this.channels = factory.createChannels();
@@ -11261,13 +11264,14 @@ var pusher_with_encryption_extends = (undefined && undefined.__extends) || (func
 })();
 
 
+
 var pusher_with_encryption_PusherWithEncryption = (function (_super) {
     pusher_with_encryption_extends(PusherWithEncryption, _super);
     function PusherWithEncryption(app_key, options) {
         var _this = this;
         core_pusher.logToConsole = PusherWithEncryption.logToConsole;
         core_pusher.log = PusherWithEncryption.log;
-        options = options || {};
+        validateOptions(options);
         options.nacl = nacl_fast;
         _this = _super.call(this, app_key, options) || this;
         return _this;

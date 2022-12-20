@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.0.0
+
+- [CHANGED] Specifying a cluster when instantiating the Pusher object is now mandatory. An exception is thrown if the cluster setting is missing.
+
 ## 7.6.0
 
 - [ADDED] Introduce headersProvider and paramsProvider to channel authorization and user authentication in order to allow for changing header and param values after the Pusher object is initialized.
