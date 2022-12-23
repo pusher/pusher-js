@@ -40,7 +40,7 @@ class Logger {
     defaultLoggingFunction: (message: string) => void,
     ...args: any[]
   ) {
-    var message = stringify.apply(this, arguments);
+    var message = stringify.apply(this, args);
     if (Pusher.log) {
       Pusher.log(message);
     } else if (Pusher.logToConsole) {
