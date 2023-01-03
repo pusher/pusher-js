@@ -45,7 +45,7 @@ var fetchAuth: AuthTransport = function(
         return response.text();
       }
       throw new HTTPAuthError(
-        200,
+        status,
         `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`
       );
     })
