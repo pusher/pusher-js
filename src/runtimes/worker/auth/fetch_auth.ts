@@ -39,7 +39,7 @@ var fetchAuth: AuthTransport = function(
   return fetch(request)
     .then(response => {
       let { status } = response;
-      if (status === 200) {
+      if (status === 200 || status === 201) {
         // manually parse the json so we can provide a more helpful error in
         // failure case
         return response.text();
@@ -56,7 +56,7 @@ var fetchAuth: AuthTransport = function(
       } catch (e) {
         throw new HTTPAuthError(
           200,
-          `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${data}`
+          `JSON returned from ${authRequestType.toString()} endpoint was invalid. Data was: ${data}`
         );
       }
       callback(null, parsedData);
