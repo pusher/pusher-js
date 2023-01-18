@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.0.0
+ * Pusher JavaScript Library v8.0.1
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -3299,7 +3299,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.0.0",
+    VERSION: "8.0.1",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -6046,7 +6046,7 @@ var fetchAuth = function (context, query, authOptions, authRequestType, callback
         if (status === 200) {
             return response.text();
         }
-        throw new HTTPAuthError(200, "Could not get " + authRequestType.toString() + " info from your auth endpoint, status: " + status);
+        throw new HTTPAuthError(status, "Could not get " + authRequestType.toString() + " info from your auth endpoint, status: " + status);
     })
         .then(function (data) {
         var parsedData;
@@ -6130,7 +6130,7 @@ var Worker = {
     },
     randomInt: function (max) {
         var random = function () {
-            var crypto = window.crypto || window['msCrypto'];
+            var crypto = globalThis.crypto || globalThis['msCrypto'];
             var random = crypto.getRandomValues(new Uint32Array(1))[0];
             return random / Math.pow(2, 32);
         };

@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.0.1
+
+- [FIXED] Fix 'window is not defined' error in the worker context
+- [FIXED] Specify the right status when an error is thrown for the pusher worker instance
+
 ## 8.0.0
 
 - [CHANGED] Specifying a cluster when instantiating the Pusher object is now mandatory. An exception is thrown if the cluster setting is missing.
