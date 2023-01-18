@@ -43,7 +43,7 @@
     "karma": "^6.4.1",
     "karma-browserstack-launcher": "^1.6.0",
     "karma-chrome-launcher": "^3.1.0",
-    "karma-firefox-launcher": "^2.1.1",
+    "karma-firefox-launcher": "^2.1.2",
     "karma-jasmine": "^4.0.1",
     "karma-jasmine-web-worker": "git+https://git@github.com/pusher/karma-jasmine-web-worker.git#jasmine_3",
     "karma-opera-launcher": "^1.0.0",
