@@ -62,7 +62,7 @@ const Worker: Runtime = {
      * Return values in the range of [0, 1[
      */
     const random = function() {
-      const crypto = window.crypto || window['msCrypto'];
+      const crypto = globalThis.crypto || globalThis['msCrypto'];
       const random = crypto.getRandomValues(new Uint32Array(1))[0];
 
       return random / 2 ** 32;
