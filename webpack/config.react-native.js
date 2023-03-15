@@ -29,7 +29,7 @@ module.exports = merge({}, configShared, {
       RUNTIME: JSON.stringify('react-native')
     }),
     new webpack.ProvidePlugin({
-      buffer: 'buffer'
+      Buffer: ['buffer', 'Buffer']
     })
   ]
 });
