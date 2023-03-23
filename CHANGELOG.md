@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.0.2
+
+- [CHANGED] Fix React Native support.
+
 ## 8.0.1
 
 - [FIXED] Fix 'window is not defined' error in the worker context
