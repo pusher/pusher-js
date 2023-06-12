@@ -1,6 +1,6 @@
 {
   "name": "pusher-js",
-  "version": "8.0.2",
+  "version": "8.1.0",
   "description": "Pusher Channels JavaScript library for browsers, React Native, NodeJS and web workers",
   "main": "dist/node/pusher.js",
   "browser": "dist/web/pusher.js",
@@ -54,17 +54,17 @@
     "prettier": "^1.19.1",
     "source-map-loader": "^1.1.3",
     "ts-loader": "^6.0.4",
-    "typescript": "^3.9.0",
+    "typescript": "^5.1.3",
     "uglify-js": "^2.6.2",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^4.11.1",
     "webpack-merge": "^5.8.0",
-    "xmlhttprequest": "^1.8.0"
+    "xmlhttprequest": "^1.8.0",
+    "@types/node": "^20.3.0",
+    "@types/express-serve-static-core": "4.17.28"
   },
   "dependencies": {
-    "tweetnacl": "^1.0.3",
-    "@types/node": "^14.14.31",
-    "@types/express-serve-static-core": "4.17.28"
+    "tweetnacl": "^1.0.3"
   }
 }

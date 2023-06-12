@@ -4,7 +4,7 @@
     "module": "es6",
     "declaration": true,
     "declarationDir": "types",
-    "target": "es3",
+    "target": "ES6",
     "removeComments": true,
     "moduleResolution": "node",
     "baseUrl": "src",

@@ -1,8 +1,8 @@
 import { Options } from './options';
 import { ChannelAuthorizationHandler, UserAuthenticationHandler } from './auth/options';
 import * as nacl from 'tweetnacl';
-export declare type AuthTransport = 'ajax' | 'jsonp';
-export declare type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockjs';
+export type AuthTransport = 'ajax' | 'jsonp';
+export type Transport = 'ws' | 'wss' | 'xhr_streaming' | 'xhr_polling' | 'sockjs';
 export interface Config {
     activityTimeout: number;
     enableStats: boolean;
