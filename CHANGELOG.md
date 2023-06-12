@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.1.0
+
+- [CHANGED] Move @types dependencies to devDependencies
+- [CHANGED] Upgrade typescript to 5.1.3
+
 ## 8.0.2
 
 - [CHANGED] Fix React Native support.

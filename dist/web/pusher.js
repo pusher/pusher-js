@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.0.2
+ * Pusher JavaScript Library v8.1.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -562,13 +562,13 @@ module.exports = __webpack_require__(3).default;
 __webpack_require__.r(__webpack_exports__);
 
 // CONCATENATED MODULE: ./src/runtimes/web/dom/script_receiver_factory.ts
-var ScriptReceiverFactory = (function () {
-    function ScriptReceiverFactory(prefix, name) {
+class ScriptReceiverFactory {
+    constructor(prefix, name) {
         this.lastId = 0;
         this.prefix = prefix;
         this.name = name;
     }
-    ScriptReceiverFactory.prototype.create = function (callback) {
+    create(callback) {
         this.lastId++;
         var number = this.lastId;
         var id = this.prefix + number;
@@ -582,18 +582,16 @@ var ScriptReceiverFactory = (function () {
         };
         this[number] = callbackWrapper;
         return { number: number, id: id, name: name, callback: callbackWrapper };
-    };
-    ScriptReceiverFactory.prototype.remove = function (receiver) {
+    }
+    remove(receiver) {
         delete this[receiver.number];
-    };
-    return ScriptReceiverFactory;
-}());
-
+    }
+}
 var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.ScriptReceivers');
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.0.2",
+    VERSION: "8.1.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -625,13 +623,13 @@ var Defaults = {
 // CONCATENATED MODULE: ./src/runtimes/web/dom/dependency_loader.ts
 
 
-var dependency_loader_DependencyLoader = (function () {
-    function DependencyLoader(options) {
+class dependency_loader_DependencyLoader {
+    constructor(options) {
         this.options = options;
         this.receivers = options.receivers || ScriptReceivers;
         this.loading = {};
     }
-    DependencyLoader.prototype.load = function (name, options, callback) {
+    load(name, options, callback) {
         var self = this;
         if (self.loading[name] && self.loading[name].length > 0) {
             self.loading[name].push(callback);
@@ -656,8 +654,8 @@ var dependency_loader_DependencyLoader = (function () {
             });
             request.send(receiver);
         }
-    };
-    DependencyLoader.prototype.getRoot = function (options) {
+    }
+    getRoot(options) {
         var cdn;
         var protocol = runtime.getDocument().location.protocol;
         if ((options && options.useTLS) || protocol === 'https:') {
@@ -667,20 +665,18 @@ var dependency_loader_DependencyLoader = (function () {
             cdn = this.options.cdn_http;
         }
         return cdn.replace(/\/*$/, '') + '/' + this.options.version;
-    };
-    DependencyLoader.prototype.getPath = function (name, options) {
+    }
+    getPath(name, options) {
         return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
-    };
-    return DependencyLoader;
-}());
-/* harmony default export */ var dependency_loader = (dependency_loader_DependencyLoader);
+    }
+}
 
 // CONCATENATED MODULE: ./src/runtimes/web/dom/dependencies.ts
 
 
 
 var DependenciesReceivers = new ScriptReceiverFactory('_pusher_dependencies', 'Pusher.DependenciesReceivers');
-var Dependencies = new dependency_loader({
+var Dependencies = new dependency_loader_DependencyLoader({
     cdn_http: defaults.cdn_http,
     cdn_https: defaults.cdn_https,
     version: defaults.VERSION,
@@ -689,7 +685,7 @@ var Dependencies = new dependency_loader({
 });
 
 // CONCATENATED MODULE: ./src/core/utils/url_store.ts
-var urlStore = {
+const urlStore = {
     baseUrl: 'https://pusher.com',
     urls: {
         authenticationEndpoint: {
@@ -709,12 +705,12 @@ var urlStore = {
         }
     }
 };
-var buildLogSuffix = function (key) {
-    var urlPrefix = 'See:';
-    var urlObj = urlStore.urls[key];
+const buildLogSuffix = function (key) {
+    const urlPrefix = 'See:';
+    const urlObj = urlStore.urls[key];
     if (!urlObj)
         return '';
-    var url;
+    let url;
     if (urlObj.fullUrl) {
         url = urlObj.fullUrl;
     }
@@ -723,9 +719,9 @@ var buildLogSuffix = function (key) {
     }
     if (!url)
         return '';
-    return urlPrefix + " " + url;
+    return `${urlPrefix} ${url}`;
 };
-/* harmony default export */ var url_store = ({ buildLogSuffix: buildLogSuffix });
+/* harmony default export */ var url_store = ({ buildLogSuffix });
 
 // CONCATENATED MODULE: ./src/core/auth/options.ts
 var AuthRequestType;
@@ -735,134 +731,76 @@ var AuthRequestType;
 })(AuthRequestType || (AuthRequestType = {}));
 
 // CONCATENATED MODULE: ./src/core/errors.ts
-var __extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var BadEventName = (function (_super) {
-    __extends(BadEventName, _super);
-    function BadEventName(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+class BadEventName extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return BadEventName;
-}(Error));
-
-var BadChannelName = (function (_super) {
-    __extends(BadChannelName, _super);
-    function BadChannelName(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class BadChannelName extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return BadChannelName;
-}(Error));
-
-var RequestTimedOut = (function (_super) {
-    __extends(RequestTimedOut, _super);
-    function RequestTimedOut(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class RequestTimedOut extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return RequestTimedOut;
-}(Error));
-
-var TransportPriorityTooLow = (function (_super) {
-    __extends(TransportPriorityTooLow, _super);
-    function TransportPriorityTooLow(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class TransportPriorityTooLow extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return TransportPriorityTooLow;
-}(Error));
-
-var TransportClosed = (function (_super) {
-    __extends(TransportClosed, _super);
-    function TransportClosed(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class TransportClosed extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return TransportClosed;
-}(Error));
-
-var UnsupportedFeature = (function (_super) {
-    __extends(UnsupportedFeature, _super);
-    function UnsupportedFeature(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class UnsupportedFeature extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return UnsupportedFeature;
-}(Error));
-
-var UnsupportedTransport = (function (_super) {
-    __extends(UnsupportedTransport, _super);
-    function UnsupportedTransport(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class UnsupportedTransport extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return UnsupportedTransport;
-}(Error));
-
-var UnsupportedStrategy = (function (_super) {
-    __extends(UnsupportedStrategy, _super);
-    function UnsupportedStrategy(msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class UnsupportedStrategy extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return UnsupportedStrategy;
-}(Error));
-
-var HTTPAuthError = (function (_super) {
-    __extends(HTTPAuthError, _super);
-    function HTTPAuthError(status, msg) {
-        var _newTarget = this.constructor;
-        var _this = _super.call(this, msg) || this;
-        _this.status = status;
-        Object.setPrototypeOf(_this, _newTarget.prototype);
-        return _this;
+}
+class HTTPAuthError extends Error {
+    constructor(status, msg) {
+        super(msg);
+        this.status = status;
+        Object.setPrototypeOf(this, new.target.prototype);
     }
-    return HTTPAuthError;
-}(Error));
-
+}
 
 // CONCATENATED MODULE: ./src/runtimes/isomorphic/auth/xhr_auth.ts
 
 
 
 
-var ajax = function (context, query, authOptions, authRequestType, callback) {
-    var xhr = runtime.createXHR();
+const ajax = function (context, query, authOptions, authRequestType, callback) {
+    const xhr = runtime.createXHR();
     xhr.open('POST', authOptions.endpoint, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     for (var headerName in authOptions.headers) {
         xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
     }
     if (authOptions.headersProvider != null) {
-        var dynamicHeaders = authOptions.headersProvider();
+        let dynamicHeaders = authOptions.headersProvider();
         for (var headerName in dynamicHeaders) {
             xhr.setRequestHeader(headerName, dynamicHeaders[headerName]);
         }
@@ -870,31 +808,31 @@ var ajax = function (context, query, authOptions, authRequestType, callback) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
-                var data = void 0;
-                var parsed = false;
+                let data;
+                let parsed = false;
                 try {
                     data = JSON.parse(xhr.responseText);
                     parsed = true;
                 }
                 catch (e) {
-                    callback(new HTTPAuthError(200, "JSON returned from " + authRequestType.toString() + " endpoint was invalid, yet status code was 200. Data was: " + xhr.responseText), null);
+                    callback(new HTTPAuthError(200, `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${xhr.responseText}`), null);
                 }
                 if (parsed) {
                     callback(null, data);
                 }
             }
             else {
-                var suffix = '';
+                let suffix = '';
                 switch (authRequestType) {
                     case AuthRequestType.UserAuthentication:
                         suffix = url_store.buildLogSuffix('authenticationEndpoint');
                         break;
                     case AuthRequestType.ChannelAuthorization:
-                        suffix = "Clients must be authorized to join private or presence channels. " + url_store.buildLogSuffix('authorizationEndpoint');
+                        suffix = `Clients must be authorized to join private or presence channels. ${url_store.buildLogSuffix('authorizationEndpoint')}`;
                         break;
                 }
-                callback(new HTTPAuthError(xhr.status, "Unable to retrieve auth string from " + authRequestType.toString() + " endpoint - " +
-                    ("received status: " + xhr.status + " from " + authOptions.endpoint + ". " + suffix)), null);
+                callback(new HTTPAuthError(xhr.status, `Unable to retrieve auth string from ${authRequestType.toString()} endpoint - ` +
+                    `received status: ${xhr.status} from ${authOptions.endpoint}. ${suffix}`), null);
             }
         }
     };
@@ -945,43 +883,28 @@ var btoa = window.btoa ||
     };
 
 // CONCATENATED MODULE: ./src/core/utils/timers/abstract_timer.ts
-var Timer = (function () {
-    function Timer(set, clear, delay, callback) {
-        var _this = this;
+class Timer {
+    constructor(set, clear, delay, callback) {
         this.clear = clear;
-        this.timer = set(function () {
-            if (_this.timer) {
-                _this.timer = callback(_this.timer);
+        this.timer = set(() => {
+            if (this.timer) {
+                this.timer = callback(this.timer);
             }
         }, delay);
     }
-    Timer.prototype.isRunning = function () {
+    isRunning() {
         return this.timer !== null;
-    };
-    Timer.prototype.ensureAborted = function () {
+    }
+    ensureAborted() {
         if (this.timer) {
             this.clear(this.timer);
             this.timer = null;
         }
-    };
-    return Timer;
-}());
+    }
+}
 /* harmony default export */ var abstract_timer = (Timer);
 
 // CONCATENATED MODULE: ./src/core/utils/timers/index.ts
-var timers_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 function timers_clearTimeout(timer) {
     window.clearTimeout(timer);
@@ -989,33 +912,27 @@ function timers_clearTimeout(timer) {
 function timers_clearInterval(timer) {
     window.clearInterval(timer);
 }
-var OneOffTimer = (function (_super) {
-    timers_extends(OneOffTimer, _super);
-    function OneOffTimer(delay, callback) {
-        return _super.call(this, setTimeout, timers_clearTimeout, delay, function (timer) {
+class timers_OneOffTimer extends abstract_timer {
+    constructor(delay, callback) {
+        super(setTimeout, timers_clearTimeout, delay, function (timer) {
             callback();
             return null;
-        }) || this;
+        });
     }
-    return OneOffTimer;
-}(abstract_timer));
-
-var PeriodicTimer = (function (_super) {
-    timers_extends(PeriodicTimer, _super);
-    function PeriodicTimer(delay, callback) {
-        return _super.call(this, setInterval, timers_clearInterval, delay, function (timer) {
+}
+class timers_PeriodicTimer extends abstract_timer {
+    constructor(delay, callback) {
+        super(setInterval, timers_clearInterval, delay, function (timer) {
             callback();
             return timer;
-        }) || this;
+        });
     }
-    return PeriodicTimer;
-}(abstract_timer));
-
+}
 
 // CONCATENATED MODULE: ./src/core/util.ts
 
 var Util = {
-    now: function () {
+    now() {
         if (Date.now) {
             return Date.now();
         }
@@ -1023,14 +940,10 @@ var Util = {
             return new Date().valueOf();
         }
     },
-    defer: function (callback) {
-        return new OneOffTimer(0, callback);
+    defer(callback) {
+        return new timers_OneOffTimer(0, callback);
     },
-    method: function (name) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
+    method(name, ...args) {
         var boundArguments = Array.prototype.slice.call(arguments, 1);
         return function (object) {
             return object[name].apply(object, boundArguments.concat(arguments));
@@ -1042,11 +955,7 @@ var Util = {
 // CONCATENATED MODULE: ./src/core/utils/collections.ts
 
 
-function extend(target) {
-    var sources = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        sources[_i - 1] = arguments[_i];
-    }
+function extend(target, ...sources) {
     for (var i = 0; i < sources.length; i++) {
         var extensions = sources[i];
         for (var property in extensions) {
@@ -1240,67 +1149,50 @@ function safeJSONStringify(source) {
 // CONCATENATED MODULE: ./src/core/logger.ts
 
 
-var logger_Logger = (function () {
-    function Logger() {
-        this.globalLog = function (message) {
+class logger_Logger {
+    constructor() {
+        this.globalLog = (message) => {
             if (window.console && window.console.log) {
                 window.console.log(message);
             }
         };
     }
-    Logger.prototype.debug = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
+    debug(...args) {
         this.log(this.globalLog, args);
-    };
-    Logger.prototype.warn = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
+    }
+    warn(...args) {
         this.log(this.globalLogWarn, args);
-    };
-    Logger.prototype.error = function () {
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
+    }
+    error(...args) {
         this.log(this.globalLogError, args);
-    };
-    Logger.prototype.globalLogWarn = function (message) {
+    }
+    globalLogWarn(message) {
         if (window.console && window.console.warn) {
             window.console.warn(message);
         }
         else {
             this.globalLog(message);
         }
-    };
-    Logger.prototype.globalLogError = function (message) {
+    }
+    globalLogError(message) {
         if (window.console && window.console.error) {
             window.console.error(message);
         }
         else {
             this.globalLogWarn(message);
         }
-    };
-    Logger.prototype.log = function (defaultLoggingFunction) {
-        var args = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            args[_i - 1] = arguments[_i];
-        }
+    }
+    log(defaultLoggingFunction, ...args) {
         var message = stringify.apply(this, arguments);
         if (core_pusher.log) {
             core_pusher.log(message);
         }
         else if (core_pusher.logToConsole) {
-            var log = defaultLoggingFunction.bind(this);
+            const log = defaultLoggingFunction.bind(this);
             log(message);
         }
-    };
-    return Logger;
-}());
+    }
+}
 /* harmony default export */ var logger = (new logger_Logger());
 
 // CONCATENATED MODULE: ./src/runtimes/web/auth/jsonp_auth.ts
@@ -1308,7 +1200,7 @@ var logger_Logger = (function () {
 var jsonp = function (context, query, authOptions, authRequestType, callback) {
     if (authOptions.headers !== undefined ||
         authOptions.headersProvider != null) {
-        logger.warn("To send headers with the " + authRequestType.toString() + " request, you must use AJAX, rather than JSONP.");
+        logger.warn(`To send headers with the ${authRequestType.toString()} request, you must use AJAX, rather than JSONP.`);
     }
     var callbackName = context.nextAuthCallbackID.toString();
     context.nextAuthCallbackID++;
@@ -1330,11 +1222,11 @@ var jsonp = function (context, query, authOptions, authRequestType, callback) {
 /* harmony default export */ var jsonp_auth = (jsonp);
 
 // CONCATENATED MODULE: ./src/runtimes/web/dom/script_request.ts
-var ScriptRequest = (function () {
-    function ScriptRequest(src) {
+class ScriptRequest {
+    constructor(src) {
         this.src = src;
     }
-    ScriptRequest.prototype.send = function (receiver) {
+    send(receiver) {
         var self = this;
         var errorString = 'Error loading ' + self.src;
         self.script = document.createElement('script');
@@ -1374,8 +1266,8 @@ var ScriptRequest = (function () {
         if (self.errorScript) {
             head.insertBefore(self.errorScript, self.script.nextSibling);
         }
-    };
-    ScriptRequest.prototype.cleanup = function () {
+    }
+    cleanup() {
         if (this.script) {
             this.script.onload = this.script.onerror = null;
             this.script.onreadystatechange = null;
@@ -1388,20 +1280,18 @@ var ScriptRequest = (function () {
         }
         this.script = null;
         this.errorScript = null;
-    };
-    return ScriptRequest;
-}());
-/* harmony default export */ var script_request = (ScriptRequest);
+    }
+}
 
 // CONCATENATED MODULE: ./src/runtimes/web/dom/jsonp_request.ts
 
 
-var jsonp_request_JSONPRequest = (function () {
-    function JSONPRequest(url, data) {
+class jsonp_request_JSONPRequest {
+    constructor(url, data) {
         this.url = url;
         this.data = data;
     }
-    JSONPRequest.prototype.send = function (receiver) {
+    send(receiver) {
         if (this.request) {
             return;
         }
@@ -1409,15 +1299,13 @@ var jsonp_request_JSONPRequest = (function () {
         var url = this.url + '/' + receiver.number + '?' + query;
         this.request = runtime.createScriptRequest(url);
         this.request.send(receiver);
-    };
-    JSONPRequest.prototype.cleanup = function () {
+    }
+    cleanup() {
         if (this.request) {
             this.request.cleanup();
         }
-    };
-    return JSONPRequest;
-}());
-/* harmony default export */ var jsonp_request = (jsonp_request_JSONPRequest);
+    }
+}
 
 // CONCATENATED MODULE: ./src/runtimes/web/timeline/jsonp_timeline.ts
 
@@ -1442,7 +1330,7 @@ var getAgent = function (sender, useTLS) {
 };
 var jsonp_timeline_jsonp = {
     name: 'jsonp',
-    getAgent: getAgent
+    getAgent
 };
 /* harmony default export */ var jsonp_timeline = (jsonp_timeline_jsonp);
 
@@ -1486,14 +1374,14 @@ var sockjs = {
 
 // CONCATENATED MODULE: ./src/core/events/callback_registry.ts
 
-var callback_registry_CallbackRegistry = (function () {
-    function CallbackRegistry() {
+class callback_registry_CallbackRegistry {
+    constructor() {
         this._callbacks = {};
     }
-    CallbackRegistry.prototype.get = function (name) {
+    get(name) {
         return this._callbacks[prefix(name)];
-    };
-    CallbackRegistry.prototype.add = function (name, callback, context) {
+    }
+    add(name, callback, context) {
         var prefixedEventName = prefix(name);
         this._callbacks[prefixedEventName] =
             this._callbacks[prefixedEventName] || [];
@@ -1501,8 +1389,8 @@ var callback_registry_CallbackRegistry = (function () {
             fn: callback,
             context: context
         });
-    };
-    CallbackRegistry.prototype.remove = function (name, callback, context) {
+    }
+    remove(name, callback, context) {
         if (!name && !callback && !context) {
             this._callbacks = {};
             return;
@@ -1514,8 +1402,8 @@ var callback_registry_CallbackRegistry = (function () {
         else {
             this.removeAllCallbacks(names);
         }
-    };
-    CallbackRegistry.prototype.removeCallback = function (names, callback, context) {
+    }
+    removeCallback(names, callback, context) {
         apply(names, function (name) {
             this._callbacks[name] = filter(this._callbacks[name] || [], function (binding) {
                 return ((callback && callback !== binding.fn) ||
@@ -1525,15 +1413,13 @@ var callback_registry_CallbackRegistry = (function () {
                 delete this._callbacks[name];
             }
         }, this);
-    };
-    CallbackRegistry.prototype.removeAllCallbacks = function (names) {
+    }
+    removeAllCallbacks(names) {
         apply(names, function (name) {
             delete this._callbacks[name];
         }, this);
-    };
-    return CallbackRegistry;
-}());
-/* harmony default export */ var callback_registry = (callback_registry_CallbackRegistry);
+    }
+}
 function prefix(name) {
     return '_' + name;
 }
@@ -1541,38 +1427,38 @@ function prefix(name) {
 // CONCATENATED MODULE: ./src/core/events/dispatcher.ts
 
 
-var dispatcher_Dispatcher = (function () {
-    function Dispatcher(failThrough) {
-        this.callbacks = new callback_registry();
+class dispatcher_Dispatcher {
+    constructor(failThrough) {
+        this.callbacks = new callback_registry_CallbackRegistry();
         this.global_callbacks = [];
         this.failThrough = failThrough;
     }
-    Dispatcher.prototype.bind = function (eventName, callback, context) {
+    bind(eventName, callback, context) {
         this.callbacks.add(eventName, callback, context);
         return this;
-    };
-    Dispatcher.prototype.bind_global = function (callback) {
+    }
+    bind_global(callback) {
         this.global_callbacks.push(callback);
         return this;
-    };
-    Dispatcher.prototype.unbind = function (eventName, callback, context) {
+    }
+    unbind(eventName, callback, context) {
         this.callbacks.remove(eventName, callback, context);
         return this;
-    };
-    Dispatcher.prototype.unbind_global = function (callback) {
+    }
+    unbind_global(callback) {
         if (!callback) {
             this.global_callbacks = [];
             return this;
         }
-        this.global_callbacks = filter(this.global_callbacks || [], function (c) { return c !== callback; });
+        this.global_callbacks = filter(this.global_callbacks || [], c => c !== callback);
         return this;
-    };
-    Dispatcher.prototype.unbind_all = function () {
+    }
+    unbind_all() {
         this.unbind();
         this.unbind_global();
         return this;
-    };
-    Dispatcher.prototype.emit = function (eventName, data, metadata) {
+    }
+    emit(eventName, data, metadata) {
         for (var i = 0; i < this.global_callbacks.length; i++) {
             this.global_callbacks[i](eventName, data);
         }
@@ -1593,54 +1479,36 @@ var dispatcher_Dispatcher = (function () {
             this.failThrough(eventName, data);
         }
         return this;
-    };
-    return Dispatcher;
-}());
-/* harmony default export */ var dispatcher = (dispatcher_Dispatcher);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/transports/transport_connection.ts
-var transport_connection_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
 
 
 
-var transport_connection_TransportConnection = (function (_super) {
-    transport_connection_extends(TransportConnection, _super);
-    function TransportConnection(hooks, name, priority, key, options) {
-        var _this = _super.call(this) || this;
-        _this.initialize = runtime.transportConnectionInitializer;
-        _this.hooks = hooks;
-        _this.name = name;
-        _this.priority = priority;
-        _this.key = key;
-        _this.options = options;
-        _this.state = 'new';
-        _this.timeline = options.timeline;
-        _this.activityTimeout = options.activityTimeout;
-        _this.id = _this.timeline.generateUniqueID();
-        return _this;
+class transport_connection_TransportConnection extends dispatcher_Dispatcher {
+    constructor(hooks, name, priority, key, options) {
+        super();
+        this.initialize = runtime.transportConnectionInitializer;
+        this.hooks = hooks;
+        this.name = name;
+        this.priority = priority;
+        this.key = key;
+        this.options = options;
+        this.state = 'new';
+        this.timeline = options.timeline;
+        this.activityTimeout = options.activityTimeout;
+        this.id = this.timeline.generateUniqueID();
     }
-    TransportConnection.prototype.handlesActivityChecks = function () {
+    handlesActivityChecks() {
         return Boolean(this.hooks.handlesActivityChecks);
-    };
-    TransportConnection.prototype.supportsPing = function () {
+    }
+    supportsPing() {
         return Boolean(this.hooks.supportsPing);
-    };
-    TransportConnection.prototype.connect = function () {
-        var _this = this;
+    }
+    connect() {
         if (this.socket || this.state !== 'initialized') {
             return false;
         }
@@ -1649,18 +1517,18 @@ var transport_connection_TransportConnection = (function (_super) {
             this.socket = this.hooks.getSocket(url, this.options);
         }
         catch (e) {
-            util.defer(function () {
-                _this.onError(e);
-                _this.changeState('closed');
+            util.defer(() => {
+                this.onError(e);
+                this.changeState('closed');
             });
             return false;
         }
         this.bindListeners();
-        logger.debug('Connecting', { transport: this.name, url: url });
+        logger.debug('Connecting', { transport: this.name, url });
         this.changeState('connecting');
         return true;
-    };
-    TransportConnection.prototype.close = function () {
+    }
+    close() {
         if (this.socket) {
             this.socket.close();
             return true;
@@ -1668,13 +1536,12 @@ var transport_connection_TransportConnection = (function (_super) {
         else {
             return false;
         }
-    };
-    TransportConnection.prototype.send = function (data) {
-        var _this = this;
+    }
+    send(data) {
         if (this.state === 'open') {
-            util.defer(function () {
-                if (_this.socket) {
-                    _this.socket.send(data);
+            util.defer(() => {
+                if (this.socket) {
+                    this.socket.send(data);
                 }
             });
             return true;
@@ -1682,24 +1549,24 @@ var transport_connection_TransportConnection = (function (_super) {
         else {
             return false;
         }
-    };
-    TransportConnection.prototype.ping = function () {
+    }
+    ping() {
         if (this.state === 'open' && this.supportsPing()) {
             this.socket.ping();
         }
-    };
-    TransportConnection.prototype.onOpen = function () {
+    }
+    onOpen() {
         if (this.hooks.beforeOpen) {
             this.hooks.beforeOpen(this.socket, this.hooks.urls.getPath(this.key, this.options));
         }
         this.changeState('open');
         this.socket.onopen = undefined;
-    };
-    TransportConnection.prototype.onError = function (error) {
+    }
+    onError(error) {
         this.emit('error', { type: 'WebSocketError', error: error });
         this.timeline.error(this.buildTimelineMessage({ error: error.toString() }));
-    };
-    TransportConnection.prototype.onClose = function (closeEvent) {
+    }
+    onClose(closeEvent) {
         if (closeEvent) {
             this.changeState('closed', {
                 code: closeEvent.code,
@@ -1712,34 +1579,33 @@ var transport_connection_TransportConnection = (function (_super) {
         }
         this.unbindListeners();
         this.socket = undefined;
-    };
-    TransportConnection.prototype.onMessage = function (message) {
+    }
+    onMessage(message) {
         this.emit('message', message);
-    };
-    TransportConnection.prototype.onActivity = function () {
+    }
+    onActivity() {
         this.emit('activity');
-    };
-    TransportConnection.prototype.bindListeners = function () {
-        var _this = this;
-        this.socket.onopen = function () {
-            _this.onOpen();
+    }
+    bindListeners() {
+        this.socket.onopen = () => {
+            this.onOpen();
         };
-        this.socket.onerror = function (error) {
-            _this.onError(error);
+        this.socket.onerror = error => {
+            this.onError(error);
         };
-        this.socket.onclose = function (closeEvent) {
-            _this.onClose(closeEvent);
+        this.socket.onclose = closeEvent => {
+            this.onClose(closeEvent);
         };
-        this.socket.onmessage = function (message) {
-            _this.onMessage(message);
+        this.socket.onmessage = message => {
+            this.onMessage(message);
         };
         if (this.supportsPing()) {
-            this.socket.onactivity = function () {
-                _this.onActivity();
+            this.socket.onactivity = () => {
+                this.onActivity();
             };
         }
-    };
-    TransportConnection.prototype.unbindListeners = function () {
+    }
+    unbindListeners() {
         if (this.socket) {
             this.socket.onopen = undefined;
             this.socket.onerror = undefined;
@@ -1749,44 +1615,40 @@ var transport_connection_TransportConnection = (function (_super) {
                 this.socket.onactivity = undefined;
             }
         }
-    };
-    TransportConnection.prototype.changeState = function (state, params) {
+    }
+    changeState(state, params) {
         this.state = state;
         this.timeline.info(this.buildTimelineMessage({
             state: state,
             params: params
         }));
         this.emit(state, params);
-    };
-    TransportConnection.prototype.buildTimelineMessage = function (message) {
+    }
+    buildTimelineMessage(message) {
         return extend({ cid: this.id }, message);
-    };
-    return TransportConnection;
-}(dispatcher));
-/* harmony default export */ var transport_connection = (transport_connection_TransportConnection);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/transports/transport.ts
 
-var transport_Transport = (function () {
-    function Transport(hooks) {
+class transport_Transport {
+    constructor(hooks) {
         this.hooks = hooks;
     }
-    Transport.prototype.isSupported = function (environment) {
+    isSupported(environment) {
         return this.hooks.isSupported(environment);
-    };
-    Transport.prototype.createConnection = function (name, priority, key, options) {
-        return new transport_connection(this.hooks, name, priority, key, options);
-    };
-    return Transport;
-}());
-/* harmony default export */ var transports_transport = (transport_Transport);
+    }
+    createConnection(name, priority, key, options) {
+        return new transport_connection_TransportConnection(this.hooks, name, priority, key, options);
+    }
+}
 
 // CONCATENATED MODULE: ./src/runtimes/isomorphic/transports/transports.ts
 
 
 
 
-var WSTransport = new transports_transport({
+var WSTransport = new transport_Transport({
     urls: ws,
     handlesActivityChecks: false,
     supportsPing: false,
@@ -1823,8 +1685,8 @@ var xhrConfiguration = {
         return runtime.isXHRSupported();
     }
 };
-var XHRStreamingTransport = new transports_transport((extend({}, streamingConfiguration, xhrConfiguration)));
-var XHRPollingTransport = new transports_transport(extend({}, pollingConfiguration, xhrConfiguration));
+var XHRStreamingTransport = new transport_Transport((extend({}, streamingConfiguration, xhrConfiguration)));
+var XHRPollingTransport = new transport_Transport(extend({}, pollingConfiguration, xhrConfiguration));
 var Transports = {
     ws: WSTransport,
     xhr_streaming: XHRStreamingTransport,
@@ -1839,7 +1701,7 @@ var Transports = {
 
 
 
-var SockJSTransport = new transports_transport({
+var SockJSTransport = new transport_Transport({
     file: 'sockjs',
     urls: sockjs,
     handlesActivityChecks: true,
@@ -1870,33 +1732,19 @@ var xdrConfiguration = {
         return yes;
     }
 };
-var XDRStreamingTransport = new transports_transport((extend({}, streamingConfiguration, xdrConfiguration)));
-var XDRPollingTransport = new transports_transport(extend({}, pollingConfiguration, xdrConfiguration));
+var XDRStreamingTransport = new transport_Transport((extend({}, streamingConfiguration, xdrConfiguration)));
+var XDRPollingTransport = new transport_Transport(extend({}, pollingConfiguration, xdrConfiguration));
 transports.xdr_streaming = XDRStreamingTransport;
 transports.xdr_polling = XDRPollingTransport;
 transports.sockjs = SockJSTransport;
 /* harmony default export */ var transports_transports = (transports);
 
 // CONCATENATED MODULE: ./src/runtimes/web/net_info.ts
-var net_info_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
-var NetInfo = (function (_super) {
-    net_info_extends(NetInfo, _super);
-    function NetInfo() {
-        var _this = _super.call(this) || this;
-        var self = _this;
+class net_info_NetInfo extends dispatcher_Dispatcher {
+    constructor() {
+        super();
+        var self = this;
         if (window.addEventListener !== undefined) {
             window.addEventListener('online', function () {
                 self.emit('online');
@@ -1905,34 +1753,30 @@ var NetInfo = (function (_super) {
                 self.emit('offline');
             }, false);
         }
-        return _this;
     }
-    NetInfo.prototype.isOnline = function () {
+    isOnline() {
         if (window.navigator.onLine === undefined) {
             return true;
         }
         else {
             return window.navigator.onLine;
         }
-    };
-    return NetInfo;
-}(dispatcher));
-
-var net_info_Network = new NetInfo();
+    }
+}
+var net_info_Network = new net_info_NetInfo();
 
 // CONCATENATED MODULE: ./src/core/transports/assistant_to_the_transport_manager.ts
 
 
-var assistant_to_the_transport_manager_AssistantToTheTransportManager = (function () {
-    function AssistantToTheTransportManager(manager, transport, options) {
+class assistant_to_the_transport_manager_AssistantToTheTransportManager {
+    constructor(manager, transport, options) {
         this.manager = manager;
         this.transport = transport;
         this.minPingDelay = options.minPingDelay;
         this.maxPingDelay = options.maxPingDelay;
         this.pingDelay = undefined;
     }
-    AssistantToTheTransportManager.prototype.createConnection = function (name, priority, key, options) {
-        var _this = this;
+    createConnection(name, priority, key, options) {
         options = extend({}, options, {
             activityTimeout: this.pingDelay
         });
@@ -1943,31 +1787,29 @@ var assistant_to_the_transport_manager_AssistantToTheTransportManager = (functio
             connection.bind('closed', onClosed);
             openTimestamp = util.now();
         };
-        var onClosed = function (closeEvent) {
+        var onClosed = closeEvent => {
             connection.unbind('closed', onClosed);
             if (closeEvent.code === 1002 || closeEvent.code === 1003) {
-                _this.manager.reportDeath();
+                this.manager.reportDeath();
             }
             else if (!closeEvent.wasClean && openTimestamp) {
                 var lifespan = util.now() - openTimestamp;
-                if (lifespan < 2 * _this.maxPingDelay) {
-                    _this.manager.reportDeath();
-                    _this.pingDelay = Math.max(lifespan / 2, _this.minPingDelay);
+                if (lifespan < 2 * this.maxPingDelay) {
+                    this.manager.reportDeath();
+                    this.pingDelay = Math.max(lifespan / 2, this.minPingDelay);
                 }
             }
         };
         connection.bind('open', onOpen);
         return connection;
-    };
-    AssistantToTheTransportManager.prototype.isSupported = function (environment) {
+    }
+    isSupported(environment) {
         return this.manager.isAlive() && this.transport.isSupported(environment);
-    };
-    return AssistantToTheTransportManager;
-}());
-/* harmony default export */ var assistant_to_the_transport_manager = (assistant_to_the_transport_manager_AssistantToTheTransportManager);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/connection/protocol/protocol.ts
-var Protocol = {
+const Protocol = {
     decodeMessage: function (messageEvent) {
         try {
             var messageData = JSON.parse(messageEvent.data);
@@ -2060,68 +1902,52 @@ var Protocol = {
 /* harmony default export */ var protocol_protocol = (Protocol);
 
 // CONCATENATED MODULE: ./src/core/connection/connection.ts
-var connection_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
 
 
-var connection_Connection = (function (_super) {
-    connection_extends(Connection, _super);
-    function Connection(id, transport) {
-        var _this = _super.call(this) || this;
-        _this.id = id;
-        _this.transport = transport;
-        _this.activityTimeout = transport.activityTimeout;
-        _this.bindListeners();
-        return _this;
+class connection_Connection extends dispatcher_Dispatcher {
+    constructor(id, transport) {
+        super();
+        this.id = id;
+        this.transport = transport;
+        this.activityTimeout = transport.activityTimeout;
+        this.bindListeners();
     }
-    Connection.prototype.handlesActivityChecks = function () {
+    handlesActivityChecks() {
         return this.transport.handlesActivityChecks();
-    };
-    Connection.prototype.send = function (data) {
+    }
+    send(data) {
         return this.transport.send(data);
-    };
-    Connection.prototype.send_event = function (name, data, channel) {
+    }
+    send_event(name, data, channel) {
         var event = { event: name, data: data };
         if (channel) {
             event.channel = channel;
         }
         logger.debug('Event sent', event);
         return this.send(protocol_protocol.encodeMessage(event));
-    };
-    Connection.prototype.ping = function () {
+    }
+    ping() {
         if (this.transport.supportsPing()) {
             this.transport.ping();
         }
         else {
             this.send_event('pusher:ping', {});
         }
-    };
-    Connection.prototype.close = function () {
+    }
+    close() {
         this.transport.close();
-    };
-    Connection.prototype.bindListeners = function () {
-        var _this = this;
+    }
+    bindListeners() {
         var listeners = {
-            message: function (messageEvent) {
+            message: (messageEvent) => {
                 var pusherEvent;
                 try {
                     pusherEvent = protocol_protocol.decodeMessage(messageEvent);
                 }
                 catch (e) {
-                    _this.emit('error', {
+                    this.emit('error', {
                         type: 'MessageParseError',
                         error: e,
                         data: messageEvent.data
@@ -2131,46 +1957,46 @@ var connection_Connection = (function (_super) {
                     logger.debug('Event recd', pusherEvent);
                     switch (pusherEvent.event) {
                         case 'pusher:error':
-                            _this.emit('error', {
+                            this.emit('error', {
                                 type: 'PusherError',
                                 data: pusherEvent.data
                             });
                             break;
                         case 'pusher:ping':
-                            _this.emit('ping');
+                            this.emit('ping');
                             break;
                         case 'pusher:pong':
-                            _this.emit('pong');
+                            this.emit('pong');
                             break;
                     }
-                    _this.emit('message', pusherEvent);
+                    this.emit('message', pusherEvent);
                 }
             },
-            activity: function () {
-                _this.emit('activity');
+            activity: () => {
+                this.emit('activity');
             },
-            error: function (error) {
-                _this.emit('error', error);
+            error: error => {
+                this.emit('error', error);
             },
-            closed: function (closeEvent) {
+            closed: closeEvent => {
                 unbindListeners();
                 if (closeEvent && closeEvent.code) {
-                    _this.handleCloseEvent(closeEvent);
+                    this.handleCloseEvent(closeEvent);
                 }
-                _this.transport = null;
-                _this.emit('closed');
+                this.transport = null;
+                this.emit('closed');
             }
         };
-        var unbindListeners = function () {
-            objectApply(listeners, function (listener, event) {
-                _this.transport.unbind(event, listener);
+        var unbindListeners = () => {
+            objectApply(listeners, (listener, event) => {
+                this.transport.unbind(event, listener);
             });
         };
-        objectApply(listeners, function (listener, event) {
-            _this.transport.bind(event, listener);
+        objectApply(listeners, (listener, event) => {
+            this.transport.bind(event, listener);
         });
-    };
-    Connection.prototype.handleCloseEvent = function (closeEvent) {
+    }
+    handleCloseEvent(closeEvent) {
         var action = protocol_protocol.getCloseAction(closeEvent);
         var error = protocol_protocol.getCloseError(closeEvent);
         if (error) {
@@ -2179,136 +2005,114 @@ var connection_Connection = (function (_super) {
         if (action) {
             this.emit(action, { action: action, error: error });
         }
-    };
-    return Connection;
-}(dispatcher));
-/* harmony default export */ var connection_connection = (connection_Connection);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/connection/handshake/index.ts
 
 
 
-var handshake_Handshake = (function () {
-    function Handshake(transport, callback) {
+class handshake_Handshake {
+    constructor(transport, callback) {
         this.transport = transport;
         this.callback = callback;
         this.bindListeners();
     }
-    Handshake.prototype.close = function () {
+    close() {
         this.unbindListeners();
         this.transport.close();
-    };
-    Handshake.prototype.bindListeners = function () {
-        var _this = this;
-        this.onMessage = function (m) {
-            _this.unbindListeners();
+    }
+    bindListeners() {
+        this.onMessage = m => {
+            this.unbindListeners();
             var result;
             try {
                 result = protocol_protocol.processHandshake(m);
             }
             catch (e) {
-                _this.finish('error', { error: e });
-                _this.transport.close();
+                this.finish('error', { error: e });
+                this.transport.close();
                 return;
             }
             if (result.action === 'connected') {
-                _this.finish('connected', {
-                    connection: new connection_connection(result.id, _this.transport),
+                this.finish('connected', {
+                    connection: new connection_Connection(result.id, this.transport),
                     activityTimeout: result.activityTimeout
                 });
             }
             else {
-                _this.finish(result.action, { error: result.error });
-                _this.transport.close();
+                this.finish(result.action, { error: result.error });
+                this.transport.close();
             }
         };
-        this.onClosed = function (closeEvent) {
-            _this.unbindListeners();
+        this.onClosed = closeEvent => {
+            this.unbindListeners();
             var action = protocol_protocol.getCloseAction(closeEvent) || 'backoff';
             var error = protocol_protocol.getCloseError(closeEvent);
-            _this.finish(action, { error: error });
+            this.finish(action, { error: error });
         };
         this.transport.bind('message', this.onMessage);
         this.transport.bind('closed', this.onClosed);
-    };
-    Handshake.prototype.unbindListeners = function () {
+    }
+    unbindListeners() {
         this.transport.unbind('message', this.onMessage);
         this.transport.unbind('closed', this.onClosed);
-    };
-    Handshake.prototype.finish = function (action, params) {
+    }
+    finish(action, params) {
         this.callback(extend({ transport: this.transport, action: action }, params));
-    };
-    return Handshake;
-}());
-/* harmony default export */ var connection_handshake = (handshake_Handshake);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/timeline/timeline_sender.ts
 
-var timeline_sender_TimelineSender = (function () {
-    function TimelineSender(timeline, options) {
+class timeline_sender_TimelineSender {
+    constructor(timeline, options) {
         this.timeline = timeline;
         this.options = options || {};
     }
-    TimelineSender.prototype.send = function (useTLS, callback) {
+    send(useTLS, callback) {
         if (this.timeline.isEmpty()) {
             return;
         }
         this.timeline.send(runtime.TimelineTransport.getAgent(this, useTLS), callback);
-    };
-    return TimelineSender;
-}());
-/* harmony default export */ var timeline_sender = (timeline_sender_TimelineSender);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/channels/channel.ts
-var channel_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
 
 
 
-var channel_Channel = (function (_super) {
-    channel_extends(Channel, _super);
-    function Channel(name, pusher) {
-        var _this = _super.call(this, function (event, data) {
+class channel_Channel extends dispatcher_Dispatcher {
+    constructor(name, pusher) {
+        super(function (event, data) {
             logger.debug('No callbacks on ' + name + ' for ' + event);
-        }) || this;
-        _this.name = name;
-        _this.pusher = pusher;
-        _this.subscribed = false;
-        _this.subscriptionPending = false;
-        _this.subscriptionCancelled = false;
-        return _this;
+        });
+        this.name = name;
+        this.pusher = pusher;
+        this.subscribed = false;
+        this.subscriptionPending = false;
+        this.subscriptionCancelled = false;
     }
-    Channel.prototype.authorize = function (socketId, callback) {
+    authorize(socketId, callback) {
         return callback(null, { auth: '' });
-    };
-    Channel.prototype.trigger = function (event, data) {
+    }
+    trigger(event, data) {
         if (event.indexOf('client-') !== 0) {
             throw new BadEventName("Event '" + event + "' does not start with 'client-'");
         }
         if (!this.subscribed) {
             var suffix = url_store.buildLogSuffix('triggeringClientEvents');
-            logger.warn("Client event triggered before channel 'subscription_succeeded' event . " + suffix);
+            logger.warn(`Client event triggered before channel 'subscription_succeeded' event . ${suffix}`);
         }
         return this.pusher.send_event(event, data, this.name);
-    };
-    Channel.prototype.disconnect = function () {
+    }
+    disconnect() {
         this.subscribed = false;
         this.subscriptionPending = false;
-    };
-    Channel.prototype.handleEvent = function (event) {
+    }
+    handleEvent(event) {
         var eventName = event.event;
         var data = event.data;
         if (eventName === 'pusher_internal:subscription_succeeded') {
@@ -2321,8 +2125,8 @@ var channel_Channel = (function (_super) {
             var metadata = {};
             this.emit(eventName, data, metadata);
         }
-    };
-    Channel.prototype.handleSubscriptionSucceededEvent = function (event) {
+    }
+    handleSubscriptionSucceededEvent(event) {
         this.subscriptionPending = false;
         this.subscribed = true;
         if (this.subscriptionCancelled) {
@@ -2331,91 +2135,69 @@ var channel_Channel = (function (_super) {
         else {
             this.emit('pusher:subscription_succeeded', event.data);
         }
-    };
-    Channel.prototype.handleSubscriptionCountEvent = function (event) {
+    }
+    handleSubscriptionCountEvent(event) {
         if (event.data.subscription_count) {
             this.subscriptionCount = event.data.subscription_count;
         }
         this.emit('pusher:subscription_count', event.data);
-    };
-    Channel.prototype.subscribe = function () {
-        var _this = this;
+    }
+    subscribe() {
         if (this.subscribed) {
             return;
         }
         this.subscriptionPending = true;
         this.subscriptionCancelled = false;
-        this.authorize(this.pusher.connection.socket_id, function (error, data) {
+        this.authorize(this.pusher.connection.socket_id, (error, data) => {
             if (error) {
-                _this.subscriptionPending = false;
+                this.subscriptionPending = false;
                 logger.error(error.toString());
-                _this.emit('pusher:subscription_error', Object.assign({}, {
+                this.emit('pusher:subscription_error', Object.assign({}, {
                     type: 'AuthError',
                     error: error.message
                 }, error instanceof HTTPAuthError ? { status: error.status } : {}));
             }
             else {
-                _this.pusher.send_event('pusher:subscribe', {
+                this.pusher.send_event('pusher:subscribe', {
                     auth: data.auth,
                     channel_data: data.channel_data,
-                    channel: _this.name
+                    channel: this.name
                 });
             }
         });
-    };
-    Channel.prototype.unsubscribe = function () {
+    }
+    unsubscribe() {
         this.subscribed = false;
         this.pusher.send_event('pusher:unsubscribe', {
             channel: this.name
         });
-    };
-    Channel.prototype.cancelSubscription = function () {
+    }
+    cancelSubscription() {
         this.subscriptionCancelled = true;
-    };
-    Channel.prototype.reinstateSubscription = function () {
+    }
+    reinstateSubscription() {
         this.subscriptionCancelled = false;
-    };
-    return Channel;
-}(dispatcher));
-/* harmony default export */ var channels_channel = (channel_Channel);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/channels/private_channel.ts
-var private_channel_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
-var PrivateChannel = (function (_super) {
-    private_channel_extends(PrivateChannel, _super);
-    function PrivateChannel() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    PrivateChannel.prototype.authorize = function (socketId, callback) {
+class private_channel_PrivateChannel extends channel_Channel {
+    authorize(socketId, callback) {
         return this.pusher.config.channelAuthorizer({
             channelName: this.name,
             socketId: socketId
         }, callback);
-    };
-    return PrivateChannel;
-}(channels_channel));
-/* harmony default export */ var private_channel = (PrivateChannel);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/channels/members.ts
 
-var members_Members = (function () {
-    function Members() {
+class members_Members {
+    constructor() {
         this.reset();
     }
-    Members.prototype.get = function (id) {
+    get(id) {
         if (Object.prototype.hasOwnProperty.call(this.members, id)) {
             return {
                 id: id,
@@ -2425,60 +2207,44 @@ var members_Members = (function () {
         else {
             return null;
         }
-    };
-    Members.prototype.each = function (callback) {
-        var _this = this;
-        objectApply(this.members, function (member, id) {
-            callback(_this.get(id));
+    }
+    each(callback) {
+        objectApply(this.members, (member, id) => {
+            callback(this.get(id));
         });
-    };
-    Members.prototype.setMyID = function (id) {
+    }
+    setMyID(id) {
         this.myID = id;
-    };
-    Members.prototype.onSubscription = function (subscriptionData) {
+    }
+    onSubscription(subscriptionData) {
         this.members = subscriptionData.presence.hash;
         this.count = subscriptionData.presence.count;
         this.me = this.get(this.myID);
-    };
-    Members.prototype.addMember = function (memberData) {
+    }
+    addMember(memberData) {
         if (this.get(memberData.user_id) === null) {
             this.count++;
         }
         this.members[memberData.user_id] = memberData.user_info;
         return this.get(memberData.user_id);
-    };
-    Members.prototype.removeMember = function (memberData) {
+    }
+    removeMember(memberData) {
         var member = this.get(memberData.user_id);
         if (member) {
             delete this.members[memberData.user_id];
             this.count--;
         }
         return member;
-    };
-    Members.prototype.reset = function () {
+    }
+    reset() {
         this.members = {};
         this.count = 0;
         this.myID = null;
         this.me = null;
-    };
-    return Members;
-}());
-/* harmony default export */ var members = (members_Members);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/channels/presence_channel.ts
-var presence_channel_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -2488,80 +2254,42 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (undefined && undefined.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+
+
+
+
+class presence_channel_PresenceChannel extends private_channel_PrivateChannel {
+    constructor(name, pusher) {
+        super(name, pusher);
+        this.members = new members_Members();
     }
-};
-
-
-
-
-var presence_channel_PresenceChannel = (function (_super) {
-    presence_channel_extends(PresenceChannel, _super);
-    function PresenceChannel(name, pusher) {
-        var _this = _super.call(this, name, pusher) || this;
-        _this.members = new members();
-        return _this;
-    }
-    PresenceChannel.prototype.authorize = function (socketId, callback) {
-        var _this = this;
-        _super.prototype.authorize.call(this, socketId, function (error, authData) { return __awaiter(_this, void 0, void 0, function () {
-            var channelData, suffix;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!!error) return [3, 3];
-                        authData = authData;
-                        if (!(authData.channel_data != null)) return [3, 1];
-                        channelData = JSON.parse(authData.channel_data);
-                        this.members.setMyID(channelData.user_id);
-                        return [3, 3];
-                    case 1: return [4, this.pusher.user.signinDonePromise];
-                    case 2:
-                        _a.sent();
-                        if (this.pusher.user.user_data != null) {
-                            this.members.setMyID(this.pusher.user.user_data.id);
-                        }
-                        else {
-                            suffix = url_store.buildLogSuffix('authorizationEndpoint');
-                            logger.error("Invalid auth response for channel '" + this.name + "', " +
-                                ("expected 'channel_data' field. " + suffix + ", ") +
-                                "or the user should be signed in.");
-                            callback('Invalid auth response');
-                            return [2];
-                        }
-                        _a.label = 3;
-                    case 3:
-                        callback(error, authData);
-                        return [2];
+    authorize(socketId, callback) {
+        super.authorize(socketId, (error, authData) => __awaiter(this, void 0, void 0, function* () {
+            if (!error) {
+                authData = authData;
+                if (authData.channel_data != null) {
+                    var channelData = JSON.parse(authData.channel_data);
+                    this.members.setMyID(channelData.user_id);
                 }
-            });
-        }); });
-    };
-    PresenceChannel.prototype.handleEvent = function (event) {
+                else {
+                    yield this.pusher.user.signinDonePromise;
+                    if (this.pusher.user.user_data != null) {
+                        this.members.setMyID(this.pusher.user.user_data.id);
+                    }
+                    else {
+                        let suffix = url_store.buildLogSuffix('authorizationEndpoint');
+                        logger.error(`Invalid auth response for channel '${this.name}', ` +
+                            `expected 'channel_data' field. ${suffix}, ` +
+                            `or the user should be signed in.`);
+                        callback('Invalid auth response');
+                        return;
+                    }
+                }
+            }
+            callback(error, authData);
+        }));
+    }
+    handleEvent(event) {
         var eventName = event.event;
         if (eventName.indexOf('pusher_internal:') === 0) {
             this.handleInternalEvent(event);
@@ -2574,8 +2302,8 @@ var presence_channel_PresenceChannel = (function (_super) {
             }
             this.emit(eventName, data, metadata);
         }
-    };
-    PresenceChannel.prototype.handleInternalEvent = function (event) {
+    }
+    handleInternalEvent(event) {
         var eventName = event.event;
         var data = event.data;
         switch (eventName) {
@@ -2596,8 +2324,8 @@ var presence_channel_PresenceChannel = (function (_super) {
                 }
                 break;
         }
-    };
-    PresenceChannel.prototype.handleSubscriptionSucceededEvent = function (event) {
+    }
+    handleSubscriptionSucceededEvent(event) {
         this.subscriptionPending = false;
         this.subscribed = true;
         if (this.subscriptionCancelled) {
@@ -2607,14 +2335,12 @@ var presence_channel_PresenceChannel = (function (_super) {
             this.members.onSubscription(event.data);
             this.emit('pusher:subscription_succeeded', this.members);
         }
-    };
-    PresenceChannel.prototype.disconnect = function () {
+    }
+    disconnect() {
         this.members.reset();
-        _super.prototype.disconnect.call(this);
-    };
-    return PresenceChannel;
-}(private_channel));
-/* harmony default export */ var presence_channel = (presence_channel_PresenceChannel);
+        super.disconnect();
+    }
+}
 
 // EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
 var utf8 = __webpack_require__(1);
@@ -2623,64 +2349,47 @@ var utf8 = __webpack_require__(1);
 var base64 = __webpack_require__(0);
 
 // CONCATENATED MODULE: ./src/core/channels/encrypted_channel.ts
-var encrypted_channel_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
 
 
 
-var encrypted_channel_EncryptedChannel = (function (_super) {
-    encrypted_channel_extends(EncryptedChannel, _super);
-    function EncryptedChannel(name, pusher, nacl) {
-        var _this = _super.call(this, name, pusher) || this;
-        _this.key = null;
-        _this.nacl = nacl;
-        return _this;
+class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel {
+    constructor(name, pusher, nacl) {
+        super(name, pusher);
+        this.key = null;
+        this.nacl = nacl;
     }
-    EncryptedChannel.prototype.authorize = function (socketId, callback) {
-        var _this = this;
-        _super.prototype.authorize.call(this, socketId, function (error, authData) {
+    authorize(socketId, callback) {
+        super.authorize(socketId, (error, authData) => {
             if (error) {
                 callback(error, authData);
                 return;
             }
-            var sharedSecret = authData['shared_secret'];
+            let sharedSecret = authData['shared_secret'];
             if (!sharedSecret) {
-                callback(new Error("No shared_secret key in auth payload for encrypted channel: " + _this.name), null);
+                callback(new Error(`No shared_secret key in auth payload for encrypted channel: ${this.name}`), null);
                 return;
             }
-            _this.key = Object(base64["decode"])(sharedSecret);
+            this.key = Object(base64["decode"])(sharedSecret);
             delete authData['shared_secret'];
             callback(null, authData);
         });
-    };
-    EncryptedChannel.prototype.trigger = function (event, data) {
+    }
+    trigger(event, data) {
         throw new UnsupportedFeature('Client events are not currently supported for encrypted channels');
-    };
-    EncryptedChannel.prototype.handleEvent = function (event) {
+    }
+    handleEvent(event) {
         var eventName = event.event;
         var data = event.data;
         if (eventName.indexOf('pusher_internal:') === 0 ||
             eventName.indexOf('pusher:') === 0) {
-            _super.prototype.handleEvent.call(this, event);
+            super.handleEvent(event);
             return;
         }
         this.handleEncryptedEvent(eventName, data);
-    };
-    EncryptedChannel.prototype.handleEncryptedEvent = function (event, data) {
-        var _this = this;
+    }
+    handleEncryptedEvent(event, data) {
         if (!this.key) {
             logger.debug('Received encrypted event before key has been retrieved from the authEndpoint');
             return;
@@ -2690,98 +2399,81 @@ var encrypted_channel_EncryptedChannel = (function (_super) {
                 data);
             return;
         }
-        var cipherText = Object(base64["decode"])(data.ciphertext);
+        let cipherText = Object(base64["decode"])(data.ciphertext);
         if (cipherText.length < this.nacl.secretbox.overheadLength) {
-            logger.error("Expected encrypted event ciphertext length to be " + this.nacl.secretbox.overheadLength + ", got: " + cipherText.length);
+            logger.error(`Expected encrypted event ciphertext length to be ${this.nacl.secretbox.overheadLength}, got: ${cipherText.length}`);
             return;
         }
-        var nonce = Object(base64["decode"])(data.nonce);
+        let nonce = Object(base64["decode"])(data.nonce);
         if (nonce.length < this.nacl.secretbox.nonceLength) {
-            logger.error("Expected encrypted event nonce length to be " + this.nacl.secretbox.nonceLength + ", got: " + nonce.length);
+            logger.error(`Expected encrypted event nonce length to be ${this.nacl.secretbox.nonceLength}, got: ${nonce.length}`);
             return;
         }
-        var bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
+        let bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
         if (bytes === null) {
             logger.debug('Failed to decrypt an event, probably because it was encrypted with a different key. Fetching a new key from the authEndpoint...');
-            this.authorize(this.pusher.connection.socket_id, function (error, authData) {
+            this.authorize(this.pusher.connection.socket_id, (error, authData) => {
                 if (error) {
-                    logger.error("Failed to make a request to the authEndpoint: " + authData + ". Unable to fetch new key, so dropping encrypted event");
+                    logger.error(`Failed to make a request to the authEndpoint: ${authData}. Unable to fetch new key, so dropping encrypted event`);
                     return;
                 }
-                bytes = _this.nacl.secretbox.open(cipherText, nonce, _this.key);
+                bytes = this.nacl.secretbox.open(cipherText, nonce, this.key);
                 if (bytes === null) {
-                    logger.error("Failed to decrypt event with new key. Dropping encrypted event");
+                    logger.error(`Failed to decrypt event with new key. Dropping encrypted event`);
                     return;
                 }
-                _this.emit(event, _this.getDataToEmit(bytes));
+                this.emit(event, this.getDataToEmit(bytes));
                 return;
             });
             return;
         }
         this.emit(event, this.getDataToEmit(bytes));
-    };
-    EncryptedChannel.prototype.getDataToEmit = function (bytes) {
-        var raw = Object(utf8["decode"])(bytes);
+    }
+    getDataToEmit(bytes) {
+        let raw = Object(utf8["decode"])(bytes);
         try {
             return JSON.parse(raw);
         }
         catch (_a) {
             return raw;
         }
-    };
-    return EncryptedChannel;
-}(private_channel));
-/* harmony default export */ var encrypted_channel = (encrypted_channel_EncryptedChannel);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/connection/connection_manager.ts
-var connection_manager_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
 
 
 
-var connection_manager_ConnectionManager = (function (_super) {
-    connection_manager_extends(ConnectionManager, _super);
-    function ConnectionManager(key, options) {
-        var _this = _super.call(this) || this;
-        _this.state = 'initialized';
-        _this.connection = null;
-        _this.key = key;
-        _this.options = options;
-        _this.timeline = _this.options.timeline;
-        _this.usingTLS = _this.options.useTLS;
-        _this.errorCallbacks = _this.buildErrorCallbacks();
-        _this.connectionCallbacks = _this.buildConnectionCallbacks(_this.errorCallbacks);
-        _this.handshakeCallbacks = _this.buildHandshakeCallbacks(_this.errorCallbacks);
+class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
+    constructor(key, options) {
+        super();
+        this.state = 'initialized';
+        this.connection = null;
+        this.key = key;
+        this.options = options;
+        this.timeline = this.options.timeline;
+        this.usingTLS = this.options.useTLS;
+        this.errorCallbacks = this.buildErrorCallbacks();
+        this.connectionCallbacks = this.buildConnectionCallbacks(this.errorCallbacks);
+        this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
         var Network = runtime.getNetwork();
-        Network.bind('online', function () {
-            _this.timeline.info({ netinfo: 'online' });
-            if (_this.state === 'connecting' || _this.state === 'unavailable') {
-                _this.retryIn(0);
+        Network.bind('online', () => {
+            this.timeline.info({ netinfo: 'online' });
+            if (this.state === 'connecting' || this.state === 'unavailable') {
+                this.retryIn(0);
             }
         });
-        Network.bind('offline', function () {
-            _this.timeline.info({ netinfo: 'offline' });
-            if (_this.connection) {
-                _this.sendActivityCheck();
+        Network.bind('offline', () => {
+            this.timeline.info({ netinfo: 'offline' });
+            if (this.connection) {
+                this.sendActivityCheck();
             }
         });
-        _this.updateStrategy();
-        return _this;
+        this.updateStrategy();
     }
-    ConnectionManager.prototype.connect = function () {
+    connect() {
         if (this.connection || this.runner) {
             return;
         }
@@ -2792,59 +2484,58 @@ var connection_manager_ConnectionManager = (function (_super) {
         this.updateState('connecting');
         this.startConnecting();
         this.setUnavailableTimer();
-    };
-    ConnectionManager.prototype.send = function (data) {
+    }
+    send(data) {
         if (this.connection) {
             return this.connection.send(data);
         }
         else {
             return false;
         }
-    };
-    ConnectionManager.prototype.send_event = function (name, data, channel) {
+    }
+    send_event(name, data, channel) {
         if (this.connection) {
             return this.connection.send_event(name, data, channel);
         }
         else {
             return false;
         }
-    };
-    ConnectionManager.prototype.disconnect = function () {
+    }
+    disconnect() {
         this.disconnectInternally();
         this.updateState('disconnected');
-    };
-    ConnectionManager.prototype.isUsingTLS = function () {
+    }
+    isUsingTLS() {
         return this.usingTLS;
-    };
-    ConnectionManager.prototype.startConnecting = function () {
-        var _this = this;
-        var callback = function (error, handshake) {
+    }
+    startConnecting() {
+        var callback = (error, handshake) => {
             if (error) {
-                _this.runner = _this.strategy.connect(0, callback);
+                this.runner = this.strategy.connect(0, callback);
             }
             else {
                 if (handshake.action === 'error') {
-                    _this.emit('error', {
+                    this.emit('error', {
                         type: 'HandshakeError',
                         error: handshake.error
                     });
-                    _this.timeline.error({ handshakeError: handshake.error });
+                    this.timeline.error({ handshakeError: handshake.error });
                 }
                 else {
-                    _this.abortConnecting();
-                    _this.handshakeCallbacks[handshake.action](handshake);
+                    this.abortConnecting();
+                    this.handshakeCallbacks[handshake.action](handshake);
                 }
             }
         };
         this.runner = this.strategy.connect(0, callback);
-    };
-    ConnectionManager.prototype.abortConnecting = function () {
+    }
+    abortConnecting() {
         if (this.runner) {
             this.runner.abort();
             this.runner = null;
         }
-    };
-    ConnectionManager.prototype.disconnectInternally = function () {
+    }
+    disconnectInternally() {
         this.abortConnecting();
         this.clearRetryTimer();
         this.clearUnavailableTimer();
@@ -2852,136 +2543,129 @@ var connection_manager_ConnectionManager = (function (_super) {
             var connection = this.abandonConnection();
             connection.close();
         }
-    };
-    ConnectionManager.prototype.updateStrategy = function () {
+    }
+    updateStrategy() {
         this.strategy = this.options.getStrategy({
             key: this.key,
             timeline: this.timeline,
             useTLS: this.usingTLS
         });
-    };
-    ConnectionManager.prototype.retryIn = function (delay) {
-        var _this = this;
+    }
+    retryIn(delay) {
         this.timeline.info({ action: 'retry', delay: delay });
         if (delay > 0) {
             this.emit('connecting_in', Math.round(delay / 1000));
         }
-        this.retryTimer = new OneOffTimer(delay || 0, function () {
-            _this.disconnectInternally();
-            _this.connect();
+        this.retryTimer = new timers_OneOffTimer(delay || 0, () => {
+            this.disconnectInternally();
+            this.connect();
         });
-    };
-    ConnectionManager.prototype.clearRetryTimer = function () {
+    }
+    clearRetryTimer() {
         if (this.retryTimer) {
             this.retryTimer.ensureAborted();
             this.retryTimer = null;
         }
-    };
-    ConnectionManager.prototype.setUnavailableTimer = function () {
-        var _this = this;
-        this.unavailableTimer = new OneOffTimer(this.options.unavailableTimeout, function () {
-            _this.updateState('unavailable');
+    }
+    setUnavailableTimer() {
+        this.unavailableTimer = new timers_OneOffTimer(this.options.unavailableTimeout, () => {
+            this.updateState('unavailable');
         });
-    };
-    ConnectionManager.prototype.clearUnavailableTimer = function () {
+    }
+    clearUnavailableTimer() {
         if (this.unavailableTimer) {
             this.unavailableTimer.ensureAborted();
         }
-    };
-    ConnectionManager.prototype.sendActivityCheck = function () {
-        var _this = this;
+    }
+    sendActivityCheck() {
         this.stopActivityCheck();
         this.connection.ping();
-        this.activityTimer = new OneOffTimer(this.options.pongTimeout, function () {
-            _this.timeline.error({ pong_timed_out: _this.options.pongTimeout });
-            _this.retryIn(0);
+        this.activityTimer = new timers_OneOffTimer(this.options.pongTimeout, () => {
+            this.timeline.error({ pong_timed_out: this.options.pongTimeout });
+            this.retryIn(0);
         });
-    };
-    ConnectionManager.prototype.resetActivityCheck = function () {
-        var _this = this;
+    }
+    resetActivityCheck() {
         this.stopActivityCheck();
         if (this.connection && !this.connection.handlesActivityChecks()) {
-            this.activityTimer = new OneOffTimer(this.activityTimeout, function () {
-                _this.sendActivityCheck();
+            this.activityTimer = new timers_OneOffTimer(this.activityTimeout, () => {
+                this.sendActivityCheck();
             });
         }
-    };
-    ConnectionManager.prototype.stopActivityCheck = function () {
+    }
+    stopActivityCheck() {
         if (this.activityTimer) {
             this.activityTimer.ensureAborted();
         }
-    };
-    ConnectionManager.prototype.buildConnectionCallbacks = function (errorCallbacks) {
-        var _this = this;
+    }
+    buildConnectionCallbacks(errorCallbacks) {
         return extend({}, errorCallbacks, {
-            message: function (message) {
-                _this.resetActivityCheck();
-                _this.emit('message', message);
+            message: message => {
+                this.resetActivityCheck();
+                this.emit('message', message);
             },
-            ping: function () {
-                _this.send_event('pusher:pong', {});
+            ping: () => {
+                this.send_event('pusher:pong', {});
             },
-            activity: function () {
-                _this.resetActivityCheck();
+            activity: () => {
+                this.resetActivityCheck();
             },
-            error: function (error) {
-                _this.emit('error', error);
+            error: error => {
+                this.emit('error', error);
             },
-            closed: function () {
-                _this.abandonConnection();
-                if (_this.shouldRetry()) {
-                    _this.retryIn(1000);
+            closed: () => {
+                this.abandonConnection();
+                if (this.shouldRetry()) {
+                    this.retryIn(1000);
                 }
             }
         });
-    };
-    ConnectionManager.prototype.buildHandshakeCallbacks = function (errorCallbacks) {
-        var _this = this;
+    }
+    buildHandshakeCallbacks(errorCallbacks) {
         return extend({}, errorCallbacks, {
-            connected: function (handshake) {
-                _this.activityTimeout = Math.min(_this.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
-                _this.clearUnavailableTimer();
-                _this.setConnection(handshake.connection);
-                _this.socket_id = _this.connection.id;
-                _this.updateState('connected', { socket_id: _this.socket_id });
+            connected: (handshake) => {
+                this.activityTimeout = Math.min(this.options.activityTimeout, handshake.activityTimeout, handshake.connection.activityTimeout || Infinity);
+                this.clearUnavailableTimer();
+                this.setConnection(handshake.connection);
+                this.socket_id = this.connection.id;
+                this.updateState('connected', { socket_id: this.socket_id });
             }
         });
-    };
-    ConnectionManager.prototype.buildErrorCallbacks = function () {
-        var _this = this;
-        var withErrorEmitted = function (callback) {
-            return function (result) {
+    }
+    buildErrorCallbacks() {
+        let withErrorEmitted = callback => {
+            return (result) => {
                 if (result.error) {
-                    _this.emit('error', { type: 'WebSocketError', error: result.error });
+                    this.emit('error', { type: 'WebSocketError', error: result.error });
                 }
                 callback(result);
             };
         };
         return {
-            tls_only: withErrorEmitted(function () {
-                _this.usingTLS = true;
-                _this.updateStrategy();
-                _this.retryIn(0);
+            tls_only: withErrorEmitted(() => {
+                this.usingTLS = true;
+                this.updateStrategy();
+                this.retryIn(0);
             }),
-            refused: withErrorEmitted(function () {
-                _this.disconnect();
+            refused: withErrorEmitted(() => {
+                this.disconnect();
             }),
-            backoff: withErrorEmitted(function () {
-                _this.retryIn(1000);
+            backoff: withErrorEmitted(() => {
+                this.retryIn(1000);
             }),
-            retry: withErrorEmitted(function () {
-                _this.retryIn(0);
+            retry: withErrorEmitted(() => {
+                this.retryIn(0);
             })
         };
-    };
-    ConnectionManager.prototype.setConnection = function (connection) {
+    }
+    setConnection(connection) {
         this.connection = connection;
         for (var event in this.connectionCallbacks) {
             this.connection.bind(event, this.connectionCallbacks[event]);
         }
         this.resetActivityCheck();
-    };
-    ConnectionManager.prototype.abandonConnection = function () {
+    }
+    abandonConnection() {
         if (!this.connection) {
             return;
         }
@@ -2992,8 +2676,8 @@ var connection_manager_ConnectionManager = (function (_super) {
         var connection = this.connection;
         this.connection = null;
         return connection;
-    };
-    ConnectionManager.prototype.updateState = function (newState, data) {
+    }
+    updateState(newState, data) {
         var previousState = this.state;
         this.state = newState;
         if (previousState !== newState) {
@@ -3006,56 +2690,52 @@ var connection_manager_ConnectionManager = (function (_super) {
             this.emit('state_change', { previous: previousState, current: newState });
             this.emit(newState, data);
         }
-    };
-    ConnectionManager.prototype.shouldRetry = function () {
+    }
+    shouldRetry() {
         return this.state === 'connecting' || this.state === 'connected';
-    };
-    return ConnectionManager;
-}(dispatcher));
-/* harmony default export */ var connection_manager = (connection_manager_ConnectionManager);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/channels/channels.ts
 
 
 
 
-var channels_Channels = (function () {
-    function Channels() {
+class channels_Channels {
+    constructor() {
         this.channels = {};
     }
-    Channels.prototype.add = function (name, pusher) {
+    add(name, pusher) {
         if (!this.channels[name]) {
             this.channels[name] = createChannel(name, pusher);
         }
         return this.channels[name];
-    };
-    Channels.prototype.all = function () {
+    }
+    all() {
         return values(this.channels);
-    };
-    Channels.prototype.find = function (name) {
+    }
+    find(name) {
         return this.channels[name];
-    };
-    Channels.prototype.remove = function (name) {
+    }
+    remove(name) {
         var channel = this.channels[name];
         delete this.channels[name];
         return channel;
-    };
-    Channels.prototype.disconnect = function () {
+    }
+    disconnect() {
         objectApply(this.channels, function (channel) {
             channel.disconnect();
         });
-    };
-    return Channels;
-}());
-/* harmony default export */ var channels = (channels_Channels);
+    }
+}
 function createChannel(name, pusher) {
     if (name.indexOf('private-encrypted-') === 0) {
         if (pusher.config.nacl) {
             return factory.createEncryptedChannel(name, pusher, pusher.config.nacl);
         }
-        var errMsg = 'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
-        var suffix = url_store.buildLogSuffix('encryptedChannelSupport');
-        throw new UnsupportedFeature(errMsg + ". " + suffix);
+        let errMsg = 'Tried to subscribe to a private-encrypted- channel but no nacl implementation available';
+        let suffix = url_store.buildLogSuffix('encryptedChannelSupport');
+        throw new UnsupportedFeature(`${errMsg}. ${suffix}`);
     }
     else if (name.indexOf('private-') === 0) {
         return factory.createPrivateChannel(name, pusher);
@@ -3082,97 +2762,94 @@ function createChannel(name, pusher) {
 
 
 var Factory = {
-    createChannels: function () {
-        return new channels();
+    createChannels() {
+        return new channels_Channels();
     },
-    createConnectionManager: function (key, options) {
-        return new connection_manager(key, options);
+    createConnectionManager(key, options) {
+        return new connection_manager_ConnectionManager(key, options);
     },
-    createChannel: function (name, pusher) {
-        return new channels_channel(name, pusher);
+    createChannel(name, pusher) {
+        return new channel_Channel(name, pusher);
     },
-    createPrivateChannel: function (name, pusher) {
-        return new private_channel(name, pusher);
+    createPrivateChannel(name, pusher) {
+        return new private_channel_PrivateChannel(name, pusher);
     },
-    createPresenceChannel: function (name, pusher) {
-        return new presence_channel(name, pusher);
+    createPresenceChannel(name, pusher) {
+        return new presence_channel_PresenceChannel(name, pusher);
     },
-    createEncryptedChannel: function (name, pusher, nacl) {
-        return new encrypted_channel(name, pusher, nacl);
+    createEncryptedChannel(name, pusher, nacl) {
+        return new encrypted_channel_EncryptedChannel(name, pusher, nacl);
     },
-    createTimelineSender: function (timeline, options) {
-        return new timeline_sender(timeline, options);
+    createTimelineSender(timeline, options) {
+        return new timeline_sender_TimelineSender(timeline, options);
     },
-    createHandshake: function (transport, callback) {
-        return new connection_handshake(transport, callback);
+    createHandshake(transport, callback) {
+        return new handshake_Handshake(transport, callback);
     },
-    createAssistantToTheTransportManager: function (manager, transport, options) {
-        return new assistant_to_the_transport_manager(manager, transport, options);
+    createAssistantToTheTransportManager(manager, transport, options) {
+        return new assistant_to_the_transport_manager_AssistantToTheTransportManager(manager, transport, options);
     }
 };
 /* harmony default export */ var factory = (Factory);
 
 // CONCATENATED MODULE: ./src/core/transports/transport_manager.ts
 
-var transport_manager_TransportManager = (function () {
-    function TransportManager(options) {
+class transport_manager_TransportManager {
+    constructor(options) {
         this.options = options || {};
         this.livesLeft = this.options.lives || Infinity;
     }
-    TransportManager.prototype.getAssistant = function (transport) {
+    getAssistant(transport) {
         return factory.createAssistantToTheTransportManager(this, transport, {
             minPingDelay: this.options.minPingDelay,
             maxPingDelay: this.options.maxPingDelay
         });
-    };
-    TransportManager.prototype.isAlive = function () {
+    }
+    isAlive() {
         return this.livesLeft > 0;
-    };
-    TransportManager.prototype.reportDeath = function () {
+    }
+    reportDeath() {
         this.livesLeft -= 1;
-    };
-    return TransportManager;
-}());
-/* harmony default export */ var transport_manager = (transport_manager_TransportManager);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/strategies/sequential_strategy.ts
 
 
 
-var sequential_strategy_SequentialStrategy = (function () {
-    function SequentialStrategy(strategies, options) {
+class sequential_strategy_SequentialStrategy {
+    constructor(strategies, options) {
         this.strategies = strategies;
         this.loop = Boolean(options.loop);
         this.failFast = Boolean(options.failFast);
         this.timeout = options.timeout;
         this.timeoutLimit = options.timeoutLimit;
     }
-    SequentialStrategy.prototype.isSupported = function () {
+    isSupported() {
         return any(this.strategies, util.method('isSupported'));
-    };
-    SequentialStrategy.prototype.connect = function (minPriority, callback) {
-        var _this = this;
+    }
+    connect(minPriority, callback) {
         var strategies = this.strategies;
         var current = 0;
         var timeout = this.timeout;
         var runner = null;
-        var tryNextStrategy = function (error, handshake) {
+        var tryNextStrategy = (error, handshake) => {
             if (handshake) {
                 callback(null, handshake);
             }
             else {
                 current = current + 1;
-                if (_this.loop) {
+                if (this.loop) {
                     current = current % strategies.length;
                 }
                 if (current < strategies.length) {
                     if (timeout) {
                         timeout = timeout * 2;
-                        if (_this.timeoutLimit) {
-                            timeout = Math.min(timeout, _this.timeoutLimit);
+                        if (this.timeoutLimit) {
+                            timeout = Math.min(timeout, this.timeoutLimit);
                         }
                     }
-                    runner = _this.tryStrategy(strategies[current], minPriority, { timeout: timeout, failFast: _this.failFast }, tryNextStrategy);
+                    runner = this.tryStrategy(strategies[current], minPriority, { timeout, failFast: this.failFast }, tryNextStrategy);
                 }
                 else {
                     callback(true);
@@ -3191,12 +2868,12 @@ var sequential_strategy_SequentialStrategy = (function () {
                 }
             }
         };
-    };
-    SequentialStrategy.prototype.tryStrategy = function (strategy, minPriority, options, callback) {
+    }
+    tryStrategy(strategy, minPriority, options, callback) {
         var timer = null;
         var runner = null;
         if (options.timeout > 0) {
-            timer = new OneOffTimer(options.timeout, function () {
+            timer = new timers_OneOffTimer(options.timeout, function () {
                 runner.abort();
                 callback(true);
             });
@@ -3221,22 +2898,20 @@ var sequential_strategy_SequentialStrategy = (function () {
                 runner.forceMinPriority(p);
             }
         };
-    };
-    return SequentialStrategy;
-}());
-/* harmony default export */ var sequential_strategy = (sequential_strategy_SequentialStrategy);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/strategies/best_connected_ever_strategy.ts
 
 
-var best_connected_ever_strategy_BestConnectedEverStrategy = (function () {
-    function BestConnectedEverStrategy(strategies) {
+class best_connected_ever_strategy_BestConnectedEverStrategy {
+    constructor(strategies) {
         this.strategies = strategies;
     }
-    BestConnectedEverStrategy.prototype.isSupported = function () {
+    isSupported() {
         return any(this.strategies, util.method('isSupported'));
-    };
-    BestConnectedEverStrategy.prototype.connect = function (minPriority, callback) {
+    }
+    connect(minPriority, callback) {
         return connect(this.strategies, minPriority, function (i, runners) {
             return function (error, handshake) {
                 runners[i].error = error;
@@ -3252,10 +2927,8 @@ var best_connected_ever_strategy_BestConnectedEverStrategy = (function () {
                 callback(null, handshake);
             };
         });
-    };
-    return BestConnectedEverStrategy;
-}());
-/* harmony default export */ var best_connected_ever_strategy = (best_connected_ever_strategy_BestConnectedEverStrategy);
+    }
+}
 function connect(strategies, minPriority, callbackBuilder) {
     var runners = map(strategies, function (strategy, i, _, rs) {
         return strategy.connect(minPriority, callbackBuilder(i, rs));
@@ -3288,18 +2961,18 @@ function abortRunner(runner) {
 
 
 
-var cached_strategy_CachedStrategy = (function () {
-    function CachedStrategy(strategy, transports, options) {
+class cached_strategy_CachedStrategy {
+    constructor(strategy, transports, options) {
         this.strategy = strategy;
         this.transports = transports;
         this.ttl = options.ttl || 1800 * 1000;
         this.usingTLS = options.useTLS;
         this.timeline = options.timeline;
     }
-    CachedStrategy.prototype.isSupported = function () {
+    isSupported() {
         return this.strategy.isSupported();
-    };
-    CachedStrategy.prototype.connect = function (minPriority, callback) {
+    }
+    connect(minPriority, callback) {
         var usingTLS = this.usingTLS;
         var info = fetchTransportCache(usingTLS);
         var strategies = [this.strategy];
@@ -3311,7 +2984,7 @@ var cached_strategy_CachedStrategy = (function () {
                     transport: info.transport,
                     latency: info.latency
                 });
-                strategies.push(new sequential_strategy([transport], {
+                strategies.push(new sequential_strategy_SequentialStrategy([transport], {
                     timeout: info.latency * 2 + 1000,
                     failFast: true
                 }));
@@ -3347,10 +3020,8 @@ var cached_strategy_CachedStrategy = (function () {
                 }
             }
         };
-    };
-    return CachedStrategy;
-}());
-/* harmony default export */ var cached_strategy = (cached_strategy_CachedStrategy);
+    }
+}
 function getTransportCacheKey(usingTLS) {
     return 'pusherTransport' + (usingTLS ? 'TLS' : 'NonTLS');
 }
@@ -3396,19 +3067,18 @@ function flushTransportCache(usingTLS) {
 
 // CONCATENATED MODULE: ./src/core/strategies/delayed_strategy.ts
 
-var delayed_strategy_DelayedStrategy = (function () {
-    function DelayedStrategy(strategy, _a) {
-        var number = _a.delay;
+class delayed_strategy_DelayedStrategy {
+    constructor(strategy, { delay: number }) {
         this.strategy = strategy;
         this.options = { delay: number };
     }
-    DelayedStrategy.prototype.isSupported = function () {
+    isSupported() {
         return this.strategy.isSupported();
-    };
-    DelayedStrategy.prototype.connect = function (minPriority, callback) {
+    }
+    connect(minPriority, callback) {
         var strategy = this.strategy;
         var runner;
-        var timer = new OneOffTimer(this.options.delay, function () {
+        var timer = new timers_OneOffTimer(this.options.delay, function () {
             runner = strategy.connect(minPriority, callback);
         });
         return {
@@ -3425,39 +3095,35 @@ var delayed_strategy_DelayedStrategy = (function () {
                 }
             }
         };
-    };
-    return DelayedStrategy;
-}());
-/* harmony default export */ var delayed_strategy = (delayed_strategy_DelayedStrategy);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/strategies/if_strategy.ts
-var IfStrategy = (function () {
-    function IfStrategy(test, trueBranch, falseBranch) {
+class IfStrategy {
+    constructor(test, trueBranch, falseBranch) {
         this.test = test;
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
     }
-    IfStrategy.prototype.isSupported = function () {
+    isSupported() {
         var branch = this.test() ? this.trueBranch : this.falseBranch;
         return branch.isSupported();
-    };
-    IfStrategy.prototype.connect = function (minPriority, callback) {
+    }
+    connect(minPriority, callback) {
         var branch = this.test() ? this.trueBranch : this.falseBranch;
         return branch.connect(minPriority, callback);
-    };
-    return IfStrategy;
-}());
-/* harmony default export */ var if_strategy = (IfStrategy);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/strategies/first_connected_strategy.ts
-var FirstConnectedStrategy = (function () {
-    function FirstConnectedStrategy(strategy) {
+class FirstConnectedStrategy {
+    constructor(strategy) {
         this.strategy = strategy;
     }
-    FirstConnectedStrategy.prototype.isSupported = function () {
+    isSupported() {
         return this.strategy.isSupported();
-    };
-    FirstConnectedStrategy.prototype.connect = function (minPriority, callback) {
+    }
+    connect(minPriority, callback) {
         var runner = this.strategy.connect(minPriority, function (error, handshake) {
             if (handshake) {
                 runner.abort();
@@ -3465,10 +3131,8 @@ var FirstConnectedStrategy = (function () {
             callback(error, handshake);
         });
         return runner;
-    };
-    return FirstConnectedStrategy;
-}());
-/* harmony default export */ var first_connected_strategy = (FirstConnectedStrategy);
+    }
+}
 
 // CONCATENATED MODULE: ./src/runtimes/web/default_strategy.ts
 
@@ -3508,12 +3172,12 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
         timeout: 15000,
         timeoutLimit: 60000
     };
-    var ws_manager = new transport_manager({
+    var ws_manager = new transport_manager_TransportManager({
         lives: 2,
         minPingDelay: 10000,
         maxPingDelay: config.activityTimeout
     });
-    var streaming_manager = new transport_manager({
+    var streaming_manager = new transport_manager_TransportManager({
         lives: 2,
         minPingDelay: 10000,
         maxPingDelay: config.activityTimeout
@@ -3525,37 +3189,37 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     var xdr_streaming_transport = defineTransportStrategy('xdr_streaming', 'xdr_streaming', 1, sockjs_options, streaming_manager);
     var xhr_polling_transport = defineTransportStrategy('xhr_polling', 'xhr_polling', 1, sockjs_options);
     var xdr_polling_transport = defineTransportStrategy('xdr_polling', 'xdr_polling', 1, sockjs_options);
-    var ws_loop = new sequential_strategy([ws_transport], timeouts);
-    var wss_loop = new sequential_strategy([wss_transport], timeouts);
-    var sockjs_loop = new sequential_strategy([sockjs_transport], timeouts);
-    var streaming_loop = new sequential_strategy([
-        new if_strategy(testSupportsStrategy(xhr_streaming_transport), xhr_streaming_transport, xdr_streaming_transport)
+    var ws_loop = new sequential_strategy_SequentialStrategy([ws_transport], timeouts);
+    var wss_loop = new sequential_strategy_SequentialStrategy([wss_transport], timeouts);
+    var sockjs_loop = new sequential_strategy_SequentialStrategy([sockjs_transport], timeouts);
+    var streaming_loop = new sequential_strategy_SequentialStrategy([
+        new IfStrategy(testSupportsStrategy(xhr_streaming_transport), xhr_streaming_transport, xdr_streaming_transport)
     ], timeouts);
-    var polling_loop = new sequential_strategy([
-        new if_strategy(testSupportsStrategy(xhr_polling_transport), xhr_polling_transport, xdr_polling_transport)
+    var polling_loop = new sequential_strategy_SequentialStrategy([
+        new IfStrategy(testSupportsStrategy(xhr_polling_transport), xhr_polling_transport, xdr_polling_transport)
     ], timeouts);
-    var http_loop = new sequential_strategy([
-        new if_strategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy([
+    var http_loop = new sequential_strategy_SequentialStrategy([
+        new IfStrategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy_BestConnectedEverStrategy([
             streaming_loop,
-            new delayed_strategy(polling_loop, { delay: 4000 })
+            new delayed_strategy_DelayedStrategy(polling_loop, { delay: 4000 })
         ]), polling_loop)
     ], timeouts);
-    var http_fallback_loop = new if_strategy(testSupportsStrategy(http_loop), http_loop, sockjs_loop);
+    var http_fallback_loop = new IfStrategy(testSupportsStrategy(http_loop), http_loop, sockjs_loop);
     var wsStrategy;
     if (baseOptions.useTLS) {
-        wsStrategy = new best_connected_ever_strategy([
+        wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
             ws_loop,
-            new delayed_strategy(http_fallback_loop, { delay: 2000 })
+            new delayed_strategy_DelayedStrategy(http_fallback_loop, { delay: 2000 })
         ]);
     }
     else {
-        wsStrategy = new best_connected_ever_strategy([
+        wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
             ws_loop,
-            new delayed_strategy(wss_loop, { delay: 2000 }),
-            new delayed_strategy(http_fallback_loop, { delay: 5000 })
+            new delayed_strategy_DelayedStrategy(wss_loop, { delay: 2000 }),
+            new delayed_strategy_DelayedStrategy(http_fallback_loop, { delay: 5000 })
         ]);
     }
-    return new cached_strategy(new first_connected_strategy(new if_strategy(testSupportsStrategy(ws_transport), wsStrategy, http_fallback_loop)), definedTransports, {
+    return new cached_strategy_CachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_fallback_loop)), definedTransports, {
         ttl: 1800000,
         timeline: baseOptions.timeline,
         useTLS: baseOptions.useTLS
@@ -3629,37 +3293,21 @@ var http_xdomain_request_hooks = {
 /* harmony default export */ var http_xdomain_request = (http_xdomain_request_hooks);
 
 // CONCATENATED MODULE: ./src/core/http/http_request.ts
-var http_request_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
-var MAX_BUFFER_LENGTH = 256 * 1024;
-var http_request_HTTPRequest = (function (_super) {
-    http_request_extends(HTTPRequest, _super);
-    function HTTPRequest(hooks, method, url) {
-        var _this = _super.call(this) || this;
-        _this.hooks = hooks;
-        _this.method = method;
-        _this.url = url;
-        return _this;
+const MAX_BUFFER_LENGTH = 256 * 1024;
+class http_request_HTTPRequest extends dispatcher_Dispatcher {
+    constructor(hooks, method, url) {
+        super();
+        this.hooks = hooks;
+        this.method = method;
+        this.url = url;
     }
-    HTTPRequest.prototype.start = function (payload) {
-        var _this = this;
+    start(payload) {
         this.position = 0;
         this.xhr = this.hooks.getRequest(this);
-        this.unloader = function () {
-            _this.close();
+        this.unloader = () => {
+            this.close();
         };
         runtime.addUnloadListener(this.unloader);
         this.xhr.open(this.method, this.url, true);
@@ -3667,8 +3315,8 @@ var http_request_HTTPRequest = (function (_super) {
             this.xhr.setRequestHeader('Content-Type', 'application/json');
         }
         this.xhr.send(payload);
-    };
-    HTTPRequest.prototype.close = function () {
+    }
+    close() {
         if (this.unloader) {
             runtime.removeUnloadListener(this.unloader);
             this.unloader = null;
@@ -3677,8 +3325,8 @@ var http_request_HTTPRequest = (function (_super) {
             this.hooks.abortRequest(this.xhr);
             this.xhr = null;
         }
-    };
-    HTTPRequest.prototype.onChunk = function (status, data) {
+    }
+    onChunk(status, data) {
         while (true) {
             var chunk = this.advanceBuffer(data);
             if (chunk) {
@@ -3691,8 +3339,8 @@ var http_request_HTTPRequest = (function (_super) {
         if (this.isBufferTooLong(data)) {
             this.emit('buffer_too_long');
         }
-    };
-    HTTPRequest.prototype.advanceBuffer = function (buffer) {
+    }
+    advanceBuffer(buffer) {
         var unreadData = buffer.slice(this.position);
         var endOfLinePosition = unreadData.indexOf('\n');
         if (endOfLinePosition !== -1) {
@@ -3702,13 +3350,11 @@ var http_request_HTTPRequest = (function (_super) {
         else {
             return null;
         }
-    };
-    HTTPRequest.prototype.isBufferTooLong = function (buffer) {
+    }
+    isBufferTooLong(buffer) {
         return this.position === buffer.length && buffer.length > MAX_BUFFER_LENGTH;
-    };
-    return HTTPRequest;
-}(dispatcher));
-/* harmony default export */ var http_request = (http_request_HTTPRequest);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/http/state.ts
 var State;
@@ -3724,24 +3370,24 @@ var State;
 
 
 var autoIncrement = 1;
-var http_socket_HTTPSocket = (function () {
-    function HTTPSocket(hooks, url) {
+class http_socket_HTTPSocket {
+    constructor(hooks, url) {
         this.hooks = hooks;
         this.session = randomNumber(1000) + '/' + randomString(8);
         this.location = getLocation(url);
         this.readyState = state.CONNECTING;
         this.openStream();
     }
-    HTTPSocket.prototype.send = function (payload) {
+    send(payload) {
         return this.sendRaw(JSON.stringify([payload]));
-    };
-    HTTPSocket.prototype.ping = function () {
+    }
+    ping() {
         this.hooks.sendHeartbeat(this);
-    };
-    HTTPSocket.prototype.close = function (code, reason) {
+    }
+    close(code, reason) {
         this.onClose(code, reason, true);
-    };
-    HTTPSocket.prototype.sendRaw = function (payload) {
+    }
+    sendRaw(payload) {
         if (this.readyState === state.OPEN) {
             try {
                 runtime.createSocketRequest('POST', getUniqueURL(getSendURL(this.location, this.session))).start(payload);
@@ -3754,12 +3400,12 @@ var http_socket_HTTPSocket = (function () {
         else {
             return false;
         }
-    };
-    HTTPSocket.prototype.reconnect = function () {
+    }
+    reconnect() {
         this.closeStream();
         this.openStream();
-    };
-    HTTPSocket.prototype.onClose = function (code, reason, wasClean) {
+    }
+    onClose(code, reason, wasClean) {
         this.closeStream();
         this.readyState = state.CLOSED;
         if (this.onclose) {
@@ -3769,8 +3415,8 @@ var http_socket_HTTPSocket = (function () {
                 wasClean: wasClean
             });
         }
-    };
-    HTTPSocket.prototype.onChunk = function (chunk) {
+    }
+    onChunk(chunk) {
         if (chunk.status !== 200) {
             return;
         }
@@ -3802,8 +3448,8 @@ var http_socket_HTTPSocket = (function () {
                 this.onClose(payload[0], payload[1], true);
                 break;
         }
-    };
-    HTTPSocket.prototype.onOpen = function (options) {
+    }
+    onOpen(options) {
         if (this.readyState === state.CONNECTING) {
             if (options && options.hostname) {
                 this.location.base = replaceHost(this.location.base, options.hostname);
@@ -3816,53 +3462,51 @@ var http_socket_HTTPSocket = (function () {
         else {
             this.onClose(1006, 'Server lost session', true);
         }
-    };
-    HTTPSocket.prototype.onEvent = function (event) {
+    }
+    onEvent(event) {
         if (this.readyState === state.OPEN && this.onmessage) {
             this.onmessage({ data: event });
         }
-    };
-    HTTPSocket.prototype.onActivity = function () {
+    }
+    onActivity() {
         if (this.onactivity) {
             this.onactivity();
         }
-    };
-    HTTPSocket.prototype.onError = function (error) {
+    }
+    onError(error) {
         if (this.onerror) {
             this.onerror(error);
         }
-    };
-    HTTPSocket.prototype.openStream = function () {
-        var _this = this;
+    }
+    openStream() {
         this.stream = runtime.createSocketRequest('POST', getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
-        this.stream.bind('chunk', function (chunk) {
-            _this.onChunk(chunk);
+        this.stream.bind('chunk', chunk => {
+            this.onChunk(chunk);
         });
-        this.stream.bind('finished', function (status) {
-            _this.hooks.onFinished(_this, status);
+        this.stream.bind('finished', status => {
+            this.hooks.onFinished(this, status);
         });
-        this.stream.bind('buffer_too_long', function () {
-            _this.reconnect();
+        this.stream.bind('buffer_too_long', () => {
+            this.reconnect();
         });
         try {
             this.stream.start();
         }
         catch (error) {
-            util.defer(function () {
-                _this.onError(error);
-                _this.onClose(1006, 'Could not start streaming', false);
+            util.defer(() => {
+                this.onError(error);
+                this.onClose(1006, 'Could not start streaming', false);
             });
         }
-    };
-    HTTPSocket.prototype.closeStream = function () {
+    }
+    closeStream() {
         if (this.stream) {
             this.stream.unbind_all();
             this.stream.close();
             this.stream = null;
         }
-    };
-    return HTTPSocket;
-}());
+    }
+}
 function getLocation(url) {
     var parts = /([^\?]*)\/*(\??.*)/.exec(url);
     return {
@@ -3969,20 +3613,20 @@ var http_xhr_request_hooks = {
 
 
 var HTTP = {
-    createStreamingSocket: function (url) {
+    createStreamingSocket(url) {
         return this.createSocket(http_streaming_socket, url);
     },
-    createPollingSocket: function (url) {
+    createPollingSocket(url) {
         return this.createSocket(http_polling_socket, url);
     },
-    createSocket: function (hooks, url) {
+    createSocket(hooks, url) {
         return new http_socket(hooks, url);
     },
-    createXHR: function (method, url) {
+    createXHR(method, url) {
         return this.createRequest(http_xhr_request, method, url);
     },
-    createRequest: function (hooks, method, url) {
-        return new http_request(hooks, method, url);
+    createRequest(hooks, method, url) {
+        return new http_request_HTTPRequest(hooks, method, url);
     }
 };
 /* harmony default export */ var http_http = (HTTP);
@@ -4018,17 +3662,16 @@ var Runtime = {
     transportConnectionInitializer: transport_connection_initializer,
     HTTPFactory: web_http_http,
     TimelineTransport: jsonp_timeline,
-    getXHRAPI: function () {
+    getXHRAPI() {
         return window.XMLHttpRequest;
     },
-    getWebSocketAPI: function () {
+    getWebSocketAPI() {
         return window.WebSocket || window.MozWebSocket;
     },
-    setup: function (PusherClass) {
-        var _this = this;
+    setup(PusherClass) {
         window.Pusher = PusherClass;
-        var initializeOnDocumentBody = function () {
-            _this.onDocumentBody(PusherClass.ready);
+        var initializeOnDocumentBody = () => {
+            this.onDocumentBody(PusherClass.ready);
         };
         if (!window.JSON) {
             Dependencies.load('json2', {}, initializeOnDocumentBody);
@@ -4037,33 +3680,32 @@ var Runtime = {
             initializeOnDocumentBody();
         }
     },
-    getDocument: function () {
+    getDocument() {
         return document;
     },
-    getProtocol: function () {
+    getProtocol() {
         return this.getDocument().location.protocol;
     },
-    getAuthorizers: function () {
+    getAuthorizers() {
         return { ajax: xhr_auth, jsonp: jsonp_auth };
     },
-    onDocumentBody: function (callback) {
-        var _this = this;
+    onDocumentBody(callback) {
         if (document.body) {
             callback();
         }
         else {
-            setTimeout(function () {
-                _this.onDocumentBody(callback);
+            setTimeout(() => {
+                this.onDocumentBody(callback);
             }, 0);
         }
     },
-    createJSONPRequest: function (url, data) {
-        return new jsonp_request(url, data);
+    createJSONPRequest(url, data) {
+        return new jsonp_request_JSONPRequest(url, data);
     },
-    createScriptRequest: function (src) {
-        return new script_request(src);
+    createScriptRequest(src) {
+        return new ScriptRequest(src);
     },
-    getLocalStorage: function () {
+    getLocalStorage() {
         try {
             return window.localStorage;
         }
@@ -4071,7 +3713,7 @@ var Runtime = {
             return undefined;
         }
     },
-    createXHR: function () {
+    createXHR() {
         if (this.getXHRAPI()) {
             return this.createXMLHttpRequest();
         }
@@ -4079,21 +3721,21 @@ var Runtime = {
             return this.createMicrosoftXHR();
         }
     },
-    createXMLHttpRequest: function () {
+    createXMLHttpRequest() {
         var Constructor = this.getXHRAPI();
         return new Constructor();
     },
-    createMicrosoftXHR: function () {
+    createMicrosoftXHR() {
         return new ActiveXObject('Microsoft.XMLHTTP');
     },
-    getNetwork: function () {
+    getNetwork() {
         return net_info_Network;
     },
-    createWebSocket: function (url) {
+    createWebSocket(url) {
         var Constructor = this.getWebSocketAPI();
         return new Constructor(url);
     },
-    createSocketRequest: function (method, url) {
+    createSocketRequest(method, url) {
         if (this.isXHRSupported()) {
             return this.HTTPFactory.createXHR(method, url);
         }
@@ -4104,16 +3746,16 @@ var Runtime = {
             throw 'Cross-origin HTTP requests are not supported';
         }
     },
-    isXHRSupported: function () {
+    isXHRSupported() {
         var Constructor = this.getXHRAPI();
         return (Boolean(Constructor) && new Constructor().withCredentials !== undefined);
     },
-    isXDRSupported: function (useTLS) {
+    isXDRSupported(useTLS) {
         var protocol = useTLS ? 'https:' : 'http:';
         var documentProtocol = this.getProtocol();
         return (Boolean(window['XDomainRequest']) && documentProtocol === protocol);
     },
-    addUnloadListener: function (listener) {
+    addUnloadListener(listener) {
         if (window.addEventListener !== undefined) {
             window.addEventListener('unload', listener, false);
         }
@@ -4121,7 +3763,7 @@ var Runtime = {
             window.attachEvent('onunload', listener);
         }
     },
-    removeUnloadListener: function (listener) {
+    removeUnloadListener(listener) {
         if (window.addEventListener !== undefined) {
             window.removeEventListener('unload', listener, false);
         }
@@ -4129,10 +3771,10 @@ var Runtime = {
             window.detachEvent('onunload', listener);
         }
     },
-    randomInt: function (max) {
-        var random = function () {
-            var crypto = window.crypto || window['msCrypto'];
-            var random = crypto.getRandomValues(new Uint32Array(1))[0];
+    randomInt(max) {
+        const random = function () {
+            const crypto = window.crypto || window['msCrypto'];
+            const random = crypto.getRandomValues(new Uint32Array(1))[0];
             return random / Math.pow(2, 32);
         };
         return Math.floor(random() * max);
@@ -4153,8 +3795,8 @@ var TimelineLevel;
 
 
 
-var timeline_Timeline = (function () {
-    function Timeline(key, session, options) {
+class timeline_Timeline {
+    constructor(key, session, options) {
         this.key = key;
         this.session = session;
         this.events = [];
@@ -4162,28 +3804,27 @@ var timeline_Timeline = (function () {
         this.sent = 0;
         this.uniqueID = 0;
     }
-    Timeline.prototype.log = function (level, event) {
+    log(level, event) {
         if (level <= this.options.level) {
             this.events.push(extend({}, event, { timestamp: util.now() }));
             if (this.options.limit && this.events.length > this.options.limit) {
                 this.events.shift();
             }
         }
-    };
-    Timeline.prototype.error = function (event) {
+    }
+    error(event) {
         this.log(timeline_level.ERROR, event);
-    };
-    Timeline.prototype.info = function (event) {
+    }
+    info(event) {
         this.log(timeline_level.INFO, event);
-    };
-    Timeline.prototype.debug = function (event) {
+    }
+    debug(event) {
         this.log(timeline_level.DEBUG, event);
-    };
-    Timeline.prototype.isEmpty = function () {
+    }
+    isEmpty() {
         return this.events.length === 0;
-    };
-    Timeline.prototype.send = function (sendfn, callback) {
-        var _this = this;
+    }
+    send(sendfn, callback) {
         var data = extend({
             session: this.session,
             bundle: this.sent + 1,
@@ -4195,43 +3836,40 @@ var timeline_Timeline = (function () {
             timeline: this.events
         }, this.options.params);
         this.events = [];
-        sendfn(data, function (error, result) {
+        sendfn(data, (error, result) => {
             if (!error) {
-                _this.sent++;
+                this.sent++;
             }
             if (callback) {
                 callback(error, result);
             }
         });
         return true;
-    };
-    Timeline.prototype.generateUniqueID = function () {
+    }
+    generateUniqueID() {
         this.uniqueID++;
         return this.uniqueID;
-    };
-    return Timeline;
-}());
-/* harmony default export */ var timeline_timeline = (timeline_Timeline);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/strategies/transport_strategy.ts
 
 
 
 
-var transport_strategy_TransportStrategy = (function () {
-    function TransportStrategy(name, priority, transport, options) {
+class transport_strategy_TransportStrategy {
+    constructor(name, priority, transport, options) {
         this.name = name;
         this.priority = priority;
         this.transport = transport;
         this.options = options || {};
     }
-    TransportStrategy.prototype.isSupported = function () {
+    isSupported() {
         return this.transport.isSupported({
             useTLS: this.options.useTLS
         });
-    };
-    TransportStrategy.prototype.connect = function (minPriority, callback) {
-        var _this = this;
+    }
+    connect(minPriority, callback) {
         if (!this.isSupported()) {
             return failAttempt(new UnsupportedStrategy(), callback);
         }
@@ -4274,7 +3912,7 @@ var transport_strategy_TransportStrategy = (function () {
         transport.bind('closed', onClosed);
         transport.initialize();
         return {
-            abort: function () {
+            abort: () => {
                 if (connected) {
                     return;
                 }
@@ -4286,11 +3924,11 @@ var transport_strategy_TransportStrategy = (function () {
                     transport.close();
                 }
             },
-            forceMinPriority: function (p) {
+            forceMinPriority: p => {
                 if (connected) {
                     return;
                 }
-                if (_this.priority < p) {
+                if (this.priority < p) {
                     if (handshake) {
                         handshake.close();
                     }
@@ -4300,10 +3938,8 @@ var transport_strategy_TransportStrategy = (function () {
                 }
             }
         };
-    };
-    return TransportStrategy;
-}());
-/* harmony default export */ var transport_strategy = (transport_strategy_TransportStrategy);
+    }
+}
 function failAttempt(error, callback) {
     util.defer(function () {
         callback(error);
@@ -4320,7 +3956,7 @@ function failAttempt(error, callback) {
 
 
 
-var strategy_builder_Transports = runtime.Transports;
+const { Transports: strategy_builder_Transports } = runtime;
 var strategy_builder_defineTransport = function (config, name, type, priority, options, manager) {
     var transportClass = strategy_builder_Transports[type];
     if (!transportClass) {
@@ -4333,7 +3969,7 @@ var strategy_builder_defineTransport = function (config, name, type, priority, o
     var transport;
     if (enabled) {
         options = Object.assign({ ignoreNullOrigin: config.ignoreNullOrigin }, options);
-        transport = new transport_strategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
+        transport = new transport_strategy_TransportStrategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
     }
     else {
         transport = strategy_builder_UnsupportedStrategy;
@@ -4374,7 +4010,7 @@ function validateOptions(options) {
 // CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
 
 
-var composeChannelQuery = function (params, authOptions) {
+const composeChannelQuery = (params, authOptions) => {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
     for (var key in authOptions.params) {
         query +=
@@ -4384,7 +4020,7 @@ var composeChannelQuery = function (params, authOptions) {
                 encodeURIComponent(authOptions.params[key]);
     }
     if (authOptions.paramsProvider != null) {
-        var dynamicParams = authOptions.paramsProvider();
+        let dynamicParams = authOptions.paramsProvider();
         for (var key in dynamicParams) {
             query +=
                 '&' +
@@ -4395,12 +4031,12 @@ var composeChannelQuery = function (params, authOptions) {
     }
     return query;
 };
-var UserAuthenticator = function (authOptions) {
+const UserAuthenticator = (authOptions) => {
     if (typeof runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
-        throw "'" + authOptions.transport + "' is not a recognized auth transport";
+        throw `'${authOptions.transport}' is not a recognized auth transport`;
     }
-    return function (params, callback) {
-        var query = composeChannelQuery(params, authOptions);
+    return (params, callback) => {
+        const query = composeChannelQuery(params, authOptions);
         runtime.getAuthorizers()[authOptions.transport](runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
     };
 };
@@ -4409,7 +4045,7 @@ var UserAuthenticator = function (authOptions) {
 // CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
 
 
-var channel_authorizer_composeChannelQuery = function (params, authOptions) {
+const channel_authorizer_composeChannelQuery = (params, authOptions) => {
     var query = 'socket_id=' + encodeURIComponent(params.socketId);
     query += '&channel_name=' + encodeURIComponent(params.channelName);
     for (var key in authOptions.params) {
@@ -4420,7 +4056,7 @@ var channel_authorizer_composeChannelQuery = function (params, authOptions) {
                 encodeURIComponent(authOptions.params[key]);
     }
     if (authOptions.paramsProvider != null) {
-        var dynamicParams = authOptions.paramsProvider();
+        let dynamicParams = authOptions.paramsProvider();
         for (var key in dynamicParams) {
             query +=
                 '&' +
@@ -4431,20 +4067,20 @@ var channel_authorizer_composeChannelQuery = function (params, authOptions) {
     }
     return query;
 };
-var ChannelAuthorizer = function (authOptions) {
+const ChannelAuthorizer = (authOptions) => {
     if (typeof runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
-        throw "'" + authOptions.transport + "' is not a recognized auth transport";
+        throw `'${authOptions.transport}' is not a recognized auth transport`;
     }
-    return function (params, callback) {
-        var query = channel_authorizer_composeChannelQuery(params, authOptions);
+    return (params, callback) => {
+        const query = channel_authorizer_composeChannelQuery(params, authOptions);
         runtime.getAuthorizers()[authOptions.transport](runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
     };
 };
 /* harmony default export */ var channel_authorizer = (ChannelAuthorizer);
 
 // CONCATENATED MODULE: ./src/core/auth/deprecated_channel_authorizer.ts
-var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGenerator) {
-    var deprecatedAuthorizerOptions = {
+const ChannelAuthorizerProxy = (pusher, authOptions, channelAuthorizerGenerator) => {
+    const deprecatedAuthorizerOptions = {
         authTransport: authOptions.transport,
         authEndpoint: authOptions.endpoint,
         auth: {
@@ -4452,32 +4088,21 @@ var ChannelAuthorizerProxy = function (pusher, authOptions, channelAuthorizerGen
             headers: authOptions.headers
         }
     };
-    return function (params, callback) {
-        var channel = pusher.channel(params.channelName);
-        var channelAuthorizer = channelAuthorizerGenerator(channel, deprecatedAuthorizerOptions);
+    return (params, callback) => {
+        const channel = pusher.channel(params.channelName);
+        const channelAuthorizer = channelAuthorizerGenerator(channel, deprecatedAuthorizerOptions);
         channelAuthorizer.authorize(params.socketId, callback);
     };
 };
 
 // CONCATENATED MODULE: ./src/core/config.ts
-var __assign = (undefined && undefined.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 
 
 
 
 
 function getConfig(opts, pusher) {
-    var config = {
+    let config = {
         activityTimeout: opts.activityTimeout || defaults.activityTimeout,
         cluster: opts.cluster,
         httpPath: opts.httpPath || defaults.httpPath,
@@ -4514,7 +4139,7 @@ function getHttpHost(opts) {
         return opts.httpHost;
     }
     if (opts.cluster) {
-        return "sockjs-" + opts.cluster + ".pusher.com";
+        return `sockjs-${opts.cluster}.pusher.com`;
     }
     return defaults.httpHost;
 }
@@ -4525,7 +4150,7 @@ function getWebsocketHost(opts) {
     return getWebsocketHostFromCluster(opts.cluster);
 }
 function getWebsocketHostFromCluster(cluster) {
-    return "ws-" + cluster + ".pusher.com";
+    return `ws-${cluster}.pusher.com`;
 }
 function shouldUseTLS(opts) {
     if (runtime.getProtocol() === 'https:') {
@@ -4546,7 +4171,7 @@ function getEnableStatsConfig(opts) {
     return false;
 }
 function buildUserAuthenticator(opts) {
-    var userAuthentication = __assign(__assign({}, defaults.userAuthentication), opts.userAuthentication);
+    const userAuthentication = Object.assign(Object.assign({}, defaults.userAuthentication), opts.userAuthentication);
     if ('customHandler' in userAuthentication &&
         userAuthentication['customHandler'] != null) {
         return userAuthentication['customHandler'];
@@ -4554,9 +4179,9 @@ function buildUserAuthenticator(opts) {
     return user_authenticator(userAuthentication);
 }
 function buildChannelAuth(opts, pusher) {
-    var channelAuthorization;
+    let channelAuthorization;
     if ('channelAuthorization' in opts) {
-        channelAuthorization = __assign(__assign({}, defaults.channelAuthorization), opts.channelAuthorization);
+        channelAuthorization = Object.assign(Object.assign({}, defaults.channelAuthorization), opts.channelAuthorization);
     }
     else {
         channelAuthorization = {
@@ -4575,7 +4200,7 @@ function buildChannelAuth(opts, pusher) {
     return channelAuthorization;
 }
 function buildChannelAuthorizer(opts, pusher) {
-    var channelAuthorization = buildChannelAuth(opts, pusher);
+    const channelAuthorization = buildChannelAuth(opts, pusher);
     if ('customHandler' in channelAuthorization &&
         channelAuthorization['customHandler'] != null) {
         return channelAuthorization['customHandler'];
@@ -4584,134 +4209,99 @@ function buildChannelAuthorizer(opts, pusher) {
 }
 
 // CONCATENATED MODULE: ./src/core/watchlist.ts
-var watchlist_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
-var watchlist_WatchlistFacade = (function (_super) {
-    watchlist_extends(WatchlistFacade, _super);
-    function WatchlistFacade(pusher) {
-        var _this = _super.call(this, function (eventName, data) {
-            logger.debug("No callbacks on watchlist events for " + eventName);
-        }) || this;
-        _this.pusher = pusher;
-        _this.bindWatchlistInternalEvent();
-        return _this;
-    }
-    WatchlistFacade.prototype.handleEvent = function (pusherEvent) {
-        var _this = this;
-        pusherEvent.data.events.forEach(function (watchlistEvent) {
-            _this.emit(watchlistEvent.name, watchlistEvent);
+class watchlist_WatchlistFacade extends dispatcher_Dispatcher {
+    constructor(pusher) {
+        super(function (eventName, data) {
+            logger.debug(`No callbacks on watchlist events for ${eventName}`);
         });
-    };
-    WatchlistFacade.prototype.bindWatchlistInternalEvent = function () {
-        var _this = this;
-        this.pusher.connection.bind('message', function (pusherEvent) {
+        this.pusher = pusher;
+        this.bindWatchlistInternalEvent();
+    }
+    handleEvent(pusherEvent) {
+        pusherEvent.data.events.forEach(watchlistEvent => {
+            this.emit(watchlistEvent.name, watchlistEvent);
+        });
+    }
+    bindWatchlistInternalEvent() {
+        this.pusher.connection.bind('message', pusherEvent => {
             var eventName = pusherEvent.event;
             if (eventName === 'pusher_internal:watchlist_events') {
-                _this.handleEvent(pusherEvent);
+                this.handleEvent(pusherEvent);
             }
         });
-    };
-    return WatchlistFacade;
-}(dispatcher));
-/* harmony default export */ var watchlist = (watchlist_WatchlistFacade);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/utils/flat_promise.ts
 function flatPromise() {
-    var resolve, reject;
-    var promise = new Promise(function (res, rej) {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {
         resolve = res;
         reject = rej;
     });
-    return { promise: promise, resolve: resolve, reject: reject };
+    return { promise, resolve, reject };
 }
 /* harmony default export */ var flat_promise = (flatPromise);
 
 // CONCATENATED MODULE: ./src/core/user.ts
-var user_extends = (undefined && undefined.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
 
 
 
 
 
-var user_UserFacade = (function (_super) {
-    user_extends(UserFacade, _super);
-    function UserFacade(pusher) {
-        var _this = _super.call(this, function (eventName, data) {
+class user_UserFacade extends dispatcher_Dispatcher {
+    constructor(pusher) {
+        super(function (eventName, data) {
             logger.debug('No callbacks on user for ' + eventName);
-        }) || this;
-        _this.signin_requested = false;
-        _this.user_data = null;
-        _this.serverToUserChannel = null;
-        _this.signinDonePromise = null;
-        _this._signinDoneResolve = null;
-        _this._onAuthorize = function (err, authData) {
+        });
+        this.signin_requested = false;
+        this.user_data = null;
+        this.serverToUserChannel = null;
+        this.signinDonePromise = null;
+        this._signinDoneResolve = null;
+        this._onAuthorize = (err, authData) => {
             if (err) {
-                logger.warn("Error during signin: " + err);
-                _this._cleanup();
+                logger.warn(`Error during signin: ${err}`);
+                this._cleanup();
                 return;
             }
-            _this.pusher.send_event('pusher:signin', {
+            this.pusher.send_event('pusher:signin', {
                 auth: authData.auth,
                 user_data: authData.user_data
             });
         };
-        _this.pusher = pusher;
-        _this.pusher.connection.bind('state_change', function (_a) {
-            var previous = _a.previous, current = _a.current;
+        this.pusher = pusher;
+        this.pusher.connection.bind('state_change', ({ previous, current }) => {
             if (previous !== 'connected' && current === 'connected') {
-                _this._signin();
+                this._signin();
             }
             if (previous === 'connected' && current !== 'connected') {
-                _this._cleanup();
-                _this._newSigninPromiseIfNeeded();
+                this._cleanup();
+                this._newSigninPromiseIfNeeded();
             }
         });
-        _this.watchlist = new watchlist(pusher);
-        _this.pusher.connection.bind('message', function (event) {
+        this.watchlist = new watchlist_WatchlistFacade(pusher);
+        this.pusher.connection.bind('message', event => {
             var eventName = event.event;
             if (eventName === 'pusher:signin_success') {
-                _this._onSigninSuccess(event.data);
+                this._onSigninSuccess(event.data);
             }
-            if (_this.serverToUserChannel &&
-                _this.serverToUserChannel.name === event.channel) {
-                _this.serverToUserChannel.handleEvent(event);
+            if (this.serverToUserChannel &&
+                this.serverToUserChannel.name === event.channel) {
+                this.serverToUserChannel.handleEvent(event);
             }
         });
-        return _this;
     }
-    UserFacade.prototype.signin = function () {
+    signin() {
         if (this.signin_requested) {
             return;
         }
         this.signin_requested = true;
         this._signin();
-    };
-    UserFacade.prototype._signin = function () {
+    }
+    _signin() {
         if (!this.signin_requested) {
             return;
         }
@@ -4722,46 +4312,45 @@ var user_UserFacade = (function (_super) {
         this.pusher.config.userAuthenticator({
             socketId: this.pusher.connection.socket_id
         }, this._onAuthorize);
-    };
-    UserFacade.prototype._onSigninSuccess = function (data) {
+    }
+    _onSigninSuccess(data) {
         try {
             this.user_data = JSON.parse(data.user_data);
         }
         catch (e) {
-            logger.error("Failed parsing user data after signin: " + data.user_data);
+            logger.error(`Failed parsing user data after signin: ${data.user_data}`);
             this._cleanup();
             return;
         }
         if (typeof this.user_data.id !== 'string' || this.user_data.id === '') {
-            logger.error("user_data doesn't contain an id. user_data: " + this.user_data);
+            logger.error(`user_data doesn't contain an id. user_data: ${this.user_data}`);
             this._cleanup();
             return;
         }
         this._signinDoneResolve();
         this._subscribeChannels();
-    };
-    UserFacade.prototype._subscribeChannels = function () {
-        var _this = this;
-        var ensure_subscribed = function (channel) {
+    }
+    _subscribeChannels() {
+        const ensure_subscribed = channel => {
             if (channel.subscriptionPending && channel.subscriptionCancelled) {
                 channel.reinstateSubscription();
             }
             else if (!channel.subscriptionPending &&
-                _this.pusher.connection.state === 'connected') {
+                this.pusher.connection.state === 'connected') {
                 channel.subscribe();
             }
         };
-        this.serverToUserChannel = new channels_channel("#server-to-user-" + this.user_data.id, this.pusher);
-        this.serverToUserChannel.bind_global(function (eventName, data) {
+        this.serverToUserChannel = new channel_Channel(`#server-to-user-${this.user_data.id}`, this.pusher);
+        this.serverToUserChannel.bind_global((eventName, data) => {
             if (eventName.indexOf('pusher_internal:') === 0 ||
                 eventName.indexOf('pusher:') === 0) {
                 return;
             }
-            _this.emit(eventName, data);
+            this.emit(eventName, data);
         });
         ensure_subscribed(this.serverToUserChannel);
-    };
-    UserFacade.prototype._cleanup = function () {
+    }
+    _cleanup() {
         this.user_data = null;
         if (this.serverToUserChannel) {
             this.serverToUserChannel.unbind_all();
@@ -4771,26 +4360,24 @@ var user_UserFacade = (function (_super) {
         if (this.signin_requested) {
             this._signinDoneResolve();
         }
-    };
-    UserFacade.prototype._newSigninPromiseIfNeeded = function () {
+    }
+    _newSigninPromiseIfNeeded() {
         if (!this.signin_requested) {
             return;
         }
         if (this.signinDonePromise && !this.signinDonePromise.done) {
             return;
         }
-        var _a = flat_promise(), promise = _a.promise, resolve = _a.resolve, _ = _a.reject;
+        const { promise, resolve, reject: _ } = flat_promise();
         promise.done = false;
-        var setDone = function () {
+        const setDone = () => {
             promise.done = true;
         };
-        promise.then(setDone)["catch"](setDone);
+        promise.then(setDone).catch(setDone);
         this.signinDonePromise = promise;
         this._signinDoneResolve = resolve;
-    };
-    return UserFacade;
-}(dispatcher));
-/* harmony default export */ var user = (user_UserFacade);
+    }
+}
 
 // CONCATENATED MODULE: ./src/core/pusher.ts
 
@@ -4806,19 +4393,29 @@ var user_UserFacade = (function (_super) {
 
 
 
-var pusher_Pusher = (function () {
-    function Pusher(app_key, options) {
-        var _this = this;
+class pusher_Pusher {
+    static ready() {
+        pusher_Pusher.isReady = true;
+        for (var i = 0, l = pusher_Pusher.instances.length; i < l; i++) {
+            pusher_Pusher.instances[i].connect();
+        }
+    }
+    static getClientFeatures() {
+        return keys(filterObject({ ws: runtime.Transports.ws }, function (t) {
+            return t.isSupported({});
+        }));
+    }
+    constructor(app_key, options) {
         checkAppKey(app_key);
         validateOptions(options);
         this.key = app_key;
         this.config = getConfig(options, this);
         this.channels = factory.createChannels();
-        this.global_emitter = new dispatcher();
+        this.global_emitter = new dispatcher_Dispatcher();
         this.sessionID = runtime.randomInt(1000000000);
-        this.timeline = new timeline_timeline(this.key, this.sessionID, {
+        this.timeline = new timeline_Timeline(this.key, this.sessionID, {
             cluster: this.config.cluster,
-            features: Pusher.getClientFeatures(),
+            features: pusher_Pusher.getClientFeatures(),
             params: this.config.timelineParams || {},
             limit: 50,
             level: timeline_level.INFO,
@@ -4830,8 +4427,8 @@ var pusher_Pusher = (function () {
                 path: '/timeline/v2/' + runtime.TimelineTransport.name
             });
         }
-        var getStrategy = function (options) {
-            return runtime.getDefaultStrategy(_this.config, options, strategy_builder_defineTransport);
+        var getStrategy = (options) => {
+            return runtime.getDefaultStrategy(this.config, options, strategy_builder_defineTransport);
         };
         this.connection = factory.createConnectionManager(this.key, {
             getStrategy: getStrategy,
@@ -4841,106 +4438,95 @@ var pusher_Pusher = (function () {
             unavailableTimeout: this.config.unavailableTimeout,
             useTLS: Boolean(this.config.useTLS)
         });
-        this.connection.bind('connected', function () {
-            _this.subscribeAll();
-            if (_this.timelineSender) {
-                _this.timelineSender.send(_this.connection.isUsingTLS());
+        this.connection.bind('connected', () => {
+            this.subscribeAll();
+            if (this.timelineSender) {
+                this.timelineSender.send(this.connection.isUsingTLS());
             }
         });
-        this.connection.bind('message', function (event) {
+        this.connection.bind('message', event => {
             var eventName = event.event;
             var internal = eventName.indexOf('pusher_internal:') === 0;
             if (event.channel) {
-                var channel = _this.channel(event.channel);
+                var channel = this.channel(event.channel);
                 if (channel) {
                     channel.handleEvent(event);
                 }
             }
             if (!internal) {
-                _this.global_emitter.emit(event.event, event.data);
+                this.global_emitter.emit(event.event, event.data);
             }
         });
-        this.connection.bind('connecting', function () {
-            _this.channels.disconnect();
+        this.connection.bind('connecting', () => {
+            this.channels.disconnect();
         });
-        this.connection.bind('disconnected', function () {
-            _this.channels.disconnect();
+        this.connection.bind('disconnected', () => {
+            this.channels.disconnect();
         });
-        this.connection.bind('error', function (err) {
+        this.connection.bind('error', err => {
             logger.warn(err);
         });
-        Pusher.instances.push(this);
-        this.timeline.info({ instances: Pusher.instances.length });
-        this.user = new user(this);
-        if (Pusher.isReady) {
+        pusher_Pusher.instances.push(this);
+        this.timeline.info({ instances: pusher_Pusher.instances.length });
+        this.user = new user_UserFacade(this);
+        if (pusher_Pusher.isReady) {
             this.connect();
         }
     }
-    Pusher.ready = function () {
-        Pusher.isReady = true;
-        for (var i = 0, l = Pusher.instances.length; i < l; i++) {
-            Pusher.instances[i].connect();
-        }
-    };
-    Pusher.getClientFeatures = function () {
-        return keys(filterObject({ ws: runtime.Transports.ws }, function (t) {
-            return t.isSupported({});
-        }));
-    };
-    Pusher.prototype.channel = function (name) {
+    channel(name) {
         return this.channels.find(name);
-    };
-    Pusher.prototype.allChannels = function () {
+    }
+    allChannels() {
         return this.channels.all();
-    };
-    Pusher.prototype.connect = function () {
+    }
+    connect() {
         this.connection.connect();
         if (this.timelineSender) {
             if (!this.timelineSenderTimer) {
                 var usingTLS = this.connection.isUsingTLS();
                 var timelineSender = this.timelineSender;
-                this.timelineSenderTimer = new PeriodicTimer(60000, function () {
+                this.timelineSenderTimer = new timers_PeriodicTimer(60000, function () {
                     timelineSender.send(usingTLS);
                 });
             }
         }
-    };
-    Pusher.prototype.disconnect = function () {
+    }
+    disconnect() {
         this.connection.disconnect();
         if (this.timelineSenderTimer) {
             this.timelineSenderTimer.ensureAborted();
             this.timelineSenderTimer = null;
         }
-    };
-    Pusher.prototype.bind = function (event_name, callback, context) {
+    }
+    bind(event_name, callback, context) {
         this.global_emitter.bind(event_name, callback, context);
         return this;
-    };
-    Pusher.prototype.unbind = function (event_name, callback, context) {
+    }
+    unbind(event_name, callback, context) {
         this.global_emitter.unbind(event_name, callback, context);
         return this;
-    };
-    Pusher.prototype.bind_global = function (callback) {
+    }
+    bind_global(callback) {
         this.global_emitter.bind_global(callback);
         return this;
-    };
-    Pusher.prototype.unbind_global = function (callback) {
+    }
+    unbind_global(callback) {
         this.global_emitter.unbind_global(callback);
         return this;
-    };
-    Pusher.prototype.unbind_all = function (callback) {
+    }
+    unbind_all(callback) {
         this.global_emitter.unbind_all();
         return this;
-    };
-    Pusher.prototype.subscribeAll = function () {
+    }
+    subscribeAll() {
         var channelName;
         for (channelName in this.channels.channels) {
             if (this.channels.channels.hasOwnProperty(channelName)) {
                 this.subscribe(channelName);
             }
         }
-    };
-    Pusher.prototype.subscribe = function (channel_name) {
+    }
+    subscribe(channel_name) {
         var channel = this.channels.add(channel_name, this);
         if (channel.subscriptionPending && channel.subscriptionCancelled) {
             channel.reinstateSubscription();
@@ -4950,8 +4536,8 @@ var pusher_Pusher = (function () {
             channel.subscribe();
         }
         return channel;
-    };
-    Pusher.prototype.unsubscribe = function (channel_name) {
+    }
+    unsubscribe(channel_name) {
         var channel = this.channels.find(channel_name);
         if (channel && channel.subscriptionPending) {
             channel.cancelSubscription();
@@ -4962,25 +4548,24 @@ var pusher_Pusher = (function () {
                 channel.unsubscribe();
             }
         }
-    };
-    Pusher.prototype.send_event = function (event_name, data, channel) {
+    }
+    send_event(event_name, data, channel) {
         return this.connection.send_event(event_name, data, channel);
-    };
-    Pusher.prototype.shouldUseTLS = function () {
+    }
+    shouldUseTLS() {
         return this.config.useTLS;
-    };
-    Pusher.prototype.signin = function () {
+    }
+    signin() {
         this.user.signin();
-    };
-    Pusher.instances = [];
-    Pusher.isReady = false;
-    Pusher.logToConsole = false;
-    Pusher.Runtime = runtime;
-    Pusher.ScriptReceivers = runtime.ScriptReceivers;
-    Pusher.DependenciesReceivers = runtime.DependenciesReceivers;
-    Pusher.auth_callbacks = runtime.auth_callbacks;
-    return Pusher;
-}());
+    }
+}
+pusher_Pusher.instances = [];
+pusher_Pusher.isReady = false;
+pusher_Pusher.logToConsole = false;
+pusher_Pusher.Runtime = runtime;
+pusher_Pusher.ScriptReceivers = runtime.ScriptReceivers;
+pusher_Pusher.DependenciesReceivers = runtime.DependenciesReceivers;
+pusher_Pusher.auth_callbacks = runtime.auth_callbacks;
 /* harmony default export */ var core_pusher = __webpack_exports__["default"] = (pusher_Pusher);
 function checkAppKey(key) {
     if (key === null || key === undefined) {
