@@ -4,5 +4,5 @@ interface Scheduler {
 interface Canceller {
     (number: any): void;
 }
-declare type Delay = number;
+type Delay = number;
 export { Scheduler, Canceller, Delay };

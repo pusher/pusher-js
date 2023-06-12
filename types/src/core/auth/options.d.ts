@@ -7,7 +7,7 @@ export interface ChannelAuthorizationData {
     channel_data?: string;
     shared_secret?: string;
 }
-export declare type ChannelAuthorizationCallback = (error: Error | null, authData: ChannelAuthorizationData | null) => void;
+export type ChannelAuthorizationCallback = (error: Error | null, authData: ChannelAuthorizationData | null) => void;
 export interface ChannelAuthorizationRequestParams {
     socketId: string;
     channelName: string;
@@ -19,14 +19,14 @@ export interface UserAuthenticationData {
     auth: string;
     user_data: string;
 }
-export declare type UserAuthenticationCallback = (error: Error | null, authData: UserAuthenticationData | null) => void;
+export type UserAuthenticationCallback = (error: Error | null, authData: UserAuthenticationData | null) => void;
 export interface UserAuthenticationRequestParams {
     socketId: string;
 }
 export interface UserAuthenticationHandler {
     (params: UserAuthenticationRequestParams, callback: UserAuthenticationCallback): void;
 }
-export declare type AuthTransportCallback = ChannelAuthorizationCallback | UserAuthenticationCallback;
+export type AuthTransportCallback = ChannelAuthorizationCallback | UserAuthenticationCallback;
 export interface AuthOptionsT<AuthHandler> {
     transport: 'ajax' | 'jsonp';
     endpoint: string;
