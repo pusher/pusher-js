@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.2.0
+
+- [CHANGED] Remove WebSocket retry limit.
+
 ## 8.1.0
 
 - [CHANGED] Move @types dependencies to devDependencies

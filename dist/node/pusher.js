@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.1.0
+ * Pusher JavaScript Library v8.2.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -7499,7 +7499,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.1.0",
+    VERSION: "8.2.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -9442,7 +9442,6 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
         timeoutLimit: 60000
     };
     var ws_manager = new transport_manager_TransportManager({
-        lives: 2,
         minPingDelay: 10000,
         maxPingDelay: config.activityTimeout
     });
