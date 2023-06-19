@@ -48,7 +48,7 @@
     "karma-jasmine-web-worker": "git+https://git@github.com/pusher/karma-jasmine-web-worker.git#jasmine_3",
     "karma-opera-launcher": "^1.0.0",
     "karma-safari-launcher": "^1.0.0",
-    "karma-spec-reporter": "0.0.32",
+    "karma-spec-reporter": "0.0.36",
     "karma-verbose-reporter": "0.0.6",
     "karma-webpack": "^4.0.2",
     "prettier": "^1.19.1",
