@@ -1,0 +1,31 @@
+# Automatically publish when code is pushed to `master` branch
+
+name: publish mfe
+
+on:
+    push:
+        branches:
+            - master
+    workflow_dispatch:
+
+jobs:
+    publish:
+        runs-on: windows-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+            - name: set Verdaccio token in build machine
+              # PRE-REQ: make sure a valid Verdaccio token is added to repo as a ST_VERDACCIO_PUBLISH_TOKEN secret
+              run: |
+                  echo '//verdaccio.servicetitan.com/:_authToken=${{ secrets.ST_VERDACCIO_PUBLISH_TOKEN }}' > .npmrc
+                  echo '//registry.npmjs.org/:_authToken=${{ secrets.ST_NPM_AUTOMATION_TOKEN }}' >> .npmrc
+                  echo 'registry=https://verdaccio.servicetitan.com/' >> .npmrc
+            - name: npm install
+              run: npm install
+            - name: publish branch
+              run: |
+                  npm publish
+            - name: clean up .npmrc
+              run: rm .npmrc
