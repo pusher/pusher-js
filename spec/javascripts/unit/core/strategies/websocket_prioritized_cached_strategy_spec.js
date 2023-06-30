@@ -1,9 +1,10 @@
 var Mocks = require("mocks");
 var Runtime = require('runtime').default;
-var CachedStrategy = require('core/strategies/cached_strategy').default;
+var WebSocketPrioritizedCachedStrategy = require('core/strategies/websocket_prioritized_cached_strategy')
+  .default;
 var Util = require('core/util').default;
 
-describe("CachedStrategy", function() {
+describe("WebSocketPrioritizedCachedStrategy", function() {
   beforeEach(function() {
     jasmine.clock().uninstall();
     jasmine.clock().install();
@@ -16,13 +17,13 @@ describe("CachedStrategy", function() {
   describe("after calling isSupported", function() {
     it("should return true when the substrategy is supported", function() {
       var substrategy = Mocks.getStrategy(true);
-      var strategy = new CachedStrategy(substrategy, {}, {});
+      var strategy = new WebSocketPrioritizedCachedStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(true);
     });
 
     it("should return false when the substrategy is not supported", function() {
       var substrategy = Mocks.getStrategy(false);
-      var strategy = new CachedStrategy(substrategy, {}, {});
+      var strategy = new WebSocketPrioritizedCachedStrategy(substrategy, {}, {});
       expect(strategy.isSupported()).toBe(false);
     });
   });
@@ -34,7 +35,7 @@ describe("CachedStrategy", function() {
 
     it("should try the substrategy immediately", function() {
       var substrategy = Mocks.getStrategy(false);
-      var strategy = new CachedStrategy(substrategy, {}, {});
+      var strategy = new WebSocketPrioritizedCachedStrategy(substrategy, {}, {});
       var callback = jasmine.createSpy("callback");
       strategy.connect(0, callback);
       expect(substrategy.connect).toHaveBeenCalled();
@@ -63,11 +64,12 @@ describe("CachedStrategy", function() {
       beforeEach(function() {
         substrategy = Mocks.getStrategy(true);
         transports = {
-          test: Mocks.getStrategy(true)
+          test: Mocks.getStrategy(true),
+          ws: Mocks.getStrategy(true)
         };
         timeline = Mocks.getTimeline();
 
-        strategy = new CachedStrategy(substrategy, transports, {
+        strategy = new WebSocketPrioritizedCachedStrategy(substrategy, transports, {
           useTLS: useTLS,
           timeline: timeline
         });
@@ -139,7 +141,8 @@ describe("CachedStrategy", function() {
             expect(JSON.parse(localStorage[usedKey])).toEqual({
               timestamp: Util.now(),
               transport: "test",
-              latency: 1000
+              latency: 1000,
+              cacheSkipCount: 0
             });
             expect(localStorage[unusedKey]).toEqual("mock");
           });
@@ -174,7 +177,8 @@ describe("CachedStrategy", function() {
           localStorage[usedKey] = JSON.stringify({
             timestamp: t0,
             transport: "test",
-            latency: 1000
+            latency: 1000,
+            cacheSkipCount: 4
           });
           localStorage[unusedKey] = "mock";
         });
@@ -188,7 +192,7 @@ describe("CachedStrategy", function() {
           strategy.connect(0, callback);
           expect(timeline.info).toHaveBeenCalledWith({
             cached: true,
-            transport: "test",
+            transport: 'test',
             latency: 1000
           });
         });
@@ -235,8 +239,9 @@ describe("CachedStrategy", function() {
           it("should cache the connected transport", function() {
             expect(JSON.parse(localStorage[usedKey])).toEqual({
               timestamp: Util.now(),
-              transport: "test",
-              latency: 2000
+              transport: 'test',
+              latency: 2000,
+              cacheSkipCount: 4
             });
             expect(localStorage[unusedKey]).toEqual("mock");
           });
@@ -327,8 +332,9 @@ describe("CachedStrategy", function() {
             it("should cache the connected transport", function() {
               expect(JSON.parse(localStorage[usedKey])).toEqual({
                 timestamp: Util.now(),
-                transport: "test",
-                latency: 500
+                transport: 'test',
+                latency: 500,
+                cacheSkipCount: 4
               });
               expect(localStorage[unusedKey]).toEqual("mock");
             });
@@ -348,6 +354,42 @@ describe("CachedStrategy", function() {
               expect(localStorage[unusedKey]).toEqual("mock");
             });
           });
+        });
+      });
+
+      describe('websocket prioritized', function() {
+        beforeEach(function() {
+          localStorage[unusedKey] = 'mock';
+          localStorage[usedKey] = JSON.stringify({
+            timestamp: Util.now(),
+            transport: 'test',
+            latency: 1000,
+            cacheSkipCount: 2
+          });
+          localStorage[usedKey] = "{}";
+        });
+
+        it('should try websocket strategy again', function() {
+          strategy.connect(0, callback);
+          expect(substrategy.connect).toHaveBeenCalled();
+        });
+
+        it('should try cached strategy when already attempted default strategy', function() {
+          localStorage[usedKey] = JSON.stringify({
+            timestamp: Util.now(),
+            transport: 'test',
+            latency: 1000,
+            cacheSkipCount: 4
+          });
+
+          strategy.connect(0, callback);
+          expect(transports.test.connect).toHaveBeenCalled();
+          expect(substrategy.connect).not.toHaveBeenCalled();
+
+          expect(JSON.parse(localStorage[usedKey])).toEqual(jasmine.objectContaining({
+            transport: 'test',
+            cacheSkipCount: 4,
+          }));
         });
       });
     }

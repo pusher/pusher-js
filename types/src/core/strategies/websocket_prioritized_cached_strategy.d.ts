@@ -5,7 +5,7 @@ import Timeline from '../timeline/timeline';
 export interface TransportStrategyDictionary {
     [key: string]: TransportStrategy;
 }
-export default class CachedStrategy implements Strategy {
+export default class WebSocketPrioritizedCachedStrategy implements Strategy {
     strategy: Strategy;
     transports: TransportStrategyDictionary;
     ttl: number;

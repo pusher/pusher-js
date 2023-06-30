@@ -4,9 +4,9 @@ import Strategy from 'core/strategies/strategy';
 import StrategyOptions from 'core/strategies/strategy_options';
 import SequentialStrategy from 'core/strategies/sequential_strategy';
 import BestConnectedEverStrategy from 'core/strategies/best_connected_ever_strategy';
-import CachedStrategy, {
+import WebSocketPrioritizedCachedStrategy, {
   TransportStrategyDictionary
-} from 'core/strategies/cached_strategy';
+} from 'core/strategies/websocket_prioritized_cached_strategy';
 import DelayedStrategy from 'core/strategies/delayed_strategy';
 import IfStrategy from 'core/strategies/if_strategy';
 import FirstConnectedStrategy from 'core/strategies/first_connected_strategy';
@@ -181,7 +181,7 @@ var getDefaultStrategy = function(
     ]);
   }
 
-  return new CachedStrategy(
+  return new WebSocketPrioritizedCachedStrategy(
     new FirstConnectedStrategy(
       new IfStrategy(
         testSupportsStrategy(ws_transport),
