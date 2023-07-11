@@ -382,7 +382,7 @@ One reason this connection might fail is your account being over its' limits. Yo
 ```js
 const pusher = new Pusher('app_key', { cluster: APP_CLUSTER });
 pusher.connection.bind( 'error', function( err ) {
-  if( err.error.data.code === 4004 ) {
+  if( err.data.code === 4004 ) {
     log('Over limit!');
   }
 });
