@@ -4,7 +4,7 @@ describe('url_store', function(){
   describe('buildLogSuffix', function(){
     it('should build a log suffix for known keys', function(){
       var suffix = url_store.buildLogSuffix('authenticationEndpoint');
-      expect(suffix).toEqual('See: https://pusher.com/docs/channels/server_api/authenticating-users');
+      expect(suffix).toEqual('See: https://pusher.com/docs/channels/server_api/authenticating_users');
     });
     it('should return a blank suffix for unknown keys', function(){
       var suffix = url_store.buildLogSuffix('somethingUnknown');
