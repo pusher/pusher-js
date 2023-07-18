@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.3.0
+
+- [CHANGED] Update cached re-connect strategy to prioritize WebSocket
+
 ## 8.2.0
 
 - [CHANGED] Remove WebSocket retry limit.
