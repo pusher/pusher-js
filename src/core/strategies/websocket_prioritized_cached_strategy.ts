@@ -11,13 +11,14 @@ export interface TransportStrategyDictionary {
   [key: string]: TransportStrategy;
 }
 
-/** Caches last successful transport and uses it for following attempts.
+/** Caches the last successful transport and, after the first few attempts,
+ *  uses the cached transport for subsequent attempts.
  *
  * @param {Strategy} strategy
  * @param {Object} transports
  * @param {Object} options
  */
-export default class CachedStrategy implements Strategy {
+export default class WebSocketPrioritizedCachedStrategy implements Strategy {
   strategy: Strategy;
   transports: TransportStrategyDictionary;
   ttl: number;
@@ -43,22 +44,27 @@ export default class CachedStrategy implements Strategy {
   connect(minPriority: number, callback: Function) {
     var usingTLS = this.usingTLS;
     var info = fetchTransportCache(usingTLS);
+    var cacheSkipCount = info && info.cacheSkipCount ? info.cacheSkipCount : 0;
 
     var strategies = [this.strategy];
     if (info && info.timestamp + this.ttl >= Util.now()) {
       var transport = this.transports[info.transport];
       if (transport) {
-        this.timeline.info({
-          cached: true,
-          transport: info.transport,
-          latency: info.latency
-        });
-        strategies.push(
-          new SequentialStrategy([transport], {
-            timeout: info.latency * 2 + 1000,
-            failFast: true
-          })
-        );
+        if (['ws', 'wss'].includes(info.transport) || cacheSkipCount > 3) {
+          this.timeline.info({
+            cached: true,
+            transport: info.transport,
+            latency: info.latency
+          });
+          strategies.push(
+            new SequentialStrategy([transport], {
+              timeout: info.latency * 2 + 1000,
+              failFast: true
+            })
+          );
+        } else {
+          cacheSkipCount++;
+        }
       }
     }
 
@@ -78,7 +84,8 @@ export default class CachedStrategy implements Strategy {
           storeTransportCache(
             usingTLS,
             handshake.transport.name,
-            Util.now() - startTimestamp
+            Util.now() - startTimestamp,
+            cacheSkipCount
           );
           callback(null, handshake);
         }
@@ -120,7 +127,8 @@ function fetchTransportCache(usingTLS: boolean): any {
 function storeTransportCache(
   usingTLS: boolean,
   transport: TransportStrategy,
-  latency: number
+  latency: number,
+  cacheSkipCount: number
 ) {
   var storage = Runtime.getLocalStorage();
   if (storage) {
@@ -128,7 +136,8 @@ function storeTransportCache(
       storage[getTransportCacheKey(usingTLS)] = Collections.safeJSONStringify({
         timestamp: Util.now(),
         transport: transport,
-        latency: latency
+        latency: latency,
+        cacheSkipCount: cacheSkipCount
       });
     } catch (e) {
       // catch over quota exceptions raised by localStorage
