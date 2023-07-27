@@ -33,6 +33,9 @@ const ajax: AuthTransport = function(
       xhr.setRequestHeader(headerName, dynamicHeaders[headerName]);
     }
   }
+  if (authOptions.signal) {
+    authOptions.signal.addEventListener("abort", () => { if (xhr.readyState != 4) { xhr.abort() } })
+  }
 
   xhr.onreadystatechange = function() {
     if (xhr.readyState === 4) {
