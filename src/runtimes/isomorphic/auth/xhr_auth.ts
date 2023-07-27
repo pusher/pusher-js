@@ -34,7 +34,11 @@ const ajax: AuthTransport = function(
     }
   }
   if (authOptions.signal) {
-    authOptions.signal.addEventListener("abort", () => { if (xhr.readyState != 4) { xhr.abort() } })
+    authOptions.signal.addEventListener('abort', () => {
+      if (xhr.readyState != 4) {
+        xhr.abort();
+      }
+    });
   }
 
   xhr.onreadystatechange = function() {
