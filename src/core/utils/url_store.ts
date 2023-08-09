@@ -6,7 +6,7 @@ const urlStore = {
   baseUrl: 'https://pusher.com',
   urls: {
     authenticationEndpoint: {
-      path: '/docs/channels/server_api/authenticating_users'
+      path: '/docs/channels/server_api/authenticating-users'
     },
     authorizationEndpoint: {
       path: '/docs/channels/server_api/authorizing-users/'
