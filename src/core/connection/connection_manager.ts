@@ -18,6 +18,8 @@ import {
 } from './callbacks';
 import Action from './protocol/action';
 
+export type ConnectionState = 'initialized' | 'connecting' | 'connected' | 'unavailable' | 'failed' | 'disconnected';
+
 /** Manages connection to Pusher.
  *
  * Uses a strategy (currently only default), timers and network availability
@@ -47,7 +49,7 @@ import Action from './protocol/action';
 export default class ConnectionManager extends EventsDispatcher {
   key: string;
   options: ConnectionManagerOptions;
-  state: string;
+  state: ConnectionState;
   connection: Connection;
   usingTLS: boolean;
   timeline: Timeline;
