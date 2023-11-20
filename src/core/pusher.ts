@@ -1,6 +1,5 @@
 import AbstractRuntime from '../runtimes/interface';
 import Runtime from 'runtime';
-import Util from './util';
 import * as Collections from './utils/collections';
 import Channels from './channels/channels';
 import Channel from './channels/channel';
@@ -10,14 +9,11 @@ import TimelineSender from './timeline/timeline_sender';
 import TimelineLevel from './timeline/level';
 import { defineTransport } from './strategies/strategy_builder';
 import ConnectionManager from './connection/connection_manager';
-import ConnectionManagerOptions from './connection/connection_manager_options';
 import { PeriodicTimer } from './utils/timers';
 import Defaults from './defaults';
-import * as DefaultConfig from './config';
 import Logger from './logger';
 import Factory from './utils/factory';
-import UrlStore from 'core/utils/url_store';
-import { Options, validateOptions } from './options';
+import { Options, ClusterOptions, validateOptions } from './options';
 import { Config, getConfig } from './config';
 import StrategyOptions from './strategies/strategy_options';
 import UserFacade from './user';
@@ -53,6 +49,7 @@ export default class Pusher {
 
   /* INSTANCE PROPERTIES */
   key: string;
+  options: Options;
   config: Config;
   channels: Channels;
   global_emitter: EventsDispatcher;
@@ -139,6 +136,19 @@ export default class Pusher {
     if (Pusher.isReady) {
       this.connect();
     }
+  }
+
+  /**
+   * Allows you to switch Pusher cluster without
+   * losing all the channels/subscription binding
+   * as this is internally managed by the SDK.
+   */
+  switchCluster(options: ClusterOptions) {
+    const { appKey, cluster } = options;
+    this.key = appKey;
+    this.options = { ...this.options, cluster };
+    this.config = getConfig(this.options, this);
+    this.connection.switchCluster(this.key);
   }
 
   channel(name: string): Channel {
