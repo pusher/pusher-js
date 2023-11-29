@@ -8,7 +8,7 @@ on:
 
 jobs:
   check-release-tag:
-    if: ${{ github.event.label.name == 'deploy-release' }}
+    if: ${{ github.head_ref == 'master' || github.event.label.name == 'deploy-release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
