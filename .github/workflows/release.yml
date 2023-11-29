@@ -1,12 +1,13 @@
 on:
   push:
-    branches: [ master ]
-    tags:
-      # Pushing a tag that starts with v and has -rc in the middle will trigger a release
-      - v*-rc*
+    types: [ labeled ]
+    branches: 
+      - master 
+      - releases/*
 
 jobs:
   check-release-tag:
+    if: ${{ github.event.label.name == 'deploy-release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
