@@ -6,7 +6,7 @@ import Timeline from './timeline/timeline';
 import TimelineSender from './timeline/timeline_sender';
 import ConnectionManager from './connection/connection_manager';
 import { PeriodicTimer } from './utils/timers';
-import { Options } from './options';
+import { Options, ClusterOptions } from './options';
 import { Config } from './config';
 import UserFacade from './user';
 export default class Pusher {
@@ -21,6 +21,7 @@ export default class Pusher {
     static log: (message: any) => void;
     private static getClientFeatures;
     key: string;
+    options: Options;
     config: Config;
     channels: Channels;
     global_emitter: EventsDispatcher;
@@ -31,6 +32,7 @@ export default class Pusher {
     timelineSenderTimer: PeriodicTimer;
     user: UserFacade;
     constructor(app_key: string, options: Options);
+    switchCluster(options: ClusterOptions): void;
     channel(name: string): Channel;
     allChannels(): Channel[];
     connect(): void;
