@@ -346,6 +346,23 @@ describe("Pusher", function() {
           "channel"
         );
       });
+
+      it('should keep the persist the previous options', () => {
+        var authorizeSpy = jasmine.createSpy("authorizeSpy");
+        const options = {
+          cluster: "mt1",
+          enableStats: true,
+          channelAuthorization: {
+            customHandler: authorizeSpy
+          }
+        };
+
+        var pusher = new Pusher("foo", options);
+        pusher.connect();
+        pusher.switchCluster({ appKey: 'bar', cluster: 'us3' });
+
+        expect(pusher.options).toEqual({ ...options, cluster: 'us3' });
+      })
     })
 
     describe("#unsubscribe", function() {
