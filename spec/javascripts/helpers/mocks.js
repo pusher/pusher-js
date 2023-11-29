@@ -245,6 +245,7 @@ var Mocks = {
     manager.disconnect = jasmine.createSpy("disconnect");
     manager.send_event = jasmine.createSpy("send_event");
     manager.isUsingTLS = jasmine.createSpy("isUsingTLS").and.returnValue(false);
+    manager.switchCluster = jasmine.createSpy("switchCluster");
     return manager;
   },
 

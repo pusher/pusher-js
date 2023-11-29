@@ -1,9 +1,14 @@
 on:
   push:
     branches: [ master ]
+  pull_request:
+    types: [ labeled ]
+    branches:
+      - master
 
 jobs:
   check-release-tag:
+    if: ${{ github.head_ref == 'master' || github.event.label.name == 'deploy-release' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

@@ -96,6 +96,15 @@ export default class ConnectionManager extends EventsDispatcher {
     this.updateStrategy();
   }
 
+  switchCluster(key: string) {
+    this.key = key;
+    // This ensures that the new config coming from
+    // pusher instance are taken into account
+    // such as appKey and cluster
+    this.updateStrategy();
+    this.retryIn(0);
+  }
+
   /** Establishes a connection to Pusher.
    *
    * Does nothing when connection is already established. See top-level doc

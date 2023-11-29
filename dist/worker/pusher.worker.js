@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.3.0
+ * Pusher JavaScript Library v8.4.0-rc1
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -868,7 +868,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.3.0",
+    VERSION: "8.4.0-rc1",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -2109,6 +2109,11 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
             }
         });
         this.updateStrategy();
+    }
+    switchCluster(key) {
+        this.key = key;
+        this.updateStrategy();
+        this.retryIn(0);
     }
     connect() {
         if (this.connection || this.runner) {
@@ -4091,6 +4096,13 @@ class pusher_Pusher {
         if (pusher_Pusher.isReady) {
             this.connect();
         }
+    }
+    switchCluster(options) {
+        const { appKey, cluster } = options;
+        this.key = appKey;
+        this.options = Object.assign(Object.assign({}, this.options), { cluster });
+        this.config = getConfig(this.options, this);
+        this.connection.switchCluster(this.key);
     }
     channel(name) {
         return this.channels.find(name);

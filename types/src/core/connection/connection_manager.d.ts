@@ -24,6 +24,7 @@ export default class ConnectionManager extends EventsDispatcher {
     handshakeCallbacks: HandshakeCallbacks;
     connectionCallbacks: ConnectionCallbacks;
     constructor(key: string, options: ConnectionManagerOptions);
+    switchCluster(key: string): void;
     connect(): void;
     send(data: any): boolean;
     send_event(name: string, data: any, channel?: string): boolean;
