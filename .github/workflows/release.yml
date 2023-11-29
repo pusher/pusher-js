@@ -1,6 +1,9 @@
 on:
   push:
     branches: [ master ]
+    tags:
+      # Pushing a tag that starts with v and ends with rc will trigger a release
+      - v*rc
 
 jobs:
   check-release-tag:
