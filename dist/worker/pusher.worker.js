@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.4.0
+ * Pusher JavaScript Library v8.4.0-rc1
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -868,7 +868,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.4.0",
+    VERSION: "8.4.0-rc1",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
