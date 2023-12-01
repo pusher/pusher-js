@@ -133,9 +133,11 @@ function getEnableStatsConfig(opts: Options): boolean {
   return false;
 }
 
-const hasCustomHandler = <T>(auth: AuthOptionsT<T>): auth is CustomAuthOptions<T> => {
- return 'customHandler' in auth && auth['customHandler'] != null;
-}
+const hasCustomHandler = <T>(
+  auth: AuthOptionsT<T>
+): auth is CustomAuthOptions<T> => {
+  return 'customHandler' in auth && auth['customHandler'] != null;
+};
 
 function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
   const userAuthentication = {
@@ -176,7 +178,7 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
           channelAuthorization,
           opts.authorizer
         )
-      }
+      };
     }
   }
   return channelAuthorization;
