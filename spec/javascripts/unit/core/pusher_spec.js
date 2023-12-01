@@ -307,6 +307,64 @@ describe("Pusher", function() {
       });
     });
 
+    describe("switch cluster", function() {
+      var pusher;
+      var subscribedChannels
+
+      beforeEach(function() {
+        pusher = new Pusher("foo", {cluster: "mt1"});
+
+        subscribedChannels = {
+          channel1: pusher.subscribe("channel1"),
+          channel2: pusher.subscribe("channel2")
+        };
+
+        pusher.connect();
+        pusher.connection.state = "connected";
+        pusher.connection.emit("connected");
+      });
+
+      it("should resubscribe to all channels", function() {
+        expect(subscribedChannels.channel1.subscribe).toHaveBeenCalledTimes(1);
+        expect(subscribedChannels.channel2.subscribe).toHaveBeenCalledTimes(1);
+
+        pusher.switchCluster({ appKey: 'bar', cluster: 'us3' });
+        pusher.connect();
+        pusher.connection.state = 'connected';
+        pusher.connection.emit('connected');
+
+        expect(subscribedChannels.channel1.subscribe).toHaveBeenCalledTimes(2);
+        expect(subscribedChannels.channel2.subscribe).toHaveBeenCalledTimes(2);
+      });
+
+      it("should send events via the connection manager", function() {
+        pusher.switchCluster({ appKey: 'bar', cluster: 'us3' });
+        pusher.send_event("event", { key: "value" }, "channel");
+        expect(pusher.connection.send_event).toHaveBeenCalledWith(
+          "event",
+          { key: "value" },
+          "channel"
+        );
+      });
+
+      it('should keep the persist the previous options', () => {
+        var authorizeSpy = jasmine.createSpy("authorizeSpy");
+        const options = {
+          cluster: "mt1",
+          enableStats: true,
+          channelAuthorization: {
+            customHandler: authorizeSpy
+          }
+        };
+
+        var pusher = new Pusher("foo", options);
+        pusher.connect();
+        pusher.switchCluster({ appKey: 'bar', cluster: 'us3' });
+
+        expect(pusher.options).toEqual({ ...options, cluster: 'us3' });
+      })
+    })
+
     describe("#unsubscribe", function() {
       it("should unsubscribe the channel if subscription is not pending", function() {
         var channel = pusher.subscribe("yyy");

@@ -44,6 +44,11 @@ export interface Options {
   wssPort?: number;
 }
 
+export interface ClusterOptions {
+  appKey: string;
+  cluster: string;
+}
+
 export function validateOptions(options) {
   if (options == null) {
     throw 'You must pass an options object';
