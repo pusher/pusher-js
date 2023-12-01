@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.4.0-rc1
+ * Pusher JavaScript Library v8.4.0-rc2
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -868,7 +868,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.4.0-rc1",
+    VERSION: "8.4.0-rc2",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -3794,10 +3794,12 @@ function getEnableStatsConfig(opts) {
     }
     return false;
 }
+const hasCustomHandler = (auth) => {
+    return 'customHandler' in auth && auth['customHandler'] != null;
+};
 function buildUserAuthenticator(opts) {
     const userAuthentication = Object.assign(Object.assign({}, defaults.userAuthentication), opts.userAuthentication);
-    if ('customHandler' in userAuthentication &&
-        userAuthentication['customHandler'] != null) {
+    if (hasCustomHandler(userAuthentication)) {
         return userAuthentication['customHandler'];
     }
     return user_authenticator(userAuthentication);
@@ -3818,15 +3820,17 @@ function buildChannelAuth(opts, pusher) {
             if ('headers' in opts.auth)
                 channelAuthorization.headers = opts.auth.headers;
         }
-        if ('authorizer' in opts)
-            channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
+        if ('authorizer' in opts) {
+            return {
+                customHandler: ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer)
+            };
+        }
     }
     return channelAuthorization;
 }
 function buildChannelAuthorizer(opts, pusher) {
     const channelAuthorization = buildChannelAuth(opts, pusher);
-    if ('customHandler' in channelAuthorization &&
-        channelAuthorization['customHandler'] != null) {
+    if (hasCustomHandler(channelAuthorization)) {
         return channelAuthorization['customHandler'];
     }
     return channel_authorizer(channelAuthorization);
@@ -4033,7 +4037,8 @@ class pusher_Pusher {
         checkAppKey(app_key);
         validateOptions(options);
         this.key = app_key;
-        this.config = getConfig(options, this);
+        this.options = options;
+        this.config = getConfig(this.options, this);
         this.channels = factory.createChannels();
         this.global_emitter = new dispatcher_Dispatcher();
         this.sessionID = worker_runtime.randomInt(1000000000);
