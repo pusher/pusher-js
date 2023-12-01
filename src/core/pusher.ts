@@ -63,7 +63,8 @@ export default class Pusher {
     checkAppKey(app_key);
     validateOptions(options);
     this.key = app_key;
-    this.config = getConfig(options, this);
+    this.options = options;
+    this.config = getConfig(this.options, this);
 
     this.channels = Factory.createChannels();
     this.global_emitter = new EventsDispatcher();
