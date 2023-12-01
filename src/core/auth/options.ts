@@ -62,9 +62,11 @@ export interface InternalAuthOptions {
 
 export type CustomAuthOptions<AuthHandler> = {
   customHandler: AuthHandler;
-}
+};
 
-export type AuthOptionsT<AuthHandler> = InternalAuthOptions | CustomAuthOptions<AuthHandler>
+export type AuthOptionsT<AuthHandler> =
+  | InternalAuthOptions
+  | CustomAuthOptions<AuthHandler>;
 
 export declare type UserAuthenticationOptions = AuthOptionsT<
   UserAuthenticationHandler
