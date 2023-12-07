@@ -20,7 +20,7 @@ export { default as ConnectionManager } from './types/src/core/connection/connec
 
 export { default } from './types/src/core/pusher';
 
-// The following types are provided for backward compatability
+// The following types are provided for backward compatibility
 export {
   DeprecatedAuthOptions as AuthOptions,
   DeprecatedChannelAuthorizer as Authorizer,
