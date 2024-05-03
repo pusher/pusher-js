@@ -6,17 +6,8 @@
  * Released under the MIT licence.
  */
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["Pusher"] = factory();
-	else
-		root["Pusher"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
+module.exports =
+/******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 /******/
@@ -561,6 +552,286 @@ module.exports = __webpack_require__(3).default;
 // ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
+// CONCATENATED MODULE: ./src/runtimes/web/dom/script_receiver_factory.ts
+class ScriptReceiverFactory {
+    constructor(prefix, name) {
+        this.lastId = 0;
+        this.prefix = prefix;
+        this.name = name;
+    }
+    create(callback) {
+        this.lastId++;
+        var number = this.lastId;
+        var id = this.prefix + number;
+        var name = this.name + '[' + number + ']';
+        var called = false;
+        var callbackWrapper = function () {
+            if (!called) {
+                callback.apply(null, arguments);
+                called = true;
+            }
+        };
+        this[number] = callbackWrapper;
+        return { number: number, id: id, name: name, callback: callbackWrapper };
+    }
+    remove(receiver) {
+        delete this[receiver.number];
+    }
+}
+var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.ScriptReceivers');
+
+// CONCATENATED MODULE: ./src/core/defaults.ts
+var Defaults = {
+    VERSION: "8.3.0",
+    PROTOCOL: 7,
+    wsPort: 80,
+    wssPort: 443,
+    wsPath: '',
+    httpHost: 'sockjs.pusher.com',
+    httpPort: 80,
+    httpsPort: 443,
+    httpPath: '/pusher',
+    stats_host: 'stats.pusher.com',
+    authEndpoint: '/pusher/auth',
+    authTransport: 'ajax',
+    activityTimeout: 120000,
+    pongTimeout: 30000,
+    unavailableTimeout: 10000,
+    userAuthentication: {
+        endpoint: '/pusher/user-auth',
+        transport: 'ajax'
+    },
+    channelAuthorization: {
+        endpoint: '/pusher/auth',
+        transport: 'ajax'
+    },
+    cdn_http: "http://js.pusher.com",
+    cdn_https: "https://js.pusher.com",
+    dependency_suffix: ""
+};
+/* harmony default export */ var defaults = (Defaults);
+
+// CONCATENATED MODULE: ./src/runtimes/web/dom/dependency_loader.ts
+
+
+class dependency_loader_DependencyLoader {
+    constructor(options) {
+        this.options = options;
+        this.receivers = options.receivers || ScriptReceivers;
+        this.loading = {};
+    }
+    load(name, options, callback) {
+        var self = this;
+        if (self.loading[name] && self.loading[name].length > 0) {
+            self.loading[name].push(callback);
+        }
+        else {
+            self.loading[name] = [callback];
+            var request = runtime.createScriptRequest(self.getPath(name, options));
+            var receiver = self.receivers.create(function (error) {
+                self.receivers.remove(receiver);
+                if (self.loading[name]) {
+                    var callbacks = self.loading[name];
+                    delete self.loading[name];
+                    var successCallback = function (wasSuccessful) {
+                        if (!wasSuccessful) {
+                            request.cleanup();
+                        }
+                    };
+                    for (var i = 0; i < callbacks.length; i++) {
+                        callbacks[i](error, successCallback);
+                    }
+                }
+            });
+            request.send(receiver);
+        }
+    }
+    getRoot(options) {
+        var cdn;
+        var protocol = runtime.getDocument().location.protocol;
+        if ((options && options.useTLS) || protocol === 'https:') {
+            cdn = this.options.cdn_https;
+        }
+        else {
+            cdn = this.options.cdn_http;
+        }
+        return cdn.replace(/\/*$/, '') + '/' + this.options.version;
+    }
+    getPath(name, options) {
+        return this.getRoot(options) + '/' + name + this.options.suffix + '.js';
+    }
+}
+
+// CONCATENATED MODULE: ./src/runtimes/web/dom/dependencies.ts
+
+
+
+var DependenciesReceivers = new ScriptReceiverFactory('_pusher_dependencies', 'Pusher.DependenciesReceivers');
+var Dependencies = new dependency_loader_DependencyLoader({
+    cdn_http: defaults.cdn_http,
+    cdn_https: defaults.cdn_https,
+    version: defaults.VERSION,
+    suffix: defaults.dependency_suffix,
+    receivers: DependenciesReceivers
+});
+
+// CONCATENATED MODULE: ./src/core/utils/url_store.ts
+const urlStore = {
+    baseUrl: 'https://pusher.com',
+    urls: {
+        authenticationEndpoint: {
+            path: '/docs/channels/server_api/authenticating_users'
+        },
+        authorizationEndpoint: {
+            path: '/docs/channels/server_api/authorizing-users/'
+        },
+        javascriptQuickStart: {
+            path: '/docs/javascript_quick_start'
+        },
+        triggeringClientEvents: {
+            path: '/docs/client_api_guide/client_events#trigger-events'
+        },
+        encryptedChannelSupport: {
+            fullUrl: 'https://github.com/pusher/pusher-js/tree/cc491015371a4bde5743d1c87a0fbac0feb53195#encrypted-channel-support'
+        }
+    }
+};
+const buildLogSuffix = function (key) {
+    const urlPrefix = 'See:';
+    const urlObj = urlStore.urls[key];
+    if (!urlObj)
+        return '';
+    let url;
+    if (urlObj.fullUrl) {
+        url = urlObj.fullUrl;
+    }
+    else if (urlObj.path) {
+        url = urlStore.baseUrl + urlObj.path;
+    }
+    if (!url)
+        return '';
+    return `${urlPrefix} ${url}`;
+};
+/* harmony default export */ var url_store = ({ buildLogSuffix });
+
+// CONCATENATED MODULE: ./src/core/auth/options.ts
+var AuthRequestType;
+(function (AuthRequestType) {
+    AuthRequestType["UserAuthentication"] = "user-authentication";
+    AuthRequestType["ChannelAuthorization"] = "channel-authorization";
+})(AuthRequestType || (AuthRequestType = {}));
+
+// CONCATENATED MODULE: ./src/core/errors.ts
+class BadEventName extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class BadChannelName extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class RequestTimedOut extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class TransportPriorityTooLow extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class TransportClosed extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class UnsupportedFeature extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class UnsupportedTransport extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class UnsupportedStrategy extends Error {
+    constructor(msg) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+class HTTPAuthError extends Error {
+    constructor(status, msg) {
+        super(msg);
+        this.status = status;
+        Object.setPrototypeOf(this, new.target.prototype);
+    }
+}
+
+// CONCATENATED MODULE: ./src/runtimes/isomorphic/auth/xhr_auth.ts
+
+
+
+
+const ajax = function (context, query, authOptions, authRequestType, callback) {
+    const xhr = runtime.createXHR();
+    xhr.open('POST', authOptions.endpoint, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    for (var headerName in authOptions.headers) {
+        xhr.setRequestHeader(headerName, authOptions.headers[headerName]);
+    }
+    if (authOptions.headersProvider != null) {
+        let dynamicHeaders = authOptions.headersProvider();
+        for (var headerName in dynamicHeaders) {
+            xhr.setRequestHeader(headerName, dynamicHeaders[headerName]);
+        }
+    }
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                let data;
+                let parsed = false;
+                try {
+                    data = JSON.parse(xhr.responseText);
+                    parsed = true;
+                }
+                catch (e) {
+                    callback(new HTTPAuthError(200, `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${xhr.responseText}`), null);
+                }
+                if (parsed) {
+                    callback(null, data);
+                }
+            }
+            else {
+                let suffix = '';
+                switch (authRequestType) {
+                    case AuthRequestType.UserAuthentication:
+                        suffix = url_store.buildLogSuffix('authenticationEndpoint');
+                        break;
+                    case AuthRequestType.ChannelAuthorization:
+                        suffix = `Clients must be authorized to join private or presence channels. ${url_store.buildLogSuffix('authorizationEndpoint')}`;
+                        break;
+                }
+                callback(new HTTPAuthError(xhr.status, `Unable to retrieve auth string from ${authRequestType.toString()} endpoint - ` +
+                    `received status: ${xhr.status} from ${authOptions.endpoint}. ${suffix}`), null);
+            }
+        }
+    };
+    xhr.send(query);
+    return xhr;
+};
+/* harmony default export */ var xhr_auth = (ajax);
+
 // CONCATENATED MODULE: ./src/core/base64.ts
 function encode(s) {
     return btoa(utob(s));
@@ -597,7 +868,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = (typeof self !== 'undefined' && self.btoa) ||
+var btoa = (typeof window !== 'undefined' && window.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -627,10 +898,10 @@ class Timer {
 // CONCATENATED MODULE: ./src/core/utils/timers/index.ts
 
 function timers_clearTimeout(timer) {
-    self.clearTimeout(timer);
+    window.clearTimeout(timer);
 }
 function timers_clearInterval(timer) {
-    self.clearInterval(timer);
+    window.clearInterval(timer);
 }
 class timers_OneOffTimer extends abstract_timer {
     constructor(delay, callback) {
@@ -741,7 +1012,7 @@ function values(object) {
 }
 function apply(array, f, context) {
     for (var i = 0; i < array.length; i++) {
-        f.call(context || self, array[i], i, array);
+        f.call(context || window, array[i], i, array);
     }
 }
 function map(array, f) {
@@ -866,36 +1137,193 @@ function safeJSONStringify(source) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/defaults.ts
-var Defaults = {
-    VERSION: "8.3.0",
-    PROTOCOL: 7,
-    wsPort: 80,
-    wssPort: 443,
-    wsPath: '',
-    httpHost: 'sockjs.pusher.com',
-    httpPort: 80,
-    httpsPort: 443,
-    httpPath: '/pusher',
-    stats_host: 'stats.pusher.com',
-    authEndpoint: '/pusher/auth',
-    authTransport: 'ajax',
-    activityTimeout: 120000,
-    pongTimeout: 30000,
-    unavailableTimeout: 10000,
-    userAuthentication: {
-        endpoint: '/pusher/user-auth',
-        transport: 'ajax'
-    },
-    channelAuthorization: {
-        endpoint: '/pusher/auth',
-        transport: 'ajax'
-    },
-    cdn_http: "http://js.pusher.com",
-    cdn_https: "https://js.pusher.com",
-    dependency_suffix: ""
+// CONCATENATED MODULE: ./src/core/logger.ts
+
+
+class logger_Logger {
+    constructor() {
+        this.globalLog = (message) => {
+            if (window.console && window.console.log) {
+                window.console.log(message);
+            }
+        };
+    }
+    debug(...args) {
+        this.log(this.globalLog, args);
+    }
+    warn(...args) {
+        this.log(this.globalLogWarn, args);
+    }
+    error(...args) {
+        this.log(this.globalLogError, args);
+    }
+    globalLogWarn(message) {
+        if (window.console && window.console.warn) {
+            window.console.warn(message);
+        }
+        else {
+            this.globalLog(message);
+        }
+    }
+    globalLogError(message) {
+        if (window.console && window.console.error) {
+            window.console.error(message);
+        }
+        else {
+            this.globalLogWarn(message);
+        }
+    }
+    log(defaultLoggingFunction, ...args) {
+        var message = stringify.apply(this, arguments);
+        if (core_pusher.log) {
+            core_pusher.log(message);
+        }
+        else if (core_pusher.logToConsole) {
+            const log = defaultLoggingFunction.bind(this);
+            log(message);
+        }
+    }
+}
+/* harmony default export */ var logger = (new logger_Logger());
+
+// CONCATENATED MODULE: ./src/runtimes/web/auth/jsonp_auth.ts
+
+var jsonp = function (context, query, authOptions, authRequestType, callback) {
+    if (authOptions.headers !== undefined ||
+        authOptions.headersProvider != null) {
+        logger.warn(`To send headers with the ${authRequestType.toString()} request, you must use AJAX, rather than JSONP.`);
+    }
+    var callbackName = context.nextAuthCallbackID.toString();
+    context.nextAuthCallbackID++;
+    var document = context.getDocument();
+    var script = document.createElement('script');
+    context.auth_callbacks[callbackName] = function (data) {
+        callback(null, data);
+    };
+    var callback_name = "Pusher.auth_callbacks['" + callbackName + "']";
+    script.src =
+        authOptions.endpoint +
+            '?callback=' +
+            encodeURIComponent(callback_name) +
+            '&' +
+            query;
+    var head = document.getElementsByTagName('head')[0] || document.documentElement;
+    head.insertBefore(script, head.firstChild);
 };
-/* harmony default export */ var defaults = (Defaults);
+/* harmony default export */ var jsonp_auth = (jsonp);
+
+// CONCATENATED MODULE: ./src/runtimes/web/dom/script_request.ts
+class ScriptRequest {
+    constructor(src) {
+        this.src = src;
+    }
+    send(receiver) {
+        var self = this;
+        var errorString = 'Error loading ' + self.src;
+        self.script = document.createElement('script');
+        self.script.id = receiver.id;
+        self.script.src = self.src;
+        self.script.type = 'text/javascript';
+        self.script.charset = 'UTF-8';
+        if (self.script.addEventListener) {
+            self.script.onerror = function () {
+                receiver.callback(errorString);
+            };
+            self.script.onload = function () {
+                receiver.callback(null);
+            };
+        }
+        else {
+            self.script.onreadystatechange = function () {
+                if (self.script.readyState === 'loaded' ||
+                    self.script.readyState === 'complete') {
+                    receiver.callback(null);
+                }
+            };
+        }
+        if (self.script.async === undefined &&
+            document.attachEvent &&
+            /opera/i.test(navigator.userAgent)) {
+            self.errorScript = document.createElement('script');
+            self.errorScript.id = receiver.id + '_error';
+            self.errorScript.text = receiver.name + "('" + errorString + "');";
+            self.script.async = self.errorScript.async = false;
+        }
+        else {
+            self.script.async = true;
+        }
+        var head = document.getElementsByTagName('head')[0];
+        head.insertBefore(self.script, head.firstChild);
+        if (self.errorScript) {
+            head.insertBefore(self.errorScript, self.script.nextSibling);
+        }
+    }
+    cleanup() {
+        if (this.script) {
+            this.script.onload = this.script.onerror = null;
+            this.script.onreadystatechange = null;
+        }
+        if (this.script && this.script.parentNode) {
+            this.script.parentNode.removeChild(this.script);
+        }
+        if (this.errorScript && this.errorScript.parentNode) {
+            this.errorScript.parentNode.removeChild(this.errorScript);
+        }
+        this.script = null;
+        this.errorScript = null;
+    }
+}
+
+// CONCATENATED MODULE: ./src/runtimes/web/dom/jsonp_request.ts
+
+
+class jsonp_request_JSONPRequest {
+    constructor(url, data) {
+        this.url = url;
+        this.data = data;
+    }
+    send(receiver) {
+        if (this.request) {
+            return;
+        }
+        var query = buildQueryString(this.data);
+        var url = this.url + '/' + receiver.number + '?' + query;
+        this.request = runtime.createScriptRequest(url);
+        this.request.send(receiver);
+    }
+    cleanup() {
+        if (this.request) {
+            this.request.cleanup();
+        }
+    }
+}
+
+// CONCATENATED MODULE: ./src/runtimes/web/timeline/jsonp_timeline.ts
+
+
+var getAgent = function (sender, useTLS) {
+    return function (data, callback) {
+        var scheme = 'http' + (useTLS ? 's' : '') + '://';
+        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
+        var request = runtime.createJSONPRequest(url, data);
+        var receiver = runtime.ScriptReceivers.create(function (error, result) {
+            ScriptReceivers.remove(receiver);
+            request.cleanup();
+            if (result && result.host) {
+                sender.host = result.host;
+            }
+            if (callback) {
+                callback(error, result);
+            }
+        });
+        request.send(receiver);
+    };
+};
+var jsonp_timeline_jsonp = {
+    name: 'jsonp',
+    getAgent
+};
+/* harmony default export */ var jsonp_timeline = (jsonp_timeline_jsonp);
 
 // CONCATENATED MODULE: ./src/core/transports/url_schemes.ts
 
@@ -1035,7 +1463,7 @@ class dispatcher_Dispatcher {
         }
         if (callbacks && callbacks.length > 0) {
             for (var i = 0; i < callbacks.length; i++) {
-                callbacks[i].fn.apply(callbacks[i].context || self, args);
+                callbacks[i].fn.apply(callbacks[i].context || window, args);
             }
         }
         else if (this.failThrough) {
@@ -1044,55 +1472,6 @@ class dispatcher_Dispatcher {
         return this;
     }
 }
-
-// CONCATENATED MODULE: ./src/core/logger.ts
-
-
-class logger_Logger {
-    constructor() {
-        this.globalLog = (message) => {
-            if (self.console && self.console.log) {
-                self.console.log(message);
-            }
-        };
-    }
-    debug(...args) {
-        this.log(this.globalLog, args);
-    }
-    warn(...args) {
-        this.log(this.globalLogWarn, args);
-    }
-    error(...args) {
-        this.log(this.globalLogError, args);
-    }
-    globalLogWarn(message) {
-        if (self.console && self.console.warn) {
-            self.console.warn(message);
-        }
-        else {
-            this.globalLog(message);
-        }
-    }
-    globalLogError(message) {
-        if (self.console && self.console.error) {
-            self.console.error(message);
-        }
-        else {
-            this.globalLogWarn(message);
-        }
-    }
-    log(defaultLoggingFunction, ...args) {
-        var message = stringify.apply(this, arguments);
-        if (core_pusher.log) {
-            core_pusher.log(message);
-        }
-        else if (core_pusher.logToConsole) {
-            const log = defaultLoggingFunction.bind(this);
-            log(message);
-        }
-    }
-}
-/* harmony default export */ var logger = (new logger_Logger());
 
 // CONCATENATED MODULE: ./src/core/transports/transport_connection.ts
 
@@ -1103,7 +1482,7 @@ class logger_Logger {
 class transport_connection_TransportConnection extends dispatcher_Dispatcher {
     constructor(hooks, name, priority, key, options) {
         super();
-        this.initialize = worker_runtime.transportConnectionInitializer;
+        this.initialize = runtime.transportConnectionInitializer;
         this.hooks = hooks;
         this.name = name;
         this.priority = priority;
@@ -1265,13 +1644,13 @@ var WSTransport = new transport_Transport({
     handlesActivityChecks: false,
     supportsPing: false,
     isInitialized: function () {
-        return Boolean(worker_runtime.getWebSocketAPI());
+        return Boolean(runtime.getWebSocketAPI());
     },
     isSupported: function () {
-        return Boolean(worker_runtime.getWebSocketAPI());
+        return Boolean(runtime.getWebSocketAPI());
     },
     getSocket: function (url) {
-        return worker_runtime.createWebSocket(url);
+        return runtime.createWebSocket(url);
     }
 });
 var httpConfiguration = {
@@ -1284,17 +1663,17 @@ var httpConfiguration = {
 };
 var streamingConfiguration = extend({
     getSocket: function (url) {
-        return worker_runtime.HTTPFactory.createStreamingSocket(url);
+        return runtime.HTTPFactory.createStreamingSocket(url);
     }
 }, httpConfiguration);
 var pollingConfiguration = extend({
     getSocket: function (url) {
-        return worker_runtime.HTTPFactory.createPollingSocket(url);
+        return runtime.HTTPFactory.createPollingSocket(url);
     }
 }, httpConfiguration);
 var xhrConfiguration = {
     isSupported: function () {
-        return worker_runtime.isXHRSupported();
+        return runtime.isXHRSupported();
     }
 };
 var XHRStreamingTransport = new transport_Transport((extend({}, streamingConfiguration, xhrConfiguration)));
@@ -1305,6 +1684,77 @@ var Transports = {
     xhr_polling: XHRPollingTransport
 };
 /* harmony default export */ var transports = (Transports);
+
+// CONCATENATED MODULE: ./src/runtimes/web/transports/transports.ts
+
+
+
+
+
+
+var SockJSTransport = new transport_Transport({
+    file: 'sockjs',
+    urls: sockjs,
+    handlesActivityChecks: true,
+    supportsPing: false,
+    isSupported: function () {
+        return true;
+    },
+    isInitialized: function () {
+        return window.SockJS !== undefined;
+    },
+    getSocket: function (url, options) {
+        return new window.SockJS(url, null, {
+            js_path: Dependencies.getPath('sockjs', {
+                useTLS: options.useTLS
+            }),
+            ignore_null_origin: options.ignoreNullOrigin
+        });
+    },
+    beforeOpen: function (socket, path) {
+        socket.send(JSON.stringify({
+            path: path
+        }));
+    }
+});
+var xdrConfiguration = {
+    isSupported: function (environment) {
+        var yes = runtime.isXDRSupported(environment.useTLS);
+        return yes;
+    }
+};
+var XDRStreamingTransport = new transport_Transport((extend({}, streamingConfiguration, xdrConfiguration)));
+var XDRPollingTransport = new transport_Transport(extend({}, pollingConfiguration, xdrConfiguration));
+transports.xdr_streaming = XDRStreamingTransport;
+transports.xdr_polling = XDRPollingTransport;
+transports.sockjs = SockJSTransport;
+/* harmony default export */ var transports_transports = (transports);
+
+// CONCATENATED MODULE: ./src/runtimes/web/net_info.ts
+
+class net_info_NetInfo extends dispatcher_Dispatcher {
+    constructor() {
+        super();
+        var self = this;
+        if (typeof window !== 'undefined' && window.addEventListener !== undefined) {
+            window.addEventListener('online', function () {
+                self.emit('online');
+            }, false);
+            window.addEventListener('offline', function () {
+                self.emit('offline');
+            }, false);
+        }
+    }
+    isOnline() {
+        if (window.navigator.onLine === undefined) {
+            return true;
+        }
+        else {
+            return window.navigator.onLine;
+        }
+    }
+}
+var net_info_Network = new net_info_NetInfo();
 
 // CONCATENATED MODULE: ./src/core/transports/assistant_to_the_transport_manager.ts
 
@@ -1440,7 +1890,7 @@ const Protocol = {
         }
     }
 };
-/* harmony default export */ var protocol = (Protocol);
+/* harmony default export */ var protocol_protocol = (Protocol);
 
 // CONCATENATED MODULE: ./src/core/connection/connection.ts
 
@@ -1467,7 +1917,7 @@ class connection_Connection extends dispatcher_Dispatcher {
             event.channel = channel;
         }
         logger.debug('Event sent', event);
-        return this.send(protocol.encodeMessage(event));
+        return this.send(protocol_protocol.encodeMessage(event));
     }
     ping() {
         if (this.transport.supportsPing()) {
@@ -1485,7 +1935,7 @@ class connection_Connection extends dispatcher_Dispatcher {
             message: (messageEvent) => {
                 var pusherEvent;
                 try {
-                    pusherEvent = protocol.decodeMessage(messageEvent);
+                    pusherEvent = protocol_protocol.decodeMessage(messageEvent);
                 }
                 catch (e) {
                     this.emit('error', {
@@ -1538,8 +1988,8 @@ class connection_Connection extends dispatcher_Dispatcher {
         });
     }
     handleCloseEvent(closeEvent) {
-        var action = protocol.getCloseAction(closeEvent);
-        var error = protocol.getCloseError(closeEvent);
+        var action = protocol_protocol.getCloseAction(closeEvent);
+        var error = protocol_protocol.getCloseError(closeEvent);
         if (error) {
             this.emit('error', error);
         }
@@ -1568,7 +2018,7 @@ class handshake_Handshake {
             this.unbindListeners();
             var result;
             try {
-                result = protocol.processHandshake(m);
+                result = protocol_protocol.processHandshake(m);
             }
             catch (e) {
                 this.finish('error', { error: e });
@@ -1588,8 +2038,8 @@ class handshake_Handshake {
         };
         this.onClosed = closeEvent => {
             this.unbindListeners();
-            var action = protocol.getCloseAction(closeEvent) || 'backoff';
-            var error = protocol.getCloseError(closeEvent);
+            var action = protocol_protocol.getCloseAction(closeEvent) || 'backoff';
+            var error = protocol_protocol.getCloseError(closeEvent);
             this.finish(action, { error: error });
         };
         this.transport.bind('message', this.onMessage);
@@ -1615,105 +2065,9 @@ class timeline_sender_TimelineSender {
         if (this.timeline.isEmpty()) {
             return;
         }
-        this.timeline.send(worker_runtime.TimelineTransport.getAgent(this, useTLS), callback);
+        this.timeline.send(runtime.TimelineTransport.getAgent(this, useTLS), callback);
     }
 }
-
-// CONCATENATED MODULE: ./src/core/errors.ts
-class BadEventName extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class BadChannelName extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class RequestTimedOut extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class TransportPriorityTooLow extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class TransportClosed extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class UnsupportedFeature extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class UnsupportedTransport extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class UnsupportedStrategy extends Error {
-    constructor(msg) {
-        super(msg);
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-class HTTPAuthError extends Error {
-    constructor(status, msg) {
-        super(msg);
-        this.status = status;
-        Object.setPrototypeOf(this, new.target.prototype);
-    }
-}
-
-// CONCATENATED MODULE: ./src/core/utils/url_store.ts
-const urlStore = {
-    baseUrl: 'https://pusher.com',
-    urls: {
-        authenticationEndpoint: {
-            path: '/docs/channels/server_api/authenticating_users'
-        },
-        authorizationEndpoint: {
-            path: '/docs/channels/server_api/authorizing-users/'
-        },
-        javascriptQuickStart: {
-            path: '/docs/javascript_quick_start'
-        },
-        triggeringClientEvents: {
-            path: '/docs/client_api_guide/client_events#trigger-events'
-        },
-        encryptedChannelSupport: {
-            fullUrl: 'https://github.com/pusher/pusher-js/tree/cc491015371a4bde5743d1c87a0fbac0feb53195#encrypted-channel-support'
-        }
-    }
-};
-const buildLogSuffix = function (key) {
-    const urlPrefix = 'See:';
-    const urlObj = urlStore.urls[key];
-    if (!urlObj)
-        return '';
-    let url;
-    if (urlObj.fullUrl) {
-        url = urlObj.fullUrl;
-    }
-    else if (urlObj.path) {
-        url = urlStore.baseUrl + urlObj.path;
-    }
-    if (!url)
-        return '';
-    return `${urlPrefix} ${url}`;
-};
-/* harmony default export */ var url_store = ({ buildLogSuffix });
 
 // CONCATENATED MODULE: ./src/core/channels/channel.ts
 
@@ -2095,7 +2449,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
         this.errorCallbacks = this.buildErrorCallbacks();
         this.connectionCallbacks = this.buildConnectionCallbacks(this.errorCallbacks);
         this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
-        var Network = worker_runtime.getNetwork();
+        var Network = runtime.getNetwork();
         Network.bind('online', () => {
             this.timeline.info({ netinfo: 'online' });
             if (this.state === 'connecting' || this.state === 'unavailable') {
@@ -2669,7 +3023,7 @@ function getTransportCacheKey(usingTLS) {
     return 'pusherTransport' + (usingTLS ? 'TLS' : 'NonTLS');
 }
 function fetchTransportCache(usingTLS) {
-    var storage = worker_runtime.getLocalStorage();
+    var storage = runtime.getLocalStorage();
     if (storage) {
         try {
             var serializedCache = storage[getTransportCacheKey(usingTLS)];
@@ -2684,7 +3038,7 @@ function fetchTransportCache(usingTLS) {
     return null;
 }
 function storeTransportCache(usingTLS, transport, latency, cacheSkipCount) {
-    var storage = worker_runtime.getLocalStorage();
+    var storage = runtime.getLocalStorage();
     if (storage) {
         try {
             storage[getTransportCacheKey(usingTLS)] = safeJSONStringify({
@@ -2699,7 +3053,7 @@ function storeTransportCache(usingTLS, transport, latency, cacheSkipCount) {
     }
 }
 function flushTransportCache(usingTLS) {
-    var storage = worker_runtime.getLocalStorage();
+    var storage = runtime.getLocalStorage();
     if (storage) {
         try {
             delete storage[getTransportCacheKey(usingTLS)];
@@ -2778,8 +3132,7 @@ class FirstConnectedStrategy {
     }
 }
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/default_strategy.ts
-
+// CONCATENATED MODULE: ./src/runtimes/web/default_strategy.ts
 
 
 
@@ -2804,10 +3157,10 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
         hostTLS: config.wsHost + ':' + config.wssPort,
         httpPath: config.wsPath
     });
-    var wss_options = extend({}, ws_options, {
+    var wss_options = Object.assign({}, ws_options, {
         useTLS: true
     });
-    var http_options = Object.assign({}, baseOptions, {
+    var sockjs_options = Object.assign({}, baseOptions, {
         hostNonTLS: config.httpHost + ':' + config.httpPort,
         hostTLS: config.httpHost + ':' + config.httpsPort,
         httpPath: config.httpPath
@@ -2828,33 +3181,42 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     });
     var ws_transport = defineTransportStrategy('ws', 'ws', 3, ws_options, ws_manager);
     var wss_transport = defineTransportStrategy('wss', 'ws', 3, wss_options, ws_manager);
-    var xhr_streaming_transport = defineTransportStrategy('xhr_streaming', 'xhr_streaming', 1, http_options, streaming_manager);
-    var xhr_polling_transport = defineTransportStrategy('xhr_polling', 'xhr_polling', 1, http_options);
+    var sockjs_transport = defineTransportStrategy('sockjs', 'sockjs', 1, sockjs_options);
+    var xhr_streaming_transport = defineTransportStrategy('xhr_streaming', 'xhr_streaming', 1, sockjs_options, streaming_manager);
+    var xdr_streaming_transport = defineTransportStrategy('xdr_streaming', 'xdr_streaming', 1, sockjs_options, streaming_manager);
+    var xhr_polling_transport = defineTransportStrategy('xhr_polling', 'xhr_polling', 1, sockjs_options);
+    var xdr_polling_transport = defineTransportStrategy('xdr_polling', 'xdr_polling', 1, sockjs_options);
     var ws_loop = new sequential_strategy_SequentialStrategy([ws_transport], timeouts);
     var wss_loop = new sequential_strategy_SequentialStrategy([wss_transport], timeouts);
-    var streaming_loop = new sequential_strategy_SequentialStrategy([xhr_streaming_transport], timeouts);
-    var polling_loop = new sequential_strategy_SequentialStrategy([xhr_polling_transport], timeouts);
+    var sockjs_loop = new sequential_strategy_SequentialStrategy([sockjs_transport], timeouts);
+    var streaming_loop = new sequential_strategy_SequentialStrategy([
+        new IfStrategy(testSupportsStrategy(xhr_streaming_transport), xhr_streaming_transport, xdr_streaming_transport)
+    ], timeouts);
+    var polling_loop = new sequential_strategy_SequentialStrategy([
+        new IfStrategy(testSupportsStrategy(xhr_polling_transport), xhr_polling_transport, xdr_polling_transport)
+    ], timeouts);
     var http_loop = new sequential_strategy_SequentialStrategy([
         new IfStrategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy_BestConnectedEverStrategy([
             streaming_loop,
             new delayed_strategy_DelayedStrategy(polling_loop, { delay: 4000 })
         ]), polling_loop)
     ], timeouts);
+    var http_fallback_loop = new IfStrategy(testSupportsStrategy(http_loop), http_loop, sockjs_loop);
     var wsStrategy;
     if (baseOptions.useTLS) {
         wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
             ws_loop,
-            new delayed_strategy_DelayedStrategy(http_loop, { delay: 2000 })
+            new delayed_strategy_DelayedStrategy(http_fallback_loop, { delay: 2000 })
         ]);
     }
     else {
         wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
             ws_loop,
             new delayed_strategy_DelayedStrategy(wss_loop, { delay: 2000 }),
-            new delayed_strategy_DelayedStrategy(http_loop, { delay: 5000 })
+            new delayed_strategy_DelayedStrategy(http_fallback_loop, { delay: 5000 })
         ]);
     }
-    return new websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop)), definedTransports, {
+    return new websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_fallback_loop)), definedTransports, {
         ttl: 1800000,
         timeline: baseOptions.timeline,
         useTLS: baseOptions.useTLS
@@ -2862,7 +3224,8 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
 };
 /* harmony default export */ var default_strategy = (getDefaultStrategy);
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/transports/transport_connection_initializer.ts
+// CONCATENATED MODULE: ./src/runtimes/web/transports/transport_connection_initializer.ts
+
 /* harmony default export */ var transport_connection_initializer = (function () {
     var self = this;
     self.timeline.info(self.buildTimelineMessage({
@@ -2871,10 +3234,60 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     if (self.hooks.isInitialized()) {
         self.changeState('initialized');
     }
+    else if (self.hooks.file) {
+        self.changeState('initializing');
+        Dependencies.load(self.hooks.file, { useTLS: self.options.useTLS }, function (error, callback) {
+            if (self.hooks.isInitialized()) {
+                self.changeState('initialized');
+                callback(true);
+            }
+            else {
+                if (error) {
+                    self.onError(error);
+                }
+                self.onClose();
+                callback(false);
+            }
+        });
+    }
     else {
         self.onClose();
     }
 });
+
+// CONCATENATED MODULE: ./src/runtimes/web/http/http_xdomain_request.ts
+
+var http_xdomain_request_hooks = {
+    getRequest: function (socket) {
+        var xdr = new window.XDomainRequest();
+        xdr.ontimeout = function () {
+            socket.emit('error', new RequestTimedOut());
+            socket.close();
+        };
+        xdr.onerror = function (e) {
+            socket.emit('error', e);
+            socket.close();
+        };
+        xdr.onprogress = function () {
+            if (xdr.responseText && xdr.responseText.length > 0) {
+                socket.onChunk(200, xdr.responseText);
+            }
+        };
+        xdr.onload = function () {
+            if (xdr.responseText && xdr.responseText.length > 0) {
+                socket.onChunk(200, xdr.responseText);
+            }
+            socket.emit('finished', 200);
+            socket.close();
+        };
+        return xdr;
+    },
+    abortRequest: function (xdr) {
+        xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
+        xdr.abort();
+    }
+};
+/* harmony default export */ var http_xdomain_request = (http_xdomain_request_hooks);
 
 // CONCATENATED MODULE: ./src/core/http/http_request.ts
 
@@ -2893,7 +3306,7 @@ class http_request_HTTPRequest extends dispatcher_Dispatcher {
         this.unloader = () => {
             this.close();
         };
-        worker_runtime.addUnloadListener(this.unloader);
+        runtime.addUnloadListener(this.unloader);
         this.xhr.open(this.method, this.url, true);
         if (this.xhr.setRequestHeader) {
             this.xhr.setRequestHeader('Content-Type', 'application/json');
@@ -2902,7 +3315,7 @@ class http_request_HTTPRequest extends dispatcher_Dispatcher {
     }
     close() {
         if (this.unloader) {
-            worker_runtime.removeUnloadListener(this.unloader);
+            runtime.removeUnloadListener(this.unloader);
             this.unloader = null;
         }
         if (this.xhr) {
@@ -2974,7 +3387,7 @@ class http_socket_HTTPSocket {
     sendRaw(payload) {
         if (this.readyState === state.OPEN) {
             try {
-                worker_runtime.createSocketRequest('POST', getUniqueURL(getSendURL(this.location, this.session))).start(payload);
+                runtime.createSocketRequest('POST', getUniqueURL(getSendURL(this.location, this.session))).start(payload);
                 return true;
             }
             catch (e) {
@@ -3063,7 +3476,7 @@ class http_socket_HTTPSocket {
         }
     }
     openStream() {
-        this.stream = worker_runtime.createSocketRequest('POST', getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
+        this.stream = runtime.createSocketRequest('POST', getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
         this.stream.bind('chunk', chunk => {
             this.onChunk(chunk);
         });
@@ -3110,7 +3523,7 @@ function replaceHost(url, hostname) {
     return urlParts[1] + hostname + urlParts[3];
 }
 function randomNumber(max) {
-    return worker_runtime.randomInt(max);
+    return runtime.randomInt(max);
 }
 function randomString(length) {
     var result = [];
@@ -3163,7 +3576,7 @@ var http_polling_socket_hooks = {
 
 var http_xhr_request_hooks = {
     getRequest: function (socket) {
-        var Constructor = worker_runtime.getXHRAPI();
+        var Constructor = runtime.getXHRAPI();
         var xhr = new Constructor();
         xhr.onreadystatechange = xhr.onprogress = function () {
             switch (xhr.readyState) {
@@ -3215,184 +3628,158 @@ var HTTP = {
 };
 /* harmony default export */ var http_http = (HTTP);
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/runtime.ts
+// CONCATENATED MODULE: ./src/runtimes/web/http/http.ts
+
+
+http_http.createXDR = function (method, url) {
+    return this.createRequest(http_xdomain_request, method, url);
+};
+/* harmony default export */ var web_http_http = (http_http);
+
+// CONCATENATED MODULE: ./src/runtimes/web/runtime.ts
 
 
 
 
 
-var Isomorphic = {
+
+
+
+
+
+
+
+var Runtime = {
+    nextAuthCallbackID: 1,
+    auth_callbacks: {},
+    ScriptReceivers: ScriptReceivers,
+    DependenciesReceivers: DependenciesReceivers,
     getDefaultStrategy: default_strategy,
-    Transports: transports,
+    Transports: transports_transports,
     transportConnectionInitializer: transport_connection_initializer,
-    HTTPFactory: http_http,
+    HTTPFactory: web_http_http,
+    TimelineTransport: jsonp_timeline,
+    getXHRAPI() {
+        return window.XMLHttpRequest;
+    },
+    getWebSocketAPI() {
+        return window.WebSocket || window.MozWebSocket;
+    },
     setup(PusherClass) {
-        PusherClass.ready();
-    },
-    getLocalStorage() {
-        return undefined;
-    },
-    getClientFeatures() {
-        return keys(filterObject({ ws: transports.ws }, function (t) {
-            return t.isSupported({});
-        }));
-    },
-    getProtocol() {
-        return 'http:';
-    },
-    isXHRSupported() {
-        return true;
-    },
-    createSocketRequest(method, url) {
-        if (this.isXHRSupported()) {
-            return this.HTTPFactory.createXHR(method, url);
+        if (typeof window !== 'undefined') {
+            window.Pusher = PusherClass;
+        }
+        var initializeOnDocumentBody = () => {
+            this.onDocumentBody(PusherClass.ready);
+        };
+        if (typeof window !== 'undefined' && !window.JSON) {
+            Dependencies.load('json2', {}, initializeOnDocumentBody);
         }
         else {
-            throw 'Cross-origin HTTP requests are not supported';
+            initializeOnDocumentBody();
+        }
+    },
+    getDocument() {
+        return document;
+    },
+    getProtocol() {
+        return this.getDocument().location.protocol;
+    },
+    getAuthorizers() {
+        return { ajax: xhr_auth, jsonp: jsonp_auth };
+    },
+    onDocumentBody(callback) {
+        if (typeof document !== 'undefined' && document.body) {
+            callback();
+        }
+        else {
+            setTimeout(() => {
+                this.onDocumentBody(callback);
+            }, 0);
+        }
+    },
+    createJSONPRequest(url, data) {
+        return new jsonp_request_JSONPRequest(url, data);
+    },
+    createScriptRequest(src) {
+        return new ScriptRequest(src);
+    },
+    getLocalStorage() {
+        try {
+            return window.localStorage;
+        }
+        catch (e) {
+            return undefined;
         }
     },
     createXHR() {
+        if (this.getXHRAPI()) {
+            return this.createXMLHttpRequest();
+        }
+        else {
+            return this.createMicrosoftXHR();
+        }
+    },
+    createXMLHttpRequest() {
         var Constructor = this.getXHRAPI();
         return new Constructor();
+    },
+    createMicrosoftXHR() {
+        return new ActiveXObject('Microsoft.XMLHTTP');
+    },
+    getNetwork() {
+        return net_info_Network;
     },
     createWebSocket(url) {
         var Constructor = this.getWebSocketAPI();
         return new Constructor(url);
     },
-    addUnloadListener(listener) { },
-    removeUnloadListener(listener) { }
-};
-/* harmony default export */ var runtime = (Isomorphic);
-
-// CONCATENATED MODULE: ./src/runtimes/worker/net_info.ts
-
-class net_info_NetInfo extends dispatcher_Dispatcher {
-    isOnline() {
-        return true;
-    }
-}
-var net_info_Network = new net_info_NetInfo();
-
-// CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
-
-var fetchAuth = function (context, query, authOptions, authRequestType, callback) {
-    var headers = new Headers();
-    headers.set('Content-Type', 'application/x-www-form-urlencoded');
-    for (var headerName in authOptions.headers) {
-        headers.set(headerName, authOptions.headers[headerName]);
-    }
-    if (authOptions.headersProvider != null) {
-        const dynamicHeaders = authOptions.headersProvider();
-        for (var headerName in dynamicHeaders) {
-            headers.set(headerName, dynamicHeaders[headerName]);
+    createSocketRequest(method, url) {
+        if (this.isXHRSupported()) {
+            return this.HTTPFactory.createXHR(method, url);
         }
-    }
-    var body = query;
-    var request = new Request(authOptions.endpoint, {
-        headers,
-        body,
-        credentials: 'same-origin',
-        method: 'POST'
-    });
-    return fetch(request)
-        .then(response => {
-        let { status } = response;
-        if (status === 200) {
-            return response.text();
+        else if (this.isXDRSupported(url.indexOf('https:') === 0)) {
+            return this.HTTPFactory.createXDR(method, url);
         }
-        throw new HTTPAuthError(status, `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`);
-    })
-        .then(data => {
-        let parsedData;
-        try {
-            parsedData = JSON.parse(data);
+        else {
+            throw 'Cross-origin HTTP requests are not supported';
         }
-        catch (e) {
-            throw new HTTPAuthError(200, `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${data}`);
-        }
-        callback(null, parsedData);
-    })
-        .catch(err => {
-        callback(err, null);
-    });
-};
-/* harmony default export */ var fetch_auth = (fetchAuth);
-
-// CONCATENATED MODULE: ./src/runtimes/worker/timeline/fetch_timeline.ts
-
-
-var getAgent = function (sender, useTLS) {
-    return function (data, callback) {
-        var scheme = 'http' + (useTLS ? 's' : '') + '://';
-        var url = scheme + (sender.host || sender.options.host) + sender.options.path;
-        var query = buildQueryString(data);
-        url += '/' + 2 + '?' + query;
-        fetch(url)
-            .then(response => {
-            if (response.status !== 200) {
-                throw `received ${response.status} from stats.pusher.com`;
-            }
-            return response.json();
-        })
-            .then(({ host }) => {
-            if (host) {
-                sender.host = host;
-            }
-        })
-            .catch(err => {
-            logger.debug('TimelineSender Error: ', err);
-        });
-    };
-};
-var fetchTimeline = {
-    name: 'xhr',
-    getAgent
-};
-/* harmony default export */ var fetch_timeline = (fetchTimeline);
-
-// CONCATENATED MODULE: ./src/runtimes/worker/runtime.ts
-
-
-
-
-const { getDefaultStrategy: runtime_getDefaultStrategy, Transports: runtime_Transports, setup, getProtocol, isXHRSupported, getLocalStorage, createXHR, createWebSocket, addUnloadListener, removeUnloadListener, transportConnectionInitializer, createSocketRequest, HTTPFactory } = runtime;
-const Worker = {
-    getDefaultStrategy: runtime_getDefaultStrategy,
-    Transports: runtime_Transports,
-    setup,
-    getProtocol,
-    isXHRSupported,
-    getLocalStorage,
-    createXHR,
-    createWebSocket,
-    addUnloadListener,
-    removeUnloadListener,
-    transportConnectionInitializer,
-    createSocketRequest,
-    HTTPFactory,
-    TimelineTransport: fetch_timeline,
-    getAuthorizers() {
-        return { ajax: fetch_auth };
     },
-    getWebSocketAPI() {
-        return WebSocket;
+    isXHRSupported() {
+        var Constructor = this.getXHRAPI();
+        return (Boolean(Constructor) && new Constructor().withCredentials !== undefined);
     },
-    getXHRAPI() {
-        return XMLHttpRequest;
+    isXDRSupported(useTLS) {
+        var protocol = useTLS ? 'https:' : 'http:';
+        var documentProtocol = this.getProtocol();
+        return (Boolean(window['XDomainRequest']) && documentProtocol === protocol);
     },
-    getNetwork() {
-        return net_info_Network;
+    addUnloadListener(listener) {
+        if (window.addEventListener !== undefined) {
+            window.addEventListener('unload', listener, false);
+        }
+        else if (window.attachEvent !== undefined) {
+            window.attachEvent('onunload', listener);
+        }
+    },
+    removeUnloadListener(listener) {
+        if (window.addEventListener !== undefined) {
+            window.removeEventListener('unload', listener, false);
+        }
+        else if (window.detachEvent !== undefined) {
+            window.detachEvent('onunload', listener);
+        }
     },
     randomInt(max) {
         const random = function () {
-            const crypto = globalThis.crypto || globalThis['msCrypto'];
+            const crypto = window.crypto || window['msCrypto'];
             const random = crypto.getRandomValues(new Uint32Array(1))[0];
             return random / Math.pow(2, 32);
         };
         return Math.floor(random() * max);
     }
 };
-/* harmony default export */ var worker_runtime = (Worker);
+/* harmony default export */ var runtime = (Runtime);
 
 // CONCATENATED MODULE: ./src/core/timeline/level.ts
 var TimelineLevel;
@@ -3568,7 +3955,7 @@ function failAttempt(error, callback) {
 
 
 
-const { Transports: strategy_builder_Transports } = worker_runtime;
+const { Transports: strategy_builder_Transports } = runtime;
 var strategy_builder_defineTransport = function (config, name, type, priority, options, manager) {
     var transportClass = strategy_builder_Transports[type];
     if (!transportClass) {
@@ -3619,13 +4006,6 @@ function validateOptions(options) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/auth/options.ts
-var AuthRequestType;
-(function (AuthRequestType) {
-    AuthRequestType["UserAuthentication"] = "user-authentication";
-    AuthRequestType["ChannelAuthorization"] = "channel-authorization";
-})(AuthRequestType || (AuthRequestType = {}));
-
 // CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
 
 
@@ -3651,12 +4031,12 @@ const composeChannelQuery = (params, authOptions) => {
     return query;
 };
 const UserAuthenticator = (authOptions) => {
-    if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+    if (typeof runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
         throw `'${authOptions.transport}' is not a recognized auth transport`;
     }
     return (params, callback) => {
         const query = composeChannelQuery(params, authOptions);
-        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
+        runtime.getAuthorizers()[authOptions.transport](runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
     };
 };
 /* harmony default export */ var user_authenticator = (UserAuthenticator);
@@ -3687,12 +4067,12 @@ const channel_authorizer_composeChannelQuery = (params, authOptions) => {
     return query;
 };
 const ChannelAuthorizer = (authOptions) => {
-    if (typeof worker_runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
+    if (typeof runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
         throw `'${authOptions.transport}' is not a recognized auth transport`;
     }
     return (params, callback) => {
         const query = channel_authorizer_composeChannelQuery(params, authOptions);
-        worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
+        runtime.getAuthorizers()[authOptions.transport](runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
     };
 };
 /* harmony default export */ var channel_authorizer = (ChannelAuthorizer);
@@ -3772,7 +4152,7 @@ function getWebsocketHostFromCluster(cluster) {
     return `ws-${cluster}.pusher.com`;
 }
 function shouldUseTLS(opts) {
-    if (worker_runtime.getProtocol() === 'https:') {
+    if (runtime.getProtocol() === 'https:') {
         return true;
     }
     else if (opts.forceTLS === false) {
@@ -4020,7 +4400,7 @@ class pusher_Pusher {
         }
     }
     static getClientFeatures() {
-        return keys(filterObject({ ws: worker_runtime.Transports.ws }, function (t) {
+        return keys(filterObject({ ws: runtime.Transports.ws }, function (t) {
             return t.isSupported({});
         }));
     }
@@ -4031,7 +4411,7 @@ class pusher_Pusher {
         this.config = getConfig(options, this);
         this.channels = factory.createChannels();
         this.global_emitter = new dispatcher_Dispatcher();
-        this.sessionID = worker_runtime.randomInt(1000000000);
+        this.sessionID = runtime.randomInt(1000000000);
         this.timeline = new timeline_Timeline(this.key, this.sessionID, {
             cluster: this.config.cluster,
             features: pusher_Pusher.getClientFeatures(),
@@ -4043,11 +4423,11 @@ class pusher_Pusher {
         if (this.config.enableStats) {
             this.timelineSender = factory.createTimelineSender(this.timeline, {
                 host: this.config.statsHost,
-                path: '/timeline/v2/' + worker_runtime.TimelineTransport.name
+                path: '/timeline/v2/' + runtime.TimelineTransport.name
             });
         }
         var getStrategy = (options) => {
-            return worker_runtime.getDefaultStrategy(this.config, options, strategy_builder_defineTransport);
+            return runtime.getDefaultStrategy(this.config, options, strategy_builder_defineTransport);
         };
         this.connection = factory.createConnectionManager(this.key, {
             getStrategy: getStrategy,
@@ -4181,20 +4561,19 @@ class pusher_Pusher {
 pusher_Pusher.instances = [];
 pusher_Pusher.isReady = false;
 pusher_Pusher.logToConsole = false;
-pusher_Pusher.Runtime = worker_runtime;
-pusher_Pusher.ScriptReceivers = worker_runtime.ScriptReceivers;
-pusher_Pusher.DependenciesReceivers = worker_runtime.DependenciesReceivers;
-pusher_Pusher.auth_callbacks = worker_runtime.auth_callbacks;
+pusher_Pusher.Runtime = runtime;
+pusher_Pusher.ScriptReceivers = runtime.ScriptReceivers;
+pusher_Pusher.DependenciesReceivers = runtime.DependenciesReceivers;
+pusher_Pusher.auth_callbacks = runtime.auth_callbacks;
 /* harmony default export */ var core_pusher = __webpack_exports__["default"] = (pusher_Pusher);
 function checkAppKey(key) {
     if (key === null || key === undefined) {
         throw 'You must pass your app key when you instantiate Pusher.';
     }
 }
-worker_runtime.setup(pusher_Pusher);
+runtime.setup(pusher_Pusher);
 
 
 /***/ })
 /******/ ]);
-});
-//# sourceMappingURL=pusher.worker.js.map
+//# sourceMappingURL=pusher.js.map

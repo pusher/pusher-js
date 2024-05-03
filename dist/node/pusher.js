@@ -7228,7 +7228,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = global.btoa ||
+var btoa = (typeof global !== 'undefined' && global.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };

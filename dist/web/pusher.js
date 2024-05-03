@@ -877,7 +877,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = window.btoa ||
+var btoa = (typeof window !== 'undefined' && window.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -1745,7 +1745,7 @@ class net_info_NetInfo extends dispatcher_Dispatcher {
     constructor() {
         super();
         var self = this;
-        if (window.addEventListener !== undefined) {
+        if (typeof window !== 'undefined' && window.addEventListener !== undefined) {
             window.addEventListener('online', function () {
                 self.emit('online');
             }, false);
@@ -3675,11 +3675,13 @@ var Runtime = {
         return window.WebSocket || window.MozWebSocket;
     },
     setup(PusherClass) {
-        window.Pusher = PusherClass;
+        if (typeof window !== 'undefined') {
+            window.Pusher = PusherClass;
+        }
         var initializeOnDocumentBody = () => {
             this.onDocumentBody(PusherClass.ready);
         };
-        if (!window.JSON) {
+        if (typeof window !== 'undefined' && !window.JSON) {
             Dependencies.load('json2', {}, initializeOnDocumentBody);
         }
         else {
@@ -3696,7 +3698,7 @@ var Runtime = {
         return { ajax: xhr_auth, jsonp: jsonp_auth };
     },
     onDocumentBody(callback) {
-        if (document.body) {
+        if (typeof document !== 'undefined' && document.body) {
             callback();
         }
         else {
