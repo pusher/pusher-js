@@ -116,6 +116,49 @@ describe("ConnectionManager", function() {
     });
   });
 
+  describe("#switchCluster", function() {
+    it("should update cluster key", function() {
+      expect(manager.key).toEqual("foo");
+      manager.switchCluster("bar");
+      expect(manager.key).toEqual("bar");
+    });
+
+    it("should re-build the strategy", function() {
+      expect(managerOptions.getStrategy.calls.count()).toEqual(1);
+      manager.switchCluster("bar");
+      expect(managerOptions.getStrategy.calls.count()).toEqual(2);
+      expect(managerOptions.getStrategy).toHaveBeenCalledWith({
+        key: "bar",
+        useTLS: false,
+        timeline: timeline
+      });
+    });
+
+    it("should try to connect using the strategy", function() {
+      manager.switchCluster("bar");
+      // connection is retried with a zero delay
+      jasmine.clock().tick(0);
+      expect(strategy.connect).toHaveBeenCalled();
+    });
+
+    it("should transition to connecting", function() {
+      var onConnecting = jasmine.createSpy("onConnecting");
+      var onStateChange = jasmine.createSpy("onStateChange");
+      manager.bind("connecting", onConnecting);
+      manager.bind("state_change", onStateChange);
+
+      manager.switchCluster("bar");// connection is retried with a zero delay
+      jasmine.clock().tick(0);
+
+      expect(manager.state).toEqual("connecting");
+      expect(onConnecting).toHaveBeenCalled();
+      expect(onStateChange).toHaveBeenCalledWith({
+        previous: "initialized",
+        current: "connecting"
+      });
+    });
+  });
+
   describe("before establishing a connection", function() {
     beforeEach(function() {
       manager.connect();

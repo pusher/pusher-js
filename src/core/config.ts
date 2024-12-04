@@ -3,7 +3,9 @@ import Defaults from './defaults';
 import {
   ChannelAuthorizationHandler,
   UserAuthenticationHandler,
-  ChannelAuthorizationOptions
+  ChannelAuthorizationOptions,
+  AuthOptionsT,
+  CustomAuthOptions
 } from './auth/options';
 import UserAuthenticator from './auth/user_authenticator';
 import ChannelAuthorizer from './auth/channel_authorizer';
@@ -131,15 +133,19 @@ function getEnableStatsConfig(opts: Options): boolean {
   return false;
 }
 
+const hasCustomHandler = <T>(
+  auth: AuthOptionsT<T>
+): auth is CustomAuthOptions<T> => {
+  return 'customHandler' in auth && auth['customHandler'] != null;
+};
+
 function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
   const userAuthentication = {
     ...Defaults.userAuthentication,
     ...opts.userAuthentication
   };
-  if (
-    'customHandler' in userAuthentication &&
-    userAuthentication['customHandler'] != null
-  ) {
+
+  if (hasCustomHandler(userAuthentication)) {
     return userAuthentication['customHandler'];
   }
 
@@ -158,17 +164,22 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
       transport: opts.authTransport || Defaults.authTransport,
       endpoint: opts.authEndpoint || Defaults.authEndpoint
     };
+
     if ('auth' in opts) {
       if ('params' in opts.auth) channelAuthorization.params = opts.auth.params;
       if ('headers' in opts.auth)
         channelAuthorization.headers = opts.auth.headers;
     }
-    if ('authorizer' in opts)
-      channelAuthorization.customHandler = ChannelAuthorizerProxy(
-        pusher,
-        channelAuthorization,
-        opts.authorizer
-      );
+
+    if ('authorizer' in opts) {
+      return {
+        customHandler: ChannelAuthorizerProxy(
+          pusher,
+          channelAuthorization,
+          opts.authorizer
+        )
+      };
+    }
   }
   return channelAuthorization;
 }
@@ -178,10 +189,8 @@ function buildChannelAuthorizer(
   pusher
 ): ChannelAuthorizationHandler {
   const channelAuthorization = buildChannelAuth(opts, pusher);
-  if (
-    'customHandler' in channelAuthorization &&
-    channelAuthorization['customHandler'] != null
-  ) {
+
+  if (hasCustomHandler(channelAuthorization)) {
     return channelAuthorization['customHandler'];
   }
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 8.4.0-rc2
+
+- [FIXED] Persist Initial Pusher Options
+- [FIXED] Authorization Custom Handler typing https://github.com/pusher/pusher-js/issues/715
+
+## 8.4.0-rc1
+
+- [Added] Introduce a new  method to switch the Pusher client to a different cluster and re-establish all existing subscriptions and channel bindings.
+
 ## 8.3.0
 
 - [CHANGED] Update cached re-connect strategy to prioritize WebSocket
