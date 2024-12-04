@@ -10,6 +10,8 @@ If you're looking for the Pusher Channels server library for Node.js, use
 For tutorials and more in-depth information about Pusher Channels, visit
 our [official docs](https://pusher.com/docs/javascript_quick_start).
 
+For reporting issues, bugs, and feature requests, please feel free to open a pull request or open an issue. If you do not receive a timely response, feel free to check our [support portal](https://docs.bird.com/pusher).
+
 ## Usage Overview
 
 The following topics are covered:
