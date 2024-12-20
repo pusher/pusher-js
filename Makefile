@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 
 .PHONY: build_all
-build_all: web react-native node worker
+build_all: web cjs react-native node worker
 
 .PHONY: json2
 json2:
@@ -21,6 +21,14 @@ web:
 
 	@echo "Minified Browser Release (with encryption)"
 	INCLUDE_TWEETNACL=true node_modules/webpack/bin/webpack.js --config=webpack/config.web.js
+
+.PHONY: cjs
+cjs:
+	@echo "CommonJS Release:"
+	MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.cjs.js
+
+	@echo "CommonJS Release (with encryption)"
+	INCLUDE_TWEETNACL=true MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.cjs.js
 
 .PHONY: react-native
 react-native:

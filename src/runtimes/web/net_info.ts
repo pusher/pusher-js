@@ -12,7 +12,10 @@ export class NetInfo extends EventsDispatcher implements Reachability {
     super();
     var self = this;
     // This is okay, as IE doesn't support this stuff anyway.
-    if (window.addEventListener !== undefined) {
+    if (
+      typeof window !== 'undefined' &&
+      window.addEventListener !== undefined
+    ) {
       window.addEventListener(
         'online',
         function() {
