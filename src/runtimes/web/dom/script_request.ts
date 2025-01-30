@@ -29,14 +29,14 @@ export default class ScriptRequest {
     self.script.charset = 'UTF-8';
 
     if (self.script.addEventListener) {
-      self.script.onerror = function() {
+      self.script.onerror = function () {
         receiver.callback(errorString);
       };
-      self.script.onload = function() {
+      self.script.onload = function () {
         receiver.callback(null);
       };
     } else {
-      self.script.onreadystatechange = function() {
+      self.script.onreadystatechange = function () {
         if (
           self.script.readyState === 'loaded' ||
           self.script.readyState === 'complete'

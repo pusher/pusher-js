@@ -35,7 +35,7 @@ interface Runtime {
   getDefaultStrategy(
     config: Config,
     options: StrategyOptions,
-    defineTransport: Function
+    defineTransport: Function,
   ): Strategy;
   Transports: TransportsTable;
   getWebSocketAPI(): new (url: string) => Socket;

@@ -14,7 +14,7 @@ import Runtime from 'runtime';
 import {
   ErrorCallbacks,
   HandshakeCallbacks,
-  ConnectionCallbacks
+  ConnectionCallbacks,
 } from './callbacks';
 import Action from './protocol/action';
 
@@ -74,7 +74,7 @@ export default class ConnectionManager extends EventsDispatcher {
 
     this.errorCallbacks = this.buildErrorCallbacks();
     this.connectionCallbacks = this.buildConnectionCallbacks(
-      this.errorCallbacks
+      this.errorCallbacks,
     );
     this.handshakeCallbacks = this.buildHandshakeCallbacks(this.errorCallbacks);
 
@@ -159,7 +159,7 @@ export default class ConnectionManager extends EventsDispatcher {
         if (handshake.action === 'error') {
           this.emit('error', {
             type: 'HandshakeError',
-            error: handshake.error
+            error: handshake.error,
           });
           this.timeline.error({ handshakeError: handshake.error });
         } else {
@@ -192,7 +192,7 @@ export default class ConnectionManager extends EventsDispatcher {
     this.strategy = this.options.getStrategy({
       key: this.key,
       timeline: this.timeline,
-      useTLS: this.usingTLS
+      useTLS: this.usingTLS,
     });
   }
 
@@ -253,10 +253,10 @@ export default class ConnectionManager extends EventsDispatcher {
   }
 
   private buildConnectionCallbacks(
-    errorCallbacks: ErrorCallbacks
+    errorCallbacks: ErrorCallbacks,
   ): ConnectionCallbacks {
     return Collections.extend<ConnectionCallbacks>({}, errorCallbacks, {
-      message: message => {
+      message: (message) => {
         // includes pong messages from server
         this.resetActivityCheck();
         this.emit('message', message);
@@ -267,7 +267,7 @@ export default class ConnectionManager extends EventsDispatcher {
       activity: () => {
         this.resetActivityCheck();
       },
-      error: error => {
+      error: (error) => {
         // just emit error to user - socket will already be closed by browser
         this.emit('error', error);
       },
@@ -276,30 +276,30 @@ export default class ConnectionManager extends EventsDispatcher {
         if (this.shouldRetry()) {
           this.retryIn(1000);
         }
-      }
+      },
     });
   }
 
   private buildHandshakeCallbacks(
-    errorCallbacks: ErrorCallbacks
+    errorCallbacks: ErrorCallbacks,
   ): HandshakeCallbacks {
     return Collections.extend<HandshakeCallbacks>({}, errorCallbacks, {
       connected: (handshake: HandshakePayload) => {
         this.activityTimeout = Math.min(
           this.options.activityTimeout,
           handshake.activityTimeout,
-          handshake.connection.activityTimeout || Infinity
+          handshake.connection.activityTimeout || Infinity,
         );
         this.clearUnavailableTimer();
         this.setConnection(handshake.connection);
         this.socket_id = this.connection.id;
         this.updateState('connected', { socket_id: this.socket_id });
-      }
+      },
     });
   }
 
   private buildErrorCallbacks(): ErrorCallbacks {
-    let withErrorEmitted = callback => {
+    let withErrorEmitted = (callback) => {
       return (result: Action | HandshakePayload) => {
         if (result.error) {
           this.emit('error', { type: 'WebSocketError', error: result.error });
@@ -322,7 +322,7 @@ export default class ConnectionManager extends EventsDispatcher {
       }),
       retry: withErrorEmitted(() => {
         this.retryIn(0);
-      })
+      }),
     };
   }
 
@@ -357,7 +357,7 @@ export default class ConnectionManager extends EventsDispatcher {
       }
       Logger.debug(
         'State changed',
-        previousState + ' -> ' + newStateDescription
+        previousState + ' -> ' + newStateDescription,
       );
       this.timeline.info({ state: newState, params: data });
       this.emit('state_change', { previous: previousState, current: newState });

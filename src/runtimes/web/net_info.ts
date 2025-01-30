@@ -15,17 +15,17 @@ export class NetInfo extends EventsDispatcher implements Reachability {
     if (window.addEventListener !== undefined) {
       window.addEventListener(
         'online',
-        function() {
+        function () {
           self.emit('online');
         },
-        false
+        false,
       );
       window.addEventListener(
         'offline',
-        function() {
+        function () {
           self.emit('offline');
         },
-        false
+        false,
       );
     }
   }

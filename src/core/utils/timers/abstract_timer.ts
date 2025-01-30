@@ -9,7 +9,7 @@ abstract class Timer {
     set: Scheduler,
     clear: Canceller,
     delay: Delay,
-    callback: TimedCallback
+    callback: TimedCallback,
   ) {
     this.clear = clear;
     this.timer = set(() => {

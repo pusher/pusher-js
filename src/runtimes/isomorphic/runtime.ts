@@ -23,9 +23,9 @@ var Isomorphic: any = {
 
   getClientFeatures(): any[] {
     return Collections.keys(
-      Collections.filterObject({ ws: Transports.ws }, function(t) {
+      Collections.filterObject({ ws: Transports.ws }, function (t) {
         return t.isSupported({});
-      })
+      }),
     );
   },
 
@@ -56,7 +56,7 @@ var Isomorphic: any = {
   },
 
   addUnloadListener(listener: any) {},
-  removeUnloadListener(listener: any) {}
+  removeUnloadListener(listener: any) {},
 };
 
 export default Isomorphic;

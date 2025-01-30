@@ -1,6 +1,6 @@
 import {
   ScriptReceivers,
-  ScriptReceiverFactory
+  ScriptReceiverFactory,
 } from './script_receiver_factory';
 import Runtime from 'runtime';
 import ScriptRequest from './script_request';
@@ -45,14 +45,14 @@ export default class DependencyLoader {
       self.loading[name] = [callback];
 
       var request = Runtime.createScriptRequest(self.getPath(name, options));
-      var receiver = self.receivers.create(function(error) {
+      var receiver = self.receivers.create(function (error) {
         self.receivers.remove(receiver);
 
         if (self.loading[name]) {
           var callbacks = self.loading[name];
           delete self.loading[name];
 
-          var successCallback = function(wasSuccessful) {
+          var successCallback = function (wasSuccessful) {
             if (!wasSuccessful) {
               request.cleanup();
             }

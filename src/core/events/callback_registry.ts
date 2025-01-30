@@ -19,7 +19,7 @@ export default class CallbackRegistry {
       this._callbacks[prefixedEventName] || [];
     this._callbacks[prefixedEventName].push({
       fn: callback,
-      context: context
+      context: context,
     });
   }
 
@@ -41,31 +41,31 @@ export default class CallbackRegistry {
   private removeCallback(names: string[], callback: Function, context: any) {
     Collections.apply(
       names,
-      function(name) {
+      function (name) {
         this._callbacks[name] = Collections.filter(
           this._callbacks[name] || [],
-          function(binding) {
+          function (binding) {
             return (
               (callback && callback !== binding.fn) ||
               (context && context !== binding.context)
             );
-          }
+          },
         );
         if (this._callbacks[name].length === 0) {
           delete this._callbacks[name];
         }
       },
-      this
+      this,
     );
   }
 
   private removeAllCallbacks(names: string[]) {
     Collections.apply(
       names,
-      function(name) {
+      function (name) {
         delete this._callbacks[name];
       },
-      this
+      this,
     );
   }
 }

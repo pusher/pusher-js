@@ -26,7 +26,7 @@ var HTTP: HTTPFactory = {
 
   createRequest(hooks: RequestHooks, method: string, url: string): HTTPRequest {
     return new HTTPRequest(hooks, method, url);
-  }
+  },
 };
 
 export default HTTP;

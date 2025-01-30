@@ -57,7 +57,7 @@ export default class Channels {
 
   /** Proxies disconnection signal to all channels. */
   disconnect() {
-    Collections.objectApply(this.channels, function(channel) {
+    Collections.objectApply(this.channels, function (channel) {
       channel.disconnect();
     });
   }
@@ -78,7 +78,7 @@ function createChannel(name: string, pusher: Pusher): Channel {
     return Factory.createPresenceChannel(name, pusher);
   } else if (name.indexOf('#') === 0) {
     throw new Errors.BadChannelName(
-      'Cannot create a channel with name "' + name + '".'
+      'Cannot create a channel with name "' + name + '".',
     );
   } else {
     return Factory.createChannel(name, pusher);

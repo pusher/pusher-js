@@ -1,6 +1,6 @@
 export enum AuthRequestType {
   UserAuthentication = 'user-authentication',
-  ChannelAuthorization = 'channel-authorization'
+  ChannelAuthorization = 'channel-authorization',
 }
 
 export interface ChannelAuthorizationData {
@@ -11,7 +11,7 @@ export interface ChannelAuthorizationData {
 
 export type ChannelAuthorizationCallback = (
   error: Error | null,
-  authData: ChannelAuthorizationData | null
+  authData: ChannelAuthorizationData | null,
 ) => void;
 
 export interface ChannelAuthorizationRequestParams {
@@ -22,7 +22,7 @@ export interface ChannelAuthorizationRequestParams {
 export interface ChannelAuthorizationHandler {
   (
     params: ChannelAuthorizationRequestParams,
-    callback: ChannelAuthorizationCallback
+    callback: ChannelAuthorizationCallback,
   ): void;
 }
 
@@ -33,7 +33,7 @@ export interface UserAuthenticationData {
 
 export type UserAuthenticationCallback = (
   error: Error | null,
-  authData: UserAuthenticationData | null
+  authData: UserAuthenticationData | null,
 ) => void;
 
 export interface UserAuthenticationRequestParams {
@@ -43,7 +43,7 @@ export interface UserAuthenticationRequestParams {
 export interface UserAuthenticationHandler {
   (
     params: UserAuthenticationRequestParams,
-    callback: UserAuthenticationCallback
+    callback: UserAuthenticationCallback,
   ): void;
 }
 
@@ -61,12 +61,10 @@ export interface AuthOptionsT<AuthHandler> {
   customHandler?: AuthHandler;
 }
 
-export declare type UserAuthenticationOptions = AuthOptionsT<
-  UserAuthenticationHandler
->;
-export declare type ChannelAuthorizationOptions = AuthOptionsT<
-  ChannelAuthorizationHandler
->;
+export declare type UserAuthenticationOptions =
+  AuthOptionsT<UserAuthenticationHandler>;
+export declare type ChannelAuthorizationOptions =
+  AuthOptionsT<ChannelAuthorizationHandler>;
 
 export interface InternalAuthOptions {
   transport: 'ajax' | 'jsonp';

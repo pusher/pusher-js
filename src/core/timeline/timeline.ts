@@ -31,7 +31,7 @@ export default class Timeline {
   log(level, event) {
     if (level <= this.options.level) {
       this.events.push(
-        Collections.extend({}, event, { timestamp: Util.now() })
+        Collections.extend({}, event, { timestamp: Util.now() }),
       );
       if (this.options.limit && this.events.length > this.options.limit) {
         this.events.shift();
@@ -65,9 +65,9 @@ export default class Timeline {
         version: this.options.version,
         cluster: this.options.cluster,
         features: this.options.features,
-        timeline: this.events
+        timeline: this.events,
       },
-      this.options.params
+      this.options.params,
     );
 
     this.events = [];

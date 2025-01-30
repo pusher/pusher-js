@@ -24,7 +24,7 @@ const {
   removeUnloadListener,
   transportConnectionInitializer,
   createSocketRequest,
-  HTTPFactory
+  HTTPFactory,
 } = Isomorphic;
 
 const NodeJS: Runtime = {
@@ -62,7 +62,7 @@ const NodeJS: Runtime = {
 
   randomInt(max: number): number {
     return randomInt(max);
-  }
+  },
 };
 
 export default NodeJS;

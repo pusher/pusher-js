@@ -4,10 +4,10 @@ import Ajax from 'core/http/ajax';
 import Runtime from 'runtime';
 
 var hooks: RequestHooks = {
-  getRequest: function(socket: HTTPRequest): Ajax {
+  getRequest: function (socket: HTTPRequest): Ajax {
     var Constructor = Runtime.getXHRAPI();
     var xhr = new Constructor();
-    xhr.onreadystatechange = xhr.onprogress = function() {
+    xhr.onreadystatechange = xhr.onprogress = function () {
       switch (xhr.readyState) {
         case 3:
           if (xhr.responseText && xhr.responseText.length > 0) {
@@ -26,10 +26,10 @@ var hooks: RequestHooks = {
     };
     return xhr;
   },
-  abortRequest: function(xhr: Ajax) {
+  abortRequest: function (xhr: Ajax) {
     xhr.onreadystatechange = null;
     xhr.abort();
-  }
+  },
 };
 
 export default hooks;

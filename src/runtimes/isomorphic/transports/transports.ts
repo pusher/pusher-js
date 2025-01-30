@@ -17,65 +17,67 @@ var WSTransport = new Transport(<TransportHooks>{
   handlesActivityChecks: false,
   supportsPing: false,
 
-  isInitialized: function() {
+  isInitialized: function () {
     return Boolean(Runtime.getWebSocketAPI());
   },
-  isSupported: function(): boolean {
+  isSupported: function (): boolean {
     return Boolean(Runtime.getWebSocketAPI());
   },
-  getSocket: function(url) {
+  getSocket: function (url) {
     return Runtime.createWebSocket(url);
-  }
+  },
 });
 
 var httpConfiguration = {
   urls: URLSchemes.http,
   handlesActivityChecks: false,
   supportsPing: true,
-  isInitialized: function() {
+  isInitialized: function () {
     return true;
-  }
+  },
 };
 
 export var streamingConfiguration = Collections.extend(
   {
-    getSocket: function(url) {
+    getSocket: function (url) {
       return Runtime.HTTPFactory.createStreamingSocket(url);
-    }
+    },
   },
-  httpConfiguration
+  httpConfiguration,
 );
 export var pollingConfiguration = Collections.extend(
   {
-    getSocket: function(url) {
+    getSocket: function (url) {
       return Runtime.HTTPFactory.createPollingSocket(url);
-    }
+    },
   },
-  httpConfiguration
+  httpConfiguration,
 );
 
 var xhrConfiguration = {
-  isSupported: function(): boolean {
+  isSupported: function (): boolean {
     return Runtime.isXHRSupported();
-  }
+  },
 };
 
 /** HTTP streaming transport using CORS-enabled XMLHttpRequest. */
 var XHRStreamingTransport = new Transport(
   <TransportHooks>(
     Collections.extend({}, streamingConfiguration, xhrConfiguration)
-  )
+  ),
 );
 
 /** HTTP long-polling transport using CORS-enabled XMLHttpRequest. */
 var XHRPollingTransport = new Transport(
-  <TransportHooks>Collections.extend({}, pollingConfiguration, xhrConfiguration)
+  <TransportHooks>(
+    Collections.extend({}, pollingConfiguration, xhrConfiguration)
+  ),
 );
 
 var Transports: TransportsTable = {
   ws: WSTransport,
   xhr_streaming: XHRStreamingTransport,
-  xhr_polling: XHRPollingTransport
+  xhr_polling: XHRPollingTransport,
 };
 
 export default Transports;

@@ -59,7 +59,7 @@ export default class SequentialStrategy implements Strategy {
             strategies[current],
             minPriority,
             { timeout, failFast: this.failFast },
-            tryNextStrategy
+            tryNextStrategy,
           );
         } else {
           callback(true);
@@ -71,19 +71,19 @@ export default class SequentialStrategy implements Strategy {
       strategies[current],
       minPriority,
       { timeout: timeout, failFast: this.failFast },
-      tryNextStrategy
+      tryNextStrategy,
     );
 
     return {
-      abort: function() {
+      abort: function () {
         runner.abort();
       },
-      forceMinPriority: function(p) {
+      forceMinPriority: function (p) {
         minPriority = p;
         if (runner) {
           runner.forceMinPriority(p);
         }
-      }
+      },
     };
   }
 
@@ -91,19 +91,19 @@ export default class SequentialStrategy implements Strategy {
     strategy: Strategy,
     minPriority: number,
     options: StrategyOptions,
-    callback: Function
+    callback: Function,
   ) {
     var timer = null;
     var runner = null;
 
     if (options.timeout > 0) {
-      timer = new Timer(options.timeout, function() {
+      timer = new Timer(options.timeout, function () {
         runner.abort();
         callback(true);
       });
     }
 
-    runner = strategy.connect(minPriority, function(error, handshake) {
+    runner = strategy.connect(minPriority, function (error, handshake) {
       if (error && timer && timer.isRunning() && !options.failFast) {
         // advance to the next strategy after the timeout
         return;
@@ -115,15 +115,15 @@ export default class SequentialStrategy implements Strategy {
     });
 
     return {
-      abort: function() {
+      abort: function () {
         if (timer) {
           timer.ensureAborted();
         }
         runner.abort();
       },
-      forceMinPriority: function(p) {
+      forceMinPriority: function (p) {
         runner.forceMinPriority(p);
-      }
+      },
     };
   }
 }

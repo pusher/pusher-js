@@ -4,7 +4,7 @@ interface Ajax {
     url: string,
     async?: boolean,
     user?: string,
-    password?: string
+    password?: string,
   ): void;
   send(payload?: any): void;
   setRequestHeader(key: string, value: string): void;

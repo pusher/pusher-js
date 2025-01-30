@@ -4,22 +4,22 @@ import Ajax from 'core/http/ajax';
 import * as Errors from 'core/errors';
 
 var hooks: RequestHooks = {
-  getRequest: function(socket: HTTPRequest): Ajax {
+  getRequest: function (socket: HTTPRequest): Ajax {
     var xdr = new (<any>window).XDomainRequest();
-    xdr.ontimeout = function() {
+    xdr.ontimeout = function () {
       socket.emit('error', new Errors.RequestTimedOut());
       socket.close();
     };
-    xdr.onerror = function(e) {
+    xdr.onerror = function (e) {
       socket.emit('error', e);
       socket.close();
     };
-    xdr.onprogress = function() {
+    xdr.onprogress = function () {
       if (xdr.responseText && xdr.responseText.length > 0) {
         socket.onChunk(200, xdr.responseText);
       }
     };
-    xdr.onload = function() {
+    xdr.onload = function () {
       if (xdr.responseText && xdr.responseText.length > 0) {
         socket.onChunk(200, xdr.responseText);
       }
@@ -28,10 +28,10 @@ var hooks: RequestHooks = {
     };
     return xdr;
   },
-  abortRequest: function(xdr: Ajax) {
+  abortRequest: function (xdr: Ajax) {
     xdr.ontimeout = xdr.onerror = xdr.onprogress = xdr.onload = null;
     xdr.abort();
-  }
+  },
 };
 
 export default hooks;

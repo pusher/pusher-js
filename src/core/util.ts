@@ -25,10 +25,10 @@ var Util = {
    */
   method(name: string, ...args: any[]): Function {
     var boundArguments = Array.prototype.slice.call(arguments, 1);
-    return function(object) {
+    return function (object) {
       return object[name].apply(object, boundArguments.concat(arguments));
     };
-  }
+  },
 };
 
 export default Util;

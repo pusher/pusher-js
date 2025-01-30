@@ -4,7 +4,7 @@ interface TimelineTransport {
   name: string;
   getAgent: (
     sender: TimelineSender,
-    useTLS: boolean
+    useTLS: boolean,
   ) => (data: any, callback: Function) => void;
 }
 

@@ -55,7 +55,7 @@ export default class TransportConnection extends EventsDispatcher {
     name: string,
     priority: number,
     key: string,
-    options: TransportConnectionOptions
+    options: TransportConnectionOptions,
   ) {
     super();
     this.initialize = Runtime.transportConnectionInitializer;
@@ -157,7 +157,7 @@ export default class TransportConnection extends EventsDispatcher {
     if (this.hooks.beforeOpen) {
       this.hooks.beforeOpen(
         this.socket,
-        this.hooks.urls.getPath(this.key, this.options)
+        this.hooks.urls.getPath(this.key, this.options),
       );
     }
     this.changeState('open');
@@ -174,7 +174,7 @@ export default class TransportConnection extends EventsDispatcher {
       this.changeState('closed', {
         code: closeEvent.code,
         reason: closeEvent.reason,
-        wasClean: closeEvent.wasClean
+        wasClean: closeEvent.wasClean,
       });
     } else {
       this.changeState('closed');
@@ -195,13 +195,13 @@ export default class TransportConnection extends EventsDispatcher {
     this.socket.onopen = () => {
       this.onOpen();
     };
-    this.socket.onerror = error => {
+    this.socket.onerror = (error) => {
       this.onError(error);
     };
-    this.socket.onclose = closeEvent => {
+    this.socket.onclose = (closeEvent) => {
       this.onClose(closeEvent);
     };
-    this.socket.onmessage = message => {
+    this.socket.onmessage = (message) => {
       this.onMessage(message);
     };
 
@@ -229,8 +229,8 @@ export default class TransportConnection extends EventsDispatcher {
     this.timeline.info(
       this.buildTimelineMessage({
         state: state,
-        params: params
-      })
+        params: params,
+      }),
     );
     this.emit(state, params);
   }

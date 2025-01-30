@@ -45,9 +45,9 @@ export default class Pusher {
 
   private static getClientFeatures(): string[] {
     return Collections.keys(
-      Collections.filterObject({ ws: Runtime.Transports.ws }, function(t) {
+      Collections.filterObject({ ws: Runtime.Transports.ws }, function (t) {
         return t.isSupported({});
-      })
+      }),
     );
   }
 
@@ -78,12 +78,12 @@ export default class Pusher {
       params: this.config.timelineParams || {},
       limit: 50,
       level: TimelineLevel.INFO,
-      version: Defaults.VERSION
+      version: Defaults.VERSION,
     });
     if (this.config.enableStats) {
       this.timelineSender = Factory.createTimelineSender(this.timeline, {
         host: this.config.statsHost,
-        path: '/timeline/v2/' + Runtime.TimelineTransport.name
+        path: '/timeline/v2/' + Runtime.TimelineTransport.name,
       });
     }
 
@@ -97,7 +97,7 @@ export default class Pusher {
       activityTimeout: this.config.activityTimeout,
       pongTimeout: this.config.pongTimeout,
       unavailableTimeout: this.config.unavailableTimeout,
-      useTLS: Boolean(this.config.useTLS)
+      useTLS: Boolean(this.config.useTLS),
     });
 
     this.connection.bind('connected', () => {
@@ -107,7 +107,7 @@ export default class Pusher {
       }
     });
 
-    this.connection.bind('message', event => {
+    this.connection.bind('message', (event) => {
       var eventName = event.event;
       var internal = eventName.indexOf('pusher_internal:') === 0;
       if (event.channel) {
@@ -127,7 +127,7 @@ export default class Pusher {
     this.connection.bind('disconnected', () => {
       this.channels.disconnect();
     });
-    this.connection.bind('error', err => {
+    this.connection.bind('error', (err) => {
       Logger.warn(err);
     });
 
@@ -156,7 +156,7 @@ export default class Pusher {
       if (!this.timelineSenderTimer) {
         var usingTLS = this.connection.isUsingTLS();
         var timelineSender = this.timelineSender;
-        this.timelineSenderTimer = new PeriodicTimer(60000, function() {
+        this.timelineSenderTimer = new PeriodicTimer(60000, function () {
           timelineSender.send(usingTLS);
         });
       }

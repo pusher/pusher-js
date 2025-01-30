@@ -6,22 +6,22 @@ import { AuthTransport } from 'core/auth/auth_transports';
 import {
   AuthRequestType,
   AuthTransportCallback,
-  InternalAuthOptions
+  InternalAuthOptions,
 } from 'core/auth/options';
 
-var jsonp: AuthTransport = function(
+var jsonp: AuthTransport = function (
   context: Browser,
   query: string,
   authOptions: InternalAuthOptions,
   authRequestType: AuthRequestType,
-  callback: AuthTransportCallback
+  callback: AuthTransportCallback,
 ) {
   if (
     authOptions.headers !== undefined ||
     authOptions.headersProvider != null
   ) {
     Logger.warn(
-      `To send headers with the ${authRequestType.toString()} request, you must use AJAX, rather than JSONP.`
+      `To send headers with the ${authRequestType.toString()} request, you must use AJAX, rather than JSONP.`,
     );
   }
 
@@ -31,7 +31,7 @@ var jsonp: AuthTransport = function(
   var document = context.getDocument();
   var script = document.createElement('script');
   // Hacked wrapper.
-  context.auth_callbacks[callbackName] = function(data) {
+  context.auth_callbacks[callbackName] = function (data) {
     callback(null, data);
   };
 

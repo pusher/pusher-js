@@ -41,7 +41,7 @@ export default class Dispatcher {
 
     this.global_callbacks = Collections.filter(
       this.global_callbacks || [],
-      c => c !== callback
+      (c) => c !== callback,
     );
 
     return this;

@@ -17,9 +17,9 @@ export default class PrivateChannel extends Channel {
     return this.pusher.config.channelAuthorizer(
       {
         channelName: this.name,
-        socketId: socketId
+        socketId: socketId,
       },
-      callback
+      callback,
     );
   }
 }

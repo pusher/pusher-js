@@ -27,7 +27,7 @@ export default class TimelineSender {
 
     this.timeline.send(
       Runtime.TimelineTransport.getAgent(this, useTLS),
-      callback
+      callback,
     );
   }
 }

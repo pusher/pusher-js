@@ -28,7 +28,7 @@ export default class AssistantToTheTransportManager {
   constructor(
     manager: TransportManager,
     transport: Transport,
-    options: PingDelayOptions
+    options: PingDelayOptions,
   ) {
     this.manager = manager;
     this.transport = transport;
@@ -51,26 +51,26 @@ export default class AssistantToTheTransportManager {
     name: string,
     priority: number,
     key: string,
-    options: Object
+    options: Object,
   ): TransportConnection {
     options = Collections.extend({}, options, {
-      activityTimeout: this.pingDelay
+      activityTimeout: this.pingDelay,
     });
     var connection = this.transport.createConnection(
       name,
       priority,
       key,
-      options
+      options,
     );
 
     var openTimestamp = null;
 
-    var onOpen = function() {
+    var onOpen = function () {
       connection.unbind('open', onOpen);
       connection.bind('closed', onClosed);
       openTimestamp = Util.now();
     };
-    var onClosed = closeEvent => {
+    var onClosed = (closeEvent) => {
       connection.unbind('closed', onClosed);
 
       if (closeEvent.code === 1002 || closeEvent.code === 1003) {

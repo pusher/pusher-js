@@ -26,23 +26,23 @@ export default class DelayedStrategy implements Strategy {
   connect(minPriority: number, callback: Function) {
     var strategy = this.strategy;
     var runner;
-    var timer = new Timer(this.options.delay, function() {
+    var timer = new Timer(this.options.delay, function () {
       runner = strategy.connect(minPriority, callback);
     });
 
     return {
-      abort: function() {
+      abort: function () {
         timer.ensureAborted();
         if (runner) {
           runner.abort();
         }
       },
-      forceMinPriority: function(p) {
+      forceMinPriority: function (p) {
         minPriority = p;
         if (runner) {
           runner.forceMinPriority(p);
         }
-      }
+      },
     };
   }
 }

@@ -17,12 +17,15 @@ export default class FirstConnectedStrategy implements Strategy {
   }
 
   connect(minPriority: number, callback: Function): StrategyRunner {
-    var runner = this.strategy.connect(minPriority, function(error, handshake) {
-      if (handshake) {
-        runner.abort();
-      }
-      callback(error, handshake);
-    });
+    var runner = this.strategy.connect(
+      minPriority,
+      function (error, handshake) {
+        if (handshake) {
+          runner.abort();
+        }
+        callback(error, handshake);
+      },
+    );
     return runner;
   }
 }

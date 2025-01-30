@@ -20,7 +20,7 @@ const Protocol = {
    * @param  {MessageEvent} messageEvent
    * @return {PusherEvent}
    */
-  decodeMessage: function(messageEvent: MessageEvent): PusherEvent {
+  decodeMessage: function (messageEvent: MessageEvent): PusherEvent {
     try {
       var messageData = JSON.parse(messageEvent.data);
       var pusherEventData = messageData.data;
@@ -32,7 +32,7 @@ const Protocol = {
       var pusherEvent: PusherEvent = {
         event: messageData.event,
         channel: messageData.channel,
-        data: pusherEventData
+        data: pusherEventData,
       };
       if (messageData.user_id) {
         pusherEvent.user_id = messageData.user_id;
@@ -49,7 +49,7 @@ const Protocol = {
    * @param  {PusherEvent} event
    * @return {String}
    */
-  encodeMessage: function(event: PusherEvent): string {
+  encodeMessage: function (event: PusherEvent): string {
     return JSON.stringify(event);
   },
 
@@ -67,7 +67,7 @@ const Protocol = {
    * @param {String} message
    * @result Object
    */
-  processHandshake: function(messageEvent: MessageEvent): Action {
+  processHandshake: function (messageEvent: MessageEvent): Action {
     var message = Protocol.decodeMessage(messageEvent);
 
     if (message.event === 'pusher:connection_established') {
@@ -77,14 +77,14 @@ const Protocol = {
       return {
         action: 'connected',
         id: message.data.socket_id,
-        activityTimeout: message.data.activity_timeout * 1000
+        activityTimeout: message.data.activity_timeout * 1000,
       };
     } else if (message.event === 'pusher:error') {
       // From protocol 6 close codes are sent only once, so this only
       // happens when connection does not support close codes
       return {
         action: this.getCloseAction(message.data),
-        error: this.getCloseError(message.data)
+        error: this.getCloseError(message.data),
       };
     } else {
       throw 'Invalid handshake';
@@ -101,7 +101,7 @@ const Protocol = {
    * @param  {CloseEvent} closeEvent
    * @return {String} close action name
    */
-  getCloseAction: function(closeEvent): string {
+  getCloseAction: function (closeEvent): string {
     if (closeEvent.code < 4000) {
       // ignore 1000 CLOSE_NORMAL, 1001 CLOSE_GOING_AWAY,
       //        1005 CLOSE_NO_STATUS, 1006 CLOSE_ABNORMAL
@@ -136,19 +136,19 @@ const Protocol = {
    * @param  {CloseEvent} closeEvent
    * @return {Object} error object
    */
-  getCloseError: function(closeEvent): any {
+  getCloseError: function (closeEvent): any {
     if (closeEvent.code !== 1000 && closeEvent.code !== 1001) {
       return {
         type: 'PusherError',
         data: {
           code: closeEvent.code,
-          message: closeEvent.reason || closeEvent.message
-        }
+          message: closeEvent.reason || closeEvent.message,
+        },
       };
     } else {
       return null;
     }
-  }
+  },
 };
 
 export default Protocol;

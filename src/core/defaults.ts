@@ -1,6 +1,6 @@
 import {
   ChannelAuthorizationOptions,
-  UserAuthenticationOptions
+  UserAuthenticationOptions,
 } from './auth/options';
 import { AuthTransport } from './config';
 
@@ -50,17 +50,17 @@ var Defaults: DefaultConfig = {
   unavailableTimeout: 10000,
   userAuthentication: {
     endpoint: '/pusher/user-auth',
-    transport: 'ajax'
+    transport: 'ajax',
   },
   channelAuthorization: {
     endpoint: '/pusher/auth',
-    transport: 'ajax'
+    transport: 'ajax',
   },
 
   // CDN configuration
   cdn_http: CDN_HTTP,
   cdn_https: CDN_HTTPS,
-  dependency_suffix: DEPENDENCY_SUFFIX
+  dependency_suffix: DEPENDENCY_SUFFIX,
 };
 
 export default Defaults;

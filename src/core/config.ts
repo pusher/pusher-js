@@ -3,7 +3,7 @@ import Defaults from './defaults';
 import {
   ChannelAuthorizationHandler,
   UserAuthenticationHandler,
-  ChannelAuthorizationOptions
+  ChannelAuthorizationOptions,
 } from './auth/options';
 import UserAuthenticator from './auth/user_authenticator';
 import ChannelAuthorizer from './auth/channel_authorizer';
@@ -71,7 +71,7 @@ export function getConfig(opts: Options, pusher): Config {
     wsHost: getWebsocketHost(opts),
 
     userAuthenticator: buildUserAuthenticator(opts),
-    channelAuthorizer: buildChannelAuthorizer(opts, pusher)
+    channelAuthorizer: buildChannelAuthorizer(opts, pusher),
   };
 
   if ('disabledTransports' in opts)
@@ -134,7 +134,7 @@ function getEnableStatsConfig(opts: Options): boolean {
 function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
   const userAuthentication = {
     ...Defaults.userAuthentication,
-    ...opts.userAuthentication
+    ...opts.userAuthentication,
   };
   if (
     'customHandler' in userAuthentication &&
@@ -151,12 +151,12 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
   if ('channelAuthorization' in opts) {
     channelAuthorization = {
       ...Defaults.channelAuthorization,
-      ...opts.channelAuthorization
+      ...opts.channelAuthorization,
     };
   } else {
     channelAuthorization = {
       transport: opts.authTransport || Defaults.authTransport,
-      endpoint: opts.authEndpoint || Defaults.authEndpoint
+      endpoint: opts.authEndpoint || Defaults.authEndpoint,
     };
     if ('auth' in opts) {
       if ('params' in opts.auth) channelAuthorization.params = opts.auth.params;
@@ -167,7 +167,7 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
       channelAuthorization.customHandler = ChannelAuthorizerProxy(
         pusher,
         channelAuthorization,
-        opts.authorizer
+        opts.authorizer,
       );
   }
   return channelAuthorization;
@@ -175,7 +175,7 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
 
 function buildChannelAuthorizer(
   opts: Options,
-  pusher
+  pusher,
 ): ChannelAuthorizationHandler {
   const channelAuthorization = buildChannelAuth(opts, pusher);
   if (
