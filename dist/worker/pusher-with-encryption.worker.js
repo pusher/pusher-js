@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.3.0
+ * Pusher JavaScript Library v8.4.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -2998,7 +2998,7 @@ var cb_encode = function (ccc) {
         b64chars.charAt(ord >>> 18),
         b64chars.charAt((ord >>> 12) & 63),
         padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
-        padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+        padlen >= 1 ? '=' : b64chars.charAt(ord & 63),
     ];
     return chars.join('');
 };
@@ -3073,7 +3073,7 @@ var Util = {
         return function (object) {
             return object[name].apply(object, boundArguments.concat(arguments));
         };
-    }
+    },
 };
 /* harmony default export */ var util = (Util);
 
@@ -3273,7 +3273,7 @@ function safeJSONStringify(source) {
 
 // CONCATENATED MODULE: ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.3.0",
+    VERSION: "8.4.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -3290,15 +3290,15 @@ var Defaults = {
     unavailableTimeout: 10000,
     userAuthentication: {
         endpoint: '/pusher/user-auth',
-        transport: 'ajax'
+        transport: 'ajax',
     },
     channelAuthorization: {
         endpoint: '/pusher/auth',
-        transport: 'ajax'
+        transport: 'ajax',
     },
     cdn_http: "http://js.pusher.com",
     cdn_https: "https://js.pusher.com",
-    dependency_suffix: ""
+    dependency_suffix: "",
 };
 /* harmony default export */ var defaults = (Defaults);
 
@@ -3323,13 +3323,13 @@ var ws = {
     getInitial: function (key, params) {
         var path = (params.httpPath || '') + getGenericPath(key, 'flash=false');
         return getGenericURL('ws', params, path);
-    }
+    },
 };
 var http = {
     getInitial: function (key, params) {
         var path = (params.httpPath || '/pusher') + getGenericPath(key);
         return getGenericURL('http', params, path);
-    }
+    },
 };
 var sockjs = {
     getInitial: function (key, params) {
@@ -3337,7 +3337,7 @@ var sockjs = {
     },
     getPath: function (key, params) {
         return getGenericPath(key);
-    }
+    },
 };
 
 // CONCATENATED MODULE: ./src/core/events/callback_registry.ts
@@ -3355,7 +3355,7 @@ class callback_registry_CallbackRegistry {
             this._callbacks[prefixedEventName] || [];
         this._callbacks[prefixedEventName].push({
             fn: callback,
-            context: context
+            context: context,
         });
     }
     remove(name, callback, context) {
@@ -3418,7 +3418,7 @@ class dispatcher_Dispatcher {
             this.global_callbacks = [];
             return this;
         }
-        this.global_callbacks = filter(this.global_callbacks || [], c => c !== callback);
+        this.global_callbacks = filter(this.global_callbacks || [], (c) => c !== callback);
         return this;
     }
     unbind_all() {
@@ -3588,7 +3588,7 @@ class transport_connection_TransportConnection extends dispatcher_Dispatcher {
             this.changeState('closed', {
                 code: closeEvent.code,
                 reason: closeEvent.reason,
-                wasClean: closeEvent.wasClean
+                wasClean: closeEvent.wasClean,
             });
         }
         else {
@@ -3607,13 +3607,13 @@ class transport_connection_TransportConnection extends dispatcher_Dispatcher {
         this.socket.onopen = () => {
             this.onOpen();
         };
-        this.socket.onerror = error => {
+        this.socket.onerror = (error) => {
             this.onError(error);
         };
-        this.socket.onclose = closeEvent => {
+        this.socket.onclose = (closeEvent) => {
             this.onClose(closeEvent);
         };
-        this.socket.onmessage = message => {
+        this.socket.onmessage = (message) => {
             this.onMessage(message);
         };
         if (this.supportsPing()) {
@@ -3637,7 +3637,7 @@ class transport_connection_TransportConnection extends dispatcher_Dispatcher {
         this.state = state;
         this.timeline.info(this.buildTimelineMessage({
             state: state,
-            params: params
+            params: params,
         }));
         this.emit(state, params);
     }
@@ -3677,7 +3677,7 @@ var WSTransport = new transport_Transport({
     },
     getSocket: function (url) {
         return worker_runtime.createWebSocket(url);
-    }
+    },
 });
 var httpConfiguration = {
     urls: http,
@@ -3685,29 +3685,29 @@ var httpConfiguration = {
     supportsPing: true,
     isInitialized: function () {
         return true;
-    }
+    },
 };
 var streamingConfiguration = extend({
     getSocket: function (url) {
         return worker_runtime.HTTPFactory.createStreamingSocket(url);
-    }
+    },
 }, httpConfiguration);
 var pollingConfiguration = extend({
     getSocket: function (url) {
         return worker_runtime.HTTPFactory.createPollingSocket(url);
-    }
+    },
 }, httpConfiguration);
 var xhrConfiguration = {
     isSupported: function () {
         return worker_runtime.isXHRSupported();
-    }
+    },
 };
 var XHRStreamingTransport = new transport_Transport((extend({}, streamingConfiguration, xhrConfiguration)));
-var XHRPollingTransport = new transport_Transport(extend({}, pollingConfiguration, xhrConfiguration));
+var XHRPollingTransport = new transport_Transport((extend({}, pollingConfiguration, xhrConfiguration)));
 var Transports = {
     ws: WSTransport,
     xhr_streaming: XHRStreamingTransport,
-    xhr_polling: XHRPollingTransport
+    xhr_polling: XHRPollingTransport,
 };
 /* harmony default export */ var transports = (Transports);
 
@@ -3724,7 +3724,7 @@ class assistant_to_the_transport_manager_AssistantToTheTransportManager {
     }
     createConnection(name, priority, key, options) {
         options = extend({}, options, {
-            activityTimeout: this.pingDelay
+            activityTimeout: this.pingDelay,
         });
         var connection = this.transport.createConnection(name, priority, key, options);
         var openTimestamp = null;
@@ -3733,7 +3733,7 @@ class assistant_to_the_transport_manager_AssistantToTheTransportManager {
             connection.bind('closed', onClosed);
             openTimestamp = util.now();
         };
-        var onClosed = closeEvent => {
+        var onClosed = (closeEvent) => {
             connection.unbind('closed', onClosed);
             if (closeEvent.code === 1002 || closeEvent.code === 1003) {
                 this.manager.reportDeath();
@@ -3769,7 +3769,7 @@ const Protocol = {
             var pusherEvent = {
                 event: messageData.event,
                 channel: messageData.channel,
-                data: pusherEventData
+                data: pusherEventData,
             };
             if (messageData.user_id) {
                 pusherEvent.user_id = messageData.user_id;
@@ -3792,13 +3792,13 @@ const Protocol = {
             return {
                 action: 'connected',
                 id: message.data.socket_id,
-                activityTimeout: message.data.activity_timeout * 1000
+                activityTimeout: message.data.activity_timeout * 1000,
             };
         }
         else if (message.event === 'pusher:error') {
             return {
                 action: this.getCloseAction(message.data),
-                error: this.getCloseError(message.data)
+                error: this.getCloseError(message.data),
             };
         }
         else {
@@ -3836,14 +3836,14 @@ const Protocol = {
                 type: 'PusherError',
                 data: {
                     code: closeEvent.code,
-                    message: closeEvent.reason || closeEvent.message
-                }
+                    message: closeEvent.reason || closeEvent.message,
+                },
             };
         }
         else {
             return null;
         }
-    }
+    },
 };
 /* harmony default export */ var protocol = (Protocol);
 
@@ -3896,7 +3896,7 @@ class connection_Connection extends dispatcher_Dispatcher {
                     this.emit('error', {
                         type: 'MessageParseError',
                         error: e,
-                        data: messageEvent.data
+                        data: messageEvent.data,
                     });
                 }
                 if (pusherEvent !== undefined) {
@@ -3905,7 +3905,7 @@ class connection_Connection extends dispatcher_Dispatcher {
                         case 'pusher:error':
                             this.emit('error', {
                                 type: 'PusherError',
-                                data: pusherEvent.data
+                                data: pusherEvent.data,
                             });
                             break;
                         case 'pusher:ping':
@@ -3921,17 +3921,17 @@ class connection_Connection extends dispatcher_Dispatcher {
             activity: () => {
                 this.emit('activity');
             },
-            error: error => {
+            error: (error) => {
                 this.emit('error', error);
             },
-            closed: closeEvent => {
+            closed: (closeEvent) => {
                 unbindListeners();
                 if (closeEvent && closeEvent.code) {
                     this.handleCloseEvent(closeEvent);
                 }
                 this.transport = null;
                 this.emit('closed');
-            }
+            },
         };
         var unbindListeners = () => {
             objectApply(listeners, (listener, event) => {
@@ -3969,7 +3969,7 @@ class handshake_Handshake {
         this.transport.close();
     }
     bindListeners() {
-        this.onMessage = m => {
+        this.onMessage = (m) => {
             this.unbindListeners();
             var result;
             try {
@@ -3983,7 +3983,7 @@ class handshake_Handshake {
             if (result.action === 'connected') {
                 this.finish('connected', {
                     connection: new connection_Connection(result.id, this.transport),
-                    activityTimeout: result.activityTimeout
+                    activityTimeout: result.activityTimeout,
                 });
             }
             else {
@@ -3991,7 +3991,7 @@ class handshake_Handshake {
                 this.transport.close();
             }
         };
-        this.onClosed = closeEvent => {
+        this.onClosed = (closeEvent) => {
             this.unbindListeners();
             var action = protocol.getCloseAction(closeEvent) || 'backoff';
             var error = protocol.getCloseError(closeEvent);
@@ -4086,21 +4086,21 @@ const urlStore = {
     baseUrl: 'https://pusher.com',
     urls: {
         authenticationEndpoint: {
-            path: '/docs/channels/server_api/authenticating_users'
+            path: '/docs/channels/server_api/authenticating_users',
         },
         authorizationEndpoint: {
-            path: '/docs/channels/server_api/authorizing-users/'
+            path: '/docs/channels/server_api/authorizing-users/',
         },
         javascriptQuickStart: {
-            path: '/docs/javascript_quick_start'
+            path: '/docs/javascript_quick_start',
         },
         triggeringClientEvents: {
-            path: '/docs/client_api_guide/client_events#trigger-events'
+            path: '/docs/client_api_guide/client_events#trigger-events',
         },
         encryptedChannelSupport: {
-            fullUrl: 'https://github.com/pusher/pusher-js/tree/cc491015371a4bde5743d1c87a0fbac0feb53195#encrypted-channel-support'
-        }
-    }
+            fullUrl: 'https://github.com/pusher/pusher-js/tree/cc491015371a4bde5743d1c87a0fbac0feb53195#encrypted-channel-support',
+        },
+    },
 };
 const buildLogSuffix = function (key) {
     const urlPrefix = 'See:';
@@ -4196,14 +4196,14 @@ class channel_Channel extends dispatcher_Dispatcher {
                 logger.error(error.toString());
                 this.emit('pusher:subscription_error', Object.assign({}, {
                     type: 'AuthError',
-                    error: error.message
+                    error: error.message,
                 }, error instanceof HTTPAuthError ? { status: error.status } : {}));
             }
             else {
                 this.pusher.send_event('pusher:subscribe', {
                     auth: data.auth,
                     channel_data: data.channel_data,
-                    channel: this.name
+                    channel: this.name,
                 });
             }
         });
@@ -4211,7 +4211,7 @@ class channel_Channel extends dispatcher_Dispatcher {
     unsubscribe() {
         this.subscribed = false;
         this.pusher.send_event('pusher:unsubscribe', {
-            channel: this.name
+            channel: this.name,
         });
     }
     cancelSubscription() {
@@ -4228,7 +4228,7 @@ class private_channel_PrivateChannel extends channel_Channel {
     authorize(socketId, callback) {
         return this.pusher.config.channelAuthorizer({
             channelName: this.name,
-            socketId: socketId
+            socketId: socketId,
         }, callback);
     }
 }
@@ -4243,7 +4243,7 @@ class members_Members {
         if (Object.prototype.hasOwnProperty.call(this.members, id)) {
             return {
                 id: id,
-                info: this.members[id]
+                info: this.members[id],
             };
         }
         else {
@@ -4559,7 +4559,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
                 if (handshake.action === 'error') {
                     this.emit('error', {
                         type: 'HandshakeError',
-                        error: handshake.error
+                        error: handshake.error,
                     });
                     this.timeline.error({ handshakeError: handshake.error });
                 }
@@ -4590,7 +4590,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
         this.strategy = this.options.getStrategy({
             key: this.key,
             timeline: this.timeline,
-            useTLS: this.usingTLS
+            useTLS: this.usingTLS,
         });
     }
     retryIn(delay) {
@@ -4642,7 +4642,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
     }
     buildConnectionCallbacks(errorCallbacks) {
         return extend({}, errorCallbacks, {
-            message: message => {
+            message: (message) => {
                 this.resetActivityCheck();
                 this.emit('message', message);
             },
@@ -4652,7 +4652,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
             activity: () => {
                 this.resetActivityCheck();
             },
-            error: error => {
+            error: (error) => {
                 this.emit('error', error);
             },
             closed: () => {
@@ -4660,7 +4660,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
                 if (this.shouldRetry()) {
                     this.retryIn(1000);
                 }
-            }
+            },
         });
     }
     buildHandshakeCallbacks(errorCallbacks) {
@@ -4671,11 +4671,11 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
                 this.setConnection(handshake.connection);
                 this.socket_id = this.connection.id;
                 this.updateState('connected', { socket_id: this.socket_id });
-            }
+            },
         });
     }
     buildErrorCallbacks() {
-        let withErrorEmitted = callback => {
+        let withErrorEmitted = (callback) => {
             return (result) => {
                 if (result.error) {
                     this.emit('error', { type: 'WebSocketError', error: result.error });
@@ -4697,7 +4697,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
             }),
             retry: withErrorEmitted(() => {
                 this.retryIn(0);
-            })
+            }),
         };
     }
     setConnection(connection) {
@@ -4830,7 +4830,7 @@ var Factory = {
     },
     createAssistantToTheTransportManager(manager, transport, options) {
         return new assistant_to_the_transport_manager_AssistantToTheTransportManager(manager, transport, options);
-    }
+    },
 };
 /* harmony default export */ var factory = (Factory);
 
@@ -4844,7 +4844,7 @@ class transport_manager_TransportManager {
     getAssistant(transport) {
         return factory.createAssistantToTheTransportManager(this, transport, {
             minPingDelay: this.options.minPingDelay,
-            maxPingDelay: this.options.maxPingDelay
+            maxPingDelay: this.options.maxPingDelay,
         });
     }
     isAlive() {
@@ -4908,7 +4908,7 @@ class sequential_strategy_SequentialStrategy {
                 if (runner) {
                     runner.forceMinPriority(p);
                 }
-            }
+            },
         };
     }
     tryStrategy(strategy, minPriority, options, callback) {
@@ -4938,7 +4938,7 @@ class sequential_strategy_SequentialStrategy {
             },
             forceMinPriority: function (p) {
                 runner.forceMinPriority(p);
-            }
+            },
         };
     }
 }
@@ -4983,7 +4983,7 @@ function connect(strategies, minPriority, callbackBuilder) {
             apply(runners, function (runner) {
                 runner.forceMinPriority(p);
             });
-        }
+        },
     };
 }
 function allRunnersFailed(runners) {
@@ -5026,11 +5026,11 @@ class websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy {
                     this.timeline.info({
                         cached: true,
                         transport: info.transport,
-                        latency: info.latency
+                        latency: info.latency,
                     });
                     strategies.push(new sequential_strategy_SequentialStrategy([transport], {
                         timeout: info.latency * 2 + 1000,
-                        failFast: true
+                        failFast: true,
                     }));
                 }
                 else {
@@ -5066,7 +5066,7 @@ class websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy {
                 if (runner) {
                     runner.forceMinPriority(p);
                 }
-            }
+            },
         };
     }
 }
@@ -5096,7 +5096,7 @@ function storeTransportCache(usingTLS, transport, latency, cacheSkipCount) {
                 timestamp: util.now(),
                 transport: transport,
                 latency: latency,
-                cacheSkipCount: cacheSkipCount
+                cacheSkipCount: cacheSkipCount,
             });
         }
         catch (e) {
@@ -5142,7 +5142,7 @@ class delayed_strategy_DelayedStrategy {
                 if (runner) {
                     runner.forceMinPriority(p);
                 }
-            }
+            },
         };
     }
 }
@@ -5207,29 +5207,29 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     var ws_options = Object.assign({}, baseOptions, {
         hostNonTLS: config.wsHost + ':' + config.wsPort,
         hostTLS: config.wsHost + ':' + config.wssPort,
-        httpPath: config.wsPath
+        httpPath: config.wsPath,
     });
     var wss_options = extend({}, ws_options, {
-        useTLS: true
+        useTLS: true,
     });
     var http_options = Object.assign({}, baseOptions, {
         hostNonTLS: config.httpHost + ':' + config.httpPort,
         hostTLS: config.httpHost + ':' + config.httpsPort,
-        httpPath: config.httpPath
+        httpPath: config.httpPath,
     });
     var timeouts = {
         loop: true,
         timeout: 15000,
-        timeoutLimit: 60000
+        timeoutLimit: 60000,
     };
     var ws_manager = new transport_manager_TransportManager({
         minPingDelay: 10000,
-        maxPingDelay: config.activityTimeout
+        maxPingDelay: config.activityTimeout,
     });
     var streaming_manager = new transport_manager_TransportManager({
         lives: 2,
         minPingDelay: 10000,
-        maxPingDelay: config.activityTimeout
+        maxPingDelay: config.activityTimeout,
     });
     var ws_transport = defineTransportStrategy('ws', 'ws', 3, ws_options, ws_manager);
     var wss_transport = defineTransportStrategy('wss', 'ws', 3, wss_options, ws_manager);
@@ -5242,27 +5242,27 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     var http_loop = new sequential_strategy_SequentialStrategy([
         new IfStrategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy_BestConnectedEverStrategy([
             streaming_loop,
-            new delayed_strategy_DelayedStrategy(polling_loop, { delay: 4000 })
-        ]), polling_loop)
+            new delayed_strategy_DelayedStrategy(polling_loop, { delay: 4000 }),
+        ]), polling_loop),
     ], timeouts);
     var wsStrategy;
     if (baseOptions.useTLS) {
         wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
             ws_loop,
-            new delayed_strategy_DelayedStrategy(http_loop, { delay: 2000 })
+            new delayed_strategy_DelayedStrategy(http_loop, { delay: 2000 }),
         ]);
     }
     else {
         wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
             ws_loop,
             new delayed_strategy_DelayedStrategy(wss_loop, { delay: 2000 }),
-            new delayed_strategy_DelayedStrategy(http_loop, { delay: 5000 })
+            new delayed_strategy_DelayedStrategy(http_loop, { delay: 5000 }),
         ]);
     }
     return new websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop)), definedTransports, {
         ttl: 1800000,
         timeline: baseOptions.timeline,
-        useTLS: baseOptions.useTLS
+        useTLS: baseOptions.useTLS,
     });
 };
 /* harmony default export */ var default_strategy = (getDefaultStrategy);
@@ -5271,7 +5271,7 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
 /* harmony default export */ var transport_connection_initializer = (function () {
     var self = this;
     self.timeline.info(self.buildTimelineMessage({
-        transport: self.name + (self.options.useTLS ? 's' : '')
+        transport: self.name + (self.options.useTLS ? 's' : ''),
     }));
     if (self.hooks.isInitialized()) {
         self.changeState('initialized');
@@ -5401,7 +5401,7 @@ class http_socket_HTTPSocket {
             this.onclose({
                 code: code,
                 reason: reason,
-                wasClean: wasClean
+                wasClean: wasClean,
             });
         }
     }
@@ -5469,10 +5469,10 @@ class http_socket_HTTPSocket {
     }
     openStream() {
         this.stream = worker_runtime.createSocketRequest('POST', getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)));
-        this.stream.bind('chunk', chunk => {
+        this.stream.bind('chunk', (chunk) => {
             this.onChunk(chunk);
         });
-        this.stream.bind('finished', status => {
+        this.stream.bind('finished', (status) => {
             this.hooks.onFinished(this, status);
         });
         this.stream.bind('buffer_too_long', () => {
@@ -5500,7 +5500,7 @@ function getLocation(url) {
     var parts = /([^\?]*)\/*(\??.*)/.exec(url);
     return {
         base: parts[1],
-        queryString: parts[2]
+        queryString: parts[2],
     };
 }
 function getSendURL(url, session) {
@@ -5539,7 +5539,7 @@ var http_streaming_socket_hooks = {
     },
     onFinished: function (socket, status) {
         socket.onClose(1006, 'Connection interrupted (' + status + ')', false);
-    }
+    },
 };
 /* harmony default export */ var http_streaming_socket = (http_streaming_socket_hooks);
 
@@ -5560,7 +5560,7 @@ var http_polling_socket_hooks = {
         else {
             socket.onClose(1006, 'Connection interrupted (' + status + ')', false);
         }
-    }
+    },
 };
 /* harmony default export */ var http_polling_socket = (http_polling_socket_hooks);
 
@@ -5591,7 +5591,7 @@ var http_xhr_request_hooks = {
     abortRequest: function (xhr) {
         xhr.onreadystatechange = null;
         xhr.abort();
-    }
+    },
 };
 /* harmony default export */ var http_xhr_request = (http_xhr_request_hooks);
 
@@ -5616,7 +5616,7 @@ var HTTP = {
     },
     createRequest(hooks, method, url) {
         return new http_request_HTTPRequest(hooks, method, url);
-    }
+    },
 };
 /* harmony default export */ var http_http = (HTTP);
 
@@ -5665,7 +5665,7 @@ var Isomorphic = {
         return new Constructor(url);
     },
     addUnloadListener(listener) { },
-    removeUnloadListener(listener) { }
+    removeUnloadListener(listener) { },
 };
 /* harmony default export */ var runtime = (Isomorphic);
 
@@ -5697,17 +5697,17 @@ var fetchAuth = function (context, query, authOptions, authRequestType, callback
         headers,
         body,
         credentials: 'same-origin',
-        method: 'POST'
+        method: 'POST',
     });
     return fetch(request)
-        .then(response => {
+        .then((response) => {
         let { status } = response;
         if (status === 200) {
             return response.text();
         }
         throw new HTTPAuthError(status, `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`);
     })
-        .then(data => {
+        .then((data) => {
         let parsedData;
         try {
             parsedData = JSON.parse(data);
@@ -5717,7 +5717,7 @@ var fetchAuth = function (context, query, authOptions, authRequestType, callback
         }
         callback(null, parsedData);
     })
-        .catch(err => {
+        .catch((err) => {
         callback(err, null);
     });
 };
@@ -5733,7 +5733,7 @@ var getAgent = function (sender, useTLS) {
         var query = buildQueryString(data);
         url += '/' + 2 + '?' + query;
         fetch(url)
-            .then(response => {
+            .then((response) => {
             if (response.status !== 200) {
                 throw `received ${response.status} from stats.pusher.com`;
             }
@@ -5744,14 +5744,14 @@ var getAgent = function (sender, useTLS) {
                 sender.host = host;
             }
         })
-            .catch(err => {
+            .catch((err) => {
             logger.debug('TimelineSender Error: ', err);
         });
     };
 };
 var fetchTimeline = {
     name: 'xhr',
-    getAgent
+    getAgent,
 };
 /* harmony default export */ var fetch_timeline = (fetchTimeline);
 
@@ -5760,7 +5760,7 @@ var fetchTimeline = {
 
 
 
-const { getDefaultStrategy: runtime_getDefaultStrategy, Transports: runtime_Transports, setup, getProtocol, isXHRSupported, getLocalStorage, createXHR, createWebSocket, addUnloadListener, removeUnloadListener, transportConnectionInitializer, createSocketRequest, HTTPFactory } = runtime;
+const { getDefaultStrategy: runtime_getDefaultStrategy, Transports: runtime_Transports, setup, getProtocol, isXHRSupported, getLocalStorage, createXHR, createWebSocket, addUnloadListener, removeUnloadListener, transportConnectionInitializer, createSocketRequest, HTTPFactory, } = runtime;
 const Worker = {
     getDefaultStrategy: runtime_getDefaultStrategy,
     Transports: runtime_Transports,
@@ -5795,7 +5795,7 @@ const Worker = {
             return random / Math.pow(2, 32);
         };
         return Math.floor(random() * max);
-    }
+    },
 };
 /* harmony default export */ var worker_runtime = (Worker);
 
@@ -5850,7 +5850,7 @@ class timeline_Timeline {
             version: this.options.version,
             cluster: this.options.cluster,
             features: this.options.features,
-            timeline: this.events
+            timeline: this.events,
         }, this.options.params);
         this.events = [];
         sendfn(data, (error, result) => {
@@ -5883,7 +5883,7 @@ class transport_strategy_TransportStrategy {
     }
     isSupported() {
         return this.transport.isSupported({
-            useTLS: this.options.useTLS
+            useTLS: this.options.useTLS,
         });
     }
     connect(minPriority, callback) {
@@ -5941,7 +5941,7 @@ class transport_strategy_TransportStrategy {
                     transport.close();
                 }
             },
-            forceMinPriority: p => {
+            forceMinPriority: (p) => {
                 if (connected) {
                     return;
                 }
@@ -5953,7 +5953,7 @@ class transport_strategy_TransportStrategy {
                         transport.close();
                     }
                 }
-            }
+            },
         };
     }
 }
@@ -5963,7 +5963,7 @@ function failAttempt(error, callback) {
     });
     return {
         abort: function () { },
-        forceMinPriority: function () { }
+        forceMinPriority: function () { },
     };
 }
 
@@ -6005,9 +6005,9 @@ var strategy_builder_UnsupportedStrategy = {
             abort: function () {
                 deferred.ensureAborted();
             },
-            forceMinPriority: function () { }
+            forceMinPriority: function () { },
         };
-    }
+    },
 };
 
 // CONCATENATED MODULE: ./src/core/options.ts
@@ -6109,8 +6109,8 @@ const ChannelAuthorizerProxy = (pusher, authOptions, channelAuthorizerGenerator)
         authEndpoint: authOptions.endpoint,
         auth: {
             params: authOptions.params,
-            headers: authOptions.headers
-        }
+            headers: authOptions.headers,
+        },
     };
     return (params, callback) => {
         const channel = pusher.channel(params.channelName);
@@ -6143,7 +6143,7 @@ function getConfig(opts, pusher) {
         useTLS: shouldUseTLS(opts),
         wsHost: getWebsocketHost(opts),
         userAuthenticator: buildUserAuthenticator(opts),
-        channelAuthorizer: buildChannelAuthorizer(opts, pusher)
+        channelAuthorizer: buildChannelAuthorizer(opts, pusher),
     };
     if ('disabledTransports' in opts)
         config.disabledTransports = opts.disabledTransports;
@@ -6210,7 +6210,7 @@ function buildChannelAuth(opts, pusher) {
     else {
         channelAuthorization = {
             transport: opts.authTransport || defaults.authTransport,
-            endpoint: opts.authEndpoint || defaults.authEndpoint
+            endpoint: opts.authEndpoint || defaults.authEndpoint,
         };
         if ('auth' in opts) {
             if ('params' in opts.auth)
@@ -6244,12 +6244,12 @@ class watchlist_WatchlistFacade extends dispatcher_Dispatcher {
         this.bindWatchlistInternalEvent();
     }
     handleEvent(pusherEvent) {
-        pusherEvent.data.events.forEach(watchlistEvent => {
+        pusherEvent.data.events.forEach((watchlistEvent) => {
             this.emit(watchlistEvent.name, watchlistEvent);
         });
     }
     bindWatchlistInternalEvent() {
-        this.pusher.connection.bind('message', pusherEvent => {
+        this.pusher.connection.bind('message', (pusherEvent) => {
             var eventName = pusherEvent.event;
             if (eventName === 'pusher_internal:watchlist_events') {
                 this.handleEvent(pusherEvent);
@@ -6293,7 +6293,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
             }
             this.pusher.send_event('pusher:signin', {
                 auth: authData.auth,
-                user_data: authData.user_data
+                user_data: authData.user_data,
             });
         };
         this.pusher = pusher;
@@ -6307,7 +6307,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
             }
         });
         this.watchlist = new watchlist_WatchlistFacade(pusher);
-        this.pusher.connection.bind('message', event => {
+        this.pusher.connection.bind('message', (event) => {
             var eventName = event.event;
             if (eventName === 'pusher:signin_success') {
                 this._onSigninSuccess(event.data);
@@ -6334,7 +6334,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
             return;
         }
         this.pusher.config.userAuthenticator({
-            socketId: this.pusher.connection.socket_id
+            socketId: this.pusher.connection.socket_id,
         }, this._onAuthorize);
     }
     _onSigninSuccess(data) {
@@ -6355,7 +6355,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
         this._subscribeChannels();
     }
     _subscribeChannels() {
-        const ensure_subscribed = channel => {
+        const ensure_subscribed = (channel) => {
             if (channel.subscriptionPending && channel.subscriptionCancelled) {
                 channel.reinstateSubscription();
             }
@@ -6443,12 +6443,12 @@ class pusher_Pusher {
             params: this.config.timelineParams || {},
             limit: 50,
             level: timeline_level.INFO,
-            version: defaults.VERSION
+            version: defaults.VERSION,
         });
         if (this.config.enableStats) {
             this.timelineSender = factory.createTimelineSender(this.timeline, {
                 host: this.config.statsHost,
-                path: '/timeline/v2/' + worker_runtime.TimelineTransport.name
+                path: '/timeline/v2/' + worker_runtime.TimelineTransport.name,
             });
         }
         var getStrategy = (options) => {
@@ -6460,7 +6460,7 @@ class pusher_Pusher {
             activityTimeout: this.config.activityTimeout,
             pongTimeout: this.config.pongTimeout,
             unavailableTimeout: this.config.unavailableTimeout,
-            useTLS: Boolean(this.config.useTLS)
+            useTLS: Boolean(this.config.useTLS),
         });
         this.connection.bind('connected', () => {
             this.subscribeAll();
@@ -6468,7 +6468,7 @@ class pusher_Pusher {
                 this.timelineSender.send(this.connection.isUsingTLS());
             }
         });
-        this.connection.bind('message', event => {
+        this.connection.bind('message', (event) => {
             var eventName = event.event;
             var internal = eventName.indexOf('pusher_internal:') === 0;
             if (event.channel) {
@@ -6487,7 +6487,7 @@ class pusher_Pusher {
         this.connection.bind('disconnected', () => {
             this.channels.disconnect();
         });
-        this.connection.bind('error', err => {
+        this.connection.bind('error', (err) => {
             logger.warn(err);
         });
         pusher_Pusher.instances.push(this);
