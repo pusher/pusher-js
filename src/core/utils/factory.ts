@@ -10,7 +10,7 @@ import HTTPSocket from '../http/http_socket';
 import Timeline from '../timeline/timeline';
 import {
   default as TimelineSender,
-  TimelineSenderOptions
+  TimelineSenderOptions,
 } from '../timeline/timeline_sender';
 import PresenceChannel from '../channels/presence_channel';
 import PrivateChannel from '../channels/private_channel';
@@ -31,7 +31,7 @@ var Factory = {
 
   createConnectionManager(
     key: string,
-    options: ConnectionManagerOptions
+    options: ConnectionManagerOptions,
   ): ConnectionManager {
     return new ConnectionManager(key, options);
   },
@@ -51,7 +51,7 @@ var Factory = {
   createEncryptedChannel(
     name: string,
     pusher: Pusher,
-    nacl: nacl
+    nacl: nacl,
   ): EncryptedChannel {
     return new EncryptedChannel(name, pusher, nacl);
   },
@@ -62,7 +62,7 @@ var Factory = {
 
   createHandshake(
     transport: TransportConnection,
-    callback: (HandshakePayload) => void
+    callback: (HandshakePayload) => void,
   ): Handshake {
     return new Handshake(transport, callback);
   },
@@ -70,10 +70,10 @@ var Factory = {
   createAssistantToTheTransportManager(
     manager: TransportManager,
     transport: Transport,
-    options: PingDelayOptions
+    options: PingDelayOptions,
   ): AssistantToTheTransportManager {
     return new AssistantToTheTransportManager(manager, transport, options);
-  }
+  },
 };
 
 export default Factory;

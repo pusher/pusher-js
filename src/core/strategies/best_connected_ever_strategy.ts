@@ -18,8 +18,8 @@ export default class BestConnectedEverStrategy implements Strategy {
   }
 
   connect(minPriority: number, callback: Function) {
-    return connect(this.strategies, minPriority, function(i, runners) {
-      return function(error, handshake) {
+    return connect(this.strategies, minPriority, function (i, runners) {
+      return function (error, handshake) {
         runners[i].error = error;
         if (error) {
           if (allRunnersFailed(runners)) {
@@ -27,7 +27,7 @@ export default class BestConnectedEverStrategy implements Strategy {
           }
           return;
         }
-        Collections.apply(runners, function(runner) {
+        Collections.apply(runners, function (runner) {
           runner.forceMinPriority(handshake.transport.priority);
         });
         callback(null, handshake);
@@ -50,25 +50,25 @@ export default class BestConnectedEverStrategy implements Strategy {
 function connect(
   strategies: Strategy[],
   minPriority: number,
-  callbackBuilder: Function
+  callbackBuilder: Function,
 ) {
-  var runners = Collections.map(strategies, function(strategy, i, _, rs) {
+  var runners = Collections.map(strategies, function (strategy, i, _, rs) {
     return strategy.connect(minPriority, callbackBuilder(i, rs));
   });
   return {
-    abort: function() {
+    abort: function () {
       Collections.apply(runners, abortRunner);
     },
-    forceMinPriority: function(p) {
-      Collections.apply(runners, function(runner) {
+    forceMinPriority: function (p) {
+      Collections.apply(runners, function (runner) {
         runner.forceMinPriority(p);
       });
-    }
+    },
   };
 }
 
 function allRunnersFailed(runners): boolean {
-  return Collections.all(runners, function(runner) {
+  return Collections.all(runners, function (runner) {
     return Boolean(runner.error);
   });
 }

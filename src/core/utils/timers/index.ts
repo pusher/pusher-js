@@ -17,7 +17,7 @@ function clearInterval(timer) {
  */
 export class OneOffTimer extends Timer {
   constructor(delay: Delay, callback: TimedCallback) {
-    super(setTimeout, clearTimeout, delay, function(timer) {
+    super(setTimeout, clearTimeout, delay, function (timer) {
       callback();
       return null;
     });
@@ -31,7 +31,7 @@ export class OneOffTimer extends Timer {
  */
 export class PeriodicTimer extends Timer {
   constructor(delay: Delay, callback: TimedCallback) {
-    super(setInterval, clearInterval, delay, function(timer) {
+    super(setInterval, clearInterval, delay, function (timer) {
       callback();
       return timer;
     });

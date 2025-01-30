@@ -87,7 +87,7 @@ export function objectApply(object: any, f: Function) {
  */
 export function keys(object: any): string[] {
   var keys = [];
-  objectApply(object, function(_, key) {
+  objectApply(object, function (_, key) {
     keys.push(key);
   });
   return keys;
@@ -100,7 +100,7 @@ export function keys(object: any): string[] {
  */
 export function values(object: any): any[] {
   var values = [];
-  objectApply(object, function(value) {
+  objectApply(object, function (value) {
     values.push(value);
   });
   return values;
@@ -154,7 +154,7 @@ export function map(array: any[], f: Function): any[] {
  */
 export function mapObject(object: any, f: Function): any {
   var result = {};
-  objectApply(object, function(value, key) {
+  objectApply(object, function (value, key) {
     result[key] = f(value);
   });
   return result;
@@ -174,7 +174,7 @@ export function mapObject(object: any, f: Function): any {
 export function filter(array: any[], test: Function): any[] {
   test =
     test ||
-    function(value) {
+    function (value) {
       return !!value;
     };
 
@@ -200,7 +200,7 @@ export function filter(array: any[], test: Function): any[] {
  */
 export function filterObject(object: Object, test: Function) {
   var result = {};
-  objectApply(object, function(value, key) {
+  objectApply(object, function (value, key) {
     if ((test && test(value, key, object, result)) || Boolean(value)) {
       result[key] = value;
     }
@@ -215,7 +215,7 @@ export function filterObject(object: Object, test: Function) {
  */
 export function flatten(object: Object): any[] {
   var result = [];
-  objectApply(object, function(value, key) {
+  objectApply(object, function (value, key) {
     result.push([key, value]);
   });
   return result;
@@ -260,7 +260,7 @@ export function all(array: any[], test: Function): boolean {
 }
 
 export function encodeParamsObject(data): string {
-  return mapObject(data, function(value) {
+  return mapObject(data, function (value) {
     if (typeof value === 'object') {
       value = safeJSONStringify(value);
     }
@@ -269,13 +269,13 @@ export function encodeParamsObject(data): string {
 }
 
 export function buildQueryString(data: any): string {
-  var params = filterObject(data, function(value) {
+  var params = filterObject(data, function (value) {
     return value !== undefined;
   });
 
   var query = map(
     flatten(encodeParamsObject(params)),
-    Util.method('join', '=')
+    Util.method('join', '='),
   ).join('&');
 
   return query;
@@ -322,7 +322,7 @@ export function decycleObject(object: any): any {
             if (Object.prototype.hasOwnProperty.call(value, name)) {
               nu[name] = derez(
                 value[name],
-                path + '[' + JSON.stringify(name) + ']'
+                path + '[' + JSON.stringify(name) + ']',
               );
             }
           }

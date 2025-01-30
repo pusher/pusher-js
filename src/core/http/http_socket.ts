@@ -48,7 +48,7 @@ class HTTPSocket implements Socket {
       try {
         Runtime.createSocketRequest(
           'POST',
-          getUniqueURL(getSendURL(this.location, this.session))
+          getUniqueURL(getSendURL(this.location, this.session)),
         ).start(payload);
         return true;
       } catch (e) {
@@ -73,7 +73,7 @@ class HTTPSocket implements Socket {
       this.onclose({
         code: code,
         reason: reason,
-        wasClean: wasClean
+        wasClean: wasClean,
       });
     }
   }
@@ -149,13 +149,13 @@ class HTTPSocket implements Socket {
   private openStream() {
     this.stream = Runtime.createSocketRequest(
       'POST',
-      getUniqueURL(this.hooks.getReceiveURL(this.location, this.session))
+      getUniqueURL(this.hooks.getReceiveURL(this.location, this.session)),
     );
 
-    this.stream.bind('chunk', chunk => {
+    this.stream.bind('chunk', (chunk) => {
       this.onChunk(chunk);
     });
-    this.stream.bind('finished', status => {
+    this.stream.bind('finished', (status) => {
       this.hooks.onFinished(this, status);
     });
     this.stream.bind('buffer_too_long', () => {
@@ -185,7 +185,7 @@ function getLocation(url): URLLocation {
   var parts = /([^\?]*)\/*(\??.*)/.exec(url);
   return {
     base: parts[1],
-    queryString: parts[2]
+    queryString: parts[2],
   };
 }
 

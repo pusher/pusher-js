@@ -21,7 +21,7 @@ const {
   removeUnloadListener,
   transportConnectionInitializer,
   createSocketRequest,
-  HTTPFactory
+  HTTPFactory,
 } = Isomorphic;
 
 const Worker: Runtime = {
@@ -61,7 +61,7 @@ const Worker: Runtime = {
     /**
      * Return values in the range of [0, 1[
      */
-    const random = function() {
+    const random = function () {
       const crypto = globalThis.crypto || globalThis['msCrypto'];
       const random = crypto.getRandomValues(new Uint32Array(1))[0];
 
@@ -69,7 +69,7 @@ const Worker: Runtime = {
     };
 
     return Math.floor(random() * max);
-  }
+  },
 };
 
 export default Worker;

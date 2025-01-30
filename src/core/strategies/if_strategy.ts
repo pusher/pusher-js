@@ -15,7 +15,7 @@ export default class IfStrategy implements Strategy {
   constructor(
     test: () => boolean,
     trueBranch: Strategy,
-    falseBranch: Strategy
+    falseBranch: Strategy,
   ) {
     this.test = test;
     this.trueBranch = trueBranch;

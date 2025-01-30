@@ -4,7 +4,7 @@ import Strategy from 'core/strategies/strategy';
 import SequentialStrategy from 'core/strategies/sequential_strategy';
 import BestConnectedEverStrategy from 'core/strategies/best_connected_ever_strategy';
 import WebSocketPrioritizedCachedStrategy, {
-  TransportStrategyDictionary
+  TransportStrategyDictionary,
 } from 'core/strategies/websocket_prioritized_cached_strategy';
 import DelayedStrategy from 'core/strategies/delayed_strategy';
 import IfStrategy from 'core/strategies/if_strategy';
@@ -13,15 +13,15 @@ import { Config } from 'core/config';
 import StrategyOptions from 'core/strategies/strategy_options';
 
 function testSupportsStrategy(strategy: Strategy) {
-  return function() {
+  return function () {
     return strategy.isSupported();
   };
 }
 
-var getDefaultStrategy = function(
+var getDefaultStrategy = function (
   config: Config,
   baseOptions: StrategyOptions,
-  defineTransport: Function
+  defineTransport: Function,
 ): Strategy {
   var definedTransports = <TransportStrategyDictionary>{};
 
@@ -30,7 +30,7 @@ var getDefaultStrategy = function(
     type: string,
     priority: number,
     options: StrategyOptions,
-    manager?: TransportManager
+    manager?: TransportManager,
   ) {
     var transport = defineTransport(
       config,
@@ -38,7 +38,7 @@ var getDefaultStrategy = function(
       type,
       priority,
       options,
-      manager
+      manager,
     );
 
     definedTransports[name] = transport;
@@ -49,30 +49,30 @@ var getDefaultStrategy = function(
   var ws_options: StrategyOptions = Object.assign({}, baseOptions, {
     hostNonTLS: config.wsHost + ':' + config.wsPort,
     hostTLS: config.wsHost + ':' + config.wssPort,
-    httpPath: config.wsPath
+    httpPath: config.wsPath,
   });
   var wss_options: StrategyOptions = Collections.extend({}, ws_options, {
-    useTLS: true
+    useTLS: true,
   });
   var http_options: StrategyOptions = Object.assign({}, baseOptions, {
     hostNonTLS: config.httpHost + ':' + config.httpPort,
     hostTLS: config.httpHost + ':' + config.httpsPort,
-    httpPath: config.httpPath
+    httpPath: config.httpPath,
   });
   var timeouts = {
     loop: true,
     timeout: 15000,
-    timeoutLimit: 60000
+    timeoutLimit: 60000,
   };
 
   var ws_manager = new TransportManager({
     minPingDelay: 10000,
-    maxPingDelay: config.activityTimeout
+    maxPingDelay: config.activityTimeout,
   });
   var streaming_manager = new TransportManager({
     lives: 2,
     minPingDelay: 10000,
-    maxPingDelay: config.activityTimeout
+    maxPingDelay: config.activityTimeout,
   });
 
   var ws_transport = defineTransportStrategy(
@@ -80,34 +80,34 @@ var getDefaultStrategy = function(
     'ws',
     3,
     ws_options,
-    ws_manager
+    ws_manager,
   );
   var wss_transport = defineTransportStrategy(
     'wss',
     'ws',
     3,
     wss_options,
-    ws_manager
+    ws_manager,
   );
   var xhr_streaming_transport = defineTransportStrategy(
     'xhr_streaming',
     'xhr_streaming',
     1,
     http_options,
-    streaming_manager
+    streaming_manager,
   );
   var xhr_polling_transport = defineTransportStrategy(
     'xhr_polling',
     'xhr_polling',
     1,
-    http_options
+    http_options,
   );
 
   var ws_loop = new SequentialStrategy([ws_transport], timeouts);
   var wss_loop = new SequentialStrategy([wss_transport], timeouts);
   var streaming_loop = new SequentialStrategy(
     [xhr_streaming_transport],
-    timeouts
+    timeouts,
   );
   var polling_loop = new SequentialStrategy([xhr_polling_transport], timeouts);
 
@@ -117,38 +117,38 @@ var getDefaultStrategy = function(
         testSupportsStrategy(streaming_loop),
         new BestConnectedEverStrategy([
           streaming_loop,
-          new DelayedStrategy(polling_loop, { delay: 4000 })
+          new DelayedStrategy(polling_loop, { delay: 4000 }),
         ]),
-        polling_loop
-      )
+        polling_loop,
+      ),
     ],
-    timeouts
+    timeouts,
   );
 
   var wsStrategy;
   if (baseOptions.useTLS) {
     wsStrategy = new BestConnectedEverStrategy([
       ws_loop,
-      new DelayedStrategy(http_loop, { delay: 2000 })
+      new DelayedStrategy(http_loop, { delay: 2000 }),
     ]);
   } else {
     wsStrategy = new BestConnectedEverStrategy([
       ws_loop,
       new DelayedStrategy(wss_loop, { delay: 2000 }),
-      new DelayedStrategy(http_loop, { delay: 5000 })
+      new DelayedStrategy(http_loop, { delay: 5000 }),
     ]);
   }
 
   return new WebSocketPrioritizedCachedStrategy(
     new FirstConnectedStrategy(
-      new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop)
+      new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop),
     ),
     definedTransports,
     {
       ttl: 1800000,
       timeline: baseOptions.timeline,
-      useTLS: baseOptions.useTLS
-    }
+      useTLS: baseOptions.useTLS,
+    },
   );
 };
 

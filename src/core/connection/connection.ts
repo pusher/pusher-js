@@ -94,7 +94,7 @@ export default class Connection extends EventsDispatcher implements Socket {
           this.emit('error', {
             type: 'MessageParseError',
             error: e,
-            data: messageEvent.data
+            data: messageEvent.data,
           });
         }
 
@@ -105,7 +105,7 @@ export default class Connection extends EventsDispatcher implements Socket {
             case 'pusher:error':
               this.emit('error', {
                 type: 'PusherError',
-                data: pusherEvent.data
+                data: pusherEvent.data,
               });
               break;
             case 'pusher:ping':
@@ -121,10 +121,10 @@ export default class Connection extends EventsDispatcher implements Socket {
       activity: () => {
         this.emit('activity');
       },
-      error: error => {
+      error: (error) => {
         this.emit('error', error);
       },
-      closed: closeEvent => {
+      closed: (closeEvent) => {
         unbindListeners();
 
         if (closeEvent && closeEvent.code) {
@@ -133,7 +133,7 @@ export default class Connection extends EventsDispatcher implements Socket {
 
         this.transport = null;
         this.emit('closed');
-      }
+      },
     };
 
     var unbindListeners = () => {

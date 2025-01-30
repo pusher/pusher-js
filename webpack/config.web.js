@@ -16,21 +16,21 @@ if (process.env.INCLUDE_TWEETNACL === 'true') {
 
 module.exports = merge({}, configShared, {
   entry: {
-    pusher: entry
+    pusher: entry,
   },
   output: {
     library: 'Pusher',
     path: path.join(__dirname, '../dist/web'),
     filename: filename,
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
   },
   resolve: {
-    modules: ['src/runtimes/web']
+    modules: ['src/runtimes/web'],
   },
   plugins: [
     new webpack.DefinePlugin({
       global: 'window',
-      RUNTIME: JSON.stringify('web')
-    })
-  ]
+      RUNTIME: JSON.stringify('web'),
+    }),
+  ],
 });

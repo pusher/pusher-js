@@ -35,7 +35,7 @@ export class ScriptReceiverFactory {
     var name = this.name + '[' + number + ']';
 
     var called = false;
-    var callbackWrapper = function() {
+    var callbackWrapper = function () {
       if (!called) {
         callback.apply(null, arguments);
         called = true;
@@ -53,5 +53,5 @@ export class ScriptReceiverFactory {
 
 export var ScriptReceivers = new ScriptReceiverFactory(
   '_pusher_script_',
-  'Pusher.ScriptReceivers'
+  'Pusher.ScriptReceivers',
 );

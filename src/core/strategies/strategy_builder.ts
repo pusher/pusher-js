@@ -10,13 +10,13 @@ import Runtime from 'runtime';
 
 const { Transports } = Runtime;
 
-export var defineTransport = function(
+export var defineTransport = function (
   config: Config,
   name: string,
   type: string,
   priority: number,
   options: StrategyOptions,
-  manager?: TransportManager
+  manager?: TransportManager,
 ): Strategy {
   var transportClass = Transports[type];
   if (!transportClass) {
@@ -33,14 +33,14 @@ export var defineTransport = function(
   if (enabled) {
     options = Object.assign(
       { ignoreNullOrigin: config.ignoreNullOrigin },
-      options
+      options,
     );
 
     transport = new TransportStrategy(
       name,
       priority,
       manager ? manager.getAssistant(transportClass) : transportClass,
-      options
+      options,
     );
   } else {
     transport = UnsupportedStrategy;
@@ -50,18 +50,18 @@ export var defineTransport = function(
 };
 
 var UnsupportedStrategy: Strategy = {
-  isSupported: function() {
+  isSupported: function () {
     return false;
   },
-  connect: function(_, callback) {
-    var deferred = Util.defer(function() {
+  connect: function (_, callback) {
+    var deferred = Util.defer(function () {
       callback(new Errors.UnsupportedStrategy());
     });
     return {
-      abort: function() {
+      abort: function () {
         deferred.ensureAborted();
       },
-      forceMinPriority: function() {}
+      forceMinPriority: function () {},
     };
-  }
+  },
 };

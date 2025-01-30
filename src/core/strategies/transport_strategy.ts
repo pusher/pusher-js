@@ -24,7 +24,7 @@ export default class TransportStrategy implements Strategy {
     name: string,
     priority: number,
     transport: Transport,
-    options: StrategyOptions
+    options: StrategyOptions,
   ) {
     this.name = name;
     this.priority = priority;
@@ -38,7 +38,7 @@ export default class TransportStrategy implements Strategy {
    */
   isSupported(): boolean {
     return this.transport.isSupported({
-      useTLS: this.options.useTLS
+      useTLS: this.options.useTLS,
     });
   }
 
@@ -59,26 +59,26 @@ export default class TransportStrategy implements Strategy {
       this.name,
       this.priority,
       this.options.key,
-      this.options
+      this.options,
     );
     var handshake = null;
 
-    var onInitialized = function() {
+    var onInitialized = function () {
       transport.unbind('initialized', onInitialized);
       transport.connect();
     };
-    var onOpen = function() {
-      handshake = Factory.createHandshake(transport, function(result) {
+    var onOpen = function () {
+      handshake = Factory.createHandshake(transport, function (result) {
         connected = true;
         unbindListeners();
         callback(null, result);
       });
     };
-    var onError = function(error) {
+    var onError = function (error) {
       unbindListeners();
       callback(error);
     };
-    var onClosed = function() {
+    var onClosed = function () {
       unbindListeners();
       var serializedTransport;
 
@@ -90,7 +90,7 @@ export default class TransportStrategy implements Strategy {
       callback(new Errors.TransportClosed(serializedTransport));
     };
 
-    var unbindListeners = function() {
+    var unbindListeners = function () {
       transport.unbind('initialized', onInitialized);
       transport.unbind('open', onOpen);
       transport.unbind('error', onError);
@@ -117,7 +117,7 @@ export default class TransportStrategy implements Strategy {
           transport.close();
         }
       },
-      forceMinPriority: p => {
+      forceMinPriority: (p) => {
         if (connected) {
           return;
         }
@@ -128,17 +128,17 @@ export default class TransportStrategy implements Strategy {
             transport.close();
           }
         }
-      }
+      },
     };
   }
 }
 
 function failAttempt(error: Error, callback: Function) {
-  Util.defer(function() {
+  Util.defer(function () {
     callback(error);
   });
   return {
-    abort: function() {},
-    forceMinPriority: function() {}
+    abort: function () {},
+    forceMinPriority: function () {},
   };
 }

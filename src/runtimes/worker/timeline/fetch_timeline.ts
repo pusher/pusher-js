@@ -5,8 +5,8 @@ import Util from 'core/util';
 import Runtime from 'runtime';
 import TimelineTransport from 'core/timeline/timeline_transport';
 
-var getAgent = function(sender: TimelineSender, useTLS: boolean) {
-  return function(data: any, callback: Function) {
+var getAgent = function (sender: TimelineSender, useTLS: boolean) {
+  return function (data: any, callback: Function) {
     var scheme = 'http' + (useTLS ? 's' : '') + '://';
     var url =
       scheme + (sender.host || sender.options.host) + sender.options.path;
@@ -14,7 +14,7 @@ var getAgent = function(sender: TimelineSender, useTLS: boolean) {
     url += '/' + 2 + '?' + query;
 
     fetch(url)
-      .then(response => {
+      .then((response) => {
         if (response.status !== 200) {
           throw `received ${response.status} from stats.pusher.com`;
         }
@@ -25,7 +25,7 @@ var getAgent = function(sender: TimelineSender, useTLS: boolean) {
           sender.host = host;
         }
       })
-      .catch(err => {
+      .catch((err) => {
         Logger.debug('TimelineSender Error: ', err);
       });
   };
@@ -33,7 +33,7 @@ var getAgent = function(sender: TimelineSender, useTLS: boolean) {
 
 var fetchTimeline = {
   name: 'xhr',
-  getAgent
+  getAgent,
 };
 
 export default fetchTimeline;

@@ -8,16 +8,16 @@ import UrlStore from 'core/utils/url_store';
 import {
   AuthRequestType,
   AuthTransportCallback,
-  InternalAuthOptions
+  InternalAuthOptions,
 } from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
-const ajax: AuthTransport = function(
+const ajax: AuthTransport = function (
   context: AbstractRuntime,
   query: string,
   authOptions: InternalAuthOptions,
   authRequestType: AuthRequestType,
-  callback: AuthTransportCallback
+  callback: AuthTransportCallback,
 ) {
   const xhr = Runtime.createXHR();
   xhr.open('POST', authOptions.endpoint, true);
@@ -34,7 +34,7 @@ const ajax: AuthTransport = function(
     }
   }
 
-  xhr.onreadystatechange = function() {
+  xhr.onreadystatechange = function () {
     if (xhr.readyState === 4) {
       if (xhr.status === 200) {
         let data;
@@ -49,9 +49,9 @@ const ajax: AuthTransport = function(
               200,
               `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${
                 xhr.responseText
-              }`
+              }`,
             ),
-            null
+            null,
           );
         }
 
@@ -67,7 +67,7 @@ const ajax: AuthTransport = function(
             break;
           case AuthRequestType.ChannelAuthorization:
             suffix = `Clients must be authorized to join private or presence channels. ${UrlStore.buildLogSuffix(
-              'authorizationEndpoint'
+              'authorizationEndpoint',
             )}`;
             break;
         }
@@ -75,9 +75,9 @@ const ajax: AuthTransport = function(
           new HTTPAuthError(
             xhr.status,
             `Unable to retrieve auth string from ${authRequestType.toString()} endpoint - ` +
-              `received status: ${xhr.status} from ${authOptions.endpoint}. ${suffix}`
+              `received status: ${xhr.status} from ${authOptions.endpoint}. ${suffix}`,
           ),
-          null
+          null,
         );
       }
     }

@@ -3,14 +3,14 @@ import {
   InternalAuthOptions,
   ChannelAuthorizationHandler,
   ChannelAuthorizationRequestParams,
-  ChannelAuthorizationCallback
+  ChannelAuthorizationCallback,
 } from './options';
 
 import Runtime from 'runtime';
 
 const composeChannelQuery = (
   params: ChannelAuthorizationRequestParams,
-  authOptions: InternalAuthOptions
+  authOptions: InternalAuthOptions,
 ) => {
   var query = 'socket_id=' + encodeURIComponent(params.socketId);
 
@@ -39,7 +39,7 @@ const composeChannelQuery = (
 };
 
 const ChannelAuthorizer = (
-  authOptions: InternalAuthOptions
+  authOptions: InternalAuthOptions,
 ): ChannelAuthorizationHandler => {
   if (typeof Runtime.getAuthorizers()[authOptions.transport] === 'undefined') {
     throw `'${authOptions.transport}' is not a recognized auth transport`;
@@ -47,7 +47,7 @@ const ChannelAuthorizer = (
 
   return (
     params: ChannelAuthorizationRequestParams,
-    callback: ChannelAuthorizationCallback
+    callback: ChannelAuthorizationCallback,
   ) => {
     const query = composeChannelQuery(params, authOptions);
 
@@ -56,7 +56,7 @@ const ChannelAuthorizer = (
       query,
       authOptions,
       AuthRequestType.ChannelAuthorization,
-      callback
+      callback,
     );
   };
 };

@@ -2,7 +2,7 @@ import Pusher from './pusher';
 import Logger from './logger';
 import {
   UserAuthenticationData,
-  UserAuthenticationCallback
+  UserAuthenticationCallback,
 } from './auth/options';
 import Channel from './channels/channel';
 import WatchlistFacade from './watchlist';
@@ -19,7 +19,7 @@ export default class UserFacade extends EventsDispatcher {
   private _signinDoneResolve: Function = null;
 
   public constructor(pusher: Pusher) {
-    super(function(eventName, data) {
+    super(function (eventName, data) {
       Logger.debug('No callbacks on user for ' + eventName);
     });
     this.pusher = pusher;
@@ -35,7 +35,7 @@ export default class UserFacade extends EventsDispatcher {
 
     this.watchlist = new WatchlistFacade(pusher);
 
-    this.pusher.connection.bind('message', event => {
+    this.pusher.connection.bind('message', (event) => {
       var eventName = event.event;
       if (eventName === 'pusher:signin_success') {
         this._onSigninSuccess(event.data);
@@ -72,15 +72,15 @@ export default class UserFacade extends EventsDispatcher {
 
     this.pusher.config.userAuthenticator(
       {
-        socketId: this.pusher.connection.socket_id
+        socketId: this.pusher.connection.socket_id,
       },
-      this._onAuthorize
+      this._onAuthorize,
     );
   }
 
   private _onAuthorize: UserAuthenticationCallback = (
     err,
-    authData: UserAuthenticationData
+    authData: UserAuthenticationData,
   ) => {
     if (err) {
       Logger.warn(`Error during signin: ${err}`);
@@ -90,7 +90,7 @@ export default class UserFacade extends EventsDispatcher {
 
     this.pusher.send_event('pusher:signin', {
       auth: authData.auth,
-      user_data: authData.user_data
+      user_data: authData.user_data,
     });
 
     // Later when we get pusher:singin_success event, the user will be marked as signed in
@@ -107,7 +107,7 @@ export default class UserFacade extends EventsDispatcher {
 
     if (typeof this.user_data.id !== 'string' || this.user_data.id === '') {
       Logger.error(
-        `user_data doesn't contain an id. user_data: ${this.user_data}`
+        `user_data doesn't contain an id. user_data: ${this.user_data}`,
       );
       this._cleanup();
       return;
@@ -119,7 +119,7 @@ export default class UserFacade extends EventsDispatcher {
   }
 
   private _subscribeChannels() {
-    const ensure_subscribed = channel => {
+    const ensure_subscribed = (channel) => {
       if (channel.subscriptionPending && channel.subscriptionCancelled) {
         channel.reinstateSubscription();
       } else if (
@@ -132,7 +132,7 @@ export default class UserFacade extends EventsDispatcher {
 
     this.serverToUserChannel = new Channel(
       `#server-to-user-${this.user_data.id}`,
-      this.pusher
+      this.pusher,
     );
     this.serverToUserChannel.bind_global((eventName, data) => {
       if (

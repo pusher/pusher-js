@@ -21,7 +21,7 @@ const {
   removeUnloadListener,
   transportConnectionInitializer,
   createSocketRequest,
-  HTTPFactory
+  HTTPFactory,
 } = Isomorphic;
 
 const ReactNative: Runtime = {
@@ -59,7 +59,7 @@ const ReactNative: Runtime = {
 
   randomInt(max: number): number {
     return Math.floor(Math.random() * max);
-  }
+  },
 };
 
 export default ReactNative;

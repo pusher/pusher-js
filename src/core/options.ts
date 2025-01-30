@@ -1,11 +1,11 @@
 import ConnectionManager from './connection/connection_manager';
 import {
   ChannelAuthorizationOptions,
-  UserAuthenticationOptions
+  UserAuthenticationOptions,
 } from './auth/options';
 import {
   ChannelAuthorizerGenerator,
-  DeprecatedAuthOptions
+  DeprecatedAuthOptions,
 } from './auth/deprecated_channel_authorizer';
 import { AuthTransport, Transport } from './config';
 import * as nacl from 'tweetnacl';
@@ -53,7 +53,7 @@ export function validateOptions(options) {
   }
   if ('disableStats' in options) {
     Logger.warn(
-      'The disableStats option is deprecated in favor of enableStats'
+      'The disableStats option is deprecated in favor of enableStats',
     );
   }
 }

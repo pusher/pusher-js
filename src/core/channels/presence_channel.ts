@@ -43,7 +43,7 @@ export default class PresenceChannel extends PrivateChannel {
             Logger.error(
               `Invalid auth response for channel '${this.name}', ` +
                 `expected 'channel_data' field. ${suffix}, ` +
-                `or the user should be signed in.`
+                `or the user should be signed in.`,
             );
             callback('Invalid auth response');
             return;

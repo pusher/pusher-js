@@ -7,7 +7,7 @@ import Metadata from './metadata';
 import UrlStore from '../utils/url_store';
 import {
   ChannelAuthorizationData,
-  ChannelAuthorizationCallback
+  ChannelAuthorizationCallback,
 } from '../auth/options';
 import { HTTPAuthError } from '../errors';
 
@@ -29,7 +29,7 @@ export default class Channel extends EventsDispatcher {
   subscriptionCount: null;
 
   constructor(name: string, pusher: Pusher) {
-    super(function(event, data) {
+    super(function (event, data) {
       Logger.debug('No callbacks on ' + name + ' for ' + event);
     });
 
@@ -52,13 +52,13 @@ export default class Channel extends EventsDispatcher {
   trigger(event: string, data: any) {
     if (event.indexOf('client-') !== 0) {
       throw new Errors.BadEventName(
-        "Event '" + event + "' does not start with 'client-'"
+        "Event '" + event + "' does not start with 'client-'",
       );
     }
     if (!this.subscribed) {
       var suffix = UrlStore.buildLogSuffix('triggeringClientEvents');
       Logger.warn(
-        `Client event triggered before channel 'subscription_succeeded' event . ${suffix}`
+        `Client event triggered before channel 'subscription_succeeded' event . ${suffix}`,
       );
     }
     return this.pusher.send_event(event, data, this.name);
@@ -127,19 +127,19 @@ export default class Channel extends EventsDispatcher {
               {},
               {
                 type: 'AuthError',
-                error: error.message
+                error: error.message,
               },
-              error instanceof HTTPAuthError ? { status: error.status } : {}
-            )
+              error instanceof HTTPAuthError ? { status: error.status } : {},
+            ),
           );
         } else {
           this.pusher.send_event('pusher:subscribe', {
             auth: data.auth,
             channel_data: data.channel_data,
-            channel: this.name
+            channel: this.name,
           });
         }
-      }
+      },
     );
   }
 
@@ -147,7 +147,7 @@ export default class Channel extends EventsDispatcher {
   unsubscribe() {
     this.subscribed = false;
     this.pusher.send_event('pusher:unsubscribe', {
-      channel: this.name
+      channel: this.name,
     });
   }
 

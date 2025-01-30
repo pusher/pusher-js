@@ -7,7 +7,7 @@ interface AuthTransport {
     query: string,
     authOptions: InternalAuthOptions,
     authRequestType: AuthRequestType,
-    callback: Function
+    callback: Function,
   ): void;
 }
 

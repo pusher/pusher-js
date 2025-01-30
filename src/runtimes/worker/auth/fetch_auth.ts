@@ -3,16 +3,16 @@ import { AuthTransport } from 'core/auth/auth_transports';
 import {
   AuthRequestType,
   AuthTransportCallback,
-  InternalAuthOptions
+  InternalAuthOptions,
 } from 'core/auth/options';
 import { HTTPAuthError } from 'core/errors';
 
-var fetchAuth: AuthTransport = function(
+var fetchAuth: AuthTransport = function (
   context: AbstractRuntime,
   query: string,
   authOptions: InternalAuthOptions,
   authRequestType: AuthRequestType,
-  callback: AuthTransportCallback
+  callback: AuthTransportCallback,
 ) {
   var headers = new Headers();
   headers.set('Content-Type', 'application/x-www-form-urlencoded');
@@ -33,11 +33,11 @@ var fetchAuth: AuthTransport = function(
     headers,
     body,
     credentials: 'same-origin',
-    method: 'POST'
+    method: 'POST',
   });
 
   return fetch(request)
-    .then(response => {
+    .then((response) => {
       let { status } = response;
       if (status === 200) {
         // manually parse the json so we can provide a more helpful error in
@@ -46,22 +46,22 @@ var fetchAuth: AuthTransport = function(
       }
       throw new HTTPAuthError(
         status,
-        `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`
+        `Could not get ${authRequestType.toString()} info from your auth endpoint, status: ${status}`,
       );
     })
-    .then(data => {
+    .then((data) => {
       let parsedData;
       try {
         parsedData = JSON.parse(data);
       } catch (e) {
         throw new HTTPAuthError(
           200,
-          `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${data}`
+          `JSON returned from ${authRequestType.toString()} endpoint was invalid, yet status code was 200. Data was: ${data}`,
         );
       }
       callback(null, parsedData);
     })
-    .catch(err => {
+    .catch((err) => {
       callback(err, null);
     });
 };

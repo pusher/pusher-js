@@ -47,7 +47,7 @@ export default class Transport {
     name: string,
     priority: number,
     key: string,
-    options: any
+    options: any,
   ): TransportConnection {
     return new TransportConnection(this.hooks, name, priority, key, options);
   }

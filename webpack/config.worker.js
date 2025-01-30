@@ -1,6 +1,6 @@
 var path = require('path');
-var NormalModuleReplacementPlugin = require('webpack')
-  .NormalModuleReplacementPlugin;
+var NormalModuleReplacementPlugin =
+  require('webpack').NormalModuleReplacementPlugin;
 var version = require('../package').version;
 const { merge } = require('webpack-merge');
 var webpack = require('webpack');
@@ -18,25 +18,25 @@ if (process.env.INCLUDE_TWEETNACL === 'true') {
 
 var config = merge(configShared, {
   entry: {
-    pusher: entry
+    pusher: entry,
   },
   output: {
     library: 'Pusher',
     path: path.join(__dirname, '../dist/worker'),
     filename: filename,
     libraryTarget: 'umd',
-    globalObject: 'this'
+    globalObject: 'this',
   },
   resolve: {
     // in order to import the appropriate runtime.ts
-    modules: ['src/runtimes/worker']
+    modules: ['src/runtimes/worker'],
   },
   plugins: [
     new webpack.DefinePlugin({
       global: 'self',
-      RUNTIME: JSON.stringify('worker')
-    })
-  ]
+      RUNTIME: JSON.stringify('worker'),
+    }),
+  ],
 });
 
 module.exports = config;

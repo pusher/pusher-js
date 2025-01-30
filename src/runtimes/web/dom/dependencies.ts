@@ -4,7 +4,7 @@ import DependencyLoader from './dependency_loader';
 
 export var DependenciesReceivers = new ScriptReceiverFactory(
   '_pusher_dependencies',
-  'Pusher.DependenciesReceivers'
+  'Pusher.DependenciesReceivers',
 );
 
 export var Dependencies = new DependencyLoader({
@@ -12,5 +12,5 @@ export var Dependencies = new DependencyLoader({
   cdn_https: Defaults.cdn_https,
   version: Defaults.VERSION,
   suffix: Defaults.dependency_suffix,
-  receivers: DependenciesReceivers
+  receivers: DependenciesReceivers,
 });

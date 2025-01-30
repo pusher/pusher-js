@@ -29,7 +29,7 @@ export default class Handshake {
 
   constructor(
     transport: TransportConnection,
-    callback: (HandshakePayload) => void
+    callback: (HandshakePayload) => void,
   ) {
     this.transport = transport;
     this.callback = callback;
@@ -42,7 +42,7 @@ export default class Handshake {
   }
 
   private bindListeners() {
-    this.onMessage = m => {
+    this.onMessage = (m) => {
       this.unbindListeners();
 
       var result;
@@ -57,7 +57,7 @@ export default class Handshake {
       if (result.action === 'connected') {
         this.finish('connected', {
           connection: new Connection(result.id, this.transport),
-          activityTimeout: result.activityTimeout
+          activityTimeout: result.activityTimeout,
         });
       } else {
         this.finish(result.action, { error: result.error });
@@ -65,7 +65,7 @@ export default class Handshake {
       }
     };
 
-    this.onClosed = closeEvent => {
+    this.onClosed = (closeEvent) => {
       this.unbindListeners();
 
       var action = Protocol.getCloseAction(closeEvent) || 'backoff';
@@ -84,7 +84,7 @@ export default class Handshake {
 
   private finish(action: string, params: any) {
     this.callback(
-      Collections.extend({ transport: this.transport, action: action }, params)
+      Collections.extend({ transport: this.transport, action: action }, params),
     );
   }
 }

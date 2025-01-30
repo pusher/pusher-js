@@ -22,7 +22,7 @@ export default class Members {
     if (Object.prototype.hasOwnProperty.call(this.members, id)) {
       return {
         id: id,
-        info: this.members[id]
+        info: this.members[id],
       };
     } else {
       return null;

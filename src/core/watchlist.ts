@@ -6,7 +6,7 @@ export default class WatchlistFacade extends EventsDispatcher {
   private pusher: Pusher;
 
   public constructor(pusher: Pusher) {
-    super(function(eventName, data) {
+    super(function (eventName, data) {
       Logger.debug(`No callbacks on watchlist events for ${eventName}`);
     });
 
@@ -15,13 +15,13 @@ export default class WatchlistFacade extends EventsDispatcher {
   }
 
   handleEvent(pusherEvent) {
-    pusherEvent.data.events.forEach(watchlistEvent => {
+    pusherEvent.data.events.forEach((watchlistEvent) => {
       this.emit(watchlistEvent.name, watchlistEvent);
     });
   }
 
   private bindWatchlistInternalEvent() {
-    this.pusher.connection.bind('message', pusherEvent => {
+    this.pusher.connection.bind('message', (pusherEvent) => {
       var eventName = pusherEvent.event;
       if (eventName === 'pusher_internal:watchlist_events') {
         this.handleEvent(pusherEvent);

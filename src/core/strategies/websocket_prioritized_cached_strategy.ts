@@ -28,7 +28,7 @@ export default class WebSocketPrioritizedCachedStrategy implements Strategy {
   constructor(
     strategy: Strategy,
     transports: TransportStrategyDictionary,
-    options: StrategyOptions
+    options: StrategyOptions,
   ) {
     this.strategy = strategy;
     this.transports = transports;
@@ -54,13 +54,13 @@ export default class WebSocketPrioritizedCachedStrategy implements Strategy {
           this.timeline.info({
             cached: true,
             transport: info.transport,
-            latency: info.latency
+            latency: info.latency,
           });
           strategies.push(
             new SequentialStrategy([transport], {
               timeout: info.latency * 2 + 1000,
-              failFast: true
-            })
+              failFast: true,
+            }),
           );
         } else {
           cacheSkipCount++;
@@ -85,22 +85,22 @@ export default class WebSocketPrioritizedCachedStrategy implements Strategy {
             usingTLS,
             handshake.transport.name,
             Util.now() - startTimestamp,
-            cacheSkipCount
+            cacheSkipCount,
           );
           callback(null, handshake);
         }
       });
 
     return {
-      abort: function() {
+      abort: function () {
         runner.abort();
       },
-      forceMinPriority: function(p) {
+      forceMinPriority: function (p) {
         minPriority = p;
         if (runner) {
           runner.forceMinPriority(p);
         }
-      }
+      },
     };
   }
 }
@@ -128,7 +128,7 @@ function storeTransportCache(
   usingTLS: boolean,
   transport: TransportStrategy,
   latency: number,
-  cacheSkipCount: number
+  cacheSkipCount: number,
 ) {
   var storage = Runtime.getLocalStorage();
   if (storage) {
@@ -137,7 +137,7 @@ function storeTransportCache(
         timestamp: Util.now(),
         transport: transport,
         latency: latency,
-        cacheSkipCount: cacheSkipCount
+        cacheSkipCount: cacheSkipCount,
       });
     } catch (e) {
       // catch over quota exceptions raised by localStorage

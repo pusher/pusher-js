@@ -4,13 +4,13 @@ import { Dependencies } from '../dom/dependencies';
  *
  * Fetches resources if needed and then transitions to initialized.
  */
-export default function() {
+export default function () {
   var self = this;
 
   self.timeline.info(
     self.buildTimelineMessage({
-      transport: self.name + (self.options.useTLS ? 's' : '')
-    })
+      transport: self.name + (self.options.useTLS ? 's' : ''),
+    }),
   );
 
   if (self.hooks.isInitialized()) {
@@ -20,7 +20,7 @@ export default function() {
     Dependencies.load(
       self.hooks.file,
       { useTLS: self.options.useTLS },
-      function(error, callback) {
+      function (error, callback) {
         if (self.hooks.isInitialized()) {
           self.changeState('initialized');
           callback(true);
@@ -31,7 +31,7 @@ export default function() {
           self.onClose();
           callback(false);
         }
-      }
+      },
     );
   } else {
     self.onClose();

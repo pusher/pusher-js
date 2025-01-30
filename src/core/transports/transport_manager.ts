@@ -33,7 +33,7 @@ export default class TransportManager {
   getAssistant(transport: Transport): AssistantToTheTransportManager {
     return Factory.createAssistantToTheTransportManager(this, transport, {
       minPingDelay: this.options.minPingDelay,
-      maxPingDelay: this.options.maxPingDelay
+      maxPingDelay: this.options.maxPingDelay,
     });
   }
 
