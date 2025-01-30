@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.4.0
+
+- [CHANGED] Dependencies minor versions updated to latest versions
+
 ## 8.3.0
 
 - [CHANGED] Update cached re-connect strategy to prioritize WebSocket
