@@ -553,7 +553,7 @@ A few gotchas to consider when using client events:
 - The event name for client events *must* start with `client-`
 
 ```
-channel.trigger('client-my-event', {message: 'Hello, world!'})
+await channel.trigger('client-my-event', {message: 'Hello, world!'})
 ```
 
 
