@@ -7,18 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Prepare tag
         id: prepare_tag
         continue-on-error: true
         run: |
-          export TAG=v$(jq -r '.version' package.json)
+          TAG=v$(jq -r '.version' package.json)
           echo "TAG=$TAG" >> $GITHUB_ENV
 
-          export CHECK_TAG=$(git tag | grep $TAG)
-          if [[ $CHECK_TAG ]]; then
+          if git tag | grep -q "^${TAG}$"; then
             echo "Skipping because release tag already exists"
             exit 1
           fi
@@ -26,7 +25,7 @@ jobs:
         id: release_output
         if: ${{ steps.prepare_tag.outcome == 'success' }}
         run: |
-          echo "::set-output name=tag::${{ env.TAG }}"
+          echo "tag=${{ env.TAG }}" >> $GITHUB_OUTPUT
     outputs:
       tag: ${{ steps.release_output.outputs.tag }}
 
@@ -35,48 +34,41 @@ jobs:
     needs: check-release-tag
     if: ${{ needs.check-release-tag.outputs.tag }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Prepare tag
         run: |
-          export TAG=v$(jq -r '.version' package.json)
+          TAG=v$(jq -r '.version' package.json)
           echo "TAG=$TAG" >> $GITHUB_ENV
-      - name: Setup git
-        run: |
-          git config user.email "pusher-ci@pusher.com"
-          git config user.name "Pusher CI"
       - name: Prepare description
         run: |
           csplit -s CHANGELOG.md "/##/" {1}
           cat xx01 > CHANGELOG.tmp
       - name: Create Release
-        uses: actions/create-release@v1
+        run: |
+          gh release create "${{ env.TAG }}" \
+            --title "${{ env.TAG }}" \
+            --notes-file CHANGELOG.tmp
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.TAG }}
-          release_name: ${{ env.TAG }}
-          body_path: CHANGELOG.tmp
-          draft: false
-          prerelease: false
 
   publish-to-npm:
     runs-on: ubuntu-latest
     needs: create-github-release
     steps:
-      - uses: actions/checkout@v2
-      - uses: flood-io/is-published-on-npm@8478347e2650eb228d303975415458183d0a37e4
-        id: is-published
-      - run: echo "This version is already published on NPM"
-        if: ${{ steps.is-published.outputs.published == 'true' }}
-      - uses: actions/setup-node@v2
-        if: ${{ steps.is-published.outputs.published == 'false' }}
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
           registry-url: https://registry.npmjs.org/
       - run: npm install
-        if: ${{ steps.is-published.outputs.published == 'false' }}
-      - run: npm publish --access public
-        if: ${{ steps.is-published.outputs.published == 'false' }}
+      - name: Publish if not already published
+        run: |
+          VERSION=$(jq -r '.version' package.json)
+          if npm view pusher-js@$VERSION version 2>/dev/null; then
+            echo "Version $VERSION already on npm, skipping."
+          else
+            npm publish --access public
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -85,13 +77,13 @@ jobs:
     runs-on: ubuntu-latest
     needs: create-github-release
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Upload to S3
         run: |
           VERSION=$(jq -r '.version' package.json | cut -d'.' -f1,2,3)
           VERSION_MIN=$(jq -r '.version' package.json | cut -d'.' -f1,2)
 
-          egrep -o '^[0-9]+\.[0-9]+\.[0-9]+' <<< $VERSION
+          grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+' <<< $VERSION
 
           aws s3 sync dist/web/ s3://${BUCKET_NAME}/latest/ --acl public-read --cache-control max-age=$MAX_AGE
           aws s3 sync dist/worker/ s3://${BUCKET_NAME}/latest/ --acl public-read --cache-control max-age=$MAX_AGE

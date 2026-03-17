@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.4.2
+
+- [CHANGED] Modernise release workflow: update action versions, replace deprecated flood-io/is-published-on-npm action with inline npm registry check
+
 ## 8.4.1
 
 - [FIXED] Pin transitive dependencies to patched versions to resolve known vulnerabilities (cipher-base, pbkdf2, sha.js, node-forge, js-yaml, compression, on-headers, tmp)
