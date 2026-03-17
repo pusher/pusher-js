@@ -1,5 +1,10 @@
 # Changelog
 
+## 8.4.3
+
+- [FIXED] Pin additional transitive dependencies to patched versions to resolve known vulnerabilities (express, qs, body-parser, lodash, minimatch, browserstack-local)
+- [FIXED] Bump integration_tests_server express dependency to resolve CVEs
+
 ## 8.4.2
 
 - [CHANGED] Modernise release workflow: update action versions, replace deprecated flood-io/is-published-on-npm action with inline npm registry check
