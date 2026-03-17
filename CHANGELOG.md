@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.4.1
+
+- [FIXED] Pin transitive dependencies to patched versions to resolve known vulnerabilities (cipher-base, pbkdf2, sha.js, node-forge, js-yaml, compression, on-headers, tmp)
+
 ## 8.4.0
 
 - [CHANGED] Dependencies minor versions updated to latest versions
