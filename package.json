@@ -78,6 +78,9 @@
     "js-yaml": "^3.14.2",
     "lodash": "^4.17.23",
     "minimatch": "^9.0.3",
+    "karma": {
+      "minimatch": "^3.1.2"
+    },
     "node-forge": "^1.3.2",
     "on-headers": "^1.1.0",
     "pbkdf2": "^3.1.5",
