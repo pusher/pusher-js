@@ -19,10 +19,9 @@ module.exports = merge({}, configShared, {
     pusher: entry,
   },
   output: {
-    library: 'Pusher',
+    library: { name: 'Pusher', type: 'umd' },
     path: path.join(__dirname, '../dist/web'),
     filename: filename,
-    libraryTarget: 'umd',
   },
   resolve: {
     modules: ['src/runtimes/web'],

@@ -16,7 +16,7 @@ module.exports =  merge({}, baseConfig, {
   output: {
     filename: "unit_tests_spec.js",
     path: path.join(__dirname, "..", "..", "..", "tmp", "node_unit"),
-    libraryTarget: "var"
+    library: { type: "var" }
   },
   externals: {
     testenv: "'node'"

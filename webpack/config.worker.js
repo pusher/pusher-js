@@ -21,10 +21,9 @@ var config = merge(configShared, {
     pusher: entry,
   },
   output: {
-    library: 'Pusher',
+    library: { name: 'Pusher', type: 'umd' },
     path: path.join(__dirname, '../dist/worker'),
     filename: filename,
-    libraryTarget: 'umd',
     globalObject: 'this',
   },
   resolve: {
