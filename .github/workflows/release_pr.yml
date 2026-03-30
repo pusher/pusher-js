@@ -11,13 +11,13 @@ jobs:
     name: Prepare release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Get current version
         shell: bash
         run: |
           CURRENT_VERSION=$(jq -r '.version' package.json)
           echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
           repository: pusher/public_actions
           path: .github/actions
@@ -25,9 +25,9 @@ jobs:
         id: bump
         with:
           current_version: ${{ env.CURRENT_VERSION }}
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v6
         with:
-          node-version: '16'
+          node-version: '20'
       - run: npm install
       - name: Push
         shell: bash

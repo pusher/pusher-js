@@ -12,11 +12,14 @@ jobs:
     env:
       CI: ${{ github.event_name == 'push' && 'basic' || 'full' }}
       MINIMAL_INTEGRATION_TESTS: ${{ github.event_name == 'push' && 'true' || '' }}
+      # webpack 4 uses MD4 hashing which is unsupported in OpenSSL 3 (Node 17+).
+      # Remove once webpack is upgraded to v5.
+      NODE_OPTIONS: --openssl-legacy-provider
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: '16'
+          node-version: '20'
       - run: npm install
       - run: npm run check-format
       - run: make web_unit
@@ -36,11 +39,15 @@ jobs:
           INTEGRATION_TESTS_APP_EU_SECRET: ${{ secrets.INTEGRATION_TESTS_APP_EU_SECRET }}
   run-node-tests:
     runs-on: ubuntu-latest
+    env:
+      # webpack 4 uses MD4 hashing which is unsupported in OpenSSL 3 (Node 17+).
+      # Remove once webpack is upgraded to v5.
+      NODE_OPTIONS: --openssl-legacy-provider
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
-          node-version: '16'
+          node-version: '20'
       - run: npm install
       - run: npm run check-format
       - run: make node_unit
