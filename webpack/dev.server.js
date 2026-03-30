@@ -4,14 +4,7 @@ var WebpackDevServer = require('webpack-dev-server');
 
 var port = parseInt(process.env.PORT) || 5555;
 
-config.entry.app = [
-  'webpack-dev-server/client?http://localhost:' + port + '/',
-  'webpack/hot/dev-server',
-];
-
 var compiler = webpack(config);
-var server = new WebpackDevServer(compiler, {
-  hot: true,
-});
+var server = new WebpackDevServer({ hot: true, port: port }, compiler);
 
-server.listen(port);
+server.start();

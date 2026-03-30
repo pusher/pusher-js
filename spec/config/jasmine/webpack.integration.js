@@ -16,7 +16,7 @@ module.exports = merge({}, baseConfig, {
   output: {
     filename: "integration_tests_spec.js",
     path: path.join(__dirname, "..", "..", "..", "tmp", "node_integration"),
-    libraryTarget: "var"
+    library: { type: "var" }
   },
   resolve: {
     modules: ['spec/javascripts/helpers'],

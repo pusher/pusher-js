@@ -8,8 +8,7 @@ module.exports = merge({}, configShared, {
     pusher: './src/core/pusher-with-encryption.js',
   },
   output: {
-    library: 'Pusher',
-    libraryTarget: 'commonjs2',
+    library: { name: 'Pusher', type: 'commonjs2' },
     path: path.join(__dirname, '../dist/node'),
     filename: 'pusher.js',
   },
