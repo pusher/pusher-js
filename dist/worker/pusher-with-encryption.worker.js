@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.4.0
+ * Pusher JavaScript Library v8.5.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -15,96 +15,12 @@
 		exports["Pusher"] = factory();
 	else
 		root["Pusher"] = factory();
-})(this, function() {
-return /******/ (function(modules) { // webpackBootstrap
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
-/******/ })
-/************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+})(this, () => {
+return /******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
+
+/***/ 594
+(__unused_webpack_module, exports) {
 
 "use strict";
 
@@ -123,7 +39,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 /**
  * Package base64 implements Base64 encoding and decoding.
  */
@@ -390,15 +306,17 @@ exports.decodedLength = function (s) {
 };
 
 
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ },
+
+/***/ 978
+(__unused_webpack_module, exports) {
 
 "use strict";
+var __webpack_unused_export__;
 
 // Copyright (C) 2016 Dmitry Chestnykh
 // MIT License. See LICENSE file for details.
-Object.defineProperty(exports, "__esModule", { value: true });
+__webpack_unused_export__ = ({ value: true });
 /**
  * Package utf8 implements UTF-8 encoding and decoding.
  */
@@ -441,7 +359,7 @@ function encode(s) {
     }
     return arr;
 }
-exports.encode = encode;
+__webpack_unused_export__ = encode;
 /**
  * Returns the number of bytes required to encode the given string into UTF-8.
  * Throws if the source string has invalid UTF-16 encoding.
@@ -472,7 +390,7 @@ function encodedLength(s) {
     }
     return result;
 }
-exports.encodedLength = encodedLength;
+__webpack_unused_export__ = encodedLength;
 /**
  * Decodes the given byte array from UTF-8 into a string.
  * Throws if encoding is invalid.
@@ -542,12 +460,13 @@ function decode(arr) {
     }
     return chars.join("");
 }
-exports.decode = decode;
+exports.D4 = decode;
 
 
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ },
+
+/***/ 601
+(module, __unused_webpack_exports, __webpack_require__) {
 
 (function(nacl) {
 'use strict';
@@ -2928,7 +2847,7 @@ nacl.setPRNG = function(fn) {
     });
   } else if (true) {
     // Node.js.
-    crypto = __webpack_require__(4);
+    crypto = __webpack_require__(281);
     if (crypto && crypto.randomBytes) {
       nacl.setPRNG(function(x, n) {
         var i, v = crypto.randomBytes(n);
@@ -2942,39 +2861,35 @@ nacl.setPRNG = function(fn) {
 })( true && module.exports ? module.exports : (self.nacl = self.nacl || {}));
 
 
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ },
 
-module.exports = __webpack_require__(5).default;
+/***/ 42
+(module, __unused_webpack_exports, __webpack_require__) {
+
+module.exports = __webpack_require__(556)["default"];
 
 
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
+/***/ },
 
-/* (ignored) */
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ 556
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-// ESM COMPAT FLAG
-__webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
-__webpack_require__.d(__webpack_exports__, "default", function() { return /* binding */ pusher_with_encryption_PusherWithEncryption; });
+__webpack_require__.d(__webpack_exports__, {
+  "default": () => (/* binding */ PusherWithEncryption)
+});
 
-// CONCATENATED MODULE: ./src/core/base64.ts
+;// ./src/core/base64.ts
 function encode(s) {
     return btoa(utob(s));
 }
 var fromCharCode = String.fromCharCode;
 var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 var b64tab = {};
-for (var base64_i = 0, l = b64chars.length; base64_i < l; base64_i++) {
-    b64tab[b64chars.charAt(base64_i)] = base64_i;
+for (var i = 0, l = b64chars.length; i < l; i++) {
+    b64tab[b64chars.charAt(i)] = i;
 }
 var cb_utob = function (c) {
     var cc = c.charCodeAt(0);
@@ -3007,7 +2922,7 @@ var btoa = self.btoa ||
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
 
-// CONCATENATED MODULE: ./src/core/utils/timers/abstract_timer.ts
+;// ./src/core/utils/timers/abstract_timer.ts
 class Timer {
     constructor(set, clear, delay, callback) {
         this.clear = clear;
@@ -3027,9 +2942,9 @@ class Timer {
         }
     }
 }
-/* harmony default export */ var abstract_timer = (Timer);
+/* harmony default export */ const abstract_timer = (Timer);
 
-// CONCATENATED MODULE: ./src/core/utils/timers/index.ts
+;// ./src/core/utils/timers/index.ts
 
 function timers_clearTimeout(timer) {
     self.clearTimeout(timer);
@@ -3037,7 +2952,7 @@ function timers_clearTimeout(timer) {
 function timers_clearInterval(timer) {
     self.clearInterval(timer);
 }
-class timers_OneOffTimer extends abstract_timer {
+class OneOffTimer extends abstract_timer {
     constructor(delay, callback) {
         super(setTimeout, timers_clearTimeout, delay, function (timer) {
             callback();
@@ -3045,7 +2960,7 @@ class timers_OneOffTimer extends abstract_timer {
         });
     }
 }
-class timers_PeriodicTimer extends abstract_timer {
+class PeriodicTimer extends abstract_timer {
     constructor(delay, callback) {
         super(setInterval, timers_clearInterval, delay, function (timer) {
             callback();
@@ -3054,7 +2969,7 @@ class timers_PeriodicTimer extends abstract_timer {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/util.ts
+;// ./src/core/util.ts
 
 var Util = {
     now() {
@@ -3066,7 +2981,7 @@ var Util = {
         }
     },
     defer(callback) {
-        return new timers_OneOffTimer(0, callback);
+        return new OneOffTimer(0, callback);
     },
     method(name, ...args) {
         var boundArguments = Array.prototype.slice.call(arguments, 1);
@@ -3075,9 +2990,9 @@ var Util = {
         };
     },
 };
-/* harmony default export */ var util = (Util);
+/* harmony default export */ const util = (Util);
 
-// CONCATENATED MODULE: ./src/core/utils/collections.ts
+;// ./src/core/utils/collections.ts
 
 
 function extend(target, ...sources) {
@@ -3271,9 +3186,9 @@ function safeJSONStringify(source) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/defaults.ts
+;// ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.4.0",
+    VERSION: "8.5.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -3300,9 +3215,9 @@ var Defaults = {
     cdn_https: "https://js.pusher.com",
     dependency_suffix: "",
 };
-/* harmony default export */ var defaults = (Defaults);
+/* harmony default export */ const defaults = (Defaults);
 
-// CONCATENATED MODULE: ./src/core/transports/url_schemes.ts
+;// ./src/core/transports/url_schemes.ts
 
 function getGenericURL(baseScheme, params, path) {
     var scheme = baseScheme + (params.useTLS ? 's' : '');
@@ -3340,9 +3255,9 @@ var sockjs = {
     },
 };
 
-// CONCATENATED MODULE: ./src/core/events/callback_registry.ts
+;// ./src/core/events/callback_registry.ts
 
-class callback_registry_CallbackRegistry {
+class CallbackRegistry {
     constructor() {
         this._callbacks = {};
     }
@@ -3392,12 +3307,12 @@ function prefix(name) {
     return '_' + name;
 }
 
-// CONCATENATED MODULE: ./src/core/events/dispatcher.ts
+;// ./src/core/events/dispatcher.ts
 
 
-class dispatcher_Dispatcher {
+class Dispatcher {
     constructor(failThrough) {
-        this.callbacks = new callback_registry_CallbackRegistry();
+        this.callbacks = new CallbackRegistry();
         this.global_callbacks = [];
         this.failThrough = failThrough;
     }
@@ -3450,10 +3365,10 @@ class dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/logger.ts
+;// ./src/core/logger.ts
 
 
-class logger_Logger {
+class Logger {
     constructor() {
         this.globalLog = (message) => {
             if (self.console && self.console.log) {
@@ -3488,24 +3403,24 @@ class logger_Logger {
     }
     log(defaultLoggingFunction, ...args) {
         var message = stringify.apply(this, arguments);
-        if (core_pusher.log) {
-            core_pusher.log(message);
+        if (pusher.log) {
+            pusher.log(message);
         }
-        else if (core_pusher.logToConsole) {
+        else if (pusher.logToConsole) {
             const log = defaultLoggingFunction.bind(this);
             log(message);
         }
     }
 }
-/* harmony default export */ var logger = (new logger_Logger());
+/* harmony default export */ const logger = (new Logger());
 
-// CONCATENATED MODULE: ./src/core/transports/transport_connection.ts
-
-
+;// ./src/core/transports/transport_connection.ts
 
 
 
-class transport_connection_TransportConnection extends dispatcher_Dispatcher {
+
+
+class TransportConnection extends Dispatcher {
     constructor(hooks, name, priority, key, options) {
         super();
         this.initialize = worker_runtime.transportConnectionInitializer;
@@ -3646,9 +3561,9 @@ class transport_connection_TransportConnection extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/transports/transport.ts
+;// ./src/core/transports/transport.ts
 
-class transport_Transport {
+class Transport {
     constructor(hooks) {
         this.hooks = hooks;
     }
@@ -3656,16 +3571,16 @@ class transport_Transport {
         return this.hooks.isSupported(environment);
     }
     createConnection(name, priority, key, options) {
-        return new transport_connection_TransportConnection(this.hooks, name, priority, key, options);
+        return new TransportConnection(this.hooks, name, priority, key, options);
     }
 }
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/transports/transports.ts
+;// ./src/runtimes/isomorphic/transports/transports.ts
 
 
 
 
-var WSTransport = new transport_Transport({
+var WSTransport = new Transport({
     urls: ws,
     handlesActivityChecks: false,
     supportsPing: false,
@@ -3702,19 +3617,19 @@ var xhrConfiguration = {
         return worker_runtime.isXHRSupported();
     },
 };
-var XHRStreamingTransport = new transport_Transport((extend({}, streamingConfiguration, xhrConfiguration)));
-var XHRPollingTransport = new transport_Transport((extend({}, pollingConfiguration, xhrConfiguration)));
+var XHRStreamingTransport = new Transport((extend({}, streamingConfiguration, xhrConfiguration)));
+var XHRPollingTransport = new Transport((extend({}, pollingConfiguration, xhrConfiguration)));
 var Transports = {
     ws: WSTransport,
     xhr_streaming: XHRStreamingTransport,
     xhr_polling: XHRPollingTransport,
 };
-/* harmony default export */ var transports = (Transports);
+/* harmony default export */ const transports = (Transports);
 
-// CONCATENATED MODULE: ./src/core/transports/assistant_to_the_transport_manager.ts
+;// ./src/core/transports/assistant_to_the_transport_manager.ts
 
 
-class assistant_to_the_transport_manager_AssistantToTheTransportManager {
+class AssistantToTheTransportManager {
     constructor(manager, transport, options) {
         this.manager = manager;
         this.transport = transport;
@@ -3754,7 +3669,7 @@ class assistant_to_the_transport_manager_AssistantToTheTransportManager {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/connection/protocol/protocol.ts
+;// ./src/core/connection/protocol/protocol.ts
 const Protocol = {
     decodeMessage: function (messageEvent) {
         try {
@@ -3845,14 +3760,14 @@ const Protocol = {
         }
     },
 };
-/* harmony default export */ var protocol = (Protocol);
+/* harmony default export */ const protocol = (Protocol);
 
-// CONCATENATED MODULE: ./src/core/connection/connection.ts
-
-
+;// ./src/core/connection/connection.ts
 
 
-class connection_Connection extends dispatcher_Dispatcher {
+
+
+class Connection extends Dispatcher {
     constructor(id, transport) {
         super();
         this.id = id;
@@ -3954,11 +3869,11 @@ class connection_Connection extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/connection/handshake/index.ts
+;// ./src/core/connection/handshake/index.ts
 
 
 
-class handshake_Handshake {
+class Handshake {
     constructor(transport, callback) {
         this.transport = transport;
         this.callback = callback;
@@ -3982,7 +3897,7 @@ class handshake_Handshake {
             }
             if (result.action === 'connected') {
                 this.finish('connected', {
-                    connection: new connection_Connection(result.id, this.transport),
+                    connection: new Connection(result.id, this.transport),
                     activityTimeout: result.activityTimeout,
                 });
             }
@@ -4009,9 +3924,9 @@ class handshake_Handshake {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/timeline/timeline_sender.ts
+;// ./src/core/timeline/timeline_sender.ts
 
-class timeline_sender_TimelineSender {
+class TimelineSender {
     constructor(timeline, options) {
         this.timeline = timeline;
         this.options = options || {};
@@ -4024,7 +3939,7 @@ class timeline_sender_TimelineSender {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/errors.ts
+;// ./src/core/errors.ts
 class BadEventName extends Error {
     constructor(msg) {
         super(msg);
@@ -4081,7 +3996,7 @@ class HTTPAuthError extends Error {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/utils/url_store.ts
+;// ./src/core/utils/url_store.ts
 const urlStore = {
     baseUrl: 'https://pusher.com',
     urls: {
@@ -4118,15 +4033,15 @@ const buildLogSuffix = function (key) {
         return '';
     return `${urlPrefix} ${url}`;
 };
-/* harmony default export */ var url_store = ({ buildLogSuffix });
+/* harmony default export */ const url_store = ({ buildLogSuffix });
 
-// CONCATENATED MODULE: ./src/core/channels/channel.ts
-
-
+;// ./src/core/channels/channel.ts
 
 
 
-class channel_Channel extends dispatcher_Dispatcher {
+
+
+class Channel extends Dispatcher {
     constructor(name, pusher) {
         super(function (event, data) {
             logger.debug('No callbacks on ' + name + ' for ' + event);
@@ -4222,9 +4137,9 @@ class channel_Channel extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/channels/private_channel.ts
+;// ./src/core/channels/private_channel.ts
 
-class private_channel_PrivateChannel extends channel_Channel {
+class PrivateChannel extends Channel {
     authorize(socketId, callback) {
         return this.pusher.config.channelAuthorizer({
             channelName: this.name,
@@ -4233,9 +4148,9 @@ class private_channel_PrivateChannel extends channel_Channel {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/channels/members.ts
+;// ./src/core/channels/members.ts
 
-class members_Members {
+class Members {
     constructor() {
         this.reset();
     }
@@ -4286,7 +4201,7 @@ class members_Members {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/channels/presence_channel.ts
+;// ./src/core/channels/presence_channel.ts
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -4300,10 +4215,10 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-class presence_channel_PresenceChannel extends private_channel_PrivateChannel {
+class PresenceChannel extends PrivateChannel {
     constructor(name, pusher) {
         super(name, pusher);
-        this.members = new members_Members();
+        this.members = new Members();
     }
     authorize(socketId, callback) {
         super.authorize(socketId, (error, authData) => __awaiter(this, void 0, void 0, function* () {
@@ -4385,18 +4300,16 @@ class presence_channel_PresenceChannel extends private_channel_PrivateChannel {
 }
 
 // EXTERNAL MODULE: ./node_modules/@stablelib/utf8/lib/utf8.js
-var utf8 = __webpack_require__(1);
-
+var utf8 = __webpack_require__(978);
 // EXTERNAL MODULE: ./node_modules/@stablelib/base64/lib/base64.js
-var base64 = __webpack_require__(0);
-
-// CONCATENATED MODULE: ./src/core/channels/encrypted_channel.ts
-
+var base64 = __webpack_require__(594);
+;// ./src/core/channels/encrypted_channel.ts
 
 
 
 
-class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel {
+
+class EncryptedChannel extends PrivateChannel {
     constructor(name, pusher, nacl) {
         super(name, pusher);
         this.key = null;
@@ -4413,7 +4326,7 @@ class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel 
                 callback(new Error(`No shared_secret key in auth payload for encrypted channel: ${this.name}`), null);
                 return;
             }
-            this.key = Object(base64["decode"])(sharedSecret);
+            this.key = (0,base64.decode)(sharedSecret);
             delete authData['shared_secret'];
             callback(null, authData);
         });
@@ -4441,12 +4354,12 @@ class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel 
                 data);
             return;
         }
-        let cipherText = Object(base64["decode"])(data.ciphertext);
+        let cipherText = (0,base64.decode)(data.ciphertext);
         if (cipherText.length < this.nacl.secretbox.overheadLength) {
             logger.error(`Expected encrypted event ciphertext length to be ${this.nacl.secretbox.overheadLength}, got: ${cipherText.length}`);
             return;
         }
-        let nonce = Object(base64["decode"])(data.nonce);
+        let nonce = (0,base64.decode)(data.nonce);
         if (nonce.length < this.nacl.secretbox.nonceLength) {
             logger.error(`Expected encrypted event nonce length to be ${this.nacl.secretbox.nonceLength}, got: ${nonce.length}`);
             return;
@@ -4472,7 +4385,7 @@ class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel 
         this.emit(event, this.getDataToEmit(bytes));
     }
     getDataToEmit(bytes) {
-        let raw = Object(utf8["decode"])(bytes);
+        let raw = (0,utf8/* decode */.D4)(bytes);
         try {
             return JSON.parse(raw);
         }
@@ -4482,13 +4395,13 @@ class encrypted_channel_EncryptedChannel extends private_channel_PrivateChannel 
     }
 }
 
-// CONCATENATED MODULE: ./src/core/connection/connection_manager.ts
+;// ./src/core/connection/connection_manager.ts
 
 
 
 
 
-class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
+class ConnectionManager extends Dispatcher {
     constructor(key, options) {
         super();
         this.state = 'initialized';
@@ -4514,6 +4427,11 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
             }
         });
         this.updateStrategy();
+    }
+    switchCluster(key) {
+        this.key = key;
+        this.updateStrategy();
+        this.retryIn(0);
     }
     connect() {
         if (this.connection || this.runner) {
@@ -4598,7 +4516,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
         if (delay > 0) {
             this.emit('connecting_in', Math.round(delay / 1000));
         }
-        this.retryTimer = new timers_OneOffTimer(delay || 0, () => {
+        this.retryTimer = new OneOffTimer(delay || 0, () => {
             this.disconnectInternally();
             this.connect();
         });
@@ -4610,7 +4528,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
         }
     }
     setUnavailableTimer() {
-        this.unavailableTimer = new timers_OneOffTimer(this.options.unavailableTimeout, () => {
+        this.unavailableTimer = new OneOffTimer(this.options.unavailableTimeout, () => {
             this.updateState('unavailable');
         });
     }
@@ -4622,7 +4540,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
     sendActivityCheck() {
         this.stopActivityCheck();
         this.connection.ping();
-        this.activityTimer = new timers_OneOffTimer(this.options.pongTimeout, () => {
+        this.activityTimer = new OneOffTimer(this.options.pongTimeout, () => {
             this.timeline.error({ pong_timed_out: this.options.pongTimeout });
             this.retryIn(0);
         });
@@ -4630,7 +4548,7 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
     resetActivityCheck() {
         this.stopActivityCheck();
         if (this.connection && !this.connection.handlesActivityChecks()) {
-            this.activityTimer = new timers_OneOffTimer(this.activityTimeout, () => {
+            this.activityTimer = new OneOffTimer(this.activityTimeout, () => {
                 this.sendActivityCheck();
             });
         }
@@ -4738,12 +4656,12 @@ class connection_manager_ConnectionManager extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/channels/channels.ts
+;// ./src/core/channels/channels.ts
 
 
 
 
-class channels_Channels {
+class Channels {
     constructor() {
         this.channels = {};
     }
@@ -4793,7 +4711,7 @@ function createChannel(name, pusher) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/utils/factory.ts
+;// ./src/core/utils/factory.ts
 
 
 
@@ -4805,38 +4723,38 @@ function createChannel(name, pusher) {
 
 var Factory = {
     createChannels() {
-        return new channels_Channels();
+        return new Channels();
     },
     createConnectionManager(key, options) {
-        return new connection_manager_ConnectionManager(key, options);
+        return new ConnectionManager(key, options);
     },
     createChannel(name, pusher) {
-        return new channel_Channel(name, pusher);
+        return new Channel(name, pusher);
     },
     createPrivateChannel(name, pusher) {
-        return new private_channel_PrivateChannel(name, pusher);
+        return new PrivateChannel(name, pusher);
     },
     createPresenceChannel(name, pusher) {
-        return new presence_channel_PresenceChannel(name, pusher);
+        return new PresenceChannel(name, pusher);
     },
     createEncryptedChannel(name, pusher, nacl) {
-        return new encrypted_channel_EncryptedChannel(name, pusher, nacl);
+        return new EncryptedChannel(name, pusher, nacl);
     },
     createTimelineSender(timeline, options) {
-        return new timeline_sender_TimelineSender(timeline, options);
+        return new TimelineSender(timeline, options);
     },
     createHandshake(transport, callback) {
-        return new handshake_Handshake(transport, callback);
+        return new Handshake(transport, callback);
     },
     createAssistantToTheTransportManager(manager, transport, options) {
-        return new assistant_to_the_transport_manager_AssistantToTheTransportManager(manager, transport, options);
+        return new AssistantToTheTransportManager(manager, transport, options);
     },
 };
-/* harmony default export */ var factory = (Factory);
+/* harmony default export */ const factory = (Factory);
 
-// CONCATENATED MODULE: ./src/core/transports/transport_manager.ts
+;// ./src/core/transports/transport_manager.ts
 
-class transport_manager_TransportManager {
+class TransportManager {
     constructor(options) {
         this.options = options || {};
         this.livesLeft = this.options.lives || Infinity;
@@ -4855,11 +4773,11 @@ class transport_manager_TransportManager {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/sequential_strategy.ts
+;// ./src/core/strategies/sequential_strategy.ts
 
 
 
-class sequential_strategy_SequentialStrategy {
+class SequentialStrategy {
     constructor(strategies, options) {
         this.strategies = strategies;
         this.loop = Boolean(options.loop);
@@ -4915,7 +4833,7 @@ class sequential_strategy_SequentialStrategy {
         var timer = null;
         var runner = null;
         if (options.timeout > 0) {
-            timer = new timers_OneOffTimer(options.timeout, function () {
+            timer = new OneOffTimer(options.timeout, function () {
                 runner.abort();
                 callback(true);
             });
@@ -4943,10 +4861,10 @@ class sequential_strategy_SequentialStrategy {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/best_connected_ever_strategy.ts
+;// ./src/core/strategies/best_connected_ever_strategy.ts
 
 
-class best_connected_ever_strategy_BestConnectedEverStrategy {
+class BestConnectedEverStrategy {
     constructor(strategies) {
         this.strategies = strategies;
     }
@@ -4998,12 +4916,12 @@ function abortRunner(runner) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/websocket_prioritized_cached_strategy.ts
+;// ./src/core/strategies/websocket_prioritized_cached_strategy.ts
 
 
 
 
-class websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy {
+class WebSocketPrioritizedCachedStrategy {
     constructor(strategy, transports, options) {
         this.strategy = strategy;
         this.transports = transports;
@@ -5028,7 +4946,7 @@ class websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy {
                         transport: info.transport,
                         latency: info.latency,
                     });
-                    strategies.push(new sequential_strategy_SequentialStrategy([transport], {
+                    strategies.push(new SequentialStrategy([transport], {
                         timeout: info.latency * 2 + 1000,
                         failFast: true,
                     }));
@@ -5114,9 +5032,9 @@ function flushTransportCache(usingTLS) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/delayed_strategy.ts
+;// ./src/core/strategies/delayed_strategy.ts
 
-class delayed_strategy_DelayedStrategy {
+class DelayedStrategy {
     constructor(strategy, { delay: number }) {
         this.strategy = strategy;
         this.options = { delay: number };
@@ -5127,7 +5045,7 @@ class delayed_strategy_DelayedStrategy {
     connect(minPriority, callback) {
         var strategy = this.strategy;
         var runner;
-        var timer = new timers_OneOffTimer(this.options.delay, function () {
+        var timer = new OneOffTimer(this.options.delay, function () {
             runner = strategy.connect(minPriority, callback);
         });
         return {
@@ -5147,7 +5065,7 @@ class delayed_strategy_DelayedStrategy {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/if_strategy.ts
+;// ./src/core/strategies/if_strategy.ts
 class IfStrategy {
     constructor(test, trueBranch, falseBranch) {
         this.test = test;
@@ -5164,7 +5082,7 @@ class IfStrategy {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/first_connected_strategy.ts
+;// ./src/core/strategies/first_connected_strategy.ts
 class FirstConnectedStrategy {
     constructor(strategy) {
         this.strategy = strategy;
@@ -5183,7 +5101,7 @@ class FirstConnectedStrategy {
     }
 }
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/default_strategy.ts
+;// ./src/runtimes/isomorphic/default_strategy.ts
 
 
 
@@ -5222,11 +5140,11 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
         timeout: 15000,
         timeoutLimit: 60000,
     };
-    var ws_manager = new transport_manager_TransportManager({
+    var ws_manager = new TransportManager({
         minPingDelay: 10000,
         maxPingDelay: config.activityTimeout,
     });
-    var streaming_manager = new transport_manager_TransportManager({
+    var streaming_manager = new TransportManager({
         lives: 2,
         minPingDelay: 10000,
         maxPingDelay: config.activityTimeout,
@@ -5235,40 +5153,40 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     var wss_transport = defineTransportStrategy('wss', 'ws', 3, wss_options, ws_manager);
     var xhr_streaming_transport = defineTransportStrategy('xhr_streaming', 'xhr_streaming', 1, http_options, streaming_manager);
     var xhr_polling_transport = defineTransportStrategy('xhr_polling', 'xhr_polling', 1, http_options);
-    var ws_loop = new sequential_strategy_SequentialStrategy([ws_transport], timeouts);
-    var wss_loop = new sequential_strategy_SequentialStrategy([wss_transport], timeouts);
-    var streaming_loop = new sequential_strategy_SequentialStrategy([xhr_streaming_transport], timeouts);
-    var polling_loop = new sequential_strategy_SequentialStrategy([xhr_polling_transport], timeouts);
-    var http_loop = new sequential_strategy_SequentialStrategy([
-        new IfStrategy(testSupportsStrategy(streaming_loop), new best_connected_ever_strategy_BestConnectedEverStrategy([
+    var ws_loop = new SequentialStrategy([ws_transport], timeouts);
+    var wss_loop = new SequentialStrategy([wss_transport], timeouts);
+    var streaming_loop = new SequentialStrategy([xhr_streaming_transport], timeouts);
+    var polling_loop = new SequentialStrategy([xhr_polling_transport], timeouts);
+    var http_loop = new SequentialStrategy([
+        new IfStrategy(testSupportsStrategy(streaming_loop), new BestConnectedEverStrategy([
             streaming_loop,
-            new delayed_strategy_DelayedStrategy(polling_loop, { delay: 4000 }),
+            new DelayedStrategy(polling_loop, { delay: 4000 }),
         ]), polling_loop),
     ], timeouts);
     var wsStrategy;
     if (baseOptions.useTLS) {
-        wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
+        wsStrategy = new BestConnectedEverStrategy([
             ws_loop,
-            new delayed_strategy_DelayedStrategy(http_loop, { delay: 2000 }),
+            new DelayedStrategy(http_loop, { delay: 2000 }),
         ]);
     }
     else {
-        wsStrategy = new best_connected_ever_strategy_BestConnectedEverStrategy([
+        wsStrategy = new BestConnectedEverStrategy([
             ws_loop,
-            new delayed_strategy_DelayedStrategy(wss_loop, { delay: 2000 }),
-            new delayed_strategy_DelayedStrategy(http_loop, { delay: 5000 }),
+            new DelayedStrategy(wss_loop, { delay: 2000 }),
+            new DelayedStrategy(http_loop, { delay: 5000 }),
         ]);
     }
-    return new websocket_prioritized_cached_strategy_WebSocketPrioritizedCachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop)), definedTransports, {
+    return new WebSocketPrioritizedCachedStrategy(new FirstConnectedStrategy(new IfStrategy(testSupportsStrategy(ws_transport), wsStrategy, http_loop)), definedTransports, {
         ttl: 1800000,
         timeline: baseOptions.timeline,
         useTLS: baseOptions.useTLS,
     });
 };
-/* harmony default export */ var default_strategy = (getDefaultStrategy);
+/* harmony default export */ const default_strategy = (getDefaultStrategy);
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/transports/transport_connection_initializer.ts
-/* harmony default export */ var transport_connection_initializer = (function () {
+;// ./src/runtimes/isomorphic/transports/transport_connection_initializer.ts
+/* harmony default export */ function transport_connection_initializer() {
     var self = this;
     self.timeline.info(self.buildTimelineMessage({
         transport: self.name + (self.options.useTLS ? 's' : ''),
@@ -5279,13 +5197,13 @@ var getDefaultStrategy = function (config, baseOptions, defineTransport) {
     else {
         self.onClose();
     }
-});
+}
 
-// CONCATENATED MODULE: ./src/core/http/http_request.ts
+;// ./src/core/http/http_request.ts
 
 
 const MAX_BUFFER_LENGTH = 256 * 1024;
-class http_request_HTTPRequest extends dispatcher_Dispatcher {
+class HTTPRequest extends Dispatcher {
     constructor(hooks, method, url) {
         super();
         this.hooks = hooks;
@@ -5345,21 +5263,21 @@ class http_request_HTTPRequest extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/http/state.ts
+;// ./src/core/http/state.ts
 var State;
 (function (State) {
     State[State["CONNECTING"] = 0] = "CONNECTING";
     State[State["OPEN"] = 1] = "OPEN";
     State[State["CLOSED"] = 3] = "CLOSED";
 })(State || (State = {}));
-/* harmony default export */ var state = (State);
+/* harmony default export */ const state = (State);
 
-// CONCATENATED MODULE: ./src/core/http/http_socket.ts
+;// ./src/core/http/http_socket.ts
 
 
 
 var autoIncrement = 1;
-class http_socket_HTTPSocket {
+class HTTPSocket {
     constructor(hooks, url) {
         this.hooks = hooks;
         this.session = randomNumber(1000) + '/' + randomString(8);
@@ -5524,10 +5442,10 @@ function randomString(length) {
     }
     return result.join('');
 }
-/* harmony default export */ var http_socket = (http_socket_HTTPSocket);
+/* harmony default export */ const http_socket = (HTTPSocket);
 
-// CONCATENATED MODULE: ./src/core/http/http_streaming_socket.ts
-var http_streaming_socket_hooks = {
+;// ./src/core/http/http_streaming_socket.ts
+var hooks = {
     getReceiveURL: function (url, session) {
         return url.base + '/' + session + '/xhr_streaming' + url.queryString;
     },
@@ -5541,9 +5459,9 @@ var http_streaming_socket_hooks = {
         socket.onClose(1006, 'Connection interrupted (' + status + ')', false);
     },
 };
-/* harmony default export */ var http_streaming_socket = (http_streaming_socket_hooks);
+/* harmony default export */ const http_streaming_socket = (hooks);
 
-// CONCATENATED MODULE: ./src/core/http/http_polling_socket.ts
+;// ./src/core/http/http_polling_socket.ts
 var http_polling_socket_hooks = {
     getReceiveURL: function (url, session) {
         return url.base + '/' + session + '/xhr' + url.queryString;
@@ -5562,9 +5480,9 @@ var http_polling_socket_hooks = {
         }
     },
 };
-/* harmony default export */ var http_polling_socket = (http_polling_socket_hooks);
+/* harmony default export */ const http_polling_socket = (http_polling_socket_hooks);
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/http/http_xhr_request.ts
+;// ./src/runtimes/isomorphic/http/http_xhr_request.ts
 
 var http_xhr_request_hooks = {
     getRequest: function (socket) {
@@ -5593,9 +5511,9 @@ var http_xhr_request_hooks = {
         xhr.abort();
     },
 };
-/* harmony default export */ var http_xhr_request = (http_xhr_request_hooks);
+/* harmony default export */ const http_xhr_request = (http_xhr_request_hooks);
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/http/http.ts
+;// ./src/runtimes/isomorphic/http/http.ts
 
 
 
@@ -5615,12 +5533,12 @@ var HTTP = {
         return this.createRequest(http_xhr_request, method, url);
     },
     createRequest(hooks, method, url) {
-        return new http_request_HTTPRequest(hooks, method, url);
+        return new HTTPRequest(hooks, method, url);
     },
 };
-/* harmony default export */ var http_http = (HTTP);
+/* harmony default export */ const http_http = (HTTP);
 
-// CONCATENATED MODULE: ./src/runtimes/isomorphic/runtime.ts
+;// ./src/runtimes/isomorphic/runtime.ts
 
 
 
@@ -5667,18 +5585,18 @@ var Isomorphic = {
     addUnloadListener(listener) { },
     removeUnloadListener(listener) { },
 };
-/* harmony default export */ var runtime = (Isomorphic);
+/* harmony default export */ const runtime = (Isomorphic);
 
-// CONCATENATED MODULE: ./src/runtimes/worker/net_info.ts
+;// ./src/runtimes/worker/net_info.ts
 
-class net_info_NetInfo extends dispatcher_Dispatcher {
+class NetInfo extends Dispatcher {
     isOnline() {
         return true;
     }
 }
-var net_info_Network = new net_info_NetInfo();
+var Network = new NetInfo();
 
-// CONCATENATED MODULE: ./src/runtimes/worker/auth/fetch_auth.ts
+;// ./src/runtimes/worker/auth/fetch_auth.ts
 
 var fetchAuth = function (context, query, authOptions, authRequestType, callback) {
     var headers = new Headers();
@@ -5721,9 +5639,9 @@ var fetchAuth = function (context, query, authOptions, authRequestType, callback
         callback(err, null);
     });
 };
-/* harmony default export */ var fetch_auth = (fetchAuth);
+/* harmony default export */ const fetch_auth = (fetchAuth);
 
-// CONCATENATED MODULE: ./src/runtimes/worker/timeline/fetch_timeline.ts
+;// ./src/runtimes/worker/timeline/fetch_timeline.ts
 
 
 var getAgent = function (sender, useTLS) {
@@ -5753,9 +5671,9 @@ var fetchTimeline = {
     name: 'xhr',
     getAgent,
 };
-/* harmony default export */ var fetch_timeline = (fetchTimeline);
+/* harmony default export */ const fetch_timeline = (fetchTimeline);
 
-// CONCATENATED MODULE: ./src/runtimes/worker/runtime.ts
+;// ./src/runtimes/worker/runtime.ts
 
 
 
@@ -5786,7 +5704,7 @@ const Worker = {
         return XMLHttpRequest;
     },
     getNetwork() {
-        return net_info_Network;
+        return Network;
     },
     randomInt(max) {
         const random = function () {
@@ -5797,22 +5715,22 @@ const Worker = {
         return Math.floor(random() * max);
     },
 };
-/* harmony default export */ var worker_runtime = (Worker);
+/* harmony default export */ const worker_runtime = (Worker);
 
-// CONCATENATED MODULE: ./src/core/timeline/level.ts
+;// ./src/core/timeline/level.ts
 var TimelineLevel;
 (function (TimelineLevel) {
     TimelineLevel[TimelineLevel["ERROR"] = 3] = "ERROR";
     TimelineLevel[TimelineLevel["INFO"] = 6] = "INFO";
     TimelineLevel[TimelineLevel["DEBUG"] = 7] = "DEBUG";
 })(TimelineLevel || (TimelineLevel = {}));
-/* harmony default export */ var timeline_level = (TimelineLevel);
+/* harmony default export */ const level = (TimelineLevel);
 
-// CONCATENATED MODULE: ./src/core/timeline/timeline.ts
+;// ./src/core/timeline/timeline.ts
 
 
 
-class timeline_Timeline {
+class Timeline {
     constructor(key, session, options) {
         this.key = key;
         this.session = session;
@@ -5830,13 +5748,13 @@ class timeline_Timeline {
         }
     }
     error(event) {
-        this.log(timeline_level.ERROR, event);
+        this.log(level.ERROR, event);
     }
     info(event) {
-        this.log(timeline_level.INFO, event);
+        this.log(level.INFO, event);
     }
     debug(event) {
-        this.log(timeline_level.DEBUG, event);
+        this.log(level.DEBUG, event);
     }
     isEmpty() {
         return this.events.length === 0;
@@ -5869,12 +5787,12 @@ class timeline_Timeline {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/transport_strategy.ts
+;// ./src/core/strategies/transport_strategy.ts
 
 
 
 
-class transport_strategy_TransportStrategy {
+class TransportStrategy {
     constructor(name, priority, transport, options) {
         this.name = name;
         this.priority = priority;
@@ -5967,14 +5885,14 @@ function failAttempt(error, callback) {
     };
 }
 
-// CONCATENATED MODULE: ./src/core/strategies/strategy_builder.ts
+;// ./src/core/strategies/strategy_builder.ts
 
 
 
 
 
 const { Transports: strategy_builder_Transports } = worker_runtime;
-var strategy_builder_defineTransport = function (config, name, type, priority, options, manager) {
+var defineTransport = function (config, name, type, priority, options, manager) {
     var transportClass = strategy_builder_Transports[type];
     if (!transportClass) {
         throw new UnsupportedTransport(type);
@@ -5986,7 +5904,7 @@ var strategy_builder_defineTransport = function (config, name, type, priority, o
     var transport;
     if (enabled) {
         options = Object.assign({ ignoreNullOrigin: config.ignoreNullOrigin }, options);
-        transport = new transport_strategy_TransportStrategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
+        transport = new TransportStrategy(name, priority, manager ? manager.getAssistant(transportClass) : transportClass, options);
     }
     else {
         transport = strategy_builder_UnsupportedStrategy;
@@ -6010,7 +5928,7 @@ var strategy_builder_UnsupportedStrategy = {
     },
 };
 
-// CONCATENATED MODULE: ./src/core/options.ts
+;// ./src/core/options.ts
 
 function validateOptions(options) {
     if (options == null) {
@@ -6024,14 +5942,14 @@ function validateOptions(options) {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/auth/options.ts
+;// ./src/core/auth/options.ts
 var AuthRequestType;
 (function (AuthRequestType) {
     AuthRequestType["UserAuthentication"] = "user-authentication";
     AuthRequestType["ChannelAuthorization"] = "channel-authorization";
 })(AuthRequestType || (AuthRequestType = {}));
 
-// CONCATENATED MODULE: ./src/core/auth/user_authenticator.ts
+;// ./src/core/auth/user_authenticator.ts
 
 
 const composeChannelQuery = (params, authOptions) => {
@@ -6064,9 +5982,9 @@ const UserAuthenticator = (authOptions) => {
         worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.UserAuthentication, callback);
     };
 };
-/* harmony default export */ var user_authenticator = (UserAuthenticator);
+/* harmony default export */ const user_authenticator = (UserAuthenticator);
 
-// CONCATENATED MODULE: ./src/core/auth/channel_authorizer.ts
+;// ./src/core/auth/channel_authorizer.ts
 
 
 const channel_authorizer_composeChannelQuery = (params, authOptions) => {
@@ -6100,9 +6018,9 @@ const ChannelAuthorizer = (authOptions) => {
         worker_runtime.getAuthorizers()[authOptions.transport](worker_runtime, query, authOptions, AuthRequestType.ChannelAuthorization, callback);
     };
 };
-/* harmony default export */ var channel_authorizer = (ChannelAuthorizer);
+/* harmony default export */ const channel_authorizer = (ChannelAuthorizer);
 
-// CONCATENATED MODULE: ./src/core/auth/deprecated_channel_authorizer.ts
+;// ./src/core/auth/deprecated_channel_authorizer.ts
 const ChannelAuthorizerProxy = (pusher, authOptions, channelAuthorizerGenerator) => {
     const deprecatedAuthorizerOptions = {
         authTransport: authOptions.transport,
@@ -6119,7 +6037,7 @@ const ChannelAuthorizerProxy = (pusher, authOptions, channelAuthorizerGenerator)
     };
 };
 
-// CONCATENATED MODULE: ./src/core/config.ts
+;// ./src/core/config.ts
 
 
 
@@ -6194,10 +6112,12 @@ function getEnableStatsConfig(opts) {
     }
     return false;
 }
+const hasCustomHandler = (auth) => {
+    return 'customHandler' in auth && auth['customHandler'] != null;
+};
 function buildUserAuthenticator(opts) {
     const userAuthentication = Object.assign(Object.assign({}, defaults.userAuthentication), opts.userAuthentication);
-    if ('customHandler' in userAuthentication &&
-        userAuthentication['customHandler'] != null) {
+    if (hasCustomHandler(userAuthentication)) {
         return userAuthentication['customHandler'];
     }
     return user_authenticator(userAuthentication);
@@ -6218,24 +6138,26 @@ function buildChannelAuth(opts, pusher) {
             if ('headers' in opts.auth)
                 channelAuthorization.headers = opts.auth.headers;
         }
-        if ('authorizer' in opts)
-            channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
+        if ('authorizer' in opts) {
+            return {
+                customHandler: ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer),
+            };
+        }
     }
     return channelAuthorization;
 }
 function buildChannelAuthorizer(opts, pusher) {
     const channelAuthorization = buildChannelAuth(opts, pusher);
-    if ('customHandler' in channelAuthorization &&
-        channelAuthorization['customHandler'] != null) {
+    if (hasCustomHandler(channelAuthorization)) {
         return channelAuthorization['customHandler'];
     }
     return channel_authorizer(channelAuthorization);
 }
 
-// CONCATENATED MODULE: ./src/core/watchlist.ts
+;// ./src/core/watchlist.ts
 
 
-class watchlist_WatchlistFacade extends dispatcher_Dispatcher {
+class WatchlistFacade extends Dispatcher {
     constructor(pusher) {
         super(function (eventName, data) {
             logger.debug(`No callbacks on watchlist events for ${eventName}`);
@@ -6258,7 +6180,7 @@ class watchlist_WatchlistFacade extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/utils/flat_promise.ts
+;// ./src/core/utils/flat_promise.ts
 function flatPromise() {
     let resolve, reject;
     const promise = new Promise((res, rej) => {
@@ -6267,15 +6189,15 @@ function flatPromise() {
     });
     return { promise, resolve, reject };
 }
-/* harmony default export */ var flat_promise = (flatPromise);
+/* harmony default export */ const flat_promise = (flatPromise);
 
-// CONCATENATED MODULE: ./src/core/user.ts
-
-
+;// ./src/core/user.ts
 
 
 
-class user_UserFacade extends dispatcher_Dispatcher {
+
+
+class UserFacade extends Dispatcher {
     constructor(pusher) {
         super(function (eventName, data) {
             logger.debug('No callbacks on user for ' + eventName);
@@ -6306,7 +6228,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
                 this._newSigninPromiseIfNeeded();
             }
         });
-        this.watchlist = new watchlist_WatchlistFacade(pusher);
+        this.watchlist = new WatchlistFacade(pusher);
         this.pusher.connection.bind('message', (event) => {
             var eventName = event.event;
             if (eventName === 'pusher:signin_success') {
@@ -6364,7 +6286,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
                 channel.subscribe();
             }
         };
-        this.serverToUserChannel = new channel_Channel(`#server-to-user-${this.user_data.id}`, this.pusher);
+        this.serverToUserChannel = new Channel(`#server-to-user-${this.user_data.id}`, this.pusher);
         this.serverToUserChannel.bind_global((eventName, data) => {
             if (eventName.indexOf('pusher_internal:') === 0 ||
                 eventName.indexOf('pusher:') === 0) {
@@ -6403,7 +6325,7 @@ class user_UserFacade extends dispatcher_Dispatcher {
     }
 }
 
-// CONCATENATED MODULE: ./src/core/pusher.ts
+;// ./src/core/pusher.ts
 
 
 
@@ -6417,11 +6339,11 @@ class user_UserFacade extends dispatcher_Dispatcher {
 
 
 
-class pusher_Pusher {
+class Pusher {
     static ready() {
-        pusher_Pusher.isReady = true;
-        for (var i = 0, l = pusher_Pusher.instances.length; i < l; i++) {
-            pusher_Pusher.instances[i].connect();
+        Pusher.isReady = true;
+        for (var i = 0, l = Pusher.instances.length; i < l; i++) {
+            Pusher.instances[i].connect();
         }
     }
     static getClientFeatures() {
@@ -6433,16 +6355,17 @@ class pusher_Pusher {
         checkAppKey(app_key);
         validateOptions(options);
         this.key = app_key;
-        this.config = getConfig(options, this);
+        this.options = options;
+        this.config = getConfig(this.options, this);
         this.channels = factory.createChannels();
-        this.global_emitter = new dispatcher_Dispatcher();
+        this.global_emitter = new Dispatcher();
         this.sessionID = worker_runtime.randomInt(1000000000);
-        this.timeline = new timeline_Timeline(this.key, this.sessionID, {
+        this.timeline = new Timeline(this.key, this.sessionID, {
             cluster: this.config.cluster,
-            features: pusher_Pusher.getClientFeatures(),
+            features: Pusher.getClientFeatures(),
             params: this.config.timelineParams || {},
             limit: 50,
-            level: timeline_level.INFO,
+            level: level.INFO,
             version: defaults.VERSION,
         });
         if (this.config.enableStats) {
@@ -6452,7 +6375,7 @@ class pusher_Pusher {
             });
         }
         var getStrategy = (options) => {
-            return worker_runtime.getDefaultStrategy(this.config, options, strategy_builder_defineTransport);
+            return worker_runtime.getDefaultStrategy(this.config, options, defineTransport);
         };
         this.connection = factory.createConnectionManager(this.key, {
             getStrategy: getStrategy,
@@ -6490,12 +6413,19 @@ class pusher_Pusher {
         this.connection.bind('error', (err) => {
             logger.warn(err);
         });
-        pusher_Pusher.instances.push(this);
-        this.timeline.info({ instances: pusher_Pusher.instances.length });
-        this.user = new user_UserFacade(this);
-        if (pusher_Pusher.isReady) {
+        Pusher.instances.push(this);
+        this.timeline.info({ instances: Pusher.instances.length });
+        this.user = new UserFacade(this);
+        if (Pusher.isReady) {
             this.connect();
         }
+    }
+    switchCluster(options) {
+        const { appKey, cluster } = options;
+        this.key = appKey;
+        this.options = Object.assign(Object.assign({}, this.options), { cluster });
+        this.config = getConfig(this.options, this);
+        this.connection.switchCluster(this.key);
     }
     channel(name) {
         return this.channels.find(name);
@@ -6509,7 +6439,7 @@ class pusher_Pusher {
             if (!this.timelineSenderTimer) {
                 var usingTLS = this.connection.isUsingTLS();
                 var timelineSender = this.timelineSender;
-                this.timelineSenderTimer = new timers_PeriodicTimer(60000, function () {
+                this.timelineSenderTimer = new PeriodicTimer(60000, function () {
                     timelineSender.send(usingTLS);
                 });
             }
@@ -6583,32 +6513,31 @@ class pusher_Pusher {
         this.user.signin();
     }
 }
-pusher_Pusher.instances = [];
-pusher_Pusher.isReady = false;
-pusher_Pusher.logToConsole = false;
-pusher_Pusher.Runtime = worker_runtime;
-pusher_Pusher.ScriptReceivers = worker_runtime.ScriptReceivers;
-pusher_Pusher.DependenciesReceivers = worker_runtime.DependenciesReceivers;
-pusher_Pusher.auth_callbacks = worker_runtime.auth_callbacks;
-/* harmony default export */ var core_pusher = (pusher_Pusher);
+Pusher.instances = [];
+Pusher.isReady = false;
+Pusher.logToConsole = false;
+Pusher.Runtime = worker_runtime;
+Pusher.ScriptReceivers = worker_runtime.ScriptReceivers;
+Pusher.DependenciesReceivers = worker_runtime.DependenciesReceivers;
+Pusher.auth_callbacks = worker_runtime.auth_callbacks;
+/* harmony default export */ const pusher = (Pusher);
 function checkAppKey(key) {
     if (key === null || key === undefined) {
         throw 'You must pass your app key when you instantiate Pusher.';
     }
 }
-worker_runtime.setup(pusher_Pusher);
+worker_runtime.setup(Pusher);
 
 // EXTERNAL MODULE: ./node_modules/tweetnacl/nacl-fast.js
-var nacl_fast = __webpack_require__(2);
-
-// CONCATENATED MODULE: ./src/core/pusher-with-encryption.ts
-
+var nacl_fast = __webpack_require__(601);
+;// ./src/core/pusher-with-encryption.ts
 
 
-class pusher_with_encryption_PusherWithEncryption extends core_pusher {
+
+class PusherWithEncryption extends pusher {
     constructor(app_key, options) {
-        core_pusher.logToConsole = pusher_with_encryption_PusherWithEncryption.logToConsole;
-        core_pusher.log = pusher_with_encryption_PusherWithEncryption.log;
+        pusher.logToConsole = PusherWithEncryption.logToConsole;
+        pusher.log = PusherWithEncryption.log;
         validateOptions(options);
         options.nacl = nacl_fast;
         super(app_key, options);
@@ -6616,7 +6545,68 @@ class pusher_with_encryption_PusherWithEncryption extends core_pusher {
 }
 
 
-/***/ })
-/******/ ]);
+/***/ },
+
+/***/ 281
+() {
+
+/* (ignored) */
+
+/***/ }
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module used 'module' so it can't be inlined
+/******/ 	var __webpack_exports__ = __webpack_require__(42);
+/******/ 	
+/******/ 	return __webpack_exports__;
+/******/ })()
+;
 });
 //# sourceMappingURL=pusher-with-encryption.worker.js.map

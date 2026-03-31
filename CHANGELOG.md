@@ -1,5 +1,12 @@
 # Changelog
 
+## 8.5.0
+
+- [ADDED] New `switchCluster` method on Pusher instances to switch cluster/app without losing channel subscriptions (PR #773)
+- [FIXED] Persist previous options when switching cluster so custom handlers and other settings are retained (PR #783)
+- [FIXED] Refactored `AuthOptionsT` to a discriminated union (`InternalAuthOptions | CustomAuthOptions`) for improved type safety
+- [FIXED] Integration tests now run HTTP tests before HTTPS to avoid browser Strict-Transport-Security downgrade issues
+
 ## 8.4.3
 
 - [FIXED] Pin additional transitive dependencies to patched versions to resolve known vulnerabilities (express, qs, body-parser, lodash, minimatch, browserstack-local)

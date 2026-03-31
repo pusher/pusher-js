@@ -68,9 +68,7 @@ export type AuthOptionsT<AuthHandler> =
   | InternalAuthOptions
   | CustomAuthOptions<AuthHandler>;
 
-export declare type UserAuthenticationOptions = AuthOptionsT<
-  UserAuthenticationHandler
->;
-export declare type ChannelAuthorizationOptions = AuthOptionsT<
-  ChannelAuthorizationHandler
->;
+export declare type UserAuthenticationOptions =
+  AuthOptionsT<UserAuthenticationHandler>;
+export declare type ChannelAuthorizationOptions =
+  AuthOptionsT<ChannelAuthorizationHandler>;

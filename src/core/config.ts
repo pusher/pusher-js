@@ -5,7 +5,7 @@ import {
   UserAuthenticationHandler,
   ChannelAuthorizationOptions,
   AuthOptionsT,
-  CustomAuthOptions
+  CustomAuthOptions,
 } from './auth/options';
 import UserAuthenticator from './auth/user_authenticator';
 import ChannelAuthorizer from './auth/channel_authorizer';
@@ -134,7 +134,7 @@ function getEnableStatsConfig(opts: Options): boolean {
 }
 
 const hasCustomHandler = <T>(
-  auth: AuthOptionsT<T>
+  auth: AuthOptionsT<T>,
 ): auth is CustomAuthOptions<T> => {
   return 'customHandler' in auth && auth['customHandler'] != null;
 };
@@ -176,8 +176,8 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
         customHandler: ChannelAuthorizerProxy(
           pusher,
           channelAuthorization,
-          opts.authorizer
-        )
+          opts.authorizer,
+        ),
       };
     }
   }
