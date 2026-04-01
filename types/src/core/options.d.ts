@@ -31,4 +31,8 @@ export interface Options {
     wsPort?: number;
     wssPort?: number;
 }
+export interface ClusterOptions {
+    appKey: string;
+    cluster: string;
+}
 export declare function validateOptions(options: any): void;

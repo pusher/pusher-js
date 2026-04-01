@@ -27,17 +27,6 @@ export interface UserAuthenticationHandler {
     (params: UserAuthenticationRequestParams, callback: UserAuthenticationCallback): void;
 }
 export type AuthTransportCallback = ChannelAuthorizationCallback | UserAuthenticationCallback;
-export interface AuthOptionsT<AuthHandler> {
-    transport: 'ajax' | 'jsonp';
-    endpoint: string;
-    params?: any;
-    headers?: any;
-    paramsProvider?: () => any;
-    headersProvider?: () => any;
-    customHandler?: AuthHandler;
-}
-export declare type UserAuthenticationOptions = AuthOptionsT<UserAuthenticationHandler>;
-export declare type ChannelAuthorizationOptions = AuthOptionsT<ChannelAuthorizationHandler>;
 export interface InternalAuthOptions {
     transport: 'ajax' | 'jsonp';
     endpoint: string;
@@ -46,3 +35,9 @@ export interface InternalAuthOptions {
     paramsProvider?: () => any;
     headersProvider?: () => any;
 }
+export type CustomAuthOptions<AuthHandler> = {
+    customHandler: AuthHandler;
+};
+export type AuthOptionsT<AuthHandler> = InternalAuthOptions | CustomAuthOptions<AuthHandler>;
+export declare type UserAuthenticationOptions = AuthOptionsT<UserAuthenticationHandler>;
+export declare type ChannelAuthorizationOptions = AuthOptionsT<ChannelAuthorizationHandler>;

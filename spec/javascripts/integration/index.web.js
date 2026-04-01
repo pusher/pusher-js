@@ -59,5 +59,19 @@ function getTestConfigs() {
     testConfigs.push({ transport: "sockjs", forceTLS: true})
     testConfigs.push({ transport: "sockjs", forceTLS: false})
   }
+
+  // Test all forceTLS: false before forceTLS: true
+  // Because browsers prevent a URL from downgrading from HTTPS to HTTP
+  // This is probably the result of Strict-Transport-Security header returned when calling the HTTPS endpoint.
+  testConfigs.sort((a, b) => {
+    if (a.forceTLS == false && b.forceTLS == true) {
+      return -1;
+    } else if (a.forceTLS == true && b.forceTLS == false) {
+      return 1;
+    } else {
+      return 0;
+    }
+  })
+
   return testConfigs
 }
