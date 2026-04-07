@@ -31,7 +31,7 @@ cjs:
 	INCLUDE_TWEETNACL=true MINIMIZE=false node_modules/webpack/bin/webpack.js --config=webpack/config.cjs.js
 
 .PHONY: cjs_unit
-cjs_unit:
+cjs_unit: cjs
 	node_modules/.bin/jasmine --config=spec/config/jasmine/cjs.json
 
 .PHONY: react-native
