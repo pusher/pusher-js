@@ -7318,7 +7318,7 @@ function encodeParamsObject(data) {
 }
 function buildQueryString(data) {
     var params = filterObject(data, function (value) {
-        return value !== undefined;
+        return value !== undefined && value !== null;
     });
     var query = map(flatten(encodeParamsObject(params)), util.method('join', '=')).join('&');
     return query;
@@ -10905,7 +10905,7 @@ module.exports = require("util");
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module used 'module' so it can't be inlined
 /******/ 	var __webpack_exports__ = __webpack_require__(42);
-/******/ 	module.exports.Pusher = __webpack_exports__;
+/******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
 ;
