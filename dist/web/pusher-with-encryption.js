@@ -3406,6 +3406,9 @@ function collections_all(array, test) {
 }
 function encodeParamsObject(data) {
     return mapObject(data, function (value) {
+        if (value === null) {
+            return '';
+        }
         if (typeof value === 'object') {
             value = safeJSONStringify(value);
         }
@@ -6086,7 +6089,7 @@ var Runtime = {
     },
     addUnloadListener(listener) {
         if (window.addEventListener !== undefined) {
-            window.addEventListener('unload', listener, false);
+            window.addEventListener('pagehide', listener, false);
         }
         else if (window.attachEvent !== undefined) {
             window.attachEvent('onunload', listener);
@@ -6094,7 +6097,7 @@ var Runtime = {
     },
     removeUnloadListener(listener) {
         if (window.addEventListener !== undefined) {
-            window.removeEventListener('unload', listener, false);
+            window.removeEventListener('pagehide', listener, false);
         }
         else if (window.detachEvent !== undefined) {
             window.detachEvent('onunload', listener);
