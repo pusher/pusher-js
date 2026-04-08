@@ -72,6 +72,10 @@ node_integration:
 	node_modules/webpack/bin/webpack.js --config=spec/config/jasmine/webpack.integration.js && \
 	node_modules/.bin/jasmine --config=spec/config/jasmine/integration.json
 
+.PHONY: node_bundle_unit
+node_bundle_unit: node
+	node_modules/.bin/jasmine --config=spec/config/jasmine/node_bundle.json
+
 
 .PHONY: serve
 serve:

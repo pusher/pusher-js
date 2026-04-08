@@ -1,0 +1,11 @@
+{
+  "spec_dir": "spec/javascripts/unit/node_bundle",
+  "spec_files": [
+    "**/*spec.js"
+  ],
+  "helpers": [],
+  "failSpecWithNoExpectations": false,
+  "stopSpecOnExpectationFailure": false,
+  "stopOnSpecFailure": false,
+  "random": false
+}
