@@ -13,15 +13,16 @@ describe("collections", function() {
       expect(query).not.toContain("missing");
     });
 
-    it("should omit null values and not serialize them as the string 'null'", function() {
+    it("should serialize null values as empty strings and not as the string 'null'", function() {
       var query = collections.buildQueryString({ foo: "bar", register_id: null });
-      expect(query).not.toContain("register_id");
+      expect(query).toContain("register_id=");
       expect(query).not.toContain("null");
     });
 
-    it("should omit all null values when the entire params object contains nulls", function() {
-      var query = collections.buildQueryString({ a: null, b: null });
-      expect(query).toEqual("");
+    it("should omit undefined values but keep null keys with empty values", function() {
+      var query = collections.buildQueryString({ a: null, b: undefined });
+      expect(query).toContain("a=");
+      expect(query).not.toContain("b");
     });
   });
 });
