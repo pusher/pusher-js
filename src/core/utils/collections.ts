@@ -270,7 +270,7 @@ export function encodeParamsObject(data): string {
 
 export function buildQueryString(data: any): string {
   var params = filterObject(data, function (value) {
-    return value !== undefined;
+    return value !== undefined && value !== null;
   });
 
   var query = map(
