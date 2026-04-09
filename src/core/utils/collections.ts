@@ -261,6 +261,9 @@ export function all(array: any[], test: Function): boolean {
 
 export function encodeParamsObject(data): string {
   return mapObject(data, function (value) {
+    if (value === null) {
+      return '';
+    }
     if (typeof value === 'object') {
       value = safeJSONStringify(value);
     }
