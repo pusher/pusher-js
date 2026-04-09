@@ -172,13 +172,11 @@ function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
     }
 
     if ('authorizer' in opts) {
-      return {
-        customHandler: ChannelAuthorizerProxy(
-          pusher,
-          channelAuthorization,
-          opts.authorizer,
-        ),
-      };
+      (channelAuthorization as any).customHandler = ChannelAuthorizerProxy(
+        pusher,
+        channelAuthorization,
+        opts.authorizer,
+      );
     }
   }
   return channelAuthorization;
