@@ -142,7 +142,7 @@ var Runtime: Browser = {
 
   addUnloadListener(listener: any) {
     if (window.addEventListener !== undefined) {
-      window.addEventListener('unload', listener, false);
+      window.addEventListener('pagehide', listener, false);
     } else if (window.attachEvent !== undefined) {
       window.attachEvent('onunload', listener);
     }
@@ -150,7 +150,7 @@ var Runtime: Browser = {
 
   removeUnloadListener(listener: any) {
     if (window.addEventListener !== undefined) {
-      window.removeEventListener('unload', listener, false);
+      window.removeEventListener('pagehide', listener, false);
     } else if (window.detachEvent !== undefined) {
       window.detachEvent('onunload', listener);
     }
