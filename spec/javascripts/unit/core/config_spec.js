@@ -156,6 +156,23 @@ describe('Config', function() {
       expect(authorizer.authorize).toHaveBeenCalledWith('1.23', callback);
     });
 
+    it('should preserve channelAuthorizer as a function when deprecated authorizer option is set', function() {
+      const authorizerGenerator = jasmine.createSpy('authorizerGenerator').and.returnValue({
+        authorize: jasmine.createSpy('authorize')
+      });
+      let opts = {
+        authorizer: authorizerGenerator,
+        authTransport: 'ajax',
+        authEndpoint: '/pusher/auth',
+      };
+      const pusher = { channel: jasmine.createSpy('channel').and.returnValue({}) };
+      let config = Config.getConfig(opts, pusher);
+
+      // Regression test for 8.5.0: authorizer option must not strip channelAuthorizer
+      expect(typeof config.channelAuthorizer).toBe('function');
+      expect(config.channelAuthorizer).not.toBeNull();
+    });
+
     it('should use channelAuthorization and override deprecated auth options', function() {
       let opts = {
         authTransport: 'some-auth-transport',
