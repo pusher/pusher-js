@@ -1,0 +1,18 @@
+name: Mark stale PRs
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5'
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          stale-issue-message: 'This issue has been automatically marked as stale because it has not had recent activity. It will be closed if no further activity occurs. If you would like this issue to stay open please leave a comment indicating how this issue is affecting you. Thank you.'
+          days-before-pr-stale: 90
+          days-before-issue-stale: -1
+          days-before-pr-close: 7
+          days-before-issue-close: -1
+          exempt-issue-labels: 'pinned,security'
