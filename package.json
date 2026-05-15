@@ -34,7 +34,7 @@
     "@react-native-community/netinfo": "^5.9.7",
     "@stablelib/base64": "^1.0.0",
     "@stablelib/utf8": "^1.0.0",
-    "buffer": "^5.6.0",
+    "buffer": "^6.0.3",
     "faye-websocket": "^0.11.3",
     "fetch-mock": "git+https://git@github.com/jpatel531/fetch-mock.git",
     "isomorphic-fetch": "^3.0.0",
