@@ -32,7 +32,7 @@
   "homepage": "https://github.com/pusher/pusher-js",
   "devDependencies": {
     "@react-native-community/netinfo": "^5.9.7",
-    "@stablelib/base64": "^1.0.0",
+    "@stablelib/base64": "^2.0.1",
     "@stablelib/utf8": "^1.0.0",
     "buffer": "^5.6.0",
     "faye-websocket": "^0.11.3",
