@@ -1,0 +1,10 @@
+{
+  "spec_dir": "spec/javascripts/unit/cjs",
+  "spec_files": [
+    "**/*spec.js"
+  ],
+  "failSpecWithNoExpectations": false,
+  "stopSpecOnExpectationFailure": false,
+  "stopOnSpecFailure": false,
+  "random": false
+}
