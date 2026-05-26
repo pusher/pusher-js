@@ -40,14 +40,16 @@ var Runtime: Browser = {
   },
 
   setup(PusherClass): void {
-    (<any>window).Pusher = PusherClass; // JSONp requires Pusher to be in the global scope.
-    var initializeOnDocumentBody = () => {
-      this.onDocumentBody(PusherClass.ready);
-    };
-    if (!(<any>window).JSON) {
-      Dependencies.load('json2', {}, initializeOnDocumentBody);
-    } else {
-      initializeOnDocumentBody();
+    if (typeof window !== 'undefined') {
+      (<any>window).Pusher = PusherClass; // JSONp requires Pusher to be in the global scope.
+      var initializeOnDocumentBody = () => {
+        this.onDocumentBody(PusherClass.ready);
+      };
+      if (!(<any>window).JSON) {
+        Dependencies.load('json2', {}, initializeOnDocumentBody);
+      } else {
+        initializeOnDocumentBody();
+      }
     }
   },
 
