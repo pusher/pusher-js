@@ -6529,9 +6529,7 @@ function buildChannelAuth(opts, pusher) {
                 channelAuthorization.headers = opts.auth.headers;
         }
         if ('authorizer' in opts) {
-            return {
-                customHandler: ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer),
-            };
+            channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
         }
     }
     return channelAuthorization;
