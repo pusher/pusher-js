@@ -13,6 +13,7 @@ const transports = Runtime.Transports;
 const Network = require("net_info").Network;
 const waitsFor = require("../../helpers/waitsFor");
 var NetInfo = require("net_info").NetInfo;
+var Errors = require("core/errors");
 
 describe("Pusher (User)", function () {
 
@@ -46,6 +47,40 @@ describe("Pusher (User)", function () {
       expect(Logger.warn).toHaveBeenCalledWith(
         "Error during signin: this error"
       );
+    });
+
+    it("should emit pusher:signin_error event on unsuccessful authorization", function () {
+      var onSigninError = jasmine.createSpy("onSigninError");
+      pusher.user.bind("pusher:signin_error", onSigninError);
+      pusher.config.userAuthenticator.and.callFake(function (params, callback) {
+        callback(new Error("test error"), null);
+      });
+      spyOn(Logger, "warn");
+
+      pusher.signin();
+
+      expect(onSigninError).toHaveBeenCalledWith({
+        type: "AuthError",
+        error: "test error"
+      });
+      expect(pusher.send_event).not.toHaveBeenCalled();
+    });
+
+    it("should include the HTTP status in pusher:signin_error when the error is an HTTPAuthError", function () {
+      var onSigninError = jasmine.createSpy("onSigninError");
+      pusher.user.bind("pusher:signin_error", onSigninError);
+      pusher.config.userAuthenticator.and.callFake(function (params, callback) {
+        callback(new Errors.HTTPAuthError(403, "Forbidden"), null);
+      });
+      spyOn(Logger, "warn");
+
+      pusher.signin();
+
+      expect(onSigninError).toHaveBeenCalledWith({
+        type: "AuthError",
+        error: "Forbidden",
+        status: 403
+      });
     });
 
     it("should send pusher:signin event", function () {
