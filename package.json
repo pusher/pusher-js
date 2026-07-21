@@ -58,7 +58,7 @@
     "uglify-js": "^3.19.3",
     "webpack": "^5.105.4",
     "webpack-cli": "^7.0.2",
-    "webpack-dev-server": "^5.2.3",
+    "webpack-dev-server": "^5.2.6",
     "webpack-merge": "^5.8.0",
     "xmlhttprequest": "^1.8.0",
     "@types/node": "^25.5.0",
