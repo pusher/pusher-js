@@ -83,6 +83,57 @@ describe("Pusher (User)", function () {
       });
     });
 
+    it("should include the HTTP status in pusher:signin_error for a 4xx error other than 403", function () {
+      var onSigninError = jasmine.createSpy("onSigninError");
+      pusher.user.bind("pusher:signin_error", onSigninError);
+      pusher.config.userAuthenticator.and.callFake(function (params, callback) {
+        callback(new Errors.HTTPAuthError(401, "Unauthorized"), null);
+      });
+      spyOn(Logger, "warn");
+
+      pusher.signin();
+
+      expect(onSigninError).toHaveBeenCalledWith({
+        type: "AuthError",
+        error: "Unauthorized",
+        status: 401
+      });
+    });
+
+    it("should include the HTTP status in pusher:signin_error for a 5xx error", function () {
+      var onSigninError = jasmine.createSpy("onSigninError");
+      pusher.user.bind("pusher:signin_error", onSigninError);
+      pusher.config.userAuthenticator.and.callFake(function (params, callback) {
+        callback(new Errors.HTTPAuthError(500, "Internal Server Error"), null);
+      });
+      spyOn(Logger, "warn");
+
+      pusher.signin();
+
+      expect(onSigninError).toHaveBeenCalledWith({
+        type: "AuthError",
+        error: "Internal Server Error",
+        status: 500
+      });
+    });
+
+    it("should include a status of 0 in pusher:signin_error when the request never reached the server", function () {
+      var onSigninError = jasmine.createSpy("onSigninError");
+      pusher.user.bind("pusher:signin_error", onSigninError);
+      pusher.config.userAuthenticator.and.callFake(function (params, callback) {
+        callback(new Errors.HTTPAuthError(0, "Connection interrupted"), null);
+      });
+      spyOn(Logger, "warn");
+
+      pusher.signin();
+
+      expect(onSigninError).toHaveBeenCalledWith({
+        type: "AuthError",
+        error: "Connection interrupted",
+        status: 0
+      });
+    });
+
     it("should send pusher:signin event", function () {
       pusher.config.userAuthenticator.and.callFake(function (params, callback) {
         callback(null, {
