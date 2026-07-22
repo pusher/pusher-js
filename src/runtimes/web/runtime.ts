@@ -159,17 +159,16 @@ var Runtime: Browser = {
   },
 
   randomInt(max: number): number {
-    /**
-     * Return values in the range of [0, 1[
-     */
-    const random = function () {
-      const crypto = window.crypto || window['msCrypto'];
-      const random = crypto.getRandomValues(new Uint32Array(1))[0];
+    // Rejection sampling avoids the bias introduced by scaling a fixed-range
+    // random value down to `max` when `max` doesn't evenly divide 2**32.
+    const crypto = window.crypto || window['msCrypto'];
+    const limit = Math.floor(2 ** 32 / max) * max;
+    let random;
+    do {
+      random = crypto.getRandomValues(new Uint32Array(1))[0];
+    } while (random >= limit);
 
-      return random / 2 ** 32;
-    };
-
-    return Math.floor(random() * max);
+    return random % max;
   },
 };
 

@@ -3269,6 +3269,11 @@ function extend(target, ...sources) {
     for (var i = 0; i < sources.length; i++) {
         var extensions = sources[i];
         for (var property in extensions) {
+            if (property === '__proto__' ||
+                property === 'constructor' ||
+                property === 'prototype') {
+                continue;
+            }
             if (extensions[property] &&
                 extensions[property].constructor &&
                 extensions[property].constructor === Object) {
@@ -6097,12 +6102,13 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const random = function () {
-            const crypto = window.crypto || window['msCrypto'];
-            const random = crypto.getRandomValues(new Uint32Array(1))[0];
-            return random / Math.pow(2, 32);
-        };
-        return Math.floor(random() * max);
+        const crypto = window.crypto || window['msCrypto'];
+        const limit = Math.floor(Math.pow(2, 32) / max) * max;
+        let random;
+        do {
+            random = crypto.getRandomValues(new Uint32Array(1))[0];
+        } while (random >= limit);
+        return random % max;
     },
 };
 /* harmony default export */ const runtime = (Runtime);

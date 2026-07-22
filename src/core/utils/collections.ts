@@ -20,6 +20,13 @@ export function extend<T>(target: any, ...sources: any[]): T {
     var extensions = sources[i];
     for (var property in extensions) {
       if (
+        property === '__proto__' ||
+        property === 'constructor' ||
+        property === 'prototype'
+      ) {
+        continue;
+      }
+      if (
         extensions[property] &&
         extensions[property].constructor &&
         extensions[property].constructor === Object

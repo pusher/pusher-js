@@ -7183,6 +7183,11 @@ function extend(target, ...sources) {
     for (var i = 0; i < sources.length; i++) {
         var extensions = sources[i];
         for (var property in extensions) {
+            if (property === '__proto__' ||
+                property === 'constructor' ||
+                property === 'prototype') {
+                continue;
+            }
             if (extensions[property] &&
                 extensions[property].constructor &&
                 extensions[property].constructor === Object) {
