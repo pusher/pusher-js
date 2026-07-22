@@ -1,5 +1,9 @@
 # Changelog
 
+## 8.6.0
+
+- [ADDED] Emit `pusher:signin_error` on user-authentication failure, mirroring the existing `pusher:subscription_error` pattern (PR #963)
+
 ## 8.5.0
 
 - [ADDED] New `switchCluster` method on Pusher instances to switch cluster/app without losing channel subscriptions (PR #773)

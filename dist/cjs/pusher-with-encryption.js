@@ -6,17 +6,7 @@
  * Released under the MIT licence.
  */
 
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else if(typeof exports === 'object')
-		exports["Pusher"] = factory();
-	else
-		root["Pusher"] = factory();
-})(self, () => {
-return /******/ (() => { // webpackBootstrap
+/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ 594
@@ -3197,7 +3187,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = (typeof window !== 'undefined' && window.btoa) ||
+var btoa = (typeof __webpack_require__.g !== 'undefined' && __webpack_require__.g.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -3227,10 +3217,10 @@ class Timer {
 ;// ./src/core/utils/timers/index.ts
 
 function timers_clearTimeout(timer) {
-    window.clearTimeout(timer);
+    __webpack_require__.g.clearTimeout(timer);
 }
 function timers_clearInterval(timer) {
-    window.clearInterval(timer);
+    __webpack_require__.g.clearInterval(timer);
 }
 class OneOffTimer extends abstract_timer {
     constructor(delay, callback) {
@@ -3341,7 +3331,7 @@ function values(object) {
 }
 function apply(array, f, context) {
     for (var i = 0; i < array.length; i++) {
-        f.call(context || window, array[i], i, array);
+        f.call(context || __webpack_require__.g, array[i], i, array);
     }
 }
 function map(array, f) {
@@ -3475,8 +3465,8 @@ function safeJSONStringify(source) {
 class Logger {
     constructor() {
         this.globalLog = (message) => {
-            if (window.console && window.console.log) {
-                window.console.log(message);
+            if (__webpack_require__.g.console && __webpack_require__.g.console.log) {
+                __webpack_require__.g.console.log(message);
             }
         };
     }
@@ -3490,16 +3480,16 @@ class Logger {
         this.log(this.globalLogError, args);
     }
     globalLogWarn(message) {
-        if (window.console && window.console.warn) {
-            window.console.warn(message);
+        if (__webpack_require__.g.console && __webpack_require__.g.console.warn) {
+            __webpack_require__.g.console.warn(message);
         }
         else {
             this.globalLog(message);
         }
     }
     globalLogError(message) {
-        if (window.console && window.console.error) {
-            window.console.error(message);
+        if (__webpack_require__.g.console && __webpack_require__.g.console.error) {
+            __webpack_require__.g.console.error(message);
         }
         else {
             this.globalLogWarn(message);
@@ -3795,7 +3785,7 @@ class Dispatcher {
         }
         if (callbacks && callbacks.length > 0) {
             for (var i = 0; i < callbacks.length; i++) {
-                callbacks[i].fn.apply(callbacks[i].context || window, args);
+                callbacks[i].fn.apply(callbacks[i].context || __webpack_require__.g, args);
             }
         }
         else if (this.failThrough) {
@@ -6989,6 +6979,18 @@ class PusherWithEncryption extends pusher {
 /******/ 		};
 /******/ 	})();
 /******/ 	
+/******/ 	/* webpack/runtime/global */
+/******/ 	(() => {
+/******/ 		__webpack_require__.g = (function() {
+/******/ 			if (typeof globalThis === 'object') return globalThis;
+/******/ 			try {
+/******/ 				return this || new Function('return this')();
+/******/ 			} catch (e) {
+/******/ 				if (typeof window === 'object') return window;
+/******/ 			}
+/******/ 		})();
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
 /******/ 	(() => {
 /******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
@@ -7000,9 +7002,8 @@ class PusherWithEncryption extends pusher {
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module used 'module' so it can't be inlined
 /******/ 	var __webpack_exports__ = __webpack_require__(42);
+/******/ 	module.exports = __webpack_exports__;
 /******/ 	
-/******/ 	return __webpack_exports__;
 /******/ })()
 ;
-});
 //# sourceMappingURL=pusher-with-encryption.js.map
