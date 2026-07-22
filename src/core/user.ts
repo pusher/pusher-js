@@ -8,6 +8,7 @@ import Channel from './channels/channel';
 import WatchlistFacade from './watchlist';
 import EventsDispatcher from './events/dispatcher';
 import flatPromise from './utils/flat_promise';
+import { HTTPAuthError } from './errors';
 
 export default class UserFacade extends EventsDispatcher {
   pusher: Pusher;
@@ -84,6 +85,17 @@ export default class UserFacade extends EventsDispatcher {
   ) => {
     if (err) {
       Logger.warn(`Error during signin: ${err}`);
+      this.emit(
+        'pusher:signin_error',
+        Object.assign(
+          {},
+          {
+            type: 'AuthError',
+            error: err.message,
+          },
+          err instanceof HTTPAuthError ? { status: err.status } : {},
+        ),
+      );
       this._cleanup();
       return;
     }
