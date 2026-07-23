@@ -3597,6 +3597,9 @@ var Runtime = {
         return window.XMLHttpRequest;
     },
     getWebSocketAPI() {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
         return window.WebSocket || window.MozWebSocket;
     },
     setup(PusherClass) {
@@ -3617,6 +3620,9 @@ var Runtime = {
         return document;
     },
     getProtocol() {
+        if (typeof document === 'undefined') {
+            return 'http:';
+        }
         return this.getDocument().location.protocol;
     },
     getAuthorizers() {
@@ -3705,7 +3711,7 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const crypto = window.crypto || window['msCrypto'];
+        const crypto = globalThis.crypto || globalThis['msCrypto'];
         const limit = Math.floor(Math.pow(2, 32) / max) * max;
         let random;
         do {

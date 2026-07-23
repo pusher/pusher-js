@@ -36,6 +36,9 @@ var Runtime: Browser = {
   },
 
   getWebSocketAPI() {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
     return window.WebSocket || window.MozWebSocket;
   },
 
@@ -58,6 +61,9 @@ var Runtime: Browser = {
   },
 
   getProtocol(): string {
+    if (typeof document === 'undefined') {
+      return 'http:';
+    }
     return this.getDocument().location.protocol;
   },
 
@@ -161,7 +167,9 @@ var Runtime: Browser = {
   randomInt(max: number): number {
     // Rejection sampling avoids the bias introduced by scaling a fixed-range
     // random value down to `max` when `max` doesn't evenly divide 2**32.
-    const crypto = window.crypto || window['msCrypto'];
+    // Uses globalThis (not window) so this also works in Node/SSR, matching
+    // the worker runtime's equivalent implementation.
+    const crypto = globalThis.crypto || globalThis['msCrypto'];
     const limit = Math.floor(2 ** 32 / max) * max;
     let random;
     do {
