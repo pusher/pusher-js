@@ -3656,7 +3656,9 @@ var jsonp_timeline_jsonp = {
 
 function getGenericURL(baseScheme, params, path) {
     var scheme = baseScheme + (params.useTLS ? 's' : '');
-    var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
+    var host = params.useTLS
+        ? params.hostTLS.replace(/:443$/, '')
+        : params.hostNonTLS.replace(/:80$/, '');
     return scheme + '://' + host + path;
 }
 function getGenericPath(key, queryString) {
@@ -5755,24 +5757,36 @@ class HTTPSocket {
         var type = chunk.data.slice(0, 1);
         switch (type) {
             case 'o':
-                payload = JSON.parse(chunk.data.slice(1) || '{}');
+                payload = parseFrame(chunk.data.slice(1) || '{}');
+                if (payload === undefined) {
+                    return;
+                }
                 this.onOpen(payload);
                 break;
             case 'a':
-                payload = JSON.parse(chunk.data.slice(1) || '[]');
+                payload = parseFrame(chunk.data.slice(1) || '[]');
+                if (!Array.isArray(payload)) {
+                    return;
+                }
                 for (var i = 0; i < payload.length; i++) {
                     this.onEvent(payload[i]);
                 }
                 break;
             case 'm':
-                payload = JSON.parse(chunk.data.slice(1) || 'null');
+                payload = parseFrame(chunk.data.slice(1) || 'null');
+                if (payload === undefined) {
+                    return;
+                }
                 this.onEvent(payload);
                 break;
             case 'h':
                 this.hooks.onHeartbeat(this);
                 break;
             case 'c':
-                payload = JSON.parse(chunk.data.slice(1) || '[]');
+                payload = parseFrame(chunk.data.slice(1) || '[]');
+                if (!Array.isArray(payload)) {
+                    return;
+                }
                 this.onClose(payload[0], payload[1], true);
                 break;
         }
@@ -5833,6 +5847,14 @@ class HTTPSocket {
             this.stream.close();
             this.stream = null;
         }
+    }
+}
+function parseFrame(data) {
+    try {
+        return JSON.parse(data);
+    }
+    catch (e) {
+        return undefined;
     }
 }
 function getLocation(url) {
@@ -5994,6 +6016,9 @@ var Runtime = {
         return window.XMLHttpRequest;
     },
     getWebSocketAPI() {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
         return window.WebSocket || window.MozWebSocket;
     },
     setup(PusherClass) {
@@ -6014,6 +6039,9 @@ var Runtime = {
         return document;
     },
     getProtocol() {
+        if (typeof document === 'undefined') {
+            return 'http:';
+        }
         return this.getDocument().location.protocol;
     },
     getAuthorizers() {
@@ -6102,7 +6130,7 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const crypto = window.crypto || window['msCrypto'];
+        const crypto = globalThis.crypto || globalThis['msCrypto'];
         const limit = Math.floor(Math.pow(2, 32) / max) * max;
         let random;
         do {

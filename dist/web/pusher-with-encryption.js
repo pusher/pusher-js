@@ -15,7 +15,7 @@
 		exports["Pusher"] = factory();
 	else
 		root["Pusher"] = factory();
-})(self, () => {
+})(this, () => {
 return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -3197,7 +3197,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = (typeof window !== 'undefined' && window.btoa) ||
+var btoa = (typeof (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this) !== 'undefined' && (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -3227,10 +3227,10 @@ class Timer {
 ;// ./src/core/utils/timers/index.ts
 
 function timers_clearTimeout(timer) {
-    window.clearTimeout(timer);
+    (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).clearTimeout(timer);
 }
 function timers_clearInterval(timer) {
-    window.clearInterval(timer);
+    (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).clearInterval(timer);
 }
 class OneOffTimer extends abstract_timer {
     constructor(delay, callback) {
@@ -3346,7 +3346,7 @@ function values(object) {
 }
 function apply(array, f, context) {
     for (var i = 0; i < array.length; i++) {
-        f.call(context || window, array[i], i, array);
+        f.call(context || (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this), array[i], i, array);
     }
 }
 function map(array, f) {
@@ -3480,8 +3480,8 @@ function safeJSONStringify(source) {
 class Logger {
     constructor() {
         this.globalLog = (message) => {
-            if (window.console && window.console.log) {
-                window.console.log(message);
+            if ((typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console && (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console.log) {
+                (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console.log(message);
             }
         };
     }
@@ -3495,16 +3495,16 @@ class Logger {
         this.log(this.globalLogError, args);
     }
     globalLogWarn(message) {
-        if (window.console && window.console.warn) {
-            window.console.warn(message);
+        if ((typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console && (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console.warn) {
+            (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console.warn(message);
         }
         else {
             this.globalLog(message);
         }
     }
     globalLogError(message) {
-        if (window.console && window.console.error) {
-            window.console.error(message);
+        if ((typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console && (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console.error) {
+            (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this).console.error(message);
         }
         else {
             this.globalLogWarn(message);
@@ -3666,7 +3666,9 @@ var jsonp_timeline_jsonp = {
 
 function getGenericURL(baseScheme, params, path) {
     var scheme = baseScheme + (params.useTLS ? 's' : '');
-    var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
+    var host = params.useTLS
+        ? params.hostTLS.replace(/:443$/, '')
+        : params.hostNonTLS.replace(/:80$/, '');
     return scheme + '://' + host + path;
 }
 function getGenericPath(key, queryString) {
@@ -3800,7 +3802,7 @@ class Dispatcher {
         }
         if (callbacks && callbacks.length > 0) {
             for (var i = 0; i < callbacks.length; i++) {
-                callbacks[i].fn.apply(callbacks[i].context || window, args);
+                callbacks[i].fn.apply(callbacks[i].context || (typeof window !== "undefined" ? window : typeof self !== "undefined" ? self : this), args);
             }
         }
         else if (this.failThrough) {
@@ -5765,24 +5767,36 @@ class HTTPSocket {
         var type = chunk.data.slice(0, 1);
         switch (type) {
             case 'o':
-                payload = JSON.parse(chunk.data.slice(1) || '{}');
+                payload = parseFrame(chunk.data.slice(1) || '{}');
+                if (payload === undefined) {
+                    return;
+                }
                 this.onOpen(payload);
                 break;
             case 'a':
-                payload = JSON.parse(chunk.data.slice(1) || '[]');
+                payload = parseFrame(chunk.data.slice(1) || '[]');
+                if (!Array.isArray(payload)) {
+                    return;
+                }
                 for (var i = 0; i < payload.length; i++) {
                     this.onEvent(payload[i]);
                 }
                 break;
             case 'm':
-                payload = JSON.parse(chunk.data.slice(1) || 'null');
+                payload = parseFrame(chunk.data.slice(1) || 'null');
+                if (payload === undefined) {
+                    return;
+                }
                 this.onEvent(payload);
                 break;
             case 'h':
                 this.hooks.onHeartbeat(this);
                 break;
             case 'c':
-                payload = JSON.parse(chunk.data.slice(1) || '[]');
+                payload = parseFrame(chunk.data.slice(1) || '[]');
+                if (!Array.isArray(payload)) {
+                    return;
+                }
                 this.onClose(payload[0], payload[1], true);
                 break;
         }
@@ -5843,6 +5857,14 @@ class HTTPSocket {
             this.stream.close();
             this.stream = null;
         }
+    }
+}
+function parseFrame(data) {
+    try {
+        return JSON.parse(data);
+    }
+    catch (e) {
+        return undefined;
     }
 }
 function getLocation(url) {
@@ -6004,6 +6026,9 @@ var Runtime = {
         return window.XMLHttpRequest;
     },
     getWebSocketAPI() {
+        if (typeof window === 'undefined') {
+            return undefined;
+        }
         return window.WebSocket || window.MozWebSocket;
     },
     setup(PusherClass) {
@@ -6024,6 +6049,9 @@ var Runtime = {
         return document;
     },
     getProtocol() {
+        if (typeof document === 'undefined') {
+            return 'http:';
+        }
         return this.getDocument().location.protocol;
     },
     getAuthorizers() {
@@ -6112,7 +6140,7 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const crypto = window.crypto || window['msCrypto'];
+        const crypto = globalThis.crypto || globalThis['msCrypto'];
         const limit = Math.floor(Math.pow(2, 32) / max) * max;
         let random;
         do {
