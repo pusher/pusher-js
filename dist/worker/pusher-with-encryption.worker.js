@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.5.0
+ * Pusher JavaScript Library v8.6.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -2917,7 +2917,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = self.btoa ||
+var btoa = (typeof self !== 'undefined' && self.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -2999,6 +2999,11 @@ function extend(target, ...sources) {
     for (var i = 0; i < sources.length; i++) {
         var extensions = sources[i];
         for (var property in extensions) {
+            if (property === '__proto__' ||
+                property === 'constructor' ||
+                property === 'prototype') {
+                continue;
+            }
             if (extensions[property] &&
                 extensions[property].constructor &&
                 extensions[property].constructor === Object) {
@@ -3126,6 +3131,9 @@ function collections_all(array, test) {
 }
 function encodeParamsObject(data) {
     return mapObject(data, function (value) {
+        if (value === null) {
+            return '';
+        }
         if (typeof value === 'object') {
             value = safeJSONStringify(value);
         }
@@ -3188,7 +3196,7 @@ function safeJSONStringify(source) {
 
 ;// ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.5.0",
+    VERSION: "8.6.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -5707,12 +5715,13 @@ const Worker = {
         return Network;
     },
     randomInt(max) {
-        const random = function () {
-            const crypto = globalThis.crypto || globalThis['msCrypto'];
-            const random = crypto.getRandomValues(new Uint32Array(1))[0];
-            return random / Math.pow(2, 32);
-        };
-        return Math.floor(random() * max);
+        const crypto = globalThis.crypto || globalThis['msCrypto'];
+        const limit = Math.floor(Math.pow(2, 32) / max) * max;
+        let random;
+        do {
+            random = crypto.getRandomValues(new Uint32Array(1))[0];
+        } while (random >= limit);
+        return random % max;
     },
 };
 /* harmony default export */ const worker_runtime = (Worker);
@@ -6139,9 +6148,7 @@ function buildChannelAuth(opts, pusher) {
                 channelAuthorization.headers = opts.auth.headers;
         }
         if ('authorizer' in opts) {
-            return {
-                customHandler: ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer),
-            };
+            channelAuthorization.customHandler = ChannelAuthorizerProxy(pusher, channelAuthorization, opts.authorizer);
         }
     }
     return channelAuthorization;
@@ -6197,6 +6204,7 @@ function flatPromise() {
 
 
 
+
 class UserFacade extends Dispatcher {
     constructor(pusher) {
         super(function (eventName, data) {
@@ -6210,6 +6218,10 @@ class UserFacade extends Dispatcher {
         this._onAuthorize = (err, authData) => {
             if (err) {
                 logger.warn(`Error during signin: ${err}`);
+                this.emit('pusher:signin_error', Object.assign({}, {
+                    type: 'AuthError',
+                    error: err.message,
+                }, err instanceof HTTPAuthError ? { status: err.status } : {}));
                 this._cleanup();
                 return;
             }

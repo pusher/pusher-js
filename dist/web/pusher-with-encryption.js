@@ -1,5 +1,5 @@
 /*!
- * Pusher JavaScript Library v8.5.0
+ * Pusher JavaScript Library v8.6.0
  * https://pusher.com/
  *
  * Copyright 2020, Pusher
@@ -2911,7 +2911,7 @@ var ScriptReceivers = new ScriptReceiverFactory('_pusher_script_', 'Pusher.Scrip
 
 ;// ./src/core/defaults.ts
 var Defaults = {
-    VERSION: "8.5.0",
+    VERSION: "8.6.0",
     PROTOCOL: 7,
     wsPort: 80,
     wssPort: 443,
@@ -3197,7 +3197,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = window.btoa ||
+var btoa = (typeof window !== 'undefined' && window.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -3279,6 +3279,11 @@ function extend(target, ...sources) {
     for (var i = 0; i < sources.length; i++) {
         var extensions = sources[i];
         for (var property in extensions) {
+            if (property === '__proto__' ||
+                property === 'constructor' ||
+                property === 'prototype') {
+                continue;
+            }
             if (extensions[property] &&
                 extensions[property].constructor &&
                 extensions[property].constructor === Object) {
@@ -4068,7 +4073,8 @@ class NetInfo extends Dispatcher {
     constructor() {
         super();
         var self = this;
-        if (window.addEventListener !== undefined) {
+        if (typeof window !== 'undefined' &&
+            window.addEventListener !== undefined) {
             window.addEventListener('online', function () {
                 self.emit('online');
             }, false);
@@ -6001,15 +6007,17 @@ var Runtime = {
         return window.WebSocket || window.MozWebSocket;
     },
     setup(PusherClass) {
-        window.Pusher = PusherClass;
-        var initializeOnDocumentBody = () => {
-            this.onDocumentBody(PusherClass.ready);
-        };
-        if (!window.JSON) {
-            Dependencies.load('json2', {}, initializeOnDocumentBody);
-        }
-        else {
-            initializeOnDocumentBody();
+        if (typeof window !== 'undefined') {
+            window.Pusher = PusherClass;
+            var initializeOnDocumentBody = () => {
+                this.onDocumentBody(PusherClass.ready);
+            };
+            if (!window.JSON) {
+                Dependencies.load('json2', {}, initializeOnDocumentBody);
+            }
+            else {
+                initializeOnDocumentBody();
+            }
         }
     },
     getDocument() {
@@ -6104,12 +6112,13 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const random = function () {
-            const crypto = window.crypto || window['msCrypto'];
-            const random = crypto.getRandomValues(new Uint32Array(1))[0];
-            return random / Math.pow(2, 32);
-        };
-        return Math.floor(random() * max);
+        const crypto = window.crypto || window['msCrypto'];
+        const limit = Math.floor(Math.pow(2, 32) / max) * max;
+        let random;
+        do {
+            random = crypto.getRandomValues(new Uint32Array(1))[0];
+        } while (random >= limit);
+        return random % max;
     },
 };
 /* harmony default export */ const runtime = (Runtime);
@@ -6585,6 +6594,7 @@ function flatPromise() {
 
 
 
+
 class UserFacade extends Dispatcher {
     constructor(pusher) {
         super(function (eventName, data) {
@@ -6598,6 +6608,10 @@ class UserFacade extends Dispatcher {
         this._onAuthorize = (err, authData) => {
             if (err) {
                 logger.warn(`Error during signin: ${err}`);
+                this.emit('pusher:signin_error', Object.assign({}, {
+                    type: 'AuthError',
+                    error: err.message,
+                }, err instanceof HTTPAuthError ? { status: err.status } : {}));
                 this._cleanup();
                 return;
             }
