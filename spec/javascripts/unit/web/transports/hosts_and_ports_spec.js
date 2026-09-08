@@ -59,12 +59,12 @@ describe("Host/Port Configuration", function() {
       window.SockJS = _SockJS;
     });
 
-    it("should connect to https://sockjs-<cluster>.pusher.com:443 by default", function() {
+    it("should connect to https://sockjs-<cluster>.pusher.com by default", function() {
       pusher = new Pusher("foobar", {cluster: "mt1"});
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "https://sockjs-mt1.pusher.com:443/pusher",
+        "https://sockjs-mt1.pusher.com/pusher",
         null,
         { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
@@ -72,12 +72,12 @@ describe("Host/Port Configuration", function() {
       );
     });
 
-    it("should connect to http://sockjs-<cluster>.pusher.com:80 by default when forceTLS disabled", function() {
+    it("should connect to http://sockjs-<cluster>.pusher.com by default when forceTLS disabled", function() {
       pusher = new Pusher("foobar", { cluster: "mt1", forceTLS: false });
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "http://sockjs-mt1.pusher.com:80/pusher",
+        "http://sockjs-mt1.pusher.com/pusher",
         null,
         { js_path: cdn_http+'/'+version +'/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined
@@ -116,7 +116,7 @@ describe("Host/Port Configuration", function() {
       pusher.connect();
 
       expect(window.SockJS).toHaveBeenCalledWith(
-        "https://sockjs-mt1.pusher.com:443/test",
+        "https://sockjs-mt1.pusher.com/test",
         null,
         { js_path: cdn_https + '/' + version + '/sockjs'+dependency_suffix+'.js',
           ignore_null_origin: undefined

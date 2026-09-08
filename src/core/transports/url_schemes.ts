@@ -7,7 +7,9 @@ function getGenericURL(
   path: string,
 ): string {
   var scheme = baseScheme + (params.useTLS ? 's' : '');
-  var host = params.useTLS ? params.hostTLS : params.hostNonTLS;
+  var host = params.useTLS
+    ? params.hostTLS.replace(/:443$/, '')
+    : params.hostNonTLS.replace(/:80$/, '');
   return scheme + '://' + host + path;
 }
 
