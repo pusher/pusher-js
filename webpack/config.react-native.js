@@ -12,7 +12,7 @@ module.exports = merge({}, configShared, {
     pusher: './src/core/pusher-with-encryption.js',
   },
   output: {
-    library: { name: 'Pusher', type: 'commonjs2' },
+    library: { type: 'commonjs2' },
     path: path.join(__dirname, '../dist/react-native'),
     filename: 'pusher.js',
   },
