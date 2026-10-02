@@ -90,24 +90,36 @@ class HTTPSocket implements Socket {
     var type = chunk.data.slice(0, 1);
     switch (type) {
       case 'o':
-        payload = JSON.parse(chunk.data.slice(1) || '{}');
+        payload = parseFrame(chunk.data.slice(1) || '{}');
+        if (payload === undefined) {
+          return;
+        }
         this.onOpen(payload);
         break;
       case 'a':
-        payload = JSON.parse(chunk.data.slice(1) || '[]');
+        payload = parseFrame(chunk.data.slice(1) || '[]');
+        if (!Array.isArray(payload)) {
+          return;
+        }
         for (var i = 0; i < payload.length; i++) {
           this.onEvent(payload[i]);
         }
         break;
       case 'm':
-        payload = JSON.parse(chunk.data.slice(1) || 'null');
+        payload = parseFrame(chunk.data.slice(1) || 'null');
+        if (payload === undefined) {
+          return;
+        }
         this.onEvent(payload);
         break;
       case 'h':
         this.hooks.onHeartbeat(this);
         break;
       case 'c':
-        payload = JSON.parse(chunk.data.slice(1) || '[]');
+        payload = parseFrame(chunk.data.slice(1) || '[]');
+        if (!Array.isArray(payload)) {
+          return;
+        }
         this.onClose(payload[0], payload[1], true);
         break;
     }
@@ -178,6 +190,18 @@ class HTTPSocket implements Socket {
       this.stream.close();
       this.stream = null;
     }
+  }
+}
+
+// Proxies and endpoint security agents sometimes inject their own content into
+// the HTTP stream. Those lines are not Pusher frames, so they are skipped:
+// throwing would escape the XHR handler and leave the frames after them, and
+// the end-of-stream close handling, unprocessed.
+function parseFrame(data: string): any {
+  try {
+    return JSON.parse(data);
+  } catch (e) {
+    return undefined;
   }
 }
 

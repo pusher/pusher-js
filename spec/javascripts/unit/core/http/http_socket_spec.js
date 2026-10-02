@@ -215,6 +215,21 @@ describe("HTTP.Socket", function() {
         expect(onOpen).toHaveBeenCalled();
       });
     });
+
+    describe("on a line that is not a Pusher frame", function() {
+      it("should not throw or open on an 'o' line that is not JSON", function() {
+        expect(function() {
+          lastXHR.emit("chunk", { status: 200, data: "onload = function () {" });
+        }).not.toThrow();
+        expect(onOpen).not.toHaveBeenCalled();
+      });
+
+      it("should still open on a later open frame", function() {
+        lastXHR.emit("chunk", { status: 200, data: "class InjectedScript {" });
+        lastXHR.emit("chunk", { status: 200, data: "o" });
+        expect(onOpen).toHaveBeenCalled();
+      });
+    });
   });
 
   describe("after opening without hostname binding", function() {
@@ -341,6 +356,45 @@ describe("HTTP.Socket", function() {
         expect(onActivity).not.toHaveBeenCalled();
         lastXHR.emit("chunk", { status: 200, data: "x" });
         expect(onActivity).toHaveBeenCalled();
+      });
+    });
+
+    describe("on a line that is not a Pusher frame", function() {
+      it("should not throw or close on a 'c' line that is not JSON", function() {
+        expect(function() {
+          lastXHR.emit("chunk", { status: 200, data: "class InjectedScript {" });
+        }).not.toThrow();
+        expect(onClose).not.toHaveBeenCalled();
+        expect(lastXHR.close).not.toHaveBeenCalled();
+      });
+
+      it("should not close on a 'c' line whose payload is not an array", function() {
+        expect(function() {
+          lastXHR.emit("chunk", { status: 200, data: "cnull" });
+        }).not.toThrow();
+        expect(onClose).not.toHaveBeenCalled();
+      });
+
+      it("should not throw or emit messages on 'a' and 'm' lines that are not JSON", function() {
+        expect(function() {
+          lastXHR.emit("chunk", { status: 200, data: "addEventListener('drop', handler, true);" });
+          lastXHR.emit("chunk", { status: 200, data: "m<!DOCTYPE html>" });
+        }).not.toThrow();
+        expect(onMessage).not.toHaveBeenCalled();
+      });
+
+      it("should not throw or emit messages on an 'a' line whose payload is not an array", function() {
+        expect(function() {
+          lastXHR.emit("chunk", { status: 200, data: "anull" });
+          lastXHR.emit("chunk", { status: 200, data: 'a"abc"' });
+        }).not.toThrow();
+        expect(onMessage).not.toHaveBeenCalled();
+      });
+
+      it("should keep handling frames that follow the line", function() {
+        lastXHR.emit("chunk", { status: 200, data: "class InjectedScript {" });
+        lastXHR.emit("chunk", { status: 200, data: 'm{"foo": 123}' });
+        expect(onMessage).toHaveBeenCalledWith({ data: { foo: 123 } });
       });
     });
   });
