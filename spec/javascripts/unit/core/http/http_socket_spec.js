@@ -383,8 +383,11 @@ describe("HTTP.Socket", function() {
         expect(onMessage).not.toHaveBeenCalled();
       });
 
-      it("should not emit messages on an 'a' line whose payload is not an array", function() {
-        lastXHR.emit("chunk", { status: 200, data: 'a"abc"' });
+      it("should not throw or emit messages on an 'a' line whose payload is not an array", function() {
+        expect(function() {
+          lastXHR.emit("chunk", { status: 200, data: "anull" });
+          lastXHR.emit("chunk", { status: 200, data: 'a"abc"' });
+        }).not.toThrow();
         expect(onMessage).not.toHaveBeenCalled();
       });
 
