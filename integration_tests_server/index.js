@@ -96,6 +96,10 @@ function start_app(port, pusher_config) {
 
   // JSONP echo
   app.get('/jsonp/echo/:id', (req, res) => {
+    if (!/^[0-9]+$/.test(req.params.id)) {
+      return res.sendStatus(400);
+    }
+
     const decoded_params =
           Object.keys(req.query)
           .filter(key => !["id", "receiver", "splat", "captures"].includes(key))
@@ -116,6 +120,10 @@ function start_app(port, pusher_config) {
   // JSONP echo
   // pusher-js 2.2 JSONP API
   app.get('/v2/jsonp/echo/:id', (req, res) => {
+    if (!/^[0-9]+$/.test(req.params.id)) {
+      return res.sendStatus(400);
+    }
+
     const decoded_params =
           Object.keys(req.query)
           .filter(key => !["id", "splat", "captures"].includes(key))
