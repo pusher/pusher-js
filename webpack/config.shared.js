@@ -30,7 +30,13 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.ts$/, loader: 'ts-loader' },
+      // Transpile only. Type-checking and the declarations in types/ come from
+      // `make types`, because ts-loader can't run on TypeScript 7.
+      {
+        test: /\.ts$/,
+        loader: 'esbuild-loader',
+        options: { target: 'es2015' },
+      },
       {
         test: /\.js$/,
         enforce: 'pre',

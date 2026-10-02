@@ -50,6 +50,7 @@ jobs:
           node-version: '20'
       - run: npm install
       - run: npm run check-format
+      - run: make typecheck
       - run: make node_unit
       - name: make node_integration
         run: |

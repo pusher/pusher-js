@@ -1,7 +1,17 @@
 SHELL := /bin/bash
 
 .PHONY: build_all
-build_all: web cjs react-native node worker
+build_all: types web cjs react-native node worker
+
+# webpack only transpiles TypeScript, so type-checking and the declarations in
+# types/ come from tsc.
+.PHONY: types
+types:
+	node_modules/.bin/tsc -p . --emitDeclarationOnly
+
+.PHONY: typecheck
+typecheck:
+	node_modules/.bin/tsc -p . --noEmit
 
 .PHONY: json2
 json2:
