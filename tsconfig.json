@@ -6,12 +6,15 @@
     "declarationDir": "types",
     "target": "ES6",
     "removeComments": true,
-    "moduleResolution": "node",
-    "baseUrl": "src",
+    "strict": false,
+    "skipLibCheck": true,
+    "useDefineForClassFields": false,
+    "types": ["node"],
+    "moduleResolution": "bundler",
     "paths": {
       "*": [
-        "*",
-        "runtimes/*"
+        "./src/*",
+        "./src/runtimes/*"
       ]
     },
     "lib": [
@@ -20,6 +23,7 @@
       "ES5"
     ]
   },
+  "include": ["src", "spec"],
   "exclude": [
     "node_modules"
   ]
