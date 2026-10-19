@@ -276,6 +276,21 @@ describe("Pusher", function() {
       expect(subscribedChannels.channel2.subscribe).toHaveBeenCalled();
     });
 
+    it("should not resubscribe channels unsubscribed while their subscription was pending", function() {
+      var channel = pusher.subscribe("xxx");
+      expect(channel.subscribe).toHaveBeenCalledTimes(1);
+      channel.subscriptionPending = true;
+      pusher.unsubscribe("xxx");
+      channel.subscriptionCancelled = true;
+
+      // the connection drops before the subscription completes
+      channel.subscriptionPending = false;
+      pusher.connection.emit("connected");
+
+      expect(channel.subscribe).toHaveBeenCalledTimes(1);
+      expect(pusher.channel("xxx")).toBe(undefined);
+    });
+
     it("should send events via the connection manager", function() {
       pusher.send_event("event", { key: "value" }, "channel");
       expect(pusher.connection.send_event).toHaveBeenCalledWith(
