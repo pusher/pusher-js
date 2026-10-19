@@ -212,7 +212,13 @@ export default class Pusher {
     var channelName;
     for (channelName in this.channels.channels) {
       if (this.channels.channels.hasOwnProperty(channelName)) {
-        this.subscribe(channelName);
+        if (this.channels.channels[channelName].subscriptionCancelled) {
+          // Unsubscribed while its subscription was pending, and the
+          // subscription never completed, so drop it instead of resubscribing.
+          this.channels.remove(channelName);
+        } else {
+          this.subscribe(channelName);
+        }
       }
     }
   }
