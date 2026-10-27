@@ -34,7 +34,10 @@ module.exports = merge({}, configShared, {
     // Points `global` in core code at one shared global object, resolved
     // once in src/runtimes/web/global_object.ts.
     new webpack.ProvidePlugin({
-      global: [path.resolve(__dirname, '../src/runtimes/web/global_object'), 'default'],
+      global: [
+        path.resolve(__dirname, '../src/runtimes/web/global_object'),
+        'default',
+      ],
     }),
     new webpack.DefinePlugin({
       RUNTIME: JSON.stringify('web'),
