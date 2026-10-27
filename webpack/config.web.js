@@ -31,9 +31,11 @@ module.exports = merge({}, configShared, {
     modules: ['src/runtimes/web'],
   },
   plugins: [
-    // `global` isn't redefined here, so webpack resolves it once to the real
-    // global object: window in browsers, and the global object in Node/SSR,
-    // where window is undefined. config.cjs.js works the same way.
+    // Points `global` in core code at one shared global object, resolved
+    // once in src/runtimes/web/global_object.ts.
+    new webpack.ProvidePlugin({
+      global: [path.resolve(__dirname, '../src/runtimes/web/global_object'), 'default'],
+    }),
     new webpack.DefinePlugin({
       RUNTIME: JSON.stringify('web'),
     }),

@@ -2567,12 +2567,12 @@ nacl.setPRNG = function(fn) {
 /***/ 42
 (module, __unused_webpack_exports, __webpack_require__) {
 
-module.exports = __webpack_require__(153)["default"];
+module.exports = __webpack_require__(796)["default"];
 
 
 /***/ },
 
-/***/ 153
+/***/ 796
 (__unused_webpack_module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -3796,6 +3796,16 @@ class NetInfo extends Dispatcher {
     }
 }
 var Network = new NetInfo();
+
+;// ./src/runtimes/web/global_object.ts
+const globalObject = typeof window !== 'undefined'
+    ? window
+    : typeof self !== 'undefined'
+        ? self
+        : typeof globalThis !== 'undefined'
+            ? globalThis
+            : Function('return this')();
+/* harmony default export */ const global_object = (globalObject);
 
 ;// ./src/core/transports/assistant_to_the_transport_manager.ts
 
@@ -5961,6 +5971,7 @@ http_http.createXDR = function (method, url) {
 
 
 
+
 var Runtime = {
     nextAuthCallbackID: 1,
     auth_callbacks: {},
@@ -6089,7 +6100,7 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const crypto = __webpack_require__.g.crypto || __webpack_require__.g['msCrypto'];
+        const crypto = global_object.crypto || global_object['msCrypto'];
         const limit = Math.floor(Math.pow(2, 32) / max) * max;
         let random;
         do {

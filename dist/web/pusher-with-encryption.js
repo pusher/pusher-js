@@ -2873,6 +2873,7 @@ const ajax = function (context, query, authOptions, authRequestType, callback) {
 /* harmony default export */ const xhr_auth = (ajax);
 
 ;// ./src/core/base64.ts
+/* provided dependency */ var global = __webpack_require__(466)["A"];
 function encode(s) {
     return btoa(utob(s));
 }
@@ -2908,7 +2909,7 @@ var cb_encode = function (ccc) {
     ];
     return chars.join('');
 };
-var btoa = (typeof __webpack_require__.g !== 'undefined' && __webpack_require__.g.btoa) ||
+var btoa = (typeof global !== 'undefined' && global.btoa) ||
     function (b) {
         return b.replace(/[\s\S]{1,3}/g, cb_encode);
     };
@@ -2936,12 +2937,13 @@ class Timer {
 /* harmony default export */ const abstract_timer = (Timer);
 
 ;// ./src/core/utils/timers/index.ts
+/* provided dependency */ var timers_global = __webpack_require__(466)["A"];
 
 function timers_clearTimeout(timer) {
-    __webpack_require__.g.clearTimeout(timer);
+    timers_global.clearTimeout(timer);
 }
 function timers_clearInterval(timer) {
-    __webpack_require__.g.clearInterval(timer);
+    timers_global.clearInterval(timer);
 }
 class OneOffTimer extends abstract_timer {
     constructor(delay, callback) {
@@ -2984,6 +2986,7 @@ var Util = {
 /* harmony default export */ const util = (Util);
 
 ;// ./src/core/utils/collections.ts
+/* provided dependency */ var collections_global = __webpack_require__(466)["A"];
 
 
 function extend(target, ...sources) {
@@ -3057,7 +3060,7 @@ function values(object) {
 }
 function apply(array, f, context) {
     for (var i = 0; i < array.length; i++) {
-        f.call(context || __webpack_require__.g, array[i], i, array);
+        f.call(context || collections_global, array[i], i, array);
     }
 }
 function map(array, f) {
@@ -3186,13 +3189,14 @@ function safeJSONStringify(source) {
 }
 
 ;// ./src/core/logger.ts
+/* provided dependency */ var logger_global = __webpack_require__(466)["A"];
 
 
 class Logger {
     constructor() {
         this.globalLog = (message) => {
-            if (__webpack_require__.g.console && __webpack_require__.g.console.log) {
-                __webpack_require__.g.console.log(message);
+            if (logger_global.console && logger_global.console.log) {
+                logger_global.console.log(message);
             }
         };
     }
@@ -3206,16 +3210,16 @@ class Logger {
         this.log(this.globalLogError, args);
     }
     globalLogWarn(message) {
-        if (__webpack_require__.g.console && __webpack_require__.g.console.warn) {
-            __webpack_require__.g.console.warn(message);
+        if (logger_global.console && logger_global.console.warn) {
+            logger_global.console.warn(message);
         }
         else {
             this.globalLog(message);
         }
     }
     globalLogError(message) {
-        if (__webpack_require__.g.console && __webpack_require__.g.console.error) {
-            __webpack_require__.g.console.error(message);
+        if (logger_global.console && logger_global.console.error) {
+            logger_global.console.error(message);
         }
         else {
             this.globalLogWarn(message);
@@ -3466,6 +3470,7 @@ function prefix(name) {
 }
 
 ;// ./src/core/events/dispatcher.ts
+/* provided dependency */ var dispatcher_global = __webpack_require__(466)["A"];
 
 
 class Dispatcher {
@@ -3513,7 +3518,7 @@ class Dispatcher {
         }
         if (callbacks && callbacks.length > 0) {
             for (var i = 0; i < callbacks.length; i++) {
-                callbacks[i].fn.apply(callbacks[i].context || __webpack_require__.g, args);
+                callbacks[i].fn.apply(callbacks[i].context || dispatcher_global, args);
             }
         }
         else if (this.failThrough) {
@@ -3807,6 +3812,8 @@ class NetInfo extends Dispatcher {
 }
 var Network = new NetInfo();
 
+// EXTERNAL MODULE: ./src/runtimes/web/global_object.ts
+var global_object = __webpack_require__(466);
 ;// ./src/core/transports/assistant_to_the_transport_manager.ts
 
 
@@ -5971,6 +5978,7 @@ http_http.createXDR = function (method, url) {
 
 
 
+
 var Runtime = {
     nextAuthCallbackID: 1,
     auth_callbacks: {},
@@ -6099,7 +6107,7 @@ var Runtime = {
         }
     },
     randomInt(max) {
-        const crypto = __webpack_require__.g.crypto || __webpack_require__.g['msCrypto'];
+        const crypto = global_object/* default */.A.crypto || global_object/* default */.A['msCrypto'];
         const limit = Math.floor(Math.pow(2, 32) / max) * max;
         let random;
         do {
@@ -6936,6 +6944,25 @@ class PusherWithEncryption extends pusher {
 
 /***/ },
 
+/***/ 466
+(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+const globalObject = typeof window !== 'undefined'
+    ? window
+    : typeof self !== 'undefined'
+        ? self
+        : typeof globalThis !== 'undefined'
+            ? globalThis
+            : Function('return this')();
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (globalObject);
+
+
+/***/ },
+
 /***/ 281
 () {
 
@@ -6980,18 +7007,6 @@ class PusherWithEncryption extends pusher {
 /******/ 				}
 /******/ 			}
 /******/ 		};
-/******/ 	})();
-/******/ 	
-/******/ 	/* webpack/runtime/global */
-/******/ 	(() => {
-/******/ 		__webpack_require__.g = (function() {
-/******/ 			if (typeof globalThis === 'object') return globalThis;
-/******/ 			try {
-/******/ 				return this || new Function('return this')();
-/******/ 			} catch (e) {
-/******/ 				if (typeof window === 'object') return window;
-/******/ 			}
-/******/ 		})();
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */

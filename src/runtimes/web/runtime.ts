@@ -13,6 +13,7 @@ import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
 import Ajax from 'core/http/ajax';
 import { Network } from './net_info';
+import globalObject from './global_object';
 import getDefaultStrategy from './default_strategy';
 import transportConnectionInitializer from './transports/transport_connection_initializer';
 import HTTPFactory from './http/http';
@@ -167,10 +168,10 @@ var Runtime: Browser = {
   randomInt(max: number): number {
     // Rejection sampling avoids the bias introduced by scaling a fixed-range
     // random value down to `max` when `max` doesn't evenly divide 2**32.
-    // Uses global (not window) so this also works in Node/SSR, while still
-    // finding msCrypto in browsers that predate crypto. webpack resolves
-    // global to the real global object, so this works where globalThis doesn't.
-    const crypto = global.crypto || global['msCrypto'];
+    // Uses the shared global object (not window or globalThis) so this works
+    // in Node/SSR and in browsers that predate globalThis, and still finds
+    // msCrypto in browsers that predate crypto.
+    const crypto = globalObject.crypto || globalObject['msCrypto'];
     const limit = Math.floor(2 ** 32 / max) * max;
     let random;
     do {
