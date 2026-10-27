@@ -167,9 +167,10 @@ var Runtime: Browser = {
   randomInt(max: number): number {
     // Rejection sampling avoids the bias introduced by scaling a fixed-range
     // random value down to `max` when `max` doesn't evenly divide 2**32.
-    // Uses globalThis (not window) so this also works in Node/SSR, matching
-    // the worker runtime's equivalent implementation.
-    const crypto = globalThis.crypto || globalThis['msCrypto'];
+    // Uses global (not window) so this also works in Node/SSR, while still
+    // finding msCrypto in browsers that predate crypto. webpack resolves
+    // global to the real global object, so this works where globalThis doesn't.
+    const crypto = global.crypto || global['msCrypto'];
     const limit = Math.floor(2 ** 32 / max) * max;
     let random;
     do {
