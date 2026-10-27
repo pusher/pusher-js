@@ -8,4 +8,4 @@ interface Canceller {
 
 type Delay = number;
 
-export { Scheduler, Canceller, Delay };
+export type { Scheduler, Canceller, Delay };

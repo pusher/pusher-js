@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "skipLibCheck": false
+  },
+  "include": [],
+  "files": [
+    "index.d.ts",
+    "react-native/index.d.ts",
+    "with-encryption/index.d.ts",
+    "worker/index.d.ts",
+    "cjs/index.d.ts",
+    "cjs/with-encryption/index.d.ts"
+  ]
+}

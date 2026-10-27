@@ -3,6 +3,7 @@
 var webpack = require('webpack');
 var fs = require('fs');
 var Config = require('./hosting_config');
+var tsconfig = require('../tsconfig.json');
 var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8');
 banner = banner.replace('<VERSION>', Config.version);
 
@@ -35,7 +36,9 @@ module.exports = {
       {
         test: /\.ts$/,
         loader: 'esbuild-loader',
-        options: { target: 'es2015' },
+        // esbuild ignores tsconfig's target, so pass it explicitly to keep
+        // tsconfig.json the only place the target is set.
+        options: { target: tsconfig.compilerOptions.target.toLowerCase() },
       },
       {
         test: /\.js$/,
