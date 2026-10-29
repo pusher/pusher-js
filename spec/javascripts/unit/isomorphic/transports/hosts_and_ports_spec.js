@@ -7,7 +7,7 @@ var version = Defaults.VERSION;
 var dependency_suffix = Defaults.dependency_suffix;
 var Runtime = require('runtime').default;
 
-describe("Host/Port Configuration", function() {
+describe("Host/Port Configuration (isomorphic)", function() {
   var transport;
   var pusher;
   var Transports;

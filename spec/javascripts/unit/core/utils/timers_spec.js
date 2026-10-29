@@ -62,12 +62,17 @@ describe("timers", function() {
 
       it("should stop callback from being called even if clearTimeout is broken", function() {
         // IE has some edge-case with clearTimeout not working, let's simulate it
+        // Jasmine doesn't allow spying on the mock clock's functions, so
+        // replace clearTimeout with a no-op directly.
         let _clearTimeout = global.clearTimeout;
-        spyOn(global, "clearTimeout");
-        timer.ensureAborted();
-        jasmine.clock().tick(1000);
-        expect(callback).not.toHaveBeenCalled();
-        global.clearTimeout = _clearTimeout;
+        global.clearTimeout = function() {};
+        try {
+          timer.ensureAborted();
+          jasmine.clock().tick(1000);
+          expect(callback).not.toHaveBeenCalled();
+        } finally {
+          global.clearTimeout = _clearTimeout;
+        }
       });
     });
   });
@@ -145,12 +150,17 @@ describe("timers", function() {
 
       it("should stop callback from being called even if clearTimeout is broken", function() {
         // IE has some edge-case with clearTimeout not working, let's simulate it
+        // Jasmine doesn't allow spying on the mock clock's functions, so
+        // replace clearTimeout with a no-op directly.
         let _clearTimeout = global.clearTimeout;
-        spyOn(global, "clearTimeout");
-        timer.ensureAborted();
-        jasmine.clock().tick(1000);
-        expect(callback).not.toHaveBeenCalled();
-        global.clearTimeout = _clearTimeout;
+        global.clearTimeout = function() {};
+        try {
+          timer.ensureAborted();
+          jasmine.clock().tick(1000);
+          expect(callback).not.toHaveBeenCalled();
+        } finally {
+          global.clearTimeout = _clearTimeout;
+        }
       });
     });
   });

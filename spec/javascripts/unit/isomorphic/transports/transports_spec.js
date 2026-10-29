@@ -157,45 +157,39 @@ describe("Transports", function() {
   });
 
   Collections.apply(XHR_TRANSPORTS, function(transport) {
-    describe(transport, function() {
-      describe("isSupported hook", function() {
-        it("should return true", function(){
-          expect(Transports[transport].hooks.isSupported({})).toBe(true);
-        });
+    describe(transport + " isSupported hook", function() {
+      it("should return true", function(){
+        expect(Transports[transport].hooks.isSupported({})).toBe(true);
       });
     });
   });
 
   Collections.apply(STREAMING_TRANSPORTS, function(transport) {
-    describe(transport, function() {
-      describe("getSocket hook", function() {
-        it("should return a new streaming HTTPSocket object", function() {
-          spyOn(HTTP, "createStreamingSocket").and.callFake(function(url) {
-            return "streaming socket mock";
-          });
-
-          var socket = Transports[transport].hooks.getSocket("streamurl");
-          expect(HTTP.createStreamingSocket.calls.count()).toEqual(1);
-          expect(HTTP.createStreamingSocket).toHaveBeenCalledWith("streamurl");
-          expect(socket).toEqual("streaming socket mock");
+    describe(transport + " getSocket hook", function() {
+      it("should return a new streaming HTTPSocket object", function() {
+        spyOn(HTTP, "createStreamingSocket").and.callFake(function(url) {
+          return "streaming socket mock";
         });
+
+        var socket = Transports[transport].hooks.getSocket("streamurl");
+        expect(HTTP.createStreamingSocket.calls.count()).toEqual(1);
+        expect(HTTP.createStreamingSocket).toHaveBeenCalledWith("streamurl");
+        expect(socket).toEqual("streaming socket mock");
       });
     });
   });
 
   Collections.apply(POLLING_TRANSPORTS, function(transport) {
-    describe(transport, function() {
-      describe("getSocket hook", function() {
-        it("should return a new polling HTTPSocket object", function() {
-          spyOn(HTTP, "createPollingSocket").and.callFake(function(url) {
-            return "polling socket mock";
-          });
-
-          var socket = Transports[transport].hooks.getSocket("streamurl");
-          expect(HTTP.createPollingSocket.calls.count()).toEqual(1);
-          expect(HTTP.createPollingSocket).toHaveBeenCalledWith("streamurl");
-          expect(socket).toEqual("polling socket mock");
+    describe(transport + " getSocket hook", function() {
+      it("should return a new polling HTTPSocket object", function() {
+        spyOn(HTTP, "createPollingSocket").and.callFake(function(url) {
+          return "polling socket mock";
         });
+
+        var socket = Transports[transport].hooks.getSocket("streamurl");
+        expect(HTTP.createPollingSocket.calls.count()).toEqual(1);
+        expect(HTTP.createPollingSocket).toHaveBeenCalledWith("streamurl");
+        expect(socket).toEqual("polling socket mock");
       });
     });
   });

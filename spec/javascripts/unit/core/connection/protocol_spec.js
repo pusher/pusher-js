@@ -336,14 +336,6 @@ describe("Protocol", function() {
       expect(Protocol.getCloseAction({ code: 4299 })).toBe("retry");
     });
 
-    it("should return 'retry' for code 4200", function() {
-      expect(Protocol.getCloseAction({ code: 4200 })).toBe("retry");
-    });
-
-    it("should return 'retry' for code 4299", function() {
-      expect(Protocol.getCloseAction({ code: 4299 })).toBe("retry");
-    });
-
     it("should return 'refused' for code 4300", function() {
       expect(Protocol.getCloseAction({ code: 4300 })).toBe("refused");
     });

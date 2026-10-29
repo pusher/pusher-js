@@ -6,8 +6,10 @@
   "helpers": [
     "../../spec/config/jasmine/helpers/**/*.js"
   ],
-  "failSpecWithNoExpectations": false,
-  "stopSpecOnExpectationFailure": false,
-  "stopOnSpecFailure": false,
-  "random": false
+  "env": {
+    "failSpecWithNoExpectations": false,
+    "stopSpecOnExpectationFailure": false,
+    "stopOnSpecFailure": false,
+    "random": false
+  }
 }

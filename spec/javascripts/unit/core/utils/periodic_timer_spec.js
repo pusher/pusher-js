@@ -63,12 +63,17 @@ describe("PeriodicTimer", function() {
 
     it("should stop callback from being called even if clearInterval is broken", function() {
       // IE has some edge-case with clearInterval not working, let's simulate it
+      // Jasmine doesn't allow spying on the mock clock's functions, so
+      // replace clearInterval with a no-op directly.
       let _clearInterval = global.clearInterval;
-      spyOn(global, "clearInterval").and.callThrough();
-      timer.ensureAborted();
-      jasmine.clock().tick(1000);
-      expect(callback).not.toHaveBeenCalled();
-      global.clearInterval = _clearInterval;
+      global.clearInterval = function() {};
+      try {
+        timer.ensureAborted();
+        jasmine.clock().tick(1000);
+        expect(callback).not.toHaveBeenCalled();
+      } finally {
+        global.clearInterval = _clearInterval;
+      }
     });
   });
 });
