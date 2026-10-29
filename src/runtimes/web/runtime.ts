@@ -13,7 +13,7 @@ import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
 import Ajax from 'core/http/ajax';
 import { Network } from './net_info';
-import globalObject from './global_object';
+import globalObject, { hasWindow } from './global_object';
 import getDefaultStrategy from './default_strategy';
 import transportConnectionInitializer from './transports/transport_connection_initializer';
 import HTTPFactory from './http/http';
@@ -33,7 +33,7 @@ var Runtime: Browser = {
   TimelineTransport: jsonpTimeline,
 
   getXHRAPI() {
-    return window.XMLHttpRequest;
+    return hasWindow ? window.XMLHttpRequest : undefined;
   },
 
   getWebSocketAPI() {
@@ -145,11 +145,16 @@ var Runtime: Browser = {
     var protocol = useTLS ? 'https:' : 'http:';
     var documentProtocol = this.getProtocol();
     return (
-      Boolean(<any>window['XDomainRequest']) && documentProtocol === protocol
+      hasWindow &&
+      Boolean(<any>window['XDomainRequest']) &&
+      documentProtocol === protocol
     );
   },
 
   addUnloadListener(listener: any) {
+    if (!hasWindow) {
+      return;
+    }
     if (window.addEventListener !== undefined) {
       window.addEventListener('pagehide', listener, false);
     } else if (window.attachEvent !== undefined) {
@@ -158,6 +163,9 @@ var Runtime: Browser = {
   },
 
   removeUnloadListener(listener: any) {
+    if (!hasWindow) {
+      return;
+    }
     if (window.addEventListener !== undefined) {
       window.removeEventListener('pagehide', listener, false);
     } else if (window.detachEvent !== undefined) {

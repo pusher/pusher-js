@@ -9,6 +9,7 @@ import * as URLSchemes from 'core/transports/url_schemes';
 import Runtime from 'runtime';
 import { Dependencies } from '../dom/dependencies';
 import * as Collections from 'core/utils/collections';
+import { hasWindow } from '../global_object';
 
 var SockJSTransport = new Transport(<TransportHooks>{
   file: 'sockjs',
@@ -17,7 +18,7 @@ var SockJSTransport = new Transport(<TransportHooks>{
   supportsPing: false,
 
   isSupported: function () {
-    return true;
+    return hasWindow;
   },
   isInitialized: function () {
     return window.SockJS !== undefined;
