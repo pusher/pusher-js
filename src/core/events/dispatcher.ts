@@ -54,8 +54,11 @@ export default class Dispatcher {
   }
 
   emit(eventName: string, data?: any, metadata?: Metadata): Dispatcher {
-    for (var i = 0; i < this.global_callbacks.length; i++) {
-      this.global_callbacks[i](eventName, data);
+    // unbind_global replaces this array. Keep the one this emit started with,
+    // as for event callbacks below, so unbinding during emit can't skip one.
+    var globalCallbacks = this.global_callbacks;
+    for (var i = 0; i < globalCallbacks.length; i++) {
+      globalCallbacks[i](eventName, data);
     }
 
     var callbacks = this.callbacks.get(eventName);

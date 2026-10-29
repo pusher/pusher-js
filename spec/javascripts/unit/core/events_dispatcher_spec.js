@@ -332,6 +332,24 @@ describe("EventsDispatcher", function() {
       expect(global2).toHaveBeenCalledWith("event", "test");
     });
 
+    it("should remove a global callback while emitting events", function () {
+      var global1 = jasmine.createSpy("global1").and.callFake(function () {
+        dispatcher.unbind_global(global1);
+      });
+      var global2 = jasmine.createSpy("global2");
+
+      dispatcher.bind_global(global1);
+      dispatcher.bind_global(global2);
+
+      dispatcher.emit("event", "test");
+      expect(global1.calls.count()).toEqual(1);
+      expect(global2.calls.count()).toEqual(1);
+
+      dispatcher.emit("event", "test");
+      expect(global1.calls.count()).toEqual(1);
+      expect(global2.calls.count()).toEqual(2);
+    });
+
     it("should remove all global callbacks if called with no params", function () {
       var global1 = jasmine.createSpy("global1");
       var global2 = jasmine.createSpy("global2");
