@@ -3,6 +3,7 @@
 var webpack = require('webpack');
 var fs = require('fs');
 var Config = require('./hosting_config');
+var tsconfig = require('../tsconfig.json');
 var banner = fs.readFileSync('./src/core/pusher-licence.js', 'utf8');
 banner = banner.replace('<VERSION>', Config.version);
 
@@ -30,7 +31,15 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.ts$/, loader: 'ts-loader' },
+      // Transpile only. Type-checking and the declarations in types/ come from
+      // `make types`, because ts-loader can't run on TypeScript 7.
+      {
+        test: /\.ts$/,
+        loader: 'esbuild-loader',
+        // esbuild ignores tsconfig's target, so pass it explicitly to keep
+        // tsconfig.json the only place the target is set.
+        options: { target: tsconfig.compilerOptions.target.toLowerCase() },
+      },
       {
         test: /\.js$/,
         enforce: 'pre',
