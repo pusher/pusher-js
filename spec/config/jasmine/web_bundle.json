@@ -4,8 +4,10 @@
     "**/*spec.js"
   ],
   "helpers": [],
-  "failSpecWithNoExpectations": false,
-  "stopSpecOnExpectationFailure": false,
-  "stopOnSpecFailure": false,
-  "random": false
+  "env": {
+    "failSpecWithNoExpectations": false,
+    "stopSpecOnExpectationFailure": false,
+    "stopOnSpecFailure": false,
+    "random": false
+  }
 }

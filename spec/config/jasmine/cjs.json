@@ -3,8 +3,10 @@
   "spec_files": [
     "**/*spec.js"
   ],
-  "failSpecWithNoExpectations": false,
-  "stopSpecOnExpectationFailure": false,
-  "stopOnSpecFailure": false,
-  "random": false
+  "env": {
+    "failSpecWithNoExpectations": false,
+    "stopSpecOnExpectationFailure": false,
+    "stopOnSpecFailure": false,
+    "random": false
+  }
 }

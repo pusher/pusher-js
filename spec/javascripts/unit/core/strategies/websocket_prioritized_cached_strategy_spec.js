@@ -357,7 +357,7 @@ describe("WebSocketPrioritizedCachedStrategy", function() {
         });
       });
 
-      describe('websocket prioritized', function() {
+      describe('websocket prioritized, useTLS=' + useTLS, function() {
         beforeEach(function() {
           localStorage[unusedKey] = 'mock';
           localStorage[usedKey] = JSON.stringify({

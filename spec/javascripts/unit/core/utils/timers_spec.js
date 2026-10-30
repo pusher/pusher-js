@@ -1,4 +1,5 @@
 var timers = require('core/utils/timers');
+var withBrokenGlobal = require('with_broken_global');
 
 describe("timers", function() {
   describe("Timer", function() {
@@ -62,12 +63,11 @@ describe("timers", function() {
 
       it("should stop callback from being called even if clearTimeout is broken", function() {
         // IE has some edge-case with clearTimeout not working, let's simulate it
-        let _clearTimeout = global.clearTimeout;
-        spyOn(global, "clearTimeout");
-        timer.ensureAborted();
-        jasmine.clock().tick(1000);
-        expect(callback).not.toHaveBeenCalled();
-        global.clearTimeout = _clearTimeout;
+        withBrokenGlobal("clearTimeout", function() {
+          timer.ensureAborted();
+          jasmine.clock().tick(1000);
+          expect(callback).not.toHaveBeenCalled();
+        });
       });
     });
   });
@@ -143,14 +143,13 @@ describe("timers", function() {
         expect(callback).not.toHaveBeenCalled();
       });
 
-      it("should stop callback from being called even if clearTimeout is broken", function() {
-        // IE has some edge-case with clearTimeout not working, let's simulate it
-        let _clearTimeout = global.clearTimeout;
-        spyOn(global, "clearTimeout");
-        timer.ensureAborted();
-        jasmine.clock().tick(1000);
-        expect(callback).not.toHaveBeenCalled();
-        global.clearTimeout = _clearTimeout;
+      it("should stop callback from being called even if clearInterval is broken", function() {
+        // IE has some edge-case with clearInterval not working, let's simulate it
+        withBrokenGlobal("clearInterval", function() {
+          timer.ensureAborted();
+          jasmine.clock().tick(1000);
+          expect(callback).not.toHaveBeenCalled();
+        });
       });
     });
   });
