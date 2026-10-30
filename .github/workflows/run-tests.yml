@@ -51,6 +51,7 @@ jobs:
       - run: npm install
       - run: npm run check-format
       - run: make node_unit
+      - run: make web_bundle_unit
       - name: make node_integration
         run: |
           cd integration_tests_server

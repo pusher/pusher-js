@@ -13,6 +13,7 @@ import jsonpTimeline from './timeline/jsonp_timeline';
 import Transports from './transports/transports';
 import Ajax from 'core/http/ajax';
 import { Network } from './net_info';
+import globalObject, { hasWindow } from './global_object';
 import getDefaultStrategy from './default_strategy';
 import transportConnectionInitializer from './transports/transport_connection_initializer';
 import HTTPFactory from './http/http';
@@ -32,10 +33,13 @@ var Runtime: Browser = {
   TimelineTransport: jsonpTimeline,
 
   getXHRAPI() {
-    return window.XMLHttpRequest;
+    return hasWindow ? window.XMLHttpRequest : undefined;
   },
 
   getWebSocketAPI() {
+    if (typeof window === 'undefined') {
+      return undefined;
+    }
     return window.WebSocket || window.MozWebSocket;
   },
 
@@ -58,6 +62,9 @@ var Runtime: Browser = {
   },
 
   getProtocol(): string {
+    if (typeof document === 'undefined') {
+      return 'http:';
+    }
     return this.getDocument().location.protocol;
   },
 
@@ -138,11 +145,16 @@ var Runtime: Browser = {
     var protocol = useTLS ? 'https:' : 'http:';
     var documentProtocol = this.getProtocol();
     return (
-      Boolean(<any>window['XDomainRequest']) && documentProtocol === protocol
+      hasWindow &&
+      Boolean(<any>window['XDomainRequest']) &&
+      documentProtocol === protocol
     );
   },
 
   addUnloadListener(listener: any) {
+    if (!hasWindow) {
+      return;
+    }
     if (window.addEventListener !== undefined) {
       window.addEventListener('pagehide', listener, false);
     } else if (window.attachEvent !== undefined) {
@@ -151,6 +163,9 @@ var Runtime: Browser = {
   },
 
   removeUnloadListener(listener: any) {
+    if (!hasWindow) {
+      return;
+    }
     if (window.addEventListener !== undefined) {
       window.removeEventListener('pagehide', listener, false);
     } else if (window.detachEvent !== undefined) {
@@ -161,7 +176,10 @@ var Runtime: Browser = {
   randomInt(max: number): number {
     // Rejection sampling avoids the bias introduced by scaling a fixed-range
     // random value down to `max` when `max` doesn't evenly divide 2**32.
-    const crypto = window.crypto || window['msCrypto'];
+    // Uses the shared global object (not window or globalThis) so this works
+    // in Node/SSR and in browsers that predate globalThis, and still finds
+    // msCrypto in browsers that predate crypto.
+    const crypto = globalObject.crypto || globalObject['msCrypto'];
     const limit = Math.floor(2 ** 32 / max) * max;
     let random;
     do {
