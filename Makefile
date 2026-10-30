@@ -99,6 +99,10 @@ node_integration:
 node_bundle_unit: node
 	node_modules/.bin/jasmine --config=spec/config/jasmine/node_bundle.json
 
+.PHONY: web_bundle_unit
+web_bundle_unit: web
+	node_modules/.bin/jasmine --config=spec/config/jasmine/web_bundle.json
+
 .PHONY: react_native_bundle_unit
 react_native_bundle_unit: react-native
 	node_modules/.bin/jasmine --config=spec/config/jasmine/react_native_bundle.json

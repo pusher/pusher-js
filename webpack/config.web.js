@@ -20,6 +20,10 @@ module.exports = merge({}, configShared, {
   },
   output: {
     library: { name: 'Pusher', type: 'umd' },
+    // Webpack 5 defaults the UMD wrapper's root object to `self`, which
+    // doesn't exist in Node.js/SSR environments. Matches config.worker.js,
+    // which already sets this for the same reason.
+    globalObject: 'this',
     path: path.join(__dirname, '../dist/web'),
     filename: filename,
   },
@@ -27,8 +31,15 @@ module.exports = merge({}, configShared, {
     modules: ['src/runtimes/web'],
   },
   plugins: [
+    // Points `global` in core code at one shared global object, resolved
+    // once in src/runtimes/web/global_object.ts.
+    new webpack.ProvidePlugin({
+      global: [
+        path.resolve(__dirname, '../src/runtimes/web/global_object'),
+        'default',
+      ],
+    }),
     new webpack.DefinePlugin({
-      global: 'window',
       RUNTIME: JSON.stringify('web'),
     }),
   ],
