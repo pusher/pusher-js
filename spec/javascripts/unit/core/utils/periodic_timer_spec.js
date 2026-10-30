@@ -1,5 +1,6 @@
 var Timers = require('core/utils/timers');
 var PeriodicTimer = Timers.PeriodicTimer;
+var withBrokenGlobal = require('with_broken_global');
 
 describe("PeriodicTimer", function() {
   var callback;
@@ -63,17 +64,11 @@ describe("PeriodicTimer", function() {
 
     it("should stop callback from being called even if clearInterval is broken", function() {
       // IE has some edge-case with clearInterval not working, let's simulate it
-      // Jasmine doesn't allow spying on the mock clock's functions, so
-      // replace clearInterval with a no-op directly.
-      let _clearInterval = global.clearInterval;
-      global.clearInterval = function() {};
-      try {
+      withBrokenGlobal("clearInterval", function() {
         timer.ensureAborted();
         jasmine.clock().tick(1000);
         expect(callback).not.toHaveBeenCalled();
-      } finally {
-        global.clearInterval = _clearInterval;
-      }
+      });
     });
   });
 });
