@@ -62,6 +62,28 @@ describe("Handshake", function() {
     });
   });
 
+  describe("after a handshake with null action", function() {
+    beforeEach(function() {
+      Protocol.processHandshake.and.returnValue({
+        action: null,
+        error: { type: "PusherError", data: { code: null, message: "Something went wrong" } }
+      });
+      transport.emit("message", { data: "dummy" });
+    });
+
+    it("should call back with 'backoff' action and error", function() {
+      expect(callback).toHaveBeenCalledWith({
+        action: "backoff",
+        transport: transport,
+        error: { type: "PusherError", data: { code: null, message: "Something went wrong" } }
+      });
+    });
+
+    it("should call close on the transport", function() {
+      expect(transport.close).toHaveBeenCalled();
+    });
+  });
+
   describe("after a handshake raising an exception", function() {
     beforeEach(function() {
       Protocol.processHandshake.and.throwError("Invalid handshake");
