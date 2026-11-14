@@ -91,7 +91,7 @@ describe("PresenceChannel", function() {
 
         presenceChannelCallback(null, authWithoutChannelData);
         await setTimeout(10);
-        expect(callback).toHaveBeenCalledWith("Invalid auth response");
+        expect(callback).toHaveBeenCalledWith(new Error("Invalid auth response"));
       });
 
       it("should wait for the in-progress sign in and call the callback with an error if signin failed", async function() {
@@ -107,7 +107,7 @@ describe("PresenceChannel", function() {
         pusher.user.user_data = null
         resolve()
         await setTimeout(10);
-        expect(callback).toHaveBeenCalledWith("Invalid auth response")
+        expect(callback).toHaveBeenCalledWith(new Error("Invalid auth response"))
       });
 
       it("should wait for the in-progress sign in and call the callback if signin succeeded", async function() {
@@ -147,7 +147,7 @@ describe("PresenceChannel", function() {
         // signin is in progress
         presenceChannelCallback(null, authWithoutChannelData)
         await setTimeout(10);
-        expect(callback).toHaveBeenCalledWith("Invalid auth response")
+        expect(callback).toHaveBeenCalledWith(new Error("Invalid auth response"))
       });
     });
 
@@ -167,6 +167,27 @@ describe("PresenceChannel", function() {
       expect(callback).toHaveBeenCalledWith(null, authdata)
     });
 
+  });
+
+  describe("#subscribe without channel_data and without a signed-in user", function() {
+    it("should emit pusher:subscription_error with the error message", async function() {
+      pusher.user = { signinDonePromise: null, user_data: null };
+      pusher.connection = { socket_id: "1.23" };
+      channelAuthorizer.and.callFake(function(params, callback) {
+        callback(null, { auth: "key:sig" });
+      });
+      var onSubscriptionError = jasmine.createSpy("onSubscriptionError");
+      channel.bind("pusher:subscription_error", onSubscriptionError);
+
+      channel.subscribe();
+      await setTimeout(10);
+
+      expect(onSubscriptionError).toHaveBeenCalledWith({
+        type: "AuthError",
+        error: "Invalid auth response"
+      });
+      expect(channel.subscriptionPending).toBe(false);
+    });
   });
 
   describe("#trigger", function() {
