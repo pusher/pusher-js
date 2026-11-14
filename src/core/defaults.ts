@@ -1,7 +1,4 @@
-import {
-  ChannelAuthorizationOptions,
-  UserAuthenticationOptions,
-} from './auth/options';
+import { InternalAuthOptions } from './auth/options';
 import { AuthTransport } from './config';
 
 export interface DefaultConfig {
@@ -20,8 +17,8 @@ export interface DefaultConfig {
   activityTimeout: number;
   pongTimeout: number;
   unavailableTimeout: number;
-  userAuthentication: UserAuthenticationOptions;
-  channelAuthorization: ChannelAuthorizationOptions;
+  userAuthentication: InternalAuthOptions;
+  channelAuthorization: InternalAuthOptions;
 
   cdn_http?: string;
   cdn_https?: string;
