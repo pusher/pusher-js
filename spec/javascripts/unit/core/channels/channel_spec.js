@@ -24,6 +24,10 @@ describe("Channel", function() {
     it("#subscriptionCancelled should be false", function() {
       expect(channel.subscriptionCancelled).toEqual(false);
     });
+
+    it("#subscriptionCount should be null", function() {
+      expect(channel.subscriptionCount).toBe(null);
+    });
   });
 
   describe("#authorize", function() {
