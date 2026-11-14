@@ -26,7 +26,7 @@ export default class Channel extends EventsDispatcher {
   subscribed: boolean;
   subscriptionPending: boolean;
   subscriptionCancelled: boolean;
-  subscriptionCount: null;
+  subscriptionCount: number | null;
 
   constructor(name: string, pusher: Pusher) {
     super(function (event, data) {
@@ -38,6 +38,7 @@ export default class Channel extends EventsDispatcher {
     this.subscribed = false;
     this.subscriptionPending = false;
     this.subscriptionCancelled = false;
+    this.subscriptionCount = null;
   }
 
   /** Skips authorization, since public channels don't require it.
