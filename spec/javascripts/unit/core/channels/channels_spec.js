@@ -78,6 +78,32 @@ describe("Channels", function() {
     });
   });
 
+  describe("with names of Object.prototype members", function() {
+    var names = ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"];
+
+    it("should create, find and remove a channel for each name", function() {
+      names.forEach(function(name) {
+        var channel = channels.add(name, {});
+        expect(channel).toEqual(jasmine.any(Channel));
+        expect(channel.name).toEqual(name);
+        expect(channels.find(name)).toBe(channel);
+      });
+      expect(channels.all().length).toEqual(names.length);
+
+      names.forEach(function(name) {
+        expect(channels.remove(name).name).toEqual(name);
+        expect(channels.find(name)).toBe(undefined);
+      });
+      expect(channels.all()).toEqual([]);
+    });
+
+    it("should not find a channel that was not added", function() {
+      names.forEach(function(name) {
+        expect(channels.find(name)).toBe(undefined);
+      });
+    });
+  });
+
   describe("#disconnect", function() {
     it("should call disconnect on all channels", function() {
       var channel1 = channels.add("test1", {});

@@ -312,6 +312,20 @@ describe("Pusher", function() {
         expect(channel.subscribe).toHaveBeenCalled();
       });
 
+      it("should subscribe channels named after Object.prototype members", function() {
+        var names = ["constructor", "toString", "valueOf", "hasOwnProperty", "__proto__"];
+        names.forEach(function(name) {
+          var channel = pusher.subscribe(name);
+          expect(channel.name).toEqual(name);
+          expect(channel.subscribe).toHaveBeenCalledTimes(1);
+        });
+
+        pusher.connection.emit("connected");
+        names.forEach(function(name) {
+          expect(pusher.channel(name).subscribe).toHaveBeenCalledTimes(2);
+        });
+      });
+
       it("should reinstate cancelled pending subscription", function() {
         var channel = pusher.subscribe("xxx");
         channel.subscriptionPending = true;

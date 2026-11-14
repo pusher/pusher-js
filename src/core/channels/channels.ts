@@ -12,7 +12,9 @@ export default class Channels {
   channels: ChannelTable;
 
   constructor() {
-    this.channels = {};
+    // No prototype, so channel names such as constructor or __proto__ find
+    // no member of Object.prototype.
+    this.channels = Object.create(null);
   }
 
   /** Creates or retrieves an existing channel by its name.
