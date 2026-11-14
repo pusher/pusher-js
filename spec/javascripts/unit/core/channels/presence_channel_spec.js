@@ -151,6 +151,20 @@ describe("PresenceChannel", function() {
       });
     });
 
+    describe("when channel_data isn't valid JSON", function() {
+      ["{user_id: 1}", { user_id: "1" }].forEach(function(channelData) {
+        it("should call the callback with an error for " + JSON.stringify(channelData), async function() {
+          const callback = jasmine.createSpy("callback");
+          channel.authorize("1.23", callback);
+          const presenceChannelCallback = channelAuthorizer.calls.mostRecent().args[1];
+
+          await presenceChannelCallback(null, { auth: "key:sig", channel_data: channelData });
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback.calls.mostRecent().args[0]).toEqual(jasmine.any(Error));
+        });
+      });
+    });
+
     it("should call the callback with auth data", function() {
       const callback = jasmine.createSpy("callback")
       channel.authorize("1.23", callback);

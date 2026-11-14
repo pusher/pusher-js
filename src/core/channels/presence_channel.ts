@@ -30,7 +30,17 @@ export default class PresenceChannel extends PrivateChannel {
       if (!error) {
         authData = authData as ChannelAuthorizationData;
         if (authData.channel_data != null) {
-          var channelData = JSON.parse(authData.channel_data);
+          var channelData;
+          try {
+            channelData = JSON.parse(authData.channel_data);
+          } catch (e) {
+            Logger.error(
+              `Invalid auth response for channel '${this.name}', ` +
+                `'channel_data' is not valid JSON.`,
+            );
+            callback(new Error('Invalid channel_data in auth response'));
+            return;
+          }
           this.members.setMyID(channelData.user_id);
         } else {
           await this.pusher.user.signinDonePromise;
