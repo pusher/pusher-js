@@ -210,9 +210,10 @@ export default class Pusher {
 
   subscribeAll() {
     var channelName;
-    for (channelName in this.channels.channels) {
-      if (this.channels.channels.hasOwnProperty(channelName)) {
-        if (this.channels.channels[channelName].subscriptionCancelled) {
+    var channels = this.channels.channels;
+    for (channelName in channels) {
+      if (Object.prototype.hasOwnProperty.call(channels, channelName)) {
+        if (channels[channelName].subscriptionCancelled) {
           // Unsubscribed while its subscription was pending, and the
           // subscription never completed, so drop it instead of resubscribing.
           this.channels.remove(channelName);
