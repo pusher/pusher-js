@@ -118,6 +118,9 @@ export default class ConnectionManager extends EventsDispatcher {
       this.updateState('failed');
       return;
     }
+    // This attempt replaces a pending retry, so the retry timer must not
+    // close the new connection later.
+    this.clearRetryTimer();
     this.updateState('connecting');
     this.startConnecting();
     this.setUnavailableTimer();
