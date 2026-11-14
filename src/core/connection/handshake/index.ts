@@ -60,7 +60,8 @@ export default class Handshake {
           activityTimeout: result.activityTimeout,
         });
       } else {
-        this.finish(result.action, { error: result.error });
+        // A pusher:error with no code gives no action: back off, as on close.
+        this.finish(result.action || 'backoff', { error: result.error });
         this.transport.close();
       }
     };
