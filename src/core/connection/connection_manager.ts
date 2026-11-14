@@ -210,6 +210,9 @@ export default class ConnectionManager extends EventsDispatcher {
     if (delay > 0) {
       this.emit('connecting_in', Math.round(delay / 1000));
     }
+    // A close with a backoff code calls retryIn twice (the action, then
+    // closed). Keep only one timer, so that disconnect() can stop it.
+    this.clearRetryTimer();
     this.retryTimer = new Timer(delay || 0, () => {
       this.disconnectInternally();
       this.connect();

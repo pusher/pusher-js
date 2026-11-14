@@ -554,6 +554,29 @@ describe("ConnectionManager", function() {
           error:  error
         });
       });
+      it("should not reconnect after disconnect() following a backoff close", function() {
+        // A close with the code 4100 gives the backoff action, then closed.
+        connection.emit("backoff", {error: {code: 4100}});
+        connection.emit("closed");
+        manager.disconnect();
+
+        jasmine.clock().tick(5000);
+        expect(manager.state).toEqual("disconnected");
+        expect(strategy.connect.calls.count()).toEqual(1);
+      });
+
+      it("should reconnect once after a backoff close", function() {
+        connection.emit("backoff", {error: {code: 4100}});
+        connection.emit("closed");
+
+        jasmine.clock().tick(1000);
+        expect(manager.state).toEqual("connecting");
+        expect(strategy.connect.calls.count()).toEqual(2);
+
+        jasmine.clock().tick(5000);
+        expect(strategy.connect.calls.count()).toEqual(2);
+      });
+
       it("should emit error and reconnect upon receipt of a retry event", function() {
         var error = {code: 4200};
         connection.emit("retry", {error: error});
