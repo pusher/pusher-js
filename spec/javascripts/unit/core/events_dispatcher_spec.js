@@ -251,6 +251,27 @@ describe("EventsDispatcher", function() {
       });
     });
 
+    it("should pass falsy data to listeners", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      dispatcher.bind("event", onEvent);
+
+      dispatcher.emit("event", 0);
+      dispatcher.emit("event", false);
+      dispatcher.emit("event", null);
+      dispatcher.emit("event", "");
+
+      expect(onEvent.calls.allArgs()).toEqual([[0], [false], [null], [""]]);
+    });
+
+    it("should call listeners with no argument when there is no data", function() {
+      var onEvent = jasmine.createSpy("onEvent");
+      dispatcher.bind("event", onEvent);
+
+      dispatcher.emit("event");
+
+      expect(onEvent.calls.allArgs()).toEqual([[]]);
+    });
+
     it("should call all global listeners", function() {
       var callbacks = Collections.map([1, 2, 3], function(i) {
         return jasmine.createSpy("onGlobal" + i);
