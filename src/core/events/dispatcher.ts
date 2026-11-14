@@ -68,9 +68,9 @@ export default class Dispatcher {
       // if there's a metadata argument, we need to call the callback with both
       // data and metadata regardless of whether data is undefined
       args.push(data, metadata);
-    } else if (data) {
+    } else if (data !== undefined) {
       // metadata is undefined, so we only need to call the callback with data
-      // if data exists
+      // if data exists (0, false, null and '' are data too)
       args.push(data);
     }
 
