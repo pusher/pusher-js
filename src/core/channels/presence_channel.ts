@@ -45,7 +45,7 @@ export default class PresenceChannel extends PrivateChannel {
                 `expected 'channel_data' field. ${suffix}, ` +
                 `or the user should be signed in.`,
             );
-            callback('Invalid auth response');
+            callback(new Error('Invalid auth response'));
             return;
           }
         }
