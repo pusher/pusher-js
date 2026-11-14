@@ -3,7 +3,6 @@ import Defaults from './defaults';
 import {
   ChannelAuthorizationHandler,
   UserAuthenticationHandler,
-  ChannelAuthorizationOptions,
   AuthOptionsT,
   CustomAuthOptions,
 } from './auth/options';
@@ -152,8 +151,11 @@ function buildUserAuthenticator(opts: Options): UserAuthenticationHandler {
   return UserAuthenticator(userAuthentication);
 }
 
-function buildChannelAuth(opts: Options, pusher): ChannelAuthorizationOptions {
-  let channelAuthorization: ChannelAuthorizationOptions;
+function buildChannelAuth(
+  opts: Options,
+  pusher,
+): AuthOptionsT<ChannelAuthorizationHandler> {
+  let channelAuthorization: AuthOptionsT<ChannelAuthorizationHandler>;
   if ('channelAuthorization' in opts) {
     channelAuthorization = {
       ...Defaults.channelAuthorization,

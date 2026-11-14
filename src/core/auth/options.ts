@@ -68,7 +68,11 @@ export type AuthOptionsT<AuthHandler> =
   | InternalAuthOptions
   | CustomAuthOptions<AuthHandler>;
 
+// The options that an app gives. transport and endpoint have defaults (see
+// Defaults), so the app can leave them out.
 export declare type UserAuthenticationOptions =
-  AuthOptionsT<UserAuthenticationHandler>;
+  | Partial<InternalAuthOptions>
+  | CustomAuthOptions<UserAuthenticationHandler>;
 export declare type ChannelAuthorizationOptions =
-  AuthOptionsT<ChannelAuthorizationHandler>;
+  | Partial<InternalAuthOptions>
+  | CustomAuthOptions<ChannelAuthorizationHandler>;
