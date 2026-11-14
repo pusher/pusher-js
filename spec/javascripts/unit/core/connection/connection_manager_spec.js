@@ -316,6 +316,9 @@ describe("ConnectionManager", function() {
 
       beforeEach(function() {
         handshake = { action: "error", error: "boom" };
+        onConnectingIn = jasmine.createSpy("onConnectingIn");
+
+        manager.bind("connecting_in", onConnectingIn);
         strategy._callback(null, handshake);
       });
 
@@ -325,6 +328,19 @@ describe("ConnectionManager", function() {
 
       it("should not abort the strategy", function() {
         expect(strategy._abort).not.toHaveBeenCalled();
+      });
+
+      it("should reconnect after 1s", function() {
+        jasmine.clock().tick(999);
+        expect(strategy.connect.calls.count()).toEqual(1);
+        jasmine.clock().tick(1);
+        expect(strategy.connect.calls.count()).toEqual(2);
+        expect(manager.state).toEqual("connecting");
+      });
+
+      it("should emit 'connecting_in' event", function() {
+        expect(onConnectingIn.calls.count()).toEqual(1);
+        expect(onConnectingIn).toHaveBeenCalledWith(1);
       });
     });
   });

@@ -171,6 +171,9 @@ export default class ConnectionManager extends EventsDispatcher {
             error: handshake.error,
           });
           this.timeline.error({ handshakeError: handshake.error });
+          // The strategy stops at the first handshake, so try again later,
+          // as for the 'backoff' action
+          this.retryIn(1000);
         } else {
           this.abortConnecting(); // we don't support switching connections yet
           this.handshakeCallbacks[handshake.action](handshake);
