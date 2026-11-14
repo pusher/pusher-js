@@ -435,6 +435,26 @@ describe("ConnectionManager", function() {
         expect(manager.state).toEqual("connecting");
       });
 
+      it("should cancel the retry when connect() is called during the wait", function() {
+        manager.connect();
+        expect(strategy.connect.calls.count()).toEqual(2);
+
+        var newConnection = Mocks.getConnection();
+        newConnection.id = "123.789";
+        strategy._callback(null, {
+          action: "connected",
+          connection: newConnection,
+          activityTimeout: 500
+        });
+        expect(manager.state).toEqual("connected");
+
+        // The retry would have fired 1 s after the close.
+        jasmine.clock().tick(1000);
+        expect(manager.state).toEqual("connected");
+        expect(newConnection.close).not.toHaveBeenCalled();
+        expect(strategy.connect.calls.count()).toEqual(2);
+      });
+
       it("should clean up the activity check", function() {
         jasmine.clock().tick(10000);
         // if activity check had worked, it would have sent a ping message
